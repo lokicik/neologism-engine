@@ -124,16 +124,20 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng) 
         roots_corpus.clone()
     };
 
-    let mut results = Vec::new();
+    // Overgenerate a pool, then keep the most brand-like by Markov word-likeness.
+    let target = cfg.count * 5;
+    let mut pool: Vec<NameResult> = Vec::new();
     let mut seen: HashSet<String> = HashSet::new();
-    let max_attempts = cfg.count * 80;
+    let max_attempts = target * 80;
 
     let bigtech_model = Model::train(&bigtech_corpus, 2);
-    // Lean harder on blending when a description supplies the roots.
-    let blend_prob = if !desc_keywords.is_empty() { 0.85 } else { 0.6 };
+    // When the user supplies roots (description or seed words), blend purely from
+    // them so re-ranking can't swap in generic names; otherwise mix in some Markov.
+    let has_roots = !desc_keywords.is_empty() || !cfg.roots.is_empty();
+    let blend_prob = if has_roots { 1.0 } else { 0.6 };
 
     for _ in 0..max_attempts {
-        if results.len() >= cfg.count { break; }
+        if pool.len() >= target { break; }
 
         let name = if rand::Rng::gen::<f64>(rng) < blend_prob {
             let a = all_roots[rand::Rng::gen_range(rng, 0..all_roots.len())];
@@ -157,7 +161,7 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng) 
         let sp = score_pronounceability(&name);
         let sn = score_novelty(&name.to_lowercase(), dict);
         let sm = score_memorability(&name);
-        results.push(NameResult {
+        pool.push(NameResult {
             syllables: syllable_count(&name.to_lowercase()),
             name,
             style: Style::BigTech,
@@ -166,7 +170,17 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng) 
             score_memorability: sm,
         });
     }
-    results
+
+    // Rank by how brand-like each blend is under the real-brand Markov model,
+    // surfacing names like "Splends" over junk like "Sptai".
+    pool.sort_by(|a, b| {
+        bigtech_model
+            .log_likelihood(&b.name)
+            .partial_cmp(&bigtech_model.log_likelihood(&a.name))
+            .unwrap_or(std::cmp::Ordering::Equal)
+    });
+    pool.truncate(cfg.count);
+    pool
 }
 
 fn generate_markov(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, corpus: &str) -> Vec<NameResult> {

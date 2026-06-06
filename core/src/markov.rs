@@ -53,6 +53,40 @@ impl Model {
         Some(result)
     }
 
+    /// Average log-probability per transition of `name` under this model
+    /// (Shannon word-likeness). Higher = more typical of the training corpus.
+    /// Unseen contexts/characters fall back to a small floor so blends that
+    /// the model never saw aren't `-inf`.
+    pub fn log_likelihood(&self, name: &str) -> f64 {
+        const FLOOR: f64 = 1e-6;
+        let padded: Vec<char> = std::iter::repeat(START)
+            .take(self.order)
+            .chain(name.to_lowercase().chars())
+            .chain(std::iter::once(END))
+            .collect();
+
+        let mut total = 0.0f64;
+        let mut steps = 0usize;
+        for i in 0..padded.len().saturating_sub(self.order) {
+            let key: String = padded[i..i + self.order].iter().collect();
+            let next = padded[i + self.order];
+            let p = match self.counts.get(&key) {
+                Some(dist) => {
+                    let sum: u32 = dist.values().sum();
+                    let c = dist.get(&next).copied().unwrap_or(0);
+                    if sum == 0 { FLOOR } else { (c as f64 / sum as f64).max(FLOOR) }
+                }
+                None => FLOOR,
+            };
+            total += p.ln();
+            steps += 1;
+        }
+        if steps == 0 {
+            return f64::NEG_INFINITY;
+        }
+        total / steps as f64
+    }
+
     fn weighted_sample<R: Rng>(&self, rng: &mut R, dist: &HashMap<char, u32>, temperature: f64) -> Option<char> {
         let t = temperature.max(0.01);
         // Sort by char to make sampling order-independent (HashMap iteration is non-deterministic)
@@ -81,6 +115,15 @@ mod tests {
     use super::*;
     use rand_chacha::ChaCha8Rng;
     use rand::SeedableRng;
+
+    #[test]
+    fn log_likelihood_prefers_typical() {
+        let names = vec!["google", "amazon", "spotify", "stripe", "notion", "vercel", "shopify"];
+        let model = Model::train(&names, 2);
+        let typical = model.log_likelihood("shoptify");
+        let junk = model.log_likelihood("xqzkph");
+        assert!(typical > junk, "typical {} vs junk {}", typical, junk);
+    }
 
     #[test]
     fn deterministic_with_seed() {
