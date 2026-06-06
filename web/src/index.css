@@ -139,7 +139,10 @@ input[type="range"] {
   cursor: pointer;
 }
 
-.roots-input input[type="text"] {
+.roots-input { display: flex; flex-direction: column; gap: .6rem; }
+
+.roots-input input[type="text"],
+.roots-input textarea {
   padding: .45rem .75rem;
   background: var(--surface2);
   border: 1px solid var(--border);
@@ -147,8 +150,11 @@ input[type="range"] {
   color: var(--text);
   font-size: .875rem;
   outline: none;
+  font-family: inherit;
+  resize: vertical;
 }
-.roots-input input[type="text"]:focus { border-color: var(--accent); }
+.roots-input input[type="text"]:focus,
+.roots-input textarea:focus { border-color: var(--accent); }
 
 .generate-btn {
   align-self: flex-start;

@@ -26,6 +26,8 @@ pub struct Config {
     pub roots: Vec<String>,
     /// Optional sub-style for sci-fi/fantasy (e.g. "elvish", "alien").
     pub variant: Option<String>,
+    /// Optional product description for big-tech naming; keywords become blend roots.
+    pub description: Option<String>,
 }
 
 fn default_count() -> usize { 10 }
@@ -44,6 +46,7 @@ impl Default for Config {
             seed: None,
             roots: vec![],
             variant: None,
+            description: None,
         }
     }
 }

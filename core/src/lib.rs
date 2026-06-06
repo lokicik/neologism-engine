@@ -1,4 +1,5 @@
 pub mod blend;
+pub mod keywords;
 pub mod markov;
 pub mod phonemes;
 pub mod phonotactics;
@@ -107,11 +108,20 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng) 
     let roots_corpus = parse_lines(ROOTS);
     let bigtech_corpus = parse_lines(BIGTECH_CORPUS);
 
-    let user_roots: Vec<&str> = cfg.roots.iter().map(|s| s.as_str()).collect();
-    let all_roots: Vec<&str> = if user_roots.is_empty() {
-        roots_corpus.clone()
+    // Priority for blend roots: description keywords > user-supplied roots > corpus.
+    let desc_keywords: Vec<String> = cfg
+        .description
+        .as_deref()
+        .filter(|d| !d.trim().is_empty())
+        .map(|d| keywords::extract_keywords(d, 6))
+        .unwrap_or_default();
+
+    let all_roots: Vec<&str> = if !desc_keywords.is_empty() {
+        desc_keywords.iter().map(|s| s.as_str()).collect()
+    } else if !cfg.roots.is_empty() {
+        cfg.roots.iter().map(|s| s.as_str()).collect()
     } else {
-        user_roots
+        roots_corpus.clone()
     };
 
     let mut results = Vec::new();
@@ -119,11 +129,13 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng) 
     let max_attempts = cfg.count * 80;
 
     let bigtech_model = Model::train(&bigtech_corpus, 2);
+    // Lean harder on blending when a description supplies the roots.
+    let blend_prob = if !desc_keywords.is_empty() { 0.85 } else { 0.6 };
 
     for _ in 0..max_attempts {
         if results.len() >= cfg.count { break; }
 
-        let name = if rand::Rng::gen::<f64>(rng) < 0.6 {
+        let name = if rand::Rng::gen::<f64>(rng) < blend_prob {
             let a = all_roots[rand::Rng::gen_range(rng, 0..all_roots.len())];
             let b = all_roots[rand::Rng::gen_range(rng, 0..all_roots.len())];
             if a == b { continue; }
@@ -226,6 +238,7 @@ mod tests {
             seed: Some(42),
             roots: vec![],
             variant: None,
+            description: None,
         }
     }
 
@@ -251,6 +264,23 @@ mod tests {
     fn generates_fantasy_names() {
         let results = generate(&cfg(Style::Fantasy));
         assert!(!results.is_empty());
+    }
+
+    #[test]
+    fn description_drives_bigtech_roots() {
+        let mut c = cfg(Style::BigTech);
+        c.description = Some("a platform for tracking fitness and health workouts".to_string());
+        c.count = 10;
+        let results = generate(&c);
+        assert!(!results.is_empty());
+        // At least one name should echo a description keyword stem.
+        let stems = ["fit", "health", "work", "track"];
+        let hit = results.iter().any(|r| {
+            let lower = r.name.to_lowercase();
+            stems.iter().any(|s| lower.contains(s))
+        });
+        assert!(hit, "no description-derived names: {:?}",
+            results.iter().map(|r| &r.name).collect::<Vec<_>>());
     }
 
     #[test]

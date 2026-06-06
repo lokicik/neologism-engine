@@ -10,6 +10,7 @@ fn show(label: &str, style: Style, variant: Option<&str>) {
         seed: Some(7),
         roots: vec![],
         variant: variant.map(|s| s.to_string()),
+        description: None,
     };
     let names: Vec<String> = generate(&cfg).into_iter().map(|r| r.name).collect();
     println!("{:<10}: {}", label, names.join(", "));

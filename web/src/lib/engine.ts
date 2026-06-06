@@ -11,6 +11,7 @@ export interface Config {
   seed?: number
   roots?: string[]
   variant?: string
+  description?: string
 }
 
 export interface NameResult {

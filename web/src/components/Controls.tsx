@@ -113,7 +113,16 @@ export function Controls({ config, onChange, onGenerate, loading }: Props) {
       {config.style === 'big_tech' && (
         <div className="roots-input">
           <label>
-            <span>Seed words (optional, comma-separated)</span>
+            <span>Describe your product (optional)</span>
+            <textarea
+              rows={2}
+              placeholder="e.g. an app for splitting expenses with friends"
+              value={config.description ?? ''}
+              onChange={(e) => set('description', e.target.value)}
+            />
+          </label>
+          <label>
+            <span>Or seed words (comma-separated)</span>
             <input
               type="text"
               placeholder="e.g. sync, orbit"
