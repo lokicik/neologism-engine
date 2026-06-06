@@ -1,5 +1,52 @@
 use std::collections::HashSet;
-use crate::phonotactics::is_vowel;
+use crate::phonotactics::{is_vowel, syllable_count};
+
+/// Plosive consonants — an initial plosive measurably raises brand-name
+/// memorability (sound-symbolism research, Pathak 2020).
+const PLOSIVES: &[char] = &['b', 'p', 't', 'd', 'k', 'g'];
+
+/// Score memorability 0–100 (higher = more memorable / brandable).
+/// Rewards: initial plosive, shortness, few syllables, repeated onsets/letters.
+pub fn score_memorability(name: &str) -> u32 {
+    if name.is_empty() { return 0; }
+    let lower = name.to_lowercase();
+    let chars: Vec<char> = lower.chars().collect();
+    let len = chars.len();
+
+    let mut score = 45.0f64;
+
+    // Initial plosive bonus
+    if PLOSIVES.contains(&chars[0]) {
+        score += 15.0;
+    }
+
+    // Shortness: peak around 4–7 chars, penalty for long names
+    if (4..=7).contains(&len) {
+        score += 15.0;
+    } else if len > 7 {
+        score -= (len as f64 - 7.0) * 4.0;
+    } else {
+        // very short (< 4) is punchy but cramped
+        score += 5.0;
+    }
+
+    // Few syllables are easier to recall
+    let syl = syllable_count(&lower);
+    score += match syl {
+        1 | 2 => 12.0,
+        3 => 4.0,
+        _ => -(syl as f64 - 3.0) * 6.0,
+    };
+
+    // Repetition / alliteration: repeated letters or doubled onset are catchy
+    let distinct: HashSet<char> = chars.iter().copied().collect();
+    let repetition = len - distinct.len();
+    if repetition > 0 {
+        score += (repetition as f64).min(2.0) * 5.0;
+    }
+
+    score.clamp(0.0, 100.0) as u32
+}
 
 /// Score pronounceability 0–100 (higher = easier to say).
 pub fn score_pronounceability(name: &str) -> u32 {
@@ -101,5 +148,15 @@ mod tests {
         assert!(s <= 100);
         let s2 = score_pronounceability("xskqr");
         assert!(s2 < s);
+    }
+
+    #[test]
+    fn memorability_favors_short_punchy() {
+        // Short, plosive-initial "Bolt" should beat long "Aelindorian"
+        let punchy = score_memorability("Bolt");
+        let long = score_memorability("Aelindorian");
+        assert!(punchy > long, "{} vs {}", punchy, long);
+        assert!(punchy <= 100);
+        assert!(long <= 100);
     }
 }

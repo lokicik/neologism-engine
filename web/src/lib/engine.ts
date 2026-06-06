@@ -19,6 +19,7 @@ export interface NameResult {
   syllables: number
   score_pronounce: number
   score_novelty: number
+  score_memorability: number
 }
 
 let initialized = false

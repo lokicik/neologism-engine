@@ -97,6 +97,13 @@ export function NameCard({ result, isFavorite, onToggleFavorite }: Props) {
           </div>
           <span className="score-value">{result.score_novelty}</span>
         </div>
+        <div className="score-row">
+          <span className="score-label">Memorable</span>
+          <div className="score-bar">
+            <div className="score-fill" style={{ width: `${result.score_memorability}%`, background: '#fbbf24' }} />
+          </div>
+          <span className="score-value">{result.score_memorability}</span>
+        </div>
       </div>
 
       <div className="domain-row">

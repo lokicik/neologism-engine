@@ -14,7 +14,7 @@ use style::{Config, Style};
 use markov::Model;
 use phonemes::{affinity_score, Variant};
 use phonotactics::{is_valid, is_valid_clustered, syllable_count};
-use score::{score_novelty, score_pronounceability};
+use score::{score_memorability, score_novelty, score_pronounceability};
 use blend::{blend, tech_transform};
 
 const BIGTECH_CORPUS: &str = include_str!("../data/bigtech.txt");
@@ -63,6 +63,7 @@ pub struct NameResult {
     pub syllables: usize,
     pub score_pronounce: u32,
     pub score_novelty: u32,
+    pub score_memorability: u32,
 }
 
 fn parse_lines(s: &str) -> Vec<&str> {
@@ -141,12 +142,14 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng) 
         seen.insert(name.clone());
         let sp = score_pronounceability(&name);
         let sn = score_novelty(&name.to_lowercase(), dict);
+        let sm = score_memorability(&name);
         results.push(NameResult {
             syllables: syllable_count(&name.to_lowercase()),
             name,
             style: Style::BigTech,
             score_pronounce: sp,
             score_novelty: sn,
+            score_memorability: sm,
         });
     }
     results
@@ -178,12 +181,14 @@ fn generate_markov(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, c
         seen.insert(name.clone());
         let sp = score_pronounceability(&name);
         let sn = score_novelty(&name.to_lowercase(), dict);
+        let sm = score_memorability(&name);
         pool.push(NameResult {
             syllables: syllable_count(&name.to_lowercase()),
             name,
             style: cfg.style,
             score_pronounce: sp,
             score_novelty: sn,
+            score_memorability: sm,
         });
     }
 
