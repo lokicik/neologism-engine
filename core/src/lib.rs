@@ -124,6 +124,13 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng) 
         roots_corpus.clone()
     };
 
+    // Never emit a real brand / root / dictionary word verbatim.
+    let corpus_set: HashSet<String> = bigtech_corpus
+        .iter()
+        .chain(roots_corpus.iter())
+        .map(|s| s.to_lowercase())
+        .collect();
+
     // Overgenerate a pool, then keep the most brand-like by Markov word-likeness.
     let target = cfg.count * 5;
     let mut pool: Vec<NameResult> = Vec::new();
@@ -155,6 +162,8 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng) 
         if !is_valid(&name.to_lowercase(), Style::BigTech) { continue; }
         // Big-tech names should read naturally → enforce sonority sequencing.
         if !respects_sonority(&name.to_lowercase()) { continue; }
+        let lower = name.to_lowercase();
+        if corpus_set.contains(&lower) || dict.contains(&lower) { continue; }
         if seen.contains(&name) { continue; }
 
         seen.insert(name.clone());
@@ -186,6 +195,8 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng) 
 fn generate_markov(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, corpus: &str) -> Vec<NameResult> {
     let names = parse_lines(corpus);
     let model = Model::train(&names, 3);
+    // Never emit a training entry verbatim — this is a neologism engine.
+    let corpus_set: HashSet<String> = names.iter().map(|s| s.to_lowercase()).collect();
 
     let variant = cfg.variant.as_deref().and_then(Variant::parse);
     // Harsher variants permit denser consonant clusters.
@@ -212,6 +223,8 @@ fn generate_markov(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, c
         let name = capitalize(&name);
         if !is_valid_clustered(&name.to_lowercase(), cfg.style, max_run) { continue; }
         if soft && !respects_sonority(&name.to_lowercase()) { continue; }
+        let lower = name.to_lowercase();
+        if corpus_set.contains(&lower) || dict.contains(&lower) { continue; }
         if seen.contains(&name) { continue; }
         seen.insert(name.clone());
         let sp = score_pronounceability(&name);
@@ -287,6 +300,32 @@ mod tests {
     fn generates_fantasy_names() {
         let results = generate(&cfg(Style::Fantasy));
         assert!(!results.is_empty());
+    }
+
+    #[test]
+    fn no_verbatim_corpus_reproduction() {
+        // Every style/variant must invent names, never echo a training entry.
+        let cases: Vec<(Style, Option<&str>)> = vec![
+            (Style::SciFi, Some("machine")),
+            (Style::SciFi, None),
+            (Style::Fantasy, Some("common")),
+            (Style::Fantasy, Some("elvish")),
+            (Style::Fantasy, None),
+            (Style::BigTech, None),
+        ];
+        for (style, variant) in cases {
+            let mut c = cfg(style);
+            c.count = 12;
+            c.variant = variant.map(|s| s.to_string());
+            let names: HashSet<String> = generate(&c).iter().map(|r| r.name.to_lowercase()).collect();
+            let corpus: HashSet<String> = match style {
+                Style::BigTech => parse_lines(BIGTECH_CORPUS).iter().chain(parse_lines(ROOTS).iter()).map(|s| s.to_lowercase()).collect(),
+                Style::SciFi => parse_lines(&scifi_corpus()).iter().map(|s| s.to_lowercase()).collect(),
+                Style::Fantasy => parse_lines(&fantasy_corpus()).iter().map(|s| s.to_lowercase()).collect(),
+            };
+            let overlap: Vec<&String> = names.intersection(&corpus).collect();
+            assert!(overlap.is_empty(), "{:?}/{:?} reproduced corpus entries: {:?}", style, variant, overlap);
+        }
     }
 
     #[test]
