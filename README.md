@@ -14,8 +14,10 @@ neologism-engine/
 **`core/`** implements:
 - **Markov chains** (order-3, character-level) for Sci-Fi and Fantasy styles
 - **Syllable blending** (portmanteau) + tech suffix transforms for Big Tech style
-- **Phonotactic filters** — rejects vowel-less output and long consonant clusters
-- **Scoring** — pronounceability (CV alternation) and novelty (dictionary distance), both 0–100
+- **Sub-style phonologies** — per-variant phoneme-affinity profiles that re-rank Markov output toward a target sound (Elvish, Dwarvish, Orcish, Common; Stellar, Machine, Alien)
+- **Description-driven naming** — simplified RAKE keyword extraction turns a product description into blend roots
+- **Phonotactic filters** — rejects vowel-less output and over-long consonant clusters (relaxed for harsh variants)
+- **Scoring** — pronounceability (CV alternation), novelty (dictionary distance), and memorability (initial plosive, brevity, repetition), each 0–100
 
 ## Prerequisites
 
@@ -68,7 +70,9 @@ App runs at **http://localhost:5173/**.
 cargo test -p neologism-core
 ```
 
-15 unit tests covering Markov determinism, phonotactic filters, blend logic, and score ranges.
+25 unit tests covering Markov determinism, phonotactic filters, blend logic, score ranges, phoneme affinity, and keyword extraction.
+
+> Quick quality check: `cargo run -p neologism-core --example sample` prints a batch of names for every style and variant.
 
 ### Production build
 
@@ -81,7 +85,27 @@ npm run build        # output in web/dist/
 ## Features
 
 - **Style selector** — Big Tech / Sci-Fi / Fantasy
-- **Controls** — count, min/max length, randomness (temperature), optional seed words for blending
-- **Score bars** — pronounceability and novelty per generated name
+- **Sub-styles** — Sci-Fi (Stellar / Machine / Alien) and Fantasy (Elvish / Dwarvish / Orcish / Common), plus "Mixed"
+- **Controls** — count, min/max length, randomness (temperature), seed words, product description
+- **Score bars** — pronounceability, novelty, and memorability per generated name
 - **Favorites** — star names; persisted across reloads via `localStorage`
 - **Domain indicator** — checks `.com` / `.io` availability via Cloudflare DNS-over-HTTPS (no API key; labeled as indicator, not authoritative)
+
+## How it works
+
+| Style | Generator | Flavoring |
+|---|---|---|
+| Big Tech | Portmanteau blend of root words + tech transforms (vowel-drop, `-ly`/`-ify`/`-io` suffixes); a Markov model trained on real brand names fills variety | Roots come from a product description (RAKE keywords), seed words, or a built-in root list |
+| Sci-Fi / Fantasy | Order-3 character Markov chain trained on a curated corpus | A variant trains on its own sub-corpus and re-ranks candidates by a phoneme-affinity profile (sonorous liquids → soft; harsh plosives/clusters → hard) |
+
+Every candidate passes a phonotactic filter, is scored on three axes, deduped, and returned. Generation is deterministic when a `seed` is supplied.
+
+## Research & references
+
+This engine is built from published techniques rather than ad-hoc heuristics:
+
+- **Brand-name blending & appeal** — Gangal et al., *Generating Appealing Brand Names*, [arXiv:1706.09335](https://arxiv.org/abs/1706.09335). Basis for syllable blending, vowel-dropping, and scoring candidates for readability/pronounceability.
+- **Markov / n-gram name generation** — the classic character-Markov approach to culture-specific names ([Markov name generation](https://luetkemj.github.io/170102/2016-markov-name-generation/)). Basis for the Sci-Fi/Fantasy generator.
+- **Sound symbolism (bouba/kiki)** — Köhler (1929); Klink, *Creating Brand Names with Meaning* / "Sounds good: phonetic patterns in top brand names"; Pathak et al. (2020), *Harsh voices, sound branding*, [Psychology & Marketing](https://onlinelibrary.wiley.com/doi/abs/10.1002/mar.21346). Basis for the memorability score (initial plosives) and the sub-style phoneme profiles (soft liquids vs. spiky plosives).
+- **Syllable structure & phonotactics** — onset/nucleus/coda phoneme classes ([Essentials of Linguistics §3.4](https://ecampusontario.pressbooks.pub/essentialsoflinguistics/chapter/3-4-syllable-structure/)). Basis for the phoneme-class model and validity filter.
+- **RAKE keyword extraction** — Rose, Engel, Cramer & Cowley (2010), *Automatic Keyword Extraction from Individual Documents*. Basis for description-driven naming — lightweight, training-free, runs in WASM.
