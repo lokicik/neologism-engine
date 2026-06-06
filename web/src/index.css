@@ -87,6 +87,31 @@ body {
   color: #fff;
 }
 
+.variant-selector {
+  display: flex;
+  gap: .4rem;
+  flex-wrap: wrap;
+}
+
+.variant-btn {
+  padding: .3rem .85rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: .8rem;
+  transition: all .15s;
+}
+
+.variant-btn:hover { color: var(--text); border-color: var(--accent2); }
+.variant-btn.active {
+  background: var(--accent2);
+  border-color: var(--accent2);
+  color: #08120d;
+  font-weight: 600;
+}
+
 .sliders {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));

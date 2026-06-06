@@ -1,5 +1,6 @@
 pub mod blend;
 pub mod markov;
+pub mod phonemes;
 pub mod phonotactics;
 pub mod score;
 pub mod style;
@@ -11,7 +12,8 @@ use serde::{Deserialize, Serialize};
 
 use style::{Config, Style};
 use markov::Model;
-use phonotactics::{is_valid, syllable_count};
+use phonemes::{affinity_score, Variant};
+use phonotactics::{is_valid, is_valid_clustered, syllable_count};
 use score::{score_novelty, score_pronounceability};
 use blend::{blend, tech_transform};
 
@@ -38,6 +40,20 @@ fn scifi_corpus() -> String {
 /// All fantasy sub-corpora concatenated (used when no variant is selected).
 fn fantasy_corpus() -> String {
     [FANTASY_ELVISH, FANTASY_DWARVISH, FANTASY_ORCISH, FANTASY_COMMON].join("\n")
+}
+
+/// Map a variant name to its dedicated sub-corpus.
+fn variant_corpus(variant: &str) -> Option<&'static str> {
+    match variant.to_lowercase().as_str() {
+        "stellar" => Some(SCIFI_STELLAR),
+        "machine" => Some(SCIFI_MACHINE),
+        "alien" => Some(SCIFI_ALIEN),
+        "elvish" => Some(FANTASY_ELVISH),
+        "dwarvish" => Some(FANTASY_DWARVISH),
+        "orcish" => Some(FANTASY_ORCISH),
+        "common" => Some(FANTASY_COMMON),
+        _ => None,
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -67,9 +83,23 @@ pub fn generate(cfg: &Config) -> Vec<NameResult> {
 
     match cfg.style {
         Style::BigTech => generate_bigtech(cfg, &dict, &mut rng),
-        Style::SciFi => generate_markov(cfg, &dict, &mut rng, &scifi_corpus()),
-        Style::Fantasy => generate_markov(cfg, &dict, &mut rng, &fantasy_corpus()),
+        Style::SciFi => {
+            let corpus = variant_only_corpus(cfg).unwrap_or_else(scifi_corpus);
+            generate_markov(cfg, &dict, &mut rng, &corpus)
+        }
+        Style::Fantasy => {
+            let corpus = variant_only_corpus(cfg).unwrap_or_else(fantasy_corpus);
+            generate_markov(cfg, &dict, &mut rng, &corpus)
+        }
     }
+}
+
+/// The dedicated sub-corpus for the config's variant, if one is set and valid.
+fn variant_only_corpus(cfg: &Config) -> Option<String> {
+    cfg.variant
+        .as_deref()
+        .and_then(variant_corpus)
+        .map(|s| s.to_string())
 }
 
 fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng) -> Vec<NameResult> {
@@ -126,20 +156,29 @@ fn generate_markov(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, c
     let names = parse_lines(corpus);
     let model = Model::train(&names, 3);
 
-    let mut results = Vec::new();
+    let variant = cfg.variant.as_deref().and_then(Variant::parse);
+    // Harsher variants permit denser consonant clusters.
+    let max_run = match variant {
+        Some(Variant::Orcish) | Some(Variant::Alien) => 4,
+        _ => 3,
+    };
+    // When a variant is set, overgenerate so we can re-rank toward its sound profile.
+    let target = if variant.is_some() { cfg.count * 4 } else { cfg.count };
+    let max_attempts = target * 60;
+
+    let mut pool: Vec<NameResult> = Vec::new();
     let mut seen: HashSet<String> = HashSet::new();
-    let max_attempts = cfg.count * 60;
 
     for _ in 0..max_attempts {
-        if results.len() >= cfg.count { break; }
+        if pool.len() >= target { break; }
         let Some(name) = model.sample(rng, cfg.temperature, cfg.min_len, cfg.max_len) else { continue };
         let name = capitalize(&name);
-        if !is_valid(&name.to_lowercase(), cfg.style) { continue; }
+        if !is_valid_clustered(&name.to_lowercase(), cfg.style, max_run) { continue; }
         if seen.contains(&name) { continue; }
         seen.insert(name.clone());
         let sp = score_pronounceability(&name);
         let sn = score_novelty(&name.to_lowercase(), dict);
-        results.push(NameResult {
+        pool.push(NameResult {
             syllables: syllable_count(&name.to_lowercase()),
             name,
             style: cfg.style,
@@ -147,7 +186,17 @@ fn generate_markov(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, c
             score_novelty: sn,
         });
     }
-    results
+
+    // Re-rank toward the variant's phoneme profile, then keep the best `count`.
+    if let Some(v) = variant {
+        pool.sort_by(|a, b| {
+            affinity_score(&b.name, v)
+                .partial_cmp(&affinity_score(&a.name, v))
+                .unwrap_or(std::cmp::Ordering::Equal)
+        });
+        pool.truncate(cfg.count);
+    }
+    pool
 }
 
 fn capitalize(s: &str) -> String {
@@ -171,6 +220,7 @@ mod tests {
             temperature: 0.7,
             seed: Some(42),
             roots: vec![],
+            variant: None,
         }
     }
 
@@ -196,6 +246,27 @@ mod tests {
     fn generates_fantasy_names() {
         let results = generate(&cfg(Style::Fantasy));
         assert!(!results.is_empty());
+    }
+
+    #[test]
+    fn variant_sharpens_profile() {
+        // Elvish output should, on average, score higher on elvish affinity
+        // than the unflavored fantasy mix.
+        use crate::phonemes::{affinity_score, Variant};
+        let mut elvish_cfg = cfg(Style::Fantasy);
+        elvish_cfg.variant = Some("elvish".to_string());
+        elvish_cfg.count = 8;
+        let elvish = generate(&elvish_cfg);
+        assert!(!elvish.is_empty());
+
+        let mut mix_cfg = cfg(Style::Fantasy);
+        mix_cfg.count = 8;
+        let mix = generate(&mix_cfg);
+
+        let avg = |v: &[NameResult]| -> f64 {
+            v.iter().map(|r| affinity_score(&r.name, Variant::Elvish)).sum::<f64>() / v.len() as f64
+        };
+        assert!(avg(&elvish) >= avg(&mix), "elvish {} vs mix {}", avg(&elvish), avg(&mix));
     }
 
     #[test]

@@ -10,6 +10,7 @@ export interface Config {
   temperature?: number
   seed?: number
   roots?: string[]
+  variant?: string
 }
 
 export interface NameResult {

@@ -24,6 +24,8 @@ pub struct Config {
     /// Seed words for big-tech blending (e.g. ["pin","interest"])
     #[serde(default)]
     pub roots: Vec<String>,
+    /// Optional sub-style for sci-fi/fantasy (e.g. "elvish", "alien").
+    pub variant: Option<String>,
 }
 
 fn default_count() -> usize { 10 }
@@ -41,6 +43,7 @@ impl Default for Config {
             temperature: default_temperature(),
             seed: None,
             roots: vec![],
+            variant: None,
         }
     }
 }

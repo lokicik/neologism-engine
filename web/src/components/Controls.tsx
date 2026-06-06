@@ -13,9 +13,29 @@ const STYLES: { value: Style; label: string; desc: string }[] = [
   { value: 'fantasy', label: 'Fantasy', desc: 'Elves, orcs, ancient kingdoms' },
 ]
 
+const VARIANTS: Partial<Record<Style, { value: string; label: string }[]>> = {
+  sci_fi: [
+    { value: 'stellar', label: 'Stellar' },
+    { value: 'machine', label: 'Machine' },
+    { value: 'alien', label: 'Alien' },
+  ],
+  fantasy: [
+    { value: 'elvish', label: 'Elvish' },
+    { value: 'dwarvish', label: 'Dwarvish' },
+    { value: 'orcish', label: 'Orcish' },
+    { value: 'common', label: 'Common' },
+  ],
+}
+
 export function Controls({ config, onChange, onGenerate, loading }: Props) {
   const set = <K extends keyof Config>(key: K, value: Config[K]) =>
     onChange({ ...config, [key]: value })
+
+  // Switching style clears any variant from the previous style.
+  const setStyle = (style: Style) =>
+    onChange({ ...config, style, variant: undefined })
+
+  const variants = VARIANTS[config.style]
 
   return (
     <div className="controls">
@@ -24,13 +44,33 @@ export function Controls({ config, onChange, onGenerate, loading }: Props) {
           <button
             key={s.value}
             className={`style-btn${config.style === s.value ? ' active' : ''}`}
-            onClick={() => set('style', s.value)}
+            onClick={() => setStyle(s.value)}
             title={s.desc}
           >
             {s.label}
           </button>
         ))}
       </div>
+
+      {variants && (
+        <div className="variant-selector">
+          <button
+            className={`variant-btn${!config.variant ? ' active' : ''}`}
+            onClick={() => set('variant', undefined)}
+          >
+            Mixed
+          </button>
+          {variants.map((v) => (
+            <button
+              key={v.value}
+              className={`variant-btn${config.variant === v.value ? ' active' : ''}`}
+              onClick={() => set('variant', v.value)}
+            >
+              {v.label}
+            </button>
+          ))}
+        </div>
+      )}
 
       <div className="sliders">
         <label>

@@ -7,7 +7,14 @@ pub fn is_vowel(c: char) -> bool {
 }
 
 /// Returns false if the name violates basic phonotactic rules.
+/// Uses a default max consonant run of 3.
 pub fn is_valid(name: &str, style: Style) -> bool {
+    is_valid_clustered(name, style, 3)
+}
+
+/// Like `is_valid`, but with a configurable max consonant run so harsher
+/// variants (orcish, alien) can permit denser clusters.
+pub fn is_valid_clustered(name: &str, style: Style, max_run: u32) -> bool {
     if name.is_empty() {
         return false;
     }
@@ -18,14 +25,14 @@ pub fn is_valid(name: &str, style: Style) -> bool {
         return false;
     }
 
-    // reject >3 consecutive consonants
+    // reject consonant runs longer than max_run
     let mut cons_run = 0u32;
     for &c in &chars {
         if is_vowel(c) || c == '\'' {
             cons_run = 0;
         } else {
             cons_run += 1;
-            if cons_run > 3 {
+            if cons_run > max_run {
                 return false;
             }
         }
