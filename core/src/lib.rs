@@ -16,10 +16,29 @@ use score::{score_novelty, score_pronounceability};
 use blend::{blend, tech_transform};
 
 const BIGTECH_CORPUS: &str = include_str!("../data/bigtech.txt");
-const SCIFI_CORPUS: &str = include_str!("../data/scifi.txt");
-const FANTASY_CORPUS: &str = include_str!("../data/fantasy.txt");
 const ROOTS: &str = include_str!("../data/roots.txt");
 const WORDS: &str = include_str!("../data/words.txt");
+
+// Sci-fi sub-corpora
+const SCIFI_STELLAR: &str = include_str!("../data/scifi/stellar.txt");
+const SCIFI_MACHINE: &str = include_str!("../data/scifi/machine.txt");
+const SCIFI_ALIEN: &str = include_str!("../data/scifi/alien.txt");
+
+// Fantasy sub-corpora
+const FANTASY_ELVISH: &str = include_str!("../data/fantasy/elvish.txt");
+const FANTASY_DWARVISH: &str = include_str!("../data/fantasy/dwarvish.txt");
+const FANTASY_ORCISH: &str = include_str!("../data/fantasy/orcish.txt");
+const FANTASY_COMMON: &str = include_str!("../data/fantasy/common.txt");
+
+/// All sci-fi sub-corpora concatenated (used when no variant is selected).
+fn scifi_corpus() -> String {
+    [SCIFI_STELLAR, SCIFI_MACHINE, SCIFI_ALIEN].join("\n")
+}
+
+/// All fantasy sub-corpora concatenated (used when no variant is selected).
+fn fantasy_corpus() -> String {
+    [FANTASY_ELVISH, FANTASY_DWARVISH, FANTASY_ORCISH, FANTASY_COMMON].join("\n")
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct NameResult {
@@ -48,8 +67,8 @@ pub fn generate(cfg: &Config) -> Vec<NameResult> {
 
     match cfg.style {
         Style::BigTech => generate_bigtech(cfg, &dict, &mut rng),
-        Style::SciFi => generate_markov(cfg, &dict, &mut rng, SCIFI_CORPUS),
-        Style::Fantasy => generate_markov(cfg, &dict, &mut rng, FANTASY_CORPUS),
+        Style::SciFi => generate_markov(cfg, &dict, &mut rng, &scifi_corpus()),
+        Style::Fantasy => generate_markov(cfg, &dict, &mut rng, &fantasy_corpus()),
     }
 }
 
