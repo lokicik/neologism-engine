@@ -14,7 +14,7 @@ use serde::{Deserialize, Serialize};
 use style::{Config, Style};
 use markov::Model;
 use phonemes::{affinity_score, Variant};
-use phonotactics::{is_valid, is_valid_clustered, syllable_count};
+use phonotactics::{is_valid, is_valid_clustered, respects_sonority, syllable_count};
 use score::{score_memorability, score_novelty, score_pronounceability};
 use blend::{blend, tech_transform};
 
@@ -149,6 +149,8 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng) 
         let name = capitalize(&name);
         if name.len() < cfg.min_len || name.len() > cfg.max_len { continue; }
         if !is_valid(&name.to_lowercase(), Style::BigTech) { continue; }
+        // Big-tech names should read naturally → enforce sonority sequencing.
+        if !respects_sonority(&name.to_lowercase()) { continue; }
         if seen.contains(&name) { continue; }
 
         seen.insert(name.clone());
@@ -177,6 +179,12 @@ fn generate_markov(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, c
         Some(Variant::Orcish) | Some(Variant::Alien) => 4,
         _ => 3,
     };
+    // Soft variants should read naturally → enforce sonority sequencing.
+    // (Mixed/harsh styles keep their full, deliberately rough range.)
+    let soft = matches!(
+        variant,
+        Some(Variant::Elvish) | Some(Variant::Stellar) | Some(Variant::Common)
+    );
     // When a variant is set, overgenerate so we can re-rank toward its sound profile.
     let target = if variant.is_some() { cfg.count * 4 } else { cfg.count };
     let max_attempts = target * 60;
@@ -189,6 +197,7 @@ fn generate_markov(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, c
         let Some(name) = model.sample(rng, cfg.temperature, cfg.min_len, cfg.max_len) else { continue };
         let name = capitalize(&name);
         if !is_valid_clustered(&name.to_lowercase(), cfg.style, max_run) { continue; }
+        if soft && !respects_sonority(&name.to_lowercase()) { continue; }
         if seen.contains(&name) { continue; }
         seen.insert(name.clone());
         let sp = score_pronounceability(&name);
