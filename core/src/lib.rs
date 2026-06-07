@@ -20,16 +20,56 @@ use phonotactics::{is_valid, is_valid_clustered, respects_sonority, syllable_cou
 use score::{score_memorability, score_novelty, score_pronounceability};
 use blend::{blend, compound, overlap_blend, tech_transform};
 
-// Default big-tech generator mix (no user roots): share of coined order-3
-// Markov names and clean blends; the remainder (~0.15) is short single-root
-// evocative names. Weighted toward coined + clean over raw prefix+suffix blends.
-const BT_MARKOV_W: f64 = 0.55;
-const BT_BLEND_W: f64 = 0.30;
+/// Tunable big-tech generation knobs (Phase 21). `Default` = production values;
+/// the tuning harness ([core/examples/tune.rs]) sweeps these in-process. Only
+/// big-tech reads them — Sci-Fi/Fantasy are unaffected.
+#[derive(Debug, Clone)]
+pub struct BigTechTuning {
+    /// P(coined Markov) in the no-roots generator mix.
+    pub markov_w: f64,
+    /// P(blend) in the mix; remainder is short single-root evocative.
+    pub blend_w: f64,
+    /// Quality gate: candidates below `corpus_mean − gate_sigma·corpus_std` log-
+    /// likelihood are rejected.
+    pub gate_sigma: f64,
+    /// Rank weight on pronounceability (fluency).
+    pub fluency_w: f64,
+    /// Rank weight on memorability (brevity).
+    pub brevity_w: f64,
+    /// MMR diversity-vs-quality balance (higher = more quality).
+    pub mmr_lambda: f64,
+    /// Reject names with more than this many syllables.
+    pub syllable_cap: usize,
+}
+
+impl Default for BigTechTuning {
+    // Phase 21: values chosen by the tuning sweep (examples/tune.rs); raised
+    // big_tech novelty ~91.7 -> ~94.3 with pron/diversity held. syllable_cap is
+    // kept at 3, NOT the sweep's 2: cap=2 scored marginally higher (the objective
+    // over-rewards brevity/novelty) but would bar every 3-syllable name —
+    // Spotify/Shopify-style brands — for a negligible real gain. brevity_w=2.5
+    // already pulls hard toward short names without that hard exclusion.
+    fn default() -> Self {
+        Self {
+            markov_w: 0.45,
+            blend_w: 0.15,
+            gate_sigma: 1.5,
+            fluency_w: 2.5,
+            brevity_w: 2.5,
+            mmr_lambda: 0.8,
+            syllable_cap: 3,
+        }
+    }
+}
 
 const BIGTECH_CORPUS: &str = include_str!("../data/bigtech.txt");
 const ROOTS: &str = include_str!("../data/roots.txt");
 const ADJECTIVES: &str = include_str!("../data/adjectives.txt");
 const WORDS: &str = include_str!("../data/words.txt");
+// ~19k common English words — used ONLY to filter big-tech output so the model
+// can't emit a plain real word as a "brand" (Guard, Telegraph, Content). Kept
+// separate from WORDS so novelty scoring and Sci-Fi/Fantasy stay unchanged.
+const COMMON_WORDS: &str = include_str!("../data/common_words.txt");
 
 // Sci-fi sub-corpora
 const SCIFI_STELLAR: &str = include_str!("../data/scifi/stellar.txt");
@@ -88,13 +128,24 @@ fn build_dictionary() -> HashSet<String> {
     parse_lines(WORDS).iter().map(|s| s.to_lowercase()).collect()
 }
 
+/// Common-English-word set for the big-tech real-word filter (see COMMON_WORDS).
+fn build_common_words() -> HashSet<String> {
+    parse_lines(COMMON_WORDS).iter().map(|s| s.to_string()).collect()
+}
+
 pub fn generate(cfg: &Config) -> Vec<NameResult> {
+    generate_with_tuning(cfg, &BigTechTuning::default())
+}
+
+/// Like `generate`, but with explicit big-tech tuning knobs (for the sweep
+/// harness). `tuning` only affects big-tech; Sci-Fi/Fantasy ignore it.
+pub fn generate_with_tuning(cfg: &Config, tuning: &BigTechTuning) -> Vec<NameResult> {
     let dict = build_dictionary();
     let seed = cfg.seed.unwrap_or_else(|| rand::random());
     let mut rng = ChaCha8Rng::seed_from_u64(seed);
 
     match cfg.style {
-        Style::BigTech => generate_bigtech(cfg, &dict, &mut rng),
+        Style::BigTech => generate_bigtech(cfg, &dict, &mut rng, tuning),
         Style::SciFi => {
             let corpus = variant_only_corpus(cfg).unwrap_or_else(scifi_corpus);
             generate_markov(cfg, &dict, &mut rng, &corpus)
@@ -165,9 +216,11 @@ fn blend_roots(rng: &mut ChaCha8Rng, roots: &[&str]) -> Option<String> {
     overlap_blend(a, b).or_else(|| blend(a, b))
 }
 
-fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng) -> Vec<NameResult> {
+fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, tuning: &BigTechTuning) -> Vec<NameResult> {
     let roots_corpus = parse_lines(ROOTS);
     let bigtech_corpus = parse_lines(BIGTECH_CORPUS);
+    // A neologism engine shouldn't surface plain real words as brand names.
+    let common_words = build_common_words();
 
     // Priority for blend roots: description keywords > user-supplied roots > corpus.
     let desc_keywords: Vec<String> = cfg
@@ -215,7 +268,7 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng) 
         let lls: Vec<f64> = bigtech_corpus.iter().map(|w| bigtech_model.log_likelihood(w)).collect();
         let mean = lls.iter().sum::<f64>() / lls.len() as f64;
         let var = lls.iter().map(|x| (x - mean).powi(2)).sum::<f64>() / lls.len() as f64;
-        mean - 2.0 * var.sqrt()
+        mean - tuning.gate_sigma * var.sqrt()
     } else {
         f64::NEG_INFINITY
     };
@@ -236,10 +289,10 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng) 
             // Weighted mix: mostly coined Markov, some clean blends, some short
             // single-root evocative names (root + tech suffix, à la Shopify).
             let pick = rand::Rng::gen::<f64>(rng);
-            if pick < BT_MARKOV_W {
+            if pick < tuning.markov_w {
                 let Some(s) = bigtech_model.sample(rng, cfg.temperature, cfg.min_len, cfg.max_len) else { continue };
                 tech_transform(rng, &s, cfg.temperature)
-            } else if pick < BT_MARKOV_W + BT_BLEND_W {
+            } else if pick < tuning.markov_w + tuning.blend_w {
                 let Some(b) = blend_roots(rng, &roots_corpus) else { continue };
                 tech_transform(rng, &b, cfg.temperature)
             } else {
@@ -256,13 +309,15 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng) 
         // Compounds join two real words, so skip the single-word sonority check.
         if !cfg.compound && !respects_sonority(&lower) { continue; }
         // Brand-shape: 1–3 syllables (research sweet spot); reject long mashups.
-        if !cfg.compound && syllable_count(&lower) > 3 { continue; }
+        if !cfg.compound && syllable_count(&lower) > tuning.syllable_cap { continue; }
         // Phonotactic-probability gate: reject candidates less brand-like than
         // the low tail of real brands (no-op when apply_gate is false).
         if bigtech_model.log_likelihood(&name) < ll_floor { continue; }
         // Don't emit names that read as a truncated/typo'd real brand.
         if apply_gate && mimics_real_brand(&lower, &bigtech_corpus) { continue; }
         if corpus_set.contains(&lower) || dict.contains(&lower) { continue; }
+        // Reject plain real words (Guard, Telegraph) — big-tech only.
+        if common_words.contains(&lower) { continue; }
         if !passes_constraints(&lower, cfg) { continue; }
         if seen.contains(&name) { continue; }
 
@@ -286,8 +341,8 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng) 
     // signal, plus a pronounceability/fluency bonus (processing fluency → trust)
     // and a brevity bonus from memorability. Brevity/fluency bias only applies
     // without user roots — with a description/seed words, keyword fidelity leads.
-    let brevity_w = if has_roots { 0.0 } else { 1.5 };
-    let fluency_w = if has_roots { 0.0 } else { 1.5 };
+    let brevity_w = if has_roots { 0.0 } else { tuning.brevity_w };
+    let fluency_w = if has_roots { 0.0 } else { tuning.fluency_w };
     let rank = |r: &NameResult| {
         bigtech_model.log_likelihood(&r.name)
             + (r.score_pronounce as f64 / 100.0) * fluency_w
@@ -301,7 +356,7 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng) 
     } else {
         // Keep the most brand-like as candidates, then diversify the final set (MMR).
         pool.truncate(cfg.count * 2);
-        metrics::mmr_select(&pool, cfg.count, 0.7)
+        metrics::mmr_select(&pool, cfg.count, tuning.mmr_lambda)
     }
 }
 
@@ -543,6 +598,17 @@ mod tests {
         assert!(mimics_real_brand("xstripe", &["stripe"]));     // prefix pad
         // A coinage that merely shares a stem with a brand → kept.
         assert!(!mimics_real_brand("twility", &["twilio"]));
+    }
+
+    #[test]
+    fn bigtech_excludes_common_words() {
+        // No big-tech name should be a plain common English word.
+        let common = build_common_words();
+        let mut c = cfg(Style::BigTech);
+        c.count = 20;
+        for r in generate(&c) {
+            assert!(!common.contains(&r.name.to_lowercase()), "{} is a common word", r.name);
+        }
     }
 
     #[test]
