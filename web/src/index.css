@@ -326,6 +326,31 @@ input[type="range"] {
 
 .score-value { font-size: .7rem; color: var(--muted); text-align: right; }
 
+/* Connotation tags */
+.connotations {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .3rem;
+}
+
+.conn-label {
+  font-size: .64rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  margin-right: .1rem;
+}
+
+.conn-tag {
+  font-size: .68rem;
+  padding: .1rem .45rem;
+  border-radius: 4px;
+  background: var(--surface2);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
 /* Domain row */
 .domain-row {
   display: flex;

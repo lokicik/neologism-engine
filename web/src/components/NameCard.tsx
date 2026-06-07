@@ -114,6 +114,15 @@ export function NameCard({ result, isFavorite, onToggleFavorite, badges = [] }: 
         </div>
       </div>
 
+      {result.connotations.length > 0 && (
+        <div className="connotations" title="The vibe this name evokes (sound symbolism)">
+          <span className="conn-label">feels</span>
+          {result.connotations.map((c) => (
+            <span key={c} className="conn-tag">{c}</span>
+          ))}
+        </div>
+      )}
+
       <div className="domain-row">
         {Object.entries(domains).map(([tld, status]) => (
           <span key={tld} className={domainBadgeClass(status)}>

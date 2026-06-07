@@ -21,6 +21,7 @@ export interface NameResult {
   score_pronounce: number
   score_novelty: number
   score_memorability: number
+  connotations: string[]
 }
 
 let initialized = false

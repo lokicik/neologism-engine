@@ -113,6 +113,7 @@ mod tests {
             score_pronounce: p,
             score_novelty: nov,
             score_memorability: m,
+            connotations: vec![],
         }
     }
 

@@ -1,4 +1,5 @@
 pub mod blend;
+pub mod connotation;
 pub mod keywords;
 pub mod markov;
 pub mod metrics;
@@ -66,6 +67,7 @@ pub struct NameResult {
     pub score_pronounce: u32,
     pub score_novelty: u32,
     pub score_memorability: u32,
+    pub connotations: Vec<String>,
 }
 
 fn parse_lines(s: &str) -> Vec<&str> {
@@ -171,6 +173,7 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng) 
         let sp = score_pronounceability(&name);
         let sn = score_novelty(&name.to_lowercase(), dict);
         let sm = score_memorability(&name);
+        let cn = connotation::connotations(&name);
         pool.push(NameResult {
             syllables: syllable_count(&name.to_lowercase()),
             name,
@@ -178,6 +181,7 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng) 
             score_pronounce: sp,
             score_novelty: sn,
             score_memorability: sm,
+            connotations: cn,
         });
     }
 
@@ -232,6 +236,7 @@ fn generate_markov(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, c
         let sp = score_pronounceability(&name);
         let sn = score_novelty(&name.to_lowercase(), dict);
         let sm = score_memorability(&name);
+        let cn = connotation::connotations(&name);
         pool.push(NameResult {
             syllables: syllable_count(&name.to_lowercase()),
             name,
@@ -239,6 +244,7 @@ fn generate_markov(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, c
             score_pronounce: sp,
             score_novelty: sn,
             score_memorability: sm,
+            connotations: cn,
         });
     }
 
