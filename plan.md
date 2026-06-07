@@ -94,9 +94,50 @@ logos/handles are optional polish.
 
 ---
 
+## 7. Engine tuning (planned — big-tech quality)
+
+*Phase 19 (order-3 backoff Markov, quality gate, syllable cap, re-weighted mix, mimics guard) and
+Phase 20 (brand corpus 355→958) made big-tech the strongest style. Several constants introduced in
+Phase 19 were reasoned defaults, never swept — and the corpus expansion surfaced a real-word-leak
+gap. This phase tunes the knobs and closes that gap. No new deps; Sci-Fi/Fantasy must stay identical.*
+
+**7a. Sweep the constants** (in [core/src/lib.rs](core/src/lib.rs) / [core/src/markov.rs](core/src/markov.rs)):
+
+| Knob | Current | Range to sweep |
+|---|---|---|
+| `BT_MARKOV_W` / `BT_BLEND_W` (generator mix) | 0.55 / 0.30 | Markov 0.40–0.70, blend 0.15–0.40 |
+| `ll_floor` sigma (quality gate) | mean − 2.0σ | 1.0–3.0σ |
+| Markov order / `BACKOFF` | 3 / 0.4 | order 3–4, backoff 0.2–0.6 |
+| `mimics_real_brand` edit-dist / len-window / min brand len | ≤2 / +2 / 5 | dist 1–2, window +1..+3, len 4–6 |
+| rank `fluency_w` / `brevity_w` | 1.5 / 1.5 | 0.5–3.0 each |
+| MMR `lambda` | 0.7 | 0.5–0.85 |
+| syllable cap | 3 | 2–3 |
+
+**Method:** extend the metrics harness ([core/examples/metrics.rs](core/examples/metrics.rs)) to (a)
+average over many seeds for stability and (b) print a composite objective — pronounceability +
+novelty + diversity, a "shape" proxy (% names in the 1–3 syllable / 5–9 char sweet spot), and avg
+order-3 log-likelihood as a coherence signal. Coordinate-descent / coarse grid; pick the Pareto-best
+config (guard against novelty collapse or diversity loss). Lock chosen constants; keep them named.
+
+**Advantages:** squeezes more quality from the existing engine with zero architectural risk; the
+harness gives fast, objective before/after.
+**Disadvantages:** diminishing returns — the metrics are already high (pron ~91, div ~0.90); gains
+are incremental, and over-fitting one metric can hurt another.
+**Effort:** ~half a day. **Verdict:** worthwhile polish, lower priority than deployment.
+
+**7b. Close the real-word-leak gap.** The bigger corpus made the model occasionally emit a real
+English word that isn't in [core/data/words.txt](core/data/words.txt) (`Guard`, `Telegraph`,
+`Content`, `Greet`) — the novelty/dict filter misses it. Options: (i) expand `words.txt` with a
+common-English list, or (ii) decide such names are *acceptable* (real-word brands like Square /
+Stripe / Notion are strong). **Lean toward (i)** with a moderate list, but keep the bar at "common
+words only" so legitimately brandable rare words still pass. **Effort:** ~1–2 hours (data).
+
+---
+
 ## Bottom line
 
-The engine is done. If anything is next, it's **#6 deployment** (ship it), then **#4 Wuggy** only
-if multilingual/template generation becomes a goal. #3 is a minor refinement; #5 is a different
-project. See `README.md` for the full research bibliography and `~/.claude/plans/` for the build
-history.
+Big-tech (the star feature) is now the strongest style and committed (Phases 19–20). Remaining
+options, best-first: **#6 deployment** (ship it — highest value), **#7 tuning** (incremental polish
+of the now-strong engine), then **#4 Wuggy** only if multilingual/template generation becomes a goal.
+#3 is a minor refinement; #5 is a different project. See `README.md` for the full research
+bibliography and `~/.claude/plans/` for the build history.
