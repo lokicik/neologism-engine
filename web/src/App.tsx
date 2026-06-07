@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react'
 import { generateNames, batchMetrics, type BatchMetrics, type Config, type NameResult } from './lib/engine'
 import { recommendations } from './lib/recommend'
+import { buildProfile, rankByPreference } from './lib/preferences'
 import { loadFavorites, toggleFavorite } from './lib/storage'
 import { Controls } from './components/Controls'
 import { NameCard } from './components/NameCard'
@@ -21,6 +22,7 @@ export default function App() {
   const [results, setResults] = useState<NameResult[]>([])
   const [metrics, setMetrics] = useState<BatchMetrics | null>(null)
   const [favorites, setFavorites] = useState<NameResult[]>(loadFavorites)
+  const [tuned, setTuned] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -44,15 +46,22 @@ export default function App() {
 
   const favoriteNames = new Set(favorites.map((f) => f.name))
 
-  // Per-name badges derived from the batch metrics.
-  const badgesFor = (i: number): string[] => {
-    if (!metrics || results.length < 2) return []
+  // Preference profile learned from favorites (Namelix-style); needs ≥3.
+  const profile = buildProfile(favorites)
+  const displayResults = tuned && profile ? rankByPreference(results, profile) : results
+
+  // Standout names by metric (compared by name, so re-ranking doesn't break badges).
+  const bestName = metrics && results.length >= 2 ? results[metrics.stats.best_index]?.name : undefined
+  const origName = results.length >= 2
+    ? results.reduce((m, r) => (r.score_novelty > m.score_novelty ? r : m)).name : undefined
+  const easyName = results.length >= 2
+    ? results.reduce((m, r) => (r.score_pronounce > m.score_pronounce ? r : m)).name : undefined
+
+  const badgesFor = (r: NameResult): string[] => {
     const b: string[] = []
-    if (i === metrics.stats.best_index) b.push('👑 Best')
-    const origIdx = results.reduce((m, r, k) => (r.score_novelty > results[m].score_novelty ? k : m), 0)
-    const easyIdx = results.reduce((m, r, k) => (r.score_pronounce > results[m].score_pronounce ? k : m), 0)
-    if (i === origIdx) b.push('✦ Original')
-    if (i === easyIdx) b.push('🔊 Easy say')
+    if (r.name === bestName) b.push('👑 Best')
+    if (r.name === origName) b.push('✦ Original')
+    if (r.name === easyName) b.push('🔊 Easy say')
     return b
   }
 
@@ -77,15 +86,22 @@ export default function App() {
 
         {metrics && <StatsPanel stats={metrics.stats} tips={tips} />}
 
-        {results.length > 0 && (
+        {results.length > 0 && profile && (
+          <label className="tuned-toggle">
+            <input type="checkbox" checked={tuned} onChange={(e) => setTuned(e.target.checked)} />
+            <span>Tuned to your favorites</span>
+          </label>
+        )}
+
+        {displayResults.length > 0 && (
           <section className="results-grid">
-            {results.map((r, i) => (
+            {displayResults.map((r) => (
               <NameCard
                 key={r.name}
                 result={r}
                 isFavorite={favoriteNames.has(r.name)}
                 onToggleFavorite={handleToggleFavorite}
-                badges={badgesFor(i)}
+                badges={badgesFor(r)}
               />
             ))}
           </section>

@@ -248,6 +248,16 @@ input[type="range"] {
   color: var(--text);
 }
 
+.tuned-toggle {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  font-size: .82rem;
+  color: var(--muted);
+  cursor: pointer;
+}
+.tuned-toggle input { accent-color: var(--accent2); cursor: pointer; }
+
 /* Results grid */
 .results-grid {
   display: grid;
