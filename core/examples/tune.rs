@@ -27,6 +27,7 @@ fn cfg_for(seed: u64) -> Config {
         compound: false,
         starts_with: None,
         contains: None,
+        exclude: vec![],
     }
 }
 

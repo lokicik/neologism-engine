@@ -246,6 +246,8 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, 
     let bigtech_corpus = parse_lines(BIGTECH_CORPUS);
     // A neologism engine shouldn't surface plain real words as brand names.
     let common_words = build_common_words();
+    // Names the user has already seen this session — never repeat them.
+    let exclude: HashSet<String> = cfg.exclude.iter().map(|s| s.to_lowercase()).collect();
 
     // Priority for blend roots: description keywords > user-supplied roots > corpus.
     let desc_keywords: Vec<String> = cfg
@@ -346,6 +348,7 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, 
         // Reject bad/offensive connotations (Bitdefect) — big-tech only.
         if BAD_SUBSTRINGS.iter().any(|b| lower.contains(b)) { continue; }
         if !passes_constraints(&lower, cfg) { continue; }
+        if exclude.contains(&lower) { continue; }
         if seen.contains(&name) { continue; }
 
         seen.insert(name.clone());
@@ -382,6 +385,9 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, 
         pool
     } else {
         // Keep the most brand-like as candidates, then diversify the final set (MMR).
+        // Cross-regeneration repetition is handled by exclude-recent (the UI passes
+        // the names already shown this session, filtered out above), which keeps the
+        // deterministic high-quality pick while never re-showing a name.
         pool.truncate(cfg.count * 2);
         metrics::mmr_select(&pool, cfg.count, tuning.mmr_lambda)
     }
@@ -392,6 +398,9 @@ fn generate_markov(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, c
     let model = Model::train(&names, 3);
     // Never emit a training entry verbatim — this is a neologism engine.
     let corpus_set: HashSet<String> = names.iter().map(|s| s.to_lowercase()).collect();
+
+    // Names the user has already seen this session — never repeat them.
+    let exclude: HashSet<String> = cfg.exclude.iter().map(|s| s.to_lowercase()).collect();
 
     let variant = cfg.variant.as_deref().and_then(Variant::parse);
     // Harsher variants permit denser consonant clusters.
@@ -421,6 +430,7 @@ fn generate_markov(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, c
         let lower = name.to_lowercase();
         if corpus_set.contains(&lower) || dict.contains(&lower) { continue; }
         if !passes_constraints(&lower, cfg) { continue; }
+        if exclude.contains(&lower) { continue; }
         if seen.contains(&name) { continue; }
         seen.insert(name.clone());
         let sp = score_pronounceability(&name);
@@ -481,6 +491,7 @@ mod tests {
             compound: false,
             starts_with: None,
             contains: None,
+            exclude: vec![],
         }
     }
 

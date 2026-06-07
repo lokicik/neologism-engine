@@ -39,6 +39,10 @@ pub struct Config {
     pub starts_with: Option<String>,
     /// Optional: only keep names containing this (case-insensitive) substring.
     pub contains: Option<String>,
+    /// Names to exclude (case-insensitive) — used to avoid repeating names the
+    /// user has already seen this session. Empty by default.
+    #[serde(default)]
+    pub exclude: Vec<String>,
 }
 
 fn default_count() -> usize { 10 }
@@ -63,6 +67,7 @@ impl Default for Config {
             compound: false,
             starts_with: None,
             contains: None,
+            exclude: vec![],
         }
     }
 }

@@ -16,6 +16,7 @@ export interface Config {
   compound?: boolean
   starts_with?: string
   contains?: string
+  exclude?: string[]
 }
 
 export interface NameResult {

@@ -19,6 +19,7 @@ fn row(label: &str, style: Style, variant: Option<&str>) {
         compound: false,
         starts_with: None,
         contains: None,
+        exclude: vec![],
     };
     let s = batch_stats(&generate(&cfg));
     println!(
