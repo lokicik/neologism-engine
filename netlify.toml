@@ -1,0 +1,4 @@
+[build]
+  base = "web"
+  publish = "dist"
+  command = "rustup toolchain install stable && (command -v wasm-pack >/dev/null 2>&1 || cargo install wasm-pack --version 0.13.1 --locked) && npm run build:wasm && npm run build"
