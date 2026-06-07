@@ -41,6 +41,9 @@ pub fn tech_transform<R: Rng>(rng: &mut R, name: &str, temperature: f64) -> Stri
     // 30% chance drop vowels, 70% chance append suffix
     if rng.gen::<f64>() < 0.3 {
         drop_trailing_vowels(name)
+    } else if name.len() >= 9 {
+        // Already long — don't bolt on a suffix and create a mashup.
+        name.to_string()
     } else {
         let suffix = TECH_SUFFIXES[rng.gen_range(0..TECH_SUFFIXES.len())];
         // avoid double-appending if name already ends with suffix
@@ -108,5 +111,17 @@ mod tests {
     fn drop_trailing_vowel() {
         assert_eq!(drop_trailing_vowels("syncro"), "syncr");
         assert_eq!(drop_trailing_vowels("flux"), "flux");
+    }
+
+    #[test]
+    fn tech_transform_never_lengthens_long_names() {
+        use rand_chacha::ChaCha8Rng;
+        use rand::SeedableRng;
+        let mut rng = ChaCha8Rng::seed_from_u64(1);
+        let base = "datacortex"; // 10 chars — already long
+        for _ in 0..100 {
+            let out = tech_transform(&mut rng, base, 1.0);
+            assert!(out.len() <= base.len(), "lengthened to {}", out);
+        }
     }
 }

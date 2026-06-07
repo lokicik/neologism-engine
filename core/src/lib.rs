@@ -180,14 +180,15 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng) 
         });
     }
 
-    // Rank by how brand-like each blend is under the real-brand Markov model,
-    // surfacing names like "Splends" over junk like "Sptai".
-    pool.sort_by(|a, b| {
-        bigtech_model
-            .log_likelihood(&b.name)
-            .partial_cmp(&bigtech_model.log_likelihood(&a.name))
-            .unwrap_or(std::cmp::Ordering::Equal)
-    });
+    // Rank by brand-likeness (Markov word-likeness) plus a brevity bonus from
+    // memorability, so short names like "Splends" beat long mashups like
+    // "Bastababase". The brevity bonus only applies without user roots — with a
+    // description/seed words, keyword fidelity matters more than pure brandability.
+    let brevity_w = if has_roots { 0.0 } else { 3.0 };
+    let rank = |r: &NameResult| {
+        bigtech_model.log_likelihood(&r.name) + (r.score_memorability as f64 / 100.0) * brevity_w
+    };
+    pool.sort_by(|a, b| rank(b).partial_cmp(&rank(a)).unwrap_or(std::cmp::Ordering::Equal));
     pool.truncate(cfg.count);
     pool
 }
