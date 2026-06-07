@@ -22,7 +22,10 @@ export function recommendations(
     tips.push(`These are hard to pronounce — lower Randomness${soft}.`)
   }
   if (stats.diversity < 0.45) {
-    tips.push('Results look similar to each other — raise Variety for more spread of shapes and lengths.')
+    const how = config.style === 'big_tech'
+      ? 'raise Variety for more spread of shapes and lengths'
+      : 'switch variant or raise Randomness for more spread'
+    tips.push(`Results look similar to each other — ${how}.`)
   }
 
   if (tips.length === 0) {

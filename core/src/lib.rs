@@ -65,7 +65,10 @@ impl BigTechTuning {
             // (one register) toward blends + evocative single-roots (more shapes).
             markov_w: lerp(0.45, 0.20),
             blend_w: lerp(0.15, 0.40),
-            gate_sigma: lerp(1.5, 3.5),
+            // Keep the word-likeness gate tight even at high variety — variety
+            // comes from the structural knobs below, NOT from admitting
+            // low-brand-likelihood junk (Bombanac/Groqual).
+            gate_sigma: lerp(1.5, 2.2),
             fluency_w: lerp(2.5, 0.0),
             brevity_w: lerp(2.5, 0.0),
             mmr_lambda: lerp(0.85, 0.50),
@@ -82,6 +85,16 @@ const WORDS: &str = include_str!("../data/words.txt");
 // can't emit a plain real word as a "brand" (Guard, Telegraph, Content). Kept
 // separate from WORDS so novelty scoring and Sci-Fi/Fantasy stay unchanged.
 const COMMON_WORDS: &str = include_str!("../data/common_words.txt");
+
+/// Substrings that make a bad/offensive brand name. Big-tech output containing
+/// any of these is rejected. Kept to 4+ chars with low collision risk (no `ass`,
+/// `anal`, `pee`, `rape`, `hell` — they hit innocent names like class/canal/speed/
+/// shell). Catches connotation flubs (`Bitdefect`) and keeps output safe.
+const BAD_SUBSTRINGS: &[&str] = &[
+    "fuck", "shit", "cunt", "dick", "cock", "bitch", "bastard", "whore", "slut",
+    "porn", "nazi", "nigg", "retard", "damn", "crap", "turd", "fart", "puke",
+    "vomit", "poop", "defect", "fraud", "scam", "lousy",
+];
 
 // Sci-fi sub-corpora
 const SCIFI_STELLAR: &str = include_str!("../data/scifi/stellar.txt");
@@ -330,6 +343,8 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, 
         if corpus_set.contains(&lower) || dict.contains(&lower) { continue; }
         // Reject plain real words (Guard, Telegraph) — big-tech only.
         if common_words.contains(&lower) { continue; }
+        // Reject bad/offensive connotations (Bitdefect) — big-tech only.
+        if BAD_SUBSTRINGS.iter().any(|b| lower.contains(b)) { continue; }
         if !passes_constraints(&lower, cfg) { continue; }
         if seen.contains(&name) { continue; }
 
@@ -433,10 +448,10 @@ fn generate_markov(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, c
         });
         pool.truncate(cfg.count * 2);
     }
-    // Select the final set balancing quality and diversity (MMR). The variety
-    // knob widens the spread; at the default (0.5) lambda is 0.70 — unchanged.
-    let lambda = 0.85 + (0.55 - 0.85) * cfg.variety.clamp(0.0, 1.0);
-    metrics::mmr_select(&pool, cfg.count, lambda)
+    // Select the final set balancing quality and diversity (MMR). Sci-Fi/Fantasy
+    // use a fixed lambda — the `variety` knob is a big-tech-only control (these
+    // styles get their spread from variants), so their output stays stable.
+    metrics::mmr_select(&pool, cfg.count, 0.7)
 }
 
 fn capitalize(s: &str) -> String {

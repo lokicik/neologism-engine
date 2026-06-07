@@ -14,7 +14,7 @@ const DEFAULT_CONFIG: Config = {
   min_len: 4,
   max_len: 12,
   temperature: 0.7,
-  variety: 0.5,
+  variety: 0.3,
   roots: [],
 }
 

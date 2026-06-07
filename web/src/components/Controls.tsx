@@ -109,14 +109,16 @@ export function Controls({ config, onChange, onGenerate, loading }: Props) {
           />
         </label>
 
-        <label title="How different the names in a batch are from each other (shapes, lengths, sounds). Higher = more varied, looser quality.">
-          <span>Variety <strong>{((config.variety ?? 0.5) * 100).toFixed(0)}%</strong></span>
-          <input
-            type="range" min={0} max={1} step={0.05}
-            value={config.variety ?? 0.5}
-            onChange={(e) => set('variety', Number(e.target.value))}
-          />
-        </label>
+        {config.style === 'big_tech' && (
+          <label title="How different the big-tech names in a batch are from each other (shapes, lengths, sounds). Higher = more varied, looser quality.">
+            <span>Variety <strong>{((config.variety ?? 0.3) * 100).toFixed(0)}%</strong></span>
+            <input
+              type="range" min={0} max={1} step={0.05}
+              value={config.variety ?? 0.3}
+              onChange={(e) => set('variety', Number(e.target.value))}
+            />
+          </label>
+        )}
       </div>
 
       {config.style === 'big_tech' && (

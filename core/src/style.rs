@@ -45,7 +45,7 @@ fn default_count() -> usize { 10 }
 fn default_min() -> usize { 4 }
 fn default_max() -> usize { 12 }
 fn default_temperature() -> f64 { 0.7 }
-fn default_variety() -> f64 { 0.5 }
+fn default_variety() -> f64 { 0.3 }
 
 impl Default for Config {
     fn default() -> Self {
