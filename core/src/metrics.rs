@@ -40,6 +40,61 @@ pub fn diversity(results: &[NameResult]) -> f64 {
     total / pairs as f64
 }
 
+/// Greedy Maximal Marginal Relevance selection (Carbonell & Goldstein 1998):
+/// pick `count` names balancing quality (composite score) against dissimilarity
+/// to those already chosen, reducing near-duplicate clustering. `lambda` (0..1)
+/// weights quality vs. diversity (0.7 = mostly quality, some spread).
+pub fn mmr_select(items: &[NameResult], count: usize, lambda: f64) -> Vec<NameResult> {
+    if items.len() <= count {
+        return items.to_vec();
+    }
+    let rel = |r: &NameResult| composite_score(r) as f64 / 100.0;
+    let sim = |a: &str, b: &str| -> f64 {
+        let max = a.chars().count().max(b.chars().count()).max(1) as f64;
+        1.0 - levenshtein(&a.to_lowercase(), &b.to_lowercase()) as f64 / max
+    };
+
+    let mut remaining: Vec<usize> = (0..items.len()).collect();
+    let mut selected: Vec<usize> = Vec::with_capacity(count);
+
+    // Seed with the highest-relevance item.
+    let first = *remaining
+        .iter()
+        .max_by(|&&i, &&j| rel(&items[i]).partial_cmp(&rel(&items[j])).unwrap_or(std::cmp::Ordering::Equal))
+        .unwrap();
+    selected.push(first);
+    remaining.retain(|&i| i != first);
+
+    while selected.len() < count && !remaining.is_empty() {
+        let next = *remaining
+            .iter()
+            .max_by(|&&i, &&j| {
+                let mi = mmr_value(&items[i], &selected, items, lambda, &rel, &sim);
+                let mj = mmr_value(&items[j], &selected, items, lambda, &rel, &sim);
+                mi.partial_cmp(&mj).unwrap_or(std::cmp::Ordering::Equal)
+            })
+            .unwrap();
+        selected.push(next);
+        remaining.retain(|&i| i != next);
+    }
+    selected.into_iter().map(|i| items[i].clone()).collect()
+}
+
+fn mmr_value(
+    cand: &NameResult,
+    selected: &[usize],
+    items: &[NameResult],
+    lambda: f64,
+    rel: &impl Fn(&NameResult) -> f64,
+    sim: &impl Fn(&str, &str) -> f64,
+) -> f64 {
+    let max_sim = selected
+        .iter()
+        .map(|&s| sim(&cand.name, &items[s].name))
+        .fold(0.0f64, f64::max);
+    lambda * rel(cand) - (1.0 - lambda) * max_sim
+}
+
 /// Aggregate statistics for one batch of names.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BatchStats {
@@ -129,6 +184,22 @@ mod tests {
         assert!(diversity(&same) < 0.01);
         let diff = vec![r("alpha", 1, 1, 1), r("zzzzz", 1, 1, 1)];
         assert!(diversity(&diff) > 0.9);
+    }
+
+    #[test]
+    fn mmr_increases_diversity() {
+        // A pool with three near-duplicates and two distinct names.
+        let pool = vec![
+            r("vrax", 90, 90, 90),
+            r("vrix", 90, 90, 90),
+            r("vrex", 90, 90, 90),
+            r("z017lon", 88, 90, 88),
+            r("quorthak", 88, 90, 88),
+        ];
+        let picked = mmr_select(&pool, 3, 0.7);
+        assert_eq!(picked.len(), 3);
+        let plain: Vec<NameResult> = pool.iter().take(3).cloned().collect();
+        assert!(diversity(&picked) > diversity(&plain), "mmr {} vs plain {}", diversity(&picked), diversity(&plain));
     }
 
     #[test]

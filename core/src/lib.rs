@@ -228,8 +228,15 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng) 
         bigtech_model.log_likelihood(&r.name) + (r.score_memorability as f64 / 100.0) * brevity_w
     };
     pool.sort_by(|a, b| rank(b).partial_cmp(&rank(a)).unwrap_or(std::cmp::Ordering::Equal));
-    pool.truncate(cfg.count);
-    pool
+    if has_roots {
+        // User-supplied roots/description: preserve keyword fidelity, no diversity pass.
+        pool.truncate(cfg.count);
+        pool
+    } else {
+        // Keep the most brand-like as candidates, then diversify the final set (MMR).
+        pool.truncate(cfg.count * 2);
+        metrics::mmr_select(&pool, cfg.count, 0.7)
+    }
 }
 
 fn generate_markov(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, corpus: &str) -> Vec<NameResult> {
@@ -250,8 +257,8 @@ fn generate_markov(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, c
         variant,
         Some(Variant::Elvish) | Some(Variant::Stellar) | Some(Variant::Common)
     );
-    // When a variant is set, overgenerate so we can re-rank toward its sound profile.
-    let target = if variant.is_some() { cfg.count * 4 } else { cfg.count };
+    // Overgenerate so MMR (and variant affinity) have room to select from.
+    let target = cfg.count * 4;
     let max_attempts = target * 60;
 
     let mut pool: Vec<NameResult> = Vec::new();
@@ -283,16 +290,18 @@ fn generate_markov(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, c
         });
     }
 
-    // Re-rank toward the variant's phoneme profile, then keep the best `count`.
+    // For a variant, pre-bias the pool toward its phoneme profile so MMR selects
+    // from on-profile candidates and sub-style flavor is preserved.
     if let Some(v) = variant {
         pool.sort_by(|a, b| {
             affinity_score(&b.name, v)
                 .partial_cmp(&affinity_score(&a.name, v))
                 .unwrap_or(std::cmp::Ordering::Equal)
         });
-        pool.truncate(cfg.count);
+        pool.truncate(cfg.count * 2);
     }
-    pool
+    // Select the final set balancing quality and diversity (MMR).
+    metrics::mmr_select(&pool, cfg.count, 0.7)
 }
 
 fn capitalize(s: &str) -> String {
