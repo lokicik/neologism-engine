@@ -18,7 +18,7 @@ use markov::Model;
 use phonemes::{affinity_score, Variant};
 use phonotactics::{is_valid, is_valid_clustered, respects_sonority, syllable_count};
 use score::{score_memorability, score_novelty, score_pronounceability};
-use blend::{blend, compound, tech_transform};
+use blend::{blend, compound, overlap_blend, tech_transform};
 
 const BIGTECH_CORPUS: &str = include_str!("../data/bigtech.txt");
 const ROOTS: &str = include_str!("../data/roots.txt");
@@ -178,7 +178,14 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng) 
             let a = all_roots[rand::Rng::gen_range(rng, 0..all_roots.len())];
             let b = all_roots[rand::Rng::gen_range(rng, 0..all_roots.len())];
             if a == b { continue; }
-            let Some(blended) = blend(a, b) else { continue };
+            // Prefer an overlap blend (pin+interest→pinterest); fall back to prefix+suffix.
+            let blended = match overlap_blend(a, b) {
+                Some(o) => o,
+                None => match blend(a, b) {
+                    Some(x) => x,
+                    None => continue,
+                },
+            };
             tech_transform(rng, &blended, cfg.temperature)
         } else {
             let Some(s) = bigtech_model.sample(rng, cfg.temperature, cfg.min_len, cfg.max_len) else { continue };

@@ -25,6 +25,23 @@ pub fn blend(a: &str, b: &str) -> Option<String> {
     Some(format!("{}{}", prefix, suffix))
 }
 
+/// Blend at a shared seam: if the end of `a` overlaps the start of `b`, merge
+/// there (pin + interest → pinterest; span + spanglish-style). Returns None when
+/// there is no overlap of length >= 2. Grounded in how real portmanteaus form.
+pub fn overlap_blend(a: &str, b: &str) -> Option<String> {
+    let a_chars: Vec<char> = a.chars().collect();
+    let b_chars: Vec<char> = b.chars().collect();
+    let max_k = a_chars.len().min(b_chars.len());
+    // Don't let the overlap swallow an entire word.
+    for k in (2..max_k).rev() {
+        if a_chars[a_chars.len() - k..] == b_chars[..k] {
+            let merged: String = a_chars.iter().chain(b_chars[k..].iter()).collect();
+            return Some(merged);
+        }
+    }
+    None
+}
+
 /// Join an adjective + noun into a CamelCase compound (SwiftForge, BrightLoom).
 pub fn compound(adj: &str, noun: &str) -> String {
     fn cap(s: &str) -> String {
@@ -129,6 +146,13 @@ mod tests {
     fn compound_camelcases() {
         assert_eq!(compound("swift", "forge"), "SwiftForge");
         assert_eq!(compound("bright", "loom"), "BrightLoom");
+    }
+
+    #[test]
+    fn overlap_blend_merges_seam() {
+        assert_eq!(overlap_blend("pin", "interest"), Some("pinterest".to_string()));
+        assert_eq!(overlap_blend("data", "tabase"), Some("database".to_string()));
+        assert_eq!(overlap_blend("smoke", "fog"), None);
     }
 
     #[test]
