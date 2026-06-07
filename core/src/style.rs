@@ -28,6 +28,9 @@ pub struct Config {
     pub variant: Option<String>,
     /// Optional product description for big-tech naming; keywords become blend roots.
     pub description: Option<String>,
+    /// Big-tech only: produce adjective+noun compounds (SwiftForge) instead of blends.
+    #[serde(default)]
+    pub compound: bool,
 }
 
 fn default_count() -> usize { 10 }
@@ -47,6 +50,7 @@ impl Default for Config {
             roots: vec![],
             variant: None,
             description: None,
+            compound: false,
         }
     }
 }

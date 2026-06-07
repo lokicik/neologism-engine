@@ -11,6 +11,7 @@ fn show(label: &str, style: Style, variant: Option<&str>) {
         roots: vec![],
         variant: variant.map(|s| s.to_string()),
         description: None,
+        compound: false,
     };
     let names: Vec<String> = generate(&cfg).into_iter().map(|r| r.name).collect();
     println!("{:<10}: {}", label, names.join(", "));

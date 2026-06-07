@@ -18,10 +18,11 @@ use markov::Model;
 use phonemes::{affinity_score, Variant};
 use phonotactics::{is_valid, is_valid_clustered, respects_sonority, syllable_count};
 use score::{score_memorability, score_novelty, score_pronounceability};
-use blend::{blend, tech_transform};
+use blend::{blend, compound, tech_transform};
 
 const BIGTECH_CORPUS: &str = include_str!("../data/bigtech.txt");
 const ROOTS: &str = include_str!("../data/roots.txt");
+const ADJECTIVES: &str = include_str!("../data/adjectives.txt");
 const WORDS: &str = include_str!("../data/words.txt");
 
 // Sci-fi sub-corpora
@@ -141,6 +142,7 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng) 
     let max_attempts = target * 80;
 
     let bigtech_model = Model::train(&bigtech_corpus, 2);
+    let adjectives = parse_lines(ADJECTIVES);
     // When the user supplies roots (description or seed words), blend purely from
     // them so re-ranking can't swap in generic names; otherwise mix in some Markov.
     let has_roots = !desc_keywords.is_empty() || !cfg.roots.is_empty();
@@ -149,7 +151,12 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng) 
     for _ in 0..max_attempts {
         if pool.len() >= target { break; }
 
-        let name = if rand::Rng::gen::<f64>(rng) < blend_prob {
+        let name = if cfg.compound {
+            // Adjective + noun compound (SwiftForge); already CamelCase.
+            let adj = adjectives[rand::Rng::gen_range(rng, 0..adjectives.len())];
+            let noun = roots_corpus[rand::Rng::gen_range(rng, 0..roots_corpus.len())];
+            compound(adj, noun)
+        } else if rand::Rng::gen::<f64>(rng) < blend_prob {
             let a = all_roots[rand::Rng::gen_range(rng, 0..all_roots.len())];
             let b = all_roots[rand::Rng::gen_range(rng, 0..all_roots.len())];
             if a == b { continue; }
@@ -162,17 +169,18 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng) 
 
         let name = capitalize(&name);
         if name.len() < cfg.min_len || name.len() > cfg.max_len { continue; }
-        if !is_valid(&name.to_lowercase(), Style::BigTech) { continue; }
-        // Big-tech names should read naturally → enforce sonority sequencing.
-        if !respects_sonority(&name.to_lowercase()) { continue; }
         let lower = name.to_lowercase();
+        if !is_valid(&lower, Style::BigTech) { continue; }
+        // Big-tech names should read naturally → enforce sonority sequencing.
+        // Compounds join two real words, so skip the single-word sonority check.
+        if !cfg.compound && !respects_sonority(&lower) { continue; }
         if corpus_set.contains(&lower) || dict.contains(&lower) { continue; }
         if seen.contains(&name) { continue; }
 
         seen.insert(name.clone());
-        let sp = score_pronounceability(&name);
-        let sn = score_novelty(&name.to_lowercase(), dict);
-        let sm = score_memorability(&name);
+        let sp = score_pronounceability(&lower);
+        let sn = score_novelty(&lower, dict);
+        let sm = score_memorability(&lower);
         let cn = connotation::connotations(&name);
         pool.push(NameResult {
             syllables: syllable_count(&name.to_lowercase()),
@@ -283,6 +291,7 @@ mod tests {
             roots: vec![],
             variant: None,
             description: None,
+            compound: false,
         }
     }
 
@@ -333,6 +342,21 @@ mod tests {
             };
             let overlap: Vec<&String> = names.intersection(&corpus).collect();
             assert!(overlap.is_empty(), "{:?}/{:?} reproduced corpus entries: {:?}", style, variant, overlap);
+        }
+    }
+
+    #[test]
+    fn compound_mode_produces_compounds() {
+        let mut c = cfg(Style::BigTech);
+        c.compound = true;
+        c.count = 6;
+        c.max_len = 16;
+        let results = generate(&c);
+        assert!(!results.is_empty());
+        // Each compound has an internal uppercase boundary (e.g. SwiftForge).
+        for r in &results {
+            let inner_caps = r.name.chars().skip(1).any(|ch| ch.is_uppercase());
+            assert!(inner_caps, "{} is not a compound", r.name);
         }
     }
 

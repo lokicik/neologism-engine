@@ -12,6 +12,7 @@ export interface Config {
   roots?: string[]
   variant?: string
   description?: string
+  compound?: boolean
 }
 
 export interface NameResult {

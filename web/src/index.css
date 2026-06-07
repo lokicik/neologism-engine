@@ -141,6 +141,15 @@ input[type="range"] {
 
 .roots-input { display: flex; flex-direction: column; gap: .6rem; }
 
+.toggle-row {
+  flex-direction: row !important;
+  align-items: center;
+  gap: .5rem !important;
+  cursor: pointer;
+  color: var(--text) !important;
+}
+.toggle-row input { accent-color: var(--accent); cursor: pointer; }
+
 .roots-input input[type="text"],
 .roots-input textarea {
   padding: .45rem .75rem;

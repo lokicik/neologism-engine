@@ -15,6 +15,7 @@ fn row(label: &str, style: Style, variant: Option<&str>) {
         roots: vec![],
         variant: variant.map(|s| s.to_string()),
         description: None,
+        compound: false,
     };
     let s = batch_stats(&generate(&cfg));
     println!(

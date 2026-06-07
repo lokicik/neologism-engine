@@ -25,6 +25,18 @@ pub fn blend(a: &str, b: &str) -> Option<String> {
     Some(format!("{}{}", prefix, suffix))
 }
 
+/// Join an adjective + noun into a CamelCase compound (SwiftForge, BrightLoom).
+pub fn compound(adj: &str, noun: &str) -> String {
+    fn cap(s: &str) -> String {
+        let mut c = s.chars();
+        match c.next() {
+            Some(f) => f.to_uppercase().collect::<String>() + c.as_str(),
+            None => String::new(),
+        }
+    }
+    format!("{}{}", cap(adj), cap(noun))
+}
+
 /// Drop the trailing vowel(s) to get a consonant-ending "tech" form (Flickr-style).
 pub fn drop_trailing_vowels(s: &str) -> String {
     let trimmed = s.trim_end_matches(|c| is_vowel(c));
@@ -111,6 +123,12 @@ mod tests {
     fn drop_trailing_vowel() {
         assert_eq!(drop_trailing_vowels("syncro"), "syncr");
         assert_eq!(drop_trailing_vowels("flux"), "flux");
+    }
+
+    #[test]
+    fn compound_camelcases() {
+        assert_eq!(compound("swift", "forge"), "SwiftForge");
+        assert_eq!(compound("bright", "loom"), "BrightLoom");
     }
 
     #[test]

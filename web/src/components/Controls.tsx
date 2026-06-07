@@ -112,6 +112,14 @@ export function Controls({ config, onChange, onGenerate, loading }: Props) {
 
       {config.style === 'big_tech' && (
         <div className="roots-input">
+          <label className="toggle-row">
+            <input
+              type="checkbox"
+              checked={config.compound ?? false}
+              onChange={(e) => set('compound', e.target.checked)}
+            />
+            <span>Compound names (SwiftForge, BrightLoom)</span>
+          </label>
           <label>
             <span>Describe your product (optional)</span>
             <textarea
