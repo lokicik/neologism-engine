@@ -1,4 +1,4 @@
-import init, { generate_names } from '../wasm/neologism_wasm.js'
+import init, { generate_names, batch_metrics } from '../wasm/neologism_wasm.js'
 
 export type Style = 'big_tech' | 'sci_fi' | 'fantasy'
 
@@ -38,4 +38,29 @@ export async function generateNames(cfg: Config): Promise<NameResult[]> {
   const parsed = JSON.parse(json) as NameResult[] | { error: string }
   if ('error' in parsed) throw new Error((parsed as { error: string }).error)
   return parsed as NameResult[]
+}
+
+export interface BatchStats {
+  count: number
+  unique_pct: number
+  avg_pronounce: number
+  avg_novelty: number
+  avg_memorability: number
+  avg_length: number
+  avg_syllables: number
+  diversity: number
+  best_index: number
+}
+
+export interface BatchMetrics {
+  stats: BatchStats
+  composites: number[]
+}
+
+export async function batchMetrics(results: NameResult[]): Promise<BatchMetrics> {
+  await ensureInit()
+  const json = batch_metrics(JSON.stringify(results))
+  const parsed = JSON.parse(json) as BatchMetrics | { error: string }
+  if ('error' in parsed) throw new Error((parsed as { error: string }).error)
+  return parsed as BatchMetrics
 }

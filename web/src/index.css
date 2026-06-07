@@ -171,6 +171,74 @@ input[type="range"] {
 .generate-btn:hover { opacity: .85; }
 .generate-btn:disabled { opacity: .45; cursor: not-allowed; }
 
+/* Stats panel */
+.stats-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: .85rem;
+}
+
+.stats-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: .15rem;
+}
+
+.stat-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -.02em;
+}
+
+.stat-label {
+  font-size: .68rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.stats-tips {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: .35rem;
+  border-top: 1px solid var(--border);
+  padding-top: .75rem;
+}
+
+.stats-tip {
+  font-size: .82rem;
+  color: var(--text);
+}
+
+.card-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .3rem;
+  margin-bottom: -.1rem;
+}
+
+.badge-pill {
+  font-size: .64rem;
+  font-weight: 600;
+  padding: .12rem .45rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #7c6af933, #4ecca333);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
 /* Results grid */
 .results-grid {
   display: grid;

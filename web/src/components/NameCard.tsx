@@ -6,6 +6,7 @@ interface Props {
   result: NameResult
   isFavorite: boolean
   onToggleFavorite: (r: NameResult) => void
+  badges?: string[]
 }
 
 const STYLE_LABEL: Record<string, string> = {
@@ -14,7 +15,7 @@ const STYLE_LABEL: Record<string, string> = {
   fantasy: 'Fantasy',
 }
 
-export function NameCard({ result, isFavorite, onToggleFavorite }: Props) {
+export function NameCard({ result, isFavorite, onToggleFavorite, badges = [] }: Props) {
   const [copied, setCopied] = useState(false)
   const [domains, setDomains] = useState<Record<string, DomainStatus>>({
     '.com': 'idle',
@@ -61,6 +62,13 @@ export function NameCard({ result, isFavorite, onToggleFavorite }: Props) {
 
   return (
     <div className={`name-card${isFavorite ? ' favorited' : ''}`}>
+      {badges.length > 0 && (
+        <div className="card-badges">
+          {badges.map((b) => (
+            <span key={b} className="badge-pill">{b}</span>
+          ))}
+        </div>
+      )}
       <div className="card-header">
         <span className="name-text">{result.name}</span>
         <div className="card-actions">
