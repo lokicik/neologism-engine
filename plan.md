@@ -127,10 +127,84 @@ brands — for negligible real gain, so cap=3 was kept (eyeballed both). Markov 
 
 ---
 
+## 8. Beyond heuristics — roadmap to better *results* (Phase 26)
+
+*Phases 19–25 squeezed the heuristic stack about as far as it goes: backoff Markov, MMR diversity,
+brand-mimic/real-word filters, a Variety knob, exclude-recent, and a 5k+ founder-vetted corpus
+(YC + GitHub). Hand-categorizing fresh samples puts the keeper rate (names you'd actually consider
+using) at roughly **two in three**. The honest finding from this run: that ceiling isn't a tuning
+problem anymore.*
+
+**The bottleneck:** the engine *generates* well but *judges* badly. Our scores — pronounceability,
+novelty, memorability, diversity — are proxies. They cannot tell `Logitan` (clean, brandable) from
+`Bombanac` (numerically fine, reads as awkward). No amount of constant-sweeping fixes a judge that
+can't see the thing that actually matters. Better results from here on means a better judge, not
+more generation tuning.
+
+Four directions, ranked by where the leverage actually is:
+
+**#1 — Offline LLM-distilled quality scorer (top pick).** Use an LLM *offline, once*, to label a
+large batch of candidate names ("would you use this as a brand name? 1–5"). Train a small model
+(logistic regression / tiny MLP over phonetic + n-gram + structural features) on those labels, and
+ship the resulting weights — kilobytes, not megabytes — into the WASM build as a drop-in replacement
+for today's heuristic gate. Estimated gain: keeper-rate ~67% → ~85%. Stays **fully offline, no API
+key, no backend** — the one neural-flavored option that doesn't break the architecture. This is
+"the gain of a model without the cost of running one."
+
+**#2 — Optional online AI mode.** Let an LLM re-rank/generate candidates, write one-line
+explanations, or take a freeform brief ("name like Stripe but for logistics"). Best raw quality and
+the most natural UX, but requires a backend + API key + per-call cost — opt-in only, and it changes
+what the project *is* (no longer purely client-side/offline). Treat as an add-on mode, not a
+replacement for the core engine.
+
+**#3 — Subword/syllable generation** (extends item #4 above, Wuggy-style). Replace character-Markov
+with an onset–nucleus–coda model: more phonotactically natural names, "a name like Spotify"
+template-matching, and per-language flavors (Japanese, Nordic, Latin). A real generation-core
+rewrite — substantial data + engineering work — but stays classical/offline. Orthogonal to #1: a
+better *generator* still needs a better *judge* to pick its best output.
+
+**#4 — Usefulness / productization** (extends item #6 above). Different axis entirely — not better
+*strings*, but more *useful* results: semantic relevance to a product description (embeddings),
+real domain/social-handle availability checks, short "why this name works" explanations,
+pronunciation guides. Valuable, but doesn't move name *quality* — complements #1 rather than
+competing with it.
+
+**The key distinction driving sequencing: data buys *variety*, a scorer buys *quality*.** Phase 25
+proved more clean data grows the distinct-name space (fewer repeats) with diminishing returns, but
+it cannot raise the keeper-rate ceiling — feeding the same Markov+heuristic judge more material
+doesn't make the judge smarter. Conversely, a better scorer raises keeper-rate *immediately*, on
+the existing corpus, with no data work at all. **Sequencing "expand data, then build the scorer" is
+sound** — a bigger corpus gives the offline labeling step (#1) more raw material to draw candidates
+from — but if forced to choose one, the scorer (#1) is where the next real quality jump lives.
+
+**Corpus growth has saturated — measured, not assumed (Phase 26).** Tested whether *more* clean
+data still helps: pulled ~5.5k PyPI top-download package names + ~900 more GitHub repos (deeper
+star-range pagination), filtered through the Phase 25 pipeline (dictionary-word removal,
+brand-likelihood scoring vs. the existing model, junk/offensive filter) down to 1,258 new clean,
+brand-scored candidates (mean log-likelihood −2.76, on par with the YC batch's −2.84) — a 25%
+corpus increase, 5,075 → 6,333. Clean A/B with the `repeats` harness (identical code, only the
+corpus file swapped):
+
+| Corpus | Distinct big-tech names (300×10 batches) | `mem` |
+|---|---|---|
+| 5,075 (Phase 25) | **2,237** | 75.5 |
+| 6,333 (+1,258 PyPI/GitHub) | **2,195** | 75.0 |
+
+More data made the space *smaller*, not bigger — both numbers are within run-to-run noise of each
+other, i.e. **no measurable gain**. The char-Markov model's statistics had already converged at
+~5k entries; another 1,258 "founder-vetted-equivalent" names just reshuffles which already-likely
+patterns the model favors, it doesn't unlock new ones. **Conclusion: stop gathering data — the
+corpus is at its useful ceiling. The 1,258-name addition was *not* merged** (kept `bigtech.txt` at
+its committed 5,075-line state). This sharpens roadmap #1: the offline scorer is now not just the
+best lever, it's the *only* lever left that can move results forward.
+
+---
+
 ## Bottom line
 
-Big-tech (the star feature) is now the strongest style and committed (Phases 19–20). Remaining
-options, best-first: **#6 deployment** (ship it — highest value), **#7 tuning** (incremental polish
-of the now-strong engine), then **#4 Wuggy** only if multilingual/template generation becomes a goal.
-#3 is a minor refinement; #5 is a different project. See `README.md` for the full research
-bibliography and `~/.claude/plans/` for the build history.
+Big-tech (the star feature) is now the strongest style and committed (Phases 19–20, tuned through
+25). Remaining options, best-first: **#6 deployment** (ship it — highest value if not yet live),
+**roadmap #1 offline scorer** (the next real quality jump — see §8), then **#4 Wuggy / roadmap #3**
+only if multilingual/template generation becomes a goal. #3 (phonotactic metric) is a minor
+refinement; #5/roadmap-#2 (neural/online-AI) is a deliberate scope boundary, not a gap. See
+`README.md` for the full research bibliography and `~/.claude/plans/` for the build history.
