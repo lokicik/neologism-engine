@@ -8,6 +8,7 @@ export interface Config {
   min_len?: number
   max_len?: number
   temperature?: number
+  variety?: number
   seed?: number
   roots?: string[]
   variant?: string

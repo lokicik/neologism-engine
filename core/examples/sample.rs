@@ -7,6 +7,7 @@ fn show(label: &str, style: Style, variant: Option<&str>) {
         min_len: 4,
         max_len: 12,
         temperature: 0.85,
+        variety: 0.5,
         seed: Some(7),
         roots: vec![],
         variant: variant.map(|s| s.to_string()),

@@ -19,6 +19,7 @@ fn cfg_for(seed: u64) -> Config {
         min_len: 4,
         max_len: 12,
         temperature: 0.85,
+        variety: 0.5,
         seed: Some(seed),
         roots: vec![],
         variant: None,
@@ -83,7 +84,7 @@ fn main() {
 
     // Accept a trial only if it beats the running best AND doesn't starve the
     // pool or materially collapse novelty/diversity vs. the original baseline.
-    let mut consider = |label: String, t: BigTechTuning, best: &mut BigTechTuning, best_e: &mut Eval| {
+    let consider = |label: String, t: BigTechTuning, best: &mut BigTechTuning, best_e: &mut Eval| {
         let e = eval(&t);
         let ok = e.uniq >= 99.5 && e.nov >= baseline.nov - 4.0 && e.div >= baseline.div - 0.04;
         let flag = if e.composite > best_e.composite && ok { "*" } else { " " };

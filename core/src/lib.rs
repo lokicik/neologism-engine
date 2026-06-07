@@ -43,20 +43,32 @@ pub struct BigTechTuning {
 }
 
 impl Default for BigTechTuning {
-    // Phase 21: values chosen by the tuning sweep (examples/tune.rs); raised
-    // big_tech novelty ~91.7 -> ~94.3 with pron/diversity held. syllable_cap is
-    // kept at 3, NOT the sweep's 2: cap=2 scored marginally higher (the objective
-    // over-rewards brevity/novelty) but would bar every 3-syllable name —
-    // Spotify/Shopify-style brands — for a negligible real gain. brevity_w=2.5
-    // already pulls hard toward short names without that hard exclusion.
+    // Phase 21: values chosen by the tuning sweep (examples/tune.rs); the v=0
+    // (max-quality) end of the variety axis below. syllable_cap kept at 3 (not the
+    // sweep's 2, which would bar every 3-syllable name for negligible gain).
     fn default() -> Self {
+        Self::from_variety(0.0)
+    }
+}
+
+impl BigTechTuning {
+    /// Map a `variety` knob in [0,1] onto the tuning, interpolating between a
+    /// tight/best-quality preset (v=0 ≈ the Phase 21 sweep result) and a wide-
+    /// spread preset (v=1). Higher variety loosens selection/ranking so a batch
+    /// spans more shapes and registers — the fix for "names all feel the same".
+    /// The quality floor (gate, syllable cap, junk/leak filters) is unchanged.
+    pub fn from_variety(v: f64) -> Self {
+        let v = v.clamp(0.0, 1.0);
+        let lerp = |a: f64, b: f64| a + (b - a) * v;
         Self {
-            markov_w: 0.45,
-            blend_w: 0.15,
-            gate_sigma: 1.5,
-            fluency_w: 2.5,
-            brevity_w: 2.5,
-            mmr_lambda: 0.8,
+            // Shift the generator mix hard at high variety: less brand-Markov
+            // (one register) toward blends + evocative single-roots (more shapes).
+            markov_w: lerp(0.45, 0.20),
+            blend_w: lerp(0.15, 0.40),
+            gate_sigma: lerp(1.5, 3.5),
+            fluency_w: lerp(2.5, 0.0),
+            brevity_w: lerp(2.5, 0.0),
+            mmr_lambda: lerp(0.85, 0.50),
             syllable_cap: 3,
         }
     }
@@ -134,7 +146,7 @@ fn build_common_words() -> HashSet<String> {
 }
 
 pub fn generate(cfg: &Config) -> Vec<NameResult> {
-    generate_with_tuning(cfg, &BigTechTuning::default())
+    generate_with_tuning(cfg, &BigTechTuning::from_variety(cfg.variety))
 }
 
 /// Like `generate`, but with explicit big-tech tuning knobs (for the sweep
@@ -421,8 +433,10 @@ fn generate_markov(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, c
         });
         pool.truncate(cfg.count * 2);
     }
-    // Select the final set balancing quality and diversity (MMR).
-    metrics::mmr_select(&pool, cfg.count, 0.7)
+    // Select the final set balancing quality and diversity (MMR). The variety
+    // knob widens the spread; at the default (0.5) lambda is 0.70 — unchanged.
+    let lambda = 0.85 + (0.55 - 0.85) * cfg.variety.clamp(0.0, 1.0);
+    metrics::mmr_select(&pool, cfg.count, lambda)
 }
 
 fn capitalize(s: &str) -> String {
@@ -444,6 +458,7 @@ mod tests {
             min_len: 4,
             max_len: 12,
             temperature: 0.7,
+            variety: 0.5,
             seed: Some(42),
             roots: vec![],
             variant: None,

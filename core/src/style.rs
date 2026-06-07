@@ -20,6 +20,10 @@ pub struct Config {
     /// 0.0 = conservative, 1.0 = wild
     #[serde(default = "default_temperature")]
     pub temperature: f64,
+    /// How varied a batch is (0.0 = tight/best-quality, 1.0 = wide spread of
+    /// shapes/registers). Distinct from `temperature` (per-name wildness).
+    #[serde(default = "default_variety")]
+    pub variety: f64,
     pub seed: Option<u64>,
     /// Seed words for big-tech blending (e.g. ["pin","interest"])
     #[serde(default)]
@@ -41,6 +45,7 @@ fn default_count() -> usize { 10 }
 fn default_min() -> usize { 4 }
 fn default_max() -> usize { 12 }
 fn default_temperature() -> f64 { 0.7 }
+fn default_variety() -> f64 { 0.5 }
 
 impl Default for Config {
     fn default() -> Self {
@@ -50,6 +55,7 @@ impl Default for Config {
             min_len: default_min(),
             max_len: default_max(),
             temperature: default_temperature(),
+            variety: default_variety(),
             seed: None,
             roots: vec![],
             variant: None,
