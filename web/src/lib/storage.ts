@@ -21,3 +21,23 @@ export function toggleFavorite(favorites: NameResult[], item: NameResult): NameR
   saveFavorites(next)
   return next
 }
+
+// Recently-shown names, persisted so repeats don't return across reloads.
+const RECENT_KEY = 'neologism:recent'
+
+export function loadRecent(): string[] {
+  try {
+    const raw = localStorage.getItem(RECENT_KEY)
+    return raw ? (JSON.parse(raw) as string[]) : []
+  } catch {
+    return []
+  }
+}
+
+export function saveRecent(names: string[]): void {
+  try {
+    localStorage.setItem(RECENT_KEY, JSON.stringify(names))
+  } catch {
+    // ignore quota / serialization errors
+  }
+}

@@ -2,7 +2,7 @@ import { useState, useCallback, useRef } from 'react'
 import { generateNames, batchMetrics, type BatchMetrics, type Config, type NameResult } from './lib/engine'
 import { recommendations } from './lib/recommend'
 import { buildProfile, rankByPreference } from './lib/preferences'
-import { loadFavorites, toggleFavorite } from './lib/storage'
+import { loadFavorites, toggleFavorite, loadRecent, saveRecent } from './lib/storage'
 import { Controls } from './components/Controls'
 import { NameCard } from './components/NameCard'
 import { StatsPanel } from './components/StatsPanel'
@@ -18,10 +18,10 @@ const DEFAULT_CONFIG: Config = {
   roots: [],
 }
 
-// Don't repeat names the user has seen recently this session. A name can't
-// recur within this many shown names (~25 batches of 10) — kills the "same
-// name again" feeling without starving the ~2k-name space.
-const RECENT_WINDOW = 250
+// Don't repeat names the user has seen recently. A name can't recur within this
+// many shown names (~50 batches of 10) — kills the "same name again" feeling.
+// Persisted across reloads, and well under the ~2.3k-name space so it won't starve.
+const RECENT_WINDOW = 500
 
 export default function App() {
   const [config, setConfig] = useState<Config>(DEFAULT_CONFIG)
@@ -31,7 +31,7 @@ export default function App() {
   const [tuned, setTuned] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const recentRef = useRef<string[]>([])
+  const recentRef = useRef<string[]>(loadRecent())
 
   const handleGenerate = useCallback(async () => {
     setLoading(true)
@@ -40,6 +40,7 @@ export default function App() {
       const names = await generateNames({ ...config, exclude: recentRef.current })
       setResults(names)
       recentRef.current = [...recentRef.current, ...names.map((n) => n.name)].slice(-RECENT_WINDOW)
+      saveRecent(recentRef.current)
       setMetrics(names.length > 0 ? await batchMetrics(names) : null)
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err))
