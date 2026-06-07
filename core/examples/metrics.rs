@@ -16,6 +16,8 @@ fn row(label: &str, style: Style, variant: Option<&str>) {
         variant: variant.map(|s| s.to_string()),
         description: None,
         compound: false,
+        starts_with: None,
+        contains: None,
     };
     let s = batch_stats(&generate(&cfg));
     println!(

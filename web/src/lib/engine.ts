@@ -13,6 +13,8 @@ export interface Config {
   variant?: string
   description?: string
   compound?: boolean
+  starts_with?: string
+  contains?: string
 }
 
 export interface NameResult {

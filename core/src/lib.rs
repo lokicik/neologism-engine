@@ -108,6 +108,24 @@ fn variant_only_corpus(cfg: &Config) -> Option<String> {
         .map(|s| s.to_string())
 }
 
+/// Optional user constraints: starting prefix and/or required substring (both
+/// case-insensitive). `lower` is the lowercased candidate name.
+fn passes_constraints(lower: &str, cfg: &Config) -> bool {
+    if let Some(s) = cfg.starts_with.as_deref() {
+        let p = s.trim().to_lowercase();
+        if !p.is_empty() && !lower.starts_with(&p) {
+            return false;
+        }
+    }
+    if let Some(sub) = cfg.contains.as_deref() {
+        let c = sub.trim().to_lowercase();
+        if !c.is_empty() && !lower.contains(&c) {
+            return false;
+        }
+    }
+    true
+}
+
 fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng) -> Vec<NameResult> {
     let roots_corpus = parse_lines(ROOTS);
     let bigtech_corpus = parse_lines(BIGTECH_CORPUS);
@@ -175,6 +193,7 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng) 
         // Compounds join two real words, so skip the single-word sonority check.
         if !cfg.compound && !respects_sonority(&lower) { continue; }
         if corpus_set.contains(&lower) || dict.contains(&lower) { continue; }
+        if !passes_constraints(&lower, cfg) { continue; }
         if seen.contains(&name) { continue; }
 
         seen.insert(name.clone());
@@ -239,6 +258,7 @@ fn generate_markov(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, c
         if soft && !respects_sonority(&name.to_lowercase()) { continue; }
         let lower = name.to_lowercase();
         if corpus_set.contains(&lower) || dict.contains(&lower) { continue; }
+        if !passes_constraints(&lower, cfg) { continue; }
         if seen.contains(&name) { continue; }
         seen.insert(name.clone());
         let sp = score_pronounceability(&name);
@@ -292,6 +312,24 @@ mod tests {
             variant: None,
             description: None,
             compound: false,
+            starts_with: None,
+            contains: None,
+        }
+    }
+
+    #[test]
+    fn constraints_filter_output() {
+        let mut c = cfg(Style::Fantasy);
+        c.count = 8;
+        c.starts_with = Some("a".to_string());
+        for r in generate(&c) {
+            assert!(r.name.to_lowercase().starts_with('a'), "{} ignored starts_with", r.name);
+        }
+        let mut c2 = cfg(Style::SciFi);
+        c2.count = 6;
+        c2.contains = Some("ar".to_string());
+        for r in generate(&c2) {
+            assert!(r.name.to_lowercase().contains("ar"), "{} ignored contains", r.name);
         }
     }
 

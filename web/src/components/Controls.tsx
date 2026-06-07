@@ -147,6 +147,29 @@ export function Controls({ config, onChange, onGenerate, loading }: Props) {
         </div>
       )}
 
+      <div className="constraints-row">
+        <label>
+          <span>Starts with</span>
+          <input
+            type="text"
+            maxLength={3}
+            placeholder="e.g. z"
+            value={config.starts_with ?? ''}
+            onChange={(e) => set('starts_with', e.target.value || undefined)}
+          />
+        </label>
+        <label>
+          <span>Contains</span>
+          <input
+            type="text"
+            maxLength={6}
+            placeholder="e.g. ex"
+            value={config.contains ?? ''}
+            onChange={(e) => set('contains', e.target.value || undefined)}
+          />
+        </label>
+      </div>
+
       <button className="generate-btn" onClick={onGenerate} disabled={loading}>
         {loading ? 'Generating…' : 'Generate'}
       </button>

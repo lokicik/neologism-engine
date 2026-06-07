@@ -31,6 +31,10 @@ pub struct Config {
     /// Big-tech only: produce adjective+noun compounds (SwiftForge) instead of blends.
     #[serde(default)]
     pub compound: bool,
+    /// Optional: only keep names starting with this (case-insensitive) letter.
+    pub starts_with: Option<String>,
+    /// Optional: only keep names containing this (case-insensitive) substring.
+    pub contains: Option<String>,
 }
 
 fn default_count() -> usize { 10 }
@@ -51,6 +55,8 @@ impl Default for Config {
             variant: None,
             description: None,
             compound: false,
+            starts_with: None,
+            contains: None,
         }
     }
 }
