@@ -20,6 +20,12 @@ use phonotactics::{is_valid, is_valid_clustered, respects_sonority, syllable_cou
 use score::{score_memorability, score_novelty, score_pronounceability};
 use blend::{blend, compound, overlap_blend, tech_transform};
 
+// Default big-tech generator mix (no user roots): share of coined order-3
+// Markov names and clean blends; the remainder (~0.15) is short single-root
+// evocative names. Weighted toward coined + clean over raw prefix+suffix blends.
+const BT_MARKOV_W: f64 = 0.55;
+const BT_BLEND_W: f64 = 0.30;
+
 const BIGTECH_CORPUS: &str = include_str!("../data/bigtech.txt");
 const ROOTS: &str = include_str!("../data/roots.txt");
 const ADJECTIVES: &str = include_str!("../data/adjectives.txt");
@@ -126,6 +132,39 @@ fn passes_constraints(lower: &str, cfg: &Config) -> bool {
     true
 }
 
+/// True if `name` reads as a broken real brand rather than a coinage: it is a
+/// truncation or same-length typo (edit distance ≤ 2) of an equal-or-longer
+/// brand. Rejects `Supaba`←supabase, `Gongodb`←mongodb; keeps genuine extensions
+/// like `Hulumi`←hulu (the brand is shorter, so the name reads as its own word).
+fn mimics_real_brand(name: &str, brands: &[&str]) -> bool {
+    let nlen = name.chars().count();
+    brands.iter().any(|w| {
+        let wlen = w.chars().count();
+        // (a) Truncation / same-length typo of an equal-or-longer brand.
+        if wlen >= nlen && wlen - nlen <= 2 && score::levenshtein(name, w) <= 2 {
+            return true;
+        }
+        // (b) A distinctive brand (≥5 chars) padded by a 1–2 char prefix or
+        // suffix (zocdoc→zocdocs, amazon→samazon) — reads as the brand, not a
+        // coinage. (Short brands are skipped: too many coincidental substrings.)
+        wlen >= 5 && nlen > wlen && nlen - wlen <= 2 && (name.starts_with(w) || name.ends_with(w))
+    })
+}
+
+/// Blend two distinct roots, preferring a clean overlap seam (pin+interest→
+/// pinterest) and falling back to prefix+suffix. None if too few/duplicate roots.
+fn blend_roots(rng: &mut ChaCha8Rng, roots: &[&str]) -> Option<String> {
+    if roots.len() < 2 {
+        return None;
+    }
+    let a = roots[rand::Rng::gen_range(rng, 0..roots.len())];
+    let b = roots[rand::Rng::gen_range(rng, 0..roots.len())];
+    if a == b {
+        return None;
+    }
+    overlap_blend(a, b).or_else(|| blend(a, b))
+}
+
 fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng) -> Vec<NameResult> {
     let roots_corpus = parse_lines(ROOTS);
     let bigtech_corpus = parse_lines(BIGTECH_CORPUS);
@@ -159,12 +198,27 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng) 
     let mut seen: HashSet<String> = HashSet::new();
     let max_attempts = target * 80;
 
-    let bigtech_model = Model::train(&bigtech_corpus, 2);
+    // Order-3 brand Markov with stupid-backoff: order-3 coherence (vs. the old
+    // wandering order-2) without dead-ending on the sparse 355-name corpus.
+    let bigtech_model = Model::train_backoff(&bigtech_corpus, 3);
     let adjectives = parse_lines(ADJECTIVES);
     // When the user supplies roots (description or seed words), blend purely from
-    // them so re-ranking can't swap in generic names; otherwise mix in some Markov.
+    // them so re-ranking can't swap in generic names; otherwise use the weighted
+    // generator mix below (coined Markov + clean blends + short evocative roots).
     let has_roots = !desc_keywords.is_empty() || !cfg.roots.is_empty();
-    let blend_prob = if has_roots { 1.0 } else { 0.6 };
+
+    // Phonotactic-probability quality gate (Springer "I'd buy that!"): a default
+    // candidate must be at least as brand-like as the low tail of real brands.
+    // Skipped for user-roots (keyword fidelity) and compound (two real words).
+    let apply_gate = !has_roots && !cfg.compound;
+    let ll_floor = if apply_gate {
+        let lls: Vec<f64> = bigtech_corpus.iter().map(|w| bigtech_model.log_likelihood(w)).collect();
+        let mean = lls.iter().sum::<f64>() / lls.len() as f64;
+        let var = lls.iter().map(|x| (x - mean).powi(2)).sum::<f64>() / lls.len() as f64;
+        mean - 2.0 * var.sqrt()
+    } else {
+        f64::NEG_INFINITY
+    };
 
     for _ in 0..max_attempts {
         if pool.len() >= target { break; }
@@ -174,22 +228,24 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng) 
             let adj = adjectives[rand::Rng::gen_range(rng, 0..adjectives.len())];
             let noun = roots_corpus[rand::Rng::gen_range(rng, 0..roots_corpus.len())];
             compound(adj, noun)
-        } else if rand::Rng::gen::<f64>(rng) < blend_prob {
-            let a = all_roots[rand::Rng::gen_range(rng, 0..all_roots.len())];
-            let b = all_roots[rand::Rng::gen_range(rng, 0..all_roots.len())];
-            if a == b { continue; }
-            // Prefer an overlap blend (pin+interest→pinterest); fall back to prefix+suffix.
-            let blended = match overlap_blend(a, b) {
-                Some(o) => o,
-                None => match blend(a, b) {
-                    Some(x) => x,
-                    None => continue,
-                },
-            };
-            tech_transform(rng, &blended, cfg.temperature)
+        } else if has_roots {
+            // Blend purely from user roots / description keywords.
+            let Some(b) = blend_roots(rng, &all_roots) else { continue };
+            tech_transform(rng, &b, cfg.temperature)
         } else {
-            let Some(s) = bigtech_model.sample(rng, cfg.temperature, cfg.min_len, cfg.max_len) else { continue };
-            tech_transform(rng, &s, cfg.temperature)
+            // Weighted mix: mostly coined Markov, some clean blends, some short
+            // single-root evocative names (root + tech suffix, à la Shopify).
+            let pick = rand::Rng::gen::<f64>(rng);
+            if pick < BT_MARKOV_W {
+                let Some(s) = bigtech_model.sample(rng, cfg.temperature, cfg.min_len, cfg.max_len) else { continue };
+                tech_transform(rng, &s, cfg.temperature)
+            } else if pick < BT_MARKOV_W + BT_BLEND_W {
+                let Some(b) = blend_roots(rng, &roots_corpus) else { continue };
+                tech_transform(rng, &b, cfg.temperature)
+            } else {
+                let root = roots_corpus[rand::Rng::gen_range(rng, 0..roots_corpus.len())];
+                tech_transform(rng, root, 1.0)
+            }
         };
 
         let name = capitalize(&name);
@@ -199,6 +255,13 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng) 
         // Big-tech names should read naturally → enforce sonority sequencing.
         // Compounds join two real words, so skip the single-word sonority check.
         if !cfg.compound && !respects_sonority(&lower) { continue; }
+        // Brand-shape: 1–3 syllables (research sweet spot); reject long mashups.
+        if !cfg.compound && syllable_count(&lower) > 3 { continue; }
+        // Phonotactic-probability gate: reject candidates less brand-like than
+        // the low tail of real brands (no-op when apply_gate is false).
+        if bigtech_model.log_likelihood(&name) < ll_floor { continue; }
+        // Don't emit names that read as a truncated/typo'd real brand.
+        if apply_gate && mimics_real_brand(&lower, &bigtech_corpus) { continue; }
         if corpus_set.contains(&lower) || dict.contains(&lower) { continue; }
         if !passes_constraints(&lower, cfg) { continue; }
         if seen.contains(&name) { continue; }
@@ -219,13 +282,16 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng) 
         });
     }
 
-    // Rank by brand-likeness (Markov word-likeness) plus a brevity bonus from
-    // memorability, so short names like "Splends" beat long mashups like
-    // "Bastababase". The brevity bonus only applies without user roots — with a
-    // description/seed words, keyword fidelity matters more than pure brandability.
-    let brevity_w = if has_roots { 0.0 } else { 3.0 };
+    // Rank leaning easy-to-say: brand-likeness (word-likelihood) is the lead
+    // signal, plus a pronounceability/fluency bonus (processing fluency → trust)
+    // and a brevity bonus from memorability. Brevity/fluency bias only applies
+    // without user roots — with a description/seed words, keyword fidelity leads.
+    let brevity_w = if has_roots { 0.0 } else { 1.5 };
+    let fluency_w = if has_roots { 0.0 } else { 1.5 };
     let rank = |r: &NameResult| {
-        bigtech_model.log_likelihood(&r.name) + (r.score_memorability as f64 / 100.0) * brevity_w
+        bigtech_model.log_likelihood(&r.name)
+            + (r.score_pronounce as f64 / 100.0) * fluency_w
+            + (r.score_memorability as f64 / 100.0) * brevity_w
     };
     pool.sort_by(|a, b| rank(b).partial_cmp(&rank(a)).unwrap_or(std::cmp::Ordering::Equal));
     if has_roots {
@@ -450,6 +516,45 @@ mod tests {
             v.iter().map(|r| affinity_score(&r.name, Variant::Elvish)).sum::<f64>() / v.len() as f64
         };
         assert!(avg(&elvish) >= avg(&mix), "elvish {} vs mix {}", avg(&elvish), avg(&mix));
+    }
+
+    #[test]
+    fn bigtech_names_within_syllable_cap() {
+        // Brand-shape rule: default big-tech names stay at 1–3 syllables.
+        let mut c = cfg(Style::BigTech);
+        c.count = 12;
+        c.max_len = 12;
+        for r in generate(&c) {
+            assert!(syllable_count(&r.name.to_lowercase()) <= 3, "{} has >3 syllables", r.name);
+        }
+    }
+
+    #[test]
+    fn mimics_real_brand_flags_truncations() {
+        let brands = ["supabase", "mongodb", "hulu", "stripe"];
+        // Truncation / same-length typo of an equal-or-longer brand → flagged.
+        assert!(mimics_real_brand("supaba", &brands));
+        assert!(mimics_real_brand("gongodb", &brands));
+        // Genuine extension of a shorter brand, or an unrelated coinage → kept.
+        assert!(!mimics_real_brand("hulumi", &brands));
+        assert!(!mimics_real_brand("zephyrium", &brands));
+        // A distinctive brand padded by a short prefix/suffix → flagged.
+        assert!(mimics_real_brand("supabasey", &["supabase"])); // suffix pad
+        assert!(mimics_real_brand("xstripe", &["stripe"]));     // prefix pad
+        // A coinage that merely shares a stem with a brand → kept.
+        assert!(!mimics_real_brand("twility", &["twilio"]));
+    }
+
+    #[test]
+    fn bigtech_avoids_brand_mimics() {
+        // No default big-tech name should be a truncated/typo'd real brand.
+        let brands = parse_lines(BIGTECH_CORPUS);
+        let mut c = cfg(Style::BigTech);
+        c.count = 15;
+        for r in generate(&c) {
+            assert!(!mimics_real_brand(&r.name.to_lowercase(), &brands),
+                "{} mimics a real brand", r.name);
+        }
     }
 
     #[test]
