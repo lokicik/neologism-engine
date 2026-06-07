@@ -102,7 +102,7 @@ pub fn score_novelty(name: &str, dictionary: &HashSet<String>) -> u32 {
     95
 }
 
-fn levenshtein(a: &str, b: &str) -> usize {
+pub(crate) fn levenshtein(a: &str, b: &str) -> usize {
     let a: Vec<char> = a.chars().collect();
     let b: Vec<char> = b.chars().collect();
     let m = a.len();

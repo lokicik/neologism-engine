@@ -1,6 +1,7 @@
 pub mod blend;
 pub mod keywords;
 pub mod markov;
+pub mod metrics;
 pub mod phonemes;
 pub mod phonotactics;
 pub mod score;
