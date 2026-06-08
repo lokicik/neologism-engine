@@ -1,7 +1,12 @@
 use rand::Rng;
 use crate::phonotactics::{is_vowel, syllable_count};
 
-const TECH_SUFFIXES: &[&str] = &["ly", "ify", "io", "ia", "ware", "hub", "base", "lab", "ai", "hq", "it"];
+const TECH_SUFFIXES: &[&str] = &[
+    // original 11
+    "ly", "ify", "io", "ia", "ware", "hub", "base", "lab", "ai", "hq", "it",
+    // Phase 29: 13 additions — all soft-ending (no harsh-cluster penalties from brand_appeal)
+    "app", "byte", "core", "edge", "flow", "forge", "hive", "link", "net", "ops", "sync", "wave", "works",
+];
 
 /// Blend two root words: take a prefix of `a` and a suffix of `b`.
 /// Returns None if inputs are too short.

@@ -71,8 +71,8 @@ impl BigTechTuning {
         Self {
             // Shift the generator mix hard at high variety: less brand-Markov
             // (one register) toward blends + evocative single-roots (more shapes).
-            markov_w: lerp(0.45, 0.20),
-            blend_w: lerp(0.15, 0.40),
+            markov_w: lerp(0.35, 0.20),
+            blend_w: lerp(0.25, 0.40),
             // Keep the word-likeness gate tight even at high variety — variety
             // comes from the structural knobs below, NOT from admitting
             // low-brand-likelihood junk (Bombanac/Groqual).
