@@ -40,6 +40,14 @@ pub struct BigTechTuning {
     pub mmr_lambda: f64,
     /// Reject names with more than this many syllables.
     pub syllable_cap: usize,
+    /// Rank weight per char of longest real-word prefix (Forge·lab, Harbor·ai).
+    /// Offline "brand-appeal" signal (Phase 28): names that open with a real word
+    /// read more brandable. Empirically the strongest of the cheap offline signals.
+    pub prefix_w: f64,
+    /// Rank bonus for a clean brandable suffix (-ify/-io/-ai/-ia). Phase 28.
+    pub suffix_w: f64,
+    /// Rank penalty for a harsh consonant-cluster ending (Bear·ch, Aure·sh). Phase 28.
+    pub harsh_w: f64,
 }
 
 impl Default for BigTechTuning {
@@ -73,6 +81,14 @@ impl BigTechTuning {
             brevity_w: lerp(2.5, 0.0),
             mmr_lambda: lerp(0.85, 0.50),
             syllable_cap: 3,
+            // Brand-appeal nudges (Phase 28). The real-word-prefix and clean-suffix
+            // rewards bias toward a brandable register, so they relax toward 0 at
+            // high variety — exactly like fluency/brevity — letting coined,
+            // non-word-starting shapes through. The harsh-ending penalty is a
+            // junk signal, not a register one, so it stays on across the axis.
+            prefix_w: lerp(0.10, 0.0),
+            suffix_w: lerp(0.40, 0.0),
+            harsh_w: 0.50,
         }
     }
 }
@@ -241,6 +257,32 @@ fn blend_roots(rng: &mut ChaCha8Rng, roots: &[&str]) -> Option<String> {
     overlap_blend(a, b).or_else(|| blend(a, b))
 }
 
+/// Offline "brand-appeal" score (Phase 28) — a cheap proxy for the *semantic*
+/// quality the structural scores miss. Rewards names that open with a real word
+/// and end in a clean brandable suffix; penalizes harsh consonant-cluster
+/// endings. On the Phase 27 LLM-labeled set these signals lifted correlation with
+/// the LLM's brand-quality judgment from ~0.19 to ~0.33; folded into ranking (not
+/// gating), so it reshapes which names surface without changing what's allowed.
+/// `lower` must be lowercase ASCII (always true for generated names).
+fn brand_appeal(lower: &str, common: &HashSet<String>, t: &BigTechTuning) -> f64 {
+    // Longest real-word prefix (≥3 chars): Forge·lab, Harbor·ai, Glide·hub.
+    let mut prefix_len = 0usize;
+    for j in (3..=lower.len()).rev() {
+        if common.contains(&lower[..j]) {
+            prefix_len = j;
+            break;
+        }
+    }
+    const CLEAN_SUFFIXES: [&str; 7] = ["ify", "io", "ai", "ia", "ly", "ix", "ora"];
+    const HARSH_ENDINGS: [&str; 12] =
+        ["rch", "tch", "sh", "ck", "sk", "ft", "rt", "rk", "nt", "st", "ld", "rd"];
+    let clean = CLEAN_SUFFIXES.iter().any(|s| lower.ends_with(s));
+    let harsh = HARSH_ENDINGS.iter().any(|s| lower.ends_with(s));
+    prefix_len as f64 * t.prefix_w
+        + if clean { t.suffix_w } else { 0.0 }
+        - if harsh { t.harsh_w } else { 0.0 }
+}
+
 fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, tuning: &BigTechTuning) -> Vec<NameResult> {
     let roots_corpus = parse_lines(ROOTS);
     let bigtech_corpus = parse_lines(BIGTECH_CORPUS);
@@ -373,10 +415,14 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, 
     // without user roots — with a description/seed words, keyword fidelity leads.
     let brevity_w = if has_roots { 0.0 } else { tuning.brevity_w };
     let fluency_w = if has_roots { 0.0 } else { tuning.fluency_w };
+    // Brand-appeal nudge only without user roots — with a description/seed words,
+    // keyword fidelity leads (same rationale as brevity/fluency above).
+    let appeal_w = if has_roots { 0.0 } else { 1.0 };
     let rank = |r: &NameResult| {
         bigtech_model.log_likelihood(&r.name)
             + (r.score_pronounce as f64 / 100.0) * fluency_w
             + (r.score_memorability as f64 / 100.0) * brevity_w
+            + appeal_w * brand_appeal(&r.name.to_lowercase(), &common_words, tuning)
     };
     pool.sort_by(|a, b| rank(b).partial_cmp(&rank(a)).unwrap_or(std::cmp::Ordering::Equal));
     if has_roots {
@@ -493,6 +539,20 @@ mod tests {
             contains: None,
             exclude: vec![],
         }
+    }
+
+    #[test]
+    fn brand_appeal_orders_by_quality() {
+        let t = BigTechTuning::default();
+        let common = build_common_words();
+        // A name opening with a real word and a clean suffix should outscore a
+        // harsh-ending coined mashup (the exact gradient the feature targets).
+        let good = brand_appeal("forgeify", &common, &t); // "forge" prefix + "ify" suffix
+        let harsh = brand_appeal("bearch", &common, &t); // harsh "-rch" ending
+        assert!(good > harsh, "good={good} should beat harsh={harsh}");
+        // Harsh ending is penalized below a neutral coined name.
+        let neutral = brand_appeal("zentu", &common, &t);
+        assert!(harsh < neutral, "harsh={harsh} should be penalized below neutral={neutral}");
     }
 
     #[test]
