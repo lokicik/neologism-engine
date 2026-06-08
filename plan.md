@@ -200,11 +200,71 @@ best lever, it's the *only* lever left that can move results forward.
 
 ---
 
+## 9. Phase 27 — offline LLM-distilled scorer: tried, stopped at Checkpoint B (no merge)
+
+*Roadmap #1 (§8) got unblocked — the user provided a local LLM (llama.cpp, Gemma 3 12B QAT Q4,
+OpenAI-compatible API at `127.0.0.1:8080`). A live probe confirmed it gives exactly the
+discriminating judgment the heuristics can't: asked to rate `Loftlab/Bombanac/Logitan/Zqxprull`
+1–5, it returned `[4, 2, 4, 1]` — correctly separating the *Logitan-vs-Bombanac* pair that's been
+this project's running example of what proxies miss. So the plan was: label ~2,000 candidates
+with the LLM once, train a tiny linear model on the existing 9 features (reusing
+`log_likelihood`, `score_pronounceability/memorability/novelty`, `syllable_count`,
+`respects_sonority`, length, vowel ratio, max-consonant-run), and ship just the weights into WASM.*
+
+**What was built** (`core/examples/label_names.rs`, `core/examples/train_scorer.rs`, both still in
+the tree, uncommitted-to-history as working tools): a candidate-pool generator with the
+word-likeness gate loosened (`gate_sigma = 8.0`) so it surfaces the full quality spectrum
+(clean brand-like names down to junk), a batched (25/call) rater calling the local LLM over raw
+HTTP/TCP, and a hand-rolled gradient-descent linear-regression trainer with z-score
+normalization and an 80/20 train/validation split.
+
+**Checkpoint A passed** — 50 names labeled, eyeballed, and the gradient made sense: label-1 names
+(`Ederfectx, Grovelab, Hebbitro, Pillseai`) read as genuinely awkward, label-4 names
+(`Breezeai, Bufferly, Lucidhub, Pixelai`) as clean and brand-like.
+
+**Checkpoint B failed — Pearson correlation 0.252 (below the 0.3 "weak" floor), MAE 0.90 on a
+1–5 scale.** Trained on 1,080 examples (1,350 labeled total — a power outage interrupted the
+2,000-name run mid-way; the resumable design preserved all progress, but re-runs kept hitting
+batches that made the model produce abnormally long reasoning and truncate its answer, so the
+remaining ~650 weren't worth fighting for). The model's predictions clustered narrowly (2.0–3.7)
+regardless of the LLM's actual rating (1–5): `Roamio` predicted 3.28, rated 5; `Scriptly`
+predicted 2.06, rated 4. One feature (`respects_sonority`) had ~zero variance in the dataset and
+its learned weight collapsed to 0.
+
+**Why it failed — and this is the useful part:** it isn't a data-volume problem (1,080 examples
+is plenty for 9 features) or a model-capacity problem (the plan's own fallback — escalate to a
+bigger model only if the linear one is the bottleneck — wouldn't have helped, because the
+ceiling is in the *inputs*, not the *fit*). It's a **feature-vocabulary gap**. The LLM's own
+reasoning showed it docking `Bombanac` because *"sounds like 'bomb' or 'bombastic' — might have
+negative connotations"* — a **semantic/connotative** judgment. Every one of our 9 features is
+structural or phonotactic (length, syllables, n-gram likelihood, consonant runs); none of them
+can represent "this string evokes the real word 'bomb'." A linear blend of nine ways to measure
+*shape* cannot predict a judgment about *meaning*. Distilling that signal would require a
+fundamentally different feature pipeline (e.g., substring/embedding similarity to a real-word
+corpus) — which is no longer "ship a kilobyte weight array," it's a different and heavier
+architecture, arguably crossing into roadmap #2/#5 territory (the deliberate offline/no-runtime
+scope boundary this project has held since Phase 18).
+
+**Conclusion: stopped per the plan's own checkpoint-gate ("if validation correlation is weak,
+stop here rather than ship a model that just adds noise") — correctly so.** Per the project's
+not-shipping-noise rule, `core/src/scorer.rs` was never written and `generate_bigtech` is
+untouched. This sharpens the original §8 diagnosis from "the judge is bad" to something more
+precise and more final: **the judge is bad because its entire feature vocabulary is structural,
+and brand-quality judgment runs on semantic association — an axis the classical/offline stack
+cannot reach without breaking its own architecture.** That reframes roadmap #2 (online AI mode)
+from "an alternative path" to "the *only* path to a smarter judge" — at the cost the project has
+always known it carries: a backend, an API key, and leaving pure-client-side behind.
+
+---
+
 ## Bottom line
 
 Big-tech (the star feature) is now the strongest style and committed (Phases 19–20, tuned through
-25). Remaining options, best-first: **#6 deployment** (ship it — highest value if not yet live),
-**roadmap #1 offline scorer** (the next real quality jump — see §8), then **#4 Wuggy / roadmap #3**
-only if multilingual/template generation becomes a goal. #3 (phonotactic metric) is a minor
-refinement; #5/roadmap-#2 (neural/online-AI) is a deliberate scope boundary, not a gap. See
-`README.md` for the full research bibliography and `~/.claude/plans/` for the build history.
+25). The offline-scorer lever (roadmap #1) was tried in Phase 27 and **conclusively did not
+pan out** — see §9: the gap is semantic, not statistical, and no amount of feature engineering
+within the classical/offline constraint closes it. Remaining options, best-first: **#6
+deployment** (ship it — highest value if not yet live, and the one item here that's pure
+upside), **roadmap #2 online AI mode** (now the only path to a materially smarter judge — opt-in,
+costs a backend/API key, see §8), then **#4 Wuggy / roadmap #3** only if multilingual/template
+generation becomes a goal. #3 (phonotactic metric) is a minor refinement. See `README.md` for the
+full research bibliography and `~/.claude/plans/` for the build history.
