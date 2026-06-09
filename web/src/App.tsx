@@ -1,9 +1,10 @@
-import { useState, useCallback, useRef } from 'react'
-import { generateNames, batchMetrics, type BatchMetrics, type Config, type NameResult } from './lib/engine'
+import { useState, useCallback, useRef, useEffect } from 'react'
+import { generateNames, batchMetrics, type BatchMetrics, type Config, type NameResult, type Style } from './lib/engine'
 import { rerank } from './lib/llm'
 import { recommendations } from './lib/recommend'
 import { buildProfile, rankByPreference } from './lib/preferences'
-import { loadFavorites, toggleFavorite, loadRecent, saveRecent } from './lib/storage'
+import { loadFavorites, toggleFavorite, saveFavorites, loadRecent, saveRecent } from './lib/storage'
+import { decodeShareUrl } from './lib/share'
 import { Controls } from './components/Controls'
 import { NameCard } from './components/NameCard'
 import { StatsPanel } from './components/StatsPanel'
@@ -37,6 +38,32 @@ export default function App() {
   const [ranking, setRanking] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const recentRef = useRef<string[]>(loadRecent())
+
+  // On mount: if a #names= share URL is present, union those names into favorites.
+  useEffect(() => {
+    const shared = decodeShareUrl()
+    if (shared.length === 0) return
+    setFavorites((prev) => {
+      const existing = new Set(prev.map((f) => f.name))
+      const stubs: NameResult[] = shared
+        .filter((p) => !existing.has(p.name))
+        .map((p) => ({
+          name: p.name,
+          style: p.style as Style,
+          score_pronounce: 0,
+          score_novelty: 0,
+          score_memorability: 0,
+          connotations: [],
+          syllables: 0,
+        }))
+      if (stubs.length === 0) return prev
+      const merged = [...prev, ...stubs]
+      saveFavorites(merged)
+      return merged
+    })
+    // Clear the hash so the URL is clean after loading.
+    history.replaceState(null, '', location.pathname)
+  }, [])
 
   const markSeen = (names: NameResult[]) => {
     recentRef.current = [...recentRef.current, ...names.map((n) => n.name)].slice(-RECENT_WINDOW)

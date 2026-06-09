@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import type { NameResult } from '../lib/engine'
-import { checkDomains, type DomainStatus } from '../lib/domain'
+import { checkDomains, checkGithub, TLDS, type DomainStatus } from '../lib/domain'
+import { Monogram } from './Monogram'
 
 interface Props {
   result: NameResult
@@ -15,17 +16,20 @@ const STYLE_LABEL: Record<string, string> = {
   fantasy: 'Fantasy',
 }
 
+function idleMap(): Record<string, DomainStatus> {
+  const m: Record<string, DomainStatus> = {}
+  for (const tld of TLDS) m[tld] = 'idle'
+  m['gh'] = 'idle'
+  return m
+}
+
 export function NameCard({ result, isFavorite, onToggleFavorite, badges = [] }: Props) {
   const [copied, setCopied] = useState(false)
-  const [domains, setDomains] = useState<Record<string, DomainStatus>>({
-    '.com': 'idle',
-    '.io': 'idle',
-  })
+  const [domains, setDomains] = useState<Record<string, DomainStatus>>(idleMap)
   const [checking, setChecking] = useState(false)
 
-  // Reset domain state when name changes
   useEffect(() => {
-    setDomains({ '.com': 'idle', '.io': 'idle' })
+    setDomains(idleMap())
     setChecking(false)
   }, [result.name])
 
@@ -36,12 +40,21 @@ export function NameCard({ result, isFavorite, onToggleFavorite, badges = [] }: 
     })
   }
 
-  async function checkDomain() {
+  async function checkAvailability() {
     setChecking(true)
-    setDomains({ '.com': 'checking', '.io': 'checking' })
-    await checkDomains(result.name, (tld, status) => {
-      setDomains((prev) => ({ ...prev, [tld]: status }))
-    })
+    const checking: Record<string, DomainStatus> = {}
+    for (const tld of TLDS) checking[tld] = 'checking'
+    checking['gh'] = 'checking'
+    setDomains(checking)
+
+    await Promise.all([
+      checkDomains(result.name, (tld, status) => {
+        setDomains((prev) => ({ ...prev, [tld]: status }))
+      }),
+      checkGithub(result.name).then((status) => {
+        setDomains((prev) => ({ ...prev, gh: status }))
+      }),
+    ])
     setChecking(false)
   }
 
@@ -52,13 +65,16 @@ export function NameCard({ result, isFavorite, onToggleFavorite, badges = [] }: 
     return 'badge badge-idle'
   }
 
-  function domainLabel(tld: string, status: DomainStatus): string {
-    if (status === 'idle') return tld
-    if (status === 'checking') return `${tld} …`
-    if (status === 'available') return `${tld} ✓`
-    if (status === 'taken') return `${tld} ✗`
-    return `${tld} ?`
+  function domainLabel(key: string, status: DomainStatus): string {
+    const label = key === 'gh' ? 'gh' : key
+    if (status === 'idle') return label
+    if (status === 'checking') return `${label} …`
+    if (status === 'available') return `${label} ✓`
+    if (status === 'taken') return `${label} ✗`
+    return `${label} ?`
   }
+
+  const allIdle = Object.values(domains).every((s) => s === 'idle')
 
   return (
     <div className={`name-card${isFavorite ? ' favorited' : ''}`}>
@@ -70,6 +86,7 @@ export function NameCard({ result, isFavorite, onToggleFavorite, badges = [] }: 
         </div>
       )}
       <div className="card-header">
+        <Monogram name={result.name} size={38} />
         <span className="name-text">{result.name}</span>
         <div className="card-actions">
           <button className="icon-btn" onClick={copy} title="Copy name">
@@ -124,17 +141,17 @@ export function NameCard({ result, isFavorite, onToggleFavorite, badges = [] }: 
       )}
 
       <div className="domain-row">
-        {Object.entries(domains).map(([tld, status]) => (
-          <span key={tld} className={domainBadgeClass(status)}>
-            {domainLabel(tld, status)}
+        {Object.entries(domains).map(([key, status]) => (
+          <span key={key} className={domainBadgeClass(status)}>
+            {domainLabel(key, status)}
           </span>
         ))}
-        {!checking && domains['.com'] === 'idle' && (
-          <button className="check-domain-btn" onClick={checkDomain}>
-            Check domains*
+        {!checking && allIdle && (
+          <button className="check-domain-btn" onClick={checkAvailability}>
+            Check availability*
           </button>
         )}
-        {(domains['.com'] !== 'idle') && (
+        {!allIdle && (
           <span className="domain-disclaimer">*indicator only</span>
         )}
       </div>
