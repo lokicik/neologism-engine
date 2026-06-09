@@ -257,14 +257,142 @@ always known it carries: a backend, an API key, and leaving pure-client-side beh
 
 ---
 
+## 10. Phase 28 — local LLM re-ranker + offline brand-appeal sweetener (shipped, `e7c5cdd`)
+
+*Phase 27 closed the offline-distilled-scorer path (§9), but two findings reopened the problem from
+a better angle. First, the "offline is a dead end" verdict was **half-wrong — it was under-featured**:
+an in-memory retrain on the same 1,350-name labeled set, adding four trivial **offline semantic**
+features, lifted held-out correlation with the LLM's judgment from r=0.19 → 0.33 (the four alone
+score 0.31; the original nine structural features were mostly noise). Second, the user runs the app
+**locally with a llama.cpp server always available**, so the "breaks the pure-offline architecture"
+objection that gated roadmap #2 doesn't apply to their use — the LLM re-ranker is unconditionally on
+the table. Chosen direction: a lightweight two-stage design (cheap offline filter → LLM rerank, the
+RAG-reranking textbook pattern), attacking the "2-in-8 keepers" problem from both ends. Big-tech only.*
+
+**Part 1 — offline brand-appeal sweetener (`core/src/lib.rs`, big-tech only).** A new
+`brand_appeal()` term folded into the bigtech `rank` closure, reusing the existing `common_words`
+HashSet (no new data/deps). It scores four researched signals: longest real-word prefix length
+(`Forge`lab), clean brandable suffix (`-ify/-io/-ai/-ia/-ly/-ix/-ora`), and a penalty for harsh
+consonant-cluster endings (`-rch/-tch/-sh/-ck/-sk/-ft/-rt/-rk/-nt/-st/-ld/-rd`). Three new
+`BigTechTuning` knobs (`prefix_w=0.10`, `suffix_w=0.40`, `harsh_w=0.50`), gated behind `!has_roots`
+exactly like `fluency_w`/`brevity_w` (the prefix/suffix rewards relax to 0 at high variety; the
+harsh penalty stays on as a junk signal). The `tune.rs` sweep was **deliberately skipped** — it
+optimizes the proxy composite (uniqueness/novelty/diversity), the exact signal `brand_appeal` exists
+to bypass, so sweeping would mis-calibrate it; defaults are grounded in the r-value research instead.
+48 tests pass; Sci-Fi/Fantasy metrics byte-for-byte identical.
+
+**Part 2 — local LLM re-ranker (`web/src/lib/llm.ts` + `App.tsx`, opt-in).** A "✨ AI rank" toggle:
+over-generates a 30-name pool, shows the offline-ranked top-N **instantly**, then a local
+OpenAI-compatible LLM (llama.cpp at `127.0.0.1:8080`) re-ranks in the background and reorders to its
+picks. Mirrors the `domain.ts` graceful-fallback pattern: any failure (unreachable, CORS, malformed
+reply) returns null and silently keeps the offline ranking — no error, never blocks. Auto-detects
+the model via `GET /v1/models`; one batched 1–10 brand-quality prompt; parses `choices[0].message.content`.
+Pool was cut 50→30 for ~30s latency (the local model's verbose reasoning makes the call scale with
+name count). CORS pre-verified with curl before building the UI.
+
+**Live evidence (this session, CLI).** A 30-name production pool (seed 42): the LLM buried `Tetript`
+(3/10) and `Regorge` (2/10) that sat in the offline **top-10**, and surfaced `Insilion`, `Haystra`,
+`Tokenlab`, `Metrace` from the offline **bottom half** (`Metrace` was offline rank 30/30, LLM 7/10).
+Offline top-10 ≈ 3/10 keepers; LLM top-10 ≈ 9/10. Separately confirmed the offline proxies *are*
+correlated with quality at the population level — the 20 most-repeated names averaged 6.2/10 vs 4.9
+for unique-once names — but with telling blind spots (`Metahub`, repeated 8×, scored 4/10: "meta"
+is structurally perfect but semantically just Meta/Facebook). The re-ranker is the piece that
+resolves those.
+
+---
+
+## 11. Phase 29 — name-space expansion (shipped, `33ef467`)
+
+*A 10k-generation sweep showed the same structural attractors dominating every session (Keyston,
+Codesk, Dataly). Root cause: of the two generative paths, the Markov path (~45%) has converged
+(Phase 26 proved more corpus data gives no gain) and the blend+transform path (~55%) applied one of
+only **11 fixed tech suffixes** — a tiny combinatorial space. Goal: widen the space without touching
+quality. Big-tech only.*
+
+**Two changes.** (1) `TECH_SUFFIXES` in `core/src/blend.rs` expanded **11 → 24** — added
+`app/byte/core/edge/flow/forge/hive/link/net/ops/sync/wave/works`, all soft-ending so none trigger
+the Phase 28 harsh-ending penalty, and none overlap the clean-suffix bonus (pure space expanders).
+(2) In `BigTechTuning::from_variety()`, shifted the generator mix at v=0: `blend_w` 0.15 → 0.25 and
+`markov_w` 0.45 → 0.35 (root weight unchanged at 0.40), moving 10% of generation off the converged
+Markov path onto the combinatorial blend path (366 roots × 366 × 24 suffixes). High-variety (v=1)
+endpoints unchanged.
+
+**Result.** Raw 10k-sweep distinct count 5,329 → 5,867 (+10%); the heavy-attractor tail flattened
+dramatically — names appearing >20× in 10k went from **62 → 2** (only Keyston/Codesk remain, and
+those are pure Markov outputs no suffix trick can touch). Official `repeats` harness: 2,026 → 2,254
+raw distinct (+11%); exclude-250 worst-case recurrence dropped to 3%. 48 tests pass; Sci-Fi/Fantasy
+byte-for-byte identical.
+
+---
+
+## 12. Phase 30 — seed/distinctness investigation + widen exclude-recent 500 → 2000 (shipped, `567e864`)
+
+*The user wanted "distinct names every time." This phase is mostly the **investigation** that found
+the real lever — and corrected an earlier mistaken claim of mine.*
+
+**The "~5,300 ceiling" was a misread — the real vocabulary is 33k+ and still climbing.** Extending
+the sweep to 100,000 generations showed the distinct count was never near an asymptote; it was just
+a point on a sampling curve:
+
+| Generated | Distinct | % unique |
+|---|---|---|
+| 10,000 | 5,867 | 58.7% |
+| 20,000 | 10,187 | 50.9% |
+| 50,000 | 20,620 | 41.2% |
+| 100,000 | **33,575** | 33.6% |
+
+The unique *rate* falls as you draw more (you re-draw names you've seen), but the absolute distinct
+count keeps rising — 68% of the 33,575 (22,707 names) appeared exactly once. The generator's true
+big-tech vocabulary is at least 6× what §11's 10k sample implied, and still growing at 100k.
+
+**Seeds were never the cause of repeats — proven, not asserted.** The engine already draws a fresh
+`rand::random()` seed on every call ([lib.rs:185](core/src/lib.rs#L185)); `wasm/Cargo.toml` enables
+`getrandom`'s `js` feature so that has real browser entropy; and the web app passes no fixed seed
+(the UI's "seed words" box is `roots`, unrelated). A decisive test — **10,000 distinct seeds, one
+name each** — produced only **6,535 distinct names (65.4%)**, with `Keyston` recurring across **92
+different seeds**. Unique seeds do *not* give unique names: a high-probability output recurs no
+matter what seed you start from (`Keyston` holds a stable ~1% of output at every scale: 109/10k,
+1,063/100k, 92/10k-seeds). Duplicates are a property of the generator's **probability distribution**,
+not seed reuse.
+
+**The only real anti-repeat lever is exclude-recent — and it's a web-app concept, not an engine
+one.** The core engine is stateless per call: it only accepts an `exclude` list
+([lib.rs:292](core/src/lib.rs#L292)) and filters those names out. The **web app** maintains the
+rolling "recent" list (capped at `RECENT_WINDOW`, persisted in localStorage) and passes it as
+`exclude` every Generate. The CLI examples mostly pass an empty exclude (`sample`, `metrics`, and the
+sweep tooling measured the **raw generator** — which is why those distinct-% figures are the floor,
+not the lived experience); `repeats.rs` is the one that *simulates* exclude-recent. So the raw sweep
+numbers and the web app's behavior differ by design: the app layers exclusion on top of the raw
+generator.
+
+**The change.** With the vocabulary now known to be 33k+, widened `RECENT_WINDOW` **500 → 2000** in
+`web/src/App.tsx` (a single UI constant — no engine/Rust/WASM change, no rebuild). Pushes the
+no-repeat horizon from ~50 to ~200 batches. **Verified headless** that the larger exclude doesn't
+starve generation: a 400-batch session with the exclude list pegged at its full 2,000-name peak
+returned the complete 10 names on **every batch (0/400 short)** — the engine's `target*80` attempt
+budget skips excluded names with ample room in a 33k space. (The temporary measurement examples
+`gen_names.rs`/`excl_check.rs` were scratch and removed; `label_names.rs`/`train_scorer.rs` from
+Phase 27 remain as documented tools.)
+
+---
+
 ## Bottom line
 
-Big-tech (the star feature) is now the strongest style and committed (Phases 19–20, tuned through
-25). The offline-scorer lever (roadmap #1) was tried in Phase 27 and **conclusively did not
-pan out** — see §9: the gap is semantic, not statistical, and no amount of feature engineering
-within the classical/offline constraint closes it. Remaining options, best-first: **#6
-deployment** (ship it — highest value if not yet live, and the one item here that's pure
-upside), **roadmap #2 online AI mode** (now the only path to a materially smarter judge — opt-in,
-costs a backend/API key, see §8), then **#4 Wuggy / roadmap #3** only if multilingual/template
-generation becomes a goal. #3 (phonotactic metric) is a minor refinement. See `README.md` for the
-full research bibliography and `~/.claude/plans/` for the build history.
+Big-tech is the strongest style, tuned through Phase 25 and extended since:
+
+- **Quality (the judge).** The offline-distilled scorer (roadmap #1) was tried and stopped in Phase
+  27 — the gap is semantic, not statistical (§9). Phase 28 then shipped the real fix as a **two-stage
+  selector**: a cheap offline `brand_appeal` nudge plus an **opt-in local-LLM re-ranker** with silent
+  fallback (§10). This is roadmap #2 (online AI mode) realized in the form that fits a local-first
+  user — the smarter judge, with no cost to anyone who doesn't run a local model.
+- **Variety & repeats.** Phase 29 widened the generative space (suffixes 11→24, more blending) and
+  flattened the attractor tail (§11). Phase 30 established that the real distinct vocabulary is
+  **33k+** (not the ~5k once believed), that fresh-per-call seeding is already correct and is *not*
+  what controls repeats, and widened the exclude-recent horizon to 2,000 — the actual lever (§12).
+- **Remaining options.** **#6 deployment** (Netlify; the Phase 28/29/30 changes need a redeploy with
+  a fresh WASM build — the AI-rank toggle silently no-ops for public users without a local LLM, by
+  design). **#4 Wuggy / roadmap #3** (subsyllabic generation, multilingual/template) remains the only
+  path to a *materially* larger or more varied generator, but is a generation-core rewrite — pursue
+  only if those become product goals. #3 (phonotactic metric) is a minor refinement.
+
+See `README.md` for the research bibliography and `~/.claude/plans/` for the full build history.
