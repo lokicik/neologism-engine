@@ -376,6 +376,47 @@ Phase 27 remain as documented tools.)
 
 ---
 
+## 13. Phase 31 — subsyllabic generator: tried, LLM-verified worse, removed (no merge)
+
+*The goal was to raise the **intrinsic quality of generated** big-tech names (not pick/filter
+better). Hypothesis: the awkward names (Tennyhoot, Bombanac, Regorge) exist because the generator is
+**character-level Markov** — it chains letters with no notion of a syllable — so building names from
+**syllable units (onset–nucleus–coda)** sampled from real brand syllables should produce names that
+are brand-shaped by construction. This is the §6/§8 "Wuggy / roadmap #3" idea, scoped to plain
+generation (not "name like X" templates) and big-tech only.*
+
+**What was built** (additive, behind a quality checkpoint): `core/src/subsyllabic.rs` — a segmenter
+that splits each corpus name into syllables (vowel-run nuclei, medial clusters split at the sonority
+trough, reusing the `phonotactics.rs` onset/coda logic) and a `SubsyllabicModel` storing
+position-conditioned onset/nucleus/coda distributions with position-only backoff, mirroring the
+`markov.rs` `train`/`sample`/`log_likelihood` interface. A checkpoint harness
+`core/examples/subsyllabic_ab.rs` generated 300 raw stems from each model under identical filters and
+ran a **blind 1–5 LLM head-to-head** (reusing the `label_names.rs` llama.cpp plumbing).
+
+**Checkpoint FAILED — the LLM rated subsyllabic ~0.3 *worse*:**
+
+| model | LLM mean (1–5) | keeper% (≥4) | proxy novelty | proxy pron |
+|---|---|---|---|---|
+| char-markov | **2.70** | **30.7** | 79.4 | 91.1 |
+| subsyllabic | 2.41 | 26.4 | **88.7** | 92.1 |
+
+**The Phase 27 lesson, a second time:** the **proxies said subsyllabic was better** (higher novelty,
+equal sonority, +1 pronounceability) — but the LLM, judging actual brand quality, said it was
+**worse**. Eyeballing the stems confirmed it: subsyllabic produced longer, more novel, but more
+awkward mashups (`bouglostrear`, `aptottebler`, `jighoufer`, `shovarpus`) alongside the clean ones.
+Trusting the proxy table would have shipped a regression. Building from syllable units does **not**
+make names more brand-shaped; the character-Markov model tuned over Phases 19–29 is genuinely better.
+
+**Conclusion: bailed per the checkpoint gate.** `subsyllabic_w` was never added to `BigTechTuning`
+and no generation branch was wired, so `generate()` stayed byte-for-byte identical (verified: 48
+tests green, big-tech `metrics` unchanged at pron 90.6 / nov 95.0 / mem 74.7). The module + harness
+were **removed** (clean negative result; the finding lives here). This closes "roadmap #3" as a
+*quality* lever: it was the last untried path to better intrinsic generation, and it's now measured
+to not help. Better big-tech *quality* from here lives entirely in the **selection** stage — the
+Phase 28 LLM re-ranker — not in the generator.
+
+---
+
 ## Bottom line
 
 Big-tech is the strongest style, tuned through Phase 25 and extended since:
@@ -384,15 +425,18 @@ Big-tech is the strongest style, tuned through Phase 25 and extended since:
   27 — the gap is semantic, not statistical (§9). Phase 28 then shipped the real fix as a **two-stage
   selector**: a cheap offline `brand_appeal` nudge plus an **opt-in local-LLM re-ranker** with silent
   fallback (§10). This is roadmap #2 (online AI mode) realized in the form that fits a local-first
-  user — the smarter judge, with no cost to anyone who doesn't run a local model.
+  user — the smarter judge, with no cost to anyone who doesn't run a local model. Phase 31 then closed
+  the *generation* side of quality: a subsyllabic generator was LLM-verified **worse** and removed
+  (§13), so better quality lives in selection (the re-ranker), not the generator.
 - **Variety & repeats.** Phase 29 widened the generative space (suffixes 11→24, more blending) and
   flattened the attractor tail (§11). Phase 30 established that the real distinct vocabulary is
   **33k+** (not the ~5k once believed), that fresh-per-call seeding is already correct and is *not*
   what controls repeats, and widened the exclude-recent horizon to 2,000 — the actual lever (§12).
 - **Remaining options.** **#6 deployment** (Netlify; the Phase 28/29/30 changes need a redeploy with
   a fresh WASM build — the AI-rank toggle silently no-ops for public users without a local LLM, by
-  design). **#4 Wuggy / roadmap #3** (subsyllabic generation, multilingual/template) remains the only
-  path to a *materially* larger or more varied generator, but is a generation-core rewrite — pursue
-  only if those become product goals. #3 (phonotactic metric) is a minor refinement.
+  design) — now the single highest-value next step. The generation-core rewrite (roadmap #3) is
+  **closed as a quality lever** (§13); it would only return as a *capability* play ("name like X"
+  templates, language flavors), not for better English big-tech quality. #3 (phonotactic metric) is a
+  minor refinement.
 
 See `README.md` for the research bibliography and `~/.claude/plans/` for the full build history.
