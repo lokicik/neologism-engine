@@ -20,9 +20,11 @@ const DEFAULT_CONFIG: Config = {
 }
 
 // Don't repeat names the user has seen recently. A name can't recur within this
-// many shown names (~50 batches of 10) — kills the "same name again" feeling.
-// Persisted across reloads, and well under the ~2.3k-name space so it won't starve.
-const RECENT_WINDOW = 500
+// many shown names (~200 batches of 10) — kills the "same name again" feeling.
+// Persisted across reloads. The engine's distinct big-tech vocabulary measured at
+// 33k+ (100k-generation sweep), so a 2k exclude list leaves ample headroom and
+// generation won't starve (the sampler skips excluded names within its attempt budget).
+const RECENT_WINDOW = 2000
 
 export default function App() {
   const [config, setConfig] = useState<Config>(DEFAULT_CONFIG)
