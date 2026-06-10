@@ -89,6 +89,26 @@ pub fn tech_transform<R: Rng>(rng: &mut R, name: &str, temperature: f64) -> Stri
     }
 }
 
+/// The recognized tech suffix `lower` ends with (longest match wins), or None.
+/// Requires the remaining stem to be ≥ 4 chars so short names aren't misparsed
+/// (e.g. "kai" → stem "k" would be nonsense). Phase 33: used for stem-level
+/// exclusion (exclude.rs) and per-batch suffix caps (mmr_select_capped).
+pub fn tech_suffix_of(lower: &str) -> Option<&'static str> {
+    // Sorted by descending length so multi-char suffixes (e.g. "works") beat
+    // shorter ones (e.g. "ks") if we ever add short entries.
+    const SORTED: &[&str] = &[
+        "works", "forge", "ware", "wave", "sync", "ops", "net", "link",
+        "hive", "hub", "hq", "flow", "edge", "core", "byte", "base",
+        "app", "ai", "lab", "ify", "io", "ia", "ly", "it",
+    ];
+    for &suf in SORTED {
+        if lower.ends_with(suf) && lower.len().saturating_sub(suf.len()) >= 4 {
+            return Some(suf);
+        }
+    }
+    None
+}
+
 /// Index of first transition from consonant to vowel (≥ 1 char in).
 fn first_vowel_boundary(chars: &[char]) -> Option<usize> {
     let mut found_cons = false;
@@ -158,6 +178,27 @@ mod tests {
         assert_eq!(overlap_blend("pin", "interest"), Some("pinterest".to_string()));
         assert_eq!(overlap_blend("data", "tabase"), Some("database".to_string()));
         assert_eq!(overlap_blend("smoke", "fog"), None);
+    }
+
+    #[test]
+    fn tech_suffix_of_recognized() {
+        assert_eq!(tech_suffix_of("keystonify"), Some("ify"));
+        assert_eq!(tech_suffix_of("dataforge"), Some("forge"));
+        assert_eq!(tech_suffix_of("cloudworks"), Some("works"));
+    }
+
+    #[test]
+    fn tech_suffix_of_stem_too_short() {
+        // stem "k" < 4 chars → None
+        assert_eq!(tech_suffix_of("kio"), None);
+        // stem "ab" < 4 chars → None
+        assert_eq!(tech_suffix_of("abai"), None);
+    }
+
+    #[test]
+    fn tech_suffix_of_no_suffix() {
+        assert_eq!(tech_suffix_of("nova"), None);
+        assert_eq!(tech_suffix_of("keron"), None);
     }
 
     #[test]

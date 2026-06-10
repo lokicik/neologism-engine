@@ -417,6 +417,64 @@ Phase 28 LLM re-ranker — not in the generator.
 
 ---
 
+## Phase 33 — Generation Distinction (fuzzy exclusion + structural caps)
+
+**Motivation.** Two gaps survived Phase 30's exact-exclude+window fix:
+
+1. **Cross-batch near-duplicates.** `exclude.contains()` blocks exact repeats only.
+   Edit-1 variants (Keyston / Keystona / Keystonn) and shared-stem siblings
+   (Keyston / Keystonify — same stem after stripping `-ify`) still appear across
+   batches even with the 2 000-name window.
+2. **Within-batch structural sameness.** MMR's plain edit-distance similarity is
+   too weak (weight 0.15 at `mmr_lambda=0.85`) to prevent 3–4 names ending in
+   the same tech suffix (e.g. four `-ify` names at `count=10`).
+
+**What was built (Phase 31 lesson applied: selection-level levers, not generator rewrites):**
+
+- `core/src/exclude.rs` — `ExcludeSet` replaces the plain `HashSet<String>`.
+  Adds two rejection layers: **stem exclusion** (strip recognized tech suffix via
+  `blend::tech_suffix_of`, then compare stems — O(1)) and **edit-1 exclusion**
+  (scan length-bucketed exclude list, ~3 buckets × ~220 entries × O(12) char
+  walk; < 1ms WASM budget, runs last after all cheaper filters).
+- `core/src/blend.rs` — `pub fn tech_suffix_of(lower: &str) → Option<&'static str>`;
+  longest-match over the 24 TECH_SUFFIXES, requiring ≥4-char stem remainder.
+- `BigTechTuning` — three new knobs (constants across the variety axis):
+  `fuzzy_exclude: bool = true`, `stem_exclude: bool = true`, `max_share: f64 = 0.2`.
+- `core/src/metrics.rs` — `pub fn mmr_select_capped(…, cap: usize)`: copy of the
+  `mmr_select` greedy loop plus `suffix_counts` / `prefix_counts` maps; skips
+  candidates when the cap is full for their suffix/prefix group, with a fallback
+  to uncapped selection when all candidates are capped (full count beats a perfect
+  cap). **`mmr_select` itself is untouched** — Sci-Fi/Fantasy still call it at
+  fixed `lambda=0.7`, so their output is byte-for-byte identical (verified below).
+- `core/examples/repeats.rs` updated: now reports near-dup rate, suffix/prefix
+  concentration (avg/peak), short batches, and runs four configs in one pass.
+
+**Before/after table (300 batches × 10 names, variety=0.3, window=2000):**
+
+| Config | distinct | worst recurrence | near-dup rate | suffix max (avg/peak) | short batches |
+|--------|----------|-----------------|--------------|----------------------|---------------|
+| pre-33 (exact only) | 2884 | 2/300 (0.7%) | **24.5%** | 1.37 / 4 | 0/300 |
+| Phase 33 — fuzzy+stem only | 2940 | 2/300 (0.7%) | **5.8%** | 1.30 / 3 | 0/300 |
+| Phase 33 — caps only | 2885 | 2/300 (0.7%) | 24.6% | 1.34 / **2** | 0/300 |
+| Phase 33 — full defaults | 2939 | 2/300 (0.7%) | **5.8%** | 1.25 / **2** | 0/300 |
+
+Near-dup rate drops from **24.5% → 5.8%** (4.2× reduction) via fuzzy+stem exclusion.
+Per-batch suffix peak drops from **4 → 2** via structural caps.
+Both improvements are additive; full defaults combines both.
+Starvation check: **0 short batches** across all configs at window=2000.
+
+**Sci-Fi/Fantasy frozen verification:** `cargo run --example sample` and
+`--example metrics` output byte-identical to pre-Phase-33 baseline (seeded runs).
+`generate_markov` is not touched; `mmr_select` (used by sci-fi/fantasy) is not
+modified; only `generate_bigtech` now calls `mmr_select_capped`.
+
+**68 tests green** (20 new: `exclude.rs` truth tables for `within_edit1`, `stem_of`,
+`ExcludeSet`; `metrics.rs` tests for `mmr_select_capped` including suffix-cap
+enforcement, all-same-suffix fallback, and `cap=usize::MAX` regression guard;
+`blend.rs` tests for `tech_suffix_of`).
+
+---
+
 ## Bottom line
 
 Big-tech is the strongest style, tuned through Phase 25 and extended since:

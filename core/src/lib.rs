@@ -1,5 +1,6 @@
 pub mod blend;
 pub mod connotation;
+pub mod exclude;
 pub mod keywords;
 pub mod markov;
 pub mod metrics;
@@ -19,6 +20,7 @@ use phonemes::{affinity_score, Variant};
 use phonotactics::{is_valid, is_valid_clustered, respects_sonority, syllable_count};
 use score::{score_memorability, score_novelty, score_pronounceability};
 use blend::{blend, compound, overlap_blend, tech_transform};
+use exclude::ExcludeSet;
 
 /// Tunable big-tech generation knobs (Phase 21). `Default` = production values;
 /// the tuning harness ([core/examples/tune.rs]) sweeps these in-process. Only
@@ -48,6 +50,17 @@ pub struct BigTechTuning {
     pub suffix_w: f64,
     /// Rank penalty for a harsh consonant-cluster ending (Bear·ch, Aure·sh). Phase 28.
     pub harsh_w: f64,
+    /// Phase 33: reject candidates within edit distance 1 of any excluded name.
+    /// The exclude-recent window (Phase 30) blocks exact repeats only — this
+    /// catches Keystona/Keystonn-style variants. false = pre-33 exact-only.
+    pub fuzzy_exclude: bool,
+    /// Phase 33: also reject candidates sharing a tech-suffix-stripped stem with
+    /// an excluded name (Keystonify vs excluded Keyston → same stem). false = pre-33.
+    pub stem_exclude: bool,
+    /// Phase 33: max fraction of a batch sharing one tech suffix or one 3-char
+    /// prefix. cap = max(1, ceil(count × max_share)). 1.0 disables the cap.
+    /// Default 0.2 → cap 2 at count=10, preventing batches of e.g. 4 × "-ify".
+    pub max_share: f64,
 }
 
 impl Default for BigTechTuning {
@@ -89,6 +102,10 @@ impl BigTechTuning {
             prefix_w: lerp(0.10, 0.0),
             suffix_w: lerp(0.40, 0.0),
             harsh_w: 0.50,
+            // Phase 33: anti-sameness floors — constant across the variety axis.
+            fuzzy_exclude: true,
+            stem_exclude: true,
+            max_share: 0.20,
         }
     }
 }
@@ -289,7 +306,8 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, 
     // A neologism engine shouldn't surface plain real words as brand names.
     let common_words = build_common_words();
     // Names the user has already seen this session — never repeat them.
-    let exclude: HashSet<String> = cfg.exclude.iter().map(|s| s.to_lowercase()).collect();
+    // Phase 33: ExcludeSet adds fuzzy (edit-1) and stem-level rejection on top of exact-match.
+    let exclude = ExcludeSet::new(&cfg.exclude);
 
     // Priority for blend roots: description keywords > user-supplied roots > corpus.
     let desc_keywords: Vec<String> = cfg
@@ -390,7 +408,8 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, 
         // Reject bad/offensive connotations (Bitdefect) — big-tech only.
         if BAD_SUBSTRINGS.iter().any(|b| lower.contains(b)) { continue; }
         if !passes_constraints(&lower, cfg) { continue; }
-        if exclude.contains(&lower) { continue; }
+        // Phase 33: fuzzy + stem exclusion (most expensive filter — runs on survivors only).
+        if exclude.rejects(&lower, tuning.fuzzy_exclude, tuning.stem_exclude) { continue; }
         if seen.contains(&name) { continue; }
 
         seen.insert(name.clone());
@@ -430,12 +449,17 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, 
         pool.truncate(cfg.count);
         pool
     } else {
-        // Keep the most brand-like as candidates, then diversify the final set (MMR).
-        // Cross-regeneration repetition is handled by exclude-recent (the UI passes
-        // the names already shown this session, filtered out above), which keeps the
-        // deterministic high-quality pick while never re-showing a name.
+        // Keep the most brand-like as candidates, then diversify the final set.
+        // Phase 33: mmr_select_capped enforces suffix/prefix structural caps so a
+        // batch never contains more than max_share*count names sharing one suffix
+        // or 3-char prefix — preventing e.g. 4×"-ify" at count=10.
+        let share_cap = if tuning.max_share >= 1.0 {
+            usize::MAX
+        } else {
+            ((cfg.count as f64 * tuning.max_share).ceil() as usize).max(1)
+        };
         pool.truncate(cfg.count * 2);
-        metrics::mmr_select(&pool, cfg.count, tuning.mmr_lambda)
+        metrics::mmr_select_capped(&pool, cfg.count, tuning.mmr_lambda, share_cap)
     }
 }
 
