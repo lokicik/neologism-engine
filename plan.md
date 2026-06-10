@@ -475,6 +475,67 @@ enforcement, all-same-suffix fallback, and `cap=usize::MAX` regression guard;
 
 ---
 
+## Phase 34 — Faster Repeated Generation + Wider Root Space
+
+**Motivation.** Three asks: better quality, more unique generation, and faster repeated
+generation with different seeds (every Generate click is a fresh `generate()` call). Profiling
+showed each big-tech call redid all seed-independent setup: parsing 19,404 common words and
+5,075 brands, retraining the order-3 backoff model (4 count tables), and re-scoring the whole
+corpus for the quality-gate floor. The rank sort also recomputed `log_likelihood` +
+`brand_appeal` per comparison (~10× redundant), and the brand-mimic filter scanned all 5,075
+brands per surviving candidate with an allocating full-DP Levenshtein.
+
+**What was built (34a — speed, zero output change):**
+
+- `BigtechStatic` in a `OnceLock` (lib.rs): corpora, trained backoff model, corpus/common-word
+  sets, by-length brand index, gate-floor mean/std (floor still `mean − gate_sigma·std`, so
+  `gate_sigma` stays a live knob). Dictionary cached in a second `OnceLock` shared by all styles.
+- Decorate-sort-undecorate for the rank sort: rank computed once per pool item.
+- `mimics_real_brand_indexed`: probes 5 length buckets (both mimic cases only involve brands
+  within ±2 chars) with `score::levenshtein_le2`, an allocation-free two-stack-row bounded
+  check. The full-scan form is kept as the reference implementation; an equivalence test pins
+  them together. `within_edit1` (Phase 33) rewritten allocation-free.
+
+**Bench (`core/examples/bench.rs`, 200 calls × 10 names, window=2000, release):**
+
+| | before | after |
+|---|---|---|
+| per call (avg) | 144.9 ms | **15.9 ms** (9.1×) |
+| p95 | 187.0 ms | 21.1 ms |
+
+Output **byte-identical for all three styles** (seeded `sample`/`metrics` diff clean) — the
+cache holds only deterministic, seed-independent values.
+
+**What was built (34b — root space):** `roots.txt` 366 → **707** and `adjectives.txt`
+135 → **272** (dupe "zenith" removed). New entries follow the existing register (short,
+concrete, evocative; new semantic fields: metals/minerals, weather, birds/animals, music,
+tools/craft, textiles, architecture, physics/space, Greek/Latin combining forms). All
+candidates filtered programmatically: 75 dropped as exact `bigtech.txt` brand matches
+(chrome, atlas, kraken, kernel…), plus dupes/charset. Blend space grows ~3.7×
+(366² → 707² ordered pairs).
+
+**Quality verification** (`core/examples/qual.rs`, 300 batches × 10 — the single-batch
+`metrics` example is too noisy to judge a corpus change): pron 91.1 → 91.0, nov 93.1 → 93.5,
+mem 71.1 → 71.5, len 7.42 → 7.37. Neutral-to-slightly-positive. 300-batch repeats at final
+config: distinct 2947 (was 2939), near-dup **4.7%** (was 5.8%), suffix/prefix peak 2,
+0 short batches. 30k sweep: distinct 75.9% (was 76.1%, noise), near-dup 48.6% (was 48.3%).
+
+**Negative results (pool widening — tried, measured, reverted):** with setup cached,
+overgeneration was nearly free, so target ×5 → ×8 and pre-MMR truncate ×2 → ×3 were tried.
+×8 *lowered* 30k distinct 76.1% → 71.5% — a deeper pool makes the rank stage converge on the
+same top attractors every batch (selection pressure ↑, batch-to-batch variety ↓). The ×3
+truncate alone bought +0.5pp distinct but cost 1.9 memorability points and visibly weaker
+names. Both reverted; ×5/×2 stands. Same lesson as Phase 31: more raw material ≠ better
+output — the selection slice was already tuned.
+
+**Sci-Fi/Fantasy frozen verification:** seeded `sample`/`metrics` lines byte-identical
+through both 34a and 34b (`generate_markov` untouched; corpora untouched; shared dictionary
+cache holds identical contents).
+
+**70 tests green** (2 new: `mimics_indexed_matches_scan`, `levenshtein_le2_matches_full`).
+
+---
+
 ## Bottom line
 
 Big-tech is the strongest style, tuned through Phase 25 and extended since:

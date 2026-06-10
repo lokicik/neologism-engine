@@ -551,6 +551,10 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, 
         } else {
             ((cfg.count as f64 * tuning.max_share).ceil() as usize).max(1)
         };
+        // Phase 34 tried ×8 overgeneration and a ×3 truncate here (cheap after
+        // the setup cache): ×8 *lowered* 30k distinct 76→71% — a deeper pool
+        // concentrates the rank top on the same attractors every batch — and ×3
+        // cost 1.9 memorability points for +0.5pp distinct. Both reverted.
         pool.truncate(cfg.count * 2);
         metrics::mmr_select_capped(&pool, cfg.count, tuning.mmr_lambda, share_cap)
     }
