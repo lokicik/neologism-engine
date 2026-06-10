@@ -9,7 +9,8 @@ pub mod phonotactics;
 pub mod score;
 pub mod style;
 
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
+use std::sync::OnceLock;
 use rand::SeedableRng;
 use rand_chacha::ChaCha8Rng;
 use serde::{Deserialize, Serialize};
@@ -191,6 +192,69 @@ fn build_common_words() -> HashSet<String> {
     parse_lines(COMMON_WORDS).iter().map(|s| s.to_string()).collect()
 }
 
+/// Seed-independent big-tech setup, built once per process (Phase 34). Before
+/// this cache every `generate` call re-parsed ~19k common words + ~5k brands,
+/// retrained the order-3 backoff model (4 count tables) and re-scored the whole
+/// corpus for the quality-gate floor — ~all of the per-call latency in the web
+/// app, where each Generate click is a fresh call with a new seed. Everything
+/// here is deterministic, so caching cannot change output. In WASM the statics
+/// live for the module instance: the first click pays setup once.
+struct BigtechStatic {
+    roots: Vec<&'static str>,
+    adjectives: Vec<&'static str>,
+    /// Order-3 brand Markov with stupid-backoff: order-3 coherence (vs. the old
+    /// wandering order-2) without dead-ending on the sparse brand corpus.
+    model: Model,
+    /// Never emit a real brand / root verbatim.
+    corpus_set: HashSet<String>,
+    /// Brands bucketed by char length for the mimic filter: its two cases only
+    /// involve brands within ±2 chars of the candidate, so probing 5 buckets
+    /// replaces a scan of the whole corpus (Phase 34 — pure speed).
+    corpus_by_len: HashMap<usize, Vec<&'static str>>,
+    common_words: HashSet<String>,
+    /// Corpus log-likelihood stats; the gate floor is mean − gate_sigma·std,
+    /// computed per call so gate_sigma stays a live tuning knob.
+    ll_mean: f64,
+    ll_std: f64,
+}
+
+static BIGTECH: OnceLock<BigtechStatic> = OnceLock::new();
+static DICT: OnceLock<HashSet<String>> = OnceLock::new();
+
+impl BigtechStatic {
+    fn get() -> &'static Self {
+        BIGTECH.get_or_init(|| {
+            let corpus = parse_lines(BIGTECH_CORPUS);
+            let roots = parse_lines(ROOTS);
+            let adjectives = parse_lines(ADJECTIVES);
+            let model = Model::train_backoff(&corpus, 3);
+            let corpus_set: HashSet<String> = corpus
+                .iter()
+                .chain(roots.iter())
+                .map(|s| s.to_lowercase())
+                .collect();
+            let mut corpus_by_len: HashMap<usize, Vec<&'static str>> = HashMap::new();
+            for &w in &corpus {
+                corpus_by_len.entry(w.chars().count()).or_default().push(w);
+            }
+            let common_words = build_common_words();
+            let lls: Vec<f64> = corpus.iter().map(|w| model.log_likelihood(w)).collect();
+            let mean = lls.iter().sum::<f64>() / lls.len() as f64;
+            let var = lls.iter().map(|x| (x - mean).powi(2)).sum::<f64>() / lls.len() as f64;
+            Self {
+                roots,
+                adjectives,
+                model,
+                corpus_set,
+                corpus_by_len,
+                common_words,
+                ll_mean: mean,
+                ll_std: var.sqrt(),
+            }
+        })
+    }
+}
+
 pub fn generate(cfg: &Config) -> Vec<NameResult> {
     generate_with_tuning(cfg, &BigTechTuning::from_variety(cfg.variety))
 }
@@ -198,19 +262,21 @@ pub fn generate(cfg: &Config) -> Vec<NameResult> {
 /// Like `generate`, but with explicit big-tech tuning knobs (for the sweep
 /// harness). `tuning` only affects big-tech; Sci-Fi/Fantasy ignore it.
 pub fn generate_with_tuning(cfg: &Config, tuning: &BigTechTuning) -> Vec<NameResult> {
-    let dict = build_dictionary();
+    // Phase 34: dictionary cached once per process — contents identical to a
+    // fresh build_dictionary(), so output is unchanged for every style.
+    let dict = DICT.get_or_init(build_dictionary);
     let seed = cfg.seed.unwrap_or_else(|| rand::random());
     let mut rng = ChaCha8Rng::seed_from_u64(seed);
 
     match cfg.style {
-        Style::BigTech => generate_bigtech(cfg, &dict, &mut rng, tuning),
+        Style::BigTech => generate_bigtech(cfg, dict, &mut rng, tuning),
         Style::SciFi => {
             let corpus = variant_only_corpus(cfg).unwrap_or_else(scifi_corpus);
-            generate_markov(cfg, &dict, &mut rng, &corpus)
+            generate_markov(cfg, dict, &mut rng, &corpus)
         }
         Style::Fantasy => {
             let corpus = variant_only_corpus(cfg).unwrap_or_else(fantasy_corpus);
-            generate_markov(cfg, &dict, &mut rng, &corpus)
+            generate_markov(cfg, dict, &mut rng, &corpus)
         }
     }
 }
@@ -245,6 +311,11 @@ fn passes_constraints(lower: &str, cfg: &Config) -> bool {
 /// truncation or same-length typo (edit distance ≤ 2) of an equal-or-longer
 /// brand. Rejects `Supaba`←supabase, `Gongodb`←mongodb; keeps genuine extensions
 /// like `Hulumi`←hulu (the brand is shorter, so the name reads as its own word).
+///
+/// Phase 34: the hot path uses `mimics_real_brand_indexed` (by-length buckets);
+/// this full-scan form is kept as the reference implementation the equivalence
+/// test (`mimics_indexed_matches_scan`) checks against.
+#[cfg_attr(not(test), allow(dead_code))]
 fn mimics_real_brand(name: &str, brands: &[&str]) -> bool {
     let nlen = name.chars().count();
     brands.iter().any(|w| {
@@ -258,6 +329,36 @@ fn mimics_real_brand(name: &str, brands: &[&str]) -> bool {
         // coinage. (Short brands are skipped: too many coincidental substrings.)
         wlen >= 5 && nlen > wlen && nlen - wlen <= 2 && (name.starts_with(w) || name.ends_with(w))
     })
+}
+
+/// Same predicate as `mimics_real_brand`, probing a by-length brand index
+/// instead of scanning the whole corpus (Phase 34 — pure speed). Both cases
+/// only involve brands within ±2 chars of the candidate, so 5 length buckets
+/// cover everything; `levenshtein_le2` is the allocation-free form of the
+/// `levenshtein(..) <= 2` check. Equivalence is asserted by
+/// `mimics_indexed_matches_scan`.
+fn mimics_real_brand_indexed(name: &str, by_len: &HashMap<usize, Vec<&'static str>>) -> bool {
+    let nlen = name.chars().count();
+    // (a) Truncation / same-length typo of an equal-or-longer brand.
+    for wlen in nlen..=nlen + 2 {
+        if let Some(ws) = by_len.get(&wlen) {
+            if ws.iter().any(|w| score::levenshtein_le2(name, w)) {
+                return true;
+            }
+        }
+    }
+    // (b) A distinctive brand (≥5 chars) padded by a 1–2 char prefix or suffix.
+    for wlen in nlen.saturating_sub(2)..nlen {
+        if wlen < 5 {
+            continue;
+        }
+        if let Some(ws) = by_len.get(&wlen) {
+            if ws.iter().any(|w| name.starts_with(w) || name.ends_with(w)) {
+                return true;
+            }
+        }
+    }
+    false
 }
 
 /// Blend two distinct roots, preferring a clean overlap seam (pin+interest→
@@ -301,10 +402,9 @@ fn brand_appeal(lower: &str, common: &HashSet<String>, t: &BigTechTuning) -> f64
 }
 
 fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, tuning: &BigTechTuning) -> Vec<NameResult> {
-    let roots_corpus = parse_lines(ROOTS);
-    let bigtech_corpus = parse_lines(BIGTECH_CORPUS);
-    // A neologism engine shouldn't surface plain real words as brand names.
-    let common_words = build_common_words();
+    // Phase 34: corpora, trained model, word sets and gate stats are cached —
+    // all seed-independent, so repeated calls (one per Generate click) skip setup.
+    let st = BigtechStatic::get();
     // Names the user has already seen this session — never repeat them.
     // Phase 33: ExcludeSet adds fuzzy (edit-1) and stem-level rejection on top of exact-match.
     let exclude = ExcludeSet::new(&cfg.exclude);
@@ -322,15 +422,8 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, 
     } else if !cfg.roots.is_empty() {
         cfg.roots.iter().map(|s| s.as_str()).collect()
     } else {
-        roots_corpus.clone()
+        st.roots.clone()
     };
-
-    // Never emit a real brand / root / dictionary word verbatim.
-    let corpus_set: HashSet<String> = bigtech_corpus
-        .iter()
-        .chain(roots_corpus.iter())
-        .map(|s| s.to_lowercase())
-        .collect();
 
     // Overgenerate a pool, then keep the most brand-like by Markov word-likeness.
     let target = cfg.count * 5;
@@ -338,10 +431,6 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, 
     let mut seen: HashSet<String> = HashSet::new();
     let max_attempts = target * 80;
 
-    // Order-3 brand Markov with stupid-backoff: order-3 coherence (vs. the old
-    // wandering order-2) without dead-ending on the sparse 355-name corpus.
-    let bigtech_model = Model::train_backoff(&bigtech_corpus, 3);
-    let adjectives = parse_lines(ADJECTIVES);
     // When the user supplies roots (description or seed words), blend purely from
     // them so re-ranking can't swap in generic names; otherwise use the weighted
     // generator mix below (coined Markov + clean blends + short evocative roots).
@@ -352,10 +441,7 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, 
     // Skipped for user-roots (keyword fidelity) and compound (two real words).
     let apply_gate = !has_roots && !cfg.compound;
     let ll_floor = if apply_gate {
-        let lls: Vec<f64> = bigtech_corpus.iter().map(|w| bigtech_model.log_likelihood(w)).collect();
-        let mean = lls.iter().sum::<f64>() / lls.len() as f64;
-        let var = lls.iter().map(|x| (x - mean).powi(2)).sum::<f64>() / lls.len() as f64;
-        mean - tuning.gate_sigma * var.sqrt()
+        st.ll_mean - tuning.gate_sigma * st.ll_std
     } else {
         f64::NEG_INFINITY
     };
@@ -365,8 +451,8 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, 
 
         let name = if cfg.compound {
             // Adjective + noun compound (SwiftForge); already CamelCase.
-            let adj = adjectives[rand::Rng::gen_range(rng, 0..adjectives.len())];
-            let noun = roots_corpus[rand::Rng::gen_range(rng, 0..roots_corpus.len())];
+            let adj = st.adjectives[rand::Rng::gen_range(rng, 0..st.adjectives.len())];
+            let noun = st.roots[rand::Rng::gen_range(rng, 0..st.roots.len())];
             compound(adj, noun)
         } else if has_roots {
             // Blend purely from user roots / description keywords.
@@ -377,13 +463,13 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, 
             // single-root evocative names (root + tech suffix, à la Shopify).
             let pick = rand::Rng::gen::<f64>(rng);
             if pick < tuning.markov_w {
-                let Some(s) = bigtech_model.sample(rng, cfg.temperature, cfg.min_len, cfg.max_len) else { continue };
+                let Some(s) = st.model.sample(rng, cfg.temperature, cfg.min_len, cfg.max_len) else { continue };
                 tech_transform(rng, &s, cfg.temperature)
             } else if pick < tuning.markov_w + tuning.blend_w {
-                let Some(b) = blend_roots(rng, &roots_corpus) else { continue };
+                let Some(b) = blend_roots(rng, &st.roots) else { continue };
                 tech_transform(rng, &b, cfg.temperature)
             } else {
-                let root = roots_corpus[rand::Rng::gen_range(rng, 0..roots_corpus.len())];
+                let root = st.roots[rand::Rng::gen_range(rng, 0..st.roots.len())];
                 tech_transform(rng, root, 1.0)
             }
         };
@@ -399,12 +485,13 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, 
         if !cfg.compound && syllable_count(&lower) > tuning.syllable_cap { continue; }
         // Phonotactic-probability gate: reject candidates less brand-like than
         // the low tail of real brands (no-op when apply_gate is false).
-        if bigtech_model.log_likelihood(&name) < ll_floor { continue; }
+        if st.model.log_likelihood(&name) < ll_floor { continue; }
         // Don't emit names that read as a truncated/typo'd real brand.
-        if apply_gate && mimics_real_brand(&lower, &bigtech_corpus) { continue; }
-        if corpus_set.contains(&lower) || dict.contains(&lower) { continue; }
+        if apply_gate && mimics_real_brand_indexed(&lower, &st.corpus_by_len) { continue; }
+        // Never emit a real brand / root / dictionary word verbatim.
+        if st.corpus_set.contains(&lower) || dict.contains(&lower) { continue; }
         // Reject plain real words (Guard, Telegraph) — big-tech only.
-        if common_words.contains(&lower) { continue; }
+        if st.common_words.contains(&lower) { continue; }
         // Reject bad/offensive connotations (Bitdefect) — big-tech only.
         if BAD_SUBSTRINGS.iter().any(|b| lower.contains(b)) { continue; }
         if !passes_constraints(&lower, cfg) { continue; }
@@ -438,12 +525,18 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, 
     // keyword fidelity leads (same rationale as brevity/fluency above).
     let appeal_w = if has_roots { 0.0 } else { 1.0 };
     let rank = |r: &NameResult| {
-        bigtech_model.log_likelihood(&r.name)
+        st.model.log_likelihood(&r.name)
             + (r.score_pronounce as f64 / 100.0) * fluency_w
             + (r.score_memorability as f64 / 100.0) * brevity_w
-            + appeal_w * brand_appeal(&r.name.to_lowercase(), &common_words, tuning)
+            + appeal_w * brand_appeal(&r.name.to_lowercase(), &st.common_words, tuning)
     };
-    pool.sort_by(|a, b| rank(b).partial_cmp(&rank(a)).unwrap_or(std::cmp::Ordering::Equal));
+    // Phase 34: rank each name once, then sort on the cached value — sort_by
+    // with rank() inline recomputed log_likelihood + brand_appeal per comparison
+    // (~10× the work). Same values, same comparator → identical order.
+    let mut decorated: Vec<(f64, NameResult)> =
+        pool.into_iter().map(|r| (rank(&r), r)).collect();
+    decorated.sort_by(|a, b| b.0.partial_cmp(&a.0).unwrap_or(std::cmp::Ordering::Equal));
+    let mut pool: Vec<NameResult> = decorated.into_iter().map(|(_, r)| r).collect();
     if has_roots {
         // User-supplied roots/description: preserve keyword fidelity, no diversity pass.
         pool.truncate(cfg.count);
@@ -745,6 +838,43 @@ mod tests {
         for r in generate(&c) {
             assert!(!mimics_real_brand(&r.name.to_lowercase(), &brands),
                 "{} mimics a real brand", r.name);
+        }
+    }
+
+    #[test]
+    fn mimics_indexed_matches_scan() {
+        // The by-length index (Phase 34) must give the same verdict as the full
+        // corpus scan for every probe — truncations, pads, typos, unrelated.
+        let st = BigtechStatic::get();
+        let corpus = parse_lines(BIGTECH_CORPUS);
+        let probes = [
+            "supaba", "gongodb", "hulumi", "zephyrium", "xstripe", "supabasey",
+            "twility", "googl", "googler", "spotif", "notione", "zzzz",
+            "keyston", "vantaflow", "amazo", "samazon", "figm", "figmaa",
+        ];
+        for p in probes {
+            assert_eq!(
+                mimics_real_brand_indexed(p, &st.corpus_by_len),
+                mimics_real_brand(p, &corpus),
+                "indexed vs scan disagree on {p}"
+            );
+        }
+    }
+
+    #[test]
+    fn levenshtein_le2_matches_full() {
+        // Bounded check must agree with the full DP on representative pairs.
+        let pairs = [
+            ("supaba", "supabase"), ("gongodb", "mongodb"), ("abc", "abc"),
+            ("abc", "abd"), ("abc", "xyz"), ("short", "shortest"),
+            ("keyston", "keystone"), ("a", "abc"), ("", "ab"), ("", "abc"),
+        ];
+        for (a, b) in pairs {
+            assert_eq!(
+                score::levenshtein_le2(a, b),
+                score::levenshtein(a, b) <= 2,
+                "le2 vs full disagree on ({a}, {b})"
+            );
         }
     }
 

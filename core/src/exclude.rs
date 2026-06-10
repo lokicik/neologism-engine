@@ -32,23 +32,23 @@ use crate::blend::tech_suffix_of;
 ///   |b| = |a| + 1  → b has one extra char that a lacks (one insertion into a)
 ///   |len diff| ≥ 2 → false immediately
 pub fn within_edit1(a: &str, b: &str) -> bool {
-    let ac: Vec<char> = a.chars().collect();
-    let bc: Vec<char> = b.chars().collect();
-    let la = ac.len();
-    let lb = bc.len();
+    // Allocation-free (Phase 34): this runs ~660× per surviving candidate, so
+    // the old per-call Vec<char> collects were the bulk of the probe cost.
+    let la = a.chars().count();
+    let lb = b.chars().count();
     match la.abs_diff(lb) {
         0 => {
             // One substitution allowed.
-            ac.iter().zip(bc.iter()).filter(|(x, y)| x != y).count() <= 1
+            a.chars().zip(b.chars()).filter(|(x, y)| x != y).count() <= 1
         }
         1 => {
             // One insertion/deletion: walk both, allowing one skip in the longer.
-            let (long, short) = if la > lb { (&ac, &bc) } else { (&bc, &ac) };
-            let mut si = 0usize; // index into short
+            let (long, short) = if la > lb { (a, b) } else { (b, a) };
+            let mut sit = short.chars().peekable();
             let mut skipped = false;
-            for &c in long.iter() {
-                if si < short.len() && c == short[si] {
-                    si += 1;
+            for c in long.chars() {
+                if sit.peek() == Some(&c) {
+                    sit.next();
                 } else if !skipped {
                     skipped = true;
                 } else {

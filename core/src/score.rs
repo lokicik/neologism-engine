@@ -102,6 +102,46 @@ pub fn score_novelty(name: &str, dictionary: &HashSet<String>) -> u32 {
     95
 }
 
+/// True iff `levenshtein(a, b) <= 2` — same predicate the brand-mimic filter
+/// uses, but allocation-free for ASCII inputs (Phase 34). The full DP below
+/// builds a nested Vec matrix per call; the mimic filter probes hundreds of
+/// brands per candidate, so those allocations dominated big-tech latency.
+/// Two stack rows + an early row-min exit give identical answers.
+pub(crate) fn levenshtein_le2(a: &str, b: &str) -> bool {
+    let (m, n) = (a.len(), b.len());
+    const CAP: usize = 64;
+    if !a.is_ascii() || !b.is_ascii() || m >= CAP || n >= CAP {
+        return levenshtein(a, b) <= 2;
+    }
+    if m.abs_diff(n) > 2 {
+        return false;
+    }
+    let (a, b) = (a.as_bytes(), b.as_bytes());
+    let mut prev = [0usize; CAP];
+    let mut curr = [0usize; CAP];
+    for (j, p) in prev.iter_mut().enumerate().take(n + 1) {
+        *p = j;
+    }
+    for i in 1..=m {
+        curr[0] = i;
+        let mut row_min = i;
+        for j in 1..=n {
+            curr[j] = if a[i - 1] == b[j - 1] {
+                prev[j - 1]
+            } else {
+                1 + prev[j].min(curr[j - 1]).min(prev[j - 1])
+            };
+            row_min = row_min.min(curr[j]);
+        }
+        // Distance only grows down the rows — once a whole row exceeds 2, done.
+        if row_min > 2 {
+            return false;
+        }
+        prev[..=n].copy_from_slice(&curr[..=n]);
+    }
+    prev[n] <= 2
+}
+
 pub(crate) fn levenshtein(a: &str, b: &str) -> usize {
     let a: Vec<char> = a.chars().collect();
     let b: Vec<char> = b.chars().collect();
