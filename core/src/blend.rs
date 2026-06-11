@@ -89,6 +89,70 @@ pub fn tech_transform<R: Rng>(rng: &mut R, name: &str, temperature: f64) -> Stri
     }
 }
 
+/// All Lyft/Tumblr/Flickr-style respellings of a real word (Phase 36). Exactly
+/// ONE transform per word so the source stays recognizable — that's what makes
+/// the style work (lyft *reads as* lift). Transforms, each yielding at most one
+/// candidate: (a) drop an interior vowel flanked by consonants (tumbler→tumblr),
+/// (b) i→y swap (lift→lyft), (c) -er→-r (flicker→flickr — also reachable via
+/// (a), kept explicit for words whose only interior vowel isn't the -er one),
+/// (d) collapse a double consonant (summit→sumit). Identity and <4-char results
+/// are dropped. Public so tests can assert the full option set.
+pub fn respell_options(lower: &str) -> Vec<String> {
+    let chars: Vec<char> = lower.chars().collect();
+    let mut out: Vec<String> = Vec::new();
+
+    // (a) Drop the last interior vowel flanked by consonants — but never from
+    // the head of the word: require an earlier vowel so the first syllable
+    // stays intact (radiance must not become rdiance).
+    for i in (2..chars.len().saturating_sub(1)).rev() {
+        if is_vowel(chars[i])
+            && !is_vowel(chars[i - 1])
+            && !is_vowel(chars[i + 1])
+            && chars[..i].iter().any(|&c| is_vowel(c))
+        {
+            let mut v = chars.clone();
+            v.remove(i);
+            out.push(v.iter().collect());
+            break;
+        }
+    }
+    // (b) First 'i' becomes 'y'.
+    if let Some(i) = chars.iter().position(|&c| c == 'i') {
+        let mut v = chars.clone();
+        v[i] = 'y';
+        out.push(v.iter().collect());
+    }
+    // (c) Trailing -er loses its vowel.
+    if lower.ends_with("er") && chars.len() >= 4 {
+        out.push(format!("{}r", &lower[..lower.len() - 2]));
+    }
+    // (d) Collapse a doubled consonant.
+    for i in 1..chars.len() {
+        if chars[i] == chars[i - 1] && !is_vowel(chars[i]) {
+            let mut v = chars.clone();
+            v.remove(i);
+            out.push(v.iter().collect());
+            break;
+        }
+    }
+
+    out.sort();
+    out.dedup();
+    // BAD_SUBSTRINGS deliberately omits "ass" (class, brass…), but a transform
+    // can CREATE that ending (pegasus → pegass) — reject it here at the source.
+    out.retain(|o| o != lower && o.len() >= 4 && !o.ends_with("ass"));
+    out
+}
+
+/// Pick one respelling of `lower` at random, or None when no transform applies.
+pub fn respell<R: Rng>(rng: &mut R, lower: &str) -> Option<String> {
+    let options = respell_options(lower);
+    if options.is_empty() {
+        return None;
+    }
+    Some(options[rng.gen_range(0..options.len())].clone())
+}
+
 /// The recognized tech suffix `lower` ends with (longest match wins), or None.
 /// Requires the remaining stem to be ≥ 4 chars so short names aren't misparsed
 /// (e.g. "kai" → stem "k" would be nonsense). Phase 33: used for stem-level
@@ -199,6 +263,35 @@ mod tests {
     fn tech_suffix_of_no_suffix() {
         assert_eq!(tech_suffix_of("nova"), None);
         assert_eq!(tech_suffix_of("keron"), None);
+    }
+
+    #[test]
+    fn respell_classic_patterns() {
+        // The canonical brand respellings must be reachable.
+        assert!(respell_options("tumbler").contains(&"tumblr".to_string()));
+        assert!(respell_options("flicker").contains(&"flickr".to_string()));
+        assert!(respell_options("lift").contains(&"lyft".to_string()));
+        assert!(respell_options("summit").contains(&"sumit".to_string()));
+    }
+
+    #[test]
+    fn respell_never_identity_or_tiny() {
+        for word in ["tumbler", "lift", "ember", "grid", "axis"] {
+            for opt in respell_options(word) {
+                assert_ne!(opt, word, "identity respell of {word}");
+                assert!(opt.len() >= 4, "tiny respell {opt} of {word}");
+            }
+        }
+        // No applicable transform → empty (no vowels to drop/swap, no doubles).
+        assert!(respell_options("orb").is_empty());
+    }
+
+    #[test]
+    fn respell_keeps_head_and_avoids_bad_endings() {
+        // Never drop a first-syllable vowel (radiance ↛ rdiance).
+        assert!(!respell_options("radiance").contains(&"rdiance".to_string()));
+        // Transform-created "-ass" endings are rejected (pegasus ↛ pegass).
+        assert!(!respell_options("pegasus").contains(&"pegass".to_string()));
     }
 
     #[test]

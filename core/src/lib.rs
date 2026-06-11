@@ -123,6 +123,9 @@ impl BigTechTuning {
 const BIGTECH_CORPUS: &str = include_str!("../data/bigtech.txt");
 const ROOTS: &str = include_str!("../data/roots.txt");
 const ADJECTIVES: &str = include_str!("../data/adjectives.txt");
+// Phase 36: extra curated evocative real words for the real-word naming mode
+// (Apple/Notion-style). Filtered against roots/adjectives/brands at curation.
+const REALWORDS: &str = include_str!("../data/realwords.txt");
 const WORDS: &str = include_str!("../data/words.txt");
 // ~19k common English words — used ONLY to filter big-tech output so the model
 // can't emit a plain real word as a "brand" (Guard, Telegraph, Content). Kept
@@ -211,6 +214,10 @@ fn build_common_words() -> HashSet<String> {
 struct BigtechStatic {
     roots: Vec<&'static str>,
     adjectives: Vec<&'static str>,
+    /// Phase 36: the real-word mode pool — roots + adjectives + realwords.txt,
+    /// 4–9 chars, deduped. These are emitted VERBATIM in real-word mode (the
+    /// one mode where "is a real word" is the point, not a rejection reason).
+    realword_pool: Vec<&'static str>,
     /// Order-3 brand Markov with stupid-backoff: order-3 coherence (vs. the old
     /// wandering order-2) without dead-ending on the sparse brand corpus.
     model: Model,
@@ -236,6 +243,15 @@ impl BigtechStatic {
             let corpus = parse_lines(BIGTECH_CORPUS);
             let roots = parse_lines(ROOTS);
             let adjectives = parse_lines(ADJECTIVES);
+            let mut realword_pool: Vec<&'static str> = roots
+                .iter()
+                .chain(adjectives.iter())
+                .chain(parse_lines(REALWORDS).iter())
+                .copied()
+                .filter(|w| w.len() >= 4 && w.len() <= 9)
+                .collect();
+            realword_pool.sort_unstable();
+            realword_pool.dedup();
             let model = Model::train_backoff(&corpus, 3);
             let corpus_set: HashSet<String> = corpus
                 .iter()
@@ -253,6 +269,7 @@ impl BigtechStatic {
             Self {
                 roots,
                 adjectives,
+                realword_pool,
                 model,
                 corpus_set,
                 corpus_by_len,
@@ -447,10 +464,20 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, 
     // generator mix below (coined Markov + clean blends + short evocative roots).
     let has_roots = !desc_keywords.is_empty() || !cfg.roots.is_empty();
 
+    // Phase 36 naming modes (big-tech reuses the previously unused `variant`
+    // field): "respell" = Lyft/Tumblr-style one-transform respellings of real
+    // words; "realword" = curated real words verbatim (Apple/Notion-style).
+    // Anything else (or None) = the unchanged default pipeline.
+    let variant_lower = cfg.variant.as_deref().map(str::to_lowercase);
+    let respell_mode = variant_lower.as_deref() == Some("respell");
+    let realword_mode = variant_lower.as_deref() == Some("realword");
+
     // Phonotactic-probability quality gate (Springer "I'd buy that!"): a default
     // candidate must be at least as brand-like as the low tail of real brands.
-    // Skipped for user-roots (keyword fidelity) and compound (two real words).
-    let apply_gate = !has_roots && !cfg.compound;
+    // Skipped for user-roots (keyword fidelity), compound (two real words), and
+    // the Phase 36 modes (curated real-word sources, not coinage to be vetted —
+    // and respellings like tumblr deliberately have un-wordlike phonotactics).
+    let apply_gate = !has_roots && !cfg.compound && !respell_mode && !realword_mode;
     let ll_floor = if apply_gate {
         st.ll_mean - tuning.gate_sigma * st.ll_std
     } else {
@@ -460,7 +487,15 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, 
     for _ in 0..max_attempts {
         if pool.len() >= target { break; }
 
-        let name = if cfg.compound {
+        let name = if respell_mode {
+            // One-transform respelling of a curated real word (lyft, tumblr).
+            let w = st.realword_pool[rand::Rng::gen_range(rng, 0..st.realword_pool.len())];
+            let Some(r) = blend::respell(rng, w) else { continue };
+            r
+        } else if realword_mode {
+            // Curated real word, emitted verbatim (Apple/Notion-style).
+            st.realword_pool[rand::Rng::gen_range(rng, 0..st.realword_pool.len())].to_string()
+        } else if cfg.compound {
             // Adjective + noun compound (SwiftForge); already CamelCase.
             let adj = st.adjectives[rand::Rng::gen_range(rng, 0..st.adjectives.len())];
             let noun = st.roots[rand::Rng::gen_range(rng, 0..st.roots.len())];
@@ -488,21 +523,31 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, 
         let name = capitalize(&name);
         if name.len() < cfg.min_len || name.len() > cfg.max_len { continue; }
         let lower = name.to_lowercase();
-        if !is_valid(&lower, Style::BigTech) { continue; }
+        // Respellings deliberately break English phonotactics (tumblr ends in
+        // a 4-consonant run) — allow the denser clusters and skip sonority,
+        // like the harsh Sci-Fi variants do.
+        if respell_mode {
+            if !is_valid_clustered(&lower, Style::BigTech, 4) { continue; }
+        } else if !is_valid(&lower, Style::BigTech) { continue; }
         // Big-tech names should read naturally → enforce sonority sequencing.
         // Compounds join two real words, so skip the single-word sonority check.
-        if !cfg.compound && !respects_sonority(&lower) { continue; }
+        if !cfg.compound && !respell_mode && !respects_sonority(&lower) { continue; }
         // Brand-shape: 1–3 syllables (research sweet spot); reject long mashups.
         if !cfg.compound && syllable_count(&lower) > tuning.syllable_cap { continue; }
         // Phonotactic-probability gate: reject candidates less brand-like than
         // the low tail of real brands (no-op when apply_gate is false).
         if st.model.log_likelihood(&name) < ll_floor { continue; }
-        // Don't emit names that read as a truncated/typo'd real brand.
-        if apply_gate && mimics_real_brand_indexed(&lower, &st.corpus_by_len) { continue; }
-        // Never emit a real brand / root / dictionary word verbatim.
-        if st.corpus_set.contains(&lower) || dict.contains(&lower) { continue; }
+        // Don't emit names that read as a truncated/typo'd real brand. Also
+        // enforced for the Phase 36 modes: a respelling can land on a brand
+        // (flicker→flickr) and a real word can read as a brand typo (strip).
+        if (apply_gate || respell_mode || realword_mode)
+            && mimics_real_brand_indexed(&lower, &st.corpus_by_len) { continue; }
+        // Never emit a real brand / root / dictionary word verbatim — except in
+        // real-word mode, where curated real words (incl. roots) are the point;
+        // there only the brand-mimic check above guards against brands.
+        if !realword_mode && (st.corpus_set.contains(&lower) || dict.contains(&lower)) { continue; }
         // Reject plain real words (Guard, Telegraph) — big-tech only.
-        if st.common_words.contains(&lower) { continue; }
+        if !realword_mode && st.common_words.contains(&lower) { continue; }
         // Reject bad/offensive connotations (Bitdefect) — big-tech only.
         if BAD_SUBSTRINGS.iter().any(|b| lower.contains(b)) { continue; }
         if !passes_constraints(&lower, cfg) { continue; }
@@ -854,6 +899,56 @@ mod tests {
             assert!(!mimics_real_brand(&r.name.to_lowercase(), &brands),
                 "{} mimics a real brand", r.name);
         }
+    }
+
+    #[test]
+    fn realword_mode_emits_pool_words_only() {
+        let mut c = cfg(Style::BigTech);
+        c.variant = Some("realword".to_string());
+        c.count = 12;
+        let results = generate(&c);
+        assert!(!results.is_empty());
+        let st = BigtechStatic::get();
+        let brands: HashSet<String> =
+            parse_lines(BIGTECH_CORPUS).iter().map(|s| s.to_lowercase()).collect();
+        for r in &results {
+            let lower = r.name.to_lowercase();
+            assert!(
+                st.realword_pool.binary_search(&lower.as_str()).is_ok(),
+                "{} not in the curated pool", r.name
+            );
+            assert!(!brands.contains(&lower), "{} is a real brand", r.name);
+        }
+    }
+
+    #[test]
+    fn respell_mode_emits_coinages_not_words() {
+        let mut c = cfg(Style::BigTech);
+        c.variant = Some("respell".to_string());
+        c.count = 12;
+        let results = generate(&c);
+        assert!(!results.is_empty());
+        let common = build_common_words();
+        for r in &results {
+            let lower = r.name.to_lowercase();
+            assert!(!common.contains(&lower), "{} is a plain real word", r.name);
+            assert!(!dict_contains(&lower), "{} is a dictionary word", r.name);
+        }
+    }
+
+    fn dict_contains(lower: &str) -> bool {
+        build_dictionary().contains(lower)
+    }
+
+    #[test]
+    fn unknown_variant_matches_default_bigtech() {
+        // An unrecognized variant must fall through to the default pipeline,
+        // byte-identical — protects existing callers and the frozen baseline.
+        let a: Vec<String> = generate(&cfg(Style::BigTech)).into_iter().map(|r| r.name).collect();
+        let mut c = cfg(Style::BigTech);
+        c.variant = Some("nonsense".to_string());
+        let b: Vec<String> = generate(&c).into_iter().map(|r| r.name).collect();
+        assert_eq!(a, b);
     }
 
     #[test]
