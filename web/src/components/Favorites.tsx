@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import type { NameResult } from '../lib/engine'
+import { composite } from '../lib/score'
 import { Monogram } from './Monogram'
+import { IconCopy, IconCheck, IconX } from './icons'
 import { exportText, exportJson, encodeShareUrl } from '../lib/share'
 
 interface Props {
@@ -10,9 +12,13 @@ interface Props {
   onClose?: () => void
 }
 
+// Phase 46: proper drawer anatomy — header (title + count + close), scrollable
+// body of rich rows with hover-revealed actions, fixed footer with the
+// contextual actions (PatternFly/Pajamas drawer guidance; wishlist pattern).
 export function Favorites({ favorites, onRemove, onClose }: Props) {
   const [copiedAll, setCopiedAll] = useState(false)
   const [copiedUrl, setCopiedUrl] = useState(false)
+  const [copiedRow, setCopiedRow] = useState<string | null>(null)
 
   if (favorites.length === 0) return null
 
@@ -21,6 +27,13 @@ export function Favorites({ favorites, onRemove, onClose }: Props) {
     navigator.clipboard.writeText(text).then(() => {
       setCopiedAll(true)
       setTimeout(() => setCopiedAll(false), 1500)
+    })
+  }
+
+  function copyOne(name: string) {
+    navigator.clipboard.writeText(name).then(() => {
+      setCopiedRow(name)
+      setTimeout(() => setCopiedRow(null), 1500)
     })
   }
 
@@ -34,48 +47,63 @@ export function Favorites({ favorites, onRemove, onClose }: Props) {
 
   return (
     <aside className="favorites-panel">
-      <div className="favorites-header">
+      <div className="drawer-header">
         <h2 className="favorites-heading">
-          <span className="favorites-star">★</span> Saved names
+          Saved <span className="count-pill">{favorites.length}</span>
         </h2>
         {onClose && (
           <button className="icon-btn" onClick={onClose} title="Close">
-            ✕
+            <IconX />
           </button>
         )}
       </div>
-      <div className="favorites-toolbar">
-        <button className="fav-btn" onClick={copyAll} title="Copy all names">
-          {copiedAll ? '✓ Copied' : 'Copy all'}
-        </button>
-        <button className="fav-btn" onClick={() => exportText(favorites)} title="Export as text">
-          ↓ TXT
-        </button>
-        <button className="fav-btn" onClick={() => exportJson(favorites)} title="Export as JSON">
-          ↓ JSON
-        </button>
-        <button className="fav-btn" onClick={shareLink} title="Copy share URL">
-          {copiedUrl ? '✓ Copied' : '↗ Share'}
-        </button>
-      </div>
+
       <ul className="favorites-list">
-        {favorites.map((f) => (
-          <li key={f.name} className="favorites-item">
-            <Monogram name={f.name} size={28} />
-            <span className="fav-name">{f.name}</span>
-            {f.style !== 'big_tech' && (
-              <span className="fav-style">{f.style.replace('_', ' ')}</span>
-            )}
-            <button
-              className="icon-btn"
-              onClick={() => onRemove(f)}
-              title="Remove"
-            >
-              ✕
-            </button>
-          </li>
-        ))}
+        {favorites.map((f) => {
+          const score = composite(f)
+          return (
+            <li key={f.name} className="fav-row">
+              <Monogram name={f.name} size={28} />
+              <span className="fav-name">{f.name}</span>
+              {f.style !== 'big_tech' && (
+                <span className="fav-style">{f.style.replace('_', ' ')}</span>
+              )}
+              {score > 0 && <span className="fav-score">★ {score}</span>}
+              <span className="fav-row-actions">
+                <button
+                  className="icon-btn"
+                  onClick={() => copyOne(f.name)}
+                  title="Copy name"
+                >
+                  {copiedRow === f.name ? <IconCheck /> : <IconCopy />}
+                </button>
+                <button className="icon-btn" onClick={() => onRemove(f)} title="Remove">
+                  <IconX />
+                </button>
+              </span>
+            </li>
+          )
+        })}
       </ul>
+
+      <div className="drawer-footer">
+        <button className="fav-primary" onClick={copyAll}>
+          {copiedAll ? '✓ Copied' : 'Copy all names'}
+        </button>
+        <div className="fav-links">
+          <button className="fav-link" onClick={() => exportText(favorites)} title="Download as .txt">
+            ↓ TXT
+          </button>
+          <span className="fav-link-dot">·</span>
+          <button className="fav-link" onClick={() => exportJson(favorites)} title="Download as .json">
+            ↓ JSON
+          </button>
+          <span className="fav-link-dot">·</span>
+          <button className="fav-link" onClick={shareLink} title="Copy a share link">
+            {copiedUrl ? '✓ Copied' : '↗ Share'}
+          </button>
+        </div>
+      </div>
     </aside>
   )
 }

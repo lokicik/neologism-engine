@@ -76,14 +76,20 @@ try {
   }
   await shot('08-after-star')
 
-  // Drawer
+  // Drawer — hover a row first so the revealed actions are captured.
   await page.click('.nav-cta', { timeout: 5000 })
   await page.waitForSelector('.drawer')
   await page.waitForTimeout(300)
+  await page.locator('.fav-row').first().hover()
+  await page.waitForTimeout(200)
   await shot('09-drawer')
 
-  // Remove one favorite from the drawer
-  await page.locator('.favorites-item button').last().click()
+  // Per-row copy, then remove one favorite from the drawer.
+  await page.locator('.fav-row').first().locator('.fav-row-actions .icon-btn').first().click()
+  await page.waitForTimeout(200)
+  await shot('09b-drawer-row-copied')
+  await page.locator('.fav-row').last().hover()
+  await page.locator('.fav-row').last().locator('.fav-row-actions .icon-btn').last().click()
   await page.waitForTimeout(300)
   await shot('10-drawer-after-remove')
   await page.keyboard.press('Escape')
