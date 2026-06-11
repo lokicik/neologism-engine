@@ -67,6 +67,16 @@ export default function App() {
   }, [loading])
   // Phase 49: end-of-grid sentinel — scrolling near it auto-appends a batch.
   const sentinelRef = useRef<HTMLDivElement | null>(null)
+  // Last generate timestamp — paces auto-appends so each batch's entrance
+  // animation finishes before the next batch can start (the engine itself
+  // takes ~20ms, which felt like an instant blast of cards).
+  const lastGenerateRef = useRef(0)
+  // Mirror of `favorites` so handleGenerate can rank an incoming batch
+  // without being re-memoized on every star.
+  const favoritesRef = useRef<NameResult[]>(favorites)
+  useEffect(() => {
+    favoritesRef.current = favorites
+  }, [favorites])
 
   // On mount: if a #names= share URL is present, union those names into favorites.
   useEffect(() => {
@@ -105,13 +115,19 @@ export default function App() {
   // step without racing the config state update.
   const handleGenerate = useCallback(async (append = false, cfgOverride?: Config) => {
     const cfg = cfgOverride ?? config
+    lastGenerateRef.current = Date.now()
     setLoading(true)
     setError(null)
     try {
       const batch = await generateNames({ ...cfg, exclude: recentRef.current })
       setPromptKeywords(cfg.description?.trim() ? await extractKeywords(cfg.description) : [])
       setExhausted(batch.length === 0)
-      const shown = append ? [...resultsRef.current, ...batch] : batch
+      // Preference ranking is applied to the incoming batch only, at insert
+      // time — re-ranking the whole list on every append (the old render-time
+      // rankByPreference) made already-visible cards jump around the grid.
+      const profile = buildProfile(favoritesRef.current)
+      const ranked = profile ? rankByPreference(batch, profile) : batch
+      const shown = append ? [...resultsRef.current, ...ranked] : ranked
       setResults(shown)
       markSeen(batch)
       setMetrics(shown.length > 0 ? await batchMetrics(shown) : null)
@@ -127,24 +143,41 @@ export default function App() {
   }, [])
 
   // Phase 49: infinite scroll — when the sentinel under the grid comes within
-  // 600px of the viewport, append the next batch (the 20k exclude window
+  // 300px of the viewport, append the next batch (the 20k exclude window
   // keeps every batch fresh; exhaustion unmounts the sentinel and the notice
-  // takes over). Re-binding on results.length matters: observe() fires the
-  // callback with the *current* intersection state, so batches keep chaining
-  // until the sentinel is pushed out of the prefetch margin.
+  // takes over). Appends are paced by APPEND_COOLDOWN_MS so each batch's
+  // entrance animation plays out before the next can start — without it the
+  // ~20ms engine chained several batches in one blast. Re-binding on
+  // results.length matters: observe() reports the *current* intersection
+  // state, so a sentinel still in range schedules the next paced append.
+  const APPEND_COOLDOWN_MS = 1000
   useEffect(() => {
     const el = sentinelRef.current
     if (!el) return
+    let timer: number | undefined
+    let visible = false
+    const tryAppend = () => {
+      timer = undefined
+      if (!visible || loadingRef.current) return
+      const wait = lastGenerateRef.current + APPEND_COOLDOWN_MS - Date.now()
+      if (wait > 0) {
+        timer = window.setTimeout(tryAppend, wait)
+        return
+      }
+      void handleGenerate(true)
+    }
     const obs = new IntersectionObserver(
       (entries) => {
-        if (entries.some((e) => e.isIntersecting) && !loadingRef.current) {
-          void handleGenerate(true)
-        }
+        visible = entries.some((e) => e.isIntersecting)
+        if (visible && timer === undefined) tryAppend()
       },
-      { rootMargin: '600px 0px' },
+      { rootMargin: '300px 0px' },
     )
     obs.observe(el)
-    return () => obs.disconnect()
+    return () => {
+      obs.disconnect()
+      if (timer !== undefined) clearTimeout(timer)
+    }
   }, [handleGenerate, results.length, exhausted, view])
 
   // The prompt's name space is used up against the seen-history: wipe the
@@ -171,9 +204,11 @@ export default function App() {
   const favoriteNames = new Set(favorites.map((f) => f.name))
 
   // Preference profile learned from favorites (Namelix-style); needs ≥3.
-  // Phase 37: applied automatically once it exists — no toggle.
+  // Phase 37: applied automatically once it exists — no toggle. Phase 49:
+  // ranking happens per batch inside handleGenerate (insert order is final);
+  // this render-time profile only drives the "tuned to favorites" note.
   const profile = buildProfile(favorites)
-  const displayResults = profile ? rankByPreference(results, profile) : results
+  const displayResults = results
 
   // Top pick of the batch (compared by name, so re-ranking doesn't break it).
   const bestName = metrics && results.length >= 2 ? results[metrics.stats.best_index]?.name : undefined
@@ -255,10 +290,6 @@ export default function App() {
                         appearDelay={(i % (config.count ?? 10)) * 45}
                       />
                     ))}
-                    {loading &&
-                      Array.from({ length: 3 }).map((_, i) => (
-                        <div key={`sk-${i}`} className="skeleton-card" style={{ animationDelay: `${i * 60}ms` }} />
-                      ))}
                   </div>
                   {!exhausted && <div ref={sentinelRef} className="scroll-sentinel" aria-hidden />}
                 </>
