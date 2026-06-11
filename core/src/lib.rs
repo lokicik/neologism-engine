@@ -687,6 +687,60 @@ fn generate_markov(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, c
     metrics::mmr_select(&pool, cfg.count, 0.7)
 }
 
+/// On-demand breakdown of why a name reads the way it does (Phase 36): the
+/// structural facts behind the scores, in UI-renderable form. Never called
+/// during generation — zero impact on the generation paths.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Explanation {
+    /// Recognized brandable tech suffix ("ify", "hub", …), if any.
+    pub suffix: Option<String>,
+    /// The name minus that suffix (present only when a suffix was found).
+    pub stem: Option<String>,
+    /// Longest real-English-word *proper* prefix of ≥3 chars (Forge·lab).
+    pub prefix_word: Option<String>,
+    /// True when the entire name is a common English word (real-word mode).
+    pub is_real_word: bool,
+    pub syllables: usize,
+    pub connotations: Vec<String>,
+    pub score_pronounce: u32,
+    pub score_novelty: u32,
+    pub score_memorability: u32,
+}
+
+pub fn explain(name: &str) -> Explanation {
+    let lower = name.to_lowercase();
+    let st = BigtechStatic::get();
+    let dict = DICT.get_or_init(build_dictionary);
+
+    let suffix = blend::tech_suffix_of(&lower).map(str::to_string);
+    let stem = suffix
+        .as_ref()
+        .map(|s| lower[..lower.len() - s.len()].to_string());
+
+    let is_real_word = st.common_words.contains(&lower);
+    let mut prefix_word = None;
+    if !is_real_word {
+        for j in (3..lower.len()).rev() {
+            if lower.is_char_boundary(j) && st.common_words.contains(&lower[..j]) {
+                prefix_word = Some(lower[..j].to_string());
+                break;
+            }
+        }
+    }
+
+    Explanation {
+        suffix,
+        stem,
+        prefix_word,
+        is_real_word,
+        syllables: syllable_count(&lower),
+        connotations: connotation::connotations(name),
+        score_pronounce: score_pronounceability(&lower),
+        score_novelty: score_novelty(&lower, dict),
+        score_memorability: score_memorability(&lower),
+    }
+}
+
 fn capitalize(s: &str) -> String {
     let mut c = s.chars();
     match c.next() {
@@ -986,6 +1040,25 @@ mod tests {
                 "le2 vs full disagree on ({a}, {b})"
             );
         }
+    }
+
+    #[test]
+    fn explain_decomposes_known_shapes() {
+        // Real-word prefix + brandable suffix.
+        let e = explain("Forgeify");
+        assert_eq!(e.prefix_word.as_deref(), Some("forge"));
+        assert_eq!(e.suffix.as_deref(), Some("ify"));
+        assert_eq!(e.stem.as_deref(), Some("forge"));
+        assert!(!e.is_real_word);
+        // A plain real word.
+        let e = explain("Notion");
+        assert!(e.is_real_word);
+        assert!(e.prefix_word.is_none());
+        // A pure coinage decomposes to nothing structural. (Not "Zentu" — that
+        // genuinely opens with the real word "zen", which explain() reports.)
+        let e = explain("Vrixo");
+        assert!(e.suffix.is_none() && e.prefix_word.is_none() && !e.is_real_word);
+        assert!(e.syllables >= 1);
     }
 
     #[test]

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import type { NameResult } from '../lib/engine'
+import { explainName, type Explanation, type NameResult } from '../lib/engine'
 import { checkDomains, checkHandles, isAuthoritative, trademarkLinks, HANDLES, TLDS, type DomainStatus } from '../lib/domain'
 import { Monogram } from './Monogram'
 
@@ -23,15 +23,34 @@ function idleMap(): Record<string, DomainStatus> {
   return m
 }
 
+// Render the structural facts as a short human sentence fragment list.
+function whyParts(e: Explanation): string[] {
+  const parts: string[] = []
+  if (e.is_real_word) parts.push('a real English word')
+  if (e.prefix_word) parts.push(`opens with “${e.prefix_word}” (real word)`)
+  if (e.suffix && e.stem) parts.push(`“${e.stem}” + brandable “-${e.suffix}”`)
+  parts.push(`${e.syllables} syllable${e.syllables === 1 ? '' : 's'}`)
+  if (e.score_pronounce >= 85) parts.push('easy to say')
+  if (e.score_memorability >= 80) parts.push('short & punchy')
+  if (e.score_novelty >= 90 && !e.is_real_word) parts.push('clearly coined')
+  return parts
+}
+
 export function NameCard({ result, isFavorite, onToggleFavorite, badges = [] }: Props) {
   const [copied, setCopied] = useState(false)
   const [domains, setDomains] = useState<Record<string, DomainStatus>>(idleMap)
   const [checking, setChecking] = useState(false)
+  const [why, setWhy] = useState<Explanation | null>(null)
 
   useEffect(() => {
     setDomains(idleMap())
     setChecking(false)
+    setWhy(null)
   }, [result.name])
+
+  function loadWhy() {
+    explainName(result.name).then(setWhy).catch(() => {})
+  }
 
   function copy() {
     navigator.clipboard.writeText(result.name).then(() => {
@@ -139,6 +158,16 @@ export function NameCard({ result, isFavorite, onToggleFavorite, badges = [] }: 
           ))}
         </div>
       )}
+
+      <div className="why-row">
+        {why ? (
+          <span className="why-text">{whyParts(why).join(' · ')}</span>
+        ) : (
+          <button className="check-domain-btn" onClick={loadWhy}>
+            Why this name?
+          </button>
+        )}
+      </div>
 
       <div className="domain-row">
         {!checking && allIdle ? (

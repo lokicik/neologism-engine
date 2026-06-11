@@ -1,4 +1,4 @@
-import init, { generate_names, batch_metrics } from '../wasm/neologism_wasm.js'
+import init, { generate_names, batch_metrics, explain_name } from '../wasm/neologism_wasm.js'
 
 export type Style = 'big_tech' | 'sci_fi' | 'fantasy'
 
@@ -61,6 +61,25 @@ export interface BatchStats {
 export interface BatchMetrics {
   stats: BatchStats
   composites: number[]
+}
+
+// Structural "why this name" breakdown (Phase 36) — computed on demand in the
+// engine, not during generation.
+export interface Explanation {
+  suffix: string | null
+  stem: string | null
+  prefix_word: string | null
+  is_real_word: boolean
+  syllables: number
+  connotations: string[]
+  score_pronounce: number
+  score_novelty: number
+  score_memorability: number
+}
+
+export async function explainName(name: string): Promise<Explanation> {
+  await ensureInit()
+  return JSON.parse(explain_name(name)) as Explanation
 }
 
 export async function batchMetrics(results: NameResult[]): Promise<BatchMetrics> {

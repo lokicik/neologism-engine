@@ -435,6 +435,13 @@ input[type="range"] {
 
 .handle-row { margin-top: .25rem; }
 
+.why-row { margin-top: .1rem; }
+.why-text {
+  font-size: .68rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
 .creative-toggle {
   font-size: .72rem;
   background: none;

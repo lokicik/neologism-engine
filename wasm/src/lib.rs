@@ -19,6 +19,13 @@ pub fn generate_names(config_json: &str) -> String {
     serde_json::to_string(&results).unwrap_or_else(|_| "[]".to_string())
 }
 
+/// Structural breakdown of a single name (Phase 36 "Why this name"): suffix,
+/// stem, real-word prefix, syllables, connotations, scores — as JSON.
+#[wasm_bindgen]
+pub fn explain_name(name: &str) -> String {
+    serde_json::to_string(&neologism_core::explain(name)).unwrap_or_else(|_| "{}".to_string())
+}
+
 /// Takes a JSON-encoded Vec<NameResult>, returns aggregate stats + per-name
 /// composite scores as JSON.
 #[wasm_bindgen]
