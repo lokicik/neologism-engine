@@ -26,6 +26,15 @@ pub fn explain_name(name: &str) -> String {
     serde_json::to_string(&neologism_core::explain(name)).unwrap_or_else(|_| "{}".to_string())
 }
 
+/// The keyword stems the engine extracts from a product description (Phase
+/// 48) — the web UI shows them so users see exactly what drove their batch.
+/// Returns a JSON string array.
+#[wasm_bindgen]
+pub fn extract_keywords(text: &str) -> String {
+    let kws = neologism_core::keywords::extract_keywords(text, 6);
+    serde_json::to_string(&kws).unwrap_or_else(|_| "[]".to_string())
+}
+
 /// Takes a JSON-encoded Vec<NameResult>, returns aggregate stats + per-name
 /// composite scores as JSON.
 #[wasm_bindgen]

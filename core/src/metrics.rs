@@ -123,20 +123,34 @@ pub fn mmr_select_capped(items: &[NameResult], count: usize, lambda: f64, cap: u
     remaining.retain(|&i| i != first);
 
     while selected.len() < count && !remaining.is_empty() {
-        // Try cap-respecting candidates first; fall back to all remaining if all are capped.
-        let allowed: Vec<usize> = remaining
-            .iter()
-            .copied()
-            .filter(|&i| {
-                let lower = items[i].name.to_lowercase();
-                let suf_ok = tech_suffix_of(&lower)
-                    .map_or(true, |s| suffix_counts.get(s).copied().unwrap_or(0) < cap);
-                let pre: String = lower.chars().take(3).collect();
-                let pre_ok = prefix_counts.get(&pre).copied().unwrap_or(0) < cap;
-                suf_ok && pre_ok
-            })
-            .collect();
-        let candidates = if allowed.is_empty() { &remaining } else { &allowed };
+        // Try cap-respecting candidates first; if every remaining candidate
+        // is capped, relax the cap ONE STEP at a time (Phase 48). The old
+        // fall-back-to-everything let overflow follow pool composition — a
+        // 3-keyword prompt reaches only ~3 prefix families, and the largest
+        // family grabbed every overflow slot (6×"Mark…" in a batch of 10).
+        // Stepwise relaxation spreads overflow evenly across families.
+        let allowed: Vec<usize> = {
+            let mut eff_cap = cap;
+            loop {
+                let a: Vec<usize> = remaining
+                    .iter()
+                    .copied()
+                    .filter(|&i| {
+                        let lower = items[i].name.to_lowercase();
+                        let suf_ok = tech_suffix_of(&lower)
+                            .map_or(true, |s| suffix_counts.get(s).copied().unwrap_or(0) < eff_cap);
+                        let pre: String = lower.chars().take(3).collect();
+                        let pre_ok = prefix_counts.get(&pre).copied().unwrap_or(0) < eff_cap;
+                        suf_ok && pre_ok
+                    })
+                    .collect();
+                if !a.is_empty() {
+                    break a;
+                }
+                eff_cap = eff_cap.saturating_add(1);
+            }
+        };
+        let candidates = &allowed;
         let next = *candidates
             .iter()
             .max_by(|&&i, &&j| {
