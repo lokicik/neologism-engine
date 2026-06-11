@@ -140,6 +140,8 @@ const BAD_SUBSTRINGS: &[&str] = &[
     "fuck", "shit", "cunt", "dick", "cock", "bitch", "bastard", "whore", "slut",
     "porn", "nazi", "nigg", "retard", "damn", "crap", "turd", "fart", "puke",
     "vomit", "poop", "defect", "fraud", "scam", "lousy",
+    // Phase 48: a blend seam produced mood+journaling → "mong" (UK slur).
+    "mong",
 ];
 
 // Sci-fi sub-corpora
@@ -477,6 +479,15 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, 
     // Skipped for user-roots (keyword fidelity), compound (two real words), and
     // the Phase 36 modes (curated real-word sources, not coinage to be vetted —
     // and respellings like tumblr deliberately have un-wordlike phonotactics).
+    // Phase 48: prompted respell batches must surface the keyword-derived
+    // respellings (journal → journl); the curated pool outnumbers them
+    // ~100:1, so they're pulled to the front of the batch at the exit below.
+    let kw_respells: HashSet<String> = if respell_mode && has_roots {
+        all_roots.iter().flat_map(|r| blend::respell_options(r)).collect()
+    } else {
+        HashSet::new()
+    };
+
     let apply_gate = !has_roots && !cfg.compound && !respell_mode && !realword_mode;
     let ll_floor = if apply_gate {
         st.ll_mean - tuning.gate_sigma * st.ll_std
@@ -489,21 +500,60 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, 
 
         let name = if respell_mode {
             // One-transform respelling of a curated real word (lyft, tumblr).
-            let w = st.realword_pool[rand::Rng::gen_range(rng, 0..st.realword_pool.len())];
+            // Phase 48: with a description, half the attempts respell its
+            // keyword stems (journal → journl) so the prompt shows through;
+            // the curated pool fills the rest (keywords yield only a few
+            // respellings each, so alone they'd starve the batch).
+            let w = if has_roots && rand::Rng::gen::<f64>(rng) < 0.5 {
+                all_roots[rand::Rng::gen_range(rng, 0..all_roots.len())]
+            } else {
+                st.realword_pool[rand::Rng::gen_range(rng, 0..st.realword_pool.len())]
+            };
             let Some(r) = blend::respell(rng, w) else { continue };
             r
         } else if realword_mode {
             // Curated real word, emitted verbatim (Apple/Notion-style).
+            // Deliberately prompt-independent — the pool is curated, and faking
+            // relevance without semantics would be worse than saying so (the
+            // web UI notes that this mode ignores the description).
             st.realword_pool[rand::Rng::gen_range(rng, 0..st.realword_pool.len())].to_string()
         } else if cfg.compound {
             // Adjective + noun compound (SwiftForge); already CamelCase.
+            // Phase 48: with a description, the noun half is usually one of
+            // its keyword stems (BrightMood, SwiftJournal); corpus nouns keep
+            // some variety in the mix.
             let adj = st.adjectives[rand::Rng::gen_range(rng, 0..st.adjectives.len())];
-            let noun = st.roots[rand::Rng::gen_range(rng, 0..st.roots.len())];
+            let noun = if has_roots && rand::Rng::gen::<f64>(rng) < 0.7 {
+                all_roots[rand::Rng::gen_range(rng, 0..all_roots.len())]
+            } else {
+                st.roots[rand::Rng::gen_range(rng, 0..st.roots.len())]
+            };
             compound(adj, noun)
         } else if has_roots {
-            // Blend purely from user roots / description keywords.
-            let Some(b) = blend_roots(rng, &all_roots) else { continue };
-            tech_transform(rng, &b, cfg.temperature)
+            // Phase 48: weighted mix instead of pure root-blending. A single
+            // keyword ("fitness") used to make blend_roots return None on
+            // every attempt — the batch came back empty and the UI showed a
+            // false "you've seen every name" notice — and pure blends alone
+            // yielded opaque fragments (mood+journaling → "mong"). Arms:
+            // blend two user roots / one root + tech transform (Shopify
+            // pattern — works with one keyword) / blend a user root with a
+            // corpus root for variety (keyword half leads).
+            let blend_two_w = if all_roots.len() >= 2 { 0.45 } else { 0.0 };
+            let suffix_w = if all_roots.len() >= 2 { 0.30 } else { 0.45 };
+            let pick = rand::Rng::gen::<f64>(rng);
+            if pick < blend_two_w {
+                let Some(b) = blend_roots(rng, &all_roots) else { continue };
+                tech_transform(rng, &b, cfg.temperature)
+            } else if pick < blend_two_w + suffix_w {
+                let root = all_roots[rand::Rng::gen_range(rng, 0..all_roots.len())];
+                tech_transform(rng, root, 1.0)
+            } else {
+                let a = all_roots[rand::Rng::gen_range(rng, 0..all_roots.len())];
+                let b = st.roots[rand::Rng::gen_range(rng, 0..st.roots.len())];
+                if a == b { continue }
+                let Some(m) = overlap_blend(a, b).or_else(|| blend(a, b)) else { continue };
+                tech_transform(rng, &m, cfg.temperature)
+            }
         } else {
             // Weighted mix: mostly coined Markov, some clean blends, some short
             // single-root evocative names (root + tech suffix, à la Shopify).
@@ -583,13 +633,14 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, 
 
     // Rank leaning easy-to-say: brand-likeness (word-likelihood) is the lead
     // signal, plus a pronounceability/fluency bonus (processing fluency → trust)
-    // and a brevity bonus from memorability. Brevity/fluency bias only applies
-    // without user roots — with a description/seed words, keyword fidelity leads.
+    // and a brevity bonus from memorability. Brevity bias only applies without
+    // user roots — keyword-derived names are as long as the keywords need.
+    // Phase 48: fluency + appeal now apply with roots too — every candidate is
+    // keyword-derived, so they only order the pool (and sink harsh fragments
+    // like "Markg" that used to top prompted batches).
     let brevity_w = if has_roots { 0.0 } else { tuning.brevity_w };
-    let fluency_w = if has_roots { 0.0 } else { tuning.fluency_w };
-    // Brand-appeal nudge only without user roots — with a description/seed words,
-    // keyword fidelity leads (same rationale as brevity/fluency above).
-    let appeal_w = if has_roots { 0.0 } else { 1.0 };
+    let fluency_w = tuning.fluency_w;
+    let appeal_w = 1.0;
     let rank = |r: &NameResult| {
         st.model.log_likelihood(&r.name)
             + (r.score_pronounce as f64 / 100.0) * fluency_w
@@ -603,27 +654,46 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, 
         pool.into_iter().map(|r| (rank(&r), r)).collect();
     decorated.sort_by(|a, b| b.0.partial_cmp(&a.0).unwrap_or(std::cmp::Ordering::Equal));
     let mut pool: Vec<NameResult> = decorated.into_iter().map(|(_, r)| r).collect();
-    if has_roots {
-        // User-supplied roots/description: preserve keyword fidelity, no diversity pass.
-        pool.truncate(cfg.count);
-        pool
-    } else {
-        // Keep the most brand-like as candidates, then diversify the final set.
-        // Phase 33: mmr_select_capped enforces suffix/prefix structural caps so a
-        // batch never contains more than max_share*count names sharing one suffix
-        // or 3-char prefix — preventing e.g. 4×"-ify" at count=10.
-        let share_cap = if tuning.max_share >= 1.0 {
-            usize::MAX
-        } else {
-            ((cfg.count as f64 * tuning.max_share).ceil() as usize).max(1)
-        };
-        // Phase 34 tried ×8 overgeneration and a ×3 truncate here (cheap after
-        // the setup cache): ×8 *lowered* 30k distinct 76→71% — a deeper pool
-        // concentrates the rank top on the same attractors every batch — and ×3
-        // cost 1.9 memorability points for +0.5pp distinct. Both reverted.
-        pool.truncate(cfg.count * 2);
-        metrics::mmr_select_capped(&pool, cfg.count, tuning.mmr_lambda, share_cap)
+    // Phase 48: a prompted respell batch leads with the keyword-derived
+    // respellings (best-ranked first, up to a third of the batch); the rest
+    // is the usual diversified pool selection.
+    let mut lead: Vec<NameResult> = Vec::new();
+    if !kw_respells.is_empty() {
+        let max_lead = (cfg.count + 2) / 3;
+        let mut i = 0;
+        while i < pool.len() && lead.len() < max_lead {
+            if kw_respells.contains(&pool[i].name.to_lowercase()) {
+                lead.push(pool.remove(i));
+            } else {
+                i += 1;
+            }
+        }
     }
+    // Keep the most brand-like as candidates, then diversify the final set.
+    // Phase 33: mmr_select_capped enforces suffix/prefix structural caps so a
+    // batch never contains more than max_share*count names sharing one suffix
+    // or 3-char prefix — preventing e.g. 4×"-ify" at count=10. Phase 48: the
+    // has_roots path goes through this too — it used to plain-truncate, which
+    // let one stem family fill the whole batch (10×"Markge…" for a
+    // marketplace prompt); the 3-char prefix cap is exactly what breaks that.
+    let share_cap = if tuning.max_share >= 1.0 {
+        usize::MAX
+    } else {
+        ((cfg.count as f64 * tuning.max_share).ceil() as usize).max(1)
+    };
+    // Phase 34 tried ×8 overgeneration and a ×3 truncate here (cheap after
+    // the setup cache): ×8 *lowered* 30k distinct 76→71% — a deeper pool
+    // concentrates the rank top on the same attractors every batch — and ×3
+    // cost 1.9 memorability points for +0.5pp distinct. Both reverted.
+    pool.truncate(cfg.count * 2);
+    let mut out = lead;
+    out.extend(metrics::mmr_select_capped(
+        &pool,
+        cfg.count - out.len(),
+        tuning.mmr_lambda,
+        share_cap,
+    ));
+    out
 }
 
 fn generate_markov(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, corpus: &str) -> Vec<NameResult> {
@@ -1036,6 +1106,128 @@ mod tests {
         for n in &second {
             assert!(!first.contains(n), "{n} repeated despite exact exclusion");
         }
+    }
+
+    #[test]
+    fn single_keyword_description_generates() {
+        // Phase 48 regression: "fitness" extracts exactly one keyword, and
+        // blend_roots (the only candidate arm then) needs two — every attempt
+        // returned None and the batch came back EMPTY on a fresh session,
+        // showing a false "you've seen every name" notice in the UI.
+        let mut c = cfg(Style::BigTech);
+        c.description = Some("fitness".to_string());
+        c.count = 10;
+        let results = generate(&c);
+        assert_eq!(results.len(), 10, "single-keyword description starved: {:?}",
+            results.iter().map(|r| &r.name).collect::<Vec<_>>());
+
+        // "AI tool for lawyers" used to reduce to one keyword too ("ai" was
+        // dropped as <3 chars, "tool" is a stopword).
+        let mut c2 = cfg(Style::BigTech);
+        c2.description = Some("AI tool for lawyers".to_string());
+        c2.count = 10;
+        assert!(!generate(&c2).is_empty(), "AI-tool prompt starved");
+    }
+
+    #[test]
+    fn description_batch_is_diverse() {
+        // Phase 48 regression: the has_roots path used to skip the MMR/share
+        // -cap pass, so one stem family filled the whole batch (10×"Markge…"
+        // for this exact prompt).
+        let mut c = cfg(Style::BigTech);
+        c.description = Some("a marketplace for vintage keyboards".to_string());
+        c.count = 10;
+        let results = generate(&c);
+        assert!(results.len() >= 6, "too few results: {}", results.len());
+        // Three keywords → only 3 reachable prefix families (mar/vin/key), so
+        // the MMR cap must relax to fill the batch — a balanced 4/4/2 is the
+        // correct outcome. The regression this guards: 10/10 names in ONE
+        // family. Require ≥3 families and no family holding over half.
+        let mut prefixes: HashMap<String, usize> = HashMap::new();
+        for r in &results {
+            let lower = r.name.to_lowercase();
+            let p: String = lower.chars().take(3).collect();
+            *prefixes.entry(p).or_insert(0) += 1;
+        }
+        let names: Vec<&String> = results.iter().map(|r| &r.name).collect();
+        assert!(prefixes.len() >= 3, "only {} prefix families: {names:?}", prefixes.len());
+        for (p, n) in &prefixes {
+            assert!(*n * 2 <= results.len(), "{n} of {} names share prefix {p:?}: {names:?}",
+                results.len());
+        }
+    }
+
+    #[test]
+    fn description_names_echo_keywords() {
+        // Prompted names must visibly carry the prompt: at least half the
+        // batch opens with (or contains) a recognizable keyword fragment.
+        let mut c = cfg(Style::BigTech);
+        c.description = Some("a journaling app with mood insights".to_string());
+        c.count = 10;
+        let results = generate(&c);
+        assert!(!results.is_empty());
+        let frags = ["jou", "journ", "moo", "mood", "ins", "insight"];
+        let hits = results.iter().filter(|r| {
+            let lower = r.name.to_lowercase();
+            frags.iter().any(|f| lower.contains(f))
+        }).count();
+        assert!(hits * 2 >= results.len(), "only {hits}/{} echo a keyword: {:?}",
+            results.len(), results.iter().map(|r| &r.name).collect::<Vec<_>>());
+    }
+
+    #[test]
+    fn no_mong_substring() {
+        // mood+journaling blends seamed into "mong" (a UK slur) before Phase
+        // 48 added it to BAD_SUBSTRINGS.
+        assert!(BAD_SUBSTRINGS.contains(&"mong"));
+        for seed in [42u64, 7, 1337] {
+            let mut c = cfg(Style::BigTech);
+            c.description = Some("a journaling app with mood insights".to_string());
+            c.count = 10;
+            c.seed = Some(seed);
+            for r in generate(&c) {
+                assert!(!r.name.to_lowercase().contains("mong"), "emitted {}", r.name);
+            }
+        }
+    }
+
+    #[test]
+    fn compound_uses_description_keywords() {
+        // Phase 48: compound mode used to ignore the description entirely.
+        let mut c = cfg(Style::BigTech);
+        c.compound = true;
+        c.description = Some("a journaling app with mood insights".to_string());
+        c.count = 8;
+        c.max_len = 16;
+        let results = generate(&c);
+        assert!(!results.is_empty());
+        let stems = ["journal", "mood", "insight"];
+        let hit = results.iter().any(|r| {
+            let lower = r.name.to_lowercase();
+            stems.iter().any(|s| lower.contains(s))
+        });
+        assert!(hit, "no keyword-derived compounds: {:?}",
+            results.iter().map(|r| &r.name).collect::<Vec<_>>());
+    }
+
+    #[test]
+    fn respell_prefers_description_keywords() {
+        // Phase 48: respell mode used to ignore the description entirely.
+        // "fitness" has several one-transform respellings (fytness, fitnes…),
+        // so a prompted respell batch should include a keyword-derived one.
+        let mut c = cfg(Style::BigTech);
+        c.variant = Some("respell".to_string());
+        c.description = Some("fitness coaching for athletes".to_string());
+        c.count = 12;
+        let results = generate(&c);
+        assert!(!results.is_empty());
+        let mut keyword_respells: Vec<String> = Vec::new();
+        for kw in keywords::extract_keywords(c.description.as_deref().unwrap(), 6) {
+            keyword_respells.extend(blend::respell_options(&kw));
+        }
+        let hit = results.iter().any(|r| keyword_respells.contains(&r.name.to_lowercase()));
+        assert!(hit, "no keyword-derived respellings (options {:?}) in {:?}",
+            keyword_respells, results.iter().map(|r| &r.name).collect::<Vec<_>>());
     }
 
     #[test]
