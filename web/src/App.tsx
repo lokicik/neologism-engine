@@ -3,12 +3,13 @@ import { generateNames, batchMetrics, type BatchMetrics, type Config, type NameR
 import { rerank } from './lib/llm'
 import { recommendations } from './lib/recommend'
 import { buildProfile, rankByPreference } from './lib/preferences'
-import { loadFavorites, toggleFavorite, saveFavorites, loadRecent, saveRecent } from './lib/storage'
+import { loadFavorites, toggleFavorite, saveFavorites, loadRecent, saveRecent, hasVisited, markVisited } from './lib/storage'
 import { decodeShareUrl } from './lib/share'
 import { Controls } from './components/Controls'
 import { NameCard } from './components/NameCard'
 import { StatsPanel } from './components/StatsPanel'
 import { Favorites } from './components/Favorites'
+import { Landing } from './components/Landing'
 
 // Defaults match the UI's "Any" length and "Balanced" creativity segments.
 const DEFAULT_CONFIG: Config = {
@@ -31,6 +32,11 @@ const DEFAULT_CONFIG: Config = {
 const RECENT_WINDOW = 20000
 
 export default function App() {
+  // First visit shows the landing; share-URL visitors skip it (they came for
+  // shared favorites). Entering the app is remembered across reloads.
+  const [view, setView] = useState<'landing' | 'app'>(() =>
+    hasVisited() || location.hash.startsWith('#names=') ? 'app' : 'landing',
+  )
   const [config, setConfig] = useState<Config>(DEFAULT_CONFIG)
   const [results, setResults] = useState<NameResult[]>([])
   const [metrics, setMetrics] = useState<BatchMetrics | null>(null)
@@ -157,10 +163,27 @@ export default function App() {
 
   const tips = metrics ? recommendations(metrics.stats, config, results) : []
 
+  if (view === 'landing') {
+    return (
+      <Landing
+        onEnter={() => {
+          markVisited()
+          setView('app')
+        }}
+      />
+    )
+  }
+
   return (
     <div className="app">
       <header className="app-header">
-        <h1>Neologism Engine</h1>
+        <h1
+          className="app-title-link"
+          onClick={() => setView('landing')}
+          title="About — back to the landing page"
+        >
+          Neologism Engine
+        </h1>
         <p className="tagline">Startup & project name generator — brandable, real-word, respelled and compound names with instant availability checks.</p>
       </header>
 

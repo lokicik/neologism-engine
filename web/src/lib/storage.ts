@@ -41,3 +41,23 @@ export function saveRecent(names: string[]): void {
     // ignore quota / serialization errors
   }
 }
+
+// Whether the visitor has entered the app before — first visit shows the
+// landing page, later visits go straight to the generator (Phase 38).
+const VISITED_KEY = 'neologism:visited'
+
+export function hasVisited(): boolean {
+  try {
+    return localStorage.getItem(VISITED_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+
+export function markVisited(): void {
+  try {
+    localStorage.setItem(VISITED_KEY, '1')
+  } catch {
+    // ignore — landing will just show again next time
+  }
+}
