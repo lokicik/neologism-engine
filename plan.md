@@ -626,6 +626,29 @@ production `npm run build` clean.
 
 ---
 
+## Phase 44 — Description-Mode Starvation Fix (+ Playwright self-verification)
+
+**Bug.** With a description prompt, generation died after ~2–3 batches — Generate/More-names
+silently produced nothing. Cause: the `has_roots` path blends ONLY the extracted keywords
+(~6–12 stems × ~26 suffix transforms), and Phase 33's **stem exclusion** blacklists every name
+sharing a stem with the (20k, localStorage-persisted) exclude window — one batch can wipe out
+every stem the description can produce, starving the candidate loop.
+
+**Fix.** Fuzzy/stem exclusion now applies only to the open-ended default mix: with user
+roots/description or the small curated realword pool, only **exact** exclusion applies
+(`generate_bigtech`, Phase 44 comment). Default path byte-identical (seeded sample/metrics
+diff). Web: a zero-name batch now shows an honest exhaustion notice with a
+"Clear seen names & regenerate" action instead of a dead button. 2 regression tests
+(`description_mode_survives_exclusion`, `realword_mode_survives_exclusion`); **81 green**.
+
+**Playwright harness** (`web/e2e/repro.mjs`, chromium): drives the built app headlessly —
+before the fix it reproduced the report (batch 3 → +3, batch 4 → +0, dead button); after,
+8 More-names clicks yield 76 names and end in the exhaustion notice. Screenshots to
+`web/e2e/shots/` (gitignored) for visual review; harness committed for future bug-hunting
+and design passes.
+
+---
+
 ## Bottom line
 
 Big-tech is the strongest style, tuned through Phase 25 and extended since:

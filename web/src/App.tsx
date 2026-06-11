@@ -42,6 +42,9 @@ export default function App() {
   const [favorites, setFavorites] = useState<NameResult[]>(loadFavorites)
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [loading, setLoading] = useState(false)
+  // True when a generate/append produced zero names — the prompt's reachable
+  // space is exhausted against the seen-names history.
+  const [exhausted, setExhausted] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const recentRef = useRef<string[]>(loadRecent())
   // Mirror of `results` for the append path — handleGenerate is memoized on
@@ -92,6 +95,7 @@ export default function App() {
     setError(null)
     try {
       const batch = await generateNames({ ...cfg, exclude: recentRef.current })
+      setExhausted(batch.length === 0)
       const shown = append ? [...resultsRef.current, ...batch] : batch
       setResults(shown)
       markSeen(batch)
@@ -120,6 +124,15 @@ export default function App() {
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [drawerOpen, favorites.length])
+
+  // The prompt's name space is used up against the seen-history: wipe the
+  // history and regenerate. (Names already starred stay in favorites.)
+  const clearSeenAndRetry = () => {
+    recentRef.current = []
+    saveRecent([])
+    setExhausted(false)
+    void handleGenerate(false)
+  }
 
   // Empty-state example prompts: set the description and generate in one click.
   const examplePrompts = [
@@ -212,6 +225,18 @@ export default function App() {
                 {loading ? 'Generating…' : 'More names'}
               </button>
             </>
+          )}
+
+          {exhausted && !loading && (
+            <div className="exhausted-notice">
+              <p>
+                You've seen every name this prompt can make. Try different words or
+                another mode — or clear your seen-names history and start over.
+              </p>
+              <button className="example-chip" onClick={clearSeenAndRetry}>
+                Clear seen names & regenerate
+              </button>
+            </div>
           )}
 
           {loading && results.length === 0 && (

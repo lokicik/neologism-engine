@@ -551,8 +551,18 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, 
         // Reject bad/offensive connotations (Bitdefect) — big-tech only.
         if BAD_SUBSTRINGS.iter().any(|b| lower.contains(b)) { continue; }
         if !passes_constraints(&lower, cfg) { continue; }
-        // Phase 33: fuzzy + stem exclusion (most expensive filter — runs on survivors only).
-        if exclude.rejects(&lower, tuning.fuzzy_exclude, tuning.stem_exclude) { continue; }
+        // Phase 33: fuzzy + stem exclusion (most expensive filter — runs on
+        // survivors only). Phase 44: only in the open-ended default mix —
+        // with user roots/description the reachable space is a handful of
+        // stems × suffixes, so stem exclusion blacklists the user's own
+        // keywords after one batch and starves generation; the curated
+        // realword pool is similarly small. Exact exclusion always applies.
+        let constrained = has_roots || realword_mode;
+        if exclude.rejects(
+            &lower,
+            tuning.fuzzy_exclude && !constrained,
+            tuning.stem_exclude && !constrained,
+        ) { continue; }
         if seen.contains(&name) { continue; }
 
         seen.insert(name.clone());
@@ -1003,6 +1013,50 @@ mod tests {
         c.variant = Some("nonsense".to_string());
         let b: Vec<String> = generate(&c).into_iter().map(|r| r.name).collect();
         assert_eq!(a, b);
+    }
+
+    #[test]
+    fn description_mode_survives_exclusion() {
+        // Phase 44 regression: a description narrows the space to a few stems
+        // × suffixes; stem/fuzzy exclusion used to blacklist all of them after
+        // one batch, starving generation. Exact exclusion must still apply.
+        let mut c = cfg(Style::BigTech);
+        c.description = Some("a marketplace for vintage keyboards".to_string());
+        c.count = 10;
+        let first: Vec<String> = generate(&c).into_iter().map(|r| r.name).collect();
+        assert!(!first.is_empty());
+
+        let mut c2 = cfg(Style::BigTech);
+        c2.description = c.description.clone();
+        c2.count = 10;
+        c2.seed = Some(1337);
+        c2.exclude = first.clone();
+        let second: Vec<String> = generate(&c2).into_iter().map(|r| r.name).collect();
+        assert!(!second.is_empty(), "description mode starved after one excluded batch");
+        for n in &second {
+            assert!(!first.contains(n), "{n} repeated despite exact exclusion");
+        }
+    }
+
+    #[test]
+    fn realword_mode_survives_exclusion() {
+        // Same shape for the small curated realword pool.
+        let mut c = cfg(Style::BigTech);
+        c.variant = Some("realword".to_string());
+        c.count = 10;
+        let first: Vec<String> = generate(&c).into_iter().map(|r| r.name).collect();
+        assert!(!first.is_empty());
+
+        let mut c2 = cfg(Style::BigTech);
+        c2.variant = c.variant.clone();
+        c2.count = 10;
+        c2.seed = Some(1337);
+        c2.exclude = first.clone();
+        let second: Vec<String> = generate(&c2).into_iter().map(|r| r.name).collect();
+        assert!(!second.is_empty(), "realword mode starved after one excluded batch");
+        for n in &second {
+            assert!(!first.contains(n), "{n} repeated despite exact exclusion");
+        }
     }
 
     #[test]

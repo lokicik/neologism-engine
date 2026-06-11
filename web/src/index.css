@@ -989,6 +989,19 @@ body {
 }
 .example-chip:hover { color: var(--text); border-color: rgba(255, 255, 255, .25); }
 
+.exhausted-notice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .8rem;
+  text-align: center;
+  padding: 1.5rem 1rem;
+  color: var(--muted);
+  font-size: .9rem;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .drawer, .drawer-overlay { animation: none; }
   .skeleton-card { animation: none; background: var(--surface); }
