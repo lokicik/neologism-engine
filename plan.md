@@ -580,6 +580,52 @@ seeded sample/metrics byte-identical. **72 tests green** (2 new scoping tests).
 
 ---
 
+## Phase 36 — Startup/Project Name Generator (product focus)
+
+**Motivation.** The product vision is a genuinely good startup/project name generator.
+Competitor research (Namelix, Nametastic, Atom/Squadhelp, Looka) showed our edges — instant/
+free/offline WASM, measured quality, never-repeat sessions (Ph35), adaptive favorites
+re-ranking — and four gaps, shipped as four checkpointed commits:
+
+**36a — Availability suite** (web only). Domain checks upgraded from a DNS guess to
+**authoritative registry RDAP** where the registry serves it with CORS: .com/.net (Verisign),
+.ai (Identity Digital), .app/.dev (Google) — 404 = available, 200 = registered (endpoints
+from the IANA bootstrap, each verified). .io/.co keep the Cloudflare DoH indicator, marked
+`~` in the UI. New dev-handle row: **GitHub + npm + PyPI + crates.io** (all CORS-friendly
+404-semantics APIs, cached, on-demand) — the checks that matter for *project* names; no
+competitor has them. Per-name **USPTO/EUIPO trademark search links** (link-outs — a real
+trademark check is a human job).
+
+**36b — Naming modes** (core). Big-tech reuses the previously unused `Config.variant`:
+- `respell` — Lyft/Tumblr-style ONE-transform respellings of curated real words (vowel drop,
+  i→y, -er→-r, double-consonant collapse; never touches the first syllable, never creates
+  "-ass" endings). Phonotactics relaxed to clustered max-run 4, no sonority — tumblr ends in
+  a 4-consonant run by design. Sample: Thryve, Plynth, Orbyt, Sundyal, Sylicon.
+- `realword` — curated evocative real words verbatim (Apple/Notion-style) from a ~1,100-word
+  pool (roots + adjectives + new `realwords.txt`, 128 additions filtered against brands).
+  The mode skips the real-word rejections (they exist to block exactly this) but keeps the
+  brand-mimic guard. Sample: Bazaar, Thicket, Kinetic, Granite, Lagoon.
+Both route through the existing candidate loop — exclusion, brand-mimic, constraints,
+ranking, capped-MMR all apply (Ph31/34 lesson: the selection pipeline IS the quality).
+Unknown variants fall through byte-identically (regression test). `examples/modes.rs`:
+respell pron 89.7 / mem 80.9, realword pron 91.3 / mem 82.1 over 100 batches, 0 short.
+
+**36c — Startup-first UI.** Hero row = Brandable / Real words / Respelled / Compound;
+Sci-Fi/Fantasy demoted to a collapsible "Creative styles" section (engine untouched). Copy,
+title and meta repositioned around startup/project naming + availability checks.
+
+**36d — Explainability.** Core `explain(name) → Explanation` (suffix + stem, real-word
+proper prefix, whole-word flag, syllables, connotations, scores) — computed on demand, zero
+generation-path changes; wasm `explain_name()`; card renders a one-line rationale behind
+"Why this name?" (e.g. *opens with "forge" (real word) · "forge" + brandable "-ify" ·
+2 syllables · easy to say*).
+
+**Frozen verification:** seeded `sample`/`metrics` byte-identical for all styles and the
+default big-tech path at every checkpoint. **79 tests green** (9 new). WASM rebuilt;
+production `npm run build` clean.
+
+---
+
 ## Bottom line
 
 Big-tech is the strongest style, tuned through Phase 25 and extended since:
