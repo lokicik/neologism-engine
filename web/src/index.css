@@ -571,56 +571,79 @@ body {
   gap: .9rem;
 }
 
-.card-action {
-  background: none;
-  border: none;
-  padding: 0;
-  font-size: .76rem;
+/* Phase 43: footer toggles use the same chip language as the command bar */
+.card-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  padding: .25rem .7rem;
+  font-size: .74rem;
+  font-weight: 500;
   color: var(--muted);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 999px;
   cursor: pointer;
-  transition: color .15s;
+  transition: color .15s, border-color .15s;
 }
-.card-action:hover { color: var(--text); }
-.card-action.active { color: var(--accent); }
+.card-chip:hover { color: var(--text); border-color: rgba(255, 255, 255, .22); }
+.card-chip.active { color: var(--accent); border-color: rgba(124, 106, 249, .5); }
+
+.chip-chevron {
+  font-size: .58rem;
+  opacity: .7;
+  transition: transform .15s ease;
+}
+.chip-chevron.open { transform: rotate(180deg); }
 
 .card-icons {
   margin-left: auto;
   display: flex;
-  gap: .15rem;
+  gap: .2rem;
 }
 
 .icon-btn {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: none;
   border: none;
   color: var(--muted);
   cursor: pointer;
-  font-size: 1rem;
-  padding: .15rem .3rem;
-  border-radius: 5px;
-  transition: color .15s;
+  border-radius: 6px;
+  transition: color .15s, background .15s, transform .1s;
 }
-.icon-btn:hover { color: var(--text); }
+.icon-btn:hover { color: var(--text); background: var(--surface2); }
+.icon-btn:active { transform: scale(1.15); }
 .star-btn.starred { color: #f59e0b; }
 
-/* Availability badges (inside the card expansion) */
+/* Availability badges (inside the card expansion) — quiet outline style */
 .domain-row {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: .35rem;
+  gap: .3rem;
 }
 
 .badge {
-  font-size: .66rem;
-  padding: .12rem .45rem;
+  font-size: .64rem;
+  padding: .1rem .42rem;
   border-radius: 999px;
   font-weight: 600;
-  border: 1px solid transparent;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
 }
-.badge-idle { background: var(--surface2); color: var(--muted); border-color: var(--border); }
-.badge-checking { background: #2d2d44; color: #a5b4fc; }
-.badge-available { background: #052e16; color: #86efac; border-color: #166534; }
-.badge-taken { background: #450a0a; color: #fca5a5; border-color: #7f1d1d; }
+.badge-checking { animation: badge-pulse 1.2s ease-in-out infinite; }
+.badge-available { color: var(--accent2); border-color: rgba(78, 204, 163, .35); }
+.badge-taken { color: #e0716d; border-color: rgba(224, 113, 109, .3); }
+
+@keyframes badge-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .45; }
+}
 
 .domain-disclaimer {
   font-size: .6rem;
@@ -969,6 +992,10 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .drawer, .drawer-overlay { animation: none; }
   .skeleton-card { animation: none; background: var(--surface); }
+  .badge-checking { animation: none; }
+  .chip-chevron { transition: none; }
+  .icon-btn { transition: color .15s, background .15s; }
+  .icon-btn:active { transform: none; }
 }
 
 @media (max-width: 900px) {
