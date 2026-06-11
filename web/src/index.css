@@ -772,6 +772,24 @@ body {
 .stats-area .stats-strip { flex: 1; border-bottom: none; }
 .stats-area { border-bottom: 1px solid var(--border); padding-bottom: .5rem; }
 
+/* Phase 48: what the engine heard — keyword stems extracted from the prompt. */
+.keyword-line {
+  margin: 0;
+  font-size: .85rem;
+  color: var(--muted);
+}
+.keyword-stem {
+  color: var(--text);
+  font-weight: 500;
+}
+
+/* Phase 48: honest note when the selected mode can't follow the prompt. */
+.mode-note {
+  margin: 0;
+  font-size: .8rem;
+  color: var(--muted);
+}
+
 /* Saved page (Phase 47) */
 .saved-page {
   display: flex;

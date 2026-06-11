@@ -17,7 +17,7 @@ type Mode = 'brandable' | 'realword' | 'respell' | 'compound'
 
 const MODES: { value: Mode; label: string; desc: string }[] = [
   { value: 'brandable', label: 'Brandable', desc: 'Invented coinages — Spotify, Vercel' },
-  { value: 'realword', label: 'Real words', desc: 'Evocative dictionary words — Notion, Linear' },
+  { value: 'realword', label: 'Real words', desc: 'Evocative dictionary words — Notion, Linear (ignores your description)' },
   { value: 'respell', label: 'Respelled', desc: 'Twisted real words — Lyft, Tumblr' },
   { value: 'compound', label: 'Compound', desc: 'Two-word names — SwiftForge' },
 ]
@@ -202,6 +202,13 @@ export function CommandBar({ config, onChange, onGenerate, loading }: Props) {
           </div>
         </Chip>
       </div>
+
+      {mode === 'realword' && (config.description?.trim() ?? '') !== '' && (
+        <p className="mode-note">
+          Real-word picks come from a curated pool — your description isn’t used. Try
+          Brandable, Respelled or Compound for prompt-driven names.
+        </p>
+      )}
     </div>
   )
 }

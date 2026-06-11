@@ -1,4 +1,4 @@
-import init, { generate_names, batch_metrics, explain_name } from '../wasm/neologism_wasm.js'
+import init, { generate_names, batch_metrics, explain_name, extract_keywords } from '../wasm/neologism_wasm.js'
 
 export type Style = 'big_tech' | 'sci_fi' | 'fantasy'
 
@@ -80,6 +80,13 @@ export interface Explanation {
 export async function explainName(name: string): Promise<Explanation> {
   await ensureInit()
   return JSON.parse(explain_name(name)) as Explanation
+}
+
+// The keyword stems the engine extracts from a description (Phase 48) —
+// shown above results so users see exactly what drove their batch.
+export async function extractKeywords(text: string): Promise<string[]> {
+  await ensureInit()
+  return JSON.parse(extract_keywords(text)) as string[]
 }
 
 export async function batchMetrics(results: NameResult[]): Promise<BatchMetrics> {

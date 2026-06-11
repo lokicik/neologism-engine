@@ -11,20 +11,23 @@ export function recommendations(
   const tips: string[] = []
   if (stats.count === 0) return tips
 
+  // Phase 48: wording matches the current command-bar controls (Mode /
+  // Length / Creativity chips) — the old tips referenced Randomness and
+  // Variety sliders removed in Phase 41.
   if (stats.avg_novelty < 50) {
-    tips.push('Names lean close to real words — raise Randomness for more invented results.')
+    tips.push('Names lean close to real words — try Wild creativity for more invented results.')
   }
   if (stats.avg_memorability < 45) {
-    tips.push('Names run long — lower Max length for punchier, more brandable picks.')
+    tips.push('Names run long — try Short length for punchier, more brandable picks.')
   }
   if (stats.avg_pronounce < 55) {
-    const soft = config.style === 'big_tech' ? '' : ' or try a softer variant (Stellar / Elvish)'
-    tips.push(`These are hard to pronounce — lower Randomness${soft}.`)
+    tips.push('These are hard to pronounce — try Safe creativity.')
   }
   if (stats.diversity < 0.45) {
-    const how = config.style === 'big_tech'
-      ? 'raise Variety for more spread of shapes and lengths'
-      : 'switch variant or raise Randomness for more spread'
+    const prompted = Boolean(config.description?.trim())
+    const how = prompted
+      ? 'a prompt focuses names on its keywords; reword it or try another mode for more spread'
+      : 'try another mode or add seed words for more spread'
     tips.push(`Results look similar to each other — ${how}.`)
   }
 

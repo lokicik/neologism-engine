@@ -62,7 +62,7 @@ try {
   await card.locator('.card-chip', { hasText: 'Why' }).click()
   await page.waitForTimeout(400)
   await card.locator('.card-chip', { hasText: 'Availability' }).click()
-  await page.waitForTimeout(2500) // let checks come back
+  await page.waitForTimeout(4500) // let checks come back (RDAP resolves in ~3s)
   await shot('07-card-expanded')
 
   // Star two names — layout-stability check: page content box before/after

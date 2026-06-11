@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
-import { generateNames, batchMetrics, type BatchMetrics, type Config, type NameResult, type Style } from './lib/engine'
+import { generateNames, batchMetrics, extractKeywords, type BatchMetrics, type Config, type NameResult, type Style } from './lib/engine'
 import { recommendations } from './lib/recommend'
 import { buildProfile, rankByPreference } from './lib/preferences'
 import { loadFavorites, toggleFavorite, saveFavorites, loadRecent, saveRecent, hasVisited, markVisited } from './lib/storage'
@@ -48,6 +48,9 @@ export default function App() {
   // True when a generate/append produced zero names — the prompt's reachable
   // space is exhausted against the seen-names history.
   const [exhausted, setExhausted] = useState(false)
+  // Keyword stems the engine extracted from the description of the last
+  // generation (Phase 48) — shown so users see what drove their batch.
+  const [promptKeywords, setPromptKeywords] = useState<string[]>([])
   const [error, setError] = useState<string | null>(null)
   const recentRef = useRef<string[]>(loadRecent())
   // Mirror of `results` for the append path — handleGenerate is memoized on
@@ -98,6 +101,7 @@ export default function App() {
     setError(null)
     try {
       const batch = await generateNames({ ...cfg, exclude: recentRef.current })
+      setPromptKeywords(cfg.description?.trim() ? await extractKeywords(cfg.description) : [])
       setExhausted(batch.length === 0)
       const shown = append ? [...resultsRef.current, ...batch] : batch
       setResults(shown)
@@ -185,6 +189,18 @@ export default function App() {
 
             <section className="canvas">
               {error && <div className="error-banner">{error}</div>}
+
+              {promptKeywords.length > 0 && (results.length > 0 || exhausted) && (
+                <p className="keyword-line" title="The keyword stems extracted from your description — every batch is built around them">
+                  naming around:{' '}
+                  {promptKeywords.map((k, i) => (
+                    <span key={k}>
+                      {i > 0 && ' · '}
+                      <span className="keyword-stem">{k}</span>
+                    </span>
+                  ))}
+                </p>
+              )}
 
               {metrics && (
                 <div className="stats-area">
