@@ -649,6 +649,47 @@ and design passes.
 
 ---
 
+## Phase 48 — Prompting Logic Fixed (keywords → recognizable, diverse names)
+
+**Bugs (all verified by driving the built app through a 9-prompt Playwright battery).**
+(1) Single-keyword prompts ("fitness", "AI tool for lawyers") generated **zero names** with a
+false "you've seen every name" notice — `blend_roots` needs ≥2 roots and was the only
+candidate arm under `has_roots`. (2) One stem family walled whole batches (10×"Markge…" for
+"a marketplace for vintage keyboards") — the `has_roots` exit skipped the MMR/share-cap pass
+and zeroed appeal/fluency ranking. (3) Blends were unrecognizable and unstemmed
+("journaling"/"keyboards" fed raw), and the mood+journaling seam produced **"mong"** (UK
+slur). (4) Respelled/Compound modes silently ignored the prompt. (5) Stats tips referenced
+Variety/Randomness sliders removed in Phase 41.
+
+**Core.** `keywords.rs`: light pinned-by-test stemmer (-ing with undoubling, -ies→y,
+sibilant -es, plain -s) + short-token allowlist (ai/ml/ar/vr) + post-stem dedupe.
+`has_roots` candidate mix: blend-two-roots (45%) / root + tech transform (30%, works with
+one keyword) / root × corpus-root blend (25%) — fixes starvation AND multiplies the
+reachable space (the Phase 44 repro prompt now passes 90+ names without exhausting, was 76).
+`has_roots` now exits through `mmr_select_capped` with appeal+fluency ranking; brevity stays
+off (keyword fidelity). `mmr_select_capped` relaxes a saturated cap **one step at a time**
+instead of falling back to everything, so overflow spreads evenly across the few prefix
+families a prompt can reach (4/3/3, not 6/2/2). Compound noun-halves draw from keyword stems
+(70%); respell tries keyword stems first and pulls keyword-derived respellings to the front
+of the batch. Real-words stays prompt-independent **by design** (curated pool; faking
+relevance without semantics would be worse) — the UI says so. `BAD_SUBSTRINGS` += "mong".
+Honest finding: for the journaling prompt, every keyword respelling is *correctly* rejected
+by the brand-mimic guard ("journl"≈journey, "ynsight"≈insight — both in the corpus), so that
+batch legitimately falls back to the pool.
+
+**Web.** "naming around: journal · mood · insight" line above results (new wasm
+`extract_keywords`); Real-words + description shows an honest note; tips rewritten in
+command-bar vocabulary.
+
+**Verification.** Default seeded `sample`/`metrics` **byte-identical** through both core
+commits. **90 tests green** (9 new, incl. `single_keyword_description_generates`,
+`description_batch_is_diverse`, `description_names_echo_keywords`, `no_mong_substring`,
+mode-fidelity tests). New `web/e2e/prompts.mjs` (4 regressions) green; `repro.mjs` green;
+battery re-run: "fitness" → Fitnit/Fitnest/Fitnessio…, journaling → Moodit/Journen/
+Moodsync/Insightai…, compound → BreezeMood/PureJournal/TrimInsight.
+
+---
+
 ## Bottom line
 
 Big-tech is the strongest style, tuned through Phase 25 and extended since:
