@@ -1,128 +1,402 @@
-import { useEffect, useRef, useState } from 'react'
-import { generateNames } from '../lib/engine'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { generateNames, explainName, type Explanation, type NameResult } from '../lib/engine'
 
 interface Props {
   onEnter: () => void
 }
 
-const TICK_MS = 2500
-const TICK_MS_REDUCED = 5000 // slower cycle when the user prefers reduced motion
-const TICK_COUNT = 5
+// ---------------------------------------------------------------------------
+// Phase 39 landing: decode hero + name-wall, Linear restraint.
+// Every demo on this page is REAL — the engine is local and instant, so the
+// hero name, the wall texture, the mode samples and the description samples
+// are all generated live in the visitor's browser. All exclusions stay
+// landing-local; nothing here touches the app's recent-names window.
+// ---------------------------------------------------------------------------
 
-const FEATURES: { icon: string; title: string; body: string }[] = [
-  {
-    icon: '✦',
-    title: 'Four naming styles',
-    body: 'Brandable coinages, evocative real words, Lyft-style respellings, and two-word compounds.',
-  },
-  {
-    icon: '✓',
-    title: 'Availability built in',
-    body: 'Registry-level domain checks, GitHub / npm / PyPI / crates.io handles, and one-click trademark search.',
-  },
-  {
-    icon: '⚡',
-    title: 'Instant & 100% private',
-    body: 'A Rust engine compiled to WebAssembly. No server, no account, no tracking — works offline.',
-  },
-  {
-    icon: '∞',
-    title: 'Never repeats itself',
-    body: 'Session-scale exclusion: 100,000 generations, zero repeats, measured.',
-  },
-]
+const DECODE_MS = 700 // letters lock left→right over this long
+const CYCLE_MS = 3600 // a new name every…
+const SCRAMBLE_CHARS = 'abcdefghijklmnopqrstuvwxyz'
 
-const STEPS: { n: string; text: string }[] = [
-  { n: '1', text: 'Describe what you’re building — or don’t.' },
-  { n: '2', text: 'Generate, then refine by style, length and creativity.' },
-  { n: '3', text: 'Check availability and save your favorites.' },
-]
+function reducedMotion(): boolean {
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches
+}
 
-export function Landing({ onEnter }: Props) {
-  const [names, setNames] = useState<string[]>([])
-  const [batch, setBatch] = useState(0)
-  // Ticker-local exclusions only — these names were glimpsed, not considered,
-  // and a ticker would burn ~100 names/min of the app's real exclude window.
-  const seenRef = useRef<string[]>([])
+// Same blend as the engine's composite_score.
+function composite(r: NameResult): number {
+  return Math.round(0.4 * r.score_pronounce + 0.3 * r.score_memorability + 0.3 * r.score_novelty)
+}
+
+// Scramble-decode: returns the partially-locked display string for `target`.
+function useDecode(target: string): { display: string; locked: boolean } {
+  const [display, setDisplay] = useState(target)
+  const [locked, setLocked] = useState(false)
 
   useEffect(() => {
-    let cancelled = false
-
-    async function tick() {
-      try {
-        const results = await generateNames({
-          style: 'big_tech',
-          count: TICK_COUNT,
-          min_len: 4,
-          max_len: 12,
-          temperature: 0.85,
-          variety: 0.5,
-          roots: [],
-          exclude: seenRef.current,
-        })
-        if (cancelled) return
-        const fresh = results.map((r) => r.name)
-        seenRef.current = [...seenRef.current, ...fresh].slice(-500)
-        setNames(fresh)
-        setBatch((b) => b + 1)
-      } catch {
-        // WASM not ready / failed — the landing simply shows no ticker.
+    if (!target) return
+    if (reducedMotion()) {
+      setDisplay(target)
+      setLocked(true)
+      return
+    }
+    setLocked(false)
+    let raf = 0
+    const start = performance.now()
+    const tick = (now: number) => {
+      const t = Math.min((now - start) / DECODE_MS, 1)
+      const lockCount = Math.floor(t * target.length)
+      let out = target.slice(0, lockCount)
+      for (let i = lockCount; i < target.length; i++) {
+        out += SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)]
+      }
+      setDisplay(out)
+      if (t < 1) {
+        raf = requestAnimationFrame(tick)
+      } else {
+        setDisplay(target)
+        setLocked(true)
       }
     }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [target])
 
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    tick() // also warms the WASM module, so entering the app is instant
-    const id = setInterval(tick, reduced ? TICK_MS_REDUCED : TICK_MS)
-    return () => {
-      cancelled = true
-      clearInterval(id)
+  return { display, locked }
+}
+
+// Reveal-on-scroll: observes every [data-reveal] inside the landing root.
+function useReveal(rootRef: React.RefObject<HTMLDivElement | null>) {
+  useEffect(() => {
+    const root = rootRef.current
+    if (!root) return
+    const els = root.querySelectorAll('[data-reveal]')
+    if (reducedMotion()) {
+      els.forEach((el) => el.classList.add('revealed'))
+      return
+    }
+    const obs = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            e.target.classList.add('revealed')
+            obs.unobserve(e.target)
+          }
+        }
+      },
+      { threshold: 0.15 },
+    )
+    els.forEach((el) => obs.observe(el))
+    return () => obs.disconnect()
+  }, [rootRef])
+}
+
+type DemoMode = 'brandable' | 'realword' | 'respell' | 'compound'
+
+const DEMO_MODES: { value: DemoMode; label: string }[] = [
+  { value: 'brandable', label: 'Brandable' },
+  { value: 'realword', label: 'Real words' },
+  { value: 'respell', label: 'Respelled' },
+  { value: 'compound', label: 'Compound' },
+]
+
+function demoConfig(mode: DemoMode, exclude: string[]) {
+  return {
+    style: 'big_tech' as const,
+    count: 3,
+    min_len: 4,
+    max_len: 12,
+    temperature: 0.85,
+    variety: 0.4,
+    roots: [],
+    compound: mode === 'compound',
+    variant: mode === 'realword' || mode === 'respell' ? mode : undefined,
+    exclude,
+  }
+}
+
+export function Landing({ onEnter }: Props) {
+  const rootRef = useRef<HTMLDivElement>(null)
+  useReveal(rootRef)
+
+  // --- Hero: decoded name from a prefetched queue --------------------------
+  const [hero, setHero] = useState<NameResult | null>(null)
+  const queueRef = useRef<NameResult[]>([])
+  const seenRef = useRef<string[]>([])
+  const { display, locked } = useDecode(hero?.name ?? '')
+
+  const refill = useCallback(async () => {
+    try {
+      const batch = await generateNames({
+        style: 'big_tech',
+        count: 12,
+        min_len: 5,
+        max_len: 10,
+        temperature: 0.85,
+        variety: 0.4,
+        roots: [],
+        exclude: seenRef.current,
+      })
+      seenRef.current = [...seenRef.current, ...batch.map((r) => r.name)].slice(-600)
+      queueRef.current.push(...batch)
+    } catch {
+      // WASM unavailable — hero just keeps its last name.
     }
   }, [])
 
-  return (
-    <div className="landing">
-      <section className="landing-hero">
-        <h1 className="landing-title">Name your next big thing.</h1>
-        <p className="landing-sub">
-          Brandable startup &amp; project names — generated instantly, entirely in your browser.
-        </p>
+  useEffect(() => {
+    let cancelled = false
+    let id: ReturnType<typeof setInterval> | undefined
 
-        <div className="ticker" aria-hidden="true">
-          {names.length > 0 && (
-            <div className="ticker-row" key={batch}>
-              {names.map((n) => (
-                <span key={n} className="ticker-chip">✦ {n}</span>
-              ))}
+    async function start() {
+      await refill()
+      if (cancelled) return
+      const next = queueRef.current.shift()
+      if (next) setHero(next)
+      id = setInterval(() => {
+        const n = queueRef.current.shift()
+        if (n) setHero(n)
+        if (queueRef.current.length < 4) void refill()
+      }, CYCLE_MS)
+    }
+    void start()
+    return () => {
+      cancelled = true
+      if (id) clearInterval(id)
+    }
+  }, [refill])
+
+  // --- Name wall background -------------------------------------------------
+  const [wall, setWall] = useState<string[][]>([])
+  useEffect(() => {
+    let cancelled = false
+    generateNames({
+      style: 'big_tech',
+      count: 40,
+      min_len: 4,
+      max_len: 9,
+      temperature: 0.9,
+      variety: 0.7,
+      roots: [],
+      exclude: [],
+    })
+      .then((r) => {
+        if (cancelled) return
+        const names = r.map((x) => x.name)
+        const rows: string[][] = [[], [], [], []]
+        names.forEach((n, i) => rows[i % 4].push(n))
+        setWall(rows)
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  // --- Bento: live mode demo -------------------------------------------------
+  const [demoMode, setDemoMode] = useState<DemoMode>('brandable')
+  const [demoNames, setDemoNames] = useState<string[]>([])
+  const demoSeenRef = useRef<string[]>([])
+  useEffect(() => {
+    let cancelled = false
+    generateNames(demoConfig(demoMode, demoSeenRef.current))
+      .then((r) => {
+        if (cancelled) return
+        const names = r.map((x) => x.name)
+        demoSeenRef.current = [...demoSeenRef.current, ...names].slice(-200)
+        setDemoNames(names)
+      })
+      .catch(() => setDemoNames([]))
+    return () => {
+      cancelled = true
+    }
+  }, [demoMode])
+
+  // --- Bento: description demo + why-this-name ------------------------------
+  const [descNames, setDescNames] = useState<string[]>([])
+  const [why, setWhy] = useState<Explanation | null>(null)
+  useEffect(() => {
+    let cancelled = false
+    generateNames({
+      style: 'big_tech',
+      count: 3,
+      min_len: 4,
+      max_len: 12,
+      temperature: 0.85,
+      variety: 0.3,
+      roots: [],
+      description: 'an app for splitting expenses with friends',
+      exclude: [],
+    })
+      .then((r) => {
+        if (!cancelled) setDescNames(r.map((x) => x.name))
+      })
+      .catch(() => {})
+    explainName('Forgeify')
+      .then((e) => {
+        if (!cancelled) setWhy(e)
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const scrollToSteps = () => {
+    rootRef.current?.querySelector('.landing-steps')?.scrollIntoView({
+      behavior: reducedMotion() ? 'auto' : 'smooth',
+      block: 'center',
+    })
+  }
+
+  return (
+    <div className="landing" ref={rootRef}>
+      <nav className="landing-nav">
+        <span className="wordmark">◈ neologism</span>
+        <button className="nav-cta" onClick={onEnter}>Open app →</button>
+      </nav>
+
+      <section className="landing-hero">
+        {wall.length > 0 && (
+          <div className="name-wall" aria-hidden="true">
+            {wall.map((row, i) => (
+              <div key={i} className={`wall-row wall-row-${i}`}>
+                <div className="wall-track">
+                  {[...row, ...row].map((n, j) => (
+                    <span key={`${n}-${j}`} className="wall-name">{n}</span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className="hero-glow" aria-hidden="true" />
+
+        <div className="hero-content">
+          <span className="eyebrow">Free · open · runs entirely in your browser</span>
+          <h1 className="landing-title">Name your next big thing.</h1>
+
+          <div className="decode-stage">
+            <div className="decode-name" aria-live="off">
+              {display || ' '}
             </div>
-          )}
+            <div className={`decode-meta${locked && hero ? ' visible' : ''}`}>
+              {hero && (
+                <>
+                  <span className="meta-score">★ {composite(hero)}</span>
+                  <span className="meta-dot">·</span>
+                  <span>{hero.syllables} syllable{hero.syllables === 1 ? '' : 's'}</span>
+                  {hero.connotations.length > 0 && (
+                    <>
+                      <span className="meta-dot">·</span>
+                      <span>feels {hero.connotations.slice(0, 2).join(', ')}</span>
+                    </>
+                  )}
+                </>
+              )}
+            </div>
+            <div className="decode-caption">generated just now — in your browser</div>
+          </div>
+
+          <div className="hero-ctas">
+            <button className="landing-cta" onClick={onEnter}>Find your name →</button>
+            <button className="ghost-cta" onClick={scrollToSteps}>How it works ↓</button>
+          </div>
+        </div>
+      </section>
+
+      <section className="bento" data-reveal>
+        <div className="tile tile-modes">
+          <h3>Four ways to a name</h3>
+          <div className="tile-pills">
+            {DEMO_MODES.map((m) => (
+              <button
+                key={m.value}
+                className={`tile-pill${demoMode === m.value ? ' active' : ''}`}
+                onClick={() => setDemoMode(m.value)}
+              >
+                {m.label}
+              </button>
+            ))}
+          </div>
+          <div className="tile-names" key={demoMode + demoNames.join()}>
+            {demoNames.map((n) => (
+              <span key={n} className="tile-name">{n}</span>
+            ))}
+          </div>
+          <p className="tile-foot">live — generated as you clicked</p>
         </div>
 
-        <button className="landing-cta" onClick={onEnter}>
-          Find your name →
-        </button>
+        <div className="tile">
+          <h3>Availability, built in</h3>
+          <div className="check-rows">
+            <span className="check-row"><i>✓</i> .com · .io · .ai — registry-level</span>
+            <span className="check-row"><i>✓</i> GitHub · npm · PyPI · crates.io</span>
+            <span className="check-row"><i>™</i> USPTO / EUIPO one click away</span>
+          </div>
+          <p className="tile-foot">every name, checked before you fall for it</p>
+        </div>
+
+        <div className="tile">
+          <h3>Names that explain themselves</h3>
+          {why ? (
+            <p className="tile-why">
+              <strong>Forgeify</strong> — opens with “{why.prefix_word}” (real word)
+              {why.suffix ? <> · “-{why.suffix}” brandable suffix</> : null} · {why.syllables} syllables
+            </p>
+          ) : (
+            <p className="tile-why"><strong>Forgeify</strong> — …</p>
+          )}
+          <p className="tile-foot">structure, sound and scores on every card</p>
+        </div>
+
+        <div className="tile tile-stat">
+          <div className="stat-big">100,000</div>
+          <p>names generated in one session. <strong>Zero repeats.</strong></p>
+          <p className="tile-foot">measured, not promised</p>
+        </div>
+
+        <div className="tile">
+          <h3>No server. No account. No tracking.</h3>
+          <p className="tile-body">
+            A Rust engine compiled to WebAssembly, running on your machine. Works offline.
+          </p>
+          <p className="tile-foot">your ideas never leave the tab</p>
+        </div>
+
+        <div className="tile tile-desc">
+          <h3>Describe it, name it</h3>
+          <p className="tile-quote">“an app for splitting expenses with friends”</p>
+          <div className="tile-names">
+            {descNames.map((n) => (
+              <span key={n} className="tile-name">{n}</span>
+            ))}
+          </div>
+        </div>
       </section>
 
-      <section className="landing-features">
-        {FEATURES.map((f) => (
-          <div key={f.title} className="feature-card">
-            <div className="feature-icon">{f.icon}</div>
-            <h3>{f.title}</h3>
-            <p>{f.body}</p>
-          </div>
-        ))}
+      <section className="landing-steps" data-reveal>
+        <div className="step">
+          <span className="step-num">01</span>
+          <span>Describe what you’re building — or don’t.</span>
+        </div>
+        <div className="step">
+          <span className="step-num">02</span>
+          <span>Generate. Refine by style, length, creativity.</span>
+        </div>
+        <div className="step">
+          <span className="step-num">03</span>
+          <span>Check availability. Save the keepers.</span>
+        </div>
       </section>
 
-      <section className="landing-steps">
-        {STEPS.map((s) => (
-          <div key={s.n} className="step">
-            <span className="step-n">{s.n}</span>
-            <span>{s.text}</span>
-          </div>
-        ))}
+      <section className="closing" data-reveal>
+        <h2 className="closing-title">Your name is already in here.</h2>
+        <button className="landing-cta" onClick={onEnter}>Find your name →</button>
       </section>
 
       <footer className="landing-footer">
-        Runs entirely in your browser — Rust compiled to WebAssembly. No servers, no accounts, no tracking.
+        <span className="wordmark">◈ neologism</span>
+        <span>Rust compiled to WebAssembly — no servers, no accounts, no tracking.</span>
       </footer>
     </div>
   )

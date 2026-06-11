@@ -10,6 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fontsource/inter": "^5.2.8",
+    "@fontsource/space-grotesk": "^5.2.10",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },
@@ -19,7 +21,7 @@
     "@vitejs/plugin-react": "^4.5.2",
     "typescript": "~5.8.3",
     "vite": "^6.3.5",
-    "vite-plugin-wasm": "^3.4.1",
-    "vite-plugin-top-level-await": "^1.4.4"
+    "vite-plugin-top-level-await": "^1.4.4",
+    "vite-plugin-wasm": "^3.4.1"
   }
 }
