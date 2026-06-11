@@ -149,7 +149,7 @@ export default function App() {
     <div className="app">
       <header className="app-header">
         <h1>Neologism Engine</h1>
-        <p className="tagline">Invented names for big-tech brands, sci-fi worlds, and fantasy realms.</p>
+        <p className="tagline">Startup & project name generator — brandable, real-word, respelled and compound names with instant availability checks.</p>
       </header>
 
       <main className="app-main">

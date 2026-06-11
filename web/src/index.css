@@ -434,6 +434,18 @@ input[type="range"] {
 }
 
 .handle-row { margin-top: .25rem; }
+
+.creative-toggle {
+  font-size: .72rem;
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  text-align: left;
+  padding: .1rem 0;
+}
+.creative-toggle:hover { color: var(--text); }
+.creative-toggle.active { color: var(--accent); }
 .tm-link { text-decoration: none; cursor: pointer; }
 .tm-link:hover { color: var(--text); border-color: var(--accent); }
 

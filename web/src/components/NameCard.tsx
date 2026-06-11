@@ -11,7 +11,7 @@ interface Props {
 }
 
 const STYLE_LABEL: Record<string, string> = {
-  big_tech: 'Big Tech',
+  big_tech: 'Startup',
   sci_fi: 'Sci-Fi',
   fantasy: 'Fantasy',
 }

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { Config, Style } from '../lib/engine'
 
 interface Props {
@@ -7,8 +8,18 @@ interface Props {
   loading: boolean
 }
 
-const STYLES: { value: Style; label: string; desc: string }[] = [
-  { value: 'big_tech', label: 'Big Tech', desc: 'Portmanteau brand names like Spotify, Vercel' },
+// Startup/project naming modes — all big_tech under the hood; respell/realword
+// map to the engine's variant field (Phase 36), compound to the compound flag.
+type Mode = 'brandable' | 'realword' | 'respell' | 'compound'
+
+const MODES: { value: Mode; label: string; desc: string }[] = [
+  { value: 'brandable', label: 'Brandable', desc: 'Invented coinages — Spotify, Vercel' },
+  { value: 'realword', label: 'Real words', desc: 'Evocative dictionary words — Notion, Linear' },
+  { value: 'respell', label: 'Respelled', desc: 'Twisted real words — Lyft, Tumblr' },
+  { value: 'compound', label: 'Compound', desc: 'Two-word names — SwiftForge, BrightLoom' },
+]
+
+const CREATIVE_STYLES: { value: Style; label: string; desc: string }[] = [
   { value: 'sci_fi', label: 'Sci-Fi', desc: 'Star names, AI cores, alien civilisations' },
   { value: 'fantasy', label: 'Fantasy', desc: 'Elves, orcs, ancient kingdoms' },
 ]
@@ -27,30 +38,72 @@ const VARIANTS: Partial<Record<Style, { value: string; label: string }[]>> = {
   ],
 }
 
+function currentMode(config: Config): Mode {
+  if (config.compound) return 'compound'
+  if (config.variant === 'realword') return 'realword'
+  if (config.variant === 'respell') return 'respell'
+  return 'brandable'
+}
+
 export function Controls({ config, onChange, onGenerate, loading }: Props) {
+  const [showCreative, setShowCreative] = useState(config.style !== 'big_tech')
+
   const set = <K extends keyof Config>(key: K, value: Config[K]) =>
     onChange({ ...config, [key]: value })
 
-  // Switching style clears any variant from the previous style.
-  const setStyle = (style: Style) =>
-    onChange({ ...config, style, variant: undefined })
+  const isStartup = config.style === 'big_tech'
+  const mode = currentMode(config)
 
-  const variants = VARIANTS[config.style]
+  const setMode = (m: Mode) =>
+    onChange({
+      ...config,
+      style: 'big_tech',
+      compound: m === 'compound',
+      variant: m === 'realword' || m === 'respell' ? m : undefined,
+    })
+
+  // Switching creative style clears any variant/mode from the previous one.
+  const setCreativeStyle = (style: Style) =>
+    onChange({ ...config, style, variant: undefined, compound: false })
+
+  const variants = isStartup ? undefined : VARIANTS[config.style]
 
   return (
     <div className="controls">
       <div className="style-selector">
-        {STYLES.map((s) => (
+        {MODES.map((m) => (
           <button
-            key={s.value}
-            className={`style-btn${config.style === s.value ? ' active' : ''}`}
-            onClick={() => setStyle(s.value)}
-            title={s.desc}
+            key={m.value}
+            className={`style-btn${isStartup && mode === m.value ? ' active' : ''}`}
+            onClick={() => setMode(m.value)}
+            title={m.desc}
           >
-            {s.label}
+            {m.label}
           </button>
         ))}
       </div>
+
+      <button
+        className={`creative-toggle${!isStartup ? ' active' : ''}`}
+        onClick={() => setShowCreative(!showCreative)}
+      >
+        {showCreative ? '▾' : '▸'} Creative styles (Sci-Fi, Fantasy)
+      </button>
+
+      {showCreative && (
+        <div className="variant-selector">
+          {CREATIVE_STYLES.map((s) => (
+            <button
+              key={s.value}
+              className={`variant-btn${config.style === s.value ? ' active' : ''}`}
+              onClick={() => setCreativeStyle(s.value)}
+              title={s.desc}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
+      )}
 
       {variants && (
         <div className="variant-selector">
@@ -109,8 +162,8 @@ export function Controls({ config, onChange, onGenerate, loading }: Props) {
           />
         </label>
 
-        {config.style === 'big_tech' && (
-          <label title="How different the big-tech names in a batch are from each other (shapes, lengths, sounds). Higher = more varied, looser quality.">
+        {isStartup && (
+          <label title="How different the names in a batch are from each other (shapes, lengths, sounds). Higher = more varied, looser quality.">
             <span>Variety <strong>{((config.variety ?? 0.3) * 100).toFixed(0)}%</strong></span>
             <input
               type="range" min={0} max={1} step={0.05}
@@ -121,16 +174,8 @@ export function Controls({ config, onChange, onGenerate, loading }: Props) {
         )}
       </div>
 
-      {config.style === 'big_tech' && (
+      {isStartup && mode === 'brandable' && (
         <div className="roots-input">
-          <label className="toggle-row">
-            <input
-              type="checkbox"
-              checked={config.compound ?? false}
-              onChange={(e) => set('compound', e.target.checked)}
-            />
-            <span>Compound names (SwiftForge, BrightLoom)</span>
-          </label>
           <label>
             <span>Describe your product (optional)</span>
             <textarea
