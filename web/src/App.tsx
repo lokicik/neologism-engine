@@ -1,11 +1,10 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { generateNames, batchMetrics, type BatchMetrics, type Config, type NameResult, type Style } from './lib/engine'
-import { rerank } from './lib/llm'
 import { recommendations } from './lib/recommend'
 import { buildProfile, rankByPreference } from './lib/preferences'
 import { loadFavorites, toggleFavorite, saveFavorites, loadRecent, saveRecent, hasVisited, markVisited } from './lib/storage'
 import { decodeShareUrl } from './lib/share'
-import { Controls } from './components/Controls'
+import { CommandBar } from './components/CommandBar'
 import { NameCard } from './components/NameCard'
 import { StatsPanel } from './components/StatsPanel'
 import { Favorites } from './components/Favorites'
@@ -42,9 +41,7 @@ export default function App() {
   const [metrics, setMetrics] = useState<BatchMetrics | null>(null)
   const [favorites, setFavorites] = useState<NameResult[]>(loadFavorites)
   const [drawerOpen, setDrawerOpen] = useState(false)
-  const [aiRank, setAiRank] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [ranking, setRanking] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const recentRef = useRef<string[]>(loadRecent())
   // Mirror of `results` for the append path — handleGenerate is memoized on
@@ -94,50 +91,17 @@ export default function App() {
     setLoading(true)
     setError(null)
     try {
-      const topN = cfg.count ?? 10
-      // With AI rank on, over-generate a broad pool for the LLM to choose from;
-      // otherwise just the requested count. 30 balances candidate breadth against
-      // re-rank latency (the local model's verbose reasoning makes the call scale
-      // with name count — ~30s at 30 names, ~50s at 50).
-      const poolCount = aiRank ? Math.max(topN, 30) : topN
-      const pool = await generateNames({ ...cfg, count: poolCount, exclude: recentRef.current })
-
-      // Show the offline-ranked top-N immediately — the LLM reorders after.
-      const offlineTop = pool.slice(0, topN)
-      const shown = append ? [...resultsRef.current, ...offlineTop] : offlineTop
+      const batch = await generateNames({ ...cfg, exclude: recentRef.current })
+      const shown = append ? [...resultsRef.current, ...batch] : batch
       setResults(shown)
-      markSeen(offlineTop)
+      markSeen(batch)
       setMetrics(shown.length > 0 ? await batchMetrics(shown) : null)
       setLoading(false)
-
-      // Opt-in second stage: local LLM re-ranks the pool, surfaces its top picks.
-      // Any failure (unreachable/CORS/malformed) leaves the offline results as-is.
-      if (aiRank && pool.length > 0) {
-        setRanking(true)
-        try {
-          const ranked = await rerank(pool, topN)
-          if (ranked && ranked.length > 0) {
-            const byName = new Map(pool.map((r) => [r.name, r]))
-            const reordered = ranked
-              .map((n) => byName.get(n))
-              .filter((r): r is NameResult => !!r)
-            if (reordered.length > 0) {
-              const base = append ? resultsRef.current.slice(0, -offlineTop.length) : []
-              const next = [...base, ...reordered]
-              setResults(next)
-              markSeen(reordered)
-              setMetrics(await batchMetrics(next))
-            }
-          }
-        } finally {
-          setRanking(false)
-        }
-      }
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err))
       setLoading(false)
     }
-  }, [config, aiRank])
+  }, [config])
 
   const handleToggleFavorite = useCallback((item: NameResult) => {
     setFavorites((prev) => toggleFavorite(prev, item))
@@ -215,8 +179,7 @@ export default function App() {
           ◈ neologism
         </span>
         <div className="nav-right">
-          {ranking && <span className="nav-note">✨ ranking…</span>}
-          {!ranking && profile && results.length > 0 && (
+          {profile && results.length > 0 && (
             <span className="nav-note" title="Results re-ranked toward your saved names">✨ tuned</span>
           )}
           {favorites.length > 0 && (
@@ -228,17 +191,12 @@ export default function App() {
       </nav>
 
       <main className="workspace">
-        <aside className="rail">
-          <Controls
-            config={config}
-            onChange={setConfig}
-            onGenerate={() => handleGenerate(false)}
-            loading={loading}
-            aiRank={aiRank}
-            onAiRank={setAiRank}
-            ranking={ranking}
-          />
-        </aside>
+        <CommandBar
+          config={config}
+          onChange={setConfig}
+          onGenerate={() => handleGenerate(false)}
+          loading={loading}
+        />
 
         <section className="canvas">
           {error && <div className="error-banner">{error}</div>}
@@ -261,7 +219,7 @@ export default function App() {
               <button
                 className="more-names-btn"
                 onClick={() => handleGenerate(true)}
-                disabled={loading || ranking}
+                disabled={loading}
               >
                 {loading ? 'Generating…' : 'More names'}
               </button>
