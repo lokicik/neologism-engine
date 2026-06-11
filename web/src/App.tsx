@@ -59,6 +59,14 @@ export default function App() {
   useEffect(() => {
     resultsRef.current = results
   }, [results])
+  // Mirror of `loading` for the infinite-scroll observer callback (same
+  // staleness reason as resultsRef).
+  const loadingRef = useRef(false)
+  useEffect(() => {
+    loadingRef.current = loading
+  }, [loading])
+  // Phase 49: end-of-grid sentinel — scrolling near it auto-appends a batch.
+  const sentinelRef = useRef<HTMLDivElement | null>(null)
 
   // On mount: if a #names= share URL is present, union those names into favorites.
   useEffect(() => {
@@ -117,6 +125,27 @@ export default function App() {
   const handleToggleFavorite = useCallback((item: NameResult) => {
     setFavorites((prev) => toggleFavorite(prev, item))
   }, [])
+
+  // Phase 49: infinite scroll — when the sentinel under the grid comes within
+  // 600px of the viewport, append the next batch (the 20k exclude window
+  // keeps every batch fresh; exhaustion unmounts the sentinel and the notice
+  // takes over). Re-binding on results.length matters: observe() fires the
+  // callback with the *current* intersection state, so batches keep chaining
+  // until the sentinel is pushed out of the prefetch margin.
+  useEffect(() => {
+    const el = sentinelRef.current
+    if (!el) return
+    const obs = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting) && !loadingRef.current) {
+          void handleGenerate(true)
+        }
+      },
+      { rootMargin: '600px 0px' },
+    )
+    obs.observe(el)
+    return () => obs.disconnect()
+  }, [handleGenerate, results.length, exhausted, view])
 
   // The prompt's name space is used up against the seen-history: wipe the
   // history and regenerate. (Names already starred stay in favorites.)
@@ -216,23 +245,22 @@ export default function App() {
               {displayResults.length > 0 && (
                 <>
                   <div className="results-grid">
-                    {displayResults.map((r) => (
+                    {displayResults.map((r, i) => (
                       <NameCard
                         key={r.name}
                         result={r}
                         isFavorite={favoriteNames.has(r.name)}
                         onToggleFavorite={handleToggleFavorite}
                         isBest={r.name === bestName}
+                        appearDelay={(i % (config.count ?? 10)) * 45}
                       />
                     ))}
+                    {loading &&
+                      Array.from({ length: 3 }).map((_, i) => (
+                        <div key={`sk-${i}`} className="skeleton-card" style={{ animationDelay: `${i * 60}ms` }} />
+                      ))}
                   </div>
-                  <button
-                    className="more-names-btn"
-                    onClick={() => handleGenerate(true)}
-                    disabled={loading}
-                  >
-                    {loading ? 'Generating…' : 'More names'}
-                  </button>
+                  {!exhausted && <div ref={sentinelRef} className="scroll-sentinel" aria-hidden />}
                 </>
               )}
 

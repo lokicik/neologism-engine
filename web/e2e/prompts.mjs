@@ -58,9 +58,9 @@ try {
     const res = await generateWith(page, 'fitness')
     check(res === 'cards', `"fitness" generates cards (got: ${res})`)
     if (res === 'cards') {
-      await page.waitForTimeout(300)
+      await page.waitForTimeout(600) // infinite scroll may auto-fill the viewport
       const n = await page.locator('.name-card').count()
-      check(n === 10, `"fitness" yields a full batch (got ${n})`)
+      check(n >= 10 && n % 10 === 0, `"fitness" yields full batches (got ${n})`)
     }
     await ctx.close()
   }
@@ -71,7 +71,7 @@ try {
     const res = await generateWith(page, 'a marketplace for vintage keyboards')
     check(res === 'cards', `marketplace prompt generates cards (got: ${res})`)
     if (res === 'cards') {
-      await page.waitForTimeout(300)
+      await page.waitForTimeout(600) // let any viewport auto-fill settle
       const names = await page.$$eval('.name-text', (els) => els.map((e) => e.textContent ?? ''))
       const counts = {}
       for (const n of names) {

@@ -11,6 +11,9 @@ interface Props {
   onToggleFavorite: (r: NameResult) => void
   /// Highest composite in the batch — gets the crown.
   isBest?: boolean
+  /// Entrance-animation stagger (ms) — set by the results grid so freshly
+  /// appended cards slide/fade in one after another (Phase 49).
+  appearDelay?: number
 }
 
 // Shown only for non-startup names (old sci-fi/fantasy favorites & share URLs).
@@ -38,7 +41,7 @@ function whyParts(e: Explanation): string[] {
   return parts
 }
 
-export function NameCard({ result, isFavorite, onToggleFavorite, isBest = false }: Props) {
+export function NameCard({ result, isFavorite, onToggleFavorite, isBest = false, appearDelay = 0 }: Props) {
   const [copied, setCopied] = useState(false)
   const [domains, setDomains] = useState<Record<string, DomainStatus>>(idleMap)
   const [showAvail, setShowAvail] = useState(false)
@@ -108,7 +111,7 @@ export function NameCard({ result, isFavorite, onToggleFavorite, isBest = false 
   if (STYLE_LABEL[result.style]) metaParts.unshift(STYLE_LABEL[result.style])
 
   return (
-    <div className={`name-card${isFavorite ? ' favorited' : ''}`}>
+    <div className={`name-card${isFavorite ? ' favorited' : ''}`} style={{ animationDelay: `${appearDelay}ms` }}>
       <div className="card-top">
         <Monogram name={result.name} size={36} />
         <span className="name-text">{result.name}</span>

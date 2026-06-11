@@ -3,8 +3,9 @@
 // web/e2e/shots/ for visual review.
 //
 // Usage:  node e2e/repro.mjs            (serves ./dist via `vite preview`)
-// Exits non-zero when a More-names click yields no new cards AND no
-// exhaustion notice — i.e. the dead-button bug.
+// Exits non-zero when a scroll-to-bottom yields no new cards AND no
+// exhaustion notice — i.e. the dead-end bug (Phase 49: infinite scroll
+// replaced the More-names button).
 import { chromium } from 'playwright'
 import { spawn } from 'node:child_process'
 import { mkdirSync } from 'node:fs'
@@ -16,7 +17,7 @@ const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const SHOTS = join(E2E_DIR, 'shots')
 const PROMPT = 'a marketplace for vintage keyboards'
-const MORE_CLICKS = 8
+const SCROLL_ROUNDS = 8
 
 mkdirSync(SHOTS, { recursive: true })
 
@@ -52,21 +53,31 @@ try {
   console.log(`generate #0: ${count} cards`)
   await page.screenshot({ path: join(SHOTS, '00-first-batch.png'), fullPage: true })
 
-  for (let i = 1; i <= MORE_CLICKS; i++) {
+  for (let i = 1; i <= SCROLL_ROUNDS; i++) {
     const before = await page.locator('.name-card').count()
-    await page.click('.more-names-btn')
-    // Wait for the click to settle (engine is fast; loading flips briefly).
-    await page.waitForFunction(
-      () => !document.querySelector('.more-names-btn')?.textContent?.includes('Generating'),
-      { timeout: 20000 },
-    )
+    // Scroll the sentinel into view — the observer auto-appends the next batch.
+    const sentinel = page.locator('.scroll-sentinel')
+    if (await sentinel.count()) {
+      await sentinel.scrollIntoViewIfNeeded()
+    } else {
+      await page.mouse.wheel(0, 5000)
+    }
+    await page
+      .waitForFunction(
+        (n) =>
+          document.querySelectorAll('.name-card').length > n ||
+          document.querySelector('.exhausted-notice'),
+        before,
+        { timeout: 20000 },
+      )
+      .catch(() => {})
     await page.waitForTimeout(400)
     const after = await page.locator('.name-card').count()
     const notice = await page.locator('.exhausted-notice').count()
-    console.log(`more #${i}: ${before} -> ${after} cards${notice ? ' [exhaustion notice shown]' : ''}`)
+    console.log(`scroll #${i}: ${before} -> ${after} cards${notice ? ' [exhaustion notice shown]' : ''}`)
     await page.screenshot({ path: join(SHOTS, `${String(i).padStart(2, '0')}-more.png`), fullPage: true })
     if (after === before && notice === 0) {
-      console.error(`FAIL: more-names click #${i} produced nothing and no exhaustion notice`)
+      console.error(`FAIL: scroll #${i} produced nothing and no exhaustion notice`)
       failed = true
       break
     }

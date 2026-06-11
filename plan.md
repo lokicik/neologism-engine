@@ -690,6 +690,21 @@ Moodsync/Insightai…, compound → BreezeMood/PureJournal/TrimInsight.
 
 ---
 
+## Phase 49 — Infinite Scroll (auto-generate on scroll, slide/fade entrance)
+
+The Create page's `More names` button is gone: an `IntersectionObserver` sentinel under the
+results grid (600px prefetch margin) auto-appends the next batch as the user scrolls; the
+observer re-binds per append so batches chain until the sentinel leaves the prefetch zone
+(also auto-fills tall viewports on first generate). Cards play a staggered slide-up/fade
+(`card-in`, 45ms/card, `animation-delay` inline) — React keys are stable so existing cards
+never re-animate; `prefers-reduced-motion` disables it (verified: computed opacity 1 at
+150ms). Exhaustion unmounts the sentinel and the Phase 44 notice takes over. Inline shimmer
+skeletons show during appends. `repro.mjs` converted from button clicks to scroll rounds
+(8 rounds → 150 names, no dead ends); `explore.mjs` captures the scrolled state;
+`prompts.mjs` batch checks widened to full-batch multiples. Web-only; engine untouched.
+
+---
+
 ## Bottom line
 
 Big-tech is the strongest style, tuned through Phase 25 and extended since:

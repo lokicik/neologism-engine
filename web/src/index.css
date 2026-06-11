@@ -420,21 +420,8 @@ body {
 }
 
 
-.more-names-btn {
-  align-self: center;
-  margin: .25rem auto 0;
-  display: block;
-  padding: .6rem 1.8rem;
-  background: transparent;
-  color: var(--muted);
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all .15s;
-}
-.more-names-btn:hover { color: var(--text); border-color: var(--accent); }
-.more-names-btn:disabled { opacity: .45; cursor: not-allowed; }
+/* Phase 49: infinite scroll — invisible trigger under the results grid. */
+.scroll-sentinel { height: 1px; }
 
 /* Stats panel */
 /* Phase 40: stats as a thin hairline strip, not a panel */
@@ -482,6 +469,14 @@ body {
   flex-direction: column;
   gap: .6rem;
   transition: border-color .15s;
+  /* Phase 49: slide/fade entrance — staggered per card via inline
+     animation-delay; cards only animate on mount (stable keys), so
+     scrolled-in batches appear one after another. */
+  animation: card-in .45s cubic-bezier(.2, .7, .3, 1) both;
+}
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: none; }
 }
 .name-card:hover { border-color: rgba(255, 255, 255, .14); }
 .name-card.favorited { border-color: #f59e0b66; }
@@ -1022,6 +1017,7 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .name-card { animation: none; }
   .skeleton-card { animation: none; background: var(--surface); }
   .badge-checking { animation: none; }
   .chip-chevron { transition: none; }

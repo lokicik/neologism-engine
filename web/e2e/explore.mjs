@@ -49,6 +49,20 @@ try {
   await page.waitForSelector('.name-card', { timeout: 20000 })
   await shot('04-results')
 
+  // Infinite scroll (Phase 49): reaching the bottom auto-appends batches.
+  const initialCards = await page.locator('.name-card').count()
+  await page.locator('.scroll-sentinel').scrollIntoViewIfNeeded()
+  await page
+    .waitForFunction((n) => document.querySelectorAll('.name-card').length > n, initialCards, { timeout: 20000 })
+    .catch(() => {})
+  await page.waitForTimeout(600)
+  const afterScroll = await page.locator('.name-card').count()
+  console.log(`infinite scroll: ${initialCards} -> ${afterScroll} cards`)
+  if (afterScroll <= initialCards) console.error('FINDING: scrolling did not append new cards')
+  await shot('04b-infinite-scroll')
+  await page.evaluate(() => window.scrollTo(0, 0))
+  await page.waitForTimeout(300)
+
   // Chip menus
   await page.click('.chips-row .chip-wrap:nth-child(1) .chip')
   await shot('05-menu-mode')
