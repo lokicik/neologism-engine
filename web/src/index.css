@@ -658,54 +658,28 @@ body {
 }
 
 /* Stats panel */
-.stats-panel {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1rem 1.25rem;
+/* Phase 40: stats as a thin hairline strip, not a panel */
+.stats-strip {
   display: flex;
   flex-direction: column;
-  gap: .85rem;
+  gap: .35rem;
+  padding: .5rem .25rem .65rem;
+  border-bottom: 1px solid var(--border);
 }
 
 .stats-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 1.5rem;
+  gap: 1.1rem;
 }
 
-.stat {
-  display: flex;
-  flex-direction: column;
-  gap: .15rem;
-}
-
-.stat-value {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--text);
-  letter-spacing: -.02em;
-}
-
-.stat-label {
-  font-size: .68rem;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: .04em;
-}
-
-.stats-tips {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: .35rem;
-  border-top: 1px solid var(--border);
-  padding-top: .75rem;
-}
+.stat { font-size: .74rem; color: var(--muted); }
+.stat-label { letter-spacing: .03em; }
+.stat-value { color: var(--text); font-weight: 600; }
 
 .stats-tip {
-  font-size: .82rem;
-  color: var(--text);
+  font-size: .76rem;
+  color: var(--muted);
 }
 
 .card-badges {
@@ -763,6 +737,7 @@ body {
 }
 
 .name-text {
+  font-family: var(--font-display);
   font-size: 1.3rem;
   font-weight: 700;
   letter-spacing: -.02em;
@@ -988,6 +963,135 @@ body {
   padding: .75rem 1rem;
   border-radius: var(--radius);
   font-size: .875rem;
+}
+
+/* Phase 40: two-pane workspace */
+.app {
+  max-width: 1280px;
+}
+
+.workspace-nav {
+  margin: -1.5rem 0 0;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: .9rem;
+}
+
+.nav-note {
+  font-size: .75rem;
+  color: var(--muted);
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.rail {
+  position: sticky;
+  top: 4.25rem;
+}
+
+.canvas {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  min-height: 60dvh;
+}
+
+/* Rail-width controls: stack the hero + refiners vertically */
+.rail .controls { padding: 1.1rem 1.2rem; }
+.rail .hero { flex-direction: column; }
+.rail .hero-input { min-height: 4.2rem; }
+.rail .refine-row { flex-direction: column; align-items: flex-start; gap: .6rem; }
+
+/* Favorites drawer */
+.drawer-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgba(0, 0, 0, .55);
+  animation: overlay-in .2s ease-out both;
+}
+@keyframes overlay-in { from { opacity: 0; } to { opacity: 1; } }
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+  width: 340px;
+  max-width: 100vw;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  padding: 1rem 1.1rem;
+  overflow-y: auto;
+  animation: drawer-in .2s ease-out both;
+}
+@keyframes drawer-in { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
+.drawer-close {
+  position: absolute;
+  top: .8rem;
+  right: .9rem;
+}
+
+.drawer .favorites-panel {
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+/* Skeleton loading cards */
+.skeleton-card {
+  height: 168px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: linear-gradient(100deg, var(--surface) 40%, var(--surface2) 50%, var(--surface) 60%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+@keyframes shimmer {
+  from { background-position: 120% 0; }
+  to { background-position: -80% 0; }
+}
+
+/* Empty-state example chips */
+.example-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: .6rem;
+  margin-top: 1rem;
+}
+
+.example-chip {
+  padding: .45rem 1rem;
+  font-size: .82rem;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all .15s;
+}
+.example-chip:hover { color: var(--text); border-color: rgba(255, 255, 255, .25); }
+
+@media (prefers-reduced-motion: reduce) {
+  .drawer, .drawer-overlay { animation: none; }
+  .skeleton-card { animation: none; background: var(--surface); }
+}
+
+@media (max-width: 900px) {
+  .workspace { grid-template-columns: 1fr; }
+  .rail { position: static; }
+  .drawer { width: 100%; border-left: none; }
 }
 
 .app-main {

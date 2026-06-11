@@ -7,32 +7,27 @@ interface Props {
 
 function Stat({ label, value, suffix = '' }: { label: string; value: number; suffix?: string }) {
   return (
-    <div className="stat">
+    <span className="stat">
+      <span className="stat-label">{label}</span>{' '}
       <span className="stat-value">{value.toFixed(value >= 10 ? 0 : 1)}{suffix}</span>
-      <span className="stat-label">{label}</span>
-    </div>
+    </span>
   )
 }
 
+// Phase 40: a thin hairline strip above the results, not a panel.
 export function StatsPanel({ stats, tips }: Props) {
   if (stats.count === 0) return null
   return (
-    <section className="stats-panel">
+    <section className="stats-strip">
       <div className="stats-row">
-        <Stat label="Pronounce" value={stats.avg_pronounce} />
-        <Stat label="Novelty" value={stats.avg_novelty} />
-        <Stat label="Memorable" value={stats.avg_memorability} />
-        <Stat label="Diversity" value={stats.diversity * 100} suffix="%" />
-        <Stat label="Unique" value={stats.unique_pct} suffix="%" />
-        <Stat label="Avg len" value={stats.avg_length} />
+        <Stat label="pronounce" value={stats.avg_pronounce} />
+        <Stat label="novelty" value={stats.avg_novelty} />
+        <Stat label="memorable" value={stats.avg_memorability} />
+        <Stat label="diversity" value={stats.diversity * 100} suffix="%" />
+        <Stat label="unique" value={stats.unique_pct} suffix="%" />
+        <Stat label="avg len" value={stats.avg_length} />
       </div>
-      {tips.length > 0 && (
-        <ul className="stats-tips">
-          {tips.map((t, i) => (
-            <li key={i} className="stats-tip">💡 {t}</li>
-          ))}
-        </ul>
-      )}
+      {tips.length > 0 && <p className="stats-tip">💡 {tips[0]}</p>}
     </section>
   )
 }

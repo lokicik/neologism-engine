@@ -41,6 +41,7 @@ export default function App() {
   const [results, setResults] = useState<NameResult[]>([])
   const [metrics, setMetrics] = useState<BatchMetrics | null>(null)
   const [favorites, setFavorites] = useState<NameResult[]>(loadFavorites)
+  const [drawerOpen, setDrawerOpen] = useState(false)
   const [aiRank, setAiRank] = useState(false)
   const [loading, setLoading] = useState(false)
   const [ranking, setRanking] = useState(false)
@@ -85,18 +86,21 @@ export default function App() {
   }
 
   // `append` = the "More names" button: the new batch joins the existing grid
-  // (the exclude-recent window guarantees it's all fresh names).
-  const handleGenerate = useCallback(async (append = false) => {
+  // (the exclude-recent window guarantees it's all fresh names). `cfgOverride`
+  // lets the empty-state example chips set a description and generate in one
+  // step without racing the config state update.
+  const handleGenerate = useCallback(async (append = false, cfgOverride?: Config) => {
+    const cfg = cfgOverride ?? config
     setLoading(true)
     setError(null)
     try {
-      const topN = config.count ?? 10
+      const topN = cfg.count ?? 10
       // With AI rank on, over-generate a broad pool for the LLM to choose from;
       // otherwise just the requested count. 30 balances candidate breadth against
       // re-rank latency (the local model's verbose reasoning makes the call scale
       // with name count — ~30s at 30 names, ~50s at 50).
       const poolCount = aiRank ? Math.max(topN, 30) : topN
-      const pool = await generateNames({ ...config, count: poolCount, exclude: recentRef.current })
+      const pool = await generateNames({ ...cfg, count: poolCount, exclude: recentRef.current })
 
       // Show the offline-ranked top-N immediately — the LLM reorders after.
       const offlineTop = pool.slice(0, topN)
@@ -139,6 +143,32 @@ export default function App() {
     setFavorites((prev) => toggleFavorite(prev, item))
   }, [])
 
+  // Close the favorites drawer with Esc, and when the last favorite is removed.
+  useEffect(() => {
+    if (!drawerOpen) return
+    if (favorites.length === 0) {
+      setDrawerOpen(false)
+      return
+    }
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setDrawerOpen(false)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [drawerOpen, favorites.length])
+
+  // Empty-state example prompts: set the description and generate in one click.
+  const examplePrompts = [
+    'a journaling app with mood insights',
+    'a tool that syncs design tokens',
+    'a marketplace for vintage keyboards',
+  ]
+  const tryExample = (desc: string) => {
+    const next = { ...config, description: desc }
+    setConfig(next)
+    void handleGenerate(false, next)
+  }
+
   const favoriteNames = new Set(favorites.map((f) => f.name))
 
   // Preference profile learned from favorites (Namelix-style); needs ≥3.
@@ -176,67 +206,102 @@ export default function App() {
 
   return (
     <div className="app">
-      <header className="app-header">
-        <h1
-          className="app-title-link"
+      <nav className="landing-nav workspace-nav">
+        <span
+          className="wordmark app-title-link"
           onClick={() => setView('landing')}
           title="About — back to the landing page"
         >
-          Neologism Engine
-        </h1>
-        <p className="tagline">Startup & project name generator — brandable, real-word, respelled and compound names with instant availability checks.</p>
-      </header>
-
-      <main className="app-main">
-        <Controls
-          config={config}
-          onChange={setConfig}
-          onGenerate={() => handleGenerate(false)}
-          loading={loading}
-          aiRank={aiRank}
-          onAiRank={setAiRank}
-          ranking={ranking}
-        />
-
-        {error && <div className="error-banner">{error}</div>}
-
-        {metrics && <StatsPanel stats={metrics.stats} tips={tips} />}
-
-        {results.length > 0 && profile && (
-          <div className="tuned-hint">✨ tuned to your favorites</div>
-        )}
-
-        {displayResults.length > 0 && (
-          <>
-            <section className="results-grid">
-              {displayResults.map((r) => (
-                <NameCard
-                  key={r.name}
-                  result={r}
-                  isFavorite={favoriteNames.has(r.name)}
-                  onToggleFavorite={handleToggleFavorite}
-                  badges={badgesFor(r)}
-                />
-              ))}
-            </section>
-            <button
-              className="more-names-btn"
-              onClick={() => handleGenerate(true)}
-              disabled={loading || ranking}
-            >
-              {loading ? 'Generating…' : 'More names'}
+          ◈ neologism
+        </span>
+        <div className="nav-right">
+          {ranking && <span className="nav-note">✨ ranking…</span>}
+          {!ranking && profile && results.length > 0 && (
+            <span className="nav-note" title="Results re-ranked toward your saved names">✨ tuned</span>
+          )}
+          {favorites.length > 0 && (
+            <button className="nav-cta" onClick={() => setDrawerOpen(true)}>
+              ★ {favorites.length} saved
             </button>
-          </>
-        )}
+          )}
+        </div>
+      </nav>
 
-        {results.length === 0 && !loading && (
-          <div className="empty-state">
-            Describe what you're building — or just hit Generate.
-          </div>
-        )}
+      <main className="workspace">
+        <aside className="rail">
+          <Controls
+            config={config}
+            onChange={setConfig}
+            onGenerate={() => handleGenerate(false)}
+            loading={loading}
+            aiRank={aiRank}
+            onAiRank={setAiRank}
+            ranking={ranking}
+          />
+        </aside>
+
+        <section className="canvas">
+          {error && <div className="error-banner">{error}</div>}
+
+          {metrics && <StatsPanel stats={metrics.stats} tips={tips} />}
+
+          {displayResults.length > 0 && (
+            <>
+              <div className="results-grid">
+                {displayResults.map((r) => (
+                  <NameCard
+                    key={r.name}
+                    result={r}
+                    isFavorite={favoriteNames.has(r.name)}
+                    onToggleFavorite={handleToggleFavorite}
+                    badges={badgesFor(r)}
+                  />
+                ))}
+              </div>
+              <button
+                className="more-names-btn"
+                onClick={() => handleGenerate(true)}
+                disabled={loading || ranking}
+              >
+                {loading ? 'Generating…' : 'More names'}
+              </button>
+            </>
+          )}
+
+          {loading && results.length === 0 && (
+            <div className="results-grid">
+              {Array.from({ length: config.count ?? 10 }).map((_, i) => (
+                <div key={i} className="skeleton-card" style={{ animationDelay: `${i * 60}ms` }} />
+              ))}
+            </div>
+          )}
+
+          {results.length === 0 && !loading && (
+            <div className="empty-state">
+              <p>Describe what you're building — or just hit Generate.</p>
+              <div className="example-chips">
+                {examplePrompts.map((p) => (
+                  <button key={p} className="example-chip" onClick={() => tryExample(p)}>
+                    “{p}”
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </section>
       </main>
 
-      <Favorites favorites={favorites} onRemove={handleToggleFavorite} />
+      {drawerOpen && (
+        <>
+          <div className="drawer-overlay" onClick={() => setDrawerOpen(false)} />
+          <div className="drawer">
+            <button className="drawer-close icon-btn" onClick={() => setDrawerOpen(false)} title="Close">
+              ✕
+            </button>
+            <Favorites favorites={favorites} onRemove={handleToggleFavorite} />
+          </div>
+        </>
+      )}
     </div>
   )
 }
