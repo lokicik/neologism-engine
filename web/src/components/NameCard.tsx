@@ -110,7 +110,7 @@ export function NameCard({ result, isFavorite, onToggleFavorite, isBest = false 
   return (
     <div className={`name-card${isFavorite ? ' favorited' : ''}`}>
       <div className="card-top">
-        <Monogram name={result.name} size={32} />
+        <Monogram name={result.name} size={36} />
         <span className="name-text">{result.name}</span>
         <span className="card-score" title="Overall score — pronounceability, memorability and originality blended">
           {isBest && <span className="card-crown" title="Top pick of this batch">👑</span>}

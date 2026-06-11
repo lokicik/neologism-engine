@@ -7,7 +7,8 @@ import { decodeShareUrl } from './lib/share'
 import { CommandBar } from './components/CommandBar'
 import { NameCard } from './components/NameCard'
 import { StatsPanel } from './components/StatsPanel'
-import { Favorites } from './components/Favorites'
+import { Sidebar, type AppView } from './components/Sidebar'
+import { SavedPage } from './components/SavedPage'
 import { Landing } from './components/Landing'
 
 // Defaults match the UI's "Any" length and "Balanced" creativity segments.
@@ -30,17 +31,19 @@ const DEFAULT_CONFIG: Config = {
 // big-tech vocabulary measured at 57k+ (100k-generation sweep).
 const RECENT_WINDOW = 20000
 
+type View = 'landing' | AppView
+
 export default function App() {
-  // First visit shows the landing; share-URL visitors skip it (they came for
-  // shared favorites). Entering the app is remembered across reloads.
-  const [view, setView] = useState<'landing' | 'app'>(() =>
-    hasVisited() || location.hash.startsWith('#names=') ? 'app' : 'landing',
-  )
+  // First visit shows the landing; share-URL visitors skip it and land on the
+  // Saved page (they came for shared favorites). Entering is remembered.
+  const [view, setView] = useState<View>(() => {
+    if (location.hash.startsWith('#names=')) return 'saved'
+    return hasVisited() ? 'create' : 'landing'
+  })
   const [config, setConfig] = useState<Config>(DEFAULT_CONFIG)
   const [results, setResults] = useState<NameResult[]>([])
   const [metrics, setMetrics] = useState<BatchMetrics | null>(null)
   const [favorites, setFavorites] = useState<NameResult[]>(loadFavorites)
-  const [drawerOpen, setDrawerOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   // True when a generate/append produced zero names — the prompt's reachable
   // space is exhausted against the seen-names history.
@@ -48,7 +51,7 @@ export default function App() {
   const [error, setError] = useState<string | null>(null)
   const recentRef = useRef<string[]>(loadRecent())
   // Mirror of `results` for the append path — handleGenerate is memoized on
-  // [config, aiRank], so reading state directly there would be stale.
+  // [config], so reading state directly there would be stale.
   const resultsRef = useRef<NameResult[]>([])
   useEffect(() => {
     resultsRef.current = results
@@ -111,20 +114,6 @@ export default function App() {
     setFavorites((prev) => toggleFavorite(prev, item))
   }, [])
 
-  // Close the favorites drawer with Esc, and when the last favorite is removed.
-  useEffect(() => {
-    if (!drawerOpen) return
-    if (favorites.length === 0) {
-      setDrawerOpen(false)
-      return
-    }
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setDrawerOpen(false)
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [drawerOpen, favorites.length])
-
   // The prompt's name space is used up against the seen-history: wipe the
   // history and regenerate. (Names already starred stay in favorites.)
   const clearSeenAndRetry = () => {
@@ -163,117 +152,110 @@ export default function App() {
       <Landing
         onEnter={() => {
           markVisited()
-          setView('app')
+          setView('create')
         }}
       />
     )
   }
 
   return (
-    <div className="app">
-      <nav className="landing-nav workspace-nav">
-        <span
-          className="wordmark app-title-link"
-          onClick={() => setView('landing')}
-          title="About — back to the landing page"
-        >
-          ◈ neologism
-        </span>
-        <div className="nav-right">
-          {profile && results.length > 0 && (
-            <span className="nav-note" title="Results re-ranked toward your saved names">✨ tuned</span>
-          )}
-          {favorites.length > 0 && (
-            <button className="nav-cta" onClick={() => setDrawerOpen(true)}>
-              ★ {favorites.length} saved
-            </button>
-          )}
-        </div>
-      </nav>
+    <div className="shell">
+      <Sidebar
+        view={view}
+        savedCount={favorites.length}
+        onNavigate={setView}
+        onAbout={() => setView('landing')}
+      />
 
-      <main className="workspace">
-        <CommandBar
-          config={config}
-          onChange={setConfig}
-          onGenerate={() => handleGenerate(false)}
-          loading={loading}
-        />
-
-        <section className="canvas">
-          {error && <div className="error-banner">{error}</div>}
-
-          {metrics && <StatsPanel stats={metrics.stats} tips={tips} />}
-
-          {displayResults.length > 0 && (
-            <>
-              <div className="results-grid">
-                {displayResults.map((r) => (
-                  <NameCard
-                    key={r.name}
-                    result={r}
-                    isFavorite={favoriteNames.has(r.name)}
-                    onToggleFavorite={handleToggleFavorite}
-                    isBest={r.name === bestName}
-                  />
-                ))}
-              </div>
-              <button
-                className="more-names-btn"
-                onClick={() => handleGenerate(true)}
-                disabled={loading}
-              >
-                {loading ? 'Generating…' : 'More names'}
-              </button>
-            </>
-          )}
-
-          {exhausted && !loading && (
-            <div className="exhausted-notice">
-              <p>
-                You've seen every name this prompt can make. Try different words or
-                another mode — or clear your seen-names history and start over.
-              </p>
-              <button className="example-chip" onClick={clearSeenAndRetry}>
-                Clear seen names & regenerate
-              </button>
-            </div>
-          )}
-
-          {loading && results.length === 0 && (
-            <div className="results-grid">
-              {Array.from({ length: config.count ?? 10 }).map((_, i) => (
-                <div key={i} className="skeleton-card" style={{ animationDelay: `${i * 60}ms` }} />
-              ))}
-            </div>
-          )}
-
-          {results.length === 0 && !loading && (
-            <div className="empty-state">
-              <p>Describe what you're building — or just hit Generate.</p>
-              <div className="example-chips">
-                {examplePrompts.map((p) => (
-                  <button key={p} className="example-chip" onClick={() => tryExample(p)}>
-                    “{p}”
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-        </section>
-      </main>
-
-      {drawerOpen && (
-        <>
-          <div className="drawer-overlay" onClick={() => setDrawerOpen(false)} />
-          <div className="drawer">
-            <Favorites
-              favorites={favorites}
-              onRemove={handleToggleFavorite}
-              onClose={() => setDrawerOpen(false)}
+      <main className="page">
+        {view === 'saved' ? (
+          <SavedPage
+            favorites={favorites}
+            onToggleFavorite={handleToggleFavorite}
+            onGoCreate={() => setView('create')}
+          />
+        ) : (
+          <>
+            <CommandBar
+              config={config}
+              onChange={setConfig}
+              onGenerate={() => handleGenerate(false)}
+              loading={loading}
             />
-          </div>
-        </>
-      )}
+
+            <section className="canvas">
+              {error && <div className="error-banner">{error}</div>}
+
+              {metrics && (
+                <div className="stats-area">
+                  <StatsPanel stats={metrics.stats} tips={tips} />
+                  {profile && results.length > 0 && (
+                    <span className="nav-note" title="Results re-ranked toward your saved names">
+                      ✨ tuned to your favorites
+                    </span>
+                  )}
+                </div>
+              )}
+
+              {displayResults.length > 0 && (
+                <>
+                  <div className="results-grid">
+                    {displayResults.map((r) => (
+                      <NameCard
+                        key={r.name}
+                        result={r}
+                        isFavorite={favoriteNames.has(r.name)}
+                        onToggleFavorite={handleToggleFavorite}
+                        isBest={r.name === bestName}
+                      />
+                    ))}
+                  </div>
+                  <button
+                    className="more-names-btn"
+                    onClick={() => handleGenerate(true)}
+                    disabled={loading}
+                  >
+                    {loading ? 'Generating…' : 'More names'}
+                  </button>
+                </>
+              )}
+
+              {exhausted && !loading && (
+                <div className="exhausted-notice">
+                  <p>
+                    You've seen every name this prompt can make. Try different words or
+                    another mode — or clear your seen-names history and start over.
+                  </p>
+                  <button className="example-chip" onClick={clearSeenAndRetry}>
+                    Clear seen names & regenerate
+                  </button>
+                </div>
+              )}
+
+              {loading && results.length === 0 && (
+                <div className="results-grid">
+                  {Array.from({ length: config.count ?? 10 }).map((_, i) => (
+                    <div key={i} className="skeleton-card" style={{ animationDelay: `${i * 60}ms` }} />
+                  ))}
+                </div>
+              )}
+
+              {results.length === 0 && !loading && !exhausted && (
+                <div className="empty-state">
+                  <p>Describe what you're building — or just hit Generate.</p>
+                  <div className="example-chips">
+                    {examplePrompts.map((p) => (
+                      <button key={p} className="example-chip" onClick={() => tryExample(p)}>
+                        “{p}”
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </section>
+          </>
+        )}
+      </main>
     </div>
   )
 }

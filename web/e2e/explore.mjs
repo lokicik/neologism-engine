@@ -65,43 +65,40 @@ try {
   await page.waitForTimeout(2500) // let checks come back
   await shot('07-card-expanded')
 
-  // Star two names — nav shift check: nav box before/after
-  const navBefore = await page.locator('.workspace-nav').boundingBox()
+  // Star two names — layout-stability check: page content box before/after
+  const gridBefore = await page.locator('.results-grid').boundingBox()
   await page.locator('.name-card .star-btn').nth(0).click()
   await page.locator('.name-card .star-btn').nth(1).click()
-  const navAfter = await page.locator('.workspace-nav').boundingBox()
-  console.log(`nav height before star: ${navBefore?.height}, after: ${navAfter?.height}`)
-  if (navBefore && navAfter && Math.abs(navBefore.height - navAfter.height) > 0.5) {
-    console.error('FINDING: nav height changes when the saved chip appears (page shift)')
+  const gridAfter = await page.locator('.results-grid').boundingBox()
+  console.log(`grid y before star: ${gridBefore?.y}, after: ${gridAfter?.y}`)
+  if (gridBefore && gridAfter && Math.abs(gridBefore.y - gridAfter.y) > 0.5) {
+    console.error('FINDING: starring shifts the results grid (page shift)')
   }
   await shot('08-after-star')
 
-  // Drawer — hover a row first so the revealed actions are captured.
-  await page.click('.nav-cta', { timeout: 5000 })
-  await page.waitForSelector('.drawer')
+  // Saved page (Phase 47: sidebar nav, full page — no drawer)
+  await page.locator('.sidebar-item', { hasText: 'Saved' }).click()
+  await page.waitForSelector('.saved-page')
   await page.waitForTimeout(300)
-  await page.locator('.fav-row').first().hover()
-  await page.waitForTimeout(200)
-  await shot('09-drawer')
+  await shot('09-saved-page')
 
-  // Per-row copy, then remove one favorite from the drawer.
-  await page.locator('.fav-row').first().locator('.fav-row-actions .icon-btn').first().click()
-  await page.waitForTimeout(200)
-  await shot('09b-drawer-row-copied')
-  await page.locator('.fav-row').last().hover()
-  await page.locator('.fav-row').last().locator('.fav-row-actions .icon-btn').last().click()
+  // Unstar one saved card (removes it), then check the count updates.
+  await page.locator('.saved-page .name-card .star-btn').last().click()
   await page.waitForTimeout(300)
-  await shot('10-drawer-after-remove')
-  await page.keyboard.press('Escape')
+  await shot('10-saved-after-remove')
+
+  // Back to create via sidebar.
+  await page.locator('.sidebar-item', { hasText: 'Create' }).click()
+  await page.waitForSelector('.command-bar')
 
   // Mobile pass
   await page.setViewportSize({ width: 390, height: 844 })
   await page.waitForTimeout(400)
   await shot('11-mobile-dashboard')
-  await page.click('.nav-cta')
-  await page.waitForSelector('.drawer')
+  await page.locator('.sidebar-item', { hasText: 'Saved' }).click()
+  await page.waitForSelector('.saved-page')
   await page.waitForTimeout(300)
-  await shot('12-mobile-drawer')
+  await shot('12-mobile-saved')
 
   console.log('explore complete — review shots in', SHOTS)
 } catch (err) {
