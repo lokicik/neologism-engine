@@ -23,6 +23,14 @@ function idleMap(): Record<string, DomainStatus> {
   return m
 }
 
+// Single overall score (Phase 37) — same formula as the engine's
+// composite_score (0.40·pronounce + 0.30·memorability + 0.30·novelty).
+function composite(r: NameResult): number {
+  return Math.round(
+    0.4 * r.score_pronounce + 0.3 * r.score_memorability + 0.3 * r.score_novelty,
+  )
+}
+
 // Render the structural facts as a short human sentence fragment list.
 function whyParts(e: Explanation): string[] {
   const parts: string[] = []
@@ -124,30 +132,12 @@ export function NameCard({ result, isFavorite, onToggleFavorite, badges = [] }: 
       <div className="card-meta">
         <span className="style-tag">{STYLE_LABEL[result.style]}</span>
         <span className="syl-tag">{result.syllables} syl.</span>
-      </div>
-
-      <div className="scores">
-        <div className="score-row">
-          <span className="score-label">Pronounce</span>
-          <div className="score-bar">
-            <div className="score-fill" style={{ width: `${result.score_pronounce}%`, background: '#6ee7b7' }} />
-          </div>
-          <span className="score-value">{result.score_pronounce}</span>
-        </div>
-        <div className="score-row">
-          <span className="score-label">Novelty</span>
-          <div className="score-bar">
-            <div className="score-fill" style={{ width: `${result.score_novelty}%`, background: '#a5b4fc' }} />
-          </div>
-          <span className="score-value">{result.score_novelty}</span>
-        </div>
-        <div className="score-row">
-          <span className="score-label">Memorable</span>
-          <div className="score-bar">
-            <div className="score-fill" style={{ width: `${result.score_memorability}%`, background: '#fbbf24' }} />
-          </div>
-          <span className="score-value">{result.score_memorability}</span>
-        </div>
+        <span
+          className="composite-score"
+          title="Overall score — pronounceability, memorability and originality blended. Details under “Why this name?”"
+        >
+          ★ {composite(result)}
+        </span>
       </div>
 
       {result.connotations.length > 0 && (
@@ -161,7 +151,13 @@ export function NameCard({ result, isFavorite, onToggleFavorite, badges = [] }: 
 
       <div className="why-row">
         {why ? (
-          <span className="why-text">{whyParts(why).join(' · ')}</span>
+          <span className="why-text">
+            {whyParts(why).join(' · ')}
+            <br />
+            <span className="why-scores">
+              say {why.score_pronounce} · stick {why.score_memorability} · new {why.score_novelty}
+            </span>
+          </span>
         ) : (
           <button className="check-domain-btn" onClick={loadWhy}>
             Why this name?

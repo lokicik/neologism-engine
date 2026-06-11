@@ -6,6 +6,9 @@ interface Props {
   onChange: (cfg: Config) => void
   onGenerate: () => void
   loading: boolean
+  aiRank: boolean
+  onAiRank: (on: boolean) => void
+  ranking: boolean
 }
 
 // Startup/project naming modes — all big_tech under the hood; respell/realword
@@ -17,6 +20,21 @@ const MODES: { value: Mode; label: string; desc: string }[] = [
   { value: 'realword', label: 'Real words', desc: 'Evocative dictionary words — Notion, Linear' },
   { value: 'respell', label: 'Respelled', desc: 'Twisted real words — Lyft, Tumblr' },
   { value: 'compound', label: 'Compound', desc: 'Two-word names — SwiftForge, BrightLoom' },
+]
+
+// The two segmented refiners replace the old five sliders (Phase 37): each
+// option is a preset over the underlying engine knobs.
+const LENGTHS: { label: string; min: number; max: number }[] = [
+  { label: 'Short', min: 4, max: 6 },
+  { label: 'Medium', min: 5, max: 9 },
+  { label: 'Long', min: 8, max: 14 },
+  { label: 'Any', min: 4, max: 12 },
+]
+
+const CREATIVITY: { label: string; temperature: number; variety: number }[] = [
+  { label: 'Safe', temperature: 0.6, variety: 0.15 },
+  { label: 'Balanced', temperature: 0.85, variety: 0.3 },
+  { label: 'Wild', temperature: 1.2, variety: 0.6 },
 ]
 
 const CREATIVE_STYLES: { value: Style; label: string; desc: string }[] = [
@@ -45,8 +63,8 @@ function currentMode(config: Config): Mode {
   return 'brandable'
 }
 
-export function Controls({ config, onChange, onGenerate, loading }: Props) {
-  const [showCreative, setShowCreative] = useState(config.style !== 'big_tech')
+export function Controls({ config, onChange, onGenerate, loading, aiRank, onAiRank, ranking }: Props) {
+  const [showAdvanced, setShowAdvanced] = useState(config.style !== 'big_tech')
 
   const set = <K extends keyof Config>(key: K, value: Config[K]) =>
     onChange({ ...config, [key]: value })
@@ -70,11 +88,24 @@ export function Controls({ config, onChange, onGenerate, loading }: Props) {
 
   return (
     <div className="controls">
-      <div className="style-selector">
+      <div className="hero">
+        <textarea
+          className="hero-input"
+          rows={2}
+          placeholder="What are you building? (optional — e.g. an app for splitting expenses with friends)"
+          value={config.description ?? ''}
+          onChange={(e) => set('description', e.target.value)}
+        />
+        <button className="generate-btn" onClick={onGenerate} disabled={loading}>
+          {loading ? 'Generating…' : 'Generate'}
+        </button>
+      </div>
+
+      <div className="mode-pills">
         {MODES.map((m) => (
           <button
             key={m.value}
-            className={`style-btn${isStartup && mode === m.value ? ' active' : ''}`}
+            className={`pill${isStartup && mode === m.value ? ' active' : ''}`}
             onClick={() => setMode(m.value)}
             title={m.desc}
           >
@@ -83,152 +114,134 @@ export function Controls({ config, onChange, onGenerate, loading }: Props) {
         ))}
       </div>
 
-      <button
-        className={`creative-toggle${!isStartup ? ' active' : ''}`}
-        onClick={() => setShowCreative(!showCreative)}
-      >
-        {showCreative ? '▾' : '▸'} Creative styles (Sci-Fi, Fantasy)
-      </button>
-
-      {showCreative && (
-        <div className="variant-selector">
-          {CREATIVE_STYLES.map((s) => (
+      <div className="refine-row">
+        <div className="segment-group">
+          <span className="segment-label">Length</span>
+          {LENGTHS.map((l) => (
             <button
-              key={s.value}
-              className={`variant-btn${config.style === s.value ? ' active' : ''}`}
-              onClick={() => setCreativeStyle(s.value)}
-              title={s.desc}
+              key={l.label}
+              className={`segment${config.min_len === l.min && config.max_len === l.max ? ' active' : ''}`}
+              onClick={() => onChange({ ...config, min_len: l.min, max_len: l.max })}
             >
-              {s.label}
+              {l.label}
             </button>
           ))}
         </div>
-      )}
+        <div className="segment-group">
+          <span className="segment-label">Creativity</span>
+          {CREATIVITY.map((c) => (
+            <button
+              key={c.label}
+              className={`segment${config.temperature === c.temperature && config.variety === c.variety ? ' active' : ''}`}
+              onClick={() => onChange({ ...config, temperature: c.temperature, variety: c.variety })}
+            >
+              {c.label}
+            </button>
+          ))}
+        </div>
+      </div>
 
-      {variants && (
-        <div className="variant-selector">
-          <button
-            className={`variant-btn${!config.variant ? ' active' : ''}`}
-            onClick={() => set('variant', undefined)}
+      <button className="creative-toggle" onClick={() => setShowAdvanced(!showAdvanced)}>
+        {showAdvanced ? '▾' : '▸'} Advanced
+      </button>
+
+      {showAdvanced && (
+        <div className="advanced-panel">
+          {isStartup && mode === 'brandable' && (
+            <label>
+              <span>Seed words (comma-separated)</span>
+              <input
+                type="text"
+                placeholder="e.g. sync, orbit"
+                value={config.roots?.join(', ') ?? ''}
+                onChange={(e) => {
+                  const roots = e.target.value
+                    .split(',')
+                    .map((s) => s.trim().toLowerCase())
+                    .filter(Boolean)
+                  set('roots', roots)
+                }}
+              />
+            </label>
+          )}
+
+          <div className="constraints-row">
+            <label>
+              <span>Starts with</span>
+              <input
+                type="text"
+                maxLength={3}
+                placeholder="e.g. z"
+                value={config.starts_with ?? ''}
+                onChange={(e) => set('starts_with', e.target.value || undefined)}
+              />
+            </label>
+            <label>
+              <span>Contains</span>
+              <input
+                type="text"
+                maxLength={6}
+                placeholder="e.g. ex"
+                value={config.contains ?? ''}
+                onChange={(e) => set('contains', e.target.value || undefined)}
+              />
+            </label>
+          </div>
+
+          <div className="advanced-creative">
+            <span className="segment-label">Creative styles</span>
+            <div className="variant-selector">
+              {CREATIVE_STYLES.map((s) => (
+                <button
+                  key={s.value}
+                  className={`variant-btn${config.style === s.value ? ' active' : ''}`}
+                  onClick={() => setCreativeStyle(s.value)}
+                  title={s.desc}
+                >
+                  {s.label}
+                </button>
+              ))}
+              {!isStartup && (
+                <button className="variant-btn" onClick={() => setMode('brandable')}>
+                  ← Startup
+                </button>
+              )}
+            </div>
+            {variants && (
+              <div className="variant-selector">
+                <button
+                  className={`variant-btn${!config.variant ? ' active' : ''}`}
+                  onClick={() => set('variant', undefined)}
+                >
+                  Mixed
+                </button>
+                {variants.map((v) => (
+                  <button
+                    key={v.value}
+                    className={`variant-btn${config.variant === v.value ? ' active' : ''}`}
+                    onClick={() => set('variant', v.value)}
+                  >
+                    {v.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <label
+            className="tuned-toggle"
+            title="Re-rank results with a local LLM (llama.cpp at 127.0.0.1:8080). Falls back silently to offline ranking if unavailable."
           >
-            Mixed
-          </button>
-          {variants.map((v) => (
-            <button
-              key={v.value}
-              className={`variant-btn${config.variant === v.value ? ' active' : ''}`}
-              onClick={() => set('variant', v.value)}
-            >
-              {v.label}
-            </button>
-          ))}
-        </div>
-      )}
-
-      <div className="sliders">
-        <label>
-          <span>Count <strong>{config.count}</strong></span>
-          <input
-            type="range" min={3} max={20} step={1}
-            value={config.count ?? 10}
-            onChange={(e) => set('count', Number(e.target.value))}
-          />
-        </label>
-
-        <label>
-          <span>Min length <strong>{config.min_len}</strong></span>
-          <input
-            type="range" min={3} max={8} step={1}
-            value={config.min_len ?? 4}
-            onChange={(e) => set('min_len', Number(e.target.value))}
-          />
-        </label>
-
-        <label>
-          <span>Max length <strong>{config.max_len}</strong></span>
-          <input
-            type="range" min={6} max={18} step={1}
-            value={config.max_len ?? 12}
-            onChange={(e) => set('max_len', Number(e.target.value))}
-          />
-        </label>
-
-        <label>
-          <span>Randomness <strong>{((config.temperature ?? 0.7) * 100).toFixed(0)}%</strong></span>
-          <input
-            type="range" min={0.1} max={1.5} step={0.05}
-            value={config.temperature ?? 0.7}
-            onChange={(e) => set('temperature', Number(e.target.value))}
-          />
-        </label>
-
-        {isStartup && (
-          <label title="How different the names in a batch are from each other (shapes, lengths, sounds). Higher = more varied, looser quality.">
-            <span>Variety <strong>{((config.variety ?? 0.3) * 100).toFixed(0)}%</strong></span>
             <input
-              type="range" min={0} max={1} step={0.05}
-              value={config.variety ?? 0.3}
-              onChange={(e) => set('variety', Number(e.target.value))}
+              type="checkbox"
+              checked={aiRank}
+              onChange={(e) => onAiRank(e.target.checked)}
+              disabled={loading || ranking}
             />
-          </label>
-        )}
-      </div>
-
-      {isStartup && mode === 'brandable' && (
-        <div className="roots-input">
-          <label>
-            <span>Describe your product (optional)</span>
-            <textarea
-              rows={2}
-              placeholder="e.g. an app for splitting expenses with friends"
-              value={config.description ?? ''}
-              onChange={(e) => set('description', e.target.value)}
-            />
-          </label>
-          <label>
-            <span>Or seed words (comma-separated)</span>
-            <input
-              type="text"
-              placeholder="e.g. sync, orbit"
-              value={config.roots?.join(', ') ?? ''}
-              onChange={(e) => {
-                const roots = e.target.value
-                  .split(',')
-                  .map((s) => s.trim().toLowerCase())
-                  .filter(Boolean)
-                set('roots', roots)
-              }}
-            />
+            <span>✨ AI rank (local LLM){ranking ? ' — ranking…' : ''}</span>
           </label>
         </div>
       )}
-
-      <div className="constraints-row">
-        <label>
-          <span>Starts with</span>
-          <input
-            type="text"
-            maxLength={3}
-            placeholder="e.g. z"
-            value={config.starts_with ?? ''}
-            onChange={(e) => set('starts_with', e.target.value || undefined)}
-          />
-        </label>
-        <label>
-          <span>Contains</span>
-          <input
-            type="text"
-            maxLength={6}
-            placeholder="e.g. ex"
-            value={config.contains ?? ''}
-            onChange={(e) => set('contains', e.target.value || undefined)}
-          />
-        </label>
-      </div>
-
-      <button className="generate-btn" onClick={onGenerate} disabled={loading}>
-        {loading ? 'Generating…' : 'Generate'}
-      </button>
     </div>
   )
 }

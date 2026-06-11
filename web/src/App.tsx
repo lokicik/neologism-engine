@@ -10,12 +10,13 @@ import { NameCard } from './components/NameCard'
 import { StatsPanel } from './components/StatsPanel'
 import { Favorites } from './components/Favorites'
 
+// Defaults match the UI's "Any" length and "Balanced" creativity segments.
 const DEFAULT_CONFIG: Config = {
   style: 'big_tech',
   count: 10,
   min_len: 4,
   max_len: 12,
-  temperature: 0.7,
+  temperature: 0.85,
   variety: 0.3,
   roots: [],
 }
@@ -34,12 +35,17 @@ export default function App() {
   const [results, setResults] = useState<NameResult[]>([])
   const [metrics, setMetrics] = useState<BatchMetrics | null>(null)
   const [favorites, setFavorites] = useState<NameResult[]>(loadFavorites)
-  const [tuned, setTuned] = useState(false)
   const [aiRank, setAiRank] = useState(false)
   const [loading, setLoading] = useState(false)
   const [ranking, setRanking] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const recentRef = useRef<string[]>(loadRecent())
+  // Mirror of `results` for the append path — handleGenerate is memoized on
+  // [config, aiRank], so reading state directly there would be stale.
+  const resultsRef = useRef<NameResult[]>([])
+  useEffect(() => {
+    resultsRef.current = results
+  }, [results])
 
   // On mount: if a #names= share URL is present, union those names into favorites.
   useEffect(() => {
@@ -72,7 +78,9 @@ export default function App() {
     saveRecent(recentRef.current)
   }
 
-  const handleGenerate = useCallback(async () => {
+  // `append` = the "More names" button: the new batch joins the existing grid
+  // (the exclude-recent window guarantees it's all fresh names).
+  const handleGenerate = useCallback(async (append = false) => {
     setLoading(true)
     setError(null)
     try {
@@ -86,9 +94,10 @@ export default function App() {
 
       // Show the offline-ranked top-N immediately — the LLM reorders after.
       const offlineTop = pool.slice(0, topN)
-      setResults(offlineTop)
+      const shown = append ? [...resultsRef.current, ...offlineTop] : offlineTop
+      setResults(shown)
       markSeen(offlineTop)
-      setMetrics(offlineTop.length > 0 ? await batchMetrics(offlineTop) : null)
+      setMetrics(shown.length > 0 ? await batchMetrics(shown) : null)
       setLoading(false)
 
       // Opt-in second stage: local LLM re-ranks the pool, surfaces its top picks.
@@ -103,9 +112,11 @@ export default function App() {
               .map((n) => byName.get(n))
               .filter((r): r is NameResult => !!r)
             if (reordered.length > 0) {
-              setResults(reordered)
+              const base = append ? resultsRef.current.slice(0, -offlineTop.length) : []
+              const next = [...base, ...reordered]
+              setResults(next)
               markSeen(reordered)
-              setMetrics(await batchMetrics(reordered))
+              setMetrics(await batchMetrics(next))
             }
           }
         } finally {
@@ -125,8 +136,9 @@ export default function App() {
   const favoriteNames = new Set(favorites.map((f) => f.name))
 
   // Preference profile learned from favorites (Namelix-style); needs ≥3.
+  // Phase 37: applied automatically once it exists — no toggle.
   const profile = buildProfile(favorites)
-  const displayResults = tuned && profile ? rankByPreference(results, profile) : results
+  const displayResults = profile ? rankByPreference(results, profile) : results
 
   // Standout names by metric (compared by name, so re-ranking doesn't break badges).
   const bestName = metrics && results.length >= 2 ? results[metrics.stats.best_index]?.name : undefined
@@ -156,48 +168,47 @@ export default function App() {
         <Controls
           config={config}
           onChange={setConfig}
-          onGenerate={handleGenerate}
+          onGenerate={() => handleGenerate(false)}
           loading={loading}
+          aiRank={aiRank}
+          onAiRank={setAiRank}
+          ranking={ranking}
         />
-
-        <label className="tuned-toggle" title="Re-rank results with a local LLM (llama.cpp at 127.0.0.1:8080). Falls back silently to offline ranking if unavailable.">
-          <input
-            type="checkbox"
-            checked={aiRank}
-            onChange={(e) => setAiRank(e.target.checked)}
-            disabled={loading || ranking}
-          />
-          <span>✨ AI rank (local LLM){ranking ? ' — ranking…' : ''}</span>
-        </label>
 
         {error && <div className="error-banner">{error}</div>}
 
         {metrics && <StatsPanel stats={metrics.stats} tips={tips} />}
 
         {results.length > 0 && profile && (
-          <label className="tuned-toggle">
-            <input type="checkbox" checked={tuned} onChange={(e) => setTuned(e.target.checked)} />
-            <span>Tuned to your favorites</span>
-          </label>
+          <div className="tuned-hint">✨ tuned to your favorites</div>
         )}
 
         {displayResults.length > 0 && (
-          <section className="results-grid">
-            {displayResults.map((r) => (
-              <NameCard
-                key={r.name}
-                result={r}
-                isFavorite={favoriteNames.has(r.name)}
-                onToggleFavorite={handleToggleFavorite}
-                badges={badgesFor(r)}
-              />
-            ))}
-          </section>
+          <>
+            <section className="results-grid">
+              {displayResults.map((r) => (
+                <NameCard
+                  key={r.name}
+                  result={r}
+                  isFavorite={favoriteNames.has(r.name)}
+                  onToggleFavorite={handleToggleFavorite}
+                  badges={badgesFor(r)}
+                />
+              ))}
+            </section>
+            <button
+              className="more-names-btn"
+              onClick={() => handleGenerate(true)}
+              disabled={loading || ranking}
+            >
+              {loading ? 'Generating…' : 'More names'}
+            </button>
+          </>
         )}
 
         {results.length === 0 && !loading && (
           <div className="empty-state">
-            Choose a style and hit Generate.
+            Describe what you're building — or just hit Generate.
           </div>
         )}
       </main>
