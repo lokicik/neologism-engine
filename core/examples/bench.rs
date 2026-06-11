@@ -9,7 +9,10 @@ use neologism_core::style::{Config, Style};
 
 const CALLS: usize = 200;
 const COUNT: usize = 10;
-const WINDOW: usize = 2000;
+// Phase 35: matches the web app's widened RECENT_WINDOW. 200 calls × 10 only
+// fills 2k of it, so also pre-fill the deque to measure the steady-state cost
+// of building the full-size exact set per call.
+const WINDOW: usize = 20000;
 
 fn cfg(seed: u64, exclude: Vec<String>) -> Config {
     Config {
@@ -32,6 +35,11 @@ fn cfg(seed: u64, exclude: Vec<String>) -> Config {
 
 fn main() {
     let mut recent: VecDeque<String> = VecDeque::new();
+    // Pre-fill to steady state: a long-running session whose exclude list is
+    // already at the full window size on every call.
+    for i in 0..WINDOW {
+        recent.push_back(format!("prefill{i}"));
+    }
     let mut times_ms: Vec<f64> = Vec::with_capacity(CALLS);
 
     for i in 0..CALLS {

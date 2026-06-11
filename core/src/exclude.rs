@@ -13,13 +13,22 @@
 //!   2. **Edit-1 exclusion**: reject candidates within Levenshtein distance 1
 //!      of any excluded name (one substitution, insertion, or deletion).
 //!
-//! Performance budget (WASM): the exclude list is at most 2 000 entries.
-//! Build cost: 2 000 × (HashSet insert + 24 ends_with) ≈ negligible.
-//! Probe cost per candidate: exact/stem = O(1). Edit-1 scan: only the three
-//! length buckets [len-1, len, len+1] are scanned; each bucket holds ~220
-//! entries on average; within_edit1 is O(max(|a|,|b|)) ≈ O(12). Total ≈
-//! 660 × 12 = ~8 k ops per probe, run only on candidates that survived every
-//! cheaper filter. Well under 1 ms per generate() call.
+//! Scoping (Phase 35): **exact** exclusion covers the entire list, while the
+//! fuzzy and stem layers only cover the most recent `fuzzy_window` entries.
+//! They must not scale together — there are only ~700 single-root stems, and
+//! edit-1 balls carpet the 4–12-char space, so session-scale fuzzy/stem
+//! exclusion would starve generation. Exact exclusion is starvation-safe at
+//! any scale (it blocks single points, not neighborhoods), and it is what
+//! bounds long-session repeats.
+//!
+//! Performance budget (WASM): build cost is one lowercase + HashSet insert per
+//! excluded name (a 20 k-name list ≈ low single-digit ms), plus the suffix
+//! strip + bucket insert for the `fuzzy_window` newest. Probe cost per
+//! candidate: exact/stem = O(1). Edit-1 scan: only the three length buckets
+//! [len-1, len, len+1] are scanned; each bucket holds ~220 entries on average
+//! at the default window of 2 000; within_edit1 is O(max(|a|,|b|)) ≈ O(12).
+//! Total ≈ 660 × 12 = ~8 k ops per probe, run only on candidates that
+//! survived every cheaper filter. Well under 1 ms per generate() call.
 
 use std::collections::{HashMap, HashSet};
 use crate::blend::tech_suffix_of;
@@ -82,15 +91,24 @@ pub struct ExcludeSet {
 
 impl ExcludeSet {
     /// Build from the caller-supplied exclude list. Lowercases internally.
-    pub fn new(names: &[String]) -> Self {
+    ///
+    /// `fuzzy_window`: the fuzzy (edit-1) and stem layers only cover the last
+    /// `fuzzy_window` entries; exact-match covers everything. Callers append
+    /// newest names last (the web app and all harnesses do), so "last N" =
+    /// "most recent N". `fuzzy_window >= names.len()` reproduces the pre-35
+    /// full-scope behavior exactly.
+    pub fn new(names: &[String], fuzzy_window: usize) -> Self {
         let mut exact = HashSet::new();
         let mut by_len: HashMap<usize, Vec<String>> = HashMap::new();
         let mut stems = HashSet::new();
-        for name in names {
+        let fuzzy_from = names.len().saturating_sub(fuzzy_window);
+        for (i, name) in names.iter().enumerate() {
             let lower = name.to_lowercase();
-            let stem = stem_of(&lower).to_string();
-            by_len.entry(lower.chars().count()).or_default().push(lower.clone());
-            stems.insert(stem);
+            if i >= fuzzy_from {
+                let stem = stem_of(&lower).to_string();
+                by_len.entry(lower.chars().count()).or_default().push(lower.clone());
+                stems.insert(stem);
+            }
             exact.insert(lower);
         }
         Self { exact, by_len, stems }
@@ -184,14 +202,14 @@ mod tests {
 
     #[test]
     fn excludeset_exact() {
-        let ex = ExcludeSet::new(&["keyston".to_string()]);
+        let ex = ExcludeSet::new(&["keyston".to_string()], usize::MAX);
         assert!(ex.rejects("keyston", false, false));
         assert!(!ex.rejects("keynova", false, false));
     }
 
     #[test]
     fn excludeset_fuzzy_edit1() {
-        let ex = ExcludeSet::new(&["keyston".to_string()]);
+        let ex = ExcludeSet::new(&["keyston".to_string()], usize::MAX);
         assert!(ex.rejects("keystona", true, false)); // 1 insertion
         assert!(ex.rejects("keystonn", true, false)); // 1 insertion
         assert!(!ex.rejects("keynova", true, false)); // unrelated
@@ -199,7 +217,7 @@ mod tests {
 
     #[test]
     fn excludeset_stem_match() {
-        let ex = ExcludeSet::new(&["keyston".to_string()]);
+        let ex = ExcludeSet::new(&["keyston".to_string()], usize::MAX);
         // "keystonify" stem is "keyston" → rejected
         assert!(ex.rejects("keystonify", false, true));
     }
@@ -207,21 +225,48 @@ mod tests {
     #[test]
     fn excludeset_stem_reverse() {
         // If keystonify is excluded, keyston should be rejected via stem too.
-        let ex = ExcludeSet::new(&["keystonify".to_string()]);
+        let ex = ExcludeSet::new(&["keystonify".to_string()], usize::MAX);
         assert!(ex.rejects("keyston", false, true));
     }
 
     #[test]
     fn excludeset_fuzzy_false_no_extra_rejects() {
-        let ex = ExcludeSet::new(&["keyston".to_string()]);
+        let ex = ExcludeSet::new(&["keyston".to_string()], usize::MAX);
         // With both false, only exact match fires.
         assert!(!ex.rejects("keystona", false, false));
         assert!(!ex.rejects("keystonify", false, false));
     }
 
     #[test]
+    fn excludeset_fuzzy_window_scopes_layers() {
+        // "keyston" is old (outside the fuzzy window of 1), "vanta" is recent.
+        let ex = ExcludeSet::new(&["keyston".to_string(), "vanta".to_string()], 1);
+        // Exact exclusion covers the whole list, old entries included.
+        assert!(ex.rejects("keyston", true, true));
+        assert!(ex.rejects("vanta", true, true));
+        // Fuzzy/stem layers only cover the recent window: keyston variants pass…
+        assert!(!ex.rejects("keystona", true, true)); // edit-1 of old entry
+        assert!(!ex.rejects("keystonify", true, true)); // stem of old entry
+        // …while variants of the recent entry are still rejected.
+        assert!(ex.rejects("vantas", true, true)); // edit-1 of recent entry
+    }
+
+    #[test]
+    fn excludeset_max_window_matches_full_scope() {
+        // fuzzy_window >= names.len() must reproduce pre-35 behavior: every
+        // entry is covered by all three layers.
+        let names = vec!["keyston".to_string(), "vanta".to_string()];
+        let ex = ExcludeSet::new(&names, usize::MAX);
+        let probes = ["keyston", "keystona", "keystonify", "vanta", "vantas", "glorbnex"];
+        let expected = [true, true, true, true, true, false];
+        for (p, want) in probes.iter().zip(expected) {
+            assert_eq!(ex.rejects(p, true, true), want, "probe {p}");
+        }
+    }
+
+    #[test]
     fn excludeset_unrelated_accepted() {
-        let ex = ExcludeSet::new(&["keyston".to_string()]);
+        let ex = ExcludeSet::new(&["keyston".to_string()], usize::MAX);
         assert!(!ex.rejects("glorbnex", true, true));
         assert!(!ex.rejects("vantaflow", true, true));
     }

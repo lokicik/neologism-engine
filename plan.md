@@ -536,6 +536,50 @@ cache holds identical contents).
 
 ---
 
+## Phase 35 — Session-Scale Distinctness (100% distinct at 100k)
+
+**Motivation.** A 100k sweep after Phase 34 yielded 57.3% distinct. The limiter was
+structural: the 2,000-name exclude window legally re-admits any name after ~200 batches, and
+the top attractors recurred exactly at that floor (Keyston 43× ≈ once per 233 batches).
+
+**What was built.** Exclusion layers now have **separate scopes**
+(`ExcludeSet::new(names, fuzzy_window)`, lib.rs knob `fuzzy_window = 2000`):
+**exact**-match covers the *entire* exclude list, while the fuzzy (edit-1) and stem layers
+only cover the most recent `fuzzy_window` entries. They must not scale together — there are
+only ~700 single-root stems and edit-1 balls carpet the 4–12-char space, so session-scale
+fuzzy/stem exclusion would starve generation; exact exclusion blocks single points and is
+starvation-safe at any scale. `fuzzy_window ≥ list len` reproduces pre-35 behavior exactly
+(regression-guard test), so behavior with exclude lists ≤ 2,000 is unchanged.
+Web: `RECENT_WINDOW` 2000 → **20000** (~200 KB through the JSON boundary, negligible).
+
+**100k sweep (10,000 batches × 10, variety 0.3):**
+
+| | pre-33 | Phase 34 (win 2000) | Phase 35 (full session) |
+|---|---|---|---|
+| distinct | 49,714 (49.7%) | 57,275 (57.3%) | **100,000 (100.0%)** |
+| worst recurrence | 47 | 43 | **1** |
+| short batches | 0 | 0 | **0** |
+| suffix conc. (avg/peak) | 1.35 / 4 | 1.25 / 2 | 1.20 / 2 |
+| quality avg (pron/nov/mem) | 90.9 / 92.5 / 70.2 | 90.9 / 92.1 / 69.7 | 90.5 / 90.4 / 64.3 |
+| drift, first→last 1000 batches | flat | flat | pron −0.5, nov −1.9, **mem −6.9** |
+
+Full-session exact exclusion makes repeats impossible and generation **never starves**
+(0/10,000 short batches) — the open question was quality, and the drift column is the honest
+answer: pron holds, but memorability decays as the finite short-name space exhausts (the
+engine is forced into longer names by batch ~8,000). This is the real capacity boundary, and
+it's far beyond any real session.
+
+**Shipped web config (window 20,000), measured at 2,500 batches / 25k names:**
+distinct 24,381 (**97.5%**), worst recurrence 2, 0 short batches, quality drift
+pron 90.9→90.8, nov 91.8→91.4, mem 69.5→67.3 — for a session ~10× longer than heavy real
+usage, repeats effectively vanish and quality stays within ~2 points.
+
+Bench at the 20k steady-state window: **18.1 ms/call** (vs 15.9 at 2k) — the larger exact
+set costs ~2 ms. Sci-Fi/Fantasy untouched (`generate_markov` has its own exact-only set);
+seeded sample/metrics byte-identical. **72 tests green** (2 new scoping tests).
+
+---
+
 ## Bottom line
 
 Big-tech is the strongest style, tuned through Phase 25 and extended since:

@@ -62,6 +62,13 @@ pub struct BigTechTuning {
     /// prefix. cap = max(1, ceil(count × max_share)). 1.0 disables the cap.
     /// Default 0.2 → cap 2 at count=10, preventing batches of e.g. 4 × "-ify".
     pub max_share: f64,
+    /// Phase 35: the fuzzy (edit-1) and stem exclusion layers only cover the
+    /// most recent `fuzzy_window` entries of cfg.exclude; exact-match covers
+    /// the whole list. They must not scale together: there are only ~700
+    /// single-root stems and edit-1 balls carpet the 4–12-char space, so
+    /// session-scale fuzzy/stem exclusion starves generation, while exact
+    /// exclusion blocks single points and is starvation-safe at any scale.
+    pub fuzzy_window: usize,
 }
 
 impl Default for BigTechTuning {
@@ -107,6 +114,8 @@ impl BigTechTuning {
             fuzzy_exclude: true,
             stem_exclude: true,
             max_share: 0.20,
+            // Phase 35: fuzzy/stem scope — constant across the variety axis.
+            fuzzy_window: 2000,
         }
     }
 }
@@ -406,8 +415,10 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, 
     // all seed-independent, so repeated calls (one per Generate click) skip setup.
     let st = BigtechStatic::get();
     // Names the user has already seen this session — never repeat them.
-    // Phase 33: ExcludeSet adds fuzzy (edit-1) and stem-level rejection on top of exact-match.
-    let exclude = ExcludeSet::new(&cfg.exclude);
+    // Phase 33: ExcludeSet adds fuzzy (edit-1) and stem-level rejection on top
+    // of exact-match. Phase 35: exact covers the whole list; fuzzy/stem only
+    // the most recent fuzzy_window entries (see the BigTechTuning field doc).
+    let exclude = ExcludeSet::new(&cfg.exclude, tuning.fuzzy_window);
 
     // Priority for blend roots: description keywords > user-supplied roots > corpus.
     let desc_keywords: Vec<String> = cfg
