@@ -54,7 +54,9 @@ export function Favorites({ favorites, onRemove }: Props) {
           <li key={f.name} className="favorites-item">
             <Monogram name={f.name} size={28} />
             <span className="fav-name">{f.name}</span>
-            <span className="fav-style">{f.style.replace('_', ' ')}</span>
+            {f.style !== 'big_tech' && (
+              <span className="fav-style">{f.style.replace('_', ' ')}</span>
+            )}
             <button
               className="icon-btn"
               onClick={() => onRemove(f)}

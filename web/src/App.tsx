@@ -140,20 +140,8 @@ export default function App() {
   const profile = buildProfile(favorites)
   const displayResults = profile ? rankByPreference(results, profile) : results
 
-  // Standout names by metric (compared by name, so re-ranking doesn't break badges).
+  // Top pick of the batch (compared by name, so re-ranking doesn't break it).
   const bestName = metrics && results.length >= 2 ? results[metrics.stats.best_index]?.name : undefined
-  const origName = results.length >= 2
-    ? results.reduce((m, r) => (r.score_novelty > m.score_novelty ? r : m)).name : undefined
-  const easyName = results.length >= 2
-    ? results.reduce((m, r) => (r.score_pronounce > m.score_pronounce ? r : m)).name : undefined
-
-  const badgesFor = (r: NameResult): string[] => {
-    const b: string[] = []
-    if (r.name === bestName) b.push('👑 Best')
-    if (r.name === origName) b.push('✦ Original')
-    if (r.name === easyName) b.push('🔊 Easy say')
-    return b
-  }
 
   const tips = metrics ? recommendations(metrics.stats, config, results) : []
 
@@ -212,7 +200,7 @@ export default function App() {
                     result={r}
                     isFavorite={favoriteNames.has(r.name)}
                     onToggleFavorite={handleToggleFavorite}
-                    badges={badgesFor(r)}
+                    isBest={r.name === bestName}
                   />
                 ))}
               </div>

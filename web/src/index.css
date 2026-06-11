@@ -488,24 +488,6 @@ body {
   color: var(--muted);
 }
 
-.card-badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: .3rem;
-  margin-bottom: -.1rem;
-}
-
-.badge-pill {
-  font-size: .64rem;
-  font-weight: 600;
-  padding: .12rem .45rem;
-  border-radius: 999px;
-  background: linear-gradient(135deg, #7c6af933, #4ecca333);
-  border: 1px solid var(--border);
-  color: var(--text);
-}
-
-
 /* Results grid */
 .results-grid {
   display: grid;
@@ -514,20 +496,21 @@ body {
   margin-top: .5rem;
 }
 
-/* NameCard */
+/* NameCard (Phase 42: one strong line, one quiet line, one footer row) */
 .name-card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 1rem 1.1rem;
+  padding: .9rem 1rem;
   display: flex;
   flex-direction: column;
-  gap: .65rem;
+  gap: .5rem;
   transition: border-color .15s;
 }
-.name-card.favorited { border-color: #f59e0b88; }
+.name-card:hover { border-color: rgba(255, 255, 255, .14); }
+.name-card.favorited { border-color: #f59e0b66; }
 
-.card-header {
+.card-top {
   display: flex;
   align-items: center;
   gap: .6rem;
@@ -535,13 +518,76 @@ body {
 
 .name-text {
   font-family: var(--font-display);
-  font-size: 1.3rem;
+  font-size: 1.25rem;
   font-weight: 700;
   letter-spacing: -.02em;
   flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.card-actions { display: flex; gap: .3rem; }
+.card-score {
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+  font-size: .82rem;
+  font-weight: 700;
+  color: var(--accent2);
+  white-space: nowrap;
+}
+.card-crown { font-size: .8rem; }
+
+.card-meta-line {
+  font-size: .76rem;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card-expansion {
+  display: flex;
+  flex-direction: column;
+  gap: .4rem;
+  padding-top: .5rem;
+  border-top: 1px solid var(--border);
+  font-size: .72rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.why-scores {
+  opacity: .7;
+  font-size: .66rem;
+}
+
+.card-actions-row {
+  margin-top: auto;
+  padding-top: .35rem;
+  display: flex;
+  align-items: center;
+  gap: .9rem;
+}
+
+.card-action {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: .76rem;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color .15s;
+}
+.card-action:hover { color: var(--text); }
+.card-action.active { color: var(--accent); }
+
+.card-icons {
+  margin-left: auto;
+  display: flex;
+  gap: .15rem;
+}
 
 .icon-btn {
   background: none;
@@ -549,74 +595,24 @@ body {
   color: var(--muted);
   cursor: pointer;
   font-size: 1rem;
-  padding: .25rem .35rem;
+  padding: .15rem .3rem;
   border-radius: 5px;
   transition: color .15s;
 }
 .icon-btn:hover { color: var(--text); }
 .star-btn.starred { color: #f59e0b; }
 
-.card-meta { display: flex; gap: .5rem; align-items: center; }
-
-.style-tag, .syl-tag {
-  font-size: .7rem;
-  padding: .15rem .5rem;
-  border-radius: 999px;
-  background: var(--surface2);
-  color: var(--muted);
-  border: 1px solid var(--border);
-}
-
-/* Scores */
-.composite-score {
-  margin-left: auto;
-  font-size: .8rem;
-  font-weight: 700;
-  color: var(--accent2);
-}
-
-.why-scores {
-  opacity: .7;
-  font-size: .64rem;
-}
-
-/* Connotation tags */
-.connotations {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: .3rem;
-}
-
-.conn-label {
-  font-size: .64rem;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: .05em;
-  margin-right: .1rem;
-}
-
-.conn-tag {
-  font-size: .68rem;
-  padding: .1rem .45rem;
-  border-radius: 4px;
-  background: var(--surface2);
-  color: var(--text);
-  border: 1px solid var(--border);
-}
-
-/* Domain row */
+/* Availability badges (inside the card expansion) */
 .domain-row {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: .4rem;
-  margin-top: .1rem;
+  gap: .35rem;
 }
 
 .badge {
-  font-size: .68rem;
-  padding: .15rem .5rem;
+  font-size: .66rem;
+  padding: .12rem .45rem;
   border-radius: 999px;
   font-weight: 600;
   border: 1px solid transparent;
@@ -626,31 +622,10 @@ body {
 .badge-available { background: #052e16; color: #86efac; border-color: #166534; }
 .badge-taken { background: #450a0a; color: #fca5a5; border-color: #7f1d1d; }
 
-.check-domain-btn {
-  font-size: .68rem;
-  background: none;
-  border: 1px solid var(--border);
-  color: var(--muted);
-  border-radius: 999px;
-  padding: .15rem .55rem;
-  cursor: pointer;
-  transition: color .15s, border-color .15s;
-}
-.check-domain-btn:hover { color: var(--text); border-color: var(--accent); }
-
 .domain-disclaimer {
-  font-size: .62rem;
+  font-size: .6rem;
   color: var(--muted);
   opacity: .6;
-}
-
-.handle-row { margin-top: .25rem; }
-
-.why-row { margin-top: .1rem; }
-.why-text {
-  font-size: .68rem;
-  color: var(--muted);
-  line-height: 1.4;
 }
 
 .tm-link { text-decoration: none; cursor: pointer; }
@@ -958,7 +933,7 @@ body {
 
 /* Skeleton loading cards */
 .skeleton-card {
-  height: 168px;
+  height: 118px;
   border-radius: var(--radius);
   border: 1px solid var(--border);
   background: linear-gradient(100deg, var(--surface) 40%, var(--surface2) 50%, var(--surface) 60%);

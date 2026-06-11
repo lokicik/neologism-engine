@@ -12,7 +12,8 @@ function nameHue(name: string): number {
 export function Monogram({ name, size = 40 }: Props) {
   const initials = name.slice(0, 2).toUpperCase()
   const hue = nameHue(name)
-  const bg = `hsl(${hue}, 55%, 32%)`
+  // Phase 42: quiet tinted tiles — per-name hue kept for identity, but
+  // desaturated to sit inside the restrained palette instead of shouting.
   return (
     <span
       className="monogram"
@@ -20,7 +21,9 @@ export function Monogram({ name, size = 40 }: Props) {
         width: size,
         height: size,
         fontSize: size * 0.4,
-        background: bg,
+        background: `hsl(${hue}, 28%, 17%)`,
+        color: `hsl(${hue}, 55%, 72%)`,
+        border: '1px solid rgba(255,255,255,.08)',
       }}
       aria-hidden="true"
     >
