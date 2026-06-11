@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import type { NameResult } from '../lib/engine'
-import { checkDomains, checkGithub, TLDS, type DomainStatus } from '../lib/domain'
+import { checkDomains, checkHandles, isAuthoritative, trademarkLinks, HANDLES, TLDS, type DomainStatus } from '../lib/domain'
 import { Monogram } from './Monogram'
 
 interface Props {
@@ -19,7 +19,7 @@ const STYLE_LABEL: Record<string, string> = {
 function idleMap(): Record<string, DomainStatus> {
   const m: Record<string, DomainStatus> = {}
   for (const tld of TLDS) m[tld] = 'idle'
-  m['gh'] = 'idle'
+  for (const h of HANDLES) m[h] = 'idle'
   return m
 }
 
@@ -44,15 +44,15 @@ export function NameCard({ result, isFavorite, onToggleFavorite, badges = [] }: 
     setChecking(true)
     const checking: Record<string, DomainStatus> = {}
     for (const tld of TLDS) checking[tld] = 'checking'
-    checking['gh'] = 'checking'
+    for (const h of HANDLES) checking[h] = 'checking'
     setDomains(checking)
 
     await Promise.all([
       checkDomains(result.name, (tld, status) => {
         setDomains((prev) => ({ ...prev, [tld]: status }))
       }),
-      checkGithub(result.name).then((status) => {
-        setDomains((prev) => ({ ...prev, gh: status }))
+      checkHandles(result.name, (handle, status) => {
+        setDomains((prev) => ({ ...prev, [handle]: status }))
       }),
     ])
     setChecking(false)
@@ -141,20 +141,44 @@ export function NameCard({ result, isFavorite, onToggleFavorite, badges = [] }: 
       )}
 
       <div className="domain-row">
-        {Object.entries(domains).map(([key, status]) => (
-          <span key={key} className={domainBadgeClass(status)}>
-            {domainLabel(key, status)}
-          </span>
-        ))}
-        {!checking && allIdle && (
+        {!checking && allIdle ? (
           <button className="check-domain-btn" onClick={checkAvailability}>
-            Check availability*
+            Check availability
           </button>
-        )}
-        {!allIdle && (
-          <span className="domain-disclaimer">*indicator only</span>
+        ) : (
+          <>
+            {TLDS.map((tld) => (
+              <span
+                key={tld}
+                className={domainBadgeClass(domains[tld])}
+                title={isAuthoritative(tld) ? 'Registry (RDAP) — authoritative' : 'DNS lookup — indicator only'}
+              >
+                {domainLabel(tld, domains[tld])}
+                {!isAuthoritative(tld) && domains[tld] !== 'idle' ? '~' : ''}
+              </span>
+            ))}
+          </>
         )}
       </div>
+      {!allIdle && (
+        <div className="domain-row handle-row">
+          {HANDLES.map((h) => (
+            <span
+              key={h}
+              className={domainBadgeClass(domains[h])}
+              title={{ gh: 'GitHub username', npm: 'npm package', pypi: 'PyPI package', crates: 'crates.io crate' }[h]}
+            >
+              {domainLabel(h, domains[h])}
+            </span>
+          ))}
+          {trademarkLinks(result.name).map((l) => (
+            <a key={l.label} className="badge badge-idle tm-link" href={l.url} target="_blank" rel="noreferrer" title="Open trademark search (manual check)">
+              ™ {l.label}
+            </a>
+          ))}
+          <span className="domain-disclaimer">~ DNS indicator only</span>
+        </div>
+      )}
     </div>
   )
 }

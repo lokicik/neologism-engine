@@ -433,6 +433,10 @@ input[type="range"] {
   opacity: .6;
 }
 
+.handle-row { margin-top: .25rem; }
+.tm-link { text-decoration: none; cursor: pointer; }
+.tm-link:hover { color: var(--text); border-color: var(--accent); }
+
 /* Monogram */
 .monogram {
   display: inline-flex;
