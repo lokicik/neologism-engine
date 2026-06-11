@@ -6,9 +6,11 @@ import { exportText, exportJson, encodeShareUrl } from '../lib/share'
 interface Props {
   favorites: NameResult[]
   onRemove: (r: NameResult) => void
+  /// Rendered as a ✕ in the header when provided (drawer context).
+  onClose?: () => void
 }
 
-export function Favorites({ favorites, onRemove }: Props) {
+export function Favorites({ favorites, onRemove, onClose }: Props) {
   const [copiedAll, setCopiedAll] = useState(false)
   const [copiedUrl, setCopiedUrl] = useState(false)
 
@@ -33,21 +35,28 @@ export function Favorites({ favorites, onRemove }: Props) {
   return (
     <aside className="favorites-panel">
       <div className="favorites-header">
-        <h2 className="favorites-heading">★ Saved names</h2>
-        <div className="favorites-toolbar">
-          <button className="icon-btn fav-toolbar-btn" onClick={copyAll} title="Copy all names">
-            {copiedAll ? '✓' : '⎘'} Copy all
+        <h2 className="favorites-heading">
+          <span className="favorites-star">★</span> Saved names
+        </h2>
+        {onClose && (
+          <button className="icon-btn" onClick={onClose} title="Close">
+            ✕
           </button>
-          <button className="icon-btn fav-toolbar-btn" onClick={() => exportText(favorites)} title="Export as text">
-            ↓ TXT
-          </button>
-          <button className="icon-btn fav-toolbar-btn" onClick={() => exportJson(favorites)} title="Export as JSON">
-            ↓ JSON
-          </button>
-          <button className="icon-btn fav-toolbar-btn" onClick={shareLink} title="Copy share URL">
-            {copiedUrl ? '✓ Copied!' : '↗ Share'}
-          </button>
-        </div>
+        )}
+      </div>
+      <div className="favorites-toolbar">
+        <button className="fav-btn" onClick={copyAll} title="Copy all names">
+          {copiedAll ? '✓ Copied' : 'Copy all'}
+        </button>
+        <button className="fav-btn" onClick={() => exportText(favorites)} title="Export as text">
+          ↓ TXT
+        </button>
+        <button className="fav-btn" onClick={() => exportJson(favorites)} title="Export as JSON">
+          ↓ JSON
+        </button>
+        <button className="fav-btn" onClick={shareLink} title="Copy share URL">
+          {copiedUrl ? '✓ Copied' : '↗ Share'}
+        </button>
       </div>
       <ul className="favorites-list">
         {favorites.map((f) => (

@@ -77,7 +77,10 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem .25rem;
+  /* Fixed height (Phase 45): chips appearing in the nav (★ N saved) must
+     never change nav geometry and shift the page. */
+  min-height: 3.6rem;
+  padding: 0 .25rem;
   margin: -1.5rem 0 -4rem;
   background: linear-gradient(to bottom, var(--bg) 60%, transparent);
 }
@@ -494,6 +497,9 @@ body {
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 1rem;
   margin-top: .5rem;
+  /* Phase 45: don't stretch the whole row when one card expands — collapsed
+     cards are structurally uniform already, so natural height stays even. */
+  align-items: start;
 }
 
 /* NameCard (Phase 42: one strong line, one quiet line, one footer row) */
@@ -679,46 +685,56 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
   gap: .5rem;
-  margin-bottom: .75rem;
+  margin-bottom: .6rem;
 }
 
 .favorites-heading {
-  font-size: .875rem;
+  font-family: var(--font-display);
+  font-size: .95rem;
   font-weight: 700;
-  color: #f59e0b;
-  margin-bottom: 0;
+  color: var(--text);
+  letter-spacing: -.01em;
 }
+.favorites-star { color: #f59e0b; }
 
 .favorites-toolbar {
   display: flex;
-  gap: .3rem;
+  gap: .35rem;
   flex-wrap: wrap;
+  padding-bottom: .75rem;
+  margin-bottom: .25rem;
+  border-bottom: 1px solid var(--border);
 }
 
-.fav-toolbar-btn {
-  font-size: .72rem !important;
-  padding: .2rem .55rem !important;
-  border: 1px solid var(--border) !important;
-  border-radius: 999px !important;
-  color: var(--muted) !important;
+.fav-btn {
+  padding: .25rem .7rem;
+  font-size: .72rem;
+  font-weight: 500;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
   transition: color .15s, border-color .15s;
 }
-.fav-toolbar-btn:hover { color: var(--text) !important; border-color: var(--accent) !important; }
+.fav-btn:hover { color: var(--text); border-color: rgba(255, 255, 255, .22); }
 
 .favorites-list {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: .4rem;
 }
 
 .favorites-item {
   display: flex;
   align-items: center;
-  gap: .5rem;
+  gap: .6rem;
+  padding: .5rem 0;
+  border-bottom: 1px solid var(--border);
 }
+.favorites-item:last-child { border-bottom: none; }
 
 .fav-name {
   font-weight: 600;
@@ -932,21 +948,15 @@ body {
   right: 0;
   bottom: 0;
   z-index: 50;
-  width: 340px;
+  width: 360px;
   max-width: 100vw;
   background: var(--surface);
   border-left: 1px solid var(--border);
-  padding: 1rem 1.1rem;
+  padding: 1rem 1.2rem;
   overflow-y: auto;
   animation: drawer-in .2s ease-out both;
 }
 @keyframes drawer-in { from { transform: translateX(100%); } to { transform: translateX(0); } }
-
-.drawer-close {
-  position: absolute;
-  top: .8rem;
-  right: .9rem;
-}
 
 .drawer .favorites-panel {
   background: transparent;

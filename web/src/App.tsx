@@ -266,10 +266,11 @@ export default function App() {
         <>
           <div className="drawer-overlay" onClick={() => setDrawerOpen(false)} />
           <div className="drawer">
-            <button className="drawer-close icon-btn" onClick={() => setDrawerOpen(false)} title="Close">
-              ✕
-            </button>
-            <Favorites favorites={favorites} onRemove={handleToggleFavorite} />
+            <Favorites
+              favorites={favorites}
+              onRemove={handleToggleFavorite}
+              onClose={() => setDrawerOpen(false)}
+            />
           </div>
         </>
       )}
