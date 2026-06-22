@@ -1,0 +1,179 @@
+import type { NameResult } from './engine'
+
+// Optional "Sharpen with AI" judge. The offline engine generates well but judges
+// badly — its scores are structural proxies blind to brand taste/meaning (proven
+// in Phase 27, r=0.25). A real LLM judges the semantic quality the proxies miss.
+// This is strictly OPT-IN: every failure path (disabled, unreachable, CORS, bad
+// key, rate-limited, malformed reply) returns null so the caller silently keeps
+// the offline ranking — the graceful-fallback pattern from domain.ts.
+//
+// OpenRouter and a local server (Ollama/llama.cpp/LM Studio) are both OpenAI-
+// compatible, so they share ONE request path; the provider only changes the base
+// URL and headers. (Resurrects + generalizes the Phase 28 web/src/lib/llm.ts.)
+
+export type JudgeProvider = 'openrouter' | 'localhost'
+
+export interface JudgeConfig {
+  enabled: boolean
+  provider: JudgeProvider
+  /// OpenRouter only — the user's own key, stored locally (see SettingsModal warning).
+  apiKey?: string
+  /// Model id. OpenRouter: e.g. a ":free" model. Localhost: auto-detected if blank.
+  model?: string
+  /// Localhost OpenAI-compatible base, e.g. http://localhost:11434/v1 (Ollama).
+  endpoint?: string
+  /// Judge prompt template; "{{names}}" is replaced with the numbered candidate list.
+  prompt?: string
+}
+
+export interface RankedJudgment {
+  name: string
+  score: number
+  reason: string
+}
+
+export const OPENROUTER_BASE = 'https://openrouter.ai/api/v1'
+export const DEFAULT_LOCAL_ENDPOINT = 'http://localhost:11434/v1'
+export const DEFAULT_OPENROUTER_MODEL = 'meta-llama/llama-3.3-70b-instruct:free'
+
+// Free ids drift over time — these are editable in the UI; this is just the list
+// the model dropdown seeds with.
+export const OPENROUTER_FREE_MODELS = [
+  'meta-llama/llama-3.3-70b-instruct:free',
+  'deepseek/deepseek-r1:free',
+  'google/gemini-2.0-flash-exp:free',
+]
+
+export const DEFAULT_JUDGE_PROMPT = `You are a branding expert judging invented startup/product names.
+Rate each name from 1 (bad: awkward, hard to say, junk-like, or unfortunate connotations) to 10 (excellent: memorable, easy to pronounce, distinctive, sounds like a real brand).
+Respond with ONLY a JSON array, one object per name, in the SAME order as the input:
+[{"i": 1, "score": 8, "reason": "short reason, max 8 words"}]
+No prose before or after the array.
+
+Names:
+{{names}}`
+
+export function defaultJudgeConfig(): JudgeConfig {
+  return {
+    enabled: false,
+    provider: 'openrouter',
+    model: DEFAULT_OPENROUTER_MODEL,
+    endpoint: DEFAULT_LOCAL_ENDPOINT,
+    prompt: DEFAULT_JUDGE_PROMPT,
+  }
+}
+
+// Whether a config has the minimum to attempt a call (used to decide if the
+// "Sharpen" button should act or open Settings first).
+export function isJudgeReady(cfg: JudgeConfig): boolean {
+  if (!cfg.enabled) return false
+  if (cfg.provider === 'openrouter') return Boolean(cfg.apiKey?.trim())
+  return Boolean((cfg.endpoint ?? DEFAULT_LOCAL_ENDPOINT).trim())
+}
+
+const cache = new Map<string, RankedJudgment[]>()
+
+function baseAndHeaders(cfg: JudgeConfig): { base: string; headers: Record<string, string> } {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+  if (cfg.provider === 'openrouter') {
+    headers['Authorization'] = `Bearer ${cfg.apiKey ?? ''}`
+    headers['X-Title'] = 'neologism'
+    return { base: OPENROUTER_BASE, headers }
+  }
+  return { base: (cfg.endpoint ?? DEFAULT_LOCAL_ENDPOINT).replace(/\/$/, ''), headers }
+}
+
+// Localhost servers often expose a single loaded model; auto-detect it so the
+// user doesn't have to type the id. OpenRouter requires an explicit model.
+async function resolveModel(cfg: JudgeConfig, base: string, headers: Record<string, string>): Promise<string | null> {
+  if (cfg.model?.trim()) return cfg.model.trim()
+  if (cfg.provider === 'openrouter') return DEFAULT_OPENROUTER_MODEL
+  try {
+    const res = await fetch(`${base}/models`, { headers })
+    if (!res.ok) return null
+    const data = (await res.json()) as { data?: { id: string }[] }
+    return data.data?.[0]?.id ?? null
+  } catch {
+    return null
+  }
+}
+
+function buildPrompt(template: string, labels: string[]): string {
+  const list = labels.map((n, i) => `${i + 1}. ${n}`).join('\n')
+  return (template || DEFAULT_JUDGE_PROMPT).replace('{{names}}', list)
+}
+
+// Pull the first top-level JSON array out of a reply that may be wrapped in prose
+// or ```json fences.
+function extractArray(content: string): unknown | null {
+  const start = content.indexOf('[')
+  const end = content.lastIndexOf(']')
+  if (start === -1 || end === -1 || end < start) return null
+  try {
+    return JSON.parse(content.slice(start, end + 1))
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Re-rank candidates by LLM brand-quality judgment, best first, with a short
+ * reason per name. Returns null on ANY failure so the caller falls back to the
+ * offline order. Pure read-only network call; nothing is mutated.
+ */
+export async function rerank(names: NameResult[], cfg: JudgeConfig): Promise<RankedJudgment[] | null> {
+  if (!isJudgeReady(cfg)) return null
+  if (names.length === 0) return []
+
+  const labels = names.map((n) => n.name)
+  const template = cfg.prompt || DEFAULT_JUDGE_PROMPT
+  const key = `${cfg.provider}|${cfg.model ?? ''}|${template.length}|${[...labels].sort().join(',')}`
+  if (cache.has(key)) return cache.get(key)!
+
+  try {
+    const { base, headers } = baseAndHeaders(cfg)
+    const model = await resolveModel(cfg, base, headers)
+    if (!model) return null
+
+    const res = await fetch(`${base}/chat/completions`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        model,
+        messages: [{ role: 'user', content: buildPrompt(template, labels) }],
+        temperature: 0,
+      }),
+    })
+    if (!res.ok) return null
+
+    const data = (await res.json()) as { choices?: { message?: { content?: string } }[] }
+    const content = data.choices?.[0]?.message?.content
+    if (!content) return null
+
+    const arr = extractArray(content)
+    if (!Array.isArray(arr) || arr.length === 0) return null
+
+    // Map each judgment to its input name. Prefer an explicit 1-based "i";
+    // fall back to array position when the array lines up with the input.
+    const byIndex = new Map<number, { score: number; reason: string }>()
+    arr.forEach((item, pos) => {
+      const o = item as { i?: unknown; score?: unknown; reason?: unknown }
+      const idx = typeof o.i === 'number' ? o.i - 1 : pos
+      const score = typeof o.score === 'number' ? o.score : NaN
+      if (idx < 0 || idx >= labels.length || Number.isNaN(score)) return
+      byIndex.set(idx, { score, reason: typeof o.reason === 'string' ? o.reason : '' })
+    })
+    // Require coverage of every candidate — a partial reply is treated as failure.
+    if (byIndex.size !== labels.length) return null
+
+    const ranked: RankedJudgment[] = labels
+      .map((name, i) => ({ name, score: byIndex.get(i)!.score, reason: byIndex.get(i)!.reason, i }))
+      .sort((a, b) => b.score - a.score || a.i - b.i)
+      .map(({ name, score, reason }) => ({ name, score, reason }))
+
+    cache.set(key, ranked)
+    return ranked
+  } catch {
+    return null
+  }
+}

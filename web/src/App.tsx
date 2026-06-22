@@ -2,13 +2,15 @@ import { useState, useCallback, useRef, useEffect } from 'react'
 import { generateNames, batchMetrics, extractKeywords, type BatchMetrics, type Config, type NameResult, type Style } from './lib/engine'
 import { recommendations } from './lib/recommend'
 import { buildProfile, rankByPreference } from './lib/preferences'
-import { loadFavorites, toggleFavorite, saveFavorites, loadRecent, saveRecent, hasVisited, markVisited } from './lib/storage'
+import { loadFavorites, toggleFavorite, saveFavorites, loadRecent, saveRecent, hasVisited, markVisited, loadJudgeConfig, saveJudgeConfig } from './lib/storage'
+import { rerank, isJudgeReady, type JudgeConfig } from './lib/judge'
 import { decodeShareUrl } from './lib/share'
 import { CommandBar } from './components/CommandBar'
 import { NameCard } from './components/NameCard'
 import { StatsPanel } from './components/StatsPanel'
 import { Sidebar, type AppView } from './components/Sidebar'
 import { SavedPage } from './components/SavedPage'
+import { SettingsModal } from './components/SettingsModal'
 import { Landing } from './components/Landing'
 
 // Defaults match the UI's "Any" length and "Balanced" creativity segments.
@@ -52,6 +54,15 @@ export default function App() {
   // generation (Phase 48) — shown so users see what drove their batch.
   const [promptKeywords, setPromptKeywords] = useState<string[]>([])
   const [error, setError] = useState<string | null>(null)
+  // Optional "Sharpen with AI" judge (Phase 50). Default off; configured once.
+  const [judgeConfig, setJudgeConfig] = useState<JudgeConfig>(loadJudgeConfig)
+  const [showSettings, setShowSettings] = useState(false)
+  const [sharpening, setSharpening] = useState(false)
+  // Per-name AI reasons for the current batch, plus the judge's #1 pick.
+  const [reasons, setReasons] = useState<Map<string, string>>(new Map())
+  const [aiPickName, setAiPickName] = useState<string | undefined>(undefined)
+  // Non-blocking note when a sharpen attempt fell back to the offline order.
+  const [judgeNotice, setJudgeNotice] = useState<string | null>(null)
   const recentRef = useRef<string[]>(loadRecent())
   // Mirror of `results` for the append path — handleGenerate is memoized on
   // [config], so reading state directly there would be stale.
@@ -122,6 +133,12 @@ export default function App() {
       const batch = await generateNames({ ...cfg, exclude: recentRef.current })
       setPromptKeywords(cfg.description?.trim() ? await extractKeywords(cfg.description) : [])
       setExhausted(batch.length === 0)
+      // A fresh batch invalidates the previous AI re-rank/reasons.
+      if (!append) {
+        setReasons(new Map())
+        setAiPickName(undefined)
+        setJudgeNotice(null)
+      }
       // Preference ranking is applied to the incoming batch only, at insert
       // time — re-ranking the whole list on every append (the old render-time
       // rankByPreference) made already-visible cards jump around the grid.
@@ -141,6 +158,44 @@ export default function App() {
   const handleToggleFavorite = useCallback((item: NameResult) => {
     setFavorites((prev) => toggleFavorite(prev, item))
   }, [])
+
+  const saveSettings = useCallback((cfg: JudgeConfig) => {
+    setJudgeConfig(cfg)
+    saveJudgeConfig(cfg)
+  }, [])
+
+  // "Sharpen with AI": re-rank the current batch by a real LLM's judgment and
+  // attach a one-line reason per name. Any failure falls back to the offline
+  // order with a small notice (rerank() returns null on every error path).
+  const handleSharpen = useCallback(async () => {
+    const batch = resultsRef.current
+    if (batch.length === 0 || sharpening) return
+    if (!isJudgeReady(judgeConfig)) {
+      setShowSettings(true)
+      return
+    }
+    setSharpening(true)
+    setJudgeNotice(null)
+    try {
+      const ranked = await rerank(batch, judgeConfig)
+      if (!ranked) {
+        setJudgeNotice('AI re-rank unavailable — kept the offline order. Check Settings.')
+        return
+      }
+      const order = new Map(ranked.map((r, i) => [r.name, i]))
+      const reordered = [...batch].sort(
+        (a, b) => (order.get(a.name) ?? Infinity) - (order.get(b.name) ?? Infinity),
+      )
+      setResults(reordered)
+      setReasons(new Map(ranked.map((r) => [r.name, r.reason])))
+      setAiPickName(ranked[0]?.name)
+      setMetrics(reordered.length > 0 ? await batchMetrics(reordered) : null)
+    } catch {
+      setJudgeNotice('AI re-rank failed — kept the offline order.')
+    } finally {
+      setSharpening(false)
+    }
+  }, [judgeConfig, sharpening])
 
   // Phase 49: infinite scroll — when the sentinel under the grid comes within
   // 300px of the viewport, append the next batch (the 20k exclude window
@@ -233,6 +288,7 @@ export default function App() {
         savedCount={favorites.length}
         onNavigate={setView}
         onAbout={() => setView('landing')}
+        onSettings={() => setShowSettings(true)}
       />
 
       <main className="page">
@@ -279,6 +335,19 @@ export default function App() {
 
               {displayResults.length > 0 && (
                 <>
+                  {judgeConfig.enabled && (
+                    <div className="sharpen-bar">
+                      <button
+                        className="sharpen-btn"
+                        onClick={() => void handleSharpen()}
+                        disabled={sharpening}
+                        title="Re-rank this batch by an LLM's brand-quality judgment"
+                      >
+                        {sharpening ? 'Sharpening…' : '✨ Sharpen with AI'}
+                      </button>
+                      {judgeNotice && <span className="sharpen-notice">{judgeNotice}</span>}
+                    </div>
+                  )}
                   <div className="results-grid">
                     {displayResults.map((r, i) => (
                       <NameCard
@@ -287,6 +356,8 @@ export default function App() {
                         isFavorite={favoriteNames.has(r.name)}
                         onToggleFavorite={handleToggleFavorite}
                         isBest={r.name === bestName}
+                        reason={reasons.get(r.name)}
+                        isAiPick={r.name === aiPickName}
                         appearDelay={(i % (config.count ?? 10)) * 45}
                       />
                     ))}
@@ -331,6 +402,10 @@ export default function App() {
           </>
         )}
       </main>
+
+      {showSettings && (
+        <SettingsModal config={judgeConfig} onSave={saveSettings} onClose={() => setShowSettings(false)} />
+      )}
     </div>
   )
 }

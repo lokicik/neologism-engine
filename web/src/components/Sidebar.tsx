@@ -7,12 +7,13 @@ interface Props {
   savedCount: number
   onNavigate: (view: AppView) => void
   onAbout: () => void
+  onSettings: () => void
 }
 
 // Phase 47 app shell: slim fixed sidebar (the Midjourney-web pattern — saved
 // work is a first-class page, not a drawer). Collapses to a horizontal top
 // bar below 900px (CSS).
-export function Sidebar({ view, savedCount, onNavigate, onAbout }: Props) {
+export function Sidebar({ view, savedCount, onNavigate, onAbout, onSettings }: Props) {
   return (
     <nav className="sidebar">
       <button className="wordmark sidebar-logo" onClick={onAbout} title="About — back to the landing page">
@@ -35,9 +36,14 @@ export function Sidebar({ view, savedCount, onNavigate, onAbout }: Props) {
         </button>
       </div>
 
-      <button className="sidebar-about" onClick={onAbout}>
-        About
-      </button>
+      <div className="sidebar-foot">
+        <button className="sidebar-item sidebar-settings" onClick={onSettings} title="AI re-rank settings">
+          ⚙ Sharpen with AI
+        </button>
+        <button className="sidebar-about" onClick={onAbout}>
+          About
+        </button>
+      </div>
     </nav>
   )
 }

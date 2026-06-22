@@ -14,6 +14,10 @@ interface Props {
   /// Entrance-animation stagger (ms) — set by the results grid so freshly
   /// appended cards slide/fade in one after another (Phase 49).
   appearDelay?: number
+  /// One-line LLM judgment shown after "Sharpen with AI" (Phase 50).
+  reason?: string
+  /// The AI judge's #1 pick of the batch.
+  isAiPick?: boolean
 }
 
 // Shown only for non-startup names (old sci-fi/fantasy favorites & share URLs).
@@ -41,7 +45,7 @@ function whyParts(e: Explanation): string[] {
   return parts
 }
 
-export function NameCard({ result, isFavorite, onToggleFavorite, isBest = false, appearDelay = 0 }: Props) {
+export function NameCard({ result, isFavorite, onToggleFavorite, isBest = false, appearDelay = 0, reason, isAiPick = false }: Props) {
   const [copied, setCopied] = useState(false)
   const [domains, setDomains] = useState<Record<string, DomainStatus>>(idleMap)
   const [showAvail, setShowAvail] = useState(false)
@@ -116,6 +120,7 @@ export function NameCard({ result, isFavorite, onToggleFavorite, isBest = false,
         <Monogram name={result.name} size={36} />
         <span className="name-text">{result.name}</span>
         <span className="card-score" title="Overall score — pronounceability, memorability and originality blended">
+          {isAiPick && <span className="card-aipick" title="The AI judge's top pick of this batch">✨</span>}
           {isBest && <span className="card-crown" title="Top pick of this batch">👑</span>}
           ★ {composite(result)}
         </span>
@@ -124,6 +129,12 @@ export function NameCard({ result, isFavorite, onToggleFavorite, isBest = false,
       <p className="card-meta-line" title="Syllables · the vibe this name evokes (sound symbolism)">
         {metaParts.join(' · ')}
       </p>
+
+      {reason && (
+        <p className="card-ai-reason" title="Why the AI judge rated this name">
+          ✨ {reason}
+        </p>
+      )}
 
       {showWhy && (
         <div className="card-expansion">
