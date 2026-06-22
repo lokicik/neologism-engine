@@ -2,6 +2,8 @@
 
 Generates invented names for three styles — **Big Tech brands**, **Sci-Fi**, and **Fantasy** — using a Rust engine compiled to WebAssembly and a React + Vite + TypeScript SPA. Everything runs fully client-side; no backend or API keys required.
 
+Built for naming **packages, CLIs, libraries, and brands** — it's the rare generator that checks **developer namespaces** (GitHub username, npm, PyPI, crates.io) alongside domain registries and trademark search, so you can clear a name everywhere it matters before you commit.
+
 ## Architecture
 
 ```

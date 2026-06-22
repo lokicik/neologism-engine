@@ -274,6 +274,10 @@ export function Landing({ onEnter }: Props) {
         <div className="hero-content">
           <span className="eyebrow">Free · open · runs entirely in your browser</span>
           <h1 className="landing-title">Name your next big thing.</h1>
+          <p className="hero-sub">
+            Coined names for packages, CLIs, libraries, and brands — checked across npm,
+            PyPI, crates.io, GitHub and domains before you commit.
+          </p>
 
           <div className="decode-stage">
             <div className="decode-name" aria-live="off">
@@ -329,11 +333,13 @@ export function Landing({ onEnter }: Props) {
         <div className="tile">
           <h3>Availability, built in</h3>
           <div className="check-rows">
-            <span className="check-row"><i>✓</i> .com · .io · .ai — registry-level</span>
+            <span className="check-group-label">Dev namespaces</span>
             <span className="check-row"><i>✓</i> GitHub · npm · PyPI · crates.io</span>
+            <span className="check-group-label">Domains &amp; trademark</span>
+            <span className="check-row"><i>✓</i> .com · .io · .ai — registry-level</span>
             <span className="check-row"><i>™</i> USPTO / EUIPO one click away</span>
           </div>
-          <p className="tile-foot">every name, checked before you fall for it</p>
+          <p className="tile-foot">the dev namespaces other generators skip</p>
         </div>
 
         <div className="tile">
@@ -385,7 +391,7 @@ export function Landing({ onEnter }: Props) {
         </div>
         <div className="step">
           <span className="step-num">03</span>
-          <span>Check availability. Save the keepers.</span>
+          <span>Check the namespace — npm, PyPI, crates.io, GitHub, domains. Save the keepers.</span>
         </div>
       </section>
 

@@ -772,6 +772,27 @@ body {
 .sharpen-est { font-size: .78rem; color: var(--muted); font-variant-numeric: tabular-nums; }
 .sharpen-notice { font-size: .8rem; color: var(--muted); }
 
+/* Phase 53: hero subcopy (dev-naming positioning) + grouped availability. */
+.hero-sub {
+  max-width: 48ch;
+  margin: .2rem auto 0;
+  color: var(--muted);
+  font-size: 1.02rem;
+  line-height: 1.55;
+}
+.check-group-label,
+.avail-label {
+  font-size: .68rem;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.check-group-label { display: block; margin-top: .35rem; }
+.check-group-label:first-child { margin-top: 0; }
+.avail-section { display: flex; flex-direction: column; gap: .3rem; margin-bottom: .5rem; }
+.avail-label { opacity: .85; }
+
 /* Phase 50: per-card AI judgment line + top-pick marker. */
 .card-ai-reason {
   margin: .1rem 0 0;

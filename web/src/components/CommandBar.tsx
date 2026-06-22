@@ -13,9 +13,10 @@ interface Props {
 // always big_tech here; the engine still supports the creative styles, they
 // are just no longer part of the web product.
 
-type Mode = 'brandable' | 'realword' | 'respell' | 'compound'
+type Mode = 'auto' | 'brandable' | 'realword' | 'respell' | 'compound'
 
 const MODES: { value: Mode; label: string; example: string; desc: string }[] = [
+  { value: 'auto', label: 'Auto', example: 'a mix', desc: 'A blend of every style — the default' },
   { value: 'brandable', label: 'Brandable', example: 'Spotify', desc: 'Invented coinages — Spotify, Vercel' },
   { value: 'realword', label: 'Real words', example: 'Notion', desc: 'Evocative dictionary words — Notion, Linear (ignores your description)' },
   { value: 'respell', label: 'Respelled', example: 'Lyft', desc: 'Twisted real words — Lyft, Tumblr' },
@@ -36,6 +37,7 @@ const CREATIVITY: { label: string; temperature: number; variety: number }[] = [
 ]
 
 function currentMode(config: Config): Mode {
+  if (config.variant === 'auto') return 'auto'
   if (config.compound) return 'compound'
   if (config.variant === 'realword') return 'realword'
   if (config.variant === 'respell') return 'respell'
@@ -93,7 +95,7 @@ export function CommandBar({ config, onChange, onGenerate, loading }: Props) {
       ...config,
       style: 'big_tech',
       compound: m === 'compound',
-      variant: m === 'realword' || m === 'respell' ? m : undefined,
+      variant: m === 'realword' || m === 'respell' || m === 'auto' ? m : undefined,
     })
 
   const set = <K extends keyof Config>(key: K, value: Config[K]) =>

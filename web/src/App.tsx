@@ -22,6 +22,8 @@ const DEFAULT_CONFIG: Config = {
   temperature: 0.85,
   variety: 0.3,
   roots: [],
+  // Auto is the default: blend all four modes into one batch (see generateBatch).
+  variant: 'auto',
 }
 
 // Don't repeat names the user has seen recently. A name can't recur within this
@@ -36,6 +38,39 @@ const RECENT_WINDOW = 20000
 // Below this batch size, an AI re-rank isn't worth a request (you can't
 // meaningfully re-order 1 name) — the Sharpen button stays hidden.
 const MIN_SHARPEN = 2
+
+// Auto mode (web-only meta-mode): blend the four engine modes into one batch.
+// The engine never sees variant:'auto' — we fan out four real sub-calls
+// (brandable-weighted), all sharing the same exclude window so the whole batch
+// stays fresh, then interleave one-from-each-mode and dedupe by name.
+async function generateBatch(cfg: Config): Promise<NameResult[]> {
+  if (cfg.variant !== 'auto') return generateNames(cfg)
+  const total = cfg.count ?? 10
+  const realword = Math.max(1, Math.round(total * 0.2))
+  const respell = Math.max(1, Math.round(total * 0.2))
+  const compound = Math.max(1, Math.round(total * 0.1))
+  const brandable = Math.max(1, total - realword - respell - compound)
+  const subs: Config[] = [
+    { ...cfg, variant: undefined, compound: false, count: brandable },
+    { ...cfg, variant: 'realword', compound: false, count: realword },
+    { ...cfg, variant: 'respell', compound: false, count: respell },
+    { ...cfg, variant: undefined, compound: true, count: compound },
+  ]
+  const batches = await Promise.all(subs.map((c) => generateNames(c)))
+  const seen = new Set<string>()
+  const merged: NameResult[] = []
+  const max = Math.max(0, ...batches.map((b) => b.length))
+  for (let i = 0; i < max; i++) {
+    for (const b of batches) {
+      const r = b[i]
+      if (r && !seen.has(r.name.toLowerCase())) {
+        seen.add(r.name.toLowerCase())
+        merged.push(r)
+      }
+    }
+  }
+  return merged
+}
 
 type View = 'landing' | AppView
 
@@ -134,7 +169,7 @@ export default function App() {
     setLoading(true)
     setError(null)
     try {
-      const batch = await generateNames({ ...cfg, exclude: recentRef.current })
+      const batch = await generateBatch({ ...cfg, exclude: recentRef.current })
       setPromptKeywords(cfg.description?.trim() ? await extractKeywords(cfg.description) : [])
       setExhausted(batch.length === 0)
       // A fresh batch invalidates the previous AI re-rank/reasons.
@@ -250,6 +285,8 @@ export default function App() {
 
   // Empty-state example prompts: set the description and generate in one click.
   const examplePrompts = [
+    'a Rust CLI that processes logs',
+    'a Python package for data validation',
     'a journaling app with mood insights',
     'a tool that syncs design tokens',
     'a marketplace for vintage keyboards',

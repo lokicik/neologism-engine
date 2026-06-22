@@ -153,33 +153,41 @@ export function NameCard({ result, isFavorite, onToggleFavorite, isBest = false,
 
       {showAvail && (
         <div className="card-expansion">
-          <div className="domain-row">
-            {TLDS.map((tld) => (
-              <span
-                key={tld}
-                className={domainBadgeClass(domains[tld])}
-                title={isAuthoritative(tld) ? 'Registry (RDAP) — authoritative' : 'DNS lookup — indicator only'}
-              >
-                {domainLabel(tld, domains[tld])}
-                {!isAuthoritative(tld) ? '~' : ''}
-              </span>
-            ))}
+          <div className="avail-section">
+            <span className="avail-label" title="The checks that matter for a project name — and that other name generators skip">
+              Dev namespaces
+            </span>
+            <div className="domain-row">
+              {HANDLES.map((h) => (
+                <span
+                  key={h}
+                  className={domainBadgeClass(domains[h])}
+                  title={{ gh: 'GitHub username', npm: 'npm package', pypi: 'PyPI package', crates: 'crates.io crate' }[h]}
+                >
+                  {domainLabel(h, domains[h])}
+                </span>
+              ))}
+            </div>
           </div>
-          <div className="domain-row">
-            {HANDLES.map((h) => (
-              <span
-                key={h}
-                className={domainBadgeClass(domains[h])}
-                title={{ gh: 'GitHub username', npm: 'npm package', pypi: 'PyPI package', crates: 'crates.io crate' }[h]}
-              >
-                {domainLabel(h, domains[h])}
-              </span>
-            ))}
-            {trademarkLinks(result.name).map((l) => (
-              <a key={l.label} className="badge badge-idle tm-link" href={l.url} target="_blank" rel="noreferrer" title="Open trademark search (manual check)">
-                ™ {l.label}
-              </a>
-            ))}
+          <div className="avail-section">
+            <span className="avail-label">Domains &amp; trademark</span>
+            <div className="domain-row">
+              {TLDS.map((tld) => (
+                <span
+                  key={tld}
+                  className={domainBadgeClass(domains[tld])}
+                  title={isAuthoritative(tld) ? 'Registry (RDAP) — authoritative' : 'DNS lookup — indicator only'}
+                >
+                  {domainLabel(tld, domains[tld])}
+                  {!isAuthoritative(tld) ? '~' : ''}
+                </span>
+              ))}
+              {trademarkLinks(result.name).map((l) => (
+                <a key={l.label} className="badge badge-idle tm-link" href={l.url} target="_blank" rel="noreferrer" title="Open trademark search (manual check)">
+                  ™ {l.label}
+                </a>
+              ))}
+            </div>
           </div>
           <span className="domain-disclaimer">~ DNS indicator only</span>
         </div>
