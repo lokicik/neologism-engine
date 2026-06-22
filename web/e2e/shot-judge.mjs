@@ -69,17 +69,20 @@ try {
   await page.click('.sidebar-settings')
   await page.waitForSelector('.settings-modal')
   await page.waitForTimeout(600) // debounced model fetch
-  const optCount = await page.locator('#judge-models option').count()
+  await page.click('.model-combo input') // open the themed dropdown
+  await page.waitForTimeout(150)
+  const optCount = await page.locator('.model-option').count()
   check(optCount >= 2, `model picker populated from live list (got ${optCount})`)
-  await page.fill('input[list="judge-models"]', 'mock/paid-model')
+  await page.locator('.settings-modal').screenshot({ path: join(E2E_DIR, 'judge-01-settings.png') })
+  await page.fill('.model-combo input', 'mock/paid-model')
   await page.waitForTimeout(150)
   const priceLines = await page.locator('.settings-field .settings-hint', { hasText: 'out' }).count()
   check(priceLines >= 1, 'selected paid model shows a price line')
-  await page.locator('.settings-modal').screenshot({ path: join(E2E_DIR, 'judge-01-settings.png') })
-  await page.keyboard.press('Escape') // cancel — keeps the seeded free model
+  await page.keyboard.press('Escape') // close dropdown
+  await page.keyboard.press('Escape') // close modal
 
-  // Guard: no Sharpen bar before any results (0 < MIN_SHARPEN).
-  check(await page.locator('.sharpen-bar').count() === 0, 'Sharpen hidden before any results (min-batch guard)')
+  // Guard: no sort control before any results (stats toolbar not rendered yet).
+  check(await page.locator('.sort-control').count() === 0, 'Sort control hidden before any results (min-batch guard)')
 
   // Generate, freeze at top.
   await page.click('.command-go')
@@ -87,22 +90,37 @@ try {
   await page.waitForTimeout(1200)
   await page.evaluate(() => window.scrollTo(0, 0))
 
-  const estText = (await page.locator('.sharpen-est').textContent()) ?? ''
-  check(/tok/.test(estText), `token estimate shown (got "${estText}")`)
-  check(estText.includes('$0'), `free model estimate shows $0 (got "${estText}")`)
+  // Default order is Score.
+  const seg = (await page.locator('.sort-seg.selected').textContent()) ?? ''
+  check(seg.trim() === 'Score', `default sort is Score (got "${seg.trim()}")`)
 
+  // The estimate lives in the ⓘ popover.
+  await page.click('.sort-info')
+  await page.waitForSelector('.sort-popover')
+  const estText = (await page.locator('.sort-est').textContent()) ?? ''
+  check(/tok/.test(estText) && estText.includes('$0'), `popover shows token/cost estimate (got "${estText.trim()}")`)
+  await page.locator('.canvas').screenshot({ path: join(E2E_DIR, 'judge-02-toolbar.png') })
+  await page.keyboard.press('Escape') // close popover
+
+  // Flip to AI taste → reorders, adds reasons + one AI-pick.
   const before = await page.$$eval('.name-text', (els) => els.map((e) => e.textContent))
-  await page.click('.sharpen-btn')
+  await page.click('.sort-seg:has-text("AI taste")')
   await page.waitForSelector('.card-ai-reason', { timeout: 10000 })
   await page.waitForTimeout(400)
   const after = await page.$$eval('.name-text', (els) => els.map((e) => e.textContent))
   check(await page.locator('.card-ai-reason').count() > 0, 'reasons rendered on cards')
   check(await page.locator('.card-aipick').count() === 1, 'exactly one AI-pick marker')
   check(before.length > 1 && after[0] === before[before.length - 1],
-    `re-rank reordered: first-after "${after[0]}" == last-before "${before[before.length - 1]}"`)
+    `AI sort reordered: first-after "${after[0]}" == last-before "${before[before.length - 1]}"`)
+  await page.locator('.canvas').screenshot({ path: join(E2E_DIR, 'judge-03-aisort.png') })
 
-  await page.locator('.canvas').screenshot({ path: join(E2E_DIR, 'judge-02-sharpened.png') })
-  console.log('screenshots: judge-01-settings.png, judge-02-sharpened.png')
+  // Flip back to Score → original engine order restored (instant, no call).
+  await page.click('.sort-seg:has-text("Score")')
+  await page.waitForTimeout(200)
+  const reverted = await page.$$eval('.name-text', (els) => els.map((e) => e.textContent))
+  check(reverted[0] === before[0], `Score restores original order (first "${reverted[0]}" == "${before[0]}")`)
+
+  console.log('screenshots: judge-01-settings.png, judge-02-toolbar.png, judge-03-aisort.png')
 } catch (err) {
   console.error('SCRIPT ERROR:', err.message)
   failures++

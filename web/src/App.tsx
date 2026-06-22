@@ -11,6 +11,7 @@ import { StatsPanel } from './components/StatsPanel'
 import { Sidebar, type AppView } from './components/Sidebar'
 import { SavedPage } from './components/SavedPage'
 import { SettingsModal } from './components/SettingsModal'
+import { SortControl } from './components/SortControl'
 import { Landing } from './components/Landing'
 
 // Defaults match the UI's "Any" length and "Balanced" creativity segments.
@@ -102,6 +103,10 @@ export default function App() {
   const [aiPickName, setAiPickName] = useState<string | undefined>(undefined)
   // Non-blocking note when a sharpen attempt fell back to the offline order.
   const [judgeNotice, setJudgeNotice] = useState<string | null>(null)
+  // Sort mode: 'score' = engine order (default), 'ai' = LLM-ranked. aiRanked
+  // caches the AI order so flipping back and forth is instant (Phase 54).
+  const [sortMode, setSortMode] = useState<'score' | 'ai'>('score')
+  const [aiRanked, setAiRanked] = useState<NameResult[] | null>(null)
   const recentRef = useRef<string[]>(loadRecent())
   // Mirror of `results` for the append path — handleGenerate is memoized on
   // [config], so reading state directly there would be stale.
@@ -172,11 +177,13 @@ export default function App() {
       const batch = await generateBatch({ ...cfg, exclude: recentRef.current })
       setPromptKeywords(cfg.description?.trim() ? await extractKeywords(cfg.description) : [])
       setExhausted(batch.length === 0)
-      // A fresh batch invalidates the previous AI re-rank/reasons.
+      // A fresh batch invalidates the previous AI re-rank/reasons/sort.
       if (!append) {
         setReasons(new Map())
         setAiPickName(undefined)
         setJudgeNotice(null)
+        setSortMode('score')
+        setAiRanked(null)
       }
       // Preference ranking is applied to the incoming batch only, at insert
       // time — re-ranking the whole list on every append (the old render-time
@@ -203,12 +210,14 @@ export default function App() {
     saveJudgeConfig(cfg)
   }, [])
 
-  // "Sharpen with AI": re-rank the current batch by a real LLM's judgment and
-  // attach a one-line reason per name. Any failure falls back to the offline
-  // order with a small notice (rerank() returns null on every error path).
-  const handleSharpen = useCallback(async () => {
+  // "✨ AI taste" sort: re-rank the current batch by a real LLM's judgment and
+  // attach a one-line reason per name. The engine order in `results` is never
+  // mutated — the AI order is cached in `aiRanked` and applied as a derived
+  // sort, so flipping back to Score is instant. Any failure falls back to Score
+  // with a small notice (rerank() returns null on every error path).
+  const applyAiSort = useCallback(async () => {
     const batch = resultsRef.current
-    if (batch.length === 0 || sharpening) return
+    if (batch.length < MIN_SHARPEN || sharpening) return
     if (!isJudgeReady(judgeConfig)) {
       setShowSettings(true)
       return
@@ -218,23 +227,29 @@ export default function App() {
     try {
       const ranked = await rerank(batch, judgeConfig)
       if (!ranked) {
-        setJudgeNotice('AI re-rank unavailable — kept the offline order. Check Settings.')
+        setJudgeNotice('AI sort unavailable — kept the Score order. Check Settings.')
         return
       }
       const order = new Map(ranked.map((r, i) => [r.name, i]))
       const reordered = [...batch].sort(
         (a, b) => (order.get(a.name) ?? Infinity) - (order.get(b.name) ?? Infinity),
       )
-      setResults(reordered)
+      setAiRanked(reordered)
       setReasons(new Map(ranked.map((r) => [r.name, r.reason])))
       setAiPickName(ranked[0]?.name)
-      setMetrics(reordered.length > 0 ? await batchMetrics(reordered) : null)
+      setSortMode('ai')
     } catch {
-      setJudgeNotice('AI re-rank failed — kept the offline order.')
+      setJudgeNotice('AI sort failed — kept the Score order.')
     } finally {
       setSharpening(false)
     }
   }, [judgeConfig, sharpening])
+
+  const sortByScore = useCallback(() => setSortMode('score'), [])
+  const sortByAi = useCallback(() => {
+    if (aiRanked) setSortMode('ai') // cached order; tail of new names shown after
+    else void applyAiSort()
+  }, [aiRanked, applyAiSort])
 
   // Phase 49: infinite scroll — when the sentinel under the grid comes within
   // 300px of the viewport, append the next batch (the 20k exclude window
@@ -304,7 +319,18 @@ export default function App() {
   // ranking happens per batch inside handleGenerate (insert order is final);
   // this render-time profile only drives the "tuned to favorites" note.
   const profile = buildProfile(favorites)
-  const displayResults = results
+
+  // Derived sort: in AI mode show the cached AI order, then any names appended
+  // since (infinite scroll) at the end. Engine order (`results`) is untouched.
+  const aiNames = aiRanked ? new Set(aiRanked.map((r) => r.name)) : null
+  const newCount = sortMode === 'ai' && aiNames ? results.filter((r) => !aiNames.has(r.name)).length : 0
+  let displayResults = results
+  if (sortMode === 'ai' && aiRanked) {
+    const present = new Set(results.map((r) => r.name))
+    const head = aiRanked.filter((r) => present.has(r.name))
+    const inHead = new Set(head.map((r) => r.name))
+    displayResults = [...head, ...results.filter((r) => !inHead.has(r.name))]
+  }
 
   // Live token/cost estimate for sharpening the current batch (Phase 52).
   const tokenEst = estimateTokens(results, judgeConfig)
@@ -370,33 +396,33 @@ export default function App() {
               {metrics && (
                 <div className="stats-area">
                   <StatsPanel stats={metrics.stats} tips={tips} />
-                  {profile && results.length > 0 && (
-                    <span className="nav-note" title="Results re-ranked toward your saved names">
-                      ✨ tuned to your favorites
-                    </span>
-                  )}
+                  <div className="stats-area-right">
+                    {profile && results.length > 0 && (
+                      <span className="nav-note" title="Results re-ranked toward your saved names">
+                        ✨ tuned to your favorites
+                      </span>
+                    )}
+                    {results.length >= MIN_SHARPEN && (
+                      <SortControl
+                        mode={sortMode}
+                        judgeEnabled={judgeConfig.enabled}
+                        sharpening={sharpening}
+                        tokens={tokenEst.total}
+                        cost={sharpenCost}
+                        notice={judgeNotice}
+                        newCount={newCount}
+                        onScore={sortByScore}
+                        onAi={sortByAi}
+                        onRerank={() => void applyAiSort()}
+                        onOpenSettings={() => setShowSettings(true)}
+                      />
+                    )}
+                  </div>
                 </div>
               )}
 
               {displayResults.length > 0 && (
                 <>
-                  {judgeConfig.enabled && results.length >= MIN_SHARPEN && (
-                    <div className="sharpen-bar">
-                      <button
-                        className="sharpen-btn"
-                        onClick={() => void handleSharpen()}
-                        disabled={sharpening}
-                        title="Re-rank this whole batch in one LLM call"
-                      >
-                        {sharpening ? 'Sharpening…' : '✨ Sharpen with AI'}
-                      </button>
-                      <span className="sharpen-est" title="Approximate tokens this re-rank will use (one batched call)">
-                        ≈ {tokenEst.total.toLocaleString()} tok ·{' '}
-                        {sharpenCost === null ? '$?' : sharpenCost === 0 ? '$0 (free)' : `≈ $${sharpenCost.toFixed(4)}`}
-                      </span>
-                      {judgeNotice && <span className="sharpen-notice">{judgeNotice}</span>}
-                    </div>
-                  )}
                   <div className="results-grid">
                     {displayResults.map((r, i) => (
                       <NameCard

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   DEFAULT_JUDGE_PROMPT,
   DEFAULT_LOCAL_ENDPOINT,
@@ -16,25 +16,48 @@ interface Props {
 }
 
 const perM = (pricePerToken: number) => `$${(pricePerToken * 1e6).toFixed(2)}/M`
+const priceTag = (m: ModelInfo) => (m.free ? 'FREE' : m.priceIn < 0 ? 'variable' : perM(m.priceIn))
 const ctxK = (m: ModelInfo) => (m.contextLength ? `${Math.round(m.contextLength / 1000)}k ctx` : '')
-const optionLabel = (m: ModelInfo) => [m.free ? 'FREE' : perM(m.priceIn), ctxK(m)].filter(Boolean).join(' · ')
+const optionTag = (m: ModelInfo) => [priceTag(m), ctxK(m)].filter(Boolean).join(' · ')
 
-// Phase 50/52: configure the optional "Sharpen with AI" judge. Two transports
+// Capture the picked model's per-token prices into the config (undefined when
+// unknown or variable, so the estimate shows "$?" rather than a bogus number).
+const priceFields = (m?: ModelInfo) => ({
+  priceIn: m?.free ? 0 : m && m.priceIn >= 0 ? m.priceIn : undefined,
+  priceOut: m?.free ? 0 : m && m.priceOut >= 0 ? m.priceOut : undefined,
+})
+
+// Phase 50/52/53: configure the optional "Sharpen with AI" judge. Two transports
 // (both OpenAI-compatible): OpenRouter with the user's own key, or a local
-// server. The model list is fetched live (Phase 52); in-browser models are
-// intentionally omitted — small models judge brand names poorly.
+// server. The model list is fetched live and shown in a themed combobox (Phase
+// 53 — the native <datalist> couldn't be styled and scrolled badly).
 export function SettingsModal({ config, onSave, onClose }: Props) {
   const [draft, setDraft] = useState<JudgeConfig>(config)
   const [models, setModels] = useState<ModelInfo[]>([])
   const [modelsLoading, setModelsLoading] = useState(false)
+  const [modelOpen, setModelOpen] = useState(false)
+  const comboRef = useRef<HTMLDivElement>(null)
 
+  // Escape closes the model dropdown first, then the modal.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
+      if (e.key !== 'Escape') return
+      if (modelOpen) setModelOpen(false)
+      else onClose()
     }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
-  }, [onClose])
+  }, [onClose, modelOpen])
+
+  // Close the dropdown on outside click.
+  useEffect(() => {
+    if (!modelOpen) return
+    const onDown = (e: MouseEvent) => {
+      if (comboRef.current && !comboRef.current.contains(e.target as Node)) setModelOpen(false)
+    }
+    document.addEventListener('mousedown', onDown)
+    return () => document.removeEventListener('mousedown', onDown)
+  }, [modelOpen])
 
   // Live model list — debounced so typing a localhost endpoint doesn't spam.
   useEffect(() => {
@@ -63,41 +86,67 @@ export function SettingsModal({ config, onSave, onClose }: Props) {
     onClose()
   }
 
-  const options: { id: string; label: string }[] = models.length
-    ? models.map((m) => ({ id: m.id, label: optionLabel(m) }))
+  const pickList: ModelInfo[] = models.length
+    ? models
     : draft.provider === 'openrouter'
-      ? OPENROUTER_FREE_MODELS.map((id) => ({ id, label: 'FREE' }))
+      ? OPENROUTER_FREE_MODELS.map((id) => ({ id, priceIn: 0, priceOut: 0, free: true }))
       : []
-  const selected = models.find((m) => m.id === draft.model)
+  const query = (draft.model ?? '').toLowerCase()
+  const selected = pickList.find((m) => m.id === draft.model)
+  // When the field holds a fully-selected id (or is empty) show the whole list
+  // so the user can browse/switch; only filter while they're typing a partial.
+  const filtered = (query === '' || selected ? pickList : pickList.filter((m) => m.id.toLowerCase().includes(query))).slice(0, 60)
+
+  const selectModel = (m: ModelInfo) => {
+    setDraft((d) => ({ ...d, model: m.id, ...priceFields(m) }))
+    setModelOpen(false)
+  }
 
   const modelField = (placeholder: string, extraLabel = '') => (
     <label className="settings-field">
       <span>Model {extraLabel}</span>
-      <input
-        type="text"
-        list="judge-models"
-        placeholder={placeholder}
-        value={draft.model ?? ''}
-        onChange={(e) => {
-          const id = e.target.value
-          const m = models.find((x) => x.id === id)
-          setDraft((d) => ({ ...d, model: id, priceIn: m?.priceIn, priceOut: m?.priceOut }))
-        }}
-      />
-      <datalist id="judge-models">
-        {options.map((o) => (
-          <option key={o.id} value={o.id} label={o.label} />
-        ))}
-      </datalist>
-      {modelsLoading && <span className="settings-hint">Loading models…</span>}
-      {!modelsLoading && models.length === 0 && (
-        <span className="settings-hint">Couldn't load the live list — type any model id.</span>
-      )}
+      <div className="model-combo" ref={comboRef}>
+        <input
+          type="text"
+          placeholder={placeholder}
+          value={draft.model ?? ''}
+          onFocus={() => setModelOpen(true)}
+          onChange={(e) => {
+            const id = e.target.value
+            setDraft((d) => ({ ...d, model: id, ...priceFields(pickList.find((x) => x.id === id)) }))
+            setModelOpen(true)
+          }}
+        />
+        {modelOpen && (
+          <div className="model-menu">
+            {modelsLoading && <div className="model-empty">Loading models…</div>}
+            {!modelsLoading && filtered.length === 0 && (
+              <div className="model-empty">No matches — any model id works.</div>
+            )}
+            {filtered.map((m) => (
+              <button
+                type="button"
+                key={m.id}
+                className={`model-option${m.id === draft.model ? ' selected' : ''}`}
+                onMouseDown={(e) => {
+                  e.preventDefault() // keep input focus; fire before blur
+                  selectModel(m)
+                }}
+              >
+                <span className="model-id">{m.id}</span>
+                <span className="model-tag">{optionTag(m)}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
       {selected && (
         <span className="settings-hint">
           {selected.free
             ? 'Free model'
-            : `${perM(selected.priceIn)} in · ${perM(selected.priceOut)} out`}
+            : selected.priceIn < 0
+              ? 'Variable pricing'
+              : `${perM(selected.priceIn)} in · ${perM(selected.priceOut)} out`}
           {ctxK(selected) ? ` · ${ctxK(selected)}` : ''}
         </span>
       )}

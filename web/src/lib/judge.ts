@@ -151,12 +151,14 @@ export async function fetchModels(cfg: JudgeConfig): Promise<ModelInfo[]> {
         }
       })
       .filter((m) => m.id)
-    // Free first, then cheapest, then alphabetical.
+    // Free first, then cheapest, then alphabetical. Negative/sentinel prices
+    // (e.g. openrouter/auto reports -1 for variable pricing) sort to the bottom
+    // of the paid group rather than above genuinely cheap models.
+    const sortPrice = (m: ModelInfo) =>
+      m.priceIn < 0 || m.priceOut < 0 ? Infinity : m.priceIn + m.priceOut
     models.sort(
       (a, b) =>
-        Number(b.free) - Number(a.free) ||
-        a.priceIn + a.priceOut - (b.priceIn + b.priceOut) ||
-        a.id.localeCompare(b.id),
+        Number(b.free) - Number(a.free) || sortPrice(a) - sortPrice(b) || a.id.localeCompare(b.id),
     )
     modelCache.set(url, models)
     return models
