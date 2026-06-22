@@ -23,6 +23,9 @@ body {
   color: var(--text);
   min-height: 100dvh;
   padding: 1.5rem;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 
@@ -69,9 +72,10 @@ body {
   border: 1px solid var(--border);
   border-radius: 8px;
   cursor: pointer;
-  transition: border-color .15s;
+  transition: border-color .15s, transform .08s;
 }
 .nav-cta:hover { border-color: rgba(255, 255, 255, .25); }
+.nav-cta:active { transform: scale(.96); }
 
 /* Hero */
 .landing-hero {
@@ -178,9 +182,10 @@ body {
   border: none;
   border-radius: 10px;
   cursor: pointer;
-  transition: opacity .15s;
+  transition: opacity .15s, transform .08s;
 }
 .landing-cta:hover { opacity: .88; }
+.landing-cta:active { transform: scale(.96); }
 
 .ghost-cta {
   padding: .8rem 1.2rem;
@@ -290,9 +295,10 @@ body {
   border: 1px solid var(--border);
   border-radius: 999px;
   cursor: pointer;
-  transition: all .15s;
+  transition: color .15s, background-color .15s, border-color .15s, transform .08s;
 }
 .tile-pill:hover { color: var(--text); }
+.tile-pill:active { transform: scale(.96); }
 .tile-pill.active { color: #fff; background: var(--accent); border-color: var(--accent); }
 
 .tile-names { display: flex; gap: .75rem; flex-wrap: wrap; animation: names-in .4s ease both; }
@@ -555,9 +561,10 @@ body {
   border: 1px solid var(--border);
   border-radius: 999px;
   cursor: pointer;
-  transition: color .15s, border-color .15s;
+  transition: color .15s, border-color .15s, transform .08s;
 }
 .card-chip:hover { color: var(--text); border-color: rgba(255, 255, 255, .22); }
+.card-chip:active { transform: scale(.96); }
 .card-chip.active { color: var(--accent); border-color: rgba(124, 106, 249, .5); }
 
 .chip-chevron {
@@ -570,7 +577,8 @@ body {
 .card-icons {
   margin-left: auto;
   display: flex;
-  gap: .2rem;
+  /* .5rem so the 40px icon-btn hit areas (extended below) meet without overlap. */
+  gap: .5rem;
 }
 
 .icon-btn {
@@ -587,7 +595,7 @@ body {
   transition: color .15s, background .15s, transform .1s;
 }
 .icon-btn:hover { color: var(--text); background: var(--surface2); }
-.icon-btn:active { transform: scale(1.15); }
+.icon-btn:active { transform: scale(.96); }
 .star-btn.starred { color: #f59e0b; }
 
 /* Availability badges (inside the card expansion) — quiet outline style */
@@ -716,9 +724,10 @@ body {
   border-radius: 8px;
   cursor: pointer;
   text-align: left;
-  transition: color .15s, background .15s;
+  transition: color .15s, background-color .15s, transform .08s;
 }
 .sidebar-item:hover { color: var(--text); background: var(--surface); }
+.sidebar-item:active { transform: scale(.96); }
 .sidebar-item.active { color: var(--text); background: var(--surface2); }
 .sidebar-item .count-pill { margin-left: auto; }
 
@@ -1096,9 +1105,10 @@ body {
   border: 1px solid var(--border);
   border-radius: 9px;
   cursor: pointer;
-  transition: border-color .15s;
+  transition: border-color .15s, transform .08s;
 }
 .toolbar-btn:hover { border-color: rgba(255, 255, 255, .25); }
+.toolbar-btn:active { transform: scale(.96); }
 
 /* Command bar (Phase 41: prompt-first dashboard) */
 .command-area {
@@ -1142,10 +1152,11 @@ body {
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: opacity .15s;
+  transition: opacity .15s, transform .08s;
   white-space: nowrap;
 }
 .command-go:hover { opacity: .88; }
+.command-go:active { transform: scale(.96); }
 .command-go:disabled { opacity: .45; cursor: not-allowed; }
 
 /* Phase 50: naming style as always-visible segmented pills (was a hidden
@@ -1169,9 +1180,10 @@ body {
   border-radius: 11px;
   cursor: pointer;
   text-align: left;
-  transition: border-color .15s, background .15s;
+  transition: border-color .15s, background-color .15s, transform .08s;
 }
 .mode-pill:hover { border-color: rgba(255, 255, 255, .22); }
+.mode-pill:active { transform: scale(.96); }
 .mode-pill.selected {
   border-color: rgba(124, 106, 249, .6);
   background: rgba(124, 106, 249, .1);
@@ -1199,9 +1211,10 @@ body {
   border: 1px solid var(--border);
   border-radius: 999px;
   cursor: pointer;
-  transition: all .15s;
+  transition: color .15s, border-color .15s, transform .08s;
 }
 .chip:hover { color: var(--text); border-color: rgba(255, 255, 255, .22); }
+.chip:active { transform: scale(.96); }
 .chip.open { color: var(--text); border-color: rgba(124, 106, 249, .6); }
 .chip-caret { font-size: .6rem; opacity: .7; }
 
@@ -1300,9 +1313,10 @@ body {
   border: 1px solid var(--border);
   border-radius: 999px;
   cursor: pointer;
-  transition: all .15s;
+  transition: color .15s, border-color .15s, transform .08s;
 }
 .example-chip:hover { color: var(--text); border-color: rgba(255, 255, 255, .25); }
+.example-chip:active { transform: scale(.96); }
 
 .exhausted-notice {
   display: flex;
@@ -1323,7 +1337,10 @@ body {
   .badge-checking { animation: none; }
   .chip-chevron { transition: none; }
   .icon-btn { transition: color .15s, background .15s; }
-  .icon-btn:active { transform: none; }
+  .icon-btn:active,
+  .command-go:active, .landing-cta:active, .nav-cta:active, .toolbar-btn:active,
+  .mode-pill:active, .chip:active, .card-chip:active, .example-chip:active,
+  .tile-pill:active, .sidebar-item:active, .sort-seg:active, .sort-rerank:active { transform: none; }
 }
 
 /* Sidebar collapses to a horizontal top bar on narrow screens */
@@ -1344,6 +1361,30 @@ body {
   .sidebar-foot { margin-top: 0; margin-left: auto; flex-direction: row; align-items: center; gap: .5rem; }
   .sidebar-about { margin-top: 0; }
   .page { padding: 1.25rem 1rem 2rem; }
+}
+
+/* Phase 55: interface-polish pass (make-interfaces-feel-better). */
+/* P9 — tabular numerals so dynamic figures don't shift layout as they change. */
+.card-score, .stat-value, .meta-score, .count-pill { font-variant-numeric: tabular-nums; }
+/* P10 — balanced display headings; orphan-free multi-line body copy. */
+.landing-title, .page-title, .closing-title, .settings-head h2, .tile h3 { text-wrap: balance; }
+.hero-sub, .settings-intro, .tile-body, .stats-tip { text-wrap: pretty; }
+/* P16 — extend the 32px card icon buttons to a 40px tap target via a pseudo. */
+.icon-btn { position: relative; }
+.icon-btn::after { content: ''; position: absolute; inset: -4px; }
+/* P7 — copy/check icon cross-fade (no motion lib): both icons stacked in one
+   grid cell, swapped by opacity/scale/blur via the .copied class. */
+.copy-swap { display: inline-grid; place-items: center; }
+.copy-swap > * {
+  grid-area: 1 / 1;
+  display: inline-flex;
+  transition: opacity .2s cubic-bezier(0.2, 0, 0, 1), transform .2s cubic-bezier(0.2, 0, 0, 1), filter .2s cubic-bezier(0.2, 0, 0, 1);
+}
+.copy-swap .copy-check { opacity: 0; transform: scale(.25); filter: blur(4px); }
+.copy-swap.copied .copy-copy { opacity: 0; transform: scale(.25); filter: blur(4px); }
+.copy-swap.copied .copy-check { opacity: 1; transform: scale(1); filter: blur(0); }
+@media (prefers-reduced-motion: reduce) {
+  .copy-swap > * { transition: none; }
 }
 
 @media (max-width: 560px) {

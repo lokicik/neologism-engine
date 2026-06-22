@@ -202,7 +202,10 @@ export function NameCard({ result, isFavorite, onToggleFavorite, isBest = false,
         </button>
         <div className="card-icons">
           <button className="icon-btn" onClick={copy} title="Copy name">
-            {copied ? <IconCheck /> : <IconCopy />}
+            <span className={`copy-swap${copied ? ' copied' : ''}`}>
+              <span className="copy-copy"><IconCopy /></span>
+              <span className="copy-check"><IconCheck /></span>
+            </span>
           </button>
           <button
             className={`icon-btn star-btn${isFavorite ? ' starred' : ''}`}
