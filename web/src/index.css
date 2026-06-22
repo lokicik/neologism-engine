@@ -769,6 +769,7 @@ body {
 }
 .sharpen-btn:hover { background: rgba(124, 106, 249, .22); }
 .sharpen-btn:disabled { opacity: .55; cursor: not-allowed; }
+.sharpen-est { font-size: .78rem; color: var(--muted); font-variant-numeric: tabular-nums; }
 .sharpen-notice { font-size: .8rem; color: var(--muted); }
 
 /* Phase 50: per-card AI judgment line + top-pick marker. */

@@ -24,6 +24,11 @@ export interface JudgeConfig {
   endpoint?: string
   /// Judge prompt template; "{{names}}" is replaced with the numbered candidate list.
   prompt?: string
+  /// USD per token for the selected model — captured when picked from the live
+  /// list so the UI can show a cost estimate without re-fetching. Undefined for
+  /// a hand-typed model id (cost then shows as unknown).
+  priceIn?: number
+  priceOut?: number
 }
 
 export interface RankedJudgment {
@@ -98,9 +103,87 @@ async function resolveModel(cfg: JudgeConfig, base: string, headers: Record<stri
   }
 }
 
-function buildPrompt(template: string, labels: string[]): string {
+export function buildPrompt(template: string, labels: string[]): string {
   const list = labels.map((n, i) => `${i + 1}. ${n}`).join('\n')
   return (template || DEFAULT_JUDGE_PROMPT).replace('{{names}}', list)
+}
+
+// ---- Model discovery + token/cost estimate (Phase 52) ----
+
+export interface ModelInfo {
+  id: string
+  name?: string
+  priceIn: number // USD per input token
+  priceOut: number // USD per output token
+  contextLength?: number
+  free: boolean
+}
+
+const modelCache = new Map<string, ModelInfo[]>()
+
+// Live model list. OpenRouter's /models is public (no key needed); a local
+// server exposes its loaded models at {endpoint}/models. Returns [] on ANY
+// failure (incl. CORS) so the UI falls back to the curated list + manual entry.
+export async function fetchModels(cfg: JudgeConfig): Promise<ModelInfo[]> {
+  const url =
+    cfg.provider === 'openrouter'
+      ? `${OPENROUTER_BASE}/models`
+      : `${(cfg.endpoint ?? DEFAULT_LOCAL_ENDPOINT).replace(/\/$/, '')}/models`
+  if (modelCache.has(url)) return modelCache.get(url)!
+  try {
+    const res = await fetch(url)
+    if (!res.ok) return []
+    const data = (await res.json()) as {
+      data?: Array<{ id?: string; name?: string; context_length?: number; pricing?: { prompt?: string; completion?: string } }>
+    }
+    const models: ModelInfo[] = (data.data ?? [])
+      .map((m) => {
+        const priceIn = parseFloat(m.pricing?.prompt ?? '0') || 0
+        const priceOut = parseFloat(m.pricing?.completion ?? '0') || 0
+        const id = m.id ?? ''
+        return {
+          id,
+          name: typeof m.name === 'string' ? m.name : undefined,
+          priceIn,
+          priceOut,
+          contextLength: typeof m.context_length === 'number' ? m.context_length : undefined,
+          free: id.endsWith(':free') || (priceIn === 0 && priceOut === 0),
+        }
+      })
+      .filter((m) => m.id)
+    // Free first, then cheapest, then alphabetical.
+    models.sort(
+      (a, b) =>
+        Number(b.free) - Number(a.free) ||
+        a.priceIn + a.priceOut - (b.priceIn + b.priceOut) ||
+        a.id.localeCompare(b.id),
+    )
+    modelCache.set(url, models)
+    return models
+  } catch {
+    return []
+  }
+}
+
+export interface TokenEstimate {
+  input: number
+  output: number
+  total: number
+}
+
+// Rough, tokenizer-free estimate: ~chars/4 for the prompt, ~15 tokens per name
+// for the {i,score,reason} output. Enough to show the order of cost (label "≈").
+export function estimateTokens(names: NameResult[], cfg: JudgeConfig): TokenEstimate {
+  const prompt = buildPrompt(cfg.prompt || DEFAULT_JUDGE_PROMPT, names.map((n) => n.name))
+  const input = Math.ceil(prompt.length / 4)
+  const output = names.length * 15
+  return { input, output, total: input + output }
+}
+
+// USD cost for an estimate at the given per-token prices, or null if unknown.
+export function estimateCost(est: TokenEstimate, priceIn?: number, priceOut?: number): number | null {
+  if (priceIn === undefined || priceOut === undefined) return null
+  return est.input * priceIn + est.output * priceOut
 }
 
 // Pull the first top-level JSON array out of a reply that may be wrapped in prose

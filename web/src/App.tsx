@@ -3,7 +3,7 @@ import { generateNames, batchMetrics, extractKeywords, type BatchMetrics, type C
 import { recommendations } from './lib/recommend'
 import { buildProfile, rankByPreference } from './lib/preferences'
 import { loadFavorites, toggleFavorite, saveFavorites, loadRecent, saveRecent, hasVisited, markVisited, loadJudgeConfig, saveJudgeConfig } from './lib/storage'
-import { rerank, isJudgeReady, type JudgeConfig } from './lib/judge'
+import { rerank, isJudgeReady, estimateTokens, estimateCost, type JudgeConfig } from './lib/judge'
 import { decodeShareUrl } from './lib/share'
 import { CommandBar } from './components/CommandBar'
 import { NameCard } from './components/NameCard'
@@ -32,6 +32,10 @@ const DEFAULT_CONFIG: Config = {
 // (fuzzy_window=2000), so a large list can't starve generation — the distinct
 // big-tech vocabulary measured at 57k+ (100k-generation sweep).
 const RECENT_WINDOW = 20000
+
+// Below this batch size, an AI re-rank isn't worth a request (you can't
+// meaningfully re-order 1 name) — the Sharpen button stays hidden.
+const MIN_SHARPEN = 2
 
 type View = 'landing' | AppView
 
@@ -265,6 +269,10 @@ export default function App() {
   const profile = buildProfile(favorites)
   const displayResults = results
 
+  // Live token/cost estimate for sharpening the current batch (Phase 52).
+  const tokenEst = estimateTokens(results, judgeConfig)
+  const sharpenCost = estimateCost(tokenEst, judgeConfig.priceIn, judgeConfig.priceOut)
+
   // Top pick of the batch (compared by name, so re-ranking doesn't break it).
   const bestName = metrics && results.length >= 2 ? results[metrics.stats.best_index]?.name : undefined
 
@@ -335,16 +343,20 @@ export default function App() {
 
               {displayResults.length > 0 && (
                 <>
-                  {judgeConfig.enabled && (
+                  {judgeConfig.enabled && results.length >= MIN_SHARPEN && (
                     <div className="sharpen-bar">
                       <button
                         className="sharpen-btn"
                         onClick={() => void handleSharpen()}
                         disabled={sharpening}
-                        title="Re-rank this batch by an LLM's brand-quality judgment"
+                        title="Re-rank this whole batch in one LLM call"
                       >
                         {sharpening ? 'Sharpening…' : '✨ Sharpen with AI'}
                       </button>
+                      <span className="sharpen-est" title="Approximate tokens this re-rank will use (one batched call)">
+                        ≈ {tokenEst.total.toLocaleString()} tok ·{' '}
+                        {sharpenCost === null ? '$?' : sharpenCost === 0 ? '$0 (free)' : `≈ $${sharpenCost.toFixed(4)}`}
+                      </span>
                       {judgeNotice && <span className="sharpen-notice">{judgeNotice}</span>}
                     </div>
                   )}

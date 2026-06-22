@@ -3,8 +3,10 @@ import {
   DEFAULT_JUDGE_PROMPT,
   DEFAULT_LOCAL_ENDPOINT,
   OPENROUTER_FREE_MODELS,
+  fetchModels,
   type JudgeConfig,
   type JudgeProvider,
+  type ModelInfo,
 } from '../lib/judge'
 
 interface Props {
@@ -13,12 +15,18 @@ interface Props {
   onClose: () => void
 }
 
-// Phase 50: configure the optional "Sharpen with AI" judge. Two transports
+const perM = (pricePerToken: number) => `$${(pricePerToken * 1e6).toFixed(2)}/M`
+const ctxK = (m: ModelInfo) => (m.contextLength ? `${Math.round(m.contextLength / 1000)}k ctx` : '')
+const optionLabel = (m: ModelInfo) => [m.free ? 'FREE' : perM(m.priceIn), ctxK(m)].filter(Boolean).join(' · ')
+
+// Phase 50/52: configure the optional "Sharpen with AI" judge. Two transports
 // (both OpenAI-compatible): OpenRouter with the user's own key, or a local
-// server. In-browser models are intentionally omitted — small models judge
-// poorly (see the note at the bottom).
+// server. The model list is fetched live (Phase 52); in-browser models are
+// intentionally omitted — small models judge brand names poorly.
 export function SettingsModal({ config, onSave, onClose }: Props) {
   const [draft, setDraft] = useState<JudgeConfig>(config)
+  const [models, setModels] = useState<ModelInfo[]>([])
+  const [modelsLoading, setModelsLoading] = useState(false)
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -28,6 +36,25 @@ export function SettingsModal({ config, onSave, onClose }: Props) {
     return () => document.removeEventListener('keydown', onKey)
   }, [onClose])
 
+  // Live model list — debounced so typing a localhost endpoint doesn't spam.
+  useEffect(() => {
+    if (!draft.enabled) return
+    let cancelled = false
+    setModelsLoading(true)
+    const t = setTimeout(() => {
+      void fetchModels(draft).then((list) => {
+        if (cancelled) return
+        setModels(list)
+        setModelsLoading(false)
+      })
+    }, 300)
+    return () => {
+      cancelled = true
+      clearTimeout(t)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draft.provider, draft.endpoint, draft.enabled])
+
   const set = <K extends keyof JudgeConfig>(key: K, value: JudgeConfig[K]) =>
     setDraft((d) => ({ ...d, [key]: value }))
 
@@ -35,6 +62,47 @@ export function SettingsModal({ config, onSave, onClose }: Props) {
     onSave(draft)
     onClose()
   }
+
+  const options: { id: string; label: string }[] = models.length
+    ? models.map((m) => ({ id: m.id, label: optionLabel(m) }))
+    : draft.provider === 'openrouter'
+      ? OPENROUTER_FREE_MODELS.map((id) => ({ id, label: 'FREE' }))
+      : []
+  const selected = models.find((m) => m.id === draft.model)
+
+  const modelField = (placeholder: string, extraLabel = '') => (
+    <label className="settings-field">
+      <span>Model {extraLabel}</span>
+      <input
+        type="text"
+        list="judge-models"
+        placeholder={placeholder}
+        value={draft.model ?? ''}
+        onChange={(e) => {
+          const id = e.target.value
+          const m = models.find((x) => x.id === id)
+          setDraft((d) => ({ ...d, model: id, priceIn: m?.priceIn, priceOut: m?.priceOut }))
+        }}
+      />
+      <datalist id="judge-models">
+        {options.map((o) => (
+          <option key={o.id} value={o.id} label={o.label} />
+        ))}
+      </datalist>
+      {modelsLoading && <span className="settings-hint">Loading models…</span>}
+      {!modelsLoading && models.length === 0 && (
+        <span className="settings-hint">Couldn't load the live list — type any model id.</span>
+      )}
+      {selected && (
+        <span className="settings-hint">
+          {selected.free
+            ? 'Free model'
+            : `${perM(selected.priceIn)} in · ${perM(selected.priceOut)} out`}
+          {ctxK(selected) ? ` · ${ctxK(selected)}` : ''}
+        </span>
+      )}
+    </label>
+  )
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -67,7 +135,7 @@ export function SettingsModal({ config, onSave, onClose }: Props) {
                   type="radio"
                   name="provider"
                   checked={draft.provider === p}
-                  onChange={() => set('provider', p)}
+                  onChange={() => setDraft((d) => ({ ...d, provider: p, model: undefined, priceIn: undefined, priceOut: undefined }))}
                 />
                 {p === 'openrouter' ? 'OpenRouter (your key)' : 'Localhost (Ollama / llama.cpp)'}
               </label>
@@ -86,21 +154,7 @@ export function SettingsModal({ config, onSave, onClose }: Props) {
                   autoComplete="off"
                 />
               </label>
-              <label className="settings-field">
-                <span>Model</span>
-                <input
-                  type="text"
-                  list="or-models"
-                  placeholder={OPENROUTER_FREE_MODELS[0]}
-                  value={draft.model ?? ''}
-                  onChange={(e) => set('model', e.target.value)}
-                />
-                <datalist id="or-models">
-                  {OPENROUTER_FREE_MODELS.map((m) => (
-                    <option key={m} value={m} />
-                  ))}
-                </datalist>
-              </label>
+              {modelField(OPENROUTER_FREE_MODELS[0])}
               <p className="settings-hint">
                 Free <code>:free</code> models work well here. Get a key at{' '}
                 <a href="https://openrouter.ai/keys" target="_blank" rel="noreferrer">openrouter.ai/keys</a>.
@@ -118,15 +172,7 @@ export function SettingsModal({ config, onSave, onClose }: Props) {
                   onChange={(e) => set('endpoint', e.target.value)}
                 />
               </label>
-              <label className="settings-field">
-                <span>Model (blank = auto-detect)</span>
-                <input
-                  type="text"
-                  placeholder="auto"
-                  value={draft.model ?? ''}
-                  onChange={(e) => set('model', e.target.value)}
-                />
-              </label>
+              {modelField('auto', '(blank = auto-detect)')}
               <p className="settings-hint">
                 Ollama: <code>http://localhost:11434/v1</code> · llama.cpp: <code>http://127.0.0.1:8080/v1</code>.
                 The browser needs CORS allowed — for Ollama run it with{' '}
