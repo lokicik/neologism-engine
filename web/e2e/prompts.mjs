@@ -93,8 +93,7 @@ try {
   {
     const { ctx, page } = await freshPage()
     await page.fill('.command-input', 'a journaling app with mood insights')
-    await page.click('.chips-row .chip-wrap:nth-child(1) .chip')
-    await page.click('.menu-item:has-text("Real words")')
+    await page.click('.mode-pill:has-text("Real words")')
     const note = await page.locator('.mode-note').textContent().catch(() => null)
     check(Boolean(note && note.includes('isn’t used')), `realword hint visible (got: ${note})`)
     await ctx.close()

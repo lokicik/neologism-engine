@@ -880,6 +880,39 @@ body {
 .command-go:hover { opacity: .88; }
 .command-go:disabled { opacity: .45; cursor: not-allowed; }
 
+/* Phase 50: naming style as always-visible segmented pills (was a hidden
+   dropdown chip). Brandable is the default/primary; each pill shows a live
+   example so the abstract mode names are self-explanatory at a glance. */
+.mode-pills {
+  display: flex;
+  gap: .5rem;
+  flex-wrap: wrap;
+}
+.mode-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: .15rem;
+  flex: 1 1 0;
+  min-width: 116px;
+  padding: .55rem .85rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color .15s, background .15s;
+}
+.mode-pill:hover { border-color: rgba(255, 255, 255, .22); }
+.mode-pill.selected {
+  border-color: rgba(124, 106, 249, .6);
+  background: rgba(124, 106, 249, .1);
+}
+.mode-pill-label { font-size: .9rem; font-weight: 600; color: var(--text); }
+.mode-pill.selected .mode-pill-label { color: var(--accent); }
+.mode-pill-eg { font-size: .72rem; color: var(--muted); }
+.mode-pill-eg::before { content: 'e.g. '; opacity: .65; }
+
 .chips-row {
   display: flex;
   gap: .45rem;

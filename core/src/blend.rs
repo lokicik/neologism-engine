@@ -92,22 +92,25 @@ pub fn tech_transform<R: Rng>(rng: &mut R, name: &str, temperature: f64) -> Stri
 /// All Lyft/Tumblr/Flickr-style respellings of a real word (Phase 36). Exactly
 /// ONE transform per word so the source stays recognizable — that's what makes
 /// the style work (lyft *reads as* lift). Transforms, each yielding at most one
-/// candidate: (a) drop an interior vowel flanked by consonants (tumbler→tumblr),
-/// (b) i→y swap (lift→lyft), (c) -er→-r (flicker→flickr — also reachable via
-/// (a), kept explicit for words whose only interior vowel isn't the -er one),
-/// (d) collapse a double consonant (summit→sumit). Identity and <4-char results
-/// are dropped. Public so tests can assert the full option set.
+/// candidate: (a) drop a reducible schwa 'e' that leaves a syllabic sonorant
+/// (tumbler→tumblr, flicker→flickr), (b) i→y swap (lift→lyft), (c) -er→-r
+/// (flicker→flickr). Phase 50: the old "drop ANY interior vowel" and "collapse a
+/// double consonant" transforms were removed — they read as typos rather than
+/// stylings (graceful→gracefl, swallow→swalow), the one real quality bug in this
+/// mode. Identity and <4-char results are dropped. Public so tests can assert it.
 pub fn respell_options(lower: &str) -> Vec<String> {
     let chars: Vec<char> = lower.chars().collect();
     let mut out: Vec<String> = Vec::new();
 
-    // (a) Drop the last interior vowel flanked by consonants — but never from
-    // the head of the word: require an earlier vowel so the first syllable
-    // stays intact (radiance must not become rdiance).
+    // (a) Drop a reducible schwa 'e' that leaves a syllabic sonorant (flicker→
+    // flickr, tumbler→tumblr). Restricted to 'e' followed by l/r/m/n so the
+    // result reads as an intentional respelling, not a typo (graceful↛gracefl;
+    // monolith has no such 'e' → no monolth). Never from the head: require an
+    // earlier vowel so the first syllable stays intact (radiance↛rdiance).
     for i in (2..chars.len().saturating_sub(1)).rev() {
-        if is_vowel(chars[i])
+        if chars[i] == 'e'
             && !is_vowel(chars[i - 1])
-            && !is_vowel(chars[i + 1])
+            && matches!(chars[i + 1], 'l' | 'r' | 'm' | 'n')
             && chars[..i].iter().any(|&c| is_vowel(c))
         {
             let mut v = chars.clone();
@@ -125,15 +128,6 @@ pub fn respell_options(lower: &str) -> Vec<String> {
     // (c) Trailing -er loses its vowel.
     if lower.ends_with("er") && chars.len() >= 4 {
         out.push(format!("{}r", &lower[..lower.len() - 2]));
-    }
-    // (d) Collapse a doubled consonant.
-    for i in 1..chars.len() {
-        if chars[i] == chars[i - 1] && !is_vowel(chars[i]) {
-            let mut v = chars.clone();
-            v.remove(i);
-            out.push(v.iter().collect());
-            break;
-        }
     }
 
     out.sort();
@@ -271,7 +265,9 @@ mod tests {
         assert!(respell_options("tumbler").contains(&"tumblr".to_string()));
         assert!(respell_options("flicker").contains(&"flickr".to_string()));
         assert!(respell_options("lift").contains(&"lyft".to_string()));
-        assert!(respell_options("summit").contains(&"sumit".to_string()));
+        // Phase 50: summit→sumit (double-consonant collapse) was removed as a
+        // typo-style transform; the i→y respelling stands in its place.
+        assert!(respell_options("summit").contains(&"summyt".to_string()));
     }
 
     #[test]

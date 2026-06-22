@@ -15,11 +15,11 @@ interface Props {
 
 type Mode = 'brandable' | 'realword' | 'respell' | 'compound'
 
-const MODES: { value: Mode; label: string; desc: string }[] = [
-  { value: 'brandable', label: 'Brandable', desc: 'Invented coinages — Spotify, Vercel' },
-  { value: 'realword', label: 'Real words', desc: 'Evocative dictionary words — Notion, Linear (ignores your description)' },
-  { value: 'respell', label: 'Respelled', desc: 'Twisted real words — Lyft, Tumblr' },
-  { value: 'compound', label: 'Compound', desc: 'Two-word names — SwiftForge' },
+const MODES: { value: Mode; label: string; example: string; desc: string }[] = [
+  { value: 'brandable', label: 'Brandable', example: 'Spotify', desc: 'Invented coinages — Spotify, Vercel' },
+  { value: 'realword', label: 'Real words', example: 'Notion', desc: 'Evocative dictionary words — Notion, Linear (ignores your description)' },
+  { value: 'respell', label: 'Respelled', example: 'Lyft', desc: 'Twisted real words — Lyft, Tumblr' },
+  { value: 'compound', label: 'Compound', example: 'SwiftForge', desc: 'Two-word names — SwiftForge' },
 ]
 
 const LENGTHS: { label: string; chip: string; min: number; max: number }[] = [
@@ -82,7 +82,6 @@ function Chip({ label, children, active }: { label: string; children: ReactNode;
 
 export function CommandBar({ config, onChange, onGenerate, loading }: Props) {
   const mode = currentMode(config)
-  const modeLabel = MODES.find((m) => m.value === mode)?.label ?? 'Brandable'
   const lengthLabel =
     LENGTHS.find((l) => l.min === config.min_len && l.max === config.max_len)?.chip ?? 'Any length'
   const creativityLabel =
@@ -119,20 +118,23 @@ export function CommandBar({ config, onChange, onGenerate, loading }: Props) {
         </button>
       </div>
 
-      <div className="chips-row">
-        <Chip label={modeLabel}>
-          {MODES.map((m) => (
-            <button
-              key={m.value}
-              className={`menu-item${mode === m.value ? ' selected' : ''}`}
-              onClick={() => setMode(m.value)}
-            >
-              <span className="menu-label">{m.label}</span>
-              <span className="menu-desc">{m.desc}</span>
-            </button>
-          ))}
-        </Chip>
+      <div className="mode-pills" role="group" aria-label="Naming style">
+        {MODES.map((m) => (
+          <button
+            key={m.value}
+            type="button"
+            className={`mode-pill${mode === m.value ? ' selected' : ''}`}
+            title={m.desc}
+            aria-pressed={mode === m.value}
+            onClick={() => setMode(m.value)}
+          >
+            <span className="mode-pill-label">{m.label}</span>
+            <span className="mode-pill-eg">{m.example}</span>
+          </button>
+        ))}
+      </div>
 
+      <div className="chips-row">
         <Chip label={lengthLabel}>
           {LENGTHS.map((l) => (
             <button

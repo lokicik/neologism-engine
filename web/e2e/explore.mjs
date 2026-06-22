@@ -63,11 +63,12 @@ try {
   await page.evaluate(() => window.scrollTo(0, 0))
   await page.waitForTimeout(300)
 
-  // Chip menus
-  await page.click('.chips-row .chip-wrap:nth-child(1) .chip')
-  await shot('05-menu-mode')
-  await page.keyboard.press('Escape')
-  await page.click('.chips-row .chip-wrap:nth-child(4) .chip')
+  // Mode pills (Phase 50: always-visible, replaced the dropdown) + chip menus.
+  await page.click('.mode-pill:has-text("Respelled")')
+  await shot('05-mode-pills')
+  await page.click('.mode-pill:has-text("Brandable")')
+  // Advanced is now the 3rd chip (mode left the chips-row).
+  await page.click('.chips-row .chip-wrap:nth-child(3) .chip')
   await shot('06-menu-advanced')
   await page.keyboard.press('Escape')
 
