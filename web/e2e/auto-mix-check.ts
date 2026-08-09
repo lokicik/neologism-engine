@@ -1,6 +1,6 @@
-// Deterministic smoke test for Auto's 70/10/10/10 presentation schedule.
-import { mergeAutoBatches } from '../src/lib/auto'
-import type { NameResult } from '../src/lib/engine'
+// Deterministic smoke test for Auto's brief-aware presentation schedule.
+import { autoModeCounts, mergeAutoBatches } from '../src/lib/auto.ts'
+import type { NameResult } from '../src/lib/engine.ts'
 
 function result(name: string): NameResult {
   return {
@@ -32,3 +32,18 @@ check(merged.slice(2).some((item) => item.name === 'Real'), 'accent modes remain
 
 const deduped = mergeAutoBatches([[result('Nomix')], [result('nomix')], [], []], 2)
 check(deduped.length === 1, 'Auto removes case-insensitive cross-mode duplicates')
+
+const guided = autoModeCounts(10, true)
+check(
+  guided.brandable === 7 && guided.realword === 1 && guided.respell === 1 && guided.compound === 1,
+  'a product brief keeps the 70/10/10/10 semantic mix',
+)
+
+const generic = autoModeCounts(10, false)
+check(
+  generic.brandable === 5 && generic.realword === 3 && generic.respell === 1 && generic.compound === 1,
+  'an empty brief uses a safer 50/30/10/10 mix',
+)
+
+const tiny = autoModeCounts(3, false)
+check(tiny.brandable === 3 && tiny.realword === 0, 'tiny batches stay entirely Brandable')

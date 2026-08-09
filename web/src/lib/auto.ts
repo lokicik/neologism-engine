@@ -1,5 +1,29 @@
 import type { NameResult } from './engine'
 
+export interface AutoModeCounts {
+  brandable: number
+  realword: number
+  respell: number
+  compound: number
+}
+
+// With a product brief, semantic Brandable names are the quality lead. Without
+// one, that same generator has no meaning to anchor it, so Auto leans more on
+// the curated real-word pool instead of filling the first page with opaque
+// coinages. Explicit mode choices are unaffected.
+export function autoModeCounts(total: number, hasBrief: boolean): AutoModeCounts {
+  const count = Math.max(0, Math.floor(total))
+  if (count < 4) {
+    return { brandable: count, realword: 0, respell: 0, compound: 0 }
+  }
+
+  const realword = Math.max(1, Math.floor(count * (hasBrief ? 0.1 : 0.3)))
+  const respell = Math.max(1, Math.floor(count * 0.1))
+  const compound = Math.max(1, Math.floor(count * 0.1))
+  const brandable = Math.max(1, count - realword - respell - compound)
+  return { brandable, realword, respell, compound }
+}
+
 // Distribute secondary naming modes through the stronger Brandable stream while
 // preserving each mode's own order and removing cross-mode duplicates.
 export function mergeAutoBatches(batches: NameResult[][], total: number): NameResult[] {

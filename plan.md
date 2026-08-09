@@ -752,6 +752,32 @@ passes (single-keyword generation, prefix diversity, keyword explanation, mode h
 
 ---
 
+## Phase 63 — Adapt Auto when no brief is given
+
+**Bottleneck.** Auto always reserved 70% of its page for Brandable generation. That works
+when a project description or roots give the generator meaning, but the same mix produced
+too many fluent-looking yet opaque coinages on an empty prompt.
+
+**Rejected experiment.** Four fixed seeds compared production Markov/blend weights with a
+lower-Markov mix and no Markov path. The alternatives occasionally improved an individual
+name, but aggregate pronounceability and memorability fell, near-duplicate pressure rose,
+and no-Markov samples introduced new malformed shapes. The core weights were therefore
+left unchanged; `generic_compare` preserves the audit instead of turning a mixed result into
+a production change.
+
+**What changed.** Auto is now brief-aware. A description or root keeps the proven
+**70/10/10/10** Brandable/Realword/Respell/Compound mix. With no semantic input it uses
+**50/30/10/10**, replacing two opaque coinage slots with names from the curated real-word
+pool. Explicit modes are untouched, and batches smaller than four remain entirely
+Brandable.
+
+**Verification.** The deterministic Auto harness checks both schedules, exact requested
+size, ordering, accent coverage, and case-insensitive deduplication. **98 core tests green**,
+WASM rebuilt, TypeScript/Vite production build clean, and the Chromium taste-feedback flow
+passes all nine persistence, accessibility, and ranking checks.
+
+---
+
 ## Bottom line
 
 Big-tech is the strongest style, tuned through Phase 25 and extended since:

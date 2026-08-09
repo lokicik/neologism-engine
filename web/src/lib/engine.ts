@@ -1,5 +1,5 @@
 import init, { generate_names, batch_metrics, explain_name, extract_keywords } from '../wasm/neologism_wasm.js'
-import { mergeAutoBatches } from './auto'
+import { autoModeCounts, mergeAutoBatches } from './auto'
 
 export type Style = 'big_tech' | 'sci_fi' | 'fantasy'
 
@@ -49,19 +49,14 @@ export async function generateNames(cfg: Config): Promise<NameResult[]> {
 
 // Auto mode (web-only meta-mode): blend the four engine modes into one batch.
 // The engine never sees variant:'auto' — we fan out four real sub-calls
-// (strongly Brandable-weighted), all sharing the exclude window, then dedupe by
-// name and distribute the three accent modes through the batch. Shared by
-// Create (Auto) and the AI Studio pool.
+// (Brandable-led with a brief, more real-word-led without one), all sharing the
+// exclude window, then dedupe by name and distribute the three accent modes
+// through the batch. Shared by Create (Auto) and the AI Studio pool.
 export async function generateBatch(cfg: Config): Promise<NameResult[]> {
   if (cfg.variant !== 'auto') return generateNames(cfg)
   const total = cfg.count ?? 10
-  // With a normal 10-name batch this is 7 Brandable + one accent from each
-  // explicit mode. Larger AI Studio pools keep the same 70/10/10/10 ratio.
-  const accent = total >= 4 ? Math.max(1, Math.floor(total * 0.1)) : 0
-  const realword = accent
-  const respell = accent
-  const compound = accent
-  const brandable = Math.max(1, total - realword - respell - compound)
+  const hasBrief = Boolean(cfg.description?.trim() || cfg.roots?.some((root) => root.trim()))
+  const { brandable, realword, respell, compound } = autoModeCounts(total, hasBrief)
   const subs: Config[] = [
     { ...cfg, variant: undefined, compound: false, count: brandable },
     { ...cfg, variant: 'realword', compound: false, count: realword },
