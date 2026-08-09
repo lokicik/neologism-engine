@@ -1388,6 +1388,55 @@ three separate 100-card Compound sessions including `legal research`.
 
 ---
 
+## Phase 82 — Build a general-domain safety net
+
+**Bottleneck.** The semantic audits were deep on developer tools but sparse elsewhere. A new
+calibration/synonym-holdout corpus across recruiting, meals, inventory, customer support, real
+estate, events, weather, habits, sales CRM, meditation, and pet care exposed three repeated
+failures. The stemmer reduced `hiring` to `hir`; unknown product words beside `team` could make
+Compound reject every candidate; and polysemous words leaked into the wrong domain, producing
+`Streamify`/`SteadyBus` for event ticketing, `Buyertrace`/`TrustedLens` for property discovery,
+and `Inboxsynth`/`SmartAgent` for customer support.
+
+The baseline calibration side generated only **965/1,100** first-page names, with
+**410/965 (42.5%)** carrying an expected semantic marker and **100/965 (10.4%)** carrying a
+known wrong-domain marker. Its recruiting and sales-CRM Compound pages were completely empty.
+The independent synonym holdout generated **1,080/1,100**, with **392/1,080 (36.3%)** semantic
+and **121/1,080 (11.2%)** wrong-domain names.
+
+**Change.** Eleven restrained offline semantic families now cover both calibration terms and
+common synonyms. A small explicit inflection table restores silent-e concepts such as
+`hiring → hire`, `coding → code`, and `writing → write` without guessing at every `-ing` word.
+Context suppression stays narrow: audience words cannot take ownership of an unknown Compound
+brief, while `agent`, `discovery`, `marketplace`, and similar ambiguous words are ignored only
+when support, real-estate, event, or another explicit domain is already present. `event` itself
+now means a consumer event; technical `queue`, `broker`, `stream`, `topic`, and `bus` remain
+separate developer signals.
+
+**Capacity-gated A/B.** The first semantic expansion looked strong on first pages but was
+rejected because a sales holdout returned **0/50** Brandable names and `pet care appointment`
+stopped at **15/100** during Load more. Removing only the redundant contextual groups fixed both
+instead of weakening the global length or coherence filters. The permanent harness now tests
+all 22 prompts with disjoint seed sets and also runs 100-name rolling sessions in both modes.
+
+**Measured result.** Calibration reaches **1,100/1,100** first-page and **2,200/2,200** rolling
+names; semantic coverage rises to **1,049/1,100 (95.4%)**, while wrong-domain leakage falls to
+**1/1,100 (0.1%)**. Synonym holdout reaches the same full capacities, rises to
+**1,051/1,100 (95.5%)** semantic coverage, and falls to **0/1,100** wrong-domain names. Results
+now include `TrustedHire`, `WarmPantry`, `QuickInbox`, `PrimeRoof`, `VividVenue`, `LiveBreeze`,
+`TrustedDeal`, `QuietPause`, and `GentleTail` instead of raw fragments or unrelated technical
+language. Exact-marker coverage intentionally undercounts transformed Brandable forms.
+
+**Verification.** The core suite is **123/123**. The original eight concept sessions still fill
+100 names; Compound remains **1,000/1,000** prompt-linked and pair-coherent with zero echoes in
+both 1,000 first-page and 2,000 long-session names. Developer-domain coverage remains
+**1,590/1,600**, and the Phase 80 morphology matrix remains unchanged at **1,100/1,100** fixed
+plus **2,200/2,200** rolling names. WASM and the production bundle build cleanly. Chromium keeps
+the developer and 30-page Auto gates green, while five separate Compound UI sessions—including
+the new recruiting and consumer-event regressions—each reach 100 unique, relevant names.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

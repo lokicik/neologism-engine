@@ -29,6 +29,16 @@ const SCENARIOS = [
       'source', 'proof', 'index', 'trace', 'lens', 'scope',
     ]),
   },
+  {
+    label: 'recruiting with an audience term',
+    description: 'a hiring pipeline for recruiting teams',
+    nouns: new Set(['talent', 'role', 'hire', 'scout', 'match', 'crew']),
+  },
+  {
+    label: 'consumer events',
+    description: 'an event ticketing platform',
+    nouns: new Set(['event', 'ticket', 'stage', 'venue', 'guest', 'pass']),
+  },
 ]
 
 const server = spawn(process.execPath, [viteCli, 'preview', '--port', String(PORT), '--strictPort'], {

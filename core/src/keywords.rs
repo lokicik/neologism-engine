@@ -175,7 +175,7 @@ fn concept_roots(word: &str) -> &'static [&'static str] {
         "cloud" | "deploy" | "deployment" | "server" | "hosting" | "infrastructure" | "infra" => {
             &["cloud", "dock", "ship", "stack", "grid"]
         }
-        "queue" | "broker" | "messaging" | "event" | "stream" | "topic" => {
+        "queue" | "broker" | "messaging" | "stream" | "topic" | "bus" => {
             &["queue", "broker", "stream", "topic", "pipe", "bus"]
         }
         "format" | "formatter" | "lint" | "linter" | "style" => {
@@ -202,8 +202,41 @@ fn concept_roots(word: &str) -> &'static [&'static str] {
         "legal" | "law" | "lawyer" | "attorney" | "court" | "litigation" => {
             &["law", "case", "brief", "clause", "docket", "counsel"]
         }
-        "research" | "investigate" | "investigation" | "discovery" => {
+        "research" | "investigate" | "investigation" => {
             &["source", "proof", "index", "trace", "lens", "scope"]
+        }
+        "hire" | "recruit" | "recruiter" | "candidate" | "talent" => {
+            &["talent", "role", "hire", "scout", "match", "crew"]
+        }
+        "meal" | "recipe" | "menu" | "grocery" | "cook" | "kitchen" => {
+            &["dish", "plate", "pantry", "menu", "meal", "table"]
+        }
+        "inventory" | "catalog" | "belonging" | "household" => {
+            &["item", "stock", "shelf", "catalog", "crate", "keep"]
+        }
+        "support" | "helpdesk" | "inbox" => {
+            &["ticket", "desk", "reply", "inbox", "care", "resolve"]
+        }
+        "estate" | "property" | "listing" | "realtor" | "housing" => {
+            &["home", "key", "door", "nest", "roof", "place"]
+        }
+        "event" | "conference" | "attendee" | "venue" => {
+            &["event", "ticket", "stage", "venue", "guest", "pass"]
+        }
+        "weather" | "forecast" | "rain" | "temperature" | "climate" | "storm" => {
+            &["sky", "cloud", "rain", "storm", "breeze", "sun"]
+        }
+        "habit" | "routine" | "streak" | "ritual" => {
+            &["habit", "routine", "streak", "ritual", "daily", "rhythm"]
+        }
+        "crm" | "sale" | "lead" | "deal" => {
+            &["lead", "deal", "client", "contact", "pipeline", "growth"]
+        }
+        "meditation" | "meditate" | "sleep" | "breath" | "rest" => {
+            &["calm", "breath", "still", "rest", "dream", "pause"]
+        }
+        "pet" | "animal" | "vet" | "veterinary" => {
+            &["paw", "tail", "care", "companion", "vital", "pet"]
         }
         "generate" | "generator" | "create" | "creator" | "build" | "builder" => {
             &["forge", "mint", "spark", "seed", "craft"]
@@ -290,7 +323,7 @@ fn concept_adjectives(word: &str) -> &'static [&'static str] {
         "cloud" | "deploy" | "deployment" | "server" | "hosting" | "infrastructure" | "infra" => {
             &["ready", "swift", "steady", "live", "open", "solid"]
         }
-        "queue" | "broker" | "messaging" | "event" | "stream" | "topic" => {
+        "queue" | "broker" | "messaging" | "stream" | "topic" | "bus" => {
             &["live", "steady", "open", "fast", "durable", "direct"]
         }
         "format" | "formatter" | "lint" | "linter" | "style" => {
@@ -317,8 +350,41 @@ fn concept_adjectives(word: &str) -> &'static [&'static str] {
         "legal" | "law" | "lawyer" | "attorney" | "court" | "litigation" => {
             &["sound", "clear", "exact", "trusted", "proven", "firm"]
         }
-        "research" | "investigate" | "investigation" | "discovery" => {
+        "research" | "investigate" | "investigation" => {
             &["deep", "exact", "clear", "open", "trusted", "focused"]
+        }
+        "hire" | "recruit" | "recruiter" | "candidate" | "talent" => {
+            &["bright", "trusted", "ready", "open", "select", "proven"]
+        }
+        "meal" | "recipe" | "menu" | "grocery" | "cook" | "kitchen" => {
+            &["fresh", "daily", "simple", "shared", "warm", "tasty"]
+        }
+        "inventory" | "catalog" | "belonging" | "household" => {
+            &["tidy", "clear", "ready", "local", "smart", "sorted"]
+        }
+        "support" | "helpdesk" | "inbox" => {
+            &["helpful", "quick", "clear", "ready", "human", "trusted"]
+        }
+        "estate" | "property" | "listing" | "realtor" | "housing" => {
+            &["local", "open", "prime", "trusted", "bright", "true"]
+        }
+        "event" | "conference" | "attendee" | "venue" => {
+            &["live", "open", "social", "local", "vivid", "shared"]
+        }
+        "weather" | "forecast" | "rain" | "temperature" | "climate" | "storm" => {
+            &["local", "clear", "live", "daily", "bright", "steady"]
+        }
+        "habit" | "routine" | "streak" | "ritual" => {
+            &["daily", "steady", "simple", "focused", "gentle", "lasting"]
+        }
+        "crm" | "sale" | "lead" | "deal" => {
+            &["clear", "ready", "active", "trusted", "direct", "prime"]
+        }
+        "meditation" | "meditate" | "sleep" | "breath" | "rest" => {
+            &["calm", "quiet", "gentle", "daily", "deep", "soft"]
+        }
+        "pet" | "animal" | "vet" | "veterinary" => {
+            &["happy", "trusted", "daily", "gentle", "healthy", "bright"]
         }
         "generate" | "generator" | "create" | "creator" | "build" | "builder" => {
             &["fresh", "bright", "bold", "swift", "open", "prime"]
@@ -392,12 +458,80 @@ const GENERAL_COMPOUND_ADJECTIVES: &[&str] = &[
     "agile", "wise", "solid", "calm", "new", "top", "key", "one", "true", "core",
 ];
 
+fn has_any_keyword(keywords: &[String], choices: &[&str]) -> bool {
+    keywords
+        .iter()
+        .any(|keyword| choices.contains(&keyword.as_str()))
+}
+
+/// Drop a weak or polysemous word only when another keyword makes the intended
+/// domain explicit. The word remains available in every other context.
+fn is_contextually_suppressed(word: &str, keywords: &[String]) -> bool {
+    let recruiting = has_any_keyword(
+        keywords,
+        &["hire", "recruit", "recruiter", "candidate", "talent"],
+    );
+    let meals = has_any_keyword(
+        keywords,
+        &["meal", "recipe", "menu", "grocery", "cook", "kitchen"],
+    );
+    let inventory = has_any_keyword(
+        keywords,
+        &["inventory", "catalog", "belonging", "household"],
+    );
+    let support = has_any_keyword(keywords, &["support", "helpdesk", "inbox"]);
+    let real_estate = has_any_keyword(
+        keywords,
+        &["estate", "property", "listing", "realtor", "housing"],
+    );
+    let events = has_any_keyword(keywords, &["event", "conference", "attendee", "venue"]);
+    let technical_queue = has_any_keyword(
+        keywords,
+        &["queue", "broker", "messaging", "stream", "topic", "bus"],
+    );
+    let weather = has_any_keyword(
+        keywords,
+        &[
+            "weather",
+            "forecast",
+            "rain",
+            "temperature",
+            "climate",
+            "storm",
+        ],
+    );
+    let habits = has_any_keyword(keywords, &["habit", "routine", "streak", "ritual"]);
+    let sales = has_any_keyword(keywords, &["crm", "sale", "lead", "deal"]);
+    let pets = has_any_keyword(keywords, &["pet", "animal", "vet", "veterinary"]);
+
+    (recruiting && matches!(word, "team" | "pipeline" | "track"))
+        || (meals && matches!(word, "plan" | "weekly" | "organizer"))
+        || (inventory && matches!(word, "home" | "tracker"))
+        || (support && matches!(word, "agent" | "customer" | "service"))
+        || (real_estate
+            && matches!(
+                word,
+                "discovery" | "home" | "market" | "marketplace" | "buyer" | "real"
+            ))
+        || (technical_queue && word == "event")
+        || (events && matches!(word, "book" | "check"))
+        || (weather && matches!(word, "alert" | "local"))
+        || (habits && matches!(word, "coach" | "daily" | "tracker"))
+        || (sales
+            && matches!(
+                word,
+                "customer" | "pipeline" | "relationship" | "representative" | "team"
+            ))
+        || (pets
+            && matches!(
+                word,
+                "appointment" | "care" | "health" | "owner" | "reminder"
+            ))
+}
+
 /// Return the focused adjective pool for a Compound first page. Unknown
 /// domains use the restrained general palette instead of the whimsical corpus.
 pub fn compound_adjectives(keywords: &[String]) -> Vec<&'static str> {
-    let has_product_concept = keywords.iter().any(|keyword| {
-        !matches!(keyword.as_str(), "friend" | "team") && !concept_adjectives(keyword).is_empty()
-    });
     let mut ordered_keywords: Vec<(u8, usize, &String)> = keywords
         .iter()
         .enumerate()
@@ -407,7 +541,9 @@ pub fn compound_adjectives(keywords: &[String]) -> Vec<&'static str> {
 
     let mut adjectives = Vec::new();
     for (_, _, keyword) in ordered_keywords {
-        if has_product_concept && matches!(keyword.as_str(), "friend" | "team") {
+        if matches!(keyword.as_str(), "friend" | "team")
+            || is_contextually_suppressed(keyword, keywords)
+        {
             continue;
         }
         for &adjective in concept_adjectives(keyword) {
@@ -502,9 +638,11 @@ pub fn compound_pair_is_coherent(
     keywords: &[String],
     allow_general: bool,
 ) -> bool {
-    let has_known_concept = keywords
-        .iter()
-        .any(|keyword| !concept_adjectives(keyword).is_empty());
+    let has_known_concept = keywords.iter().any(|keyword| {
+        !matches!(keyword.as_str(), "friend" | "team")
+            && !is_contextually_suppressed(keyword, keywords)
+            && !concept_adjectives(keyword).is_empty()
+    });
     if !has_known_concept {
         return true;
     }
@@ -513,6 +651,9 @@ pub fn compound_pair_is_coherent(
     }
 
     for keyword in keywords {
+        if is_contextually_suppressed(keyword, keywords) {
+            continue;
+        }
         if !concept_adjectives(keyword).contains(&adjective) {
             continue;
         }
@@ -601,9 +742,9 @@ fn is_specialized_dev_domain(word: &str) -> bool {
             | "queue"
             | "broker"
             | "messaging"
-            | "event"
             | "stream"
             | "topic"
+            | "bus"
             | "format"
             | "formatter"
             | "lint"
@@ -675,7 +816,7 @@ pub fn compound_roots(keywords: &[String], limit: usize) -> Vec<String> {
     let has_queue_domain = keywords.iter().any(|keyword| {
         matches!(
             keyword.as_str(),
-            "queue" | "broker" | "messaging" | "event" | "stream" | "topic"
+            "queue" | "broker" | "messaging" | "stream" | "topic" | "bus"
         )
     });
     let has_dependency_domain = keywords.iter().any(|keyword| {
@@ -704,7 +845,8 @@ pub fn compound_roots(keywords: &[String], limit: usize) -> Vec<String> {
             !matches!(
                 keyword.as_str(),
                 "friend" | "team" | "fast" | "speed" | "performance" | "rapid"
-            ) && !(has_analytics && keyword.as_str() == "api")
+            ) && !is_contextually_suppressed(keyword, keywords)
+                && !(has_analytics && keyword.as_str() == "api")
                 && !(has_specialized_dev_domain && is_dev_artifact(keyword))
                 && !(has_source_control && keyword.as_str() == "automation")
                 && !(has_queue_domain && keyword.as_str() == "message")
@@ -780,7 +922,7 @@ pub fn brand_root_groups(keywords: &[String], limit: usize) -> Vec<Vec<String>> 
     let has_queue_domain = keywords.iter().any(|keyword| {
         matches!(
             keyword.as_str(),
-            "queue" | "broker" | "messaging" | "event" | "stream" | "topic"
+            "queue" | "broker" | "messaging" | "stream" | "topic" | "bus"
         )
     });
     let has_dependency_domain = keywords.iter().any(|keyword| {
@@ -794,6 +936,9 @@ pub fn brand_root_groups(keywords: &[String], limit: usize) -> Vec<Vec<String>> 
     for (source_order, keyword) in keywords.iter().enumerate() {
         if seen.len() == limit {
             break;
+        }
+        if is_contextually_suppressed(keyword, keywords) {
+            continue;
         }
         if (has_queue_domain && keyword == "message")
             || (has_dependency_domain && keyword == "automation")
@@ -839,6 +984,23 @@ const SHORT_KEEP: &[&str] = &["ai", "ml", "ar", "vr"];
 /// the blender as "journal"/"keyboard". Deliberately not a Porter stemmer:
 /// each rule is pinned by a test and nothing else is touched.
 fn stem(word: &str) -> String {
+    if let Some(base) = match word {
+        "hiring" => Some("hire"),
+        "coding" => Some("code"),
+        "naming" => Some("name"),
+        "writing" => Some("write"),
+        "sharing" => Some("share"),
+        "caching" => Some("cache"),
+        "messaging" => Some("message"),
+        "migrating" => Some("migrate"),
+        "creating" => Some("create"),
+        "generating" => Some("generate"),
+        "updating" => Some("update"),
+        "listing" => Some("listing"),
+        _ => None,
+    } {
+        return base.to_string();
+    }
     let mut w = word.to_string();
     if let Some(base) = w.strip_suffix("ing") {
         if base.len() >= 3 {
@@ -944,6 +1106,11 @@ mod tests {
     #[test]
     fn stems_inflections() {
         assert_eq!(stem("journaling"), "journal");
+        assert_eq!(stem("hiring"), "hire");
+        assert_eq!(stem("coding"), "code");
+        assert_eq!(stem("writing"), "write");
+        assert_eq!(stem("generating"), "generate");
+        assert_eq!(stem("listing"), "listing");
         assert_eq!(stem("keyboards"), "keyboard");
         assert_eq!(stem("splitting"), "split");
         assert_eq!(stem("tracking"), "track");
@@ -1044,6 +1211,59 @@ mod tests {
             &adjectives[..8],
             ["clear", "bright", "bold", "open", "prime", "simple", "swift", "pure"]
         );
+    }
+
+    #[test]
+    fn audience_terms_do_not_replace_an_unknown_product_domain() {
+        let keywords = ["plumber".into(), "pipeline".into(), "team".into()];
+        let adjectives = compound_adjectives(&keywords);
+        assert_eq!(&adjectives[..4], ["clear", "bright", "bold", "open"]);
+        assert!(!adjectives.contains(&"shared"));
+        assert!(compound_pair_is_coherent(
+            "clear", "pipeline", &keywords, false
+        ));
+    }
+
+    #[test]
+    fn disambiguates_common_consumer_product_contexts() {
+        let event = extract_keywords("an event ticketing platform", 6);
+        let event_roots = brand_roots(&event, 16);
+        assert!(event_roots.contains(&"venue".to_string()));
+        assert!(!event_roots.contains(&"queue".to_string()));
+
+        let event_bus = extract_keywords("an event bus for services", 6);
+        let event_bus_roots = brand_roots(&event_bus, 16);
+        assert!(event_bus_roots.contains(&"queue".to_string()));
+        assert!(!event_bus_roots.contains(&"venue".to_string()));
+
+        let property = extract_keywords("property discovery for home buyers", 6);
+        let property_roots = brand_roots(&property, 16);
+        assert!(property_roots.contains(&"home".to_string()));
+        assert!(!property_roots.contains(&"source".to_string()));
+
+        let support = extract_keywords("a ticket inbox for customer service agents", 6);
+        let support_roots = brand_roots(&support, 16);
+        assert!(support_roots.contains(&"reply".to_string()));
+        assert!(!support_roots.contains(&"neural".to_string()));
+    }
+
+    #[test]
+    fn expands_general_product_domains_on_synonym_prompts() {
+        for (prompt, marker) in [
+            ("candidate tracking software for recruiters", "talent"),
+            ("a weekly menu and grocery organizer", "pantry"),
+            ("a catalog for household belongings", "stock"),
+            ("conference booking and attendee check-in", "venue"),
+            ("local rain and temperature alerts", "breeze"),
+            ("routine and streak coaching", "ritual"),
+            ("a CRM for sales teams", "contact"),
+            ("a guided breathing and rest companion", "still"),
+            ("animal health reminders for pet owners", "paw"),
+        ] {
+            let keywords = extract_keywords(prompt, 6);
+            let roots = brand_roots(&keywords, 16);
+            assert!(roots.contains(&marker.to_string()), "{prompt}: {roots:?}");
+        }
     }
 
     #[test]
