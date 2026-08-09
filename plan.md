@@ -1021,11 +1021,53 @@ explicit Real-word hint regressions.
 
 ---
 
+## Phase 72 — Make Compound earn its explicit mode
+
+**Bottleneck.** Phase 70 correctly removed Compound from guided Auto because its noun half
+used a description keyword only 70% of the time and its adjective came from a 272-word general
+corpus. Across six briefs and five fixed seeds, only 148/300 Compound names (**49.3%**) had a
+prompt-linked noun. The same generic attractors recurred across unrelated projects: `PoshParse`,
+`SolarLope`, and `AgileFlock` appeared beside names such as `BlitheTeam` and `PureVintage`.
+
+**A/B.** Requiring semantic nouns immediately reached 300/300 relevance, but the first compact
+palettes exhausted at only 34 security names, 47 expense names, and 41 analytics names in a
+100-name request. That version was not retained. Reducing the candidate pool below 2x improved
+cross-seed novelty but cost roughly two composite points; the retained 2x pool keeps enough
+selection headroom. The final palettes expand only within matching product concepts rather than
+reopening the whimsical global adjective corpus.
+
+**What changed.** Compound now orders brief concepts by naming role and draws from transparent,
+domain-aware adjective palettes (`Quiet/Lucid` for journals, `Safe/Sealed` for security,
+`Fair/Equal` for shared expenses, `Swift/Exact` for analytics). Its noun half comes from the
+existing semantic root lexicon. Audience and claim terms such as `team`, `friend`, `fast`, and
+`performance` no longer displace the product noun when a stronger concept exists; narrower
+guards keep API analytics on `Signal/Lens/Trace` and expense splitting away from generic
+`Mint/Vault`. Tautological prefix pairs such as `SharedShare` and `SettledSettle` are rejected.
+Promptless Compound retains its former exploratory corpus behavior.
+
+**Measured result.** The same 30 first pages now return **300/300 prompt-linked nouns**. Mean
+composite moves 76.28 → 76.57 and mean intra-batch diversity 0.763 → 0.780. Cross-seed first-page
+distinctness trades 94.7% → 82.7% because the vocabulary is intentionally narrower, while all
+six one-shot long audits return 100/100 names and the real rolling browser session reaches 100
+unique cards. Representative results include `PrimeLex`, `QuietInk`, `CoreLock`, `FairTally`,
+`RetroBoard`, and `KeenLens` instead of unrelated corpus pairings.
+
+**Verification.** The core suite is **108/108**, including all-name semantic-noun, single-root,
+and 100-name Compound regressions; the unchanged Brandable `concept_compare` remains clean.
+WASM and the TypeScript/Vite production bundle build successfully. Chromium passes the
+30-page Auto gate,
+the existing 100-name Brandable session, all prompt/mode regressions, and a new explicit
+Compound session requiring 100 unique security-linked cards with no false exhaustion.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
 Brandable by default and only admits a Respell accent that visibly comes from the brief; the
 broader modes remain explicit choices and still form the exploratory mix when no brief exists.
+Compound is now a genuinely brief-aware explicit alternative rather than a random adjective
+showcase, while keeping its readable two-word promise and benchmarked 100-name session capacity.
 Long prompted sessions no longer collapse into repeated suffix families or stop before 100
 names, and semantic joins no longer erase a concept at one-letter/vowel boundaries. Local taste
 feedback can already adjust structural and mode preferences, while AI Studio remains an

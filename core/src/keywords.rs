@@ -185,9 +185,7 @@ fn concept_roots(word: &str) -> &'static [&'static str] {
         "vintage" | "retro" | "classic" | "antique" => {
             &["retro", "relic", "classic", "heritage", "timber"]
         }
-        "keyboard" | "keyboards" | "typing" | "type" => {
-            &["key", "type", "switch", "cap", "board"]
-        }
+        "keyboard" | "keyboards" | "typing" | "type" => &["key", "type", "switch", "cap", "board"],
         "travel" | "trip" | "map" | "route" => &["roam", "atlas", "route", "compass", "trek"],
         "photo" | "image" | "video" | "audio" | "music" => {
             &["frame", "reel", "wave", "tune", "echo"]
@@ -202,6 +200,154 @@ fn concept_roots(word: &str) -> &'static [&'static str] {
     }
 }
 
+/// Compact adjective palettes for readable two-word names. Unlike the broad
+/// adjective corpus, these words are selected to make sense beside the product
+/// concepts in the brief (QuietInk, FairTally, SwiftTrace).
+fn concept_adjectives(word: &str) -> &'static [&'static str] {
+    match word {
+        "name" | "naming" | "brand" | "title" | "word" | "identity" => {
+            &["clear", "fresh", "prime", "true", "open", "bright"]
+        }
+        "developer" | "code" | "coding" | "program" | "programming" | "package" | "library"
+        | "cli" | "api" => &["open", "native", "prime", "solid", "swift", "clean"],
+        "generate" | "generator" | "create" | "creator" | "build" | "builder" => {
+            &["fresh", "bright", "bold", "rapid", "open", "prime"]
+        }
+        "secure" | "security" | "private" | "privacy" | "password" | "auth" | "encrypt"
+        | "encrypted" => &[
+            "safe", "solid", "sure", "sealed", "steady", "trusted", "private", "strong", "secure",
+            "hidden", "silent", "iron", "firm", "secret", "inner", "verified", "proven", "guarded",
+            "locked", "zero", "core", "deep", "hard", "sound",
+        ],
+        "finance" | "money" | "payment" | "expense" | "budget" | "bank" | "invoice" => &[
+            "fair", "clear", "even", "steady", "shared", "simple", "equal", "balanced", "honest",
+            "joint", "mutual", "settled", "easy", "open", "smart", "ready", "clean", "daily",
+        ],
+        "health" | "fitness" | "workout" | "exercise" | "medical" | "care" => {
+            &["vital", "active", "well", "steady", "bright", "daily"]
+        }
+        "write" | "writing" | "journal" | "note" | "document" | "editor" => {
+            &["quiet", "lucid", "daily", "clear", "open", "true"]
+        }
+        "mood" | "emotion" | "feeling" => &["calm", "vivid", "inner", "lucid", "honest", "gentle"],
+        "friend" | "community" | "social" | "team" | "chat" | "message" => {
+            &["shared", "trusted", "connected", "close", "open", "united"]
+        }
+        "split" | "share" | "sharing" | "divide" | "settle" => {
+            &["fair", "even", "shared", "equal", "settled", "clear"]
+        }
+        "data" | "analytic" | "analytics" | "insight" | "metric" => &[
+            "clear", "sharp", "live", "direct", "exact", "bright", "deep", "smart", "real",
+            "fresh", "prime", "focused", "active", "clean", "pure", "open", "agile", "ready",
+            "lucid", "keen", "steady", "wise", "core", "total",
+        ],
+        "design" | "color" | "visual" | "creative" => {
+            &["vivid", "clear", "bold", "bright", "pure", "fresh"]
+        }
+        "task" | "plan" | "schedule" | "calendar" | "focus" | "productivity" => {
+            &["clear", "steady", "daily", "focused", "simple", "swift"]
+        }
+        "market" | "marketplace" | "shop" | "sell" | "buy" | "commerce" => {
+            &["rare", "prime", "open", "local", "select", "curated"]
+        }
+        "vintage" | "retro" | "classic" | "antique" => &[
+            "retro", "classic", "heritage", "timeless", "tactile", "rare",
+        ],
+        "keyboard" | "keyboards" | "typing" | "type" => {
+            &["tactile", "clicky", "custom", "quiet", "classic", "select"]
+        }
+        "travel" | "trip" | "map" | "route" => &["open", "wild", "free", "local", "far", "direct"],
+        "photo" | "image" | "video" | "audio" | "music" => {
+            &["vivid", "clear", "live", "deep", "pure", "sonic"]
+        }
+        "learn" | "education" | "study" | "course" => {
+            &["bright", "clear", "open", "smart", "deep", "daily"]
+        }
+        "delivery" | "ship" | "shipping" | "logistic" | "logistics" | "transport" => {
+            &["swift", "direct", "ready", "steady", "rapid", "local"]
+        }
+        "ai" | "model" | "agent" | "automation" => {
+            &["smart", "native", "open", "clear", "deep", "bright"]
+        }
+        "fast" | "speed" | "performance" | "rapid" => {
+            &["swift", "rapid", "live", "quick", "instant", "sharp"]
+        }
+        _ => &[],
+    }
+}
+
+/// Return a small, deterministic adjective pool for Compound mode. Unknown
+/// domains still get a restrained general-purpose palette instead of falling
+/// back to hundreds of whimsical corpus adjectives.
+pub fn compound_adjectives(keywords: &[String]) -> Vec<&'static str> {
+    const DEFAULT: &[&str] = &[
+        "clear", "bright", "bold", "open", "prime", "simple", "swift", "pure", "fresh", "smart",
+        "vivid", "lucid", "native", "ready", "steady", "direct", "modern", "novel", "rare",
+        "vital", "agile", "wise", "solid", "calm", "new", "top", "key", "one", "true", "core",
+    ];
+
+    let has_product_concept = keywords.iter().any(|keyword| {
+        !matches!(keyword.as_str(), "friend" | "team") && !concept_adjectives(keyword).is_empty()
+    });
+    let mut ordered_keywords: Vec<(u8, usize, &String)> = keywords
+        .iter()
+        .enumerate()
+        .map(|(index, keyword)| (concept_position(keyword), index, keyword))
+        .collect();
+    ordered_keywords.sort_by_key(|(position, index, _)| (*position, *index));
+
+    let mut adjectives = Vec::new();
+    for (_, _, keyword) in ordered_keywords {
+        if has_product_concept && matches!(keyword.as_str(), "friend" | "team") {
+            continue;
+        }
+        for &adjective in concept_adjectives(keyword) {
+            if !adjectives.contains(&adjective) {
+                adjectives.push(adjective);
+            }
+            if adjectives.len() == 30 {
+                return adjectives;
+            }
+        }
+    }
+    if adjectives.is_empty() {
+        adjectives.extend_from_slice(DEFAULT);
+    }
+    adjectives
+}
+
+/// Noun roots for Compound mode. Audience terms ("for teams", "with friends")
+/// and speed claims work better as context/adjectives than as the noun half of
+/// a product name, provided the brief contains a stronger product concept.
+pub fn compound_roots(keywords: &[String], limit: usize) -> Vec<String> {
+    let has_analytics = keywords.iter().any(|keyword| {
+        matches!(
+            keyword.as_str(),
+            "data" | "analytic" | "analytics" | "insight" | "metric"
+        )
+    });
+    let product_keywords: Vec<String> = keywords
+        .iter()
+        .filter(|keyword| {
+            !matches!(
+                keyword.as_str(),
+                "friend" | "team" | "fast" | "speed" | "performance" | "rapid"
+            ) && !(has_analytics && keyword.as_str() == "api")
+        })
+        .cloned()
+        .collect();
+
+    let mut roots = brand_roots(&product_keywords, limit);
+    if roots.is_empty() {
+        roots = brand_roots(keywords, limit);
+    }
+    roots.retain(|root| !matches!(root.as_str(), "retro" | "classic" | "fair" | "swift"));
+    if keywords.iter().any(|keyword| keyword == "expense") {
+        roots.retain(|root| !matches!(root.as_str(), "mint" | "vault"));
+    }
+    roots
+}
+
 /// Artifact words are informative in a brief but weak literal naming roots.
 /// Their concept expansions remain, avoiding Dev-/Gen-/Pack- stem walls.
 fn suppress_literal_root(word: &str) -> bool {
@@ -213,15 +359,13 @@ fn suppress_literal_root(word: &str) -> bool {
 /// between RetroKey and KeyRetro, or InkLens and LensInk, without an LLM.
 fn concept_position(word: &str) -> u8 {
     match word {
-        "name" | "naming" | "brand" | "title" | "word" | "identity"
-        | "mood" | "emotion" | "feeling"
-        | "split" | "share" | "sharing" | "divide" | "settle"
-        | "vintage" | "retro" | "classic" | "antique"
-        | "fast" | "speed" | "performance" | "rapid" => 0,
-        "generate" | "generator" | "create" | "creator" | "build" | "builder"
-        | "friend" | "community" | "social" | "team" | "chat" | "message"
-        | "data" | "analytic" | "analytics" | "insight" | "metric"
-        | "market" | "marketplace" | "shop" | "sell" | "buy" | "commerce" => 2,
+        "name" | "naming" | "brand" | "title" | "word" | "identity" | "mood" | "emotion"
+        | "feeling" | "split" | "share" | "sharing" | "divide" | "settle" | "vintage" | "retro"
+        | "classic" | "antique" | "fast" | "speed" | "performance" | "rapid" => 0,
+        "generate" | "generator" | "create" | "creator" | "build" | "builder" | "friend"
+        | "community" | "social" | "team" | "chat" | "message" | "data" | "analytic"
+        | "analytics" | "insight" | "metric" | "market" | "marketplace" | "shop" | "sell"
+        | "buy" | "commerce" => 2,
         _ => 1,
     }
 }
@@ -459,5 +603,53 @@ mod tests {
         assert!(groups[0].contains(&"retro".to_string()));
         assert!(groups[1].contains(&"key".to_string()));
         assert!(groups[2].contains(&"bazaar".to_string()));
+    }
+
+    #[test]
+    fn compound_adjectives_follow_the_brief() {
+        let journal = compound_adjectives(&["journal".into(), "mood".into()]);
+        assert!(journal.contains(&"quiet"));
+        assert!(journal.contains(&"lucid"));
+
+        let security = compound_adjectives(&["password".into(), "team".into()]);
+        assert!(security.contains(&"safe"));
+        assert!(security.contains(&"trusted"));
+    }
+
+    #[test]
+    fn compound_adjectives_have_a_restrained_fallback() {
+        let adjectives = compound_adjectives(&["lawyer".into()]);
+        assert_eq!(adjectives.len(), 30);
+        assert_eq!(
+            &adjectives[..8],
+            ["clear", "bright", "bold", "open", "prime", "simple", "swift", "pure"]
+        );
+    }
+
+    #[test]
+    fn compound_roots_drop_audience_and_modifier_terms() {
+        let security = compound_roots(
+            &[
+                "manager".into(),
+                "password".into(),
+                "secure".into(),
+                "team".into(),
+            ],
+            16,
+        );
+        assert!(security.contains(&"vault".to_string()));
+        assert!(!security.contains(&"kin".to_string()));
+
+        let analytics = compound_roots(
+            &[
+                "analytics".into(),
+                "fast".into(),
+                "api".into(),
+                "performance".into(),
+            ],
+            16,
+        );
+        assert!(analytics.contains(&"signal".to_string()));
+        assert!(!analytics.contains(&"bolt".to_string()));
     }
 }

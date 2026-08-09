@@ -559,8 +559,9 @@ fn generate_bigtech(
         .filter(|d| !d.trim().is_empty())
         .map(|d| keywords::extract_keywords(d, 6))
         .unwrap_or_default();
-    // Concept roots are a Brandable strategy. Compound and Respell promise the
-    // user's literal words, so silently replacing those roots breaks the mode.
+    // Brandable uses semantic groups to coin new forms. Compound keeps its
+    // two-word shape but uses the same transparent lexicon for readable noun
+    // halves (QuietInk instead of a random adjective + raw "journaling").
     let use_concept_roots =
         tuning.concept_expand && !cfg.compound && !respell_mode && !realword_mode;
     let concept_groups = if use_concept_roots {
@@ -575,6 +576,17 @@ fn generate_bigtech(
     };
     let concept_expanded = expanded_desc_keywords != raw_desc_keywords;
     let desc_keywords = expanded_desc_keywords;
+    let compound_desc_roots = if cfg.compound && !raw_desc_keywords.is_empty() {
+        keywords::compound_roots(&raw_desc_keywords, 16)
+    } else {
+        Vec::new()
+    };
+    let compound_adjectives =
+        if cfg.compound && (!raw_desc_keywords.is_empty() || !cfg.roots.is_empty()) {
+            keywords::compound_adjectives(&raw_desc_keywords)
+        } else {
+            Vec::new()
+        };
     // Preserve the strongest semantic mix for the first two multi-concept
     // batches (one for a smaller single-concept brief), then open a metaphor
     // lane so Load more does not exhaust suffix permutations.
@@ -589,7 +601,9 @@ fn generate_bigtech(
             .count()
             >= prompt_history_threshold;
 
-    let all_roots: Vec<&str> = if !desc_keywords.is_empty() {
+    let all_roots: Vec<&str> = if !compound_desc_roots.is_empty() {
+        compound_desc_roots.iter().map(|s| s.as_str()).collect()
+    } else if !desc_keywords.is_empty() {
         desc_keywords.iter().map(|s| s.as_str()).collect()
     } else if !cfg.roots.is_empty() {
         cfg.roots.iter().map(|s| s.as_str()).collect()
@@ -599,7 +613,14 @@ fn generate_bigtech(
 
     // Keep the candidate pool shallow enough that different seeds explore
     // different semantic pairings instead of converging on one global top ten.
-    let target = cfg.count * 5;
+    // A prompted Compound pool is intentionally shallower. Its curated
+    // adjective x noun space is finite; exhausting it made every seed converge
+    // on the same ranked names instead of offering meaningful alternatives.
+    let target = if cfg.compound && !compound_adjectives.is_empty() {
+        cfg.count * 2
+    } else {
+        cfg.count * 5
+    };
     let mut pool: Vec<NameResult> = Vec::new();
     let mut seen: HashSet<String> = HashSet::new();
     let max_attempts = target * 80;
@@ -670,15 +691,29 @@ fn generate_bigtech(
             st.realword_pool[rand::Rng::gen_range(rng, 0..st.realword_pool.len())].to_string()
         } else if cfg.compound {
             // Adjective + noun compound (SwiftForge); already CamelCase.
-            // Phase 48: with a description, the noun half is usually one of
-            // its keyword stems (BrightMood, SwiftJournal); corpus nouns keep
-            // some variety in the mix.
-            let adj = st.adjectives[rand::Rng::gen_range(rng, 0..st.adjectives.len())];
-            let noun = if has_roots && rand::Rng::gen::<f64>(rng) < 0.7 {
+            // With a brief or explicit roots, both halves remain intentional:
+            // a brief-aware adjective plus a semantic noun root. The broad
+            // corpora remain available for promptless exploration.
+            let adj = if !compound_adjectives.is_empty() {
+                compound_adjectives[rand::Rng::gen_range(rng, 0..compound_adjectives.len())]
+            } else {
+                st.adjectives[rand::Rng::gen_range(rng, 0..st.adjectives.len())]
+            };
+            let noun = if has_roots {
                 all_roots[rand::Rng::gen_range(rng, 0..all_roots.len())]
             } else {
                 st.roots[rand::Rng::gen_range(rng, 0..st.roots.len())]
             };
+            if adj.eq_ignore_ascii_case(noun) {
+                continue;
+            }
+            let adj_lower = adj.to_ascii_lowercase();
+            let noun_lower = noun.to_ascii_lowercase();
+            if adj_lower.len().min(noun_lower.len()) >= 4
+                && (adj_lower.starts_with(&noun_lower) || noun_lower.starts_with(&adj_lower))
+            {
+                continue;
+            }
             compound(adj, noun)
         } else if has_roots {
             // Phase 48: weighted mix instead of pure root-blending. A single
@@ -1291,6 +1326,20 @@ mod tests {
     }
 
     #[test]
+    fn compound_with_one_explicit_root_fills_the_batch() {
+        let mut c = cfg(Style::BigTech);
+        c.compound = true;
+        c.roots = vec!["research".to_string()];
+        c.count = 10;
+        c.max_len = 12;
+        let results = generate(&c);
+        assert_eq!(results.len(), 10);
+        assert!(results
+            .iter()
+            .all(|result| result.name.to_lowercase().ends_with("research")));
+    }
+
+    #[test]
     fn description_drives_bigtech_roots() {
         let mut c = cfg(Style::BigTech);
         c.description = Some("a platform for tracking fitness and health workouts".to_string());
@@ -1699,24 +1748,50 @@ mod tests {
 
     #[test]
     fn compound_uses_description_keywords() {
-        // Phase 48: compound mode used to ignore the description entirely.
+        // Phase 72: every prompted compound keeps a semantic noun from the
+        // brief, not merely one lucky literal keyword somewhere in the batch.
         let mut c = cfg(Style::BigTech);
         c.compound = true;
         c.description = Some("a journaling app with mood insights".to_string());
-        c.count = 8;
+        c.count = 20;
         c.max_len = 16;
         let results = generate(&c);
-        assert!(!results.is_empty());
-        let stems = ["journal", "mood", "insight"];
-        let hit = results.iter().any(|r| {
-            let lower = r.name.to_lowercase();
-            stems.iter().any(|s| lower.contains(s))
-        });
-        assert!(
-            hit,
-            "no keyword-derived compounds: {:?}",
-            results.iter().map(|r| &r.name).collect::<Vec<_>>()
-        );
+        assert_eq!(results.len(), 20);
+        let extracted = keywords::extract_keywords(c.description.as_deref().unwrap(), 6);
+        let roots: HashSet<String> = keywords::compound_roots(&extracted, 16)
+            .into_iter()
+            .collect();
+        for result in results {
+            let noun = result
+                .name
+                .char_indices()
+                .skip(1)
+                .find(|(_, character)| character.is_ascii_uppercase())
+                .map(|(index, _)| result.name[index..].to_lowercase())
+                .unwrap_or_default();
+            assert!(roots.contains(&noun), "unrelated compound: {}", result.name);
+        }
+    }
+
+    #[test]
+    fn prompted_compound_sustains_long_batches() {
+        // The first brief-aware palette was attractive but finite: these three
+        // prompts stopped at 34/47/41 names. Keep Load more viable without
+        // reopening the broad, mismatched adjective corpus.
+        let prompts = [
+            "a secure password manager for teams",
+            "an app for splitting expenses with friends",
+            "a fast analytics dashboard for API performance",
+        ];
+        for prompt in prompts {
+            let mut c = cfg(Style::BigTech);
+            c.compound = true;
+            c.description = Some(prompt.to_string());
+            c.count = 100;
+            c.max_len = 12;
+            let results = generate(&c);
+            assert_eq!(results.len(), 100, "short Compound batch for {prompt}");
+        }
     }
 
     #[test]
