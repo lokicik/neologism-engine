@@ -1,9 +1,9 @@
-// A/B harness for prompt-root quality. Runs the production generator with the
-// same seeds while toggling only BigTechTuning::concept_expand.
+// A/B harness for prompt-root quality. Runs the generator with fixed seeds,
+// comparing raw keywords with concept expansion at several coverage weights.
 // Run: cargo run -p neologism-core --example concept_compare --release
+use neologism_core::keywords::{brand_root_groups, extract_keywords};
 use neologism_core::style::{Config, Style};
 use neologism_core::{generate_with_tuning, BigTechTuning};
-use neologism_core::keywords::{brand_root_groups, extract_keywords};
 
 const PROMPTS: &[&str] = &[
     "a developer tool that generates names for packages CLIs libraries and projects",
@@ -33,9 +33,10 @@ fn config(prompt: &str, seed: u64) -> Config {
     }
 }
 
-fn names(prompt: &str, seed: u64, concept_expand: bool) -> String {
+fn names(prompt: &str, seed: u64, concept_expand: bool, coverage_w: f64) -> String {
     let mut tuning = BigTechTuning::from_variety(0.3);
     tuning.concept_expand = concept_expand;
+    tuning.concept_coverage_w = coverage_w;
     generate_with_tuning(&config(prompt, seed), &tuning)
         .into_iter()
         .map(|r| r.name)
@@ -49,7 +50,9 @@ fn main() {
         let keywords = extract_keywords(prompt, 6);
         println!("\n{prompt}");
         println!("  roots: {:?}", brand_root_groups(&keywords, 16));
-        println!("  old : {}", names(prompt, seed, false));
-        println!("  new : {}", names(prompt, seed, true));
+        println!("  old  : {}", names(prompt, seed, false, 0.85));
+        println!("  .85  : {}", names(prompt, seed, true, 0.85));
+        println!("  .50  : {}", names(prompt, seed, true, 0.50));
+        println!("  .25  : {}", names(prompt, seed, true, 0.25));
     }
 }

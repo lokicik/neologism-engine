@@ -72,6 +72,10 @@ pub struct BigTechTuning {
     /// Expand prompt keywords through a curated offline concept lexicon before
     /// blending. Kept as a switch so quality harnesses can compare old/new paths.
     pub concept_expand: bool,
+    /// Bonus for carrying an additional prompt concept in a coined name.
+    /// Exposed to the A/B harness so semantic fidelity can be balanced against
+    /// names that read like literal two-root labels.
+    pub concept_coverage_w: f64,
 }
 
 impl Default for BigTechTuning {
@@ -120,6 +124,7 @@ impl BigTechTuning {
             // Phase 35: fuzzy/stem scope — constant across the variety axis.
             fuzzy_window: 2000,
             concept_expand: true,
+            concept_coverage_w: 0.25,
         }
     }
 }
@@ -449,9 +454,9 @@ fn concept_coverage(lower: &str, groups: &[Vec<String>]) -> usize {
     groups
         .iter()
         .filter(|group| {
-            group.iter().any(|root| {
-                lower.contains(root) || (root.len() >= 3 && lower.contains(&root[..3]))
-            })
+            group
+                .iter()
+                .any(|root| lower.contains(root) || (root.len() >= 3 && lower.contains(&root[..3])))
         })
         .count()
 }
@@ -635,7 +640,11 @@ fn generate_bigtech(
             // pattern — works with one keyword) / blend a user root with a
             // corpus root for variety (keyword half leads).
             let blend_two_w = if concept_expanded {
-                if concept_groups.len() >= 2 { 0.75 } else { 0.0 }
+                if concept_groups.len() >= 2 {
+                    0.75
+                } else {
+                    0.0
+                }
             } else if all_roots.len() >= 2 {
                 0.45
             } else {
@@ -817,9 +826,8 @@ fn generate_bigtech(
     };
     let rank = |r: &NameResult| {
         let coverage_bonus = if concept_expanded {
-            concept_coverage(&r.name.to_lowercase(), &concept_groups)
-                .saturating_sub(1) as f64
-                * 0.85
+            concept_coverage(&r.name.to_lowercase(), &concept_groups).saturating_sub(1) as f64
+                * tuning.concept_coverage_w
         } else {
             0.0
         };
@@ -1488,6 +1496,36 @@ mod tests {
             results.len(),
             results.iter().map(|r| &r.name).collect::<Vec<_>>()
         );
+    }
+
+    #[test]
+    fn concept_ranking_balances_coinages_and_literal_joins() {
+        // Phase 62: rewarding every extra visible concept too strongly made
+        // literal joins occupy 9/10 slots for the app's own brief. Keep both
+        // families: compact one-concept coinages supply brand character while
+        // multi-concept joins preserve explicit product meaning.
+        let description =
+            "a developer tool that generates names for packages CLIs libraries and projects";
+        let mut c = cfg(Style::BigTech);
+        c.description = Some(description.to_string());
+        c.count = 10;
+        c.temperature = 0.85;
+        c.variety = 0.3;
+        c.seed = Some(0xA076_1D64_78BD_642F);
+        let results = generate(&c);
+        let keywords = keywords::extract_keywords(description, 6);
+        let groups = keywords::brand_root_groups(&keywords, 16);
+        let single = results
+            .iter()
+            .filter(|result| concept_coverage(&result.name.to_lowercase(), &groups) == 1)
+            .count();
+        let joined = results
+            .iter()
+            .filter(|result| concept_coverage(&result.name.to_lowercase(), &groups) >= 2)
+            .count();
+        let names: Vec<&String> = results.iter().map(|result| &result.name).collect();
+        assert!(single >= 4, "only {single} compact coinages: {names:?}");
+        assert!(joined >= 2, "only {joined} semantic joins: {names:?}");
     }
 
     #[test]

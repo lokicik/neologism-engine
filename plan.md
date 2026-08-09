@@ -727,6 +727,31 @@ restoration; visual review confirms the extra action fits the existing card hier
 
 ---
 
+## Phase 62 — Balance semantic fidelity with brand character
+
+**Bottleneck.** Concept expansion fixed relevance, but its `0.85` extra-concept bonus
+over-corrected: for this product's own brief, 9/10 Brandable slots became literal two-root
+joins (`Stackforge`, `Nodecraft`, `Markseed`). Compact coinages such as `Lexora` and `Nomix`
+were present in the pool but rarely surfaced.
+
+**What changed.** The semantic-coverage weight is now an explicit tuning value and the
+fixed-seed harness compares `0.85`, `0.50`, and `0.25`. Production uses **0.25**: meaning
+still matters, but carrying a second visible concept no longer overwhelms phonetic quality,
+brand appeal, and MMR diversity.
+
+**A/B result.** On the app's own brief, the same seed changes from 9 literal joins + 1
+coinage to a mixed first page: `Lexia`, `Markify`, `Nomora`, `Stackforge`, `Markio`,
+`Nomix`, `Lexora`, `Nodecraft`, `Cratespark`, `Marknode`. Five other fixed briefs retained
+their semantic roots; suffix coinages rose only where the offline scorer considered them
+competitive. A regression test requires at least four compact coinages and two semantic
+joins, pinning the intended mix without pinning exact output strings.
+
+**Verification.** **98 core tests green**, fixed-seed six-brief A/B harness clean, WASM
+rebuilt, TypeScript/Vite production build clean, and the Chromium prompt-regression battery
+passes (single-keyword generation, prefix diversity, keyword explanation, mode honesty).
+
+---
+
 ## Bottom line
 
 Big-tech is the strongest style, tuned through Phase 25 and extended since:
