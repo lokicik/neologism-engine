@@ -25,8 +25,8 @@ const SCENARIOS = [
     label: 'legal research',
     description: 'legal research',
     nouns: new Set([
-      'law', 'case', 'brief', 'clause', 'docket', 'counsel',
-      'source', 'proof', 'index', 'trace', 'lens', 'scope',
+      'law', 'case', 'brief', 'clause', 'jury', 'docket',
+      'source', 'proof', 'trace', 'lens', 'cite',
     ]),
   },
   {

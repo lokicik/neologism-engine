@@ -151,9 +151,9 @@ fn concept_roots(word: &str) -> &'static [&'static str] {
         }
         "developer" | "code" | "coding" | "program" | "programming" | "package" | "library"
         | "cli" | "api" => &["crate", "stack", "byte", "node", "kit"],
-        "database" | "db" | "sql" | "query" | "schema" | "table" | "storage" | "store" => {
-            &["schema", "query", "table", "store", "base"]
-        }
+        "database" | "db" | "sql" | "query" | "schema" | "table" | "storage" | "store" => &[
+            "schema", "query", "table", "store", "base", "data", "record", "row", "field", "index",
+        ],
         "migration" | "migrate" => &["shift", "bridge", "relay", "port", "move"],
         "rate" | "limit" | "limiter" | "throttle" | "quota" => {
             &["gate", "meter", "quota", "pace", "burst"]
@@ -180,11 +180,11 @@ fn concept_roots(word: &str) -> &'static [&'static str] {
         "queue" | "broker" | "messaging" | "stream" | "topic" | "bus" => {
             &["queue", "broker", "stream", "topic", "pipe", "bus"]
         }
-        "format" | "formatter" | "lint" | "linter" | "style" => {
-            &["format", "lint", "style", "rule", "tidy"]
-        }
+        "format" | "formatter" | "lint" | "linter" | "style" => &[
+            "format", "lint", "style", "rule", "tidy", "syntax", "indent", "align",
+        ],
         "environment" | "env" | "variable" | "config" | "configuration" | "setting"
-        | "settings" | "secret" => &["env", "config", "setting", "secret", "value"],
+        | "settings" | "secret" => &["env", "config", "dot", "secret", "value", "setting"],
         "filesystem" | "file" | "path" | "directory" | "folder" | "search" | "find" | "index" => {
             &["file", "path", "find", "scan", "index", "seek"]
         }
@@ -202,10 +202,10 @@ fn concept_roots(word: &str) -> &'static [&'static str] {
         }
         "site" | "website" | "portal" => &["site", "page", "web", "portal", "home"],
         "legal" | "law" | "lawyer" | "attorney" | "court" | "litigation" => {
-            &["law", "case", "brief", "clause", "docket", "counsel"]
+            &["law", "case", "brief", "clause", "jury", "docket"]
         }
         "research" | "investigate" | "investigation" => {
-            &["source", "proof", "index", "trace", "lens", "scope"]
+            &["source", "proof", "trace", "lens", "cite"]
         }
         "hire" | "recruit" | "recruiter" | "candidate" | "talent" => {
             &["talent", "role", "hire", "scout", "match", "crew"]
@@ -231,9 +231,9 @@ fn concept_roots(word: &str) -> &'static [&'static str] {
         "habit" | "routine" | "streak" | "ritual" => {
             &["habit", "routine", "streak", "ritual", "daily", "rhythm"]
         }
-        "crm" | "sale" | "lead" | "deal" => {
-            &["lead", "deal", "client", "contact", "pipeline", "growth"]
-        }
+        "crm" | "sale" | "lead" | "deal" => &[
+            "lead", "deal", "sale", "close", "client", "contact", "growth",
+        ],
         "meditation" | "meditate" | "sleep" | "breath" | "rest" => {
             &["calm", "breath", "still", "rest", "dream", "pause"]
         }
@@ -277,7 +277,9 @@ fn concept_roots(word: &str) -> &'static [&'static str] {
         "photo" | "image" | "video" | "audio" | "music" => {
             &["frame", "reel", "wave", "tune", "echo"]
         }
-        "learn" | "education" | "study" | "course" => &["learn", "lore", "study", "skill", "class"],
+        "learn" | "education" | "study" | "course" => {
+            &["learn", "lore", "sage", "quiz", "study", "skill"]
+        }
         "delivery" | "ship" | "shipping" | "logistic" | "logistics" | "transport" => {
             &["route", "fleet", "cargo", "relay", "dock"]
         }
@@ -949,6 +951,26 @@ fn concept_position(word: &str) -> u8 {
 /// separate lets the generator combine *different ideas* (Ink + Lens) instead
 /// of accidentally pairing synonyms from one idea (Lens + Scope).
 pub fn brand_root_groups(keywords: &[String], limit: usize) -> Vec<Vec<String>> {
+    let has_rich_dev_palette = keywords.iter().any(|keyword| {
+        matches!(
+            keyword.as_str(),
+            "database"
+                | "db"
+                | "sql"
+                | "query"
+                | "schema"
+                | "table"
+                | "storage"
+                | "store"
+                | "migration"
+                | "migrate"
+                | "format"
+                | "formatter"
+                | "lint"
+                | "linter"
+                | "style"
+        )
+    });
     let has_queue_domain = keywords.iter().any(|keyword| {
         matches!(
             keyword.as_str(),
@@ -974,6 +996,9 @@ pub fn brand_root_groups(keywords: &[String], limit: usize) -> Vec<Vec<String>> 
             continue;
         }
         if has_semantic_anchor && is_brand_context_only(keyword) {
+            continue;
+        }
+        if has_rich_dev_palette && is_dev_artifact(keyword) {
             continue;
         }
         if (has_queue_domain && keyword == "message")
@@ -1461,6 +1486,50 @@ mod tests {
         assert!(release.contains(&"push".to_string()));
         assert!(release.contains(&"patch".to_string()));
         assert!(!release.contains(&"ship".to_string()));
+    }
+
+    #[test]
+    fn rich_dev_palettes_replace_generic_artifacts_only_when_they_can() {
+        let database = brand_roots(&extract_keywords("a CLI for database migrations", 6), 16);
+        assert!(database.contains(&"record".to_string()));
+        assert!(database.contains(&"row".to_string()));
+        assert!(!database.contains(&"crate".to_string()));
+        assert!(!database.contains(&"stack".to_string()));
+
+        let formatter = brand_roots(&extract_keywords("a code formatter and linter", 6), 16);
+        assert!(formatter.contains(&"syntax".to_string()));
+        assert!(formatter.contains(&"indent".to_string()));
+        assert!(!formatter.contains(&"crate".to_string()));
+        assert!(!formatter.contains(&"stack".to_string()));
+
+        let rate_limit = brand_roots(&extract_keywords("an API rate limiting library", 6), 16);
+        assert!(rate_limit.contains(&"meter".to_string()));
+        assert!(rate_limit.contains(&"kit".to_string()));
+    }
+
+    #[test]
+    fn low_scoring_domains_gain_short_distinctive_roots() {
+        let sales = brand_roots(&extract_keywords("a CRM for sales teams", 6), 16);
+        assert!(sales.contains(&"sale".to_string()));
+        assert!(sales.contains(&"close".to_string()));
+        assert!(!sales.contains(&"pipeline".to_string()));
+
+        let education = brand_roots(&extract_keywords("an online course and study app", 6), 16);
+        assert!(education.contains(&"sage".to_string()));
+        assert!(education.contains(&"quiz".to_string()));
+        assert!(!education.contains(&"class".to_string()));
+
+        let environment = brand_roots(&extract_keywords("an environment variable manager", 6), 16);
+        assert!(environment.contains(&"dot".to_string()));
+        assert!(environment.contains(&"setting".to_string()));
+        assert!(!environment.contains(&"var".to_string()));
+
+        let legal = brand_roots(&extract_keywords("legal research for court cases", 6), 16);
+        assert!(legal.contains(&"jury".to_string()));
+        assert!(legal.contains(&"docket".to_string()));
+        assert!(legal.contains(&"cite".to_string()));
+        assert!(!legal.contains(&"counsel".to_string()));
+        assert!(!legal.contains(&"scope".to_string()));
     }
 
     #[test]

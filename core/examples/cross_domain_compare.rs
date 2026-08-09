@@ -211,15 +211,21 @@ const WEAK_CONTEXT_ROOTS: &[&str] = &["edit", "online", "seller"];
 const FOCUS_CASES: &[&str] = &[
     "inventory",
     "finance",
+    "sales CRM",
     "marketplace",
     "travel",
     "media",
+    "education",
     "rate limiting",
     "git release",
     "bookmarks",
     "cloud deployment",
     "background jobs",
     "dependencies",
+    "database",
+    "formatter",
+    "environment",
+    "legal research",
 ];
 
 fn config(prompt: &str, seed: u64) -> Config {
@@ -433,15 +439,15 @@ fn main() {
         "cross-domain exact collision pairs regressed: {collision_pairs} > 20"
     );
     assert!(
-        audit_composite as f64 / total as f64 >= 80.1,
+        audit_composite as f64 / total as f64 >= 80.5,
         "broad-domain composite quality regressed"
     );
     assert!(
-        audit_diversity / (CASES.len() * SEEDS.len()) as f64 >= 0.72,
+        audit_diversity / (CASES.len() * SEEDS.len()) as f64 >= 0.725,
         "broad-domain diversity regressed"
     );
     assert!(
-        audit_domain_unique / CASES.len() as f64 >= 0.46,
+        audit_domain_unique / CASES.len() as f64 >= 0.47,
         "broad-domain uniqueness regressed"
     );
 }

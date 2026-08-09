@@ -13,7 +13,10 @@ const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
 const CASES = [
   {
     prompt: 'a CLI for database migrations',
-    markers: ['schema', 'query', 'table', 'store', 'base', 'shift', 'bridge', 'relay', 'port'],
+    markers: [
+      'schema', 'query', 'table', 'store', 'base', 'data', 'record',
+      'row', 'field', 'index', 'shift', 'bridge', 'relay', 'port',
+    ],
   },
   {
     prompt: 'an API rate limiting library',
@@ -49,11 +52,11 @@ const CASES = [
   },
   {
     prompt: 'a code formatter and linter',
-    markers: ['format', 'lint', 'style', 'rule', 'tidy'],
+    markers: ['format', 'lint', 'style', 'rule', 'tidy', 'syntax', 'indent', 'align'],
   },
   {
     prompt: 'an environment variable manager',
-    markers: ['env', 'config', 'setting', 'secret', 'value'],
+    markers: ['env', 'config', 'dot', 'setting', 'secret', 'value'],
   },
   {
     prompt: 'a filesystem search CLI',

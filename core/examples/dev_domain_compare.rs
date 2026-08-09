@@ -13,7 +13,8 @@ const CASES: &[Case] = &[
     Case {
         prompt: "a CLI for database migrations",
         semantic_markers: &[
-            "schema", "query", "table", "store", "base", "shift", "bridge", "relay", "port",
+            "schema", "query", "table", "store", "base", "data", "record", "row", "field", "index",
+            "shift", "bridge", "relay", "port",
         ],
     },
     Case {
@@ -52,11 +53,13 @@ const CASES: &[Case] = &[
     },
     Case {
         prompt: "a code formatter and linter",
-        semantic_markers: &["format", "lint", "style", "rule", "tidy"],
+        semantic_markers: &[
+            "format", "lint", "style", "rule", "tidy", "syntax", "indent", "align",
+        ],
     },
     Case {
         prompt: "an environment variable manager",
-        semantic_markers: &["env", "config", "setting", "secret", "value"],
+        semantic_markers: &["env", "config", "dot", "setting", "secret", "value"],
     },
     Case {
         prompt: "a filesystem search CLI",

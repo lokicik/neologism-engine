@@ -1668,6 +1668,56 @@ without false exhaustion.
 
 ---
 
+## Phase 88 — Lift the weakest domain vocabularies
+
+**Bottleneck.** Once cross-domain repetition was bounded, the 48-domain quality report exposed a
+wide floor gap. Education scored only **67.38** composite, sales CRM **73.06**, legal research
+**73.46**, environment tooling **74.98**, database migrations **75.44**, and formatters **76.08**.
+The first pages explained why: education overused long `Study…`/`Class…` joins, while specialized
+developer briefs reopened the generic `crate`/`stack`/`byte`/`node`/`kit` palette and produced
+interchangeable forms such as `Storekit`, `Relaystack`, `Lintbyte`, and `Tidystack`.
+
+**Bounded correction and rejected variants.** A first attempt suppressed generic developer
+artifacts beside every specialized developer domain. It increased session spread, but common
+`gate` and `trace` forms then filled the gap, exact collision pairs rose **20 → 29**, and broad
+composite fell **80.16 → 80.09**; that global rule was rejected. The retained boundary applies
+only where a richer replacement palette was measured: database adds `data`, `record`, `row`,
+`field`, and `index`, while formatter adds `syntax`, `indent`, and `align`. Rate limiting,
+testing, and filesystem naming keep their useful developer-artifact accents.
+
+The lowest consumer/business palettes were tuned with the same fixed-seed A/B loop. Education
+adds the shorter `sage` and `quiz`; sales adds `sale` and `close` while preserving productive
+`client`, `contact`, and `growth`; environment adds `dot` while retaining `setting`; legal
+research balances `jury`, `docket`, and `cite`. `grow`/`funnel` sales roots were rejected after
+lowering composite to **71.88** and producing `Closespring`/`Growscope`. A raw `var` environment
+root raised composite but collapsed diversity to **0.616** around `Vario`/`Varia`, and an
+over-pruned eight-root legal palette collapsed diversity to **0.618**; neither survives.
+
+**Measured result.** Broad composite rises **80.16 → 80.53**, diversity **0.726 → 0.728**, and
+average per-domain uniqueness **46.5% → 47.1%**, while exact collision pairs remain capped at
+**20** and capacity remains **2,400/2,400**. Education improves **67.38 → 74.24** composite and
+**0.761 → 0.791** diversity; sales **73.06 → 73.98** and **0.722 → 0.776**; formatter
+**76.08 → 77.46** and **0.766 → 0.810**. Environment reaches **78.42**, legal research **77.40**,
+and database migrations **76.44**. The retained first pages include `Sageloom`, `Quizlumen`,
+`Contactio`, `Salepath`, `Dotloom`, `Docketlens`, `Juryproof`, `Relayrow`, `Syntaxio`, and
+`Indentix`. Broad audit floors now fail closed below **80.5** composite, **0.725** diversity, or
+**47%** average domain uniqueness.
+
+The established morphology matrix improves again from **80.48 → 80.74** composite and
+**0.728 → 0.730** diversity, with **1,100/1,100** first-page and **2,200/2,200** rolling names.
+General-domain semantic coverage remains **1,069/1,100** calibration and **1,067/1,100**
+holdout; their Brandable composite rises **79.86 → 79.95** and **79.73 → 79.83** respectively.
+Developer marker coverage rises **1,591/1,600 → 1,594/1,600**.
+
+**Verification.** The workspace suite is **129/129**. The modifier corpus remains **550/550**,
+and Compound remains **1,000/1,000** prompt-linked and pair-coherent with zero lexical echoes.
+WASM, TypeScript, and the production bundle build cleanly. Chromium passes all **85** Auto pages
+with **45/45** prompt-linked accents, developer coverage remains **800/800 Brandable** and
+**791/800 Compound**, and the 100-name Brandable session plus all five 100-name Compound sessions
+remain duplicate-free without false exhaustion.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
