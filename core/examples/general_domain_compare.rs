@@ -1,9 +1,9 @@
 // Calibration/holdout audit for common non-developer product domains.
-// Run: cargo run -p neologism-core --example general_domain_compare --release
-use neologism_core::generate;
+// Run: cargo run -p neologism-core --example general_domain_compare --release [metaphor-share] [concept-suffix-bonus]
 use neologism_core::keywords::{brand_root_groups, extract_keywords};
 use neologism_core::metrics::{composite_score, diversity};
 use neologism_core::style::{Config, Style};
+use neologism_core::{generate_with_tuning, BigTechTuning};
 use std::collections::HashSet;
 
 struct Case {
@@ -128,6 +128,7 @@ const CASES: &[Case] = &[
 
 const CALIBRATION_SEEDS: &[u64] = &[7, 42, 101, 2024, 9999];
 const HOLDOUT_SEEDS: &[u64] = &[13, 67, 313, 4096, 65_537];
+const CONCEPT_SUFFIXES: &[&str] = &["ia", "io", "ora", "ix", "ify"];
 
 fn config(prompt: &str, seed: u64, compound: bool) -> Config {
     Config {
@@ -157,9 +158,32 @@ struct Audit {
     unique: HashSet<String>,
     first: Vec<String>,
     rolling_count: usize,
+    concept_suffixes: usize,
+    metaphor_forms: usize,
 }
 
-fn rolling_count(prompt: &str, compound: bool, seeds: &[u64]) -> usize {
+fn concept_coverage(name: &str, groups: &[Vec<String>]) -> usize {
+    let lower = name.to_lowercase();
+    groups
+        .iter()
+        .filter(|group| {
+            group
+                .iter()
+                .any(|root| lower.contains(root) || (root.len() >= 3 && lower.contains(&root[..3])))
+        })
+        .count()
+}
+
+fn has_concept_suffix(name: &str, groups: &[Vec<String>]) -> bool {
+    let lower = name.to_lowercase();
+    groups.iter().flatten().any(|root| {
+        CONCEPT_SUFFIXES
+            .iter()
+            .any(|suffix| lower == format!("{root}{suffix}"))
+    })
+}
+
+fn rolling_count(prompt: &str, compound: bool, seeds: &[u64], tuning: &BigTechTuning) -> usize {
     let mut excluded = Vec::new();
     let mut total = 0;
     for batch in 0..10 {
@@ -167,14 +191,21 @@ fn rolling_count(prompt: &str, compound: bool, seeds: &[u64]) -> usize {
             .wrapping_add(0x9E37_79B9_7F4A_7C15u64.wrapping_mul(batch as u64 + 1));
         let mut cfg = config(prompt, seed, compound);
         cfg.exclude = excluded.clone();
-        let names = generate(&cfg);
+        let names = generate_with_tuning(&cfg, tuning);
         total += names.len();
         excluded.extend(names.into_iter().map(|name| name.name));
     }
     total
 }
 
-fn audit(prompt: &str, compound: bool, case: &Case, seeds: &[u64]) -> Audit {
+fn audit(
+    prompt: &str,
+    compound: bool,
+    case: &Case,
+    seeds: &[u64],
+    tuning: &BigTechTuning,
+) -> Audit {
+    let groups = brand_root_groups(&extract_keywords(prompt, 6), 16);
     let mut result = Audit {
         total: 0,
         semantic: 0,
@@ -183,11 +214,13 @@ fn audit(prompt: &str, compound: bool, case: &Case, seeds: &[u64]) -> Audit {
         diversity: 0.0,
         unique: HashSet::new(),
         first: Vec::new(),
-        rolling_count: rolling_count(prompt, compound, seeds),
+        rolling_count: rolling_count(prompt, compound, seeds, tuning),
+        concept_suffixes: 0,
+        metaphor_forms: 0,
     };
 
     for (index, seed) in seeds.iter().enumerate() {
-        let names = generate(&config(prompt, *seed, compound));
+        let names = generate_with_tuning(&config(prompt, *seed, compound), tuning);
         if index == 0 {
             result.first = names.iter().map(|name| name.name.clone()).collect();
         }
@@ -206,6 +239,13 @@ fn audit(prompt: &str, compound: bool, case: &Case, seeds: &[u64]) -> Audit {
                     .any(|marker| lower.contains(marker)),
             );
             result.composite += composite_score(&name) as u64;
+            if !compound {
+                if has_concept_suffix(&name.name, &groups) {
+                    result.concept_suffixes += 1;
+                } else if concept_coverage(&name.name, &groups) < 2 {
+                    result.metaphor_forms += 1;
+                }
+            }
             result.unique.insert(lower);
         }
     }
@@ -216,6 +256,21 @@ fn main() {
     const EXPECTED_PER_SPLIT: usize = CASES.len() * 2 * CALIBRATION_SEEDS.len() * 10;
     const EXPECTED_ROLLING_PER_SPLIT: usize = CASES.len() * 2 * 100;
     let mut totals = [[0usize; 4]; 2];
+    let mut shape_totals = [[0usize; 3]; 2];
+    let mut tuning = BigTechTuning::from_variety(0.3);
+    if let Some(value) = std::env::args().nth(1) {
+        tuning.single_concept_metaphor_w = value
+            .parse::<f64>()
+            .expect("metaphor share must be a number");
+    }
+    if let Some(value) = std::env::args().nth(2) {
+        tuning.concept_suffix_w = value.parse::<f64>().expect("suffix bonus must be a number");
+    }
+    println!(
+        "single-concept metaphor candidate share: {:.0}%, multi-concept suffix rank bonus: {:.2}",
+        tuning.single_concept_metaphor_w * 100.0,
+        tuning.concept_suffix_w,
+    );
 
     for case in CASES {
         println!("\n{}", case.label);
@@ -236,7 +291,7 @@ fn main() {
                 brand_root_groups(&keywords, 16)
             );
             for (label, compound) in [("brandable", false), ("compound", true)] {
-                let result = audit(prompt, compound, case, seeds);
+                let result = audit(prompt, compound, case, seeds, &tuning);
                 totals[split_index][0] += result.total;
                 totals[split_index][1] += result.semantic;
                 totals[split_index][2] += result.wrong_domain;
@@ -253,6 +308,17 @@ fn main() {
                     result.unique.len() as f64 / result.total as f64 * 100.0,
                     result.rolling_count,
                 );
+                if !compound {
+                    shape_totals[split_index][0] += result.concept_suffixes;
+                    shape_totals[split_index][1] += result.metaphor_forms;
+                    shape_totals[split_index][2] += result.total;
+                    println!(
+                        "                         shape suffix {}  metaphor {}  multi/other {}",
+                        result.concept_suffixes,
+                        result.metaphor_forms,
+                        result.total - result.concept_suffixes - result.metaphor_forms,
+                    );
+                }
             }
         }
     }
@@ -270,6 +336,12 @@ fn main() {
             totals[index][2] as f64 / totals[index][0] as f64 * 100.0,
             totals[index][3],
             EXPECTED_ROLLING_PER_SPLIT,
+        );
+        println!(
+            "{split} Brandable shape: suffix {}, metaphor {}, multi/other {}",
+            shape_totals[index][0],
+            shape_totals[index][1],
+            shape_totals[index][2] - shape_totals[index][0] - shape_totals[index][1],
         );
     }
 }

@@ -47,8 +47,14 @@ pub struct BigTechTuning {
     /// Offline "brand-appeal" signal (Phase 28): names that open with a real word
     /// read more brandable. Empirically the strongest of the cheap offline signals.
     pub prefix_w: f64,
-    /// Rank bonus for a clean brandable suffix (-ify/-io/-ai/-ia). Phase 28.
+    /// Rank bonus for a clean brandable suffix (-ify/-io/-ai/-ia) when no
+    /// project description is available. Phase 28.
     pub suffix_w: f64,
+    /// Reduced suffix bonus for descriptions spanning multiple concept groups.
+    /// It keeps a compact coined-name lane beside literal two-root joins. A
+    /// single known concept needs no suffix bonus because its root already
+    /// supplies the meaning.
+    pub concept_suffix_w: f64,
     /// Rank penalty for a harsh consonant-cluster ending (Bear·ch, Aure·sh). Phase 28.
     pub harsh_w: f64,
     /// Phase 33: reject candidates within edit distance 1 of any excluded name.
@@ -76,6 +82,10 @@ pub struct BigTechTuning {
     /// Exposed to the A/B harness so semantic fidelity can be balanced against
     /// names that read like literal two-root labels.
     pub concept_coverage_w: f64,
+    /// Candidate share reserved for readable root+metaphor forms on a
+    /// single-concept first page. Multi-concept and continuation mixes are
+    /// intentionally independent.
+    pub single_concept_metaphor_w: f64,
 }
 
 impl Default for BigTechTuning {
@@ -116,6 +126,7 @@ impl BigTechTuning {
             // junk signal, not a register one, so it stays on across the axis.
             prefix_w: lerp(0.10, 0.0),
             suffix_w: lerp(0.40, 0.0),
+            concept_suffix_w: lerp(0.20, 0.0),
             harsh_w: 0.50,
             // Phase 33: anti-sameness floors — constant across the variety axis.
             fuzzy_exclude: true,
@@ -125,6 +136,7 @@ impl BigTechTuning {
             fuzzy_window: 2000,
             concept_expand: true,
             concept_coverage_w: 0.25,
+            single_concept_metaphor_w: 0.20,
         }
     }
 }
@@ -511,7 +523,7 @@ fn rank_jitter(name: &str, salt: u64) -> f64 {
 /// the LLM's brand-quality judgment from ~0.19 to ~0.33; folded into ranking (not
 /// gating), so it reshapes which names surface without changing what's allowed.
 /// `lower` must be lowercase ASCII (always true for generated names).
-fn brand_appeal(lower: &str, common: &HashSet<String>, t: &BigTechTuning) -> f64 {
+fn brand_appeal(lower: &str, common: &HashSet<String>, t: &BigTechTuning, suffix_w: f64) -> f64 {
     // Longest real-word prefix (≥3 chars): Forge·lab, Harbor·ai, Glide·hub.
     let mut prefix_len = 0usize;
     for j in (3..=lower.len()).rev() {
@@ -526,8 +538,22 @@ fn brand_appeal(lower: &str, common: &HashSet<String>, t: &BigTechTuning) -> f64
     ];
     let clean = CLEAN_SUFFIXES.iter().any(|s| lower.ends_with(s));
     let harsh = HARSH_ENDINGS.iter().any(|s| lower.ends_with(s));
-    prefix_len as f64 * t.prefix_w + if clean { t.suffix_w } else { 0.0 }
+    prefix_len as f64 * t.prefix_w + if clean { suffix_w } else { 0.0 }
         - if harsh { t.harsh_w } else { 0.0 }
+}
+
+fn suffix_rank_weight(
+    tuning: &BigTechTuning,
+    concept_expanded: bool,
+    concept_count: usize,
+) -> f64 {
+    if concept_expanded && concept_count >= 2 {
+        tuning.concept_suffix_w
+    } else if concept_expanded {
+        0.0
+    } else {
+        tuning.suffix_w
+    }
 }
 
 fn generate_bigtech(
@@ -753,7 +779,7 @@ fn generate_bigtech(
                 if concept_groups.len() >= 2 || has_prompt_history {
                     0.25
                 } else {
-                    0.80
+                    1.0 - tuning.single_concept_metaphor_w.clamp(0.0, 1.0)
                 }
             } else if all_roots.len() >= 2 {
                 0.30
@@ -943,6 +969,7 @@ fn generate_bigtech(
     } else {
         0.0
     };
+    let suffix_rank_w = suffix_rank_weight(tuning, concept_expanded, concept_groups.len());
     let rank = |r: &NameResult| {
         let coverage_bonus = if concept_expanded {
             concept_coverage(&r.name.to_lowercase(), &concept_groups).saturating_sub(1) as f64
@@ -961,7 +988,13 @@ fn generate_bigtech(
         st.model.log_likelihood(&r.name)
             + (r.score_pronounce as f64 / 100.0) * fluency_w
             + (r.score_memorability as f64 / 100.0) * brevity_w
-            + appeal_w * brand_appeal(&r.name.to_lowercase(), &st.common_words, tuning)
+            + appeal_w
+                * brand_appeal(
+                    &r.name.to_lowercase(),
+                    &st.common_words,
+                    tuning,
+                    suffix_rank_w,
+                )
             + coverage_bonus
             + rank_jitter(&r.name, concept_rank_salt) * exploration_w
             - typo_penalty
@@ -1220,14 +1253,28 @@ mod tests {
         let common = build_common_words();
         // A name opening with a real word and a clean suffix should outscore a
         // harsh-ending coined mashup (the exact gradient the feature targets).
-        let good = brand_appeal("forgeify", &common, &t); // "forge" prefix + "ify" suffix
-        let harsh = brand_appeal("bearch", &common, &t); // harsh "-rch" ending
+        let good = brand_appeal("forgeify", &common, &t, t.suffix_w); // "forge" prefix + "ify" suffix
+        let harsh = brand_appeal("bearch", &common, &t, t.suffix_w); // harsh "-rch" ending
         assert!(good > harsh, "good={good} should beat harsh={harsh}");
         // Harsh ending is penalized below a neutral coined name.
-        let neutral = brand_appeal("zentu", &common, &t);
+        let neutral = brand_appeal("zentu", &common, &t, t.suffix_w);
         assert!(
             harsh < neutral,
             "harsh={harsh} should be penalized below neutral={neutral}"
+        );
+    }
+
+    #[test]
+    fn multi_concept_names_use_a_reduced_suffix_bonus() {
+        let tuning = BigTechTuning::from_variety(0.3);
+        assert!(tuning.suffix_w > 0.0);
+        assert_eq!(tuning.concept_suffix_w, 0.14);
+        assert!(tuning.concept_suffix_w < tuning.suffix_w);
+        assert_eq!(suffix_rank_weight(&tuning, false, 0), tuning.suffix_w);
+        assert_eq!(suffix_rank_weight(&tuning, true, 1), 0.0);
+        assert_eq!(
+            suffix_rank_weight(&tuning, true, 2),
+            tuning.concept_suffix_w
         );
     }
 

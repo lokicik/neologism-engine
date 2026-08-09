@@ -1,6 +1,6 @@
 // Fixed-seed human-audit harness for generic (no-prompt) Brandable names.
-// Compares only the generator-family mix; every filter and ranking stage stays
-// production-identical.
+// Compares the generator-family mix and the no-prompt suffix-ranking signal;
+// every filter stays production-identical.
 // Run: cargo run -p neologism-core --example generic_compare --release
 use neologism_core::style::{Config, Style};
 use neologism_core::{generate_with_tuning, BigTechTuning};
@@ -26,10 +26,11 @@ fn config(seed: u64) -> Config {
     }
 }
 
-fn names(seed: u64, markov_w: f64, blend_w: f64) -> String {
+fn names(seed: u64, markov_w: f64, blend_w: f64, suffix_w: f64) -> String {
     let mut tuning = BigTechTuning::from_variety(0.3);
     tuning.markov_w = markov_w;
     tuning.blend_w = blend_w;
+    tuning.suffix_w = suffix_w;
     generate_with_tuning(&config(seed), &tuning)
         .into_iter()
         .map(|result| result.name)
@@ -43,9 +44,18 @@ fn main() {
         println!("\nseed {seed}");
         println!(
             "  prod : {}",
-            names(seed, production.markov_w, production.blend_w)
+            names(
+                seed,
+                production.markov_w,
+                production.blend_w,
+                production.suffix_w,
+            )
         );
-        println!("  low  : {}", names(seed, 0.10, 0.35));
-        println!("  none : {}", names(seed, 0.00, 0.40));
+        println!(
+            "  no suffix bonus: {}",
+            names(seed, production.markov_w, production.blend_w, 0.0)
+        );
+        println!("  low  : {}", names(seed, 0.10, 0.35, production.suffix_w));
+        println!("  none : {}", names(seed, 0.00, 0.40, production.suffix_w));
     }
 }

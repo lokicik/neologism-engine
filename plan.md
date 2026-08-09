@@ -1437,6 +1437,50 @@ the new recruiting and consumer-event regressions—each reach 100 unique, relev
 
 ---
 
+## Phase 83 — Stop rewarding every project name for looking like a suffix template
+
+**Bottleneck.** Phase 80 opened a readable metaphor lane, but the Phase 28 brand-appeal scorer
+still gave every clean `-ify/-io/-ia/-ix/-ora` form a **0.28** ranking bonus at production
+variety. Candidate diversity had improved while final selection continued to prefer mechanical
+forms such as `Careora` and `Dishify` over equally relevant `Careflow`, `Rainloom`, or
+`Clientrelay`. The expanded general-domain harness now records suffix, metaphor, and multi-root
+shapes in addition to semantic coverage and capacity. Its baseline Brandable pages selected
+**396/550** suffix forms on calibration and **409/550** on the independent synonym holdout.
+
+**A/B and rejected shortcuts.** Removing the bonus globally was rejected: prompts without a
+brief lost useful corpus guidance and surfaced weaker replacements such as `Pinarroww` and
+`Sayeslika`. Removing it for every described project also failed the existing multi-concept
+balance regression; the app's own brief fell to only two compact coinages and became dominated
+by literal two-root joins. A blanket **0.14** bonus preserved that test but left single-concept
+pages unnecessarily suffix-heavy. The retained policy follows the information already present:
+generic generation keeps its old bonus, a recognized single concept gets no suffix bonus, and a
+multi-concept brief gets a reduced bonus that is **0.14** at production variety and relaxes toward
+zero as variety rises. The 20% single-concept metaphor candidate lane remains unchanged.
+
+**Measured result.** Across the established twenty-two-brief morphology matrix, direct suffix
+forms fall **658/1,100 → 513/1,100**, readable metaphor forms rise **115 → 189**, and
+multi-concept joins move **327 → 398**. Suffix-heavy pages halve **30/110 → 15/110** and
+suffix-only pages fall **6/110 → 4/110**. Diversity holds **0.725 → 0.726**; the legacy
+structural composite moves **80.87 → 80.15**, expected because that metric explicitly includes
+the suffix reward being reduced. All **2,200/2,200** rolling names still return with no collapsed
+seams or short batches.
+
+The independent general-domain corpus keeps full capacity and meaning: calibration reaches
+**1,053/1,100 (95.7%)** semantic with **1/1,100** wrong-domain, while holdout reaches
+**1,050/1,100 (95.5%)** semantic with zero wrong-domain; both rolling sides remain
+**2,200/2,200**. Their Brandable shape mix is now almost balanced: calibration selects
+**277 suffix / 273 metaphor**, and holdout **300 suffix / 247 metaphor / 3 other**. Developer
+coverage also stays **1,591/1,600 (99.4%)**. This is a bounded family-balance correction, not a
+claim that the engine has learned personal taste; no real like/pass export was available.
+
+**Verification.** The workspace suite is **124/124**. WASM and the production bundle build
+cleanly. Chromium reports **800/800 Brandable** and **791/800 Compound** developer-domain names,
+all 30 Auto pages keep ten names and their sole accents are **15/15** prompt-linked, five
+Compound scenarios each reach 100 unique relevant names, and the app's own Brandable brief also
+reaches 100 without repeats or false exhaustion.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
@@ -1452,7 +1496,7 @@ names, and semantic joins no longer erase a concept at one-letter/vowel boundari
 feedback can already adjust structural and mode preferences, while AI Studio remains an
 optional, separate batch judge rather than a hidden dependency of Create.
 
-The next scorer change is evidence-gated: collect at least ten real likes and ten passes in
+The next broad aesthetic scorer change is evidence-gated: collect at least ten real likes and ten passes in
 matching project contexts, audit the current composite, and require held-out pairwise
 improvement before shipping new weights. Language flavors and “name like X” templates remain
 possible capability expansions, but they are not substitutes for proving better English
