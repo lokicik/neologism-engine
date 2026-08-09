@@ -121,6 +121,21 @@ const addQualityNeutralGuidedAlternative = (
   return next
 }
 
+const preserveGuidedConstruction = (
+  page: NameResult[],
+  candidate: NameResult | undefined,
+): NameResult[] => {
+  if (!candidate) return page
+  // mergeAutoBatches may keep the ordinary Brandable copy when the guided
+  // pool found the same spelling. Preserve its provenance on that one card.
+  const candidateName = letters(candidate.name)
+  return page.map((result) => (
+    letters(result.name) === candidateName
+      ? { ...result, construction: 'guided_metaphor', constructionRank: 1 }
+      : result
+  ))
+}
+
 let initialized = false
 
 async function ensureInit() {
@@ -197,19 +212,35 @@ export async function generateBatch(cfg: Config): Promise<NameResult[]> {
         count: GUIDED_METAPHOR_POOL,
       }
       metaphorAccent = pickGuidedMetaphor(await generateNames(metaphorConfig))
-      if (metaphorAccent.length === 0 && (cfg.exclude?.length ?? 0) === 0) {
-        metaphorAccent = pickGuidedMetaphor(await generateNames({
+      // The independent seed is a fresh-page second chance only. Keep every
+      // primary-pool winner, then fill at most one missing distinct tail.
+      if (metaphorAccent.length < 2 && (cfg.exclude?.length ?? 0) === 0) {
+        const usedNames = new Set(metaphorAccent.map((result) => letters(result.name)))
+        const usedTails = new Set(metaphorAccent.map(guidedMetaphorTail))
+        const fallback = pickGuidedMetaphor(await generateNames({
           ...metaphorConfig,
           seed: guidedMetaphorFallbackSeed(cfg.seed),
         }))
+        for (const result of fallback) {
+          const name = letters(result.name)
+          const tail = guidedMetaphorTail(result)
+          if (!tail || usedNames.has(name) || usedTails.has(tail)) continue
+          metaphorAccent.push({
+            ...result,
+            constructionRank: metaphorAccent.length === 0 ? 1 : 2,
+          })
+          usedNames.add(name)
+          usedTails.add(tail)
+          if (metaphorAccent.length === 2) break
+        }
       }
     }
-    const primaryPage = mergeAutoBatches([
+    const primaryPage = preserveGuidedConstruction(mergeAutoBatches([
       brandableBatch,
       [],
       linkedRespells,
       metaphorAccent.slice(0, 1),
-    ], total)
+    ], total), metaphorAccent[0])
     return linkedRespells.length === 0
       ? addQualityNeutralGuidedAlternative(primaryPage, metaphorAccent[1])
       : primaryPage

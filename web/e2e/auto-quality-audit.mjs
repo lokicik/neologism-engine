@@ -93,6 +93,7 @@ let failures = 0
 let weakContextForms = 0
 const guidedMetaphorNames = []
 const secondaryMetaphorNames = []
+const pageViolations = []
 try {
   const page = await browser.newPage()
   await page.goto(APP_URL)
@@ -155,18 +156,22 @@ try {
       .filter(({ item }) => item.constructionRank === 2)
       .map(({ item }) => item.name))
     weakContextForms += weakForms.length
-    if (
-      row.results.length !== 10
-      || samples.length > 1
-      || badAccents.length > 0
-      || lossySeams.length > 0
-      || weakForms.length > 0
-      || guidedMetaphors.length > 2
-      || guidedMetaphors.some(({ tail }) => !tail)
-      || new Set(guidedTails).size !== guidedTails.length
-      || guidedRanks.some((rank, index) => rank !== index + 1)
-      || invalidGuidedMetaphors.length > 0
-    ) failures++
+    const violations = [
+      [row.results.length !== 10, `size ${row.results.length}`],
+      [samples.length > 1, `${samples.length} mode accents`],
+      [badAccents.length > 0, 'unlinked mode accent'],
+      [lossySeams.length > 0, `lossy seam ${lossySeams.map((item) => item.name).join('/')}`],
+      [weakForms.length > 0, `weak context ${weakForms.map((item) => item.name).join('/')}`],
+      [guidedMetaphors.length > 2, `${guidedMetaphors.length} guided metaphors`],
+      [guidedMetaphors.some(({ tail }) => !tail), 'unknown metaphor tail'],
+      [new Set(guidedTails).size !== guidedTails.length, 'repeated metaphor tail'],
+      [guidedRanks.some((rank, index) => rank !== index + 1), `guided ranks ${guidedRanks.join('/')}`],
+      [invalidGuidedMetaphors.length > 0, 'sub-85 guided metaphor'],
+    ].filter(([violated]) => violated).map(([, label]) => label)
+    if (violations.length > 0) {
+      failures++
+      pageViolations.push(`${row.seed} · ${row.prompt}: ${violations.join(', ')}`)
+    }
     if (VERBOSE) {
       console.log(`\n${row.seed}  ${row.prompt}`)
       console.log(`keywords: ${row.keywords.join(', ')}`)
@@ -192,6 +197,7 @@ try {
     console.log(`all: ${[...new Set(guidedMetaphorNames)].sort().join(', ')}`)
     console.log(`secondary: ${[...new Set(secondaryMetaphorNames)].sort().join(', ')}`)
   }
+  if (pageViolations.length > 0) console.log(`violations:\n${pageViolations.join('\n')}`)
   console.log('\nAuto accent relevance')
   for (const [mode, stats] of Object.entries(byMode)) {
     console.log(`${mode}: ${stats.linked}/${stats.total} prompt-linked`)

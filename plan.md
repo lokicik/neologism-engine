@@ -2494,7 +2494,8 @@ eight-candidate pool may now identify one second candidate only when its curated
 from the primary and it also scores at least 85. With no Respell present, that candidate competes
 only against direct, single-concept suffix cards and enters only if its structural quality is at
 least as high as the card it replaces. Multi-concept forms are protected, page size stays ten,
-and later pages remain untouched because the seed fallback is still fresh-first-page only.
+and the independent seed fallback remains fresh-first-page only; continuation pages keep using
+their existing primary pool.
 Guided forms carry explicit construction/rank metadata so audits and future taste exports can
 distinguish them from ordinary Brandable names that happen to end in `flow`, `lab`, or `signal`.
 
@@ -2521,6 +2522,51 @@ gate requires one or two on every fixed page. All cold, Auto, namespace, taste, 
 four-session, feedback/export, and developer-domain browser gates pass. TypeScript and the
 production bundle build cleanly. The Rust engine/WASM are unchanged, so the **139/139** core suite
 and Phase 108's morphology/cross-domain baselines remain applicable.
+
+---
+
+## Phase 110 — Let the fallback fill one missing strong form
+
+**Bottleneck and measurement correction.** Phase 109 found a safe second-form rule, but only
+**8/15** namespace pages had two qualifying candidates in their primary eight-name pool. The
+independent `seed + 16` pool already rescued pages with zero candidates, yet it was never asked to
+complete a page with exactly one. The new construction metadata also exposed an audit undercount:
+when a guided candidate duplicated a normal Brandable spelling, merge kept one visible copy but
+dropped its provenance. With that metadata preserved and no name change, the true Phase 109
+baseline is **62** guided forms / **38** unique across 85 pages, not the previously reported 56/36.
+
+**Retained correction.** On a fresh page with no safe Respell, the primary metaphor pool still gets
+first refusal. If it returns fewer than two candidates, the same deterministic fallback pool may
+fill only the missing slot. Exact names and metaphor endings are deduplicated before the existing
+quality-neutral replacement rule runs; no third form can enter. Pages with exclusion history do
+not open the independent pool, so the four proven 100-name continuation paths keep their prior
+behavior. When normal Brandable and guided pools produce the same spelling, the retained card now
+keeps explicit guided construction/rank metadata for honest audits and future taste evidence.
+
+**Measured result.** Across 85 guided pages, correctly observed forms rise **62 → 72** and unique
+forms **38 → 42**; unique secondary forms grow **10 → 17**. In the fifteen namespace pages,
+guided forms improve **23 → 26**, direct suffix forms **86 → 83**, namespace markers **55 → 57**,
+and the three five-seed unions **77 → 80**. Mean quality rises **86.18 → 86.25** and similarity
+improves **0.160 → 0.159**. The product's own seed-42 page is unchanged because its primary pool
+already supplied both `Keyloom` and `Tagsignal`; the fallback changes only pages missing a second
+qualified construction.
+
+Across 90 cold pages, direct quality improves **83.02 → 83.10**, repaired quality
+**83.11 → 83.17**, and raw sub-75 candidates fall **9 → 8**. Repair activation stays 34 pages and
+near pairs stay 43; mean similarity moves slightly **0.200 → 0.201**, remaining better than the
+pre-Phase-109 baseline and below the 0.21 gate. The 1,000-name taste matrix improves quality
+**85.45 → 85.47**, affinity **-0.791 → -0.789**, suffix forms **605 → 604**, fresh-session coverage
+**312 → 314**, and exact repeated retries **7 → 6**; near pairs and similarity hold at 193/0.201.
+Specialized namespace retention rises **69 → 70/200**. Mode-aware taste remains at 100 unique
+names, while all four visible-only sessions retain the same **85.28** mean, **84.36** tenth-page
+quality, and 100/100 unique prompt-linked names.
+
+**Verification.** The diagnostic Auto audit now reports page-level violation reasons rather than
+only a total, and validates contiguous construction ranks after deduplication. All 85 Auto pages,
+fifteen namespace pages, 90 cold pages, the 1,000-name taste matrix, four 100-name sessions,
+mode-aware taste, and real feedback/export flow pass. TypeScript and the production bundle build
+cleanly. The Rust engine/WASM remain unchanged, so the **139/139** core and prior morphology,
+cross-domain, and explicit developer-domain baselines remain applicable.
 
 ---
 
