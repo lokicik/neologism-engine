@@ -96,7 +96,8 @@ try {
             exclude: [],
             seed,
           })
-          const selected = shortlistByPreference(pool, profile, requested)
+          const baseline = shortlistByPreference(pool, profile, requested)
+          const selected = shortlistByPreference(pool, profile, requested, seed)
           output.push({
             references,
             prompt: testCase.prompt,
@@ -104,6 +105,7 @@ try {
             poolRequested,
             poolReturned: pool.length,
             engineFirstPage: pool.slice(0, requested).map((item) => item.name),
+            baseline: baseline.map((item) => item.name),
             selected: selected.map((item) => ({
               name: item.name,
               mode: item.sourceMode,
@@ -195,6 +197,26 @@ try {
     || row.selected.length !== 10
   )).length
   const returnedCounts = [...new Set(rows.map((row) => row.poolReturned))].sort((a, b) => a - b)
+  const retryGroups = new Map()
+  for (const row of rows) {
+    const key = `${row.references}\n${row.prompt}`
+    if (!retryGroups.has(key)) retryGroups.set(key, [])
+    retryGroups.get(key).push(row)
+  }
+  const retrySummary = (field) => {
+    let uniqueNames = 0
+    let repeatedPages = 0
+    for (const group of retryGroups.values()) {
+      const pages = group.map((row) => (
+        field === 'baseline' ? row.baseline : row.selected.map((item) => item.name)
+      ))
+      uniqueNames += new Set(pages.flat().map((name) => name.toLowerCase())).size
+      repeatedPages += pages.length - new Set(pages.map((page) => page.join('|').toLowerCase())).size
+    }
+    return { uniqueNames, repeatedPages }
+  }
+  const baselineRetries = retrySummary('baseline')
+  const seededRetries = retrySummary('selected')
 
   console.log(`personalized pages: ${rows.length}`)
   console.log(`selected names: ${names.length}`)
@@ -207,6 +229,8 @@ try {
   console.log(`near-duplicate pairs: ${nearPairs}`)
   console.log(`mean pair similarity: ${meanPairSimilarity.toFixed(3)}`)
   console.log(`returned pool sizes: ${returnedCounts.join(', ')}`)
+  console.log(`retry unique names: ${baselineRetries.uniqueNames} -> ${seededRetries.uniqueNames} / ${retryGroups.size * SEEDS.length * 10}`)
+  console.log(`exact repeated retry pages: ${baselineRetries.repeatedPages} -> ${seededRetries.repeatedPages}`)
   const poolsByPrompt = new Map()
   for (const row of rows) {
     if (!poolsByPrompt.has(row.prompt)) poolsByPrompt.set(row.prompt, new Set())
@@ -243,6 +267,14 @@ try {
     [averageTaste >= -0.82, 'reference affinity stays within the retained floor'],
     [nearPairs <= 230, 'near-duplicate pairs stay at or below 230'],
     [meanPairSimilarity <= 0.22, 'mean pair similarity stays at or below 0.22'],
+    [
+      seededRetries.uniqueNames >= baselineRetries.uniqueNames + 30,
+      'seed-aware taste adds at least 30 fresh names across repeated first pages',
+    ],
+    [
+      seededRetries.repeatedPages <= 10,
+      'no more than ten seeded retries reproduce an exact prior page',
+    ],
     [
       semanticRetentionFailures === 0,
       'taste keeps at least 70% of the engine first page\'s specialized meaning',

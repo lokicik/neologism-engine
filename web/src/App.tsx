@@ -38,6 +38,12 @@ const DEFAULT_CONFIG: Config = {
 // big-tech vocabulary measured at 57k+ (100k-generation sweep).
 const RECENT_WINDOW = 20000
 
+function randomSelectionSalt(): number {
+  const value = new Uint32Array(1)
+  crypto.getRandomValues(value)
+  return value[0]
+}
+
 type View = 'landing' | AppView
 
 export default function App() {
@@ -65,6 +71,10 @@ export default function App() {
   const [judgeConfig, setJudgeConfig] = useState<JudgeConfig>(loadJudgeConfig)
   const [showSettings, setShowSettings] = useState(false)
   const recentRef = useRef<string[]>(loadRecent())
+  // One nearby taste direction per visible session. A manual fresh generation
+  // gets a new salt; infinite-scroll pages keep it so the session feels
+  // coherent instead of changing preference direction on every append.
+  const preferenceSaltRef = useRef<number | null>(null)
   // Mirror of `results` for the append path — handleGenerate is memoized on
   // [config], so reading state directly there would be stale.
   const resultsRef = useRef<NameResult[]>([])
@@ -145,6 +155,9 @@ export default function App() {
         feedback.rejected,
         tasteReferences,
       )
+      if (!append || preferenceSaltRef.current === null) {
+        preferenceSaltRef.current = cfg.seed ?? randomSelectionSalt()
+      }
       const requestedCount = cfg.count ?? 10
       const poolCount = preferencePoolCount(requestedCount, profile)
       const primaryPool = await generateBatch({
@@ -171,7 +184,12 @@ export default function App() {
         pool = [...primaryPool, ...fallback]
         batch = repairWeakShortlist(primaryPool, fallback, requestedCount)
       } else {
-        batch = shortlistByPreference(primaryPool, profile, requestedCount)
+        batch = shortlistByPreference(
+          primaryPool,
+          profile,
+          requestedCount,
+          preferenceSaltRef.current,
+        )
       }
       setPromptKeywords(cfg.description?.trim() ? await extractKeywords(cfg.description) : [])
       setExhausted(pool.length === 0)

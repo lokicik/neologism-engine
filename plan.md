@@ -2256,6 +2256,43 @@ cleanly.
 
 ---
 
+## Phase 104 — Make fresh personalized sessions genuinely different
+
+**Bottleneck.** The local taste selector fully re-sorted its hidden candidate pool with a
+seed-independent score. Engine order changed slightly across seeds, but most five-seed pages were
+still identical after personalization: across twenty prompt/reference combinations, the unions
+contained only **250/1,000** names and **57/80** retry pages exactly reproduced an earlier page in
+their group. This made a fresh attempt feel deterministic even though every returned name was
+structurally valid.
+
+**A/B boundary.** A stable name-and-session hash now contributes only a small bounded tie-break
+after learned shape, engine quality, and brief-concept coverage. A **0.08** weight raised the union
+to 278 names and reduced exact repeated pages to 10. The retained **0.12** weight reached 288 and
+8. A stronger **0.16** trial reached 311 and 2, but reduced specialized Rust/log names from
+20/200 to 18/200 and failed the existing 70% semantic-retention gate, so it was removed.
+
+**Retained correction.** One fresh manual generation receives a new local selection salt; its
+infinite-scroll continuation keeps the same salt so the session has a coherent taste direction.
+An explicitly supplied seed remains deterministic. The bounded contribution is at most ±0.06,
+cannot bypass the 75-point floor, cannot accumulate brief bonuses, and still passes the visible
+prefix and ending-family caps. Cold generation and the Rust engine are unchanged.
+
+**Measured result.** Five-seed personalized first-page coverage rises **250 → 288** names
+(**+15.2%**) and exact repeated retries fall **57 → 8 (−86%)**. Across the same 1,000 selected
+names, structural quality holds at **85.39**, reference affinity at **−0.778**, sub-75 names and
+prefix overflow remain zero, exact-ending excess is **134**, near pairs are **220**, and mean
+pair similarity is **0.208**. All five brief families retain their semantic gate. In the rolling
+audit, all four personalized sessions still reach 100 unique, prompt-linked names; mean quality
+is **85.27** and tenth-page quality **83.60**.
+
+**Verification.** The deterministic preference smoke test proves that one salt repeats exactly
+while a new salt explores another shortlist. The 1,000-name Chromium matrix now gates at least
+30 additional cross-seed names and at most ten exact repeated pages. The real 100-name UI,
+feedback/reference/export flow, TypeScript build, and production Vite bundle are green. No LLM,
+network call, new corpus entry, scorer retraining, or hidden name blacklist was added.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

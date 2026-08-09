@@ -78,6 +78,19 @@ if (ixProfile) {
     shortlist.length === 10 && shortlist[0].name === 'Nymix',
     'taste can pull a better candidate from outside the original first page',
   )
+
+  const exploratoryPool = [
+    'Lexix', 'Nexix', 'Vexix', 'Dexix', 'Rexix', 'Texix',
+    'Mexix', 'Pexix', 'Kexix', 'Zexix', 'Bexix', 'Cexix',
+  ].map((name) => scoredResult(name, 88))
+  const seededA = shortlistByPreference(exploratoryPool, ixProfile, 10, 7)
+    .map((item) => item.name).join('|')
+  const seededARepeat = shortlistByPreference(exploratoryPool, ixProfile, 10, 7)
+    .map((item) => item.name).join('|')
+  const seededB = shortlistByPreference(exploratoryPool, ixProfile, 10, 42)
+    .map((item) => item.name).join('|')
+  check(seededA === seededARepeat, 'one taste-session salt stays deterministic')
+  check(seededA !== seededB, 'a fresh taste-session salt explores a nearby shortlist')
 }
 check(preferencePoolCount(10, null) === 10, 'cold start keeps the requested candidate count')
 check(coldQualityPoolCount(10) === 30, 'a weak cold Auto page opens a three-page repair pool')

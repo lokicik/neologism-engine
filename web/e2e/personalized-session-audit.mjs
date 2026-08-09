@@ -72,7 +72,7 @@ try {
           exclude: excluded,
           seed,
         })
-        const selected = shortlistByPreference(pool, profile, requested)
+        const selected = shortlistByPreference(pool, profile, requested, seed)
         visible.push(...selected)
         pages.push({
           pool: pool.length,

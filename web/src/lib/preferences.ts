@@ -12,6 +12,7 @@ const SHARP = new Set(['k', 't', 'x', 'z', 'q', 'v'])
 const KNOWN_SUFFIXES = ['ify', 'ora', 'ium', 'ion', 'io', 'ia', 'ix', 'ly', 'ai']
 const ENGINE_QUALITY_WEIGHT = 1.1
 const CONCEPT_COVERAGE_WEIGHT = 0.2
+const PREFERENCE_EXPLORATION_WEIGHT = 0.12
 const MIN_SHORTLIST_QUALITY = 0.75
 const VISIBLE_PREFIX_SHARE = 0.2
 const VISIBLE_SUFFIX_SHARE = 0.2
@@ -285,6 +286,21 @@ function engineQuality(result: NameResult): number {
   ) / 100
 }
 
+// Stable noise in [-0.5, 0.5]. It only separates close personalized choices:
+// engine quality, learned shape, brief coverage, and visible family caps still
+// own the selection. A fresh salt makes Retry explore a nearby good shortlist
+// instead of reproducing the same deterministic top ten.
+function preferenceJitter(name: string, salt: number): number {
+  let hash = (0x811c9dc5 ^ (salt >>> 0)) >>> 0
+  for (const char of letters(name)) {
+    hash = Math.imul(hash ^ char.charCodeAt(0), 0x01000193) >>> 0
+  }
+  hash ^= hash >>> 16
+  hash = Math.imul(hash, 0x7feb352d) >>> 0
+  hash ^= hash >>> 15
+  return hash / 0xffffffff - 0.5
+}
+
 function editDistance(left: string, right: string): number {
   const row = Array.from({ length: right.length + 1 }, (_, index) => index)
   for (let i = 1; i <= left.length; i++) {
@@ -470,7 +486,11 @@ export function repairWeakShortlist(
   return diversifyColdShortlist(selected, fallback, namingPage)
 }
 
-export function rankByPreference(results: NameResult[], profile: PreferenceProfile): NameResult[] {
+export function rankByPreference(
+  results: NameResult[],
+  profile: PreferenceProfile,
+  explorationSalt?: number,
+): NameResult[] {
   return results
     .map((result, index) => ({
       result,
@@ -482,7 +502,10 @@ export function rankByPreference(results: NameResult[], profile: PreferenceProfi
       score: similarity(result, profile)
         + engineQuality(result) * ENGINE_QUALITY_WEIGHT
         + Math.min(1, Math.max(0, (result.concept_coverage ?? 0) - 1))
-          * CONCEPT_COVERAGE_WEIGHT,
+          * CONCEPT_COVERAGE_WEIGHT
+        + (explorationSalt === undefined
+          ? 0
+          : preferenceJitter(result.name, explorationSalt) * PREFERENCE_EXPLORATION_WEIGHT),
     }))
     .sort((a, b) => b.score - a.score || a.index - b.index)
     .map(({ result }) => result)
@@ -504,12 +527,13 @@ export function shortlistByPreference(
   results: NameResult[],
   profile: PreferenceProfile | null,
   requested: number,
+  explorationSalt?: number,
 ): NameResult[] {
   const count = Math.max(0, Math.floor(requested))
   if (count === 0) return []
   if (!profile) return results.slice(0, count)
 
-  const ranked = rankByPreference(results, profile)
+  const ranked = rankByPreference(results, profile, explorationSalt)
   const qualified = ranked.filter((result) => engineQuality(result) >= MIN_SHORTLIST_QUALITY)
   const candidates = qualified.length >= count
     ? qualified
