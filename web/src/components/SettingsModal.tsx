@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   DEFAULT_JUDGE_PROMPT,
   DEFAULT_LOCAL_ENDPOINT,
@@ -9,7 +9,7 @@ import {
   type ModelInfo,
 } from '../lib/judge'
 import type { NameResult } from '../lib/engine'
-import { exportTasteDataset } from '../lib/taste-data'
+import { buildTasteDataset, exportTasteDataset } from '../lib/taste-data'
 import { IconDownload } from './icons'
 
 interface Props {
@@ -101,7 +101,10 @@ export function SettingsModal({ config, favorites, rejected, onSave, onClose }: 
   // When the field holds a fully-selected id (or is empty) show the whole list
   // so the user can browse/switch; only filter while they're typing a partial.
   const filtered = (query === '' || selected ? pickList : pickList.filter((m) => m.id.toLowerCase().includes(query))).slice(0, 60)
-  const comparisonCount = favorites.length * rejected.length
+  const tasteSummary = useMemo(
+    () => buildTasteDataset(favorites, rejected).summary,
+    [favorites, rejected],
+  )
   const feedbackCount = favorites.length + rejected.length
 
   const selectModel = (m: ModelInfo) => {
@@ -265,9 +268,9 @@ export function SettingsModal({ config, favorites, rejected, onSave, onClose }: 
           <div className="settings-data-copy">
             <h3 id="taste-data-title">Local taste data</h3>
             <p className="settings-data-meta">
-              {favorites.length} liked · {rejected.length} passed · {comparisonCount} preference pairs
+              {favorites.length} liked · {rejected.length} passed · {tasteSummary.comparisons} same-project pairs
             </p>
-            <p>Exports explicit feedback only — never your API key or recent-name history.</p>
+            <p>Includes each name's project brief — never your API key or recent-name history.</p>
           </div>
           <button
             type="button"

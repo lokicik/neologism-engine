@@ -4,14 +4,14 @@
 //
 // Run: cargo run -p neologism-core --release --example taste_audit -- <taste.json> [more.json]
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
 
 use neologism_core::metrics::composite_score;
 use neologism_core::NameResult;
 use serde::Deserialize;
 
-const SCHEMA: &str = "neologism-taste-v1";
+const SCHEMAS: [&str; 2] = ["neologism-taste-v1", "neologism-taste-v2"];
 
 #[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "lowercase")]
@@ -26,6 +26,13 @@ struct ResultRow {
     value: NameResult,
     #[serde(default, rename = "sourceMode")]
     source_mode: Option<String>,
+    #[serde(default, rename = "tasteContext")]
+    taste_context: Option<TasteContextRow>,
+}
+
+#[derive(Debug, Deserialize)]
+struct TasteContextRow {
+    id: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -52,18 +59,27 @@ struct PairAudit {
 struct Audit {
     pairs: Vec<PairAudit>,
     modes: BTreeMap<String, [usize; 2]>, // [liked, passed]
+    contexts: BTreeSet<String>,
 }
 
 fn audit_dataset(dataset: &Dataset) -> Result<Audit, String> {
-    if dataset.schema != SCHEMA {
+    if !SCHEMAS.contains(&dataset.schema.as_str()) {
         return Err(format!(
-            "unsupported schema {:?}; expected {SCHEMA:?}",
+            "unsupported schema {:?}; expected one of {SCHEMAS:?}",
             dataset.schema
         ));
     }
 
     let mut audit = Audit::default();
     for example in &dataset.examples {
+        audit.contexts.insert(
+            example
+                .result
+                .taste_context
+                .as_ref()
+                .map(|context| context.id.clone())
+                .unwrap_or_else(|| "legacy-unscoped".to_string()),
+        );
         let mode = example
             .result
             .source_mode
@@ -90,6 +106,25 @@ fn audit_dataset(dataset: &Dataset) -> Result<Audit, String> {
                 "comparison {pair_index} must point liked > passed, got {:?} > {:?}",
                 preferred.label, rejected.label
             ));
+        }
+        if dataset.schema == "neologism-taste-v2" {
+            let preferred_context = preferred
+                .result
+                .taste_context
+                .as_ref()
+                .map(|context| context.id.as_str());
+            let rejected_context = rejected
+                .result
+                .taste_context
+                .as_ref()
+                .map(|context| context.id.as_str());
+            if preferred_context != rejected_context {
+                return Err(format!(
+                    "comparison {pair_index} crosses project contexts: {:?} > {:?}",
+                    preferred_context.unwrap_or("legacy-unscoped"),
+                    rejected_context.unwrap_or("legacy-unscoped")
+                ));
+            }
         }
         audit.pairs.push(PairAudit {
             preferred: preferred.result.value.name.clone(),
@@ -120,6 +155,7 @@ fn print_report(audit: &mut Audit) {
 
     println!("\n=== Offline composite vs human taste ===");
     println!("examples: {liked} liked, {passed} passed");
+    println!("contexts: {}", audit.contexts.len());
     println!("pairs: {}", audit.pairs.len());
     if !audit.pairs.is_empty() {
         let agreement = (wins as f64 + ties as f64 * 0.5) / audit.pairs.len() as f64 * 100.0;
@@ -181,6 +217,7 @@ fn main() {
             audit.pairs.len()
         );
         combined.pairs.extend(audit.pairs);
+        combined.contexts.extend(audit.contexts);
         for (mode, counts) in audit.modes {
             let total = combined.modes.entry(mode).or_default();
             total[0] += counts[0];
@@ -202,13 +239,14 @@ mod tests {
     fn computes_pairwise_agreement_and_modes() {
         let dataset = parse(
             r#"{
-              "schema":"neologism-taste-v1",
+              "schema":"neologism-taste-v2",
               "examples":[
-                {"label":"liked","result":{"name":"Noma","style":"big_tech","sourceMode":"realword","syllables":2,"score_pronounce":90,"score_novelty":90,"score_memorability":90,"connotations":[]}},
-                {"label":"liked","result":{"name":"Lexix","style":"big_tech","sourceMode":"brandable","syllables":2,"score_pronounce":60,"score_novelty":60,"score_memorability":60,"connotations":[]}},
-                {"label":"passed","result":{"name":"Bobbyn","style":"big_tech","sourceMode":"respell","syllables":2,"score_pronounce":80,"score_novelty":80,"score_memorability":80,"connotations":[]}}
+                {"label":"liked","result":{"name":"Noma","style":"big_tech","sourceMode":"realword","tasteContext":{"id":"project-a"},"syllables":2,"score_pronounce":90,"score_novelty":90,"score_memorability":90,"connotations":[]}},
+                {"label":"liked","result":{"name":"Lexix","style":"big_tech","sourceMode":"brandable","tasteContext":{"id":"project-b"},"syllables":2,"score_pronounce":60,"score_novelty":60,"score_memorability":60,"connotations":[]}},
+                {"label":"passed","result":{"name":"Bobbyn","style":"big_tech","sourceMode":"respell","tasteContext":{"id":"project-a"},"syllables":2,"score_pronounce":80,"score_novelty":80,"score_memorability":80,"connotations":[]}},
+                {"label":"passed","result":{"name":"Toppyr","style":"big_tech","sourceMode":"respell","tasteContext":{"id":"project-b"},"syllables":2,"score_pronounce":80,"score_novelty":80,"score_memorability":80,"connotations":[]}}
               ],
-              "comparisons":[[0,2],[1,2]]
+              "comparisons":[[0,2],[1,3]]
             }"#,
         );
         let audit = audit_dataset(&dataset).expect("auditable");
@@ -216,7 +254,8 @@ mod tests {
         assert!(audit.pairs[0].margin > 0.0);
         assert!(audit.pairs[1].margin < 0.0);
         assert_eq!(audit.modes["realword"], [1, 0]);
-        assert_eq!(audit.modes["respell"], [0, 1]);
+        assert_eq!(audit.modes["respell"], [0, 2]);
+        assert_eq!(audit.contexts.len(), 2);
     }
 
     #[test]
@@ -228,7 +267,7 @@ mod tests {
 
         let reversed = parse(
             r#"{
-              "schema":"neologism-taste-v1",
+              "schema":"neologism-taste-v2",
               "examples":[
                 {"label":"passed","result":{"name":"Bad","style":"big_tech","syllables":1,"score_pronounce":50,"score_novelty":50,"score_memorability":50,"connotations":[]}},
                 {"label":"liked","result":{"name":"Good","style":"big_tech","syllables":1,"score_pronounce":90,"score_novelty":90,"score_memorability":90,"connotations":[]}}
@@ -239,5 +278,23 @@ mod tests {
         assert!(audit_dataset(&reversed)
             .unwrap_err()
             .contains("liked > passed"));
+    }
+
+    #[test]
+    fn rejects_v2_pairs_across_project_contexts() {
+        let crossed = parse(
+            r#"{
+              "schema":"neologism-taste-v2",
+              "examples":[
+                {"label":"liked","result":{"name":"Noma","style":"big_tech","tasteContext":{"id":"project-a"},"syllables":2,"score_pronounce":90,"score_novelty":90,"score_memorability":90,"connotations":[]}},
+                {"label":"passed","result":{"name":"Bobbyn","style":"big_tech","tasteContext":{"id":"project-b"},"syllables":2,"score_pronounce":80,"score_novelty":80,"score_memorability":80,"connotations":[]}}
+              ],
+              "comparisons":[[0,1]]
+            }"#,
+        );
+
+        assert!(audit_dataset(&crossed)
+            .unwrap_err()
+            .contains("crosses project contexts"));
     }
 }

@@ -100,7 +100,7 @@ try {
   check(await page.locator('.settings-group').count() === 1, 'enabling AI reveals provider details')
   await page.locator('.settings-toggle input').click()
   const dataMeta = (await page.locator('.settings-data-meta').textContent()) ?? ''
-  check(/3 liked.*2 passed.*6 preference pairs/.test(dataMeta), 'Settings summarizes pairwise taste data')
+  check(/3 liked.*2 passed.*6 same-project pairs/.test(dataMeta), 'Settings summarizes contextual pairwise taste data')
   await page.screenshot({ path: join(SHOTS, 'taste-export-settings.png'), fullPage: true })
   const downloadPromise = page.waitForEvent('download')
   await page.click('.taste-export-btn')
@@ -108,12 +108,12 @@ try {
   check(download.suggestedFilename() === 'neologism-taste.json', 'taste export uses a stable filename')
   const exported = JSON.parse(await readDownload(download))
   check(
-    exported.schema === 'neologism-taste-v1' && exported.comparisons.length === 6,
+    exported.schema === 'neologism-taste-v2' && exported.comparisons.length === 6,
     'downloaded taste data carries the versioned pairwise dataset',
   )
   check(
-    exported.examples.every((example) => example.result.sourceMode),
-    'downloaded feedback retains source modes without AI settings',
+    exported.examples.every((example) => example.result.sourceMode && example.result.tasteContext),
+    'downloaded feedback retains source modes and project context without AI settings',
   )
 
   await context.close()

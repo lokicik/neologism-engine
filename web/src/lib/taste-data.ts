@@ -1,6 +1,6 @@
 import type { NameResult } from './engine'
 
-export const TASTE_DATA_SCHEMA = 'neologism-taste-v1'
+export const TASTE_DATA_SCHEMA = 'neologism-taste-v2'
 
 export interface TasteExample {
   label: 'liked' | 'passed'
@@ -14,6 +14,7 @@ export interface TasteDataset {
     liked: number
     passed: number
     comparisons: number
+    contexts: number
   }
   examples: TasteExample[]
   // Indices into examples: [preferred, rejected]. Keeping references compact
@@ -31,9 +32,23 @@ export function buildTasteDataset(
     ...rejected.map((result) => ({ label: 'passed' as const, result })),
   ]
   const comparisons: Array<[number, number]> = []
+  const contextIds = new Set<string>()
+  let hasLegacyContext = false
+  for (const { result } of examples) {
+    if (result.tasteContext) contextIds.add(result.tasteContext.id)
+    else hasLegacyContext = true
+  }
   for (let liked = 0; liked < favorites.length; liked++) {
     for (let passed = 0; passed < rejected.length; passed++) {
-      comparisons.push([liked, favorites.length + passed])
+      const likedContext = favorites[liked].tasteContext?.id
+      const passedContext = rejected[passed].tasteContext?.id
+      // New feedback is comparable only inside one project context. Historical
+      // records predate context tagging, so preserve them together in one
+      // explicit legacy bucket without mixing them into scoped projects.
+      const sameContext = likedContext && passedContext
+        ? likedContext === passedContext
+        : !likedContext && !passedContext
+      if (sameContext) comparisons.push([liked, favorites.length + passed])
     }
   }
   return {
@@ -43,6 +58,7 @@ export function buildTasteDataset(
       liked: favorites.length,
       passed: rejected.length,
       comparisons: comparisons.length,
+      contexts: contextIds.size + Number(hasLegacyContext),
     },
     examples,
     comparisons,

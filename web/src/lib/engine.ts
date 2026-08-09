@@ -1,8 +1,15 @@
 import init, { generate_names, batch_metrics, explain_name, extract_keywords } from '../wasm/neologism_wasm.js'
 import { autoModeCounts, mergeAutoBatches } from './auto'
+import { tasteContextForConfig } from './taste-context'
 
 export type Style = 'big_tech' | 'sci_fi' | 'fantasy'
 export type NamingMode = 'brandable' | 'realword' | 'respell' | 'compound'
+
+export interface TasteContext {
+  id: string
+  description?: string
+  roots: string[]
+}
 
 export interface Config {
   style: Style
@@ -25,6 +32,7 @@ export interface NameResult {
   name: string
   style: Style
   sourceMode?: NamingMode
+  tasteContext?: TasteContext
   syllables: number
   score_pronounce: number
   score_novelty: number
@@ -47,7 +55,9 @@ export async function generateNames(cfg: Config): Promise<NameResult[]> {
   const parsed = JSON.parse(json) as NameResult[] | { error: string }
   if ('error' in parsed) throw new Error((parsed as { error: string }).error)
   const results = parsed as NameResult[]
-  if (cfg.style !== 'big_tech') return results
+  const tasteContext = tasteContextForConfig(cfg)
+  const contextual = results.map((result) => ({ ...result, tasteContext }))
+  if (cfg.style !== 'big_tech') return contextual
 
   // The WASM result intentionally stays engine-generic; the web layer knows
   // which big-tech strategy produced each sub-batch and preserves that source
@@ -59,7 +69,7 @@ export async function generateNames(cfg: Config): Promise<NameResult[]> {
       : cfg.compound
         ? 'compound'
         : 'brandable'
-  return results.map((result) => ({ ...result, sourceMode }))
+  return contextual.map((result) => ({ ...result, sourceMode }))
 }
 
 // Auto mode (web-only meta-mode): blend the four engine modes into one batch.

@@ -883,6 +883,37 @@ suite count to 98. No production generation or ranking path changed.
 
 ---
 
+## Phase 68 — Scope taste evidence to its project context
+
+**Bottleneck.** The v1 exporter crossed every liked name with every passed name. That is a
+valid preference only when both names answered the same naming brief; comparing a liked dev
+tool name with a passed fantasy-game name would inject false supervision into the scorer we
+eventually want to tune.
+
+**What changed.** Every newly generated result now carries a stable taste context derived
+from style, normalized project description, and normalized seed roots. Batch size,
+randomness, output constraints, and Big Tech source mode are deliberately excluded so names
+for one project remain comparable while the user explores generation controls. The
+`neologism-taste-v2` exporter creates `liked > passed` pairs only when their context IDs
+match. Historical records without context remain usable inside a separate legacy-unscoped
+bucket, but never mix with scoped feedback. Settings reports the real same-project pair
+count and tells the user that the exported data includes each name's project brief.
+
+The Rust audit accepts both historical v1 and current v2 files. For v2 it rejects any pair
+that crosses context IDs, reports the number of contexts represented, and keeps the existing
+schema, direction, and score-agreement checks.
+
+**Verification.** Twelve deterministic TypeScript checks cover v2 schema, same-context
+pairing, context counts, legacy isolation, credential exclusion, and context normalization
+across case, whitespace, root order, duplicate roots, and irrelevant generation controls.
+Three focused Rust tests cover score agreement, direction/schema errors, and cross-context
+rejection. The TypeScript/Vite production build is clean. Eighteen Chromium checks validate
+real WASM feedback, reload persistence, the Settings count, downloaded v2 JSON, and preserved
+source/context metadata; visual review confirms the compact Settings layout still fits at
+1440px.
+
+---
+
 ## Bottom line
 
 Big-tech is the strongest style, tuned through Phase 25 and extended since:

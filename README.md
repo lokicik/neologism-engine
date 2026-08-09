@@ -87,10 +87,11 @@ composite agrees with real `liked > passed` choices:
 cargo run -p neologism-core --release --example taste_audit -- path/to/neologism-taste.json
 ```
 
-The report includes pairwise agreement, labels by source mode, and the worst score-vs-human
-disagreements. Pairs share examples, so treat the result as descriptive until the export has
-at least 10 liked and 10 passed names. It is an evidence gate for scorer experiments, not a
-production model.
+The report includes pairwise agreement, project-context counts, labels by source mode, and
+the worst score-vs-human disagreements. It accepts historical v1 exports and validates that
+v2 comparisons stay within one project context. Pairs share examples, so treat the result as
+descriptive until the export has at least 10 liked and 10 passed names. It is an evidence gate
+for scorer experiments, not a production model.
 
 ### Production build
 
@@ -107,7 +108,7 @@ npm run build        # output in web/dist/
 - **Controls** — count, min/max length, randomness (temperature), seed words, product description, starts-with / contains constraints
 - **Compound mode** — big-tech adjective+noun names (SwiftForge, NobleFrost) alongside blends
 - **Local taste learning** — star or pass on 3+ names; future batches are automatically re-ranked toward liked structures and naming modes or away from repeatedly rejected ones. Feedback stays in `localStorage`.
-- **Taste data export** — Settings turns explicit likes and passes into a versioned, pairwise-ready JSON dataset without exporting AI credentials or browsing history.
+- **Taste data export** — Settings turns explicit likes and passes into a versioned JSON dataset, preserving each name's project brief while forming preference pairs only within the same project context. It never exports AI credentials or recent-name history.
 - **Brief-aware Auto** — project descriptions lead with semantic Brandable names; an empty brief leans further on the curated real-word pool instead of returning a page of opaque coinages.
 - **Score bars** — pronounceability, novelty, and memorability per generated name
 - **Favorites** — star names; persisted across reloads via `localStorage`
