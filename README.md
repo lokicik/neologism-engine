@@ -74,9 +74,23 @@ App runs at **http://localhost:5173/**.
 cargo test -p neologism-core
 ```
 
-28 unit tests covering Markov determinism, phonotactic filters, blend logic, score ranges, phoneme affinity, sonority sequencing, word-likeness, and keyword extraction.
+98 unit tests covering Markov determinism, phonotactic filters, blend logic, score ranges, phoneme affinity, sonority sequencing, word-likeness, keyword extraction, semantic ranking, and exclusion behavior.
 
 > Quick quality check: `cargo run -p neologism-core --example sample` prints a batch of names for every style and variant.
+
+### Audit exported taste data
+
+After exporting **Local taste data** from Settings, measure how often the current offline
+composite agrees with real `liked > passed` choices:
+
+```sh
+cargo run -p neologism-core --release --example taste_audit -- path/to/neologism-taste.json
+```
+
+The report includes pairwise agreement, labels by source mode, and the worst score-vs-human
+disagreements. Pairs share examples, so treat the result as descriptive until the export has
+at least 10 liked and 10 passed names. It is an evidence gate for scorer experiments, not a
+production model.
 
 ### Production build
 

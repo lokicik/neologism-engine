@@ -862,6 +862,27 @@ the default modal fits without scrolling and the export card matches the establi
 
 ---
 
+## Phase 67 — Audit the current scorer against human preference pairs
+
+**Bottleneck.** A pairwise export is only potential evidence until a repeatable tool can say
+whether the current offline score agrees with it. Training another model first would repeat
+the Phase 27 mistake: optimize before proving that the labels expose a useful gap.
+
+**What changed.** `core/examples/taste_audit.rs` consumes one or more
+`neologism-taste-v1` exports and validates schema, indices, and `liked > passed` direction.
+It measures the existing 40/30/30 pronounceability/memorability/novelty composite on every
+human pair, reports wins/ties/losses and agreement, groups labels by Phase 65 source mode,
+and prints the ten worst score-vs-human disagreements. Multiple files aggregate for future
+cross-user audits. A small-sample warning stays visible until there are at least ten unique
+liked and ten passed examples, since cross-product pairs are not independent observations.
+
+**Verification.** Two focused Rust tests prove one agreeing and one disagreeing pair,
+source-mode counts, wrong-schema rejection, and reversed-pair rejection. The example builds
+as a real CLI target; the README documents the release command and updates the verified core
+suite count to 98. No production generation or ranking path changed.
+
+---
+
 ## Bottom line
 
 Big-tech is the strongest style, tuned through Phase 25 and extended since:
