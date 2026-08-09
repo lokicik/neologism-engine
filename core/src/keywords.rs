@@ -568,7 +568,8 @@ fn is_contextually_suppressed(word: &str, keywords: &[String]) -> bool {
 fn is_brand_context_only(word: &str) -> bool {
     matches!(
         word,
-        "automatic"
+        "assistant"
+            | "automatic"
             | "collaborative"
             | "companion"
             | "edit"
@@ -579,6 +580,7 @@ fn is_brand_context_only(word: &str) -> bool {
             | "modern"
             | "offline"
             | "online"
+            | "powered"
             | "reminder"
             | "seller"
             | "shared"
@@ -1167,6 +1169,23 @@ pub fn guided_pair_root_groups(keywords: &[String], limit: usize) -> Vec<Vec<Str
         return bounded_guided_groups(GROUPS, limit);
     }
 
+    let artificial_intelligence = keywords
+        .iter()
+        .any(|keyword| matches!(keyword.as_str(), "ai" | "model" | "agent"));
+    let workflow_automation = keywords
+        .iter()
+        .any(|keyword| matches!(keyword.as_str(), "automation" | "workflow"));
+    if artificial_intelligence && workflow_automation {
+        // The broad AI roots produce readable suffix forms but become too long
+        // when joined to a workflow concept. These short roles keep both ideas
+        // visible in names such as `CogLoop` without changing ordinary Auto.
+        const GROUPS: &[&[&str]] = &[
+            &["cog", "aid"],
+            &["loop", "run", "task", "flow"],
+        ];
+        return bounded_guided_groups(GROUPS, limit);
+    }
+
     let mut groups = brand_root_groups(keywords, limit);
     let used = groups.iter().flatten().count();
     if used >= limit {
@@ -1572,6 +1591,28 @@ mod tests {
         assert!(guided.iter().flatten().any(|root| root == "tab"));
         assert!(guided.iter().flatten().any(|root| root == "mate"));
         assert!(guided.iter().flatten().count() <= 16, "{guided:?}");
+    }
+
+    #[test]
+    fn guided_ai_workflows_use_short_roles_only_in_their_lane() {
+        let keywords = extract_keywords("an AI assistant for workflow automation", 6);
+        let ordinary = brand_root_groups(&keywords, 16);
+        let guided = guided_pair_root_groups(&keywords, 16);
+        assert!(!ordinary.iter().flatten().any(|root| root == "cog"));
+        assert!(!ordinary.iter().flatten().any(|root| root == "loop"));
+        assert!(guided.iter().flatten().any(|root| root == "cog"));
+        assert!(guided.iter().flatten().any(|root| root == "loop"));
+        assert!(guided.iter().flatten().count() <= 16, "{guided:?}");
+    }
+
+    #[test]
+    fn known_ai_domain_precedes_incidental_assistant_context() {
+        let keywords = extract_keywords("workflow automation assistant powered by AI", 6);
+        let groups = brand_root_groups(&keywords, 16);
+        assert!(groups[0].iter().any(|root| root == "synth"), "{groups:?}");
+        assert!(!groups.iter().flatten().any(|root| root == "assistant"));
+        assert!(!groups.iter().flatten().any(|root| root == "powered"));
+        assert!(groups.iter().flatten().any(|root| root == "workflow"));
     }
 
     #[test]

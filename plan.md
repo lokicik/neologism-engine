@@ -2946,6 +2946,48 @@ No LLM, network call, broad scorer adjustment, or ordinary generation-pool expan
 
 ---
 
+## Phase 120 — Add a real holdout and close AI-workflow starvation
+
+**Independent matrix.** The fixed 90-page audit had no unqualified gaps left, so further rules
+against those same fixtures would risk overfitting. A new production-path holdout now runs 35
+different consumer and developer briefs over independent seeds 13, 67, and 313: **105 pages**.
+Four additional AI-workflow phrasings add twelve wording-order stress pages without changing the
+base aggregate. The reusable `keyword_probe` example exposes extracted keywords, ordinary groups,
+isolated pair groups, and Respell sources when a page needs diagnosis.
+
+**Observed gap and bounded fix.** Before a new rule, the three base AI-workflow pages led with
+`Synthora`, `Agentio`, or `Synthify`; their metaphor/pair retry returned no qualifying alternative.
+The isolated `concept_pair` lane now maps an explicit AI/model/agent plus workflow/automation brief
+to two short role groups: `cog`/`aid` and `loop`/`run`/`task`/`flow`. `CogLoop 89.5/c2` replaces an
+unused or mechanical suffix form and earns the lead through the existing quality, coverage,
+prefix-family, and mean-similarity guards. Ordinary Auto and non-automation AI briefs do not receive
+these roots; a strong existing non-suffix lead or earned Respell still keeps ownership.
+
+**Prompt-order starvation.** The wording `workflow automation assistant powered by AI` exposed a
+separate zero-result bug. Because `assistant` was the first ordinary group, every compact suffix or
+join exceeded the length/phonotactic gates before the recognized AI group could contribute. The
+words `assistant` and `powered` are now treated as context-only only when a recognized semantic
+anchor exists. Unknown personal-assistant briefs still keep their literal words. The formerly empty
+prompt now yields a full page and leads with `CogLoop` on all three independent seeds.
+
+**Measured result.** On the unchanged 105-page base, average structural quality improves
+**83.91 -> 83.95**, mean lead quality **85.61 -> 85.91**, mean lead coverage **1.15 -> 1.18**,
+near-duplicate pairs **85 -> 80**, mean pair similarity **0.204 -> 0.202**, direct suffix leaders
+**27 -> 24**, and guided leaders **37 -> 40**; no visible name is below 75. All twelve extra wording
+pages contain ten names. Ten of the fifteen total AI-workflow focus pages lead with `CogLoop`; the
+others already have a non-suffix lead or an earned Respell, so none leaves an unqualified suffix-only
+first impression.
+
+**Verification.** The core suite is **144/144**. The original 90-page cold audit is byte-for-byte
+stable at **83.21** average quality, **42** near pairs, **0.199** similarity, **85.43** lead quality,
+**1.26** lead coverage, and **8** suffix leaders. The 85-page Auto audit, fifteen-page namespace
+audit, 800-name developer-domain browser audit, 2,400-name cross-domain audit, prompt UI, WASM,
+TypeScript, and production Vite bundle all pass. The cross-domain run keeps 2,400/2,400 names,
+zero short pages, zero unexplained collisions, and an 83.09 average composite. No LLM, network
+call, broad scorer adjustment, or ordinary role-palette expansion was added.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
@@ -2964,6 +3006,8 @@ coverage or diversity. On an already-proven retry page, one unused 85+ Brandable
 repair pool may make the same guarded inner-card upgrade without another generation call.
 The remaining shared-expense and workout-planner retries now use small concrete role palettes,
 so the last gap can produce names such as `PayMate` and `RepLoop` without changing ordinary Auto.
+AI workflow retries use the same isolated pattern for `CogLoop`, and recognized semantic domains
+can no longer starve merely because incidental words such as `assistant` appear first.
 Compound is now a genuinely brief-aware explicit alternative rather than a random adjective
 showcase. Focused first pages stay narrow; recognized concepts open a restrained continuation
 palette only when the user asks for more, preserving 100-name session capacity without generic
