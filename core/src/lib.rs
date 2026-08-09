@@ -625,6 +625,12 @@ fn generate_bigtech(
     } else {
         HashSet::new()
     };
+    // Try every prompt-derived styling before the generic pool can fill the
+    // small candidate budget. This matters most for Auto's one-name Respell
+    // accent: the old 50/50 random sampling often returned an unrelated word
+    // even when a usable keyword respelling existed.
+    let mut pending_kw_respells: Vec<String> = kw_respells.iter().cloned().collect();
+    pending_kw_respells.sort_unstable();
 
     let apply_gate = !has_roots && !cfg.compound && !respell_mode && !realword_mode;
     let ll_floor = if apply_gate {
@@ -640,19 +646,22 @@ fn generate_bigtech(
 
         let name = if respell_mode {
             // One-transform respelling of a curated real word (lyft, tumblr).
-            // Phase 48: with a description, half the attempts respell its
-            // keyword stems (journal → journl) so the prompt shows through;
-            // the curated pool fills the rest (keywords yield only a few
-            // respellings each, so alone they'd starve the batch).
-            let w = if has_roots && rand::Rng::gen::<f64>(rng) < 0.5 {
-                all_roots[rand::Rng::gen_range(rng, 0..all_roots.len())]
+            // Prompt-derived options are attempted first; the curated pool
+            // fills the rest when those few options are exhausted or invalid.
+            if !pending_kw_respells.is_empty() {
+                let index = rand::Rng::gen_range(rng, 0..pending_kw_respells.len());
+                pending_kw_respells.swap_remove(index)
             } else {
-                st.realword_pool[rand::Rng::gen_range(rng, 0..st.realword_pool.len())]
-            };
-            let Some(r) = blend::respell(rng, w) else {
-                continue;
-            };
-            r
+                let w = if has_roots && rand::Rng::gen::<f64>(rng) < 0.5 {
+                    all_roots[rand::Rng::gen_range(rng, 0..all_roots.len())]
+                } else {
+                    st.realword_pool[rand::Rng::gen_range(rng, 0..st.realword_pool.len())]
+                };
+                let Some(r) = blend::respell(rng, w) else {
+                    continue;
+                };
+                r
+            }
         } else if realword_mode {
             // Curated real word, emitted verbatim (Apple/Notion-style).
             // Deliberately prompt-independent — the pool is curated, and faking
@@ -1734,6 +1743,39 @@ mod tests {
             keyword_respells,
             results.iter().map(|r| &r.name).collect::<Vec<_>>()
         );
+    }
+
+    #[test]
+    fn single_viable_respell_accent_stays_tied_to_the_description() {
+        let prompts = [
+            "a developer tool that generates names for packages CLIs libraries and projects",
+            "an app for splitting expenses with friends",
+            "a marketplace for vintage keyboards",
+        ];
+
+        for (index, description) in prompts.iter().enumerate() {
+            let mut c = cfg(Style::BigTech);
+            c.variant = Some("respell".to_string());
+            c.description = Some((*description).to_string());
+            c.count = 1;
+            c.seed = Some(0xA076_1D64_78BD_642Fu64.wrapping_mul(index as u64 + 1));
+            let expected: HashSet<String> = keywords::extract_keywords(description, 6)
+                .iter()
+                .flat_map(|keyword| blend::respell_options(keyword))
+                .collect();
+            let results = generate(&c);
+            assert_eq!(results.len(), 1, "wrong count for {description}");
+            assert_eq!(
+                results[0].name,
+                generate(&c)[0].name,
+                "prompted Respell lost seeded determinism"
+            );
+            assert!(
+                expected.contains(&results[0].name.to_lowercase()),
+                "{} is unrelated to {description}; expected one of {expected:?}",
+                results[0].name
+            );
+        }
     }
 
     #[test]

@@ -1,5 +1,5 @@
 import init, { generate_names, batch_metrics, explain_name, extract_keywords } from '../wasm/neologism_wasm.js'
-import { autoModeCounts, mergeAutoBatches } from './auto'
+import { autoModeCounts, isPromptLinkedRespell, mergeAutoBatches } from './auto'
 import { tasteContextForConfig } from './taste-context'
 
 export type Style = 'big_tech' | 'sci_fi' | 'fantasy'
@@ -72,23 +72,39 @@ export async function generateNames(cfg: Config): Promise<NameResult[]> {
   return contextual.map((result) => ({ ...result, sourceMode }))
 }
 
-// Auto mode (web-only meta-mode): blend the four engine modes into one batch.
-// The engine never sees variant:'auto' — we fan out four real sub-calls
-// (Brandable-led with a brief, more real-word-led without one), all sharing the
-// exclude window, then dedupe by name and distribute the three accent modes
-// through the batch. Shared by Create (Auto) and the AI Studio pool.
+// Auto mode (web-only meta-mode): choose a brief-aware mode mix. The engine
+// never sees variant:'auto'. A guided batch uses Brandable plus at most one
+// prompt-derived Respell; an empty brief keeps the broad four-mode sampler.
+// Shared by Create (Auto) and the AI Studio pool.
 export async function generateBatch(cfg: Config): Promise<NameResult[]> {
   if (cfg.variant !== 'auto') return generateNames(cfg)
   const total = cfg.count ?? 10
   const hasBrief = Boolean(cfg.description?.trim() || cfg.roots?.some((root) => root.trim()))
   const { brandable, realword, respell, compound } = autoModeCounts(total, hasBrief)
+  if (hasBrief) {
+    const terms = [
+      ...(cfg.description?.trim() ? await extractKeywords(cfg.description) : []),
+      ...(cfg.roots ?? []),
+    ]
+    const [brandableBatch, respellBatch] = await Promise.all([
+      generateNames({ ...cfg, variant: undefined, compound: false, count: total }),
+      respell > 0
+        ? generateNames({ ...cfg, variant: 'respell', compound: false, count: respell })
+        : Promise.resolve([]),
+    ])
+    const linkedRespells = respellBatch
+      .filter((result) => isPromptLinkedRespell(result.name, terms))
+      .slice(0, respell)
+    return mergeAutoBatches([brandableBatch, [], linkedRespells, []], total)
+  }
+
   const subs: Config[] = [
     { ...cfg, variant: undefined, compound: false, count: brandable },
     { ...cfg, variant: 'realword', compound: false, count: realword },
     { ...cfg, variant: 'respell', compound: false, count: respell },
     { ...cfg, variant: undefined, compound: true, count: compound },
   ]
-  const batches = await Promise.all(subs.map((c) => generateNames(c)))
+  const batches = await Promise.all(subs.map((c) => (c.count ? generateNames(c) : Promise.resolve([]))))
   // Round-robin only the accent modes, then place them at even intervals among
   // Brandable results. The old one-from-each round robin made three of the first
   // four cards accent modes even though Brandable was the quality lead.

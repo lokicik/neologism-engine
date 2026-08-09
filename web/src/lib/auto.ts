@@ -7,21 +7,59 @@ export interface AutoModeCounts {
   compound: number
 }
 
-// With a product brief, semantic Brandable names are the quality lead. Without
-// one, that same generator has no meaning to anchor it, so Auto leans more on
-// the curated real-word pool instead of filling the first page with opaque
-// coinages. Explicit mode choices are unaffected.
+// With a product brief, semantic Brandable names are the quality lead and a
+// prompt-derived Respell may earn one accent slot. Prompt-independent Real-word
+// and semantically uneven Compound names remain explicit choices instead of
+// being forced into the first page. Without a brief, Auto keeps the broad mix.
 export function autoModeCounts(total: number, hasBrief: boolean): AutoModeCounts {
   const count = Math.max(0, Math.floor(total))
   if (count < 4) {
     return { brandable: count, realword: 0, respell: 0, compound: 0 }
   }
 
-  const realword = Math.max(1, Math.floor(count * (hasBrief ? 0.1 : 0.3)))
+  if (hasBrief) {
+    const respell = Math.max(1, Math.floor(count * 0.1))
+    return { brandable: count - respell, realword: 0, respell, compound: 0 }
+  }
+
+  const realword = Math.max(1, Math.floor(count * 0.3))
   const respell = Math.max(1, Math.floor(count * 0.1))
   const compound = Math.max(1, Math.floor(count * 0.1))
   const brandable = Math.max(1, count - realword - respell - compound)
   return { brandable, realword, respell, compound }
+}
+
+function letters(value: string): string {
+  return value.toLowerCase().replace(/[^a-z]/g, '')
+}
+
+// Respell uses one deletion or substitution (Lyft/Tumblr-style). Keeping the
+// same one-edit contract here prevents Auto from admitting a high-scoring but
+// unrelated generic respelling when the prompt has no viable transformation.
+export function isPromptLinkedRespell(name: string, terms: string[]): boolean {
+  const candidate = letters(name)
+  return terms.some((term) => {
+    const source = letters(term)
+    if (source.length < 4 || Math.abs(candidate.length - source.length) > 1) return false
+    let edits = 0
+    let i = 0
+    let j = 0
+    while (i < candidate.length && j < source.length) {
+      if (candidate[i] === source[j]) {
+        i++
+        j++
+        continue
+      }
+      if (++edits > 1) return false
+      if (candidate.length < source.length) j++
+      else if (candidate.length > source.length) i++
+      else {
+        i++
+        j++
+      }
+    }
+    return edits + Number(i < candidate.length || j < source.length) === 1
+  })
 }
 
 // Distribute secondary naming modes through the stronger Brandable stream while

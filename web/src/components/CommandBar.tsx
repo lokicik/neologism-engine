@@ -16,7 +16,7 @@ interface Props {
 type Mode = 'auto' | 'brandable' | 'realword' | 'respell' | 'compound'
 
 const MODES: { value: Mode; label: string; example: string; desc: string }[] = [
-  { value: 'auto', label: 'Auto', example: 'a mix', desc: 'A blend of every style — the default' },
+  { value: 'auto', label: 'Auto', example: 'best fit', desc: 'Chooses a brief-aware mix — the default' },
   { value: 'brandable', label: 'Brandable', example: 'Spotify', desc: 'Invented coinages — Spotify, Vercel' },
   { value: 'realword', label: 'Real words', example: 'Notion', desc: 'Evocative dictionary words — Notion, Linear (ignores your description)' },
   { value: 'respell', label: 'Respelled', example: 'Lyft', desc: 'Twisted real words — Lyft, Tumblr' },

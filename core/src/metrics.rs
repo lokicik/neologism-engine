@@ -47,6 +47,9 @@ pub fn diversity(results: &[NameResult]) -> f64 {
 /// to those already chosen, reducing near-duplicate clustering. `lambda` (0..1)
 /// weights quality vs. diversity (0.7 = mostly quality, some spread).
 pub fn mmr_select(items: &[NameResult], count: usize, lambda: f64) -> Vec<NameResult> {
+    if count == 0 {
+        return Vec::new();
+    }
     if items.len() <= count {
         return items.to_vec();
     }
@@ -111,6 +114,9 @@ pub(crate) fn mmr_select_capped_by<F>(
 where
     F: Fn(&NameResult) -> f64,
 {
+    if count == 0 {
+        return Vec::new();
+    }
     if items.len() <= count {
         return items.to_vec();
     }
@@ -307,6 +313,13 @@ mod tests {
         assert_eq!(picked.len(), 3);
         let plain: Vec<NameResult> = pool.iter().take(3).cloned().collect();
         assert!(diversity(&picked) > diversity(&plain), "mmr {} vs plain {}", diversity(&picked), diversity(&plain));
+    }
+
+    #[test]
+    fn zero_count_selects_nothing() {
+        let pool = vec![r("vrax", 90, 90, 90), r("zephyra", 85, 85, 85)];
+        assert!(mmr_select(&pool, 0, 0.7).is_empty());
+        assert!(mmr_select_capped(&pool, 0, 0.7, 2).is_empty());
     }
 
     #[test]

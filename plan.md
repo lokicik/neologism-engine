@@ -956,13 +956,51 @@ recent-history coverage, and the visible keyword trace.
 
 ---
 
+## Phase 70 — Make Auto accents earn their place
+
+**Bottleneck.** Auto treated mode representation as a quota rather than a quality decision.
+Across six representative briefs and five fixed seeds, the 30 first pages contained 105
+non-Brandable cards, but only 37 were visibly tied to their prompt. Real-word is explicitly
+prompt-independent, while small Respell and Compound calls often surfaced unrelated names such
+as `Bobbyn`, `GladAwl`, `FineClink`, and `VitalWatt`. A separate count-contract bug made the
+problem worse: when a prompted Respell already filled `count=1`, the zero-count MMR remainder
+still seeded one extra result.
+
+**Rejected alternatives.** Keeping the fixed 70/10/10/10 mix preserves mode exposure at the
+expense of the product's actual job. Globally sorting all four modes by the existing composite
+is worse: structurally fluent but irrelevant `Bobbyn` and `GladAwl` scored 95 and 94, above many
+useful semantic names. The offline score does not contain prompt meaning, so it cannot be used
+as a cross-mode relevance judge.
+
+**What changed.** Both MMR selectors now return an empty result for `count=0`, restoring the
+generator's exact count contract. Prompt-derived Respell options are attempted before the
+generic curated pool, with stable ordering before seeded sampling. Guided Auto now asks
+Brandable for a full fallback page and admits at most one Respell only when it is exactly one
+edit from an extracted brief term or supplied root. Prompt-independent Real-word and
+semantically uneven Compound remain available as explicit modes, but they are no longer forced
+into a guided first page. Empty-brief Auto retains its 50/30/10/10 exploratory mix.
+
+**Measured result.** After the change, the same 30-page audit returns ten names on every page
+and 15/15 non-Brandable accents are prompt-linked; briefs without a viable Respell simply get
+ten Brandable names. The previous run had 68 unrelated accents among 300 first-page cards.
+The audit is now a browser regression rather than a one-off printout.
+
+**Verification.** The core suite is 103/103, including zero-count MMR and single prompted
+Respell regressions. The deterministic Auto harness covers the 9/0/1/0 guided policy, exact
+one-edit gate, unchanged empty-brief mix, scheduling, and deduplication. WASM and the production
+web bundle build cleanly; Chromium verifies the 30-page quality audit plus the existing
+long-session and local-taste flows.
+
+---
+
 ## Bottom line
 
-Big-tech Auto remains the product's strongest path. The first page now balances semantic
-Brandable candidates with Real-word, Respell, and Compound accents; long prompted sessions no
-longer collapse into repeated suffix families or stop before 100 names. Local taste feedback
-can already adjust structural and mode preferences, while AI Studio remains an optional,
-separate batch judge rather than a hidden dependency of Create.
+Big-tech Auto remains the product's strongest path. A guided first page is now semantic
+Brandable by default and only admits a Respell accent that visibly comes from the brief; the
+broader modes remain explicit choices and still form the exploratory mix when no brief exists.
+Long prompted sessions no longer collapse into repeated suffix families or stop before 100
+names. Local taste feedback can already adjust structural and mode preferences, while AI
+Studio remains an optional, separate batch judge rather than a hidden dependency of Create.
 
 The next scorer change is evidence-gated: collect at least ten real likes and ten passes in
 matching project contexts, audit the current composite, and require held-out pairwise

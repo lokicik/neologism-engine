@@ -1,5 +1,5 @@
 // Deterministic smoke test for Auto's brief-aware presentation schedule.
-import { autoModeCounts, mergeAutoBatches } from '../src/lib/auto.ts'
+import { autoModeCounts, isPromptLinkedRespell, mergeAutoBatches } from '../src/lib/auto.ts'
 import type { NameResult } from '../src/lib/engine.ts'
 
 function result(name: string): NameResult {
@@ -26,7 +26,7 @@ const merged = mergeAutoBatches(
 )
 
 check(merged.length === 10, 'Auto keeps the requested batch size')
-check(merged.filter((item) => item.name.startsWith('Brand')).length === 7, 'Auto keeps seven Brandable names')
+check(merged.filter((item) => item.name.startsWith('Brand')).length === 7, 'the merge keeps all supplied primary names')
 check(merged[0].name === 'Brand0' && merged[1].name === 'Brand1', 'Auto opens with two Brandable names')
 check(merged.slice(2).some((item) => item.name === 'Real'), 'accent modes remain represented')
 
@@ -35,8 +35,16 @@ check(deduped.length === 1, 'Auto removes case-insensitive cross-mode duplicates
 
 const guided = autoModeCounts(10, true)
 check(
-  guided.brandable === 7 && guided.realword === 1 && guided.respell === 1 && guided.compound === 1,
-  'a product brief keeps the 70/10/10/10 semantic mix',
+  guided.brandable === 9 && guided.realword === 0 && guided.respell === 1 && guided.compound === 0,
+  'a product brief reserves one earned Respell slot without forcing unrelated modes',
+)
+
+check(
+  isPromptLinkedRespell('Developr', ['developer', 'package'])
+    && isPromptLinkedRespell('Vyntage', ['keyboard', 'vintage'])
+    && !isPromptLinkedRespell('Developer', ['developer'])
+    && !isPromptLinkedRespell('Bobbyn', ['journal', 'mood']),
+  'the Auto accent gate accepts one-edit prompt stylings only',
 )
 
 const generic = autoModeCounts(10, false)
