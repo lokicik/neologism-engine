@@ -160,6 +160,14 @@ const CONCEPT_METAPHORS: &[&str] = &[
     "signal", "hive", "smith", "harbor", "grove", "spring", "frame", "glow", "flux", "loom",
     "muse", "atlas",
 ];
+// Smaller first-page palette for Auto's internal Brandable accent. Unlike the
+// broader continuation lane, every second half is intentionally neutral across
+// product domains and avoids delivery/filesystem words such as `path`.
+const GUIDED_METAPHORS: &[&str] = &[
+    "flow", "forge", "spark", "seed", "craft", "lab", "wave", "link", "pulse", "beam",
+    "prism", "lumen", "nova", "peak", "signal", "smith", "grove", "glow", "loom", "muse",
+    "flux", "atlas",
+];
 // ~19k common English words — used ONLY to filter big-tech output so the model
 // can't emit a plain real word as a "brand" (Guard, Telegraph, Content). Kept
 // separate from WORDS so novelty scoring and Sci-Fi/Fantasy stay unchanged.
@@ -586,11 +594,13 @@ fn generate_bigtech(
 
     // Phase 36 naming modes (big-tech reuses the previously unused `variant`
     // field): "respell" = Lyft/Tumblr-style one-transform respellings of real
-    // words; "realword" = curated real words verbatim (Apple/Notion-style).
+    // words; "realword" = curated real words verbatim (Apple/Notion-style);
+    // "metaphor" = an internal Auto pool of readable semantic root joins.
     // Anything else (or None) = the default brandable pipeline.
     let variant_lower = cfg.variant.as_deref().map(str::to_lowercase);
     let respell_mode = variant_lower.as_deref() == Some("respell");
     let realword_mode = variant_lower.as_deref() == Some("realword");
+    let metaphor_mode = variant_lower.as_deref() == Some("metaphor");
 
     // Priority for blend roots: description keywords > user-supplied roots > corpus.
     let raw_desc_keywords: Vec<String> = cfg
@@ -773,6 +783,13 @@ fn generate_bigtech(
                 continue;
             }
             compound(adj, noun)
+        } else if metaphor_mode && has_roots {
+            let root = all_roots[rand::Rng::gen_range(rng, 0..all_roots.len())];
+            let metaphor = GUIDED_METAPHORS[rand::Rng::gen_range(rng, 0..GUIDED_METAPHORS.len())];
+            let Some(joined) = metaphor_join(root, metaphor) else {
+                continue;
+            };
+            joined
         } else if has_roots {
             // Phase 48: weighted mix instead of pure root-blending. A single
             // keyword ("fitness") used to make blend_roots return None on
@@ -1750,6 +1767,35 @@ mod tests {
             Some("bumppulse".to_string())
         );
         assert_eq!(metaphor_join("mint", "mint"), None);
+    }
+
+    #[test]
+    fn guided_metaphor_mode_stays_brief_linked_and_uses_safe_endings() {
+        let description =
+            "an offline naming engine for developer projects that checks npm and crates.io";
+        let keywords = keywords::extract_keywords(description, 6);
+        let groups = keywords::brand_root_groups(&keywords, 16);
+        let mut c = cfg(Style::BigTech);
+        c.variant = Some("metaphor".to_string());
+        c.description = Some(description.to_string());
+        c.count = 8;
+        c.seed = Some(7);
+
+        let results = generate(&c);
+        assert_eq!(results.len(), 8);
+        for result in results {
+            let lower = result.name.to_lowercase();
+            assert!(
+                GUIDED_METAPHORS.iter().any(|ending| lower.ends_with(ending)),
+                "{} escaped the guided palette",
+                result.name
+            );
+            assert!(
+                concept_coverage(&lower, &groups) >= 1,
+                "{} lost the product brief",
+                result.name
+            );
+        }
     }
 
     #[test]

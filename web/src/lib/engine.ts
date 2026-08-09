@@ -41,6 +41,15 @@ export interface NameResult {
   connotations: string[]
 }
 
+const GUIDED_METAPHOR_POOL = 8
+const GUIDED_METAPHOR_QUALITY_FLOOR = 85
+
+const structuralQuality = (result: NameResult): number => (
+  result.score_pronounce * 0.4
+  + result.score_memorability * 0.3
+  + result.score_novelty * 0.3
+)
+
 let initialized = false
 
 async function ensureInit() {
@@ -105,7 +114,24 @@ export async function generateBatch(cfg: Config): Promise<NameResult[]> {
     const linkedRespells = respellBatch
       .filter((result) => isPromptLinkedRespell(result.name, terms))
       .slice(0, respell)
-    return mergeAutoBatches([brandableBatch, [], linkedRespells, []], total)
+    // Respell owns the single guided accent when it is genuinely derived from
+    // the brief. Otherwise let one strong semantic metaphor compete with the
+    // Brandable page instead of widening the main generator's whole first pool.
+    const metaphorAccent = total > 0 && linkedRespells.length === 0
+      ? (await generateNames({
+          ...cfg,
+          variant: 'metaphor',
+          compound: false,
+          count: GUIDED_METAPHOR_POOL,
+        }))
+          .filter((result) => (
+            (result.concept_coverage ?? 0) > 0
+            && structuralQuality(result) >= GUIDED_METAPHOR_QUALITY_FLOOR
+          ))
+          .sort((left, right) => structuralQuality(right) - structuralQuality(left))
+          .slice(0, 1)
+      : []
+    return mergeAutoBatches([brandableBatch, [], linkedRespells, metaphorAccent], total)
   }
 
   const subs: Config[] = [

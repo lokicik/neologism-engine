@@ -2372,10 +2372,66 @@ No LLM, network call, corpus addition, scorer retraining, or hidden name blackli
 
 ---
 
+## Phase 107 — Let cold Auto earn one non-template form
+
+**Bottleneck.** The developer-namespace pages still passed every structural gate while looking
+mechanical. Across the fifteen fixed pages, **99/150** names were direct `Lex/Nom/Mark/Mint` plus
+suffix forms and the rest were compact namespace joins; there was no third construction. The
+three brief groups exposed only **63** distinct names, with **85.30** mean structural quality and
+**0.173** within-page similarity. A numerically strong page could therefore still read as ten
+variations of the same naming template.
+
+**Rejected alternatives.** Opening the main first-page generator to a 15% general metaphor lane
+raised one five-seed union from 21 to 28 names, but dropped namespace coverage to **13/50** on one
+brief and structural quality to **84.39** on another. A 10% lane still produced `Markpath`, missed
+the namespace gate, and lowered two briefs below 85. Replacing `mark/mint` with `verb/onom` only
+moved the repetition wall: similarity reached **0.203** and quality fell as low as **84.15**;
+single-root variants also missed retained gates. A cold Compound fallback produced `PrimeMint`
+and `PrimeMark` while lowering one namespace group to **14/50**, so it was removed.
+
+**A/B boundary.** A separate internal Brandable pool proved safer than changing the main mix.
+Three candidates surfaced a strong alternative on 4/15 pages; five reached 8/15; the retained
+eight-candidate pool reached 9/15 while improving the aggregate quality/diversity balance. A
+twelve-candidate trial reached 12/15 but began converging on repeated `Nomnova` forms, worsened
+mean similarity from **0.168 to 0.171**, and lowered one brief below its baseline quality, so it
+was removed.
+
+**Retained correction.** When guided Auto has a brief but cannot earn a product-linked Respell,
+it asks the Rust engine for eight semantic root-plus-metaphor candidates from a restrained set of
+safe second halves. A candidate must visibly carry the brief, score at least **85**, and beat the
+other candidates before at most one can enter the page. Respell keeps first refusal, the new form
+remains Brandable rather than inventing another user-facing mode, and the normal cold repair plus
+local-taste selectors still make the final decision. No broad generator weight, scorer weight,
+network call, LLM, or final-name blacklist changed.
+
+**Measured result.** In the fifteen namespace pages, direct suffix forms fall **99 → 93**, nine
+quality-gated metaphor forms appear (`Keyflow`, `Tagwave`, `Keyflux`, `Nombeam`), namespace-root
+coverage rises **51 → 54**, and the three five-seed unions grow **63 → 69** names. Mean structural
+quality improves **85.30 → 85.62** and similarity **0.173 → 0.168**. Across all 90 cold Auto pages,
+repaired quality rises **82.85 → 83.02**, pages needing repair fall **42 → 38**, near-duplicate
+pairs fall **47 → 43**, and no selected name falls below 75.
+
+The 1,000-name personalized matrix also improves: quality **85.24 → 85.33**, measured reference
+affinity **-0.800 → -0.797**, direct suffix forms **614 → 610**, near pairs **203 → 198**, mean
+similarity **0.206 → 0.203**, fresh-session coverage **288 → 300**, and exact repeated retry pages
+**8 → 7**. All four rolling personalized sessions still reach 100 unique prompt-linked names;
+mean quality is **85.29** and tenth-page quality **84.69**.
+
+**Verification.** The new Rust invariant pins safe endings and brief coverage; the workspace suite
+is **139/139**. The strengthened namespace audit requires at least two non-template metaphor forms
+per brief alongside its existing semantic and structural gates. Chromium passes all 90 cold Auto
+pages, all 85 guided pages, the 1,000-name taste matrix, four 100-name personalized sessions, the
+real feedback/reference/export flow, and the 100-name brief UI. The 1,100/2,200-name morphology
+matrices, 2,400-name cross-domain audit, 800/800 developer Brandable matrix, 791/800 Compound
+matrix, WASM build, TypeScript, and production bundle are green.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
-Brandable by default and only admits a Respell accent that visibly comes from the brief; the
+Brandable by default and only admits a Respell accent that visibly comes from the brief; when no
+safe Respell exists, one quality-gated root-plus-metaphor Brandable may break the suffix wall. The
 broader modes remain explicit choices and still form the exploratory mix when no brief exists.
 Compound is now a genuinely brief-aware explicit alternative rather than a random adjective
 showcase. Focused first pages stay narrow; recognized concepts open a restrained continuation

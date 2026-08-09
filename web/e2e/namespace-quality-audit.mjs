@@ -16,6 +16,13 @@ const PROMPTS = [
 ]
 const SEEDS = [7, 42, 101, 2024, 9999]
 const NAMESPACE_MARKERS = ['scope', 'key', 'tag', 'alias', 'slug']
+const NAMING_ROOTS = ['lex', 'nym', 'nom', 'mark', 'mint']
+const NAMING_SUFFIXES = ['ify', 'ora', 'ion', 'era', 'io', 'ia', 'ix', 'el', 'en', 'on']
+const GUIDED_METAPHORS = [
+  'flow', 'forge', 'spark', 'seed', 'craft', 'lab', 'wave', 'link', 'pulse', 'beam',
+  'prism', 'lumen', 'nova', 'peak', 'signal', 'smith', 'grove', 'glow', 'loom', 'muse',
+  'flux', 'atlas',
+]
 const WRONG_CONTEXT = ['engine', 'offline', 'check', 'file', 'path', 'find', 'scan', 'seek']
 const VERBOSE = process.argv.includes('--verbose')
 
@@ -106,6 +113,12 @@ try {
     const all = row.pages.flat()
     const normalized = all.map((item) => item.name.toLowerCase().replace(/[^a-z]/g, ''))
     const markerHits = normalized.filter((name) => NAMESPACE_MARKERS.some((marker) => name.includes(marker))).length
+    const directSuffixHits = normalized.filter((name) => (
+      NAMING_ROOTS.some((root) => NAMING_SUFFIXES.some((suffix) => name === `${root}${suffix}`))
+    )).length
+    const guidedMetaphorHits = normalized.filter((name) => (
+      GUIDED_METAPHORS.some((metaphor) => name.endsWith(metaphor))
+    )).length
     const wrongForms = normalized.filter((name) => WRONG_CONTEXT.some((word) => name.includes(word)))
     const averageQuality = all.reduce((sum, item) => sum + quality(item), 0) / all.length
     const averageSimilarity = row.pages.reduce((sum, batch) => sum + pageSimilarity(batch), 0) / row.pages.length
@@ -113,13 +126,14 @@ try {
     const scopePages = row.pages.filter((batch) => batch.some((item) => item.name.toLowerCase().includes('scope'))).length
 
     console.log(`\n${row.prompt}`)
-    console.log(`namespace ${markerHits}/50 · quality ${averageQuality.toFixed(2)} · similarity ${averageSimilarity.toFixed(3)} · unique ${unique}/50`)
+    console.log(`namespace ${markerHits}/50 · direct suffix ${directSuffixHits}/50 · guided metaphor ${guidedMetaphorHits}/50 · quality ${averageQuality.toFixed(2)} · similarity ${averageSimilarity.toFixed(3)} · unique ${unique}/50`)
     if (VERBOSE) {
       row.pages.forEach((batch, index) => console.log(`${SEEDS[index]}: ${batch.map((item) => item.name).join(', ')}`))
     }
     check(row.pages.every((batch) => batch.length === 10), 'every cold Auto page contains ten names')
     check(scopePages === SEEDS.length, 'every fixed page carries the developer-namespace concept')
     check(markerHits >= 15, 'at least 30% of names carry a namespace naming root')
+    check(guidedMetaphorHits >= 2, 'each brief earns at least two strong non-template metaphor forms')
     check(wrongForms.length === 0, `no delivery/filesystem context leaks (${wrongForms.join(', ') || 'none'})`)
     check(all.every((item) => quality(item) >= 75), 'no visible name falls below the structural floor')
     check(averageQuality >= 85, 'visible structural quality stays at or above 85')
