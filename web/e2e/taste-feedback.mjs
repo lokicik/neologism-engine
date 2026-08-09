@@ -57,6 +57,11 @@ try {
     await cards.nth(index).locator('.star-btn').click()
   }
   check(await storedCount(page, 'neologism:favorites') === 3, 'three likes are stored locally')
+  const storedModes = await page.evaluate(() => {
+    const raw = localStorage.getItem('neologism:favorites')
+    return raw ? JSON.parse(raw).map((item) => item.sourceMode) : []
+  })
+  check(storedModes.every(Boolean), 'Auto feedback preserves each candidate source mode')
 
   // Opposite feedback is mutually exclusive in both directions.
   await cards.nth(0).locator('.pass-btn').click()

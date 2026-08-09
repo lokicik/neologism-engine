@@ -1,12 +1,13 @@
 // Deterministic smoke test for the local favorite-profile ranker.
 // Bundle with esbuild, then run with Node (see Phase 59 verification notes).
 import { buildProfile, rankByPreference } from '../src/lib/preferences'
-import type { NameResult } from '../src/lib/engine'
+import type { NameResult, NamingMode } from '../src/lib/engine'
 
-function result(name: string, syllables = 2): NameResult {
+function result(name: string, syllables = 2, sourceMode?: NamingMode): NameResult {
   return {
     name,
     style: 'big_tech',
+    sourceMode,
     syllables,
     score_pronounce: 85,
     score_novelty: 90,
@@ -79,4 +80,43 @@ check(passOnlyProfile?.likedCount === 0, 'three passes build a profile without f
 if (passOnlyProfile) {
   const ranked = rankByPreference([result('Vexora'), result('Vexium')], passOnlyProfile)
   check(ranked[0].name === 'Vexium', 'pass-only learning steers away from a rejected shape')
+}
+
+const realwordProfile = buildProfile([
+  result('Noma', 2, 'realword'),
+  result('Lexa', 2, 'realword'),
+  result('Mara', 2, 'realword'),
+])
+if (realwordProfile) {
+  const ranked = rankByPreference([
+    result('Vexa', 2, 'brandable'),
+    result('Vexa', 2, 'realword'),
+  ], realwordProfile)
+  check(ranked[0].sourceMode === 'realword', 'liked naming modes break an otherwise tied shape')
+}
+
+const mixedModeProfile = buildProfile([
+  result('Noma', 2, 'brandable'),
+  result('Lexa', 2, 'brandable'),
+  result('Mara', 2, 'realword'),
+])
+if (mixedModeProfile) {
+  const ranked = rankByPreference([
+    result('Vexa', 2, 'realword'),
+    result('Vexa', 2, 'brandable'),
+  ], mixedModeProfile)
+  check(ranked[0].sourceMode === 'realword', 'a normal mixed-mode sample does not invent mode taste')
+}
+
+const rejectedRespellProfile = buildProfile([], [
+  result('Noma', 2, 'respell'),
+  result('Lexa', 2, 'respell'),
+  result('Mara', 2, 'respell'),
+])
+if (rejectedRespellProfile) {
+  const ranked = rankByPreference([
+    result('Vexa', 2, 'respell'),
+    result('Vexa', 2, 'brandable'),
+  ], rejectedRespellProfile)
+  check(ranked[0].sourceMode === 'brandable', 'passed naming modes lose an otherwise tied shape')
 }

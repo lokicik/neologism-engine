@@ -2,6 +2,7 @@ import init, { generate_names, batch_metrics, explain_name, extract_keywords } f
 import { autoModeCounts, mergeAutoBatches } from './auto'
 
 export type Style = 'big_tech' | 'sci_fi' | 'fantasy'
+export type NamingMode = 'brandable' | 'realword' | 'respell' | 'compound'
 
 export interface Config {
   style: Style
@@ -23,6 +24,7 @@ export interface Config {
 export interface NameResult {
   name: string
   style: Style
+  sourceMode?: NamingMode
   syllables: number
   score_pronounce: number
   score_novelty: number
@@ -44,7 +46,20 @@ export async function generateNames(cfg: Config): Promise<NameResult[]> {
   const json = generate_names(JSON.stringify(cfg))
   const parsed = JSON.parse(json) as NameResult[] | { error: string }
   if ('error' in parsed) throw new Error((parsed as { error: string }).error)
-  return parsed as NameResult[]
+  const results = parsed as NameResult[]
+  if (cfg.style !== 'big_tech') return results
+
+  // The WASM result intentionally stays engine-generic; the web layer knows
+  // which big-tech strategy produced each sub-batch and preserves that source
+  // for local taste learning and persisted feedback.
+  const sourceMode: NamingMode = cfg.variant === 'realword'
+    ? 'realword'
+    : cfg.variant === 'respell'
+      ? 'respell'
+      : cfg.compound
+        ? 'compound'
+        : 'brandable'
+  return results.map((result) => ({ ...result, sourceMode }))
 }
 
 // Auto mode (web-only meta-mode): blend the four engine modes into one batch.

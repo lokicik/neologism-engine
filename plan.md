@@ -801,6 +801,38 @@ mutual-exclusion, accessibility, reload, and pass-only activation checks. Visual
 
 ---
 
+## Phase 65 — Learn which naming modes the user prefers
+
+**Bottleneck.** The local profile learned spelling shape, length, suffixes, and compounds,
+but Auto discarded the source strategy after merging its four sub-batches. A user could
+consistently like Real words or reject Respelled names and the ranker still treated those
+families as indistinguishable Brandable strings.
+
+**Rejected alternatives.** A fixed-seed audit kept generic Compound in Auto because its
+quality was mixed rather than uniformly weak (`PureSync`, `UrbanEdge`, `CopperMoor`, and
+`ProudPulse` were viable). Applying the prompt-only typo penalty globally changed none of
+four audited first pages and moved the 300-batch proxies by only +0.03 novelty/+0.01
+memorability. Replacing proxy relevance with the stronger internal rank removed some weak
+names but collapsed novelty **93.50 → 81.92**; a 35% rank blend still fell to **90.25**
+and introduced new misses. All three production experiments were reverted.
+
+**What changed.** The web engine now tags each Big-tech result with its actual source mode:
+Brandable, Realword, Respell, or Compound. The optional tag travels with existing local
+favorite/pass records. The shape profile learns a bounded mode affinity alongside suffix,
+onset, bigram, and structural signals, so otherwise-equal candidates from consistently liked
+modes move up and candidates from consistently passed modes move down. Mode affinity activates
+only when at least 75% of a feedback profile shares one source, preventing Auto's naturally
+Brandable-heavy exposure from masquerading as preference. Old records require no migration:
+CamelCase still identifies Compound and everything else remains neutral `unknown`.
+
+**Verification.** Fourteen deterministic preference checks cover liked, rejected, and mixed
+mode ties plus all prior shape/contrast behavior. Eight Auto schedule/dedupe checks remain green.
+TypeScript/Vite production build clean; Chromium verifies twelve storage, source-tag,
+mutual-exclusion, accessibility, reload, and pass-only activation checks using real WASM
+output.
+
+---
+
 ## Bottom line
 
 Big-tech is the strongest style, tuned through Phase 25 and extended since:

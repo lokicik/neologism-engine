@@ -1,8 +1,9 @@
-import type { NameResult } from './engine'
+import type { NameResult, NamingMode } from './engine'
 
 // Client-side preference learning. The profile stays transparent and tiny: it
-// contrasts saved names with explicit passes, never sends either set anywhere,
-// and is rebuilt locally whenever feedback changes.
+// contrasts saved names with explicit passes (including their source naming
+// mode), never sends either set anywhere, and is rebuilt locally whenever
+// feedback changes.
 
 const FRONT = new Set(['e', 'i', 'y'])
 const BACK = new Set(['o', 'u'])
@@ -21,6 +22,7 @@ interface ShapeProfile {
   suffixes: Record<string, number>
   onsets: Record<string, number>
   bigrams: Record<string, number>
+  modes: Record<string, number>
 }
 
 export interface PreferenceProfile {
@@ -56,6 +58,11 @@ function isCompound(name: string): boolean {
   return /[a-z][A-Z]/.test(name)
 }
 
+function namingMode(item: NameResult): NamingMode | 'unknown' {
+  if (item.sourceMode) return item.sourceMode
+  return isCompound(item.name) ? 'compound' : 'unknown'
+}
+
 function suffix(name: string): string {
   const lower = letters(name)
   return KNOWN_SUFFIXES.find((ending) => lower.endsWith(ending)) ?? lower.slice(-2)
@@ -82,6 +89,14 @@ function normalizedCounts(values: string[]): Record<string, number> {
   return counts
 }
 
+function concentratedAffinity(counts: Record<string, number>, value: string): number {
+  const rate = counts[value] ?? 0
+  // Auto exposes Brandable more often than its accent modes. Treat a mode as
+  // taste only when feedback clearly concentrates there, not from a normal
+  // mixed batch whose source distribution is already imbalanced.
+  return rate >= 0.75 ? rate : 0
+}
+
 function buildShapeProfile(items: NameResult[]): ShapeProfile {
   const n = items.length
   return {
@@ -97,6 +112,7 @@ function buildShapeProfile(items: NameResult[]): ShapeProfile {
     suffixes: normalizedCounts(items.map((item) => suffix(item.name))),
     onsets: normalizedCounts(items.map((item) => onset(item.name))),
     bigrams: normalizedCounts(items.flatMap((item) => bigrams(item.name))),
+    modes: normalizedCounts(items.map(namingMode)),
   }
 }
 
@@ -137,10 +153,12 @@ function shapeSimilarity(name: NameResult, profile: ShapeProfile): number {
     : grams.reduce((sum, gram) => sum + (profile.bigrams[gram] ?? 0), 0) / grams.length
   const suffixAffinity = profile.suffixes[suffix(name.name)] ?? 0
   const onsetAffinity = profile.onsets[onset(name.name)] ?? 0
+  const modeAffinity = concentratedAffinity(profile.modes, namingMode(name))
 
   return suffixAffinity * 0.9
     + onsetAffinity * 0.25
     + bigramAffinity * 2.0
+    + modeAffinity * 0.75
     - lenDiff
     - syllableDiff
     - leanDiff
