@@ -1827,6 +1827,39 @@ gain, not a claim that cold-start aesthetics have been solved.
 
 ---
 
+## Phase 92 — Seed local taste with names the user already likes
+
+**Bottleneck.** Phase 91 gave the local judge thirty candidates to choose from, but a new user
+still had to label three generated names before that judge could help. This was avoidable: people
+often already know the naming language they want (`Vercel`, `Linear`, `Notion`) even when they
+cannot express it as a scoring rule.
+
+**Retained correction.** Advanced options now accepts three to eight reference names. The same
+offline shape profile extracts length, syllable rhythm, vowel balance, sharpness, compound form,
+endings, onsets, and bigrams from those examples; three usable positive examples immediately
+activate the existing 30-to-10 local shortlist. References are bounded, normalized, and
+deduplicated against each other and starred names. They persist in a separate localStorage key,
+never count as real likes or passes, and never enter the taste-data export. Explicit feedback
+remains project-scoped; references are an intentional global style preference. The shortlist's
+engine-quality anchor was also raised so a shape match cannot promote a structurally weak name
+over a strong candidate.
+
+**Interface.** The former ellipsis chip is now the discoverable `Advanced` control. Its first
+field is `Names you like`, with a stable `0/3` readiness indicator, concise guidance, and a
+40-pixel input target using the existing dark surface, border, and accent system. Active result
+status reports references separately from project likes and passes.
+
+**Verification.** Twenty-seven deterministic checks cover parsing, normalization, the eight-name cap,
+reference-only profile activation, the thirty-candidate pool, and favorite/reference
+deduplication plus the quality-floor contract. A fixed-seed audit across three briefs and five
+seeds compared 150 selected names: the previous weight averaged **84.10** engine quality with
+**7/150** below 75; the retained weight averages **86.01** with **0/150** below 75 while mean
+reference affinity moves only **-0.016**. TypeScript and the production build are clean.
+Twenty-eight Chromium checks cover persistence, ten-from-thirty selection, readiness/status
+copy, and separation from explicit feedback.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
@@ -1845,7 +1878,8 @@ optional, separate batch judge rather than a hidden dependency of Create.
 The next broad aesthetic scorer change is evidence-gated: collect at least ten real likes and ten passes in
 matching project contexts, audit the current composite, and require held-out pairwise
 improvement before shipping new weights. Language flavors and “name like X” templates remain
-possible capability expansions, but they are not substitutes for proving better English
-dev-name selection on human preference data.
+possible capability expansions. Reference names now provide a transparent local approximation
+of “name like X”; broader language templates are still not a substitute for proving better
+English dev-name selection on human preference data.
 
 See `README.md` for the research bibliography and `~/.claude/plans/` for the full build history.

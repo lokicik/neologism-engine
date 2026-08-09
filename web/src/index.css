@@ -1192,7 +1192,7 @@ body {
   flex-direction: column;
   gap: .7rem;
   padding: .5rem .4rem;
-  min-width: 230px;
+  min-width: 260px;
 }
 .menu-form label {
   display: flex;
@@ -1202,6 +1202,7 @@ body {
   color: var(--muted);
 }
 .menu-form input {
+  min-height: 40px;
   padding: .45rem .65rem;
   background: var(--surface2);
   border: 1px solid var(--border);
@@ -1213,6 +1214,24 @@ body {
 }
 .menu-form input:focus { border-color: rgba(124, 106, 249, .55); }
 .menu-form input:disabled { opacity: .4; }
+.menu-label-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+}
+.menu-progress {
+  color: var(--accent);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.menu-help {
+  display: block;
+  color: var(--muted);
+  font-size: .68rem;
+  line-height: 1.4;
+  text-wrap: pretty;
+}
 
 
 

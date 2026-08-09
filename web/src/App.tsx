@@ -1,9 +1,9 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { generateBatch, batchMetrics, extractKeywords, type BatchMetrics, type Config, type NameResult, type Style } from './lib/engine'
 import { recommendations } from './lib/recommend'
-import { buildProfile, feedbackForContext, MIN_TASTE_SIGNALS, preferencePoolCount, shortlistByPreference } from './lib/preferences'
+import { buildReferencedProfile, feedbackForContext, MIN_TASTE_SIGNALS, preferencePoolCount, shortlistByPreference } from './lib/preferences'
 import { tasteContextForConfig } from './lib/taste-context'
-import { loadFavorites, toggleFavorite, removeFavorite, saveFavorites, loadRejected, toggleRejected, removeRejected, loadRecent, saveRecent, hasVisited, markVisited, loadJudgeConfig, saveJudgeConfig } from './lib/storage'
+import { loadFavorites, toggleFavorite, removeFavorite, saveFavorites, loadRejected, toggleRejected, removeRejected, loadTasteReferences, saveTasteReferences, loadRecent, saveRecent, hasVisited, markVisited, loadJudgeConfig, saveJudgeConfig } from './lib/storage'
 import { type JudgeConfig } from './lib/judge'
 import { decodeShareUrl } from './lib/share'
 import { CommandBar } from './components/CommandBar'
@@ -29,8 +29,8 @@ const DEFAULT_CONFIG: Config = {
 }
 
 // Don't repeat names the user has seen recently. A name can't recur within this
-// many shown names (~2,000 batches of 10) — effectively "never repeats" for any
-// real session. Persisted across reloads; ~200 KB through the JSON boundary per
+// many explored names (~667 personalized pools of 30) — effectively "never
+// repeats" for any real session. Persisted across reloads; ~200 KB through the JSON boundary per
 // call, negligible. Safe to scale: since Phase 35 the engine applies exact-match
 // exclusion to the whole list but windows the fuzzy/stem layers internally
 // (fuzzy_window=2000), so a large list can't starve generation — the distinct
@@ -51,6 +51,7 @@ export default function App() {
   const [metrics, setMetrics] = useState<BatchMetrics | null>(null)
   const [favorites, setFavorites] = useState<NameResult[]>(loadFavorites)
   const [rejected, setRejected] = useState<NameResult[]>(loadRejected)
+  const [tasteReferences, setTasteReferences] = useState(loadTasteReferences)
   const [loading, setLoading] = useState(false)
   // True when a generate/append produced zero names — the prompt's reachable
   // space is exhausted against the seen-names history.
@@ -138,7 +139,11 @@ export default function App() {
         rejectedRef.current,
         tasteContextForConfig(cfg).id,
       )
-      const profile = buildProfile(feedback.favorites, feedback.rejected)
+      const { profile } = buildReferencedProfile(
+        feedback.favorites,
+        feedback.rejected,
+        tasteReferences,
+      )
       const requestedCount = cfg.count ?? 10
       const poolCount = preferencePoolCount(requestedCount, profile)
       const pool = await generateBatch({
@@ -162,7 +167,13 @@ export default function App() {
       setError(err instanceof Error ? err.message : String(err))
       setLoading(false)
     }
-  }, [config])
+  }, [config, tasteReferences])
+
+  const handleTasteReferencesChange = useCallback((value: string) => {
+    const next = value.slice(0, 240)
+    setTasteReferences(next)
+    saveTasteReferences(next)
+  }, [])
 
   const handleToggleFavorite = useCallback((item: NameResult) => {
     const wasFavorite = favoritesRef.current.some(
@@ -274,12 +285,19 @@ export default function App() {
     rejected,
     tasteContextForConfig(config).id,
   )
-  const profile = buildProfile(tasteFeedback.favorites, tasteFeedback.rejected)
+  const { profile, references: activeReferences } = buildReferencedProfile(
+    tasteFeedback.favorites,
+    tasteFeedback.rejected,
+    tasteReferences,
+  )
   const displayResults = results
-  const likesNeeded = Math.max(0, MIN_TASTE_SIGNALS - tasteFeedback.favorites.length)
+  const positiveSignals = tasteFeedback.favorites.length + activeReferences.length
+  const likesNeeded = Math.max(0, MIN_TASTE_SIGNALS - positiveSignals)
   const passesNeeded = Math.max(0, MIN_TASTE_SIGNALS - tasteFeedback.rejected.length)
-  const tastePrompt = `Teach local taste${tasteFeedback.scope === 'project' ? ' for this project' : ''} · ${likesNeeded} ${likesNeeded === 1 ? 'like' : 'likes'} or ${passesNeeded} ${passesNeeded === 1 ? 'pass' : 'passes'} left`
-  const tasteScope = tasteFeedback.scope === 'project' ? ' · this project' : ''
+  const tastePrompt = activeReferences.length > 0
+    ? `Teach local taste · ${activeReferences.length} refs · ${likesNeeded} ${likesNeeded === 1 ? 'like or ref' : 'likes or refs'} or ${passesNeeded} ${passesNeeded === 1 ? 'pass' : 'passes'} left`
+    : `Teach local taste${tasteFeedback.scope === 'project' ? ' for this project' : ''} · ${likesNeeded} ${likesNeeded === 1 ? 'like' : 'likes'} or ${passesNeeded} ${passesNeeded === 1 ? 'pass' : 'passes'} left`
+  const feedbackScope = tasteFeedback.scope === 'project' ? 'this project: ' : ''
 
   // Top pick of the batch (compared by name, so re-ranking doesn't break it).
   const bestName = metrics && results.length >= 2 ? results[metrics.stats.best_index]?.name : undefined
@@ -328,6 +346,8 @@ export default function App() {
               onChange={setConfig}
               onGenerate={() => handleGenerate(false)}
               loading={loading}
+              tasteReferences={tasteReferences}
+              onTasteReferencesChange={handleTasteReferencesChange}
             />
 
             <section className="canvas">
@@ -351,10 +371,10 @@ export default function App() {
                   {results.length > 0 && (
                     <span
                       className={`nav-note taste-note${profile ? ' active' : ''}`}
-                      title="Star names you like and use Not for me on misses. New batches are ranked locally for this project; nothing leaves your browser."
+                      title="Add reference names in Advanced, star names you like, and use Not for me on misses. New batches are selected from a larger local pool; nothing leaves your browser."
                     >
                       {profile
-                        ? `Local taste${tasteScope} · ${tasteFeedback.favorites.length} liked · ${tasteFeedback.rejected.length} passed`
+                        ? `Local taste · ${activeReferences.length > 0 ? `${activeReferences.length} refs · ` : ''}${feedbackScope}${tasteFeedback.favorites.length} liked · ${tasteFeedback.rejected.length} passed`
                         : tastePrompt}
                     </span>
                   )}

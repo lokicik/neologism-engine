@@ -2,7 +2,9 @@
 // Bundle with esbuild, then run with Node (see Phase 59 verification notes).
 import {
   buildProfile,
+  buildReferencedProfile,
   feedbackForContext,
+  parseTasteReferences,
   preferencePoolCount,
   rankByPreference,
   shortlistByPreference,
@@ -25,6 +27,15 @@ function result(
     score_memorability: 80,
     connotations: [],
     tasteContext: contextId ? { id: contextId } : undefined,
+  }
+}
+
+function scoredResult(name: string, score: number): NameResult {
+  return {
+    ...result(name),
+    score_pronounce: score,
+    score_novelty: score,
+    score_memorability: score,
   }
 }
 
@@ -66,6 +77,48 @@ if (ixProfile) {
   )
 }
 check(preferencePoolCount(10, null) === 10, 'cold start keeps the requested candidate count')
+
+const parsedReferences = parseTasteReferences(
+  ' Vercel, linear; NOTION\nver-cel, x, A Really Long Reference Name Beyond Limit ',
+)
+check(
+  parsedReferences.join('|') === 'Vercel|linear|NOTION',
+  'reference names are trimmed, normalized, deduplicated, and length-checked',
+)
+check(
+  parseTasteReferences('Alpha, Bravo, Cedar, Delta, Ember, Fable, Grove, Hazel, Ivory').length === 8,
+  'reference input stays bounded at eight usable examples',
+)
+
+const referencedTaste = buildReferencedProfile([], [], 'Vercel, Linear, Notion')
+check(
+  referencedTaste.references.length === 3 && referencedTaste.profile !== null,
+  'three reference names can initialize local taste before any feedback',
+)
+check(
+  preferencePoolCount(10, referencedTaste.profile) === 30,
+  'reference-initialized taste opens the larger local candidate pool',
+)
+if (referencedTaste.profile) {
+  const ranked = rankByPreference(
+    [scoredResult('Checktag', 62), scoredResult('Nomio', 88)],
+    referencedTaste.profile,
+  )
+  check(
+    ranked[0].name === 'Nomio',
+    'reference affinity cannot promote a structurally weak name over a strong one',
+  )
+}
+
+const deduplicatedTaste = buildReferencedProfile(
+  [result('Vercel')],
+  [],
+  'ver-cel, Linear, Notion',
+)
+check(
+  deduplicatedTaste.references.length === 2 && deduplicatedTaste.profile?.likedCount === 3,
+  'a starred reference is counted only once in the positive profile',
+)
 
 const projectALikes = [
   result('Nomix', 2, 'brandable', 'project-a'),

@@ -3,7 +3,9 @@ import { defaultJudgeConfig, type JudgeConfig } from './judge'
 
 const KEY = 'neologism:favorites'
 const REJECTED_KEY = 'neologism:rejected'
+const TASTE_REFERENCES_KEY = 'neologism:taste-references'
 const MAX_REJECTED = 200
+const MAX_TASTE_REFERENCE_INPUT = 240
 
 function sameName(a: NameResult, b: NameResult): boolean {
   return a.name.toLowerCase() === b.name.toLowerCase()
@@ -63,6 +65,24 @@ export function removeRejected(rejected: NameResult[], item: NameResult): NameRe
   const next = rejected.filter((candidate) => !sameName(candidate, item))
   if (next.length !== rejected.length) saveRejected(next)
   return next
+}
+
+// Optional examples such as "Vercel, Linear, Notion" seed the local shape
+// ranker. They are deliberately stored separately from explicit likes/passes.
+export function loadTasteReferences(): string {
+  try {
+    return localStorage.getItem(TASTE_REFERENCES_KEY) ?? ''
+  } catch {
+    return ''
+  }
+}
+
+export function saveTasteReferences(value: string): void {
+  try {
+    localStorage.setItem(TASTE_REFERENCES_KEY, value.slice(0, MAX_TASTE_REFERENCE_INPUT))
+  } catch {
+    // ignore quota / privacy-mode storage errors
+  }
 }
 
 // Recently-shown names, persisted so repeats don't return across reloads.

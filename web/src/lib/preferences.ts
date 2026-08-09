@@ -10,9 +10,11 @@ const BACK = new Set(['o', 'u'])
 const VOWELS = new Set(['a', 'e', 'i', 'o', 'u', 'y'])
 const SHARP = new Set(['k', 't', 'x', 'z', 'q', 'v'])
 const KNOWN_SUFFIXES = ['ify', 'ora', 'ium', 'io', 'ia', 'ix', 'ly', 'ai']
+const ENGINE_QUALITY_WEIGHT = 1.1
 export const MIN_TASTE_SIGNALS = 3
 export const TASTE_POOL_MULTIPLIER = 3
 export const MAX_TASTE_POOL = 60
+export const MAX_TASTE_REFERENCES = 8
 
 interface ShapeProfile {
   avgLength: number
@@ -38,6 +40,11 @@ export interface ContextFeedback {
   favorites: NameResult[]
   rejected: NameResult[]
   scope: 'project' | 'legacy'
+}
+
+export interface ReferencedProfile {
+  profile: PreferenceProfile | null
+  references: NameResult[]
 }
 
 function letters(name: string): string {
@@ -85,6 +92,36 @@ function bigrams(name: string): string[] {
   const grams: string[] = []
   for (let i = 0; i + 1 < lower.length; i++) grams.push(lower.slice(i, i + 2))
   return grams
+}
+
+export function parseTasteReferences(input: string): string[] {
+  const seen = new Set<string>()
+  const references: string[] = []
+  for (const raw of input.split(/[,;\n]+/)) {
+    const name = raw.trim().replace(/\s+/g, ' ')
+    const key = letters(name)
+    if (key.length < 3 || key.length > 20 || seen.has(key)) continue
+    seen.add(key)
+    references.push(name)
+    if (references.length === MAX_TASTE_REFERENCES) break
+  }
+  return references
+}
+
+function estimatedSyllables(name: string): number {
+  return Math.max(1, letters(name).match(/[aeiouy]+/g)?.length ?? 0)
+}
+
+function tasteReferenceResults(input: string): NameResult[] {
+  return parseTasteReferences(input).map((name) => ({
+    name,
+    style: 'big_tech',
+    syllables: estimatedSyllables(name),
+    score_pronounce: 0,
+    score_novelty: 0,
+    score_memorability: 0,
+    connotations: [],
+  }))
 }
 
 function normalizedCounts(values: string[]): Record<string, number> {
@@ -164,6 +201,23 @@ export function buildProfile(
   }
 }
 
+// Explicit references such as "Vercel, Linear, Notion" are positive shape
+// examples, not stored likes. Keep them out of feedback counts and exports,
+// and avoid double-counting a name the user has also starred.
+export function buildReferencedProfile(
+  favorites: NameResult[],
+  rejected: NameResult[],
+  input: string,
+): ReferencedProfile {
+  const favoriteNames = new Set(favorites.map((item) => letters(item.name)))
+  const references = tasteReferenceResults(input)
+    .filter((item) => !favoriteNames.has(letters(item.name)))
+  return {
+    profile: buildProfile([...favorites, ...references], rejected),
+    references,
+  }
+}
+
 // Higher = closer to the learned profile. Continuous shape penalties prevent
 // overfitting to one saved name; suffix/onset/bigram affinity captures recurring
 // taste such as Nomix + Lexix -> short, front-vowel, -ix coinages.
@@ -223,7 +277,9 @@ export function rankByPreference(results: NameResult[], profile: PreferenceProfi
     .map((result, index) => ({
       result,
       index,
-      score: similarity(result, profile) + engineQuality(result) * 0.3,
+      // Taste chooses among credible engine results; it should not pull a
+      // structurally weak candidate into view solely because its shape fits.
+      score: similarity(result, profile) + engineQuality(result) * ENGINE_QUALITY_WEIGHT,
     }))
     .sort((a, b) => b.score - a.score || a.index - b.index)
     .map(({ result }) => result)

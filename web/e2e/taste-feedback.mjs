@@ -161,6 +161,56 @@ try {
   )
   await passOnlyPage.screenshot({ path: join(SHOTS, 'taste-pass-only.png'), fullPage: true })
   await passOnlyContext.close()
+
+  const referenceContext = await browser.newContext()
+  await referenceContext.addInitScript(() => localStorage.setItem('neologism:visited', '1'))
+  const referencePage = await referenceContext.newPage({ viewport: { width: 1440, height: 1000 } })
+  await referencePage.goto(APP_URL)
+  await referencePage.locator('.command-input').fill(
+    'an offline naming engine for developer projects that checks npm and crates.io',
+  )
+  await referencePage.locator('.chips-row .chip-wrap:last-child > .chip').click()
+  await referencePage.locator('.taste-reference-input').fill('Vercel, Linear, Notion')
+  check(
+    await referencePage.evaluate(() => localStorage.getItem('neologism:taste-references'))
+      === 'Vercel, Linear, Notion',
+    'reference names are stored separately in the browser',
+  )
+  await referencePage.click('.command-go')
+  await referencePage.waitForFunction(() => {
+    const raw = localStorage.getItem('neologism:recent')
+    return raw ? JSON.parse(raw).length >= 30 : false
+  })
+  const referenceCards = referencePage.locator('.name-card')
+  const referenceStatus = (await referencePage.locator('.taste-note').textContent()) ?? ''
+  check(await referenceCards.count() === 10, 'reference taste still renders ten selected names')
+  check(
+    await storedCount(referencePage, 'neologism:recent') === 30,
+    'three references select the first page from a thirty-name offline pool',
+  )
+  check(
+    /Local taste.*3 refs.*0 liked.*0 passed/.test(referenceStatus),
+    `reference status explains the active local model (got "${referenceStatus.trim()}")`,
+  )
+  check(
+    await storedCount(referencePage, 'neologism:favorites') === 0
+      && await storedCount(referencePage, 'neologism:rejected') === 0,
+    'reference names do not masquerade as explicit likes or passes',
+  )
+  await referencePage.locator('.chips-row .chip-wrap:last-child > .chip').click()
+  check(
+    (await referencePage.locator('.menu-progress').textContent())?.trim() === '3/3',
+    'Advanced shows when reference taste is ready',
+  )
+  await referencePage.waitForTimeout(700)
+  await referencePage.screenshot({ path: join(SHOTS, 'taste-references.png'), fullPage: true })
+  await referencePage.reload()
+  await referencePage.locator('.chips-row .chip-wrap:last-child > .chip').click()
+  check(
+    await referencePage.locator('.taste-reference-input').inputValue() === 'Vercel, Linear, Notion',
+    'reference names survive a reload',
+  )
+  await referenceContext.close()
 } catch (error) {
   console.error('SCRIPT ERROR:', error.message)
   failures++

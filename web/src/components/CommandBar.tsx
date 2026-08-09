@@ -1,11 +1,14 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import type { Config } from '../lib/engine'
+import { MIN_TASTE_SIGNALS, parseTasteReferences } from '../lib/preferences'
 
 interface Props {
   config: Config
   onChange: (cfg: Config) => void
   onGenerate: () => void
   loading: boolean
+  tasteReferences: string
+  onTasteReferencesChange: (value: string) => void
 }
 
 // Phase 41: command-bar dashboard (the Ideogram/Google-search pattern) — one
@@ -82,8 +85,17 @@ function Chip({ label, children, active }: { label: string; children: ReactNode;
   )
 }
 
-export function CommandBar({ config, onChange, onGenerate, loading }: Props) {
+export function CommandBar({
+  config,
+  onChange,
+  onGenerate,
+  loading,
+  tasteReferences,
+  onTasteReferencesChange,
+}: Props) {
   const mode = currentMode(config)
+  const referenceCount = parseTasteReferences(tasteReferences).length
+  const referencesNeeded = Math.max(0, MIN_TASTE_SIGNALS - referenceCount)
   const lengthLabel =
     LENGTHS.find((l) => l.min === config.min_len && l.max === config.max_len)?.chip ?? 'Any length'
   const creativityLabel =
@@ -163,10 +175,37 @@ export function CommandBar({ config, onChange, onGenerate, loading }: Props) {
         </Chip>
 
         <Chip
-          label="⋯"
-          active={Boolean(config.roots?.length || config.starts_with || config.contains)}
+          label="Advanced"
+          active={Boolean(
+            tasteReferences.trim()
+            || config.roots?.length
+            || config.starts_with
+            || config.contains,
+          )}
         >
           <div className="menu-form" onClick={(e) => e.stopPropagation()}>
+            <label>
+              <span className="menu-label-line">
+                <span>Names you like</span>
+                <span className="menu-progress">
+                  {Math.min(referenceCount, MIN_TASTE_SIGNALS)}/{MIN_TASTE_SIGNALS}
+                </span>
+              </span>
+              <input
+                className="taste-reference-input"
+                type="text"
+                maxLength={240}
+                placeholder="Vercel, Linear, Notion"
+                value={tasteReferences}
+                aria-describedby="taste-reference-help"
+                onChange={(e) => onTasteReferencesChange(e.target.value)}
+              />
+              <small id="taste-reference-help" className="menu-help">
+                {referencesNeeded === 0
+                  ? 'Guiding the larger local candidate pool.'
+                  : `Add ${referencesNeeded} more ${referencesNeeded === 1 ? 'name' : 'names'} to guide local ranking.`}
+              </small>
+            </label>
             <label>
               <span>Seed words{mode !== 'brandable' ? ' (Brandable mode only)' : ''}</span>
               <input
