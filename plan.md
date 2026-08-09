@@ -3310,6 +3310,60 @@ added.
 
 ---
 
+## Phase 131 — Make color-palette pages vary without losing taste
+
+**Observed bottleneck.** The worst remaining held-out seed spread was the color-palette brief:
+three ten-name first pages retained only **11/30** distinct names, shared **9.33/10** names per seed
+pair, and seeds 67/313 produced the same set. Manual review found the same mechanical wall behind
+the metric: `Pixelia`, `Canvasia`, `Prismora`, `Prismify`, `Pixelio`, `Canvasio`, `Hueora`, and
+`Hueify`, plus the same `Vysual` accent. The seed changed generation order, but the compact viable
+root/suffix pool converged during quality selection.
+
+**Root and candidate review.** The visual map looked five-root wide, but its `Form...` family scored
+only **69.6–71.8** and never survived the 75-point page floor. `Tone` and `Tint` supplied both clear
+color semantics and viable shapes: `Toneora 91.3`, `Toneify 89.8`, `Tintify 92.8`, and
+`Tintix 94.8`; their metaphor forms included the more deliberate `Toneseed 87.5` and
+`Toneloom 87.5`. The retained map adds these roots only for explicit `color` or `palette` terms.
+Generic `design`, `visual`, and `creative` keep their old root map, including `Form`, so design-token
+taste and unrelated visual products remain unchanged.
+
+**Rejected A/Bs and scope correction.** Replacing `Form` with `Tone` alone raised structural
+quality but left the same **11/30** spread and duplicate page, so it was rejected. Adding both roots
+globally to design/visual removed the duplicate, but the 1,000-selection taste matrix exposed a real
+regression: design-token specialized-meaning retention fell from **80% to 51%**, and mode-aware
+taste exceeded its structural-quality tolerance. That version was removed. A wording probe also
+found that `designer` could become the first unknown root and collapse a palette page to two names,
+while `generator` could produce the poor `Genrator` Respell. Only in the explicit color-palette
+lane, `designer`, `generator`, and `scheme` are now treated as context rather than naming material.
+
+**Retained Auto behavior.** A color/palette plus design/visual/creative/generator/scheme brief opens
+the scoped path. If it earns a strong prompt-linked Respell, Auto may keep one 85+ semantic metaphor
+beside it; without a viable Respell, the existing one-or-two-metaphor contract remains unchanged.
+This reuses the existing bounded metaphor pool and one-mode-accent rule: no new scorer, retry,
+random source, or online service was added. Three wording variants over three seeds pin full pages,
+at least 13/30 names, at most 8.0 pair overlap, a strong metaphor, and the absence of
+`Desygn`/`Genrator`/designer-root leakage.
+
+**Measured result.** The canonical color pages improve from **86.69 -> 87.40** average structural
+quality, **11 -> 13/30** distinct names, **9.33 -> 8.00** pair overlap, and **one -> zero** duplicate
+seed pages. Representative deliberate forms are `Toneseed` and `Toneloom`; every page still keeps
+ten prompt-linked names and the strong `Vysual` accent. Across the unchanged 105-page held-out base,
+average quality improves **84.18 -> 84.20**, near pairs **77 -> 72**, suffix leaders **23 -> 21**,
+guided leaders **50 -> 52**, seed spread **18.17 -> 18.23/30**, pair overlap **5.15 -> 5.11/10**,
+and duplicate seed pages **3 -> 2**. Lead quality moves only **86.77 -> 86.76** while coverage stays
+**1.33**; the reviewed one-hundredth-point trade reflects stronger non-template color leads and
+remains well inside the retained gate.
+
+**Verification.** The core suite is **151/151**. The held-out audit now covers 105 base pages plus
+48 wording-stress pages. The 90-page cold audit and 85-page Auto audit remain unchanged. The final
+1,000-selection taste matrix and 25-page mode-aware taste audit return exactly to their Phase 130
+metrics after the scoped correction. The 48-domain/2,400-name collision audit returns all names,
+no short page, and zero unexplained collision; the shared `tone` root explains its one design/mood
+overlap. Rebuilt WASM, TypeScript, and the production bundle are green. No LLM or network call is
+used.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

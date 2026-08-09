@@ -95,6 +95,12 @@ const isNamingToolBrief = (terms: string[]): boolean => {
     ].some((term) => normalized.has(term))
 }
 
+const isColorPaletteBrief = (terms: string[]): boolean => {
+  const normalized = new Set(terms.map(letters))
+  return ['color', 'palette'].some((term) => normalized.has(term))
+    && ['design', 'visual', 'creative', 'generator', 'scheme'].some((term) => normalized.has(term))
+}
+
 export const guidedMetaphorTail = (result: NameResult): string | undefined => {
   const normalized = letters(result.name)
   return GUIDED_METAPHOR_TAILS.find((tail) => normalized.endsWith(tail))
@@ -315,6 +321,7 @@ export async function generateBatch(cfg: Config): Promise<NameResult[]> {
     const recruiterTrackingBrief = isRecruiterTrackingBrief(terms)
     const featureFlagBrief = isFeatureFlagBrief(terms)
     const namingToolBrief = isNamingToolBrief(terms)
+    const colorPaletteBrief = isColorPaletteBrief(terms)
     const [brandableBatch, respellBatch] = await Promise.all([
       generateNames({ ...cfg, variant: undefined, compound: false, count: total }),
       respell > 0
@@ -329,9 +336,10 @@ export async function generateBatch(cfg: Config): Promise<NameResult[]> {
         )
       ))
       .slice(0, respell)
-    // Respell owns the single guided accent when it is genuinely derived from
-    // the brief. Otherwise let one strong semantic metaphor compete with the
-    // Brandable page instead of widening the main generator's whole first pool.
+    // Respell normally owns the single guided accent when it is genuinely
+    // derived from the brief. A color-palette page may also keep one strong
+    // semantic metaphor because its compact suffix pool otherwise converges on
+    // the same first page across seeds.
     let metaphorAccent: NameResult[] = []
     let pairAccent: NameResult[] = []
     if (total > 0 && recruiterTrackingBrief) {
@@ -344,7 +352,7 @@ export async function generateBatch(cfg: Config): Promise<NameResult[]> {
         compound: false,
         count: GUIDED_PAIR_POOL,
       }))
-    } else if (total > 0 && linkedRespells.length === 0) {
+    } else if (total > 0 && (linkedRespells.length === 0 || colorPaletteBrief)) {
       const metaphorConfig = {
         ...cfg,
         variant: 'metaphor',

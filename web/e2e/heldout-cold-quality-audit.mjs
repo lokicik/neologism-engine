@@ -68,12 +68,18 @@ const NAMING_TOOL_VARIANTS = [
   'a tool that generates product names',
   'find available package names for developers',
 ]
+const COLOR_PALETTE_VARIANTS = [
+  'a visual color system for designers',
+  'a palette tool for visual designers',
+  'a color scheme generator',
+]
 const PROMPTS = [
   ...BASE_PROMPTS,
   ...AI_VARIANTS,
   ...RECRUITER_VARIANTS,
   ...FEATURE_FLAG_VARIANTS,
   ...NAMING_TOOL_VARIANTS,
+  ...COLOR_PALETTE_VARIANTS,
 ]
 const SEEDS = [13, 67, 313]
 const DIRECT_SUFFIXES = ['ify', 'ora', 'ion', 'era', 'io', 'ia', 'ix', 'el', 'en', 'on']
@@ -287,6 +293,14 @@ try {
     0,
   ) / (namingToolRows.length * 10)
   const namingToolVariantRows = rows.filter((row) => NAMING_TOOL_VARIANTS.includes(row.prompt))
+  const colorPaletteRows = rows.filter((row) => (
+    row.prompt === 'a color palette and visual design tool'
+  ))
+  const colorPaletteAverage = colorPaletteRows.reduce(
+    (sum, row) => sum + row.selected.reduce((pageSum, item) => pageSum + quality(item), 0),
+    0,
+  ) / (colorPaletteRows.length * 10)
+  const colorPaletteVariantRows = rows.filter((row) => COLOR_PALETTE_VARIANTS.includes(row.prompt))
   const seedDiversity = BASE_PROMPTS.map((prompt) => {
     const promptRows = auditRows.filter((row) => row.prompt === prompt)
     const nameSeeds = new Map()
@@ -343,6 +357,31 @@ try {
   const exactDuplicateSeedPages = seedDiversity.reduce(
     (sum, row) => sum + row.exactDuplicatePages, 0,
   )
+  const colorPaletteDiversity = seedDiversity.find((row) => (
+    row.prompt === 'a color palette and visual design tool'
+  ))
+  const colorPaletteVariantDiversity = COLOR_PALETTE_VARIANTS.map((prompt) => {
+    const promptRows = colorPaletteVariantRows.filter((row) => row.prompt === prompt)
+    const names = new Set(promptRows.flatMap((row) => (
+      row.selected.map((item) => letters(item.name))
+    )))
+    let pairOverlap = 0
+    let pairTotal = 0
+    for (let i = 0; i < promptRows.length; i++) {
+      const left = new Set(promptRows[i].selected.map((item) => letters(item.name)))
+      for (let j = i + 1; j < promptRows.length; j++) {
+        const right = new Set(promptRows[j].selected.map((item) => letters(item.name)))
+        pairOverlap += [...left].filter((name) => right.has(name)).length
+        pairTotal++
+      }
+    }
+    return {
+      prompt,
+      rowCount: promptRows.length,
+      uniqueNames: names.size,
+      averagePairOverlap: pairTotal === 0 ? 0 : pairOverlap / pairTotal,
+    }
+  })
   const dominantStemOverflowFor = (items) => {
     const counts = new Map()
     for (const item of items) {
@@ -412,6 +451,7 @@ try {
   console.log(`recruiter tracking average: ${recruiterTrackingAverage.toFixed(2)}`)
   console.log(`feature flag average: ${featureFlagAverage.toFixed(2)}`)
   console.log(`naming tool average: ${namingToolAverage.toFixed(2)}`)
+  console.log(`color palette average: ${colorPaletteAverage.toFixed(2)} · ${colorPaletteDiversity?.uniqueNames ?? 0}/30 unique · ${colorPaletteDiversity?.averagePairOverlap.toFixed(2) ?? '0.00'} overlap`)
   console.log(`guarded repair upgrades: ${guardedRepairUpgrades.length}`)
   console.log(`weak Respell accents: ${weakRespellAccents.length}`)
   console.log(`seed diversity: ${averageUniqueNames.toFixed(2)}/30 unique · ${averageSeedOverlap.toFixed(2)}/10 pair overlap · ${exactDuplicateSeedPages} duplicate pages`)
@@ -446,6 +486,10 @@ try {
   }
   console.log('\nnaming tool focus')
   for (const row of [...namingToolRows, ...namingToolVariantRows]) {
+    console.log(`${row.seed} · ${row.prompt} · ${row.selected.map((item) => item.name).join(', ')}`)
+  }
+  console.log('\ncolor palette focus')
+  for (const row of [...colorPaletteRows, ...colorPaletteVariantRows]) {
     console.log(`${row.seed} · ${row.prompt} · ${row.selected.map((item) => item.name).join(', ')}`)
   }
   console.log('\nguarded repair upgrades')
@@ -520,10 +564,40 @@ try {
     ],
     [averageUniqueNames >= 18, 'held-out first pages retain at least 18/30 names across three seeds'],
     [averageSeedOverlap <= 5.25, 'held-out seed pairs share at most 5.25/10 names on average'],
-    [exactDuplicateSeedPages <= 3, 'held-out content-identical seed pages do not increase'],
+    [exactDuplicateSeedPages <= 2, 'held-out content-identical seed pages retain the color-page repair'],
     [dominantStemExcess <= 9, 'held-out exact-stem repetition stays at or below nine excess cards'],
     [suffixLeads.length <= 24, 'held-out direct suffix leads stay at or below 24'],
     [guardedRepairUpgrades.length >= 6, 'held-out repair surfaces brief-specific inner-card upgrades'],
+    [
+      colorPaletteRows.length === SEEDS.length
+        && colorPaletteAverage >= 87.3
+        && colorPaletteDiversity?.uniqueNames >= 13
+        && colorPaletteDiversity?.averagePairOverlap <= 8
+        && colorPaletteDiversity?.exactDuplicatePages === 0
+        && colorPaletteRows.every((row) => (
+          row.selected.length === 10
+          && row.selected.filter((item) => item.sourceMode === 'respell').length === 1
+          && row.selected.filter((item) => item.construction === 'guided_metaphor').length === 1
+          && !row.retryRequested
+        )),
+      'color-palette pages add viable Tone/Tint roots and retain a strong metaphor beside Vysual',
+    ],
+    [
+      colorPaletteVariantRows.length === COLOR_PALETTE_VARIANTS.length * SEEDS.length
+        && colorPaletteVariantDiversity.every((row) => (
+          row.rowCount === SEEDS.length
+          && row.uniqueNames >= 13
+          && row.averagePairOverlap <= 8
+        ))
+        && colorPaletteVariantRows.every((row) => (
+          row.selected.length === 10
+          && row.selected.some((item) => item.construction === 'guided_metaphor')
+          && row.selected.every((item) => !['desygn', 'genrator'].includes(letters(item.name)))
+          && row.selected.every((item) => !letters(item.name).startsWith('designer'))
+          && !row.retryRequested
+        )),
+      'color-palette wording variants stay full, seed-diverse, and free of audience/function Respells',
+    ],
     [
       recruiterTrackingRows.length === SEEDS.length
         && recruiterTrackingAverage >= 82.7

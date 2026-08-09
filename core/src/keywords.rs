@@ -266,7 +266,8 @@ fn concept_roots(word: &str) -> &'static [&'static str] {
         "data" | "analytic" | "analytics" | "insight" | "metric" => {
             &["signal", "lens", "trace", "scope", "vector"]
         }
-        "design" | "color" | "visual" | "creative" => &["hue", "form", "pixel", "canvas", "prism"],
+        "color" | "palette" => &["hue", "tone", "tint", "pixel", "canvas", "prism"],
+        "design" | "visual" | "creative" => &["hue", "form", "pixel", "canvas", "prism"],
         "task" | "plan" | "schedule" | "calendar" | "focus" | "productivity" => {
             &["focus", "flow", "tempo", "task", "plan"]
         }
@@ -478,6 +479,14 @@ fn is_feature_flag_brief(keywords: &[String]) -> bool {
         && has_any_keyword(keywords, &["flag", "toggle", "rollout", "switch", "gate"])
 }
 
+fn is_color_palette_brief(keywords: &[String]) -> bool {
+    has_any_keyword(keywords, &["color", "palette"])
+        && has_any_keyword(
+            keywords,
+            &["design", "visual", "creative", "generator", "scheme"],
+        )
+}
+
 /// Drop a weak or polysemous word only when another keyword makes the intended
 /// domain explicit. The word remains available in every other context.
 fn is_contextually_suppressed(word: &str, keywords: &[String]) -> bool {
@@ -545,6 +554,7 @@ fn is_contextually_suppressed(word: &str, keywords: &[String]) -> bool {
             "available",
         ],
     );
+    let color_palette = is_color_palette_brief(keywords);
 
     (recruiting && matches!(word, "team" | "pipeline" | "track"))
         || (meals && matches!(word, "plan" | "weekly" | "organizer"))
@@ -572,6 +582,7 @@ fn is_contextually_suppressed(word: &str, keywords: &[String]) -> bool {
         || (travel && word == "plan")
         || (release && word == "automation")
         || (naming && developer_namespace && matches!(word, "check" | "find" | "search"))
+        || (color_palette && matches!(word, "designer" | "generator" | "scheme"))
 }
 
 /// Describes how a known product is delivered rather than what it is. These
@@ -1968,6 +1979,34 @@ mod tests {
             let roots = brand_roots(&keywords, 16);
             assert!(roots.contains(&marker.to_string()), "{prompt}: {roots:?}");
         }
+    }
+
+    #[test]
+    fn color_palette_briefs_add_viable_roots_and_drop_context_words() {
+        for prompt in [
+            "a color palette and visual design tool",
+            "a palette tool for visual designers",
+            "a color scheme generator",
+        ] {
+            let keywords = extract_keywords(prompt, 6);
+            let roots = brand_roots(&keywords, 16);
+            let respell_sources = respell_source_keywords(&keywords);
+            for expected in ["tone", "tint", "pixel", "canvas", "prism"] {
+                assert!(roots.contains(&expected.to_string()), "{prompt}: {roots:?}");
+            }
+            for dropped in ["designer", "generator", "scheme"] {
+                assert!(!roots.contains(&dropped.to_string()), "{prompt}: {roots:?}");
+                assert!(
+                    !respell_sources.iter().any(|source| source == dropped),
+                    "{prompt}: {respell_sources:?}",
+                );
+            }
+        }
+
+        let photo = extract_keywords("a photo editing tool with color presets", 6);
+        let events = extract_keywords("color labels for calendar events", 6);
+        assert!(!is_color_palette_brief(&photo));
+        assert!(!is_color_palette_brief(&events));
     }
 
     #[test]
