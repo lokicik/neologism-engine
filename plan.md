@@ -2293,6 +2293,43 @@ network call, new corpus entry, scorer retraining, or hidden name blacklist was 
 
 ---
 
+## Phase 105 — Keep personalized pages from becoming suffix templates
+
+**Bottleneck.** Exact-ending caps prevented four copies of `-ia` or `-io`, but could not see a
+page assembled from different generic endings. The fixed personalized matrix still contained
+**649/1,000** direct root-plus-suffix names such as `Byteia`, `Crateio`, `Shieldio`, and
+`Lockia`. On **42/100** pages at least eight cards used that construction, and **14** pages were
+entirely suffix templates despite passing every structural and exact-ending gate.
+
+**A/B boundary.** The selector now recognizes only the narrow production pattern: a Brandable
+candidate carrying exactly one brief concept and ending in one of the explicit semantic/naming
+suffixes. An **80%** visible-page cap reduced the total to 614 and removed every suffix-only page.
+A stricter **70%** trial reached 572 and removed all eight-form pages, but structural quality fell
+to **85.14** and reference affinity to **−0.823**, failing both retained gates. It was removed.
+
+**Retained correction.** When a strong expanded pool permits it, a ten-name personalized page
+now reserves at least two cards for another construction: a semantic join, readable metaphor, or
+other non-suffix form. Direct suffix candidates beyond eight are deferred, not rejected; the
+existing constrained-pool fallback still fills the requested count. The rule cannot admit a
+sub-75 name and does not affect cold generation, Compound, Respell, Sci-Fi, Fantasy, or the Rust
+engine.
+
+**Measured result.** Direct suffix forms move **649 → 614**, suffix-only pages **14 → 0**, and no
+page exceeds eight. Exact-ending excess improves **134 → 122**, near pairs **220 → 203**, and mean
+pair similarity **0.208 → 0.206**. Structural quality holds at **85.24**, reference affinity at
+**−0.800**, and sub-75 names plus prefix overflow remain zero. Specialized npm/crates.io names
+rise **56 → 65/200** and Rust/log names **20 → 29/200**; all other semantic families retain their
+previous gate. Fresh-session variety remains 288 names with only eight exact retry pages.
+
+**Verification.** The deterministic preference smoke test requires a full ten-name page with no
+more than eight direct suffix forms. Chromium gates all 1,000 personalized names, and all four
+rolling sessions still reach 100 unique prompt-linked names at **85.25** mean and **83.63**
+tenth-page quality. The real 100-name UI, feedback/reference/export flow, TypeScript build, and
+production bundle are green. No LLM, network call, corpus addition, scorer retraining, or hidden
+name blacklist was added.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
@@ -2312,7 +2349,8 @@ availability without confusing `find` with filesystem search. Cold Auto preserve
 first-page names and opens a bounded offline fallback
 for weak slots or an overly repetitive page. Local taste feedback selects each
 visible page from up to sixty offline candidates per project, applies a structural quality floor,
-preserves additional brief concepts, and restores visible stem and ending-family diversity.
+preserves additional brief concepts, restores visible stem and ending-family diversity, and
+keeps every sufficiently rich page from becoming only root-plus-suffix templates.
 AI Studio remains an optional, separate batch judge rather than a hidden dependency of Create.
 
 The next broad aesthetic scorer change is evidence-gated: collect at least ten real likes and ten passes in

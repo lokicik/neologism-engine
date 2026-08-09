@@ -17,6 +17,7 @@ const MIN_SHORTLIST_QUALITY = 0.75
 const VISIBLE_PREFIX_SHARE = 0.2
 const VISIBLE_SUFFIX_SHARE = 0.2
 const VISIBLE_GENERAL_SUFFIX_SHARE = 0.3
+const VISIBLE_DIRECT_SUFFIX_SHARE = 0.8
 const MAX_COLD_PAIR_SIMILARITY = 0.21
 export const MIN_TASTE_SIGNALS = 3
 export const TASTE_POOL_MULTIPLIER = 6
@@ -89,6 +90,15 @@ function namingMode(item: NameResult): NamingMode | 'unknown' {
 function suffix(name: string): string {
   const lower = letters(name)
   return KNOWN_SUFFIXES.find((ending) => lower.endsWith(ending)) ?? lower.slice(-2)
+}
+
+const DIRECT_CONCEPT_SUFFIXES = ['ify', 'ora', 'ion', 'era', 'io', 'ia', 'ix', 'el', 'en', 'on']
+
+function isDirectConceptSuffix(result: NameResult): boolean {
+  const lower = letters(result.name)
+  return result.sourceMode === 'brandable'
+    && result.concept_coverage === 1
+    && DIRECT_CONCEPT_SUFFIXES.some((ending) => lower.endsWith(ending))
 }
 
 function onset(name: string): string {
@@ -547,16 +557,20 @@ export function shortlistByPreference(
   const suffixCap = Math.max(1, Math.ceil(
     count * (isNamingBrief(candidates) ? VISIBLE_SUFFIX_SHARE : VISIBLE_GENERAL_SUFFIX_SHARE),
   ))
+  const directSuffixCap = Math.max(1, Math.ceil(count * VISIBLE_DIRECT_SUFFIX_SHARE))
   const selected: NameResult[] = []
   const deferred: NameResult[] = []
   const prefixCounts = new Map<string, number>()
   const suffixCounts = new Map<string, number>()
+  let directSuffixCount = 0
   for (const candidate of candidates) {
     const prefix = letters(candidate.name).slice(0, 3)
     const ending = suffix(candidate.name)
+    const directSuffix = isDirectConceptSuffix(candidate)
     if (
       (prefixCounts.get(prefix) ?? 0) >= prefixCap
       || (suffixCounts.get(ending) ?? 0) >= suffixCap
+      || (directSuffix && directSuffixCount >= directSuffixCap)
     ) {
       deferred.push(candidate)
       continue
@@ -564,6 +578,7 @@ export function shortlistByPreference(
     selected.push(candidate)
     prefixCounts.set(prefix, (prefixCounts.get(prefix) ?? 0) + 1)
     suffixCounts.set(ending, (suffixCounts.get(ending) ?? 0) + 1)
+    directSuffixCount += Number(directSuffix)
     if (selected.length === count) return selected
   }
 

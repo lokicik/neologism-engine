@@ -41,6 +41,7 @@ const REFERENCE_SETS = [
 ]
 const SEEDS = [7, 42, 101, 2024, 9999]
 const KNOWN_SUFFIXES = ['ify', 'ora', 'ium', 'ion', 'io', 'ia', 'ix', 'ly', 'ai']
+const DIRECT_CONCEPT_SUFFIXES = ['ify', 'ora', 'ion', 'era', 'io', 'ia', 'ix', 'el', 'en', 'on']
 
 const server = spawn(process.execPath, [viteCli, '--port', String(PORT), '--strictPort'], {
   cwd: WEB_DIR,
@@ -111,6 +112,7 @@ try {
               mode: item.sourceMode,
               quality: quality(item),
               taste: similarity(item, profile),
+              conceptCoverage: item.concept_coverage ?? 0,
             })),
           })
         }
@@ -151,6 +153,16 @@ try {
   let endingOverTwo = 0
   let endingOverThree = 0
   let maxEndingCount = 0
+  let directSuffixForms = 0
+  let suffixHeavyPages = 0
+  let suffixOnlyPages = 0
+  let maxDirectSuffixes = 0
+  const isDirectSuffix = (item) => {
+    const normalized = item.name.toLowerCase().replace(/[^a-z]/g, '')
+    return item.mode === 'brandable'
+      && item.conceptCoverage === 1
+      && DIRECT_CONCEPT_SUFFIXES.some((suffix) => normalized.endsWith(suffix))
+  }
   for (const row of rows) {
     const prefixes = new Map()
     const endings = new Map()
@@ -169,6 +181,11 @@ try {
     endingOverThree += [...endings.values()]
       .reduce((sum, count) => sum + Math.max(0, count - 3), 0)
     maxEndingCount = Math.max(maxEndingCount, ...endings.values())
+    const pageDirectSuffixes = row.selected.filter(isDirectSuffix).length
+    directSuffixForms += pageDirectSuffixes
+    suffixHeavyPages += Number(pageDirectSuffixes >= 8)
+    suffixOnlyPages += Number(pageDirectSuffixes === row.selected.length)
+    maxDirectSuffixes = Math.max(maxDirectSuffixes, pageDirectSuffixes)
     for (let i = 0; i < row.selected.length; i++) {
       for (let j = i + 1; j < row.selected.length; j++) {
         const overlap = lexicalSimilarity(row.selected[i].name, row.selected[j].name)
@@ -226,6 +243,7 @@ try {
   console.log(`three-plus prefix overflow: ${prefixOverTwo}`)
   console.log(`three-plus exact-ending overflow: ${endingOverTwo}`)
   console.log(`four-plus exact-ending overflow: ${endingOverThree} (max ${maxEndingCount})`)
+  console.log(`direct suffix forms / pages at cap / suffix-only / max: ${directSuffixForms} / ${suffixHeavyPages} / ${suffixOnlyPages} / ${maxDirectSuffixes}`)
   console.log(`near-duplicate pairs: ${nearPairs}`)
   console.log(`mean pair similarity: ${meanPairSimilarity.toFixed(3)}`)
   console.log(`returned pool sizes: ${returnedCounts.join(', ')}`)
@@ -267,6 +285,8 @@ try {
     [averageTaste >= -0.82, 'reference affinity stays within the retained floor'],
     [nearPairs <= 230, 'near-duplicate pairs stay at or below 230'],
     [meanPairSimilarity <= 0.22, 'mean pair similarity stays at or below 0.22'],
+    [directSuffixForms <= 620, 'direct root-plus-suffix forms stay below the retained ceiling'],
+    [suffixOnlyPages === 0 && maxDirectSuffixes <= 8, 'no personalized page is only suffix templates'],
     [
       seededRetries.uniqueNames >= baselineRetries.uniqueNames + 30,
       'seed-aware taste adds at least 30 fresh names across repeated first pages',

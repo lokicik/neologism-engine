@@ -91,6 +91,25 @@ if (ixProfile) {
     .map((item) => item.name).join('|')
   check(seededA === seededARepeat, 'one taste-session salt stays deterministic')
   check(seededA !== seededB, 'a fresh taste-session salt explores a nearby shortlist')
+
+  const directSuffixPool = [
+    'Lexia', 'Nymio', 'Nomora', 'Markix', 'Mintify',
+    'Lexel', 'Nymen', 'Nomon', 'Tagion', 'Keyera',
+    'Scopeflow', 'Tagforge', 'Keyscope',
+  ].map((name) => ({
+    ...scoredResult(name, 88),
+    sourceMode: 'brandable' as const,
+    concept_coverage: 1,
+  }))
+  const familyBalanced = shortlistByPreference(directSuffixPool, ixProfile, 10, 7)
+  const directEndings = ['ify', 'ora', 'ion', 'era', 'io', 'ia', 'ix', 'el', 'en', 'on']
+  check(
+    familyBalanced.length === 10
+      && familyBalanced.filter((item) => directEndings.some((ending) => (
+        item.name.toLowerCase().endsWith(ending)
+      ))).length <= 8,
+    'a personalized page keeps space for non-suffix naming forms',
+  )
 }
 check(preferencePoolCount(10, null) === 10, 'cold start keeps the requested candidate count')
 check(coldQualityPoolCount(10) === 30, 'a weak cold Auto page opens a three-page repair pool')
