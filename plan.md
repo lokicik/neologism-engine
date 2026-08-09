@@ -1760,6 +1760,41 @@ never falsely exhaust.
 
 ---
 
+## Phase 90 — Keep local taste inside each project
+
+**Bottleneck and rejected generator experiments.** Phase 89 improved the cold-start result, but
+the remaining misses (`Keyseed`, `Aliasseed`, repeated `-forge` families) tempted increasingly
+narrow generator rules. Five fixed-seed variants were measured and rejected: a deeper candidate
+pool left the app's first page unchanged and introduced two suffix-only morphology pages; a
+naming-specific suffix mix raised exact cross-domain collisions **20 → 23**; broad and narrow
+tail caps lowered the app brief's composite and edit diversity; and banning identifier-plus-seed
+pairs lowered it to **83.46** composite and raised collisions to **21**. None beat the committed
+Phase 89 setting, so no speculative root or final-name blacklist remains.
+
+The evidence-backed gap was already in the product. Every liked/passed result carried a stable
+project context and the v2 export formed pairs only inside that context, but the live local-taste
+ranker still built one profile from every project. Likes from a fantasy game could therefore
+reorder names for a developer package. That contradicted the data boundary and made repeated use
+of the app less reliable.
+
+**Retained correction.** Live feedback is now filtered by the current context ID before a
+profile is built. Three signals teach one project, not every future brief. A new project begins
+without inherited ranking; returning to the original brief restores its profile. Collections
+created entirely before context tagging retain the old global behavior as a compatibility
+fallback, while scoped and legacy records are never mixed. The status now says
+`Local taste · this project` when active and shows project-specific progress otherwise.
+
+**Verification.** Eighteen deterministic preference checks cover positive, negative, mode, and
+shape learning plus four new context gates: cross-project exclusion, current-project ranking,
+new-project isolation, and legacy fallback. TypeScript and the production bundle build cleanly.
+Nineteen Chromium checks exercise real WASM feedback, mutual exclusion, persistence, project
+switching, pass-only activation, Settings, and the v2 download; switching briefs visibly resets
+`3 liked · 2 passed` to `3 likes or 3 passes left`. The Phase 89 core remains the retained
+cold-start engine: **129/129** workspace tests, **80.61** broad composite, **0.729** diversity,
+and the established Auto/developer/session gates all remain green.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
@@ -1772,7 +1807,7 @@ first-page dilution. Its focused two-word names now also reject cross-concept ad
 pairings that are individually relevant but read poorly together.
 Long prompted sessions no longer collapse into repeated suffix families or stop before 100
 names, and semantic joins no longer erase a concept at one-letter/vowel boundaries. Local taste
-feedback can already adjust structural and mode preferences, while AI Studio remains an
+feedback adjusts structural and mode preferences per project, while AI Studio remains an
 optional, separate batch judge rather than a hidden dependency of Create.
 
 The next broad aesthetic scorer change is evidence-gated: collect at least ten real likes and ten passes in

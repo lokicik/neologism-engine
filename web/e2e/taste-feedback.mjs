@@ -88,6 +88,18 @@ try {
   check(/Local taste.*3 liked.*2 passed/.test(status), `taste status explains the active model (got "${status.trim()}")`)
   await page.screenshot({ path: join(SHOTS, 'taste-feedback.png'), fullPage: true })
 
+  await page.fill('.command-input', 'a secure password manager for a new project')
+  await page.click('.command-go')
+  await page.waitForFunction(() => {
+    const text = document.querySelector('.taste-note')?.textContent ?? ''
+    return /this project.*3 likes.*3 passes left/.test(text)
+  })
+  const newProjectStatus = (await page.locator('.taste-note').textContent()) ?? ''
+  check(
+    !/Local taste.*liked/.test(newProjectStatus),
+    `another project does not inherit the active profile (got "${newProjectStatus.trim()}")`,
+  )
+
   await page.reload()
   await page.click('.command-go')
   await page.waitForSelector('.taste-note', { timeout: 20000 })

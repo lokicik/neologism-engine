@@ -1,7 +1,8 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { generateBatch, batchMetrics, extractKeywords, type BatchMetrics, type Config, type NameResult, type Style } from './lib/engine'
 import { recommendations } from './lib/recommend'
-import { buildProfile, MIN_TASTE_SIGNALS, rankByPreference } from './lib/preferences'
+import { buildProfile, feedbackForContext, MIN_TASTE_SIGNALS, rankByPreference } from './lib/preferences'
+import { tasteContextForConfig } from './lib/taste-context'
 import { loadFavorites, toggleFavorite, removeFavorite, saveFavorites, loadRejected, toggleRejected, removeRejected, loadRecent, saveRecent, hasVisited, markVisited, loadJudgeConfig, saveJudgeConfig } from './lib/storage'
 import { type JudgeConfig } from './lib/judge'
 import { decodeShareUrl } from './lib/share'
@@ -138,7 +139,12 @@ export default function App() {
       // Preference ranking is applied to the incoming batch only, at insert
       // time — re-ranking the whole list on every append (the old render-time
       // rankByPreference) made already-visible cards jump around the grid.
-      const profile = buildProfile(favoritesRef.current, rejectedRef.current)
+      const feedback = feedbackForContext(
+        favoritesRef.current,
+        rejectedRef.current,
+        tasteContextForConfig(cfg).id,
+      )
+      const profile = buildProfile(feedback.favorites, feedback.rejected)
       const ranked = profile ? rankByPreference(batch, profile) : batch
       const shown = append ? [...resultsRef.current, ...ranked] : ranked
       setResults(shown)
@@ -256,11 +262,17 @@ export default function App() {
   // Phase 37: applied automatically once it exists — no toggle. Phase 49:
   // ranking happens per batch inside handleGenerate (insert order is final);
   // this render-time profile only drives the local-taste status note.
-  const profile = buildProfile(favorites, rejected)
+  const tasteFeedback = feedbackForContext(
+    favorites,
+    rejected,
+    tasteContextForConfig(config).id,
+  )
+  const profile = buildProfile(tasteFeedback.favorites, tasteFeedback.rejected)
   const displayResults = results
-  const likesNeeded = Math.max(0, MIN_TASTE_SIGNALS - favorites.length)
-  const passesNeeded = Math.max(0, MIN_TASTE_SIGNALS - rejected.length)
-  const tastePrompt = `Teach local taste · ${likesNeeded} ${likesNeeded === 1 ? 'like' : 'likes'} or ${passesNeeded} ${passesNeeded === 1 ? 'pass' : 'passes'} left`
+  const likesNeeded = Math.max(0, MIN_TASTE_SIGNALS - tasteFeedback.favorites.length)
+  const passesNeeded = Math.max(0, MIN_TASTE_SIGNALS - tasteFeedback.rejected.length)
+  const tastePrompt = `Teach local taste${tasteFeedback.scope === 'project' ? ' for this project' : ''} · ${likesNeeded} ${likesNeeded === 1 ? 'like' : 'likes'} or ${passesNeeded} ${passesNeeded === 1 ? 'pass' : 'passes'} left`
+  const tasteScope = tasteFeedback.scope === 'project' ? ' · this project' : ''
 
   // Top pick of the batch (compared by name, so re-ranking doesn't break it).
   const bestName = metrics && results.length >= 2 ? results[metrics.stats.best_index]?.name : undefined
@@ -332,10 +344,10 @@ export default function App() {
                   {results.length > 0 && (
                     <span
                       className={`nav-note taste-note${profile ? ' active' : ''}`}
-                      title="Star names you like and use Not for me on misses. New batches are ranked locally; nothing leaves your browser."
+                      title="Star names you like and use Not for me on misses. New batches are ranked locally for this project; nothing leaves your browser."
                     >
                       {profile
-                        ? `Local taste · ${favorites.length} liked · ${rejected.length} passed`
+                        ? `Local taste${tasteScope} · ${tasteFeedback.favorites.length} liked · ${tasteFeedback.rejected.length} passed`
                         : tastePrompt}
                     </span>
                   )}

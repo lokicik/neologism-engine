@@ -1,9 +1,14 @@
 // Deterministic smoke test for the local favorite-profile ranker.
 // Bundle with esbuild, then run with Node (see Phase 59 verification notes).
-import { buildProfile, rankByPreference } from '../src/lib/preferences'
+import { buildProfile, feedbackForContext, rankByPreference } from '../src/lib/preferences'
 import type { NameResult, NamingMode } from '../src/lib/engine'
 
-function result(name: string, syllables = 2, sourceMode?: NamingMode): NameResult {
+function result(
+  name: string,
+  syllables = 2,
+  sourceMode?: NamingMode,
+  contextId?: string,
+): NameResult {
   return {
     name,
     style: 'big_tech',
@@ -13,6 +18,7 @@ function result(name: string, syllables = 2, sourceMode?: NamingMode): NameResul
     score_novelty: 90,
     score_memorability: 80,
     connotations: [],
+    tasteContext: contextId ? { id: contextId } : undefined,
   }
 }
 
@@ -30,6 +36,49 @@ if (ixProfile) {
   )
   check(ranked[0].name === 'Nymix', 'repeated -ix taste outranks an unrelated shape')
 }
+
+const projectALikes = [
+  result('Nomix', 2, 'brandable', 'project-a'),
+  result('Lexix', 2, 'brandable', 'project-a'),
+  result('Markix', 2, 'brandable', 'project-a'),
+]
+const projectBLikes = [
+  result('Nomora', 3, 'brandable', 'project-b'),
+  result('Lexora', 3, 'brandable', 'project-b'),
+  result('Markora', 3, 'brandable', 'project-b'),
+]
+const projectBPasses = [result('Nymix', 2, 'brandable', 'project-b')]
+const projectAFeedback = feedbackForContext(
+  [...projectALikes, ...projectBLikes],
+  projectBPasses,
+  'project-a',
+)
+check(
+  projectAFeedback.favorites.length === 3 && projectAFeedback.rejected.length === 0,
+  'live taste excludes feedback from other project contexts',
+)
+const projectAProfile = buildProfile(projectAFeedback.favorites, projectAFeedback.rejected)
+if (projectAProfile) {
+  const ranked = rankByPreference(
+    [result('Vexora', 3), result('Nymix', 2)],
+    projectAProfile,
+  )
+  check(ranked[0].name === 'Nymix', 'the current project keeps its own learned shape')
+}
+const unseenProject = feedbackForContext(projectALikes, [], 'project-c')
+check(
+  unseenProject.favorites.length === 0 && unseenProject.scope === 'project',
+  'a new project does not inherit another project profile',
+)
+const legacyFeedback = feedbackForContext(
+  [result('Noma'), result('Lexa'), result('Mara')],
+  [],
+  'project-a',
+)
+check(
+  legacyFeedback.favorites.length === 3 && legacyFeedback.scope === 'legacy',
+  'fully legacy feedback remains available as a compatibility fallback',
+)
 
 const compoundProfile = buildProfile([
   result('KeyBazaar', 3),

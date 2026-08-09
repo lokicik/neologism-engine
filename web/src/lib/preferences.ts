@@ -32,6 +32,12 @@ export interface PreferenceProfile {
   rejectedCount: number
 }
 
+export interface ContextFeedback {
+  favorites: NameResult[]
+  rejected: NameResult[]
+  scope: 'project' | 'legacy'
+}
+
 function letters(name: string): string {
   return name.toLowerCase().replace(/[^a-z]/g, '')
 }
@@ -113,6 +119,27 @@ function buildShapeProfile(items: NameResult[]): ShapeProfile {
     onsets: normalizedCounts(items.map((item) => onset(item.name))),
     bigrams: normalizedCounts(items.flatMap((item) => bigrams(item.name))),
     modes: normalizedCounts(items.map(namingMode)),
+  }
+}
+
+// Keep live taste learning inside the project that produced the feedback. The
+// v2 export already enforces this boundary for offline training; applying the
+// same rule here prevents, for example, fantasy-name likes from reordering a
+// developer-tool batch. Collections made before context tagging remain usable
+// only while the whole collection is legacy/unscoped.
+export function feedbackForContext(
+  favorites: NameResult[],
+  rejected: NameResult[],
+  contextId: string,
+): ContextFeedback {
+  const hasScopedFeedback = favorites.some((item) => item.tasteContext)
+    || rejected.some((item) => item.tasteContext)
+  if (!hasScopedFeedback) return { favorites, rejected, scope: 'legacy' }
+
+  return {
+    favorites: favorites.filter((item) => item.tasteContext?.id === contextId),
+    rejected: rejected.filter((item) => item.tasteContext?.id === contextId),
+    scope: 'project',
   }
 }
 
