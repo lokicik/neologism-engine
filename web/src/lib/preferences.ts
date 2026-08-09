@@ -24,6 +24,8 @@ const MAX_COLD_PAIR_SIMILARITY = 0.21
 const COLD_NON_SUFFIX_LEAD_MARGIN = 0.02
 const COLD_NEAR_TIE_LEAD_TOLERANCE = 0.005
 const COLD_PAIR_REPLACEMENT_TOLERANCE = 0.005
+const COLD_PAIR_QUALITY_FLOOR = 0.84
+const COLD_PAIR_SET_GAIN = 0.02
 export const MIN_TASTE_SIGNALS = 3
 export const TASTE_POOL_MULTIPLIER = 6
 export const MAX_TASTE_POOL = 60
@@ -366,10 +368,12 @@ export function needsColdLeadRetry(results: NameResult[]): boolean {
 }
 
 // Targeted deterministic semantic pools may close a true cold-page gap, but a
-// candidate earns a place only by replacing a suffix and satisfying the same
-// guarded lead selector. Metaphors remain quality-neutral; a two-concept pair
-// may trade at most the same half point allowed by the semantic lead rule.
-// Existing Respell accents and two-form pages keep their current direction.
+// candidate earns the lead only by replacing a suffix and satisfying the same
+// guarded selector. Metaphors remain quality-neutral; a two-concept pair may
+// trade at most the same half point allowed by the semantic lead rule. An 84+
+// pair that cannot lead may instead upgrade a non-leading Brandable by at least
+// two points without losing coverage or diversity. Existing Respell accents
+// and two-form pages keep their current direction.
 export function fillColdLeadRetry(
   results: NameResult[],
   candidates: NameResult[],
@@ -381,49 +385,103 @@ export function fillColdLeadRetry(
     .map(guidedMetaphorTail)
     .filter((tail): tail is string => Boolean(tail)))
   const constructionRank: 1 | 2 = guided.length === 0 ? 1 : 2
+  const currentSimilarity = meanPairSimilarity(results)
+  let bestPairUpgrade: { results: NameResult[]; gain: number; similarity: number } | undefined
 
   for (const candidate of candidates) {
     const name = letters(candidate.name)
     const tail = guidedMetaphorTail(candidate)
     const pair = candidate.construction === 'guided_pair'
+    const candidateQuality = engineQuality(candidate)
     if (
       (!pair && (!tail || usedTails.has(tail)))
       || usedNames.has(name)
       || (pair ? (candidate.concept_coverage ?? 0) < 2 : (candidate.concept_coverage ?? 0) === 0)
-      || engineQuality(candidate) < 0.85
+      || candidateQuality < (pair ? COLD_PAIR_QUALITY_FLOOR : 0.85)
     ) continue
 
-    const replacements = results
-      .map((result, index) => ({ result, index, quality: engineQuality(result) }))
-      .filter(({ result, quality }) => (
-        isDirectConceptSuffix(result)
-        && quality <= engineQuality(candidate)
-          + (pair ? COLD_PAIR_REPLACEMENT_TOLERANCE : Number.EPSILON)
-      ))
-      .sort((left, right) => left.quality - right.quality || right.index - left.index)
-    if (replacements.length === 0) continue
+    if (!pair || candidateQuality >= 0.85) {
+      const replacements = results
+        .map((result, index) => ({ result, index, quality: engineQuality(result) }))
+        .filter(({ result, quality }) => (
+          isDirectConceptSuffix(result)
+          && quality <= candidateQuality
+            + (pair ? COLD_PAIR_REPLACEMENT_TOLERANCE : Number.EPSILON)
+        ))
+        .sort((left, right) => left.quality - right.quality || right.index - left.index)
 
-    for (const replacement of replacements) {
-      const prefix = name.slice(0, 3)
-      const prefixCap = Math.max(1, Math.ceil(results.length * VISIBLE_PREFIX_SHARE))
-      const prefixBefore = results.filter((result) => letters(result.name).startsWith(prefix)).length
-      const prefixAfter = prefixBefore
-        + 1
-        - Number(letters(replacement.result.name).startsWith(prefix))
-      if (prefixAfter > Math.max(prefixCap, prefixBefore)) continue
+      for (const replacement of replacements) {
+        const prefix = name.slice(0, 3)
+        const prefixCap = Math.max(1, Math.ceil(results.length * VISIBLE_PREFIX_SHARE))
+        const prefixBefore = results.filter((result) => letters(result.name).startsWith(prefix)).length
+        const prefixAfter = prefixBefore
+          + 1
+          - Number(letters(replacement.result.name).startsWith(prefix))
+        if (prefixAfter > Math.max(prefixCap, prefixBefore)) continue
 
-      const trial = results.slice()
-      trial[replacement.index] = {
-        ...candidate,
-        construction: pair ? 'guided_pair' : 'guided_metaphor',
-        constructionRank,
+        const trial = results.slice()
+        trial[replacement.index] = {
+          ...candidate,
+          construction: pair ? 'guided_pair' : 'guided_metaphor',
+          constructionRank,
+        }
+        if (meanPairSimilarity(trial) > currentSimilarity + Number.EPSILON) continue
+        const ordered = prioritizeColdStrongLead(trial)
+        if (!isDirectConceptSuffix(ordered[0])) return ordered
       }
-      if (meanPairSimilarity(trial) > meanPairSimilarity(results) + Number.EPSILON) continue
-      const ordered = prioritizeColdStrongLead(trial)
-      if (!isDirectConceptSuffix(ordered[0])) return ordered
+    }
+
+    if (pair) {
+      const replacements = results
+        .map((result, index) => ({ result, index, quality: engineQuality(result) }))
+        .filter(({ result, index, quality }) => (
+          index > 0
+          && result.sourceMode === 'brandable'
+          && !isGuidedConstruction(result)
+          && (result.concept_coverage ?? 0) <= (candidate.concept_coverage ?? 0)
+          && quality + COLD_PAIR_SET_GAIN <= candidateQuality
+        ))
+        .sort((left, right) => left.quality - right.quality || right.index - left.index)
+
+      for (const replacement of replacements) {
+        const prefix = name.slice(0, 3)
+        const ending = suffix(candidate.name)
+        const prefixCap = Math.max(1, Math.ceil(results.length * VISIBLE_PREFIX_SHARE))
+        const endingCap = Math.max(1, Math.ceil(results.length * VISIBLE_SUFFIX_SHARE))
+        const prefixBefore = results.filter((result) => letters(result.name).startsWith(prefix)).length
+        const prefixAfter = prefixBefore
+          + 1
+          - Number(letters(replacement.result.name).startsWith(prefix))
+        const endingBefore = results.filter((result) => suffix(result.name) === ending).length
+        const endingAfter = endingBefore + 1 - Number(suffix(replacement.result.name) === ending)
+        if (
+          prefixAfter > Math.max(prefixCap, prefixBefore)
+          || endingAfter > Math.max(endingCap, endingBefore)
+        ) continue
+
+        const trial = results.slice()
+        trial[replacement.index] = {
+          ...candidate,
+          construction: 'guided_pair',
+          constructionRank,
+        }
+        const trialSimilarity = meanPairSimilarity(trial)
+        if (trialSimilarity > currentSimilarity + Number.EPSILON) continue
+        const gain = candidateQuality - replacement.quality
+        if (
+          !bestPairUpgrade
+          || gain > bestPairUpgrade.gain + Number.EPSILON
+          || (
+            Math.abs(gain - bestPairUpgrade.gain) <= Number.EPSILON
+            && trialSimilarity < bestPairUpgrade.similarity
+          )
+        ) {
+          bestPairUpgrade = { results: trial, gain, similarity: trialSimilarity }
+        }
+      }
     }
   }
-  return results.slice()
+  return bestPairUpgrade?.results ?? results.slice()
 }
 
 // Stable noise in [-0.5, 0.5]. It only separates close personalized choices:

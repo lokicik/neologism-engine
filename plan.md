@@ -2795,6 +2795,46 @@ non-Big-Tech styles do not use this lane.
 
 ---
 
+## Phase 116 — Upgrade one weak semantic card without touching the lead
+
+**Bottleneck and boundary.** Phase 115 left eleven suffix-led pages: five correctly belonged to
+an earned Respell, three had already used both guided slots, and only three remained open to the
+final retry. The expense page at seed 9999 had no pair strong enough to challenge `Poolify 91.3`,
+but its bounded pair pool contained `TallyBond 84.0/c2`, a materially stronger replacement for
+`Sharebond 78.0/c2`. Lowering the 85-point lead floor would have blurred the existing first-card
+contract, so the lead rule stays unchanged. The narrower opportunity is to improve the rest of a
+proven gap page without pretending the new name should lead.
+
+**Retained set upgrade.** A two-concept pair may now enter this already-bounded retry path at 84+
+for a non-leading set upgrade only. It must replace a non-guided Brandable below the first card,
+gain at least two structural points, preserve or improve concept coverage, avoid worsening both
+the three-letter prefix and exact-ending family caps, and leave mean pair similarity no higher.
+The best quality gain wins, with lower similarity breaking a tie. The existing lead is never a
+replacement candidate. Pair candidates still need 85+ and the prior half-point tolerance to close
+a lead gap; metaphor retries remain quality-neutral. Respell ownership, two-form capacity, local
+taste, Load more, AI Studio, and ordinary successful pages remain unchanged.
+
+**Measured result.** Exactly one additional fixed set changes: `Sharebond 78.0/c2 -> TallyBond
+84.0/c2` on the expense page at seed 9999. `Poolify` remains first, the existing `Tallyglow`
+guided form remains present, prefix and ending counts stay within their prior caps, and page
+similarity does not increase. This adds six structural-quality points to one of 900 visible names;
+aggregate quality still rounds to **83.20**. All lead metrics remain exactly at Phase 115:
+**49/90** reordered pages, **85.41** mean lead quality, **1.23** mean lead coverage, **11** suffix
+leads, and **43** guided leads. Near-duplicate pairs remain **43**, mean similarity remains
+**0.200**, the product's `Keyloom` page is unchanged, and all fifteen developer-namespace pages
+retain their prior sets and metrics.
+
+**Verification.** The deterministic preference suite pins the accepted `TallyBond` upgrade and
+separately rejects a sub-84 candidate, a gain below two points, and an overflowing prefix family.
+The 90-page production audit requires exactly the three prior gap-closing swaps plus this one
+non-leading set upgrade, validates its quality, coverage, slot, family, and similarity contracts,
+and keeps every prior lead and aggregate gate. The 85-page Auto audit, 15-page namespace audit,
+pre-retry first-impression sweep, 1,000-name taste matrix, four 100-name personalized sessions,
+mode-aware taste audit, real feedback/reference/export flow, prompt UI, brief continuation,
+TypeScript, and production bundle all pass. The Rust core and WASM generation logic are unchanged.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
@@ -2807,7 +2847,9 @@ both non-decreasing. A remaining direct suffix yields only to a same-coverage no
 a two-point quality advantage, or to a half-point near-tie that adds a concept or already passed
 the guided-form quality gate. If that still leaves a mechanical lead, a final diversity-safe local
 retry may add either a proven metaphor or an 85+ two-concept pair; pair swaps stay inside the same
-half-point boundary and cannot deepen a visible prefix family.
+half-point boundary and cannot deepen a visible prefix family. An 84+ pair that cannot earn the
+lead may still replace one non-leading Brandable only with a two-point quality gain and no loss in
+coverage or diversity.
 Compound is now a genuinely brief-aware explicit alternative rather than a random adjective
 showcase. Focused first pages stay narrow; recognized concepts open a restrained continuation
 palette only when the user asks for more, preserving 100-name session capacity without generic

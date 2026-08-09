@@ -45,7 +45,8 @@ export interface NameResult {
 
 const GUIDED_METAPHOR_POOL = 8
 const GUIDED_PAIR_POOL = 12
-const GUIDED_CONSTRUCTION_QUALITY_FLOOR = 85
+const GUIDED_METAPHOR_QUALITY_FLOOR = 85
+const GUIDED_PAIR_QUALITY_FLOOR = 84
 const GUIDED_METAPHOR_FALLBACK_SEED_OFFSET = 16
 const COLD_LEAD_METAPHOR_RETRY_SEED_OFFSETS = [13, 521]
 const UINT32_RANGE = 0x1_0000_0000
@@ -89,7 +90,7 @@ const pickGuidedMetaphor = (results: NameResult[]): NameResult[] => {
   const ranked = results
     .filter((result) => (
       (result.concept_coverage ?? 0) > 0
-      && structuralQuality(result) >= GUIDED_CONSTRUCTION_QUALITY_FLOOR
+      && structuralQuality(result) >= GUIDED_METAPHOR_QUALITY_FLOOR
     ))
     .sort((left, right) => structuralQuality(right) - structuralQuality(left))
   const selected: NameResult[] = []
@@ -111,7 +112,7 @@ const pickGuidedMetaphor = (results: NameResult[]): NameResult[] => {
 const pickGuidedPair = (results: NameResult[]): NameResult[] => results
   .filter((result) => (
     (result.concept_coverage ?? 0) >= 2
-    && structuralQuality(result) >= GUIDED_CONSTRUCTION_QUALITY_FLOOR
+    && structuralQuality(result) >= GUIDED_PAIR_QUALITY_FLOOR
   ))
   .sort((left, right) => structuralQuality(right) - structuralQuality(left))
   .slice(0, 4)

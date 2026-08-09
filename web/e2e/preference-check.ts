@@ -275,6 +275,88 @@ check(
   }])[0].name === 'Vitalia',
   'a concept pair outside the half-point lead tolerance stays out of the page',
 )
+const semanticSetGap = [
+  { ...scoredResult('Poolify', 91.3), sourceMode: 'brandable' as const, concept_coverage: 1 },
+  { ...scoredResult('Sharebond', 78), sourceMode: 'brandable' as const, concept_coverage: 2 },
+  { ...scoredResult('Coinlink', 83.4), sourceMode: 'brandable' as const, concept_coverage: 2 },
+  { ...scoredResult('Ledgerkin', 79.5), sourceMode: 'brandable' as const, concept_coverage: 2 },
+  { ...scoredResult('Splitfund', 75.2), sourceMode: 'brandable' as const, concept_coverage: 2 },
+  {
+    ...scoredResult('Tallyglow', 85.5),
+    sourceMode: 'brandable' as const,
+    concept_coverage: 1,
+    construction: 'guided_metaphor' as const,
+    constructionRank: 1 as const,
+  },
+  { ...scoredResult('Sharecoin', 78), sourceMode: 'brandable' as const, concept_coverage: 2 },
+  { ...scoredResult('Poolledger', 83.9), sourceMode: 'brandable' as const, concept_coverage: 2 },
+  { ...scoredResult('Ledgerbond', 79.4), sourceMode: 'brandable' as const, concept_coverage: 2 },
+  { ...scoredResult('Cointribe', 75.5), sourceMode: 'brandable' as const, concept_coverage: 2 },
+]
+const upgradedSemanticSet = fillColdLeadRetry(semanticSetGap, [{
+  ...scoredResult('TallyBond', 84),
+  sourceMode: 'brandable',
+  concept_coverage: 2,
+  construction: 'guided_pair',
+}])
+check(
+  upgradedSemanticSet[0].name === 'Poolify'
+    && upgradedSemanticSet.some((item) => item.name === 'TallyBond')
+    && upgradedSemanticSet.some((item) => item.name === 'Tallyglow')
+    && !upgradedSemanticSet.some((item) => item.name === 'Sharebond'),
+  'an 84+ semantic pair may upgrade a weaker non-leading Brandable without changing the lead',
+)
+check(
+  !fillColdLeadRetry(semanticSetGap, [{
+    ...scoredResult('TallyBond', 83.9),
+    sourceMode: 'brandable',
+    concept_coverage: 2,
+    construction: 'guided_pair',
+  }]).some((item) => item.name === 'TallyBond'),
+  'a semantic set upgrade below 84 stays out of the page',
+)
+check(
+  !fillColdLeadRetry([
+    { ...scoredResult('Poolify', 91.3), sourceMode: 'brandable', concept_coverage: 1 },
+    { ...scoredResult('Sharebond', 82.1), sourceMode: 'brandable', concept_coverage: 2 },
+    { ...scoredResult('Coinlink', 86), sourceMode: 'brandable', concept_coverage: 2 },
+  ], [{
+    ...scoredResult('TallyBond', 84),
+    sourceMode: 'brandable',
+    concept_coverage: 2,
+    construction: 'guided_pair',
+  }]).some((item) => item.name === 'TallyBond'),
+  'a semantic pair needs a full two-point gain to upgrade the set',
+)
+check(
+  !fillColdLeadRetry([
+    { ...scoredResult('Poolify', 91.3), sourceMode: 'brandable', concept_coverage: 1 },
+    { ...scoredResult('Poolmark', 90), sourceMode: 'brandable', concept_coverage: 2 },
+    { ...scoredResult('Poolgrid', 89), sourceMode: 'brandable', concept_coverage: 2 },
+    { ...scoredResult('Sharebond', 78), sourceMode: 'brandable', concept_coverage: 2 },
+  ], [{
+    ...scoredResult('PoolBond', 84),
+    sourceMode: 'brandable',
+    concept_coverage: 2,
+    construction: 'guided_pair',
+  }]).some((item) => item.name === 'PoolBond'),
+  'a semantic set upgrade cannot deepen an overflowing prefix family',
+)
+check(
+  !fillColdLeadRetry([
+    { ...scoredResult('Poolify', 91.3), sourceMode: 'brandable', concept_coverage: 1 },
+    { ...scoredResult('Guardbond', 90), sourceMode: 'brandable', concept_coverage: 2 },
+    { ...scoredResult('Ledgerbond', 89), sourceMode: 'brandable', concept_coverage: 2 },
+    { ...scoredResult('Coinbond', 88), sourceMode: 'brandable', concept_coverage: 2 },
+    { ...scoredResult('Sharecoin', 78), sourceMode: 'brandable', concept_coverage: 2 },
+  ], [{
+    ...scoredResult('TallyBond', 84),
+    sourceMode: 'brandable',
+    concept_coverage: 2,
+    construction: 'guided_pair',
+  }]).some((item) => item.name === 'TallyBond'),
+  'a semantic set upgrade cannot deepen an overflowing ending family',
+)
 check(
   fillColdLeadRetry([
     { ...scoredResult('Dashify', 89.8), sourceMode: 'brandable', concept_coverage: 1 },

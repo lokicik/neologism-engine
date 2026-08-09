@@ -32,9 +32,13 @@ const PROMPTS = [
 ]
 const SEEDS = [7, 42, 101, 2024, 9999]
 const DIRECT_SUFFIXES = ['ify', 'ora', 'ion', 'era', 'io', 'ia', 'ix', 'el', 'en', 'on']
+const KNOWN_SUFFIXES = ['ify', 'ora', 'ium', 'ion', 'io', 'ia', 'ix', 'ly', 'ai']
 const NEAR_TIE_TOLERANCE = 0.005
+const PAIR_SET_QUALITY_FLOOR = 0.84
+const PAIR_SET_GAIN = 0.02
 const EXPECTED_RETRY_CHANGES = [
   'Shieldora -> Kinloom',
+  'Sharebond -> TallyBond',
   'Surgeora -> Kitwave',
   'Fitio -> FitPath',
 ]
@@ -129,6 +133,17 @@ try {
     const right = b.toLowerCase().replace(/[^a-z]/g, '')
     return 1 - editDistance(left, right) / Math.max(left.length, right.length)
   }
+  const meanSimilarity = (items) => {
+    let total = 0
+    let pairs = 0
+    for (let i = 0; i < items.length; i++) {
+      for (let j = i + 1; j < items.length; j++) {
+        total += lexicalSimilarity(items[i].name, items[j].name)
+        pairs++
+      }
+    }
+    return pairs === 0 ? 0 : total / pairs
+  }
   const summarize = (field) => {
     const names = rows.flatMap((row) => row[field])
     let nearPairs = 0
@@ -166,6 +181,9 @@ try {
   const maxAccents = Math.max(...accentCounts)
   const ownBrief = rows.find((row) => row.prompt.startsWith('an offline naming engine') && row.seed === 42)
   const normalized = (item) => item.name.toLowerCase().replace(/[^a-z]/g, '')
+  const familySuffix = (item) => (
+    KNOWN_SUFFIXES.find((ending) => normalized(item).endsWith(ending)) ?? normalized(item).slice(-2)
+  )
   const isDirectSuffix = (item) => (
     item.sourceMode === 'brandable'
     && item.concept_coverage === 1
@@ -192,19 +210,42 @@ try {
     const selectedNames = new Set(row.selected.map(normalized))
     const removed = row.repaired.filter((item) => !selectedNames.has(normalized(item)))
     const added = row.selected.filter((item) => !repairedNames.has(normalized(item)))
+    const label = `${removed[0]?.name ?? '?'} -> ${added[0]?.name ?? '?'}`
+    if (removed.length !== 1 || added.length !== 1) return { valid: false, label }
     const semanticPair = added[0]?.construction === 'guided_pair'
-    const valid = removed.length === 1
-      && added.length === 1
+    const sharedContract = isGuided(added[0])
+      && !row.repaired.some((item) => item.sourceMode === 'respell')
+      && row.selected.filter(isGuided).length <= 2
+    const leadRetry = sharedContract
       && isDirectSuffix(removed[0])
-      && isGuided(added[0])
       && quality(added[0]) + (semanticPair ? NEAR_TIE_TOLERANCE : Number.EPSILON)
         >= quality(removed[0])
       && (!semanticPair || (added[0].concept_coverage ?? 0) >= 2)
-      && !row.repaired.some((item) => item.sourceMode === 'respell')
-      && row.selected.filter(isGuided).length <= 2
+    const prefix = normalized(added[0]).slice(0, 3)
+    const ending = familySuffix(added[0])
+    const prefixBefore = row.repaired.filter((item) => normalized(item).startsWith(prefix)).length
+    const prefixAfter = row.selected.filter((item) => normalized(item).startsWith(prefix)).length
+    const endingBefore = row.repaired.filter((item) => familySuffix(item) === ending).length
+    const endingAfter = row.selected.filter((item) => familySuffix(item) === ending).length
+    const replacementIndex = row.repaired.findIndex((item) => normalized(item) === normalized(removed[0]))
+    const addedIndex = row.selected.findIndex((item) => normalized(item) === normalized(added[0]))
+    const setUpgrade = sharedContract
+      && semanticPair
+      && normalized(row.repaired[0]) === normalized(row.selected[0])
+      && replacementIndex > 0
+      && replacementIndex === addedIndex
+      && removed[0].sourceMode === 'brandable'
+      && !isGuided(removed[0])
+      && quality(added[0]) >= PAIR_SET_QUALITY_FLOOR
+      && quality(added[0]) + Number.EPSILON >= quality(removed[0]) + PAIR_SET_GAIN
+      && (added[0].concept_coverage ?? 0) >= (removed[0].concept_coverage ?? 0)
+      && prefixAfter <= Math.max(2, prefixBefore)
+      && endingAfter <= Math.max(2, endingBefore)
+      && meanSimilarity(row.selected) <= meanSimilarity(row.repaired) + Number.EPSILON
+    const valid = leadRetry || setUpgrade
     return {
       valid,
-      label: `${removed[0]?.name ?? '?'} -> ${added[0]?.name ?? '?'}`,
+      label,
     }
   })
   const retryContractViolations = retryChanges.filter((change) => !change.valid).length
@@ -241,16 +282,16 @@ try {
   console.log(`multiple-accent pages: ${multipleAccentPages}/${rows.length} (max ${maxAccents})`)
   console.log(`strong lead reorder: ${reorderedPages}/${rows.length} · quality ${originalLeadQuality.toFixed(2)} -> ${selectedLeadQuality.toFixed(2)} · coverage ${selectedLeadCoverage.toFixed(2)} · suffix first ${originalSuffixLeads} -> ${selectedSuffixLeads} · guided first ${selectedGuidedLeads}`)
   console.log(`justified near-tie trades: ${justifiedNearTies.length} · max quality loss ${(maxLeadQualityLoss * 100).toFixed(2)}`)
-  console.log(`targeted retry changes: ${retryChanges.map((change) => change.label).join(', ') || 'none'}`)
+  console.log(`targeted retry/set changes: ${retryChanges.map((change) => change.label).join(', ') || 'none'}`)
   console.log(`own brief: ${ownBrief.selected.map((item) => `${item.sourceMode}:${item.name}`).join(', ')}`)
 
   const gates = [
     [wrongSize === 0, 'every repaired cold page contains ten names'],
     [wrongFallback === 0, 'repair uses either no fallback or the bounded 30-name pool'],
     [multipleAccentPages === 0, 'cold repair preserves Auto\'s one-accent visible-page contract'],
-    [retryRows.length === 3 && exactRetryChanges, 'the targeted retry closes exactly the three fixed cold-page gaps'],
+    [retryRows.length === 4 && exactRetryChanges, 'the targeted retry closes exactly three fixed gaps and upgrades one weak set card'],
     [orderingChangedSet === retryRows.length, 'only targeted retry pages change the repaired name set'],
-    [retryContractViolations === 0, 'each retry stays quality-neutral or uses the bounded two-concept half-point trade'],
+    [retryContractViolations === 0, 'each change is a bounded lead retry or a diversity-safe two-point semantic set upgrade'],
     [unjustifiedWeakenedLeads === 0, 'any first-card quality trade stays inside the semantic/guided near-tie rule'],
     [justifiedNearTies.length === 4, 'the fixed matrix contains exactly four justified near-tie promotions'],
     [maxLeadQualityLoss <= NEAR_TIE_TOLERANCE + Number.EPSILON, 'first-card structural quality loss never exceeds half a point'],

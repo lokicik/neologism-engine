@@ -127,9 +127,18 @@ try {
   for (const row of rows) {
     const pageNames = new Set(row.ordered.map((item) => letters(item.name)))
     const currentSimilarity = meanSimilarity(row.ordered)
+    const selectedNames = new Set(row.selected.map((item) => letters(item.name)))
+    const removed = row.ordered.filter((item) => !selectedNames.has(letters(item.name)))
+    const added = row.selected.filter((item) => !pageNames.has(letters(item.name)))
+    const productionChange = removed.length === 1 && added.length === 1
+      ? `${removed[0].name} -> ${added[0].name}`
+      : 'unchanged'
+    const retryEligible = !row.ordered.some((item) => item.sourceMode === 'respell')
+      && row.ordered.filter((item) => item.construction).length < 2
     console.log(`\n${row.seed} - ${row.prompt}`)
     console.log(`before: ${row.ordered.map(describe).join(', ')}`)
-    console.log(`production: ${row.ordered[0].name} -> ${row.selected[0].name}`)
+    console.log(`production lead: ${row.ordered[0].name} -> ${row.selected[0].name}`)
+    console.log(`production set: ${productionChange}`)
     console.log(`fallback count: ${row.fallback.length}`)
     for (const [label, pool] of [
       ['deep brandable', row.deep],
@@ -161,25 +170,61 @@ try {
               break
             }
           }
-          if (!chosen) return { candidate, safe: false, delta: 0, replacement: undefined }
+          let upgrade
+          if (pairPool && retryEligible && quality(candidate) >= 84) {
+            const weaker = row.ordered
+              .map((item, index) => ({ item, index }))
+              .filter(({ item, index }) => (
+                index > 0
+                && item.sourceMode === 'brandable'
+                && !item.construction
+                && (item.concept_coverage ?? 0) <= (candidate.concept_coverage ?? 0)
+                && quality(item) + 2 <= quality(candidate)
+              ))
+              .sort((left, right) => quality(left.item) - quality(right.item) || right.index - left.index)
+            for (const replacement of weaker) {
+              const next = row.ordered.slice()
+              next[replacement.index] = candidate
+              const prefix = letters(candidate.name).slice(0, 3)
+              const ending = letters(candidate.name).slice(-2)
+              const prefixBefore = row.ordered.filter((item) => letters(item.name).startsWith(prefix)).length
+              const prefixAfter = next.filter((item) => letters(item.name).startsWith(prefix)).length
+              const endingBefore = row.ordered.filter((item) => letters(item.name).endsWith(ending)).length
+              const endingAfter = next.filter((item) => letters(item.name).endsWith(ending)).length
+              const delta = meanSimilarity(next) - currentSimilarity
+              if (
+                prefixAfter <= Math.max(2, prefixBefore)
+                && endingAfter <= Math.max(2, endingBefore)
+                && delta <= Number.EPSILON
+              ) {
+                upgrade = { replacement, delta }
+                break
+              }
+            }
+          }
+          if (!chosen && !upgrade) {
+            return { candidate, safe: false, upgrade: false, delta: 0, replacement: undefined }
+          }
           return {
             candidate,
-            replacement: chosen.replacement.item,
-            delta: chosen.delta,
-            safe: quality(candidate) >= 85
+            replacement: (chosen ?? upgrade).replacement.item,
+            delta: (chosen ?? upgrade).delta,
+            safe: Boolean(chosen) && quality(candidate) >= 85
               && (candidate.concept_coverage ?? 0) >= (row.ordered[0].concept_coverage ?? 0)
               && quality(candidate) + (pairPool ? 0.5 : Number.EPSILON)
                 >= quality(row.ordered[0]),
+            upgrade: !chosen && Boolean(upgrade),
           }
         })
         .sort((left, right) => (
           Number(right.safe) - Number(left.safe)
+          || Number(right.upgrade) - Number(left.upgrade)
           || (right.candidate.concept_coverage ?? 0) - (left.candidate.concept_coverage ?? 0)
           || quality(right.candidate) - quality(left.candidate)
         ))
         .slice(0, 12)
-      console.log(`${label}: ${candidates.map(({ candidate, safe, delta, replacement }) => (
-        `${safe ? '*' : '-'}${describe(candidate)}`
+      console.log(`${label}: ${candidates.map(({ candidate, safe, upgrade, delta, replacement }) => (
+        `${safe ? '*' : upgrade ? '+' : '-'}${describe(candidate)}`
         + `${replacement ? `>${replacement.name}/s${delta >= 0 ? '+' : ''}${delta.toFixed(3)}` : ''}`
       )).join(', ') || 'none'}`)
     }
