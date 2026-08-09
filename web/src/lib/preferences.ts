@@ -9,6 +9,7 @@ const BACK = new Set(['o', 'u'])
 const VOWELS = new Set(['a', 'e', 'i', 'o', 'u', 'y'])
 const SHARP = new Set(['k', 't', 'x', 'z', 'q', 'v'])
 const KNOWN_SUFFIXES = ['ify', 'ora', 'ium', 'io', 'ia', 'ix', 'ly', 'ai']
+export const MIN_TASTE_SIGNALS = 3
 
 interface ShapeProfile {
   avgLength: number
@@ -22,7 +23,8 @@ interface ShapeProfile {
   bigrams: Record<string, number>
 }
 
-export interface PreferenceProfile extends ShapeProfile {
+export interface PreferenceProfile {
+  liked: ShapeProfile | null
   avoided: ShapeProfile | null
   likedCount: number
   rejectedCount: number
@@ -102,10 +104,16 @@ export function buildProfile(
   favorites: NameResult[],
   rejected: NameResult[] = [],
 ): PreferenceProfile | null {
-  if (favorites.length < 3) return null
+  const liked = favorites.length >= MIN_TASTE_SIGNALS ? buildShapeProfile(favorites) : null
+  // A positive centroid makes even one pass useful as a contrast. Without
+  // likes, wait for three passes so an accidental click cannot define taste.
+  const avoided = rejected.length >= (liked ? 1 : MIN_TASTE_SIGNALS)
+    ? buildShapeProfile(rejected)
+    : null
+  if (!liked && !avoided) return null
   return {
-    ...buildShapeProfile(favorites),
-    avoided: rejected.length > 0 ? buildShapeProfile(rejected) : null,
+    liked,
+    avoided,
     likedCount: favorites.length,
     rejectedCount: rejected.length,
   }
@@ -142,8 +150,8 @@ function shapeSimilarity(name: NameResult, profile: ShapeProfile): number {
 }
 
 export function similarity(name: NameResult, profile: PreferenceProfile): number {
-  const liked = shapeSimilarity(name, profile)
-  if (!profile.avoided) return liked
+  const liked = profile.liked ? shapeSimilarity(name, profile.liked) : null
+  if (!profile.avoided) return liked ?? 0
 
   // Compare the candidate with both centroids instead of applying an absolute
   // blacklist. The tanh bound prevents a narrow rejected cluster from
@@ -151,6 +159,7 @@ export function similarity(name: NameResult, profile: PreferenceProfile): number
   // pass a weak signal and five passes a full-strength signal.
   const avoided = shapeSimilarity(name, profile.avoided)
   const evidence = Math.min(1, profile.rejectedCount / 5)
+  if (liked === null) return -Math.tanh(avoided) * evidence
   return liked + Math.tanh(liked - avoided) * evidence
 }
 

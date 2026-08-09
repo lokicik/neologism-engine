@@ -778,6 +778,29 @@ passes all nine persistence, accessibility, and ranking checks.
 
 ---
 
+## Phase 64 — Learn from passes before the first favorite
+
+**Bottleneck.** Negative feedback was stored immediately but the local profile still
+required three favorites before it existed. A user who only passed on weak names saw an
+active-looking control with no effect on later batches.
+
+**What changed.** Three passes can now create an avoided-shape profile
+without any favorites. Two passes remain inert to avoid overfitting; once a three-favorite
+positive profile exists, even one pass is retained as a weak contrast signal, preserving the
+existing evidence ramp. Negative-only similarity is bounded with `tanh`, and engine quality
+remains in the ranking, so the model steers away from a pattern instead of hard-blacklisting
+it. The status chip now explains that either three likes or three passes can teach local
+taste.
+
+**Verification.** The deterministic preference harness proves two passes stay inactive,
+three `-ora` passes activate a zero-like profile, and `Vexium` then outranks the matching
+`Vexora` shape. Existing liked-only, compound-family, and positive/negative contrast cases
+remain green. TypeScript/Vite production build clean; Chromium verifies all eleven storage,
+mutual-exclusion, accessibility, reload, and pass-only activation checks. Visual review at
+1440px confirms the zero-like status fits the existing stats row.
+
+---
+
 ## Bottom line
 
 Big-tech is the strongest style, tuned through Phase 25 and extended since:

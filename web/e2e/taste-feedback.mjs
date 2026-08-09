@@ -83,6 +83,25 @@ try {
   check(/3 liked.*2 passed/.test(restored), 'taste feedback survives a reload')
 
   await context.close()
+
+  const passOnlyContext = await browser.newContext()
+  await passOnlyContext.addInitScript(() => localStorage.setItem('neologism:visited', '1'))
+  const passOnlyPage = await passOnlyContext.newPage({ viewport: { width: 1440, height: 1000 } })
+  await passOnlyPage.goto(APP_URL)
+  await passOnlyPage.click('.command-go')
+  await passOnlyPage.waitForSelector('.name-card', { timeout: 20000 })
+  const passOnlyCards = passOnlyPage.locator('.name-card')
+  for (let index = 0; index < 3; index++) {
+    await passOnlyCards.nth(index).locator('.pass-btn').click()
+  }
+  check(await storedCount(passOnlyPage, 'neologism:rejected') === 3, 'three passes work without any likes')
+  const passOnlyStatus = (await passOnlyPage.locator('.taste-note').textContent()) ?? ''
+  check(
+    /Local taste.*0 liked.*3 passed/.test(passOnlyStatus),
+    `pass-only feedback activates local taste (got "${passOnlyStatus.trim()}")`,
+  )
+  await passOnlyPage.screenshot({ path: join(SHOTS, 'taste-pass-only.png'), fullPage: true })
+  await passOnlyContext.close()
 } catch (error) {
   console.error('SCRIPT ERROR:', error.message)
   failures++

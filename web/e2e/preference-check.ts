@@ -51,6 +51,9 @@ if (likedOnly) {
   check(ranked[0].name === 'Vexora', 'positive profile alone prefers its familiar vowel ending')
 }
 
+const onePassContrast = buildProfile(broadLikes, [result('Nomora')])
+check(onePassContrast?.avoided !== null, 'one pass stays a weak contrast once likes exist')
+
 const contrastProfile = buildProfile(broadLikes, [
   result('Nomora'),
   result('Lexora'),
@@ -62,4 +65,18 @@ check(contrastProfile?.rejectedCount === 5, 'rejected feedback is represented in
 if (contrastProfile) {
   const ranked = rankByPreference([result('Vexora'), result('Vexium')], contrastProfile)
   check(ranked[0].name === 'Vexium', 'repeatedly rejected -ora shapes are pushed below alternatives')
+}
+
+const twoPasses = buildProfile([], [result('Nomora'), result('Lexora')])
+check(twoPasses === null, 'two passes alone do not overfit the local ranker')
+
+const passOnlyProfile = buildProfile([], [
+  result('Nomora'),
+  result('Lexora'),
+  result('Markora'),
+])
+check(passOnlyProfile?.likedCount === 0, 'three passes build a profile without favorites')
+if (passOnlyProfile) {
+  const ranked = rankByPreference([result('Vexora'), result('Vexium')], passOnlyProfile)
+  check(ranked[0].name === 'Vexium', 'pass-only learning steers away from a rejected shape')
 }

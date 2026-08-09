@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { generateBatch, batchMetrics, extractKeywords, type BatchMetrics, type Config, type NameResult, type Style } from './lib/engine'
 import { recommendations } from './lib/recommend'
-import { buildProfile, rankByPreference } from './lib/preferences'
+import { buildProfile, MIN_TASTE_SIGNALS, rankByPreference } from './lib/preferences'
 import { loadFavorites, toggleFavorite, removeFavorite, saveFavorites, loadRejected, toggleRejected, removeRejected, loadRecent, saveRecent, hasVisited, markVisited, loadJudgeConfig, saveJudgeConfig } from './lib/storage'
 import { type JudgeConfig } from './lib/judge'
 import { decodeShareUrl } from './lib/share'
@@ -252,12 +252,15 @@ export default function App() {
   const favoriteNames = new Set(favorites.map((item) => item.name.toLowerCase()))
   const rejectedNames = new Set(rejected.map((item) => item.name.toLowerCase()))
 
-  // Preference profile contrasts favorites with explicit passes; needs ≥3 likes.
+  // Preference profile learns toward likes or away from repeated passes.
   // Phase 37: applied automatically once it exists — no toggle. Phase 49:
   // ranking happens per batch inside handleGenerate (insert order is final);
   // this render-time profile only drives the local-taste status note.
   const profile = buildProfile(favorites, rejected)
   const displayResults = results
+  const likesNeeded = Math.max(0, MIN_TASTE_SIGNALS - favorites.length)
+  const passesNeeded = Math.max(0, MIN_TASTE_SIGNALS - rejected.length)
+  const tastePrompt = `Teach local taste · ${likesNeeded} ${likesNeeded === 1 ? 'like' : 'likes'} or ${passesNeeded} ${passesNeeded === 1 ? 'pass' : 'passes'} left`
 
   // Top pick of the batch (compared by name, so re-ranking doesn't break it).
   const bestName = metrics && results.length >= 2 ? results[metrics.stats.best_index]?.name : undefined
@@ -333,7 +336,7 @@ export default function App() {
                     >
                       {profile
                         ? `Local taste · ${favorites.length} liked · ${rejected.length} passed`
-                        : `Teach local taste · star ${Math.max(0, 3 - favorites.length)} more · pass misses`}
+                        : tastePrompt}
                     </span>
                   )}
                 </div>
