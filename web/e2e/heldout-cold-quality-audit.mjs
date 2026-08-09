@@ -53,7 +53,12 @@ const AI_VARIANTS = [
   'an AI automation agent',
   'an autonomous agent workflow builder',
 ]
-const PROMPTS = [...BASE_PROMPTS, ...AI_VARIANTS]
+const RECRUITER_VARIANTS = [
+  'a recruiting pipeline for talent teams',
+  'an applicant tracking system for hiring teams',
+  'a hiring pipeline for recruiters',
+]
+const PROMPTS = [...BASE_PROMPTS, ...AI_VARIANTS, ...RECRUITER_VARIANTS]
 const SEEDS = [13, 67, 313]
 const DIRECT_SUFFIXES = ['ify', 'ora', 'ion', 'era', 'io', 'ia', 'ix', 'el', 'en', 'on']
 
@@ -246,6 +251,14 @@ try {
     (sum, row) => sum + row.selected.reduce((pageSum, item) => pageSum + quality(item), 0),
     0,
   ) / (householdCatalogRows.length * 10)
+  const recruiterTrackingRows = rows.filter((row) => (
+    row.prompt === 'candidate tracking software for recruiters'
+  ))
+  const recruiterTrackingAverage = recruiterTrackingRows.reduce(
+    (sum, row) => sum + row.selected.reduce((pageSum, item) => pageSum + quality(item), 0),
+    0,
+  ) / (recruiterTrackingRows.length * 10)
+  const recruiterVariantRows = rows.filter((row) => RECRUITER_VARIANTS.includes(row.prompt))
   const seedDiversity = BASE_PROMPTS.map((prompt) => {
     const promptRows = auditRows.filter((row) => row.prompt === prompt)
     const nameSeeds = new Map()
@@ -359,7 +372,7 @@ try {
     .sort((left, right) => left.average - right.average)
     .slice(0, 12)
 
-  console.log(`held-out cold pages: ${auditRows.length} + ${rows.length - auditRows.length} AI wording variants`)
+  console.log(`held-out cold pages: ${auditRows.length} + ${rows.length - auditRows.length} wording stress pages`)
   console.log(`average quality: ${averageQuality.toFixed(2)} · lead ${leadQuality.toFixed(2)} · coverage ${leadCoverage.toFixed(2)}`)
   console.log(`sub-75: ${weak.length} · near pairs ${nearPairs} · similarity ${(pairSimilarity / pairCount).toFixed(3)}`)
   console.log(`suffix leads: ${suffixLeads.length} · guided leads: ${guidedLeads.length}`)
@@ -368,6 +381,7 @@ try {
   console.log(`CRM average: ${crmAverage.toFixed(2)} · RevLoop leads ${crmRows.filter((row) => row.selected[0]?.name === 'RevLoop').length}/${crmRows.length}`)
   console.log(`formatter average: ${formatterAverage.toFixed(2)} · TidyKit leads ${formatterRows.filter((row) => row.selected[0]?.name === 'TidyKit').length}/${formatterRows.length}`)
   console.log(`household catalog average: ${householdCatalogAverage.toFixed(2)} · StowLog leads ${householdCatalogRows.filter((row) => row.selected[0]?.name === 'StowLog').length}/${householdCatalogRows.length}`)
+  console.log(`recruiter tracking average: ${recruiterTrackingAverage.toFixed(2)}`)
   console.log(`guarded repair upgrades: ${guardedRepairUpgrades.length}`)
   console.log(`weak Respell accents: ${weakRespellAccents.length}`)
   console.log(`seed diversity: ${averageUniqueNames.toFixed(2)}/30 unique · ${averageSeedOverlap.toFixed(2)}/10 pair overlap · ${exactDuplicateSeedPages} duplicate pages`)
@@ -388,6 +402,13 @@ try {
   console.log('\nformatter focus')
   for (const row of formatterRows) {
     console.log(`${row.seed} · ${row.selected.map((item) => item.name).join(', ')}`)
+  }
+  console.log('\nrecruiter tracking focus')
+  for (const row of [...recruiterTrackingRows, ...recruiterVariantRows]) {
+    const names = row.selected.length > 0
+      ? row.selected.map((item) => item.name).join(', ')
+      : `empty · direct ${row.direct.map((item) => item.name).join('/')} · fallback ${row.fallbackCount}`
+    console.log(`${row.seed} · ${row.prompt} · ${names}`)
   }
   console.log('\nguarded repair upgrades')
   for (const { row, replacement, candidate } of guardedRepairUpgrades) {
@@ -465,6 +486,35 @@ try {
     [dominantStemExcess <= 9, 'held-out exact-stem repetition stays at or below nine excess cards'],
     [suffixLeads.length <= 24, 'held-out direct suffix leads stay at or below 24'],
     [guardedRepairUpgrades.length >= 6, 'held-out repair surfaces brief-specific inner-card upgrades'],
+    [
+      recruiterTrackingRows.length === SEEDS.length
+        && recruiterTrackingAverage >= 82.7
+        && recruiterTrackingRows.every((row) => (
+          row.selected[0]?.name === 'JobLoop'
+          && row.selected[0]?.construction === 'guided_pair'
+          && row.direct.some((item) => (
+            item.name === 'JobLoop' && item.construction === 'guided_pair'
+          ))
+          && row.selected.filter((item) => item.sourceMode === 'respell').length === 1
+          && !row.retryRequested
+        )),
+      'recruiter tracking pages lead with JobLoop while preserving one earned Respell accent',
+    ],
+    [
+      recruiterVariantRows.length === RECRUITER_VARIANTS.length * SEEDS.length
+        && recruiterVariantRows.every((row) => (
+          row.selected.length === 10
+          && row.selected[0]?.name === 'JobLoop'
+          && row.selected[0]?.construction === 'guided_pair'
+          && !row.retryRequested
+          && (
+            row.prompt.startsWith('an applicant')
+              ? row.selected.every((item) => item.sourceMode !== 'respell')
+              : row.selected.filter((item) => item.sourceMode === 'respell').length === 1
+          )
+        )),
+      'recruiter wording variants keep JobLoop and reject the weak applicant Respell',
+    ],
     [
       formatterRows.length === SEEDS.length
         && formatterAverage >= 83

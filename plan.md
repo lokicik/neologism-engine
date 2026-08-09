@@ -3171,6 +3171,47 @@ vocabulary, or additional generation request was added.
 
 ---
 
+## Phase 128 — Give recruiter trackers a hiring-workflow role
+
+**Observed gap.** `candidate tracking software for recruiters` contained the weakest held-out page
+at **79.43** and averaged only **81.48** across three seeds. Its ordinary roots all describe the
+recruiting domain (`Talentix`, `Scoutforge`, `Crewrelay`), but none expresses the pipeline function.
+The useful `Recruitr 83.4` Respell then closed Auto's normal pair path, even though a two-concept
+construction could improve one of the page's weak suffix cards without displacing that accent.
+
+**Candidate review.** The first obvious family was rejected: `HireFlow 80.0`, `HireLane 79.3`, and
+`TalentFlow 77.5` did not clear the existing pair threshold. A second manual probe found a stronger
+and more readable direction: `JobLoop 89.5`, `JobHub 88.8`, `JobDock 88.0`, `HireHub 88.0`, and
+`HireMap 86.5`. Only a brief containing both a recruiting marker and `track` or `pipeline` receives
+the private `job`/`hire`/`crew` plus `loop`/`hub`/`map`/`log`/`set` groups. A wording stress pass also
+found that unknown `applicant` became a separate nine-letter lead group and starved every candidate
+under the twelve-character/three-syllable limits; mapping it into the existing recruiting synonym
+group fixes the empty page instead of hiding the variant from the audit.
+
+**Guarded insertion.** This exact lane may request one twelve-name local pair pool even when an
+earned Respell is present. The Respell remains the page's sole mode accent. A pair must carry both
+concepts, score at least 85, and gain at least two structural points over the direct-suffix card it
+replaces. Recruiter Auto additionally raises its Respell floor from 75 to 80: `Recruitr 83.4` and
+`Recruyt` remain useful accents, while the reviewed `Applycant 77.0` does not enter applicant pages.
+Explicit Respell remains unchanged. Unrelated trackers and ordinary Brandable never receive the
+vocabulary. On the weakest seed, `JobLoop 89.5/c2` replaces `Matchify 75.6/c1` and reduces mean page
+similarity by 0.010.
+
+**Measured result.** All three recruiter pages now lead with `JobLoop` without a final retry and
+retain exactly one `Recruitr` accent. Their average improves **81.48 -> 82.77**. Across 105 held-out
+pages, average quality improves **84.11 -> 84.15**, lead quality **86.49 -> 86.73**, lead concept
+coverage **1.25 -> 1.28**, mean similarity **0.202 -> 0.201**, suffix leaders **24 -> 23**, and
+guided leaders **47 -> 50**. Near pairs remain 78; seed spread changes only slightly
+(**18.17 -> 18.14/30**, overlap **5.14 -> 5.16/10**) and remains inside the existing gates.
+
+**Verification.** The core suite is **148/148**. The full held-out gate, fixed 90-page cold audit,
+85-page Auto audit, fifteen namespace pages, 1,600 developer-domain names, and all nine recruiter
+wording stress pages pass, including three formerly empty applicant-tracking pages. Rebuilt WASM,
+TypeScript, and the production Vite bundle also pass. No LLM, network call, global score adjustment,
+or ordinary-pool expansion was added.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
@@ -3200,6 +3241,8 @@ Generic `builder` wording likewise cannot steal the Respell accent from a recogn
 subject; unknown builder briefs still keep their literal source.
 Household inventory briefs can express the job directly through the isolated `StowLog` family
 without teaching ordinary catalogs another global template.
+Recruiter tracking briefs likewise gain the isolated `JobLoop` hiring-workflow role; a strong pair
+can improve an inner suffix card without removing the page's one earned Respell accent.
 Cold Auto also limits exact four-letter stem repetition on a visible page, but only through a
 quality-neutral, coverage-preserving non-suffix substitution from the fallback it already opened.
 Compound is now a genuinely brief-aware explicit alternative rather than a random adjective

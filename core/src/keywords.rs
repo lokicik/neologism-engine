@@ -211,7 +211,7 @@ fn concept_roots(word: &str) -> &'static [&'static str] {
         "research" | "investigate" | "investigation" => {
             &["source", "proof", "trace", "lens", "cite"]
         }
-        "hire" | "recruit" | "recruiter" | "candidate" | "talent" => {
+        "hire" | "recruit" | "recruiter" | "candidate" | "applicant" | "talent" => {
             &["talent", "role", "hire", "scout", "match", "crew"]
         }
         "meal" | "recipe" | "menu" | "grocery" | "cook" | "kitchen" => {
@@ -362,7 +362,7 @@ fn concept_adjectives(word: &str) -> &'static [&'static str] {
         "research" | "investigate" | "investigation" => {
             &["deep", "exact", "clear", "open", "trusted", "focused"]
         }
-        "hire" | "recruit" | "recruiter" | "candidate" | "talent" => {
+        "hire" | "recruit" | "recruiter" | "candidate" | "applicant" | "talent" => {
             &["bright", "trusted", "ready", "open", "select", "proven"]
         }
         "meal" | "recipe" | "menu" | "grocery" | "cook" | "kitchen" => {
@@ -478,7 +478,14 @@ fn has_any_keyword(keywords: &[String], choices: &[&str]) -> bool {
 fn is_contextually_suppressed(word: &str, keywords: &[String]) -> bool {
     let recruiting = has_any_keyword(
         keywords,
-        &["hire", "recruit", "recruiter", "candidate", "talent"],
+        &[
+            "hire",
+            "recruit",
+            "recruiter",
+            "candidate",
+            "applicant",
+            "talent",
+        ],
     );
     let meals = has_any_keyword(
         keywords,
@@ -1214,6 +1221,26 @@ pub fn guided_pair_root_groups(keywords: &[String], limit: usize) -> Vec<Vec<Str
         return bounded_guided_groups(GROUPS, limit);
     }
 
+    let recruiting = keywords.iter().any(|keyword| {
+        matches!(
+            keyword.as_str(),
+            "candidate" | "applicant" | "recruit" | "recruiter" | "talent" | "hire"
+        )
+    });
+    let candidate_tracking = keywords
+        .iter()
+        .any(|keyword| matches!(keyword.as_str(), "track" | "pipeline"));
+    if recruiting && candidate_tracking {
+        // Candidate pipelines need a workflow role beside the ordinary talent
+        // roots. Keep concise forms such as `JobLoop` and `HireHub` private to
+        // this pair lane instead of teaching every tracker another template.
+        const GROUPS: &[&[&str]] = &[
+            &["job", "hire", "crew"],
+            &["loop", "hub", "map", "log", "set"],
+        ];
+        return bounded_guided_groups(GROUPS, limit);
+    }
+
     let household = keywords
         .iter()
         .any(|keyword| matches!(keyword.as_str(), "household" | "belonging" | "belongings"));
@@ -1704,6 +1731,39 @@ mod tests {
             .iter()
             .flatten()
             .any(|root| root == "stow"));
+    }
+
+    #[test]
+    fn guided_recruiter_tracking_uses_hiring_workflow_roles_only_in_its_lane() {
+        let keywords = extract_keywords("candidate tracking software for recruiters", 6);
+        let ordinary = brand_root_groups(&keywords, 16);
+        let guided = guided_pair_root_groups(&keywords, 16);
+        assert!(!ordinary.iter().flatten().any(|root| root == "job"));
+        assert!(guided.iter().flatten().any(|root| root == "job"));
+        assert!(guided.iter().flatten().any(|root| root == "hire"));
+        assert!(guided.iter().flatten().any(|root| root == "loop"));
+        assert!(guided.iter().flatten().any(|root| root == "hub"));
+        assert_eq!(guided.len(), 2, "{guided:?}");
+        assert!(guided.iter().flatten().count() <= 16, "{guided:?}");
+
+        let applicant = extract_keywords("an applicant tracking system for hiring teams", 6);
+        let applicant_ordinary = brand_root_groups(&applicant, 16);
+        let applicant_guided = guided_pair_root_groups(&applicant, 16);
+        assert_eq!(applicant_ordinary.len(), 1, "{applicant_ordinary:?}");
+        assert!(applicant_ordinary
+            .iter()
+            .flatten()
+            .any(|root| root == "talent"));
+        assert!(applicant_guided
+            .iter()
+            .flatten()
+            .any(|root| root == "job"));
+
+        let unrelated = extract_keywords("a package dependency tracker", 6);
+        assert!(!guided_pair_root_groups(&unrelated, 16)
+            .iter()
+            .flatten()
+            .any(|root| root == "job"));
     }
 
     #[test]

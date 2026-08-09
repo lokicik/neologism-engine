@@ -48,6 +48,9 @@ const GUIDED_PAIR_POOL = 12
 const AUTO_ACCENT_QUALITY_FLOOR = 75
 const GUIDED_METAPHOR_QUALITY_FLOOR = 85
 const GUIDED_PAIR_QUALITY_FLOOR = 84
+const RECRUITER_RESPELL_QUALITY_FLOOR = 80
+const RESPELL_COMPANION_PAIR_QUALITY_FLOOR = 85
+const GUIDED_PAIR_SET_GAIN = 2
 const GUIDED_METAPHOR_FALLBACK_SEED_OFFSET = 16
 // Order is deliberate: preserve the stronger Kinloom and Kitwave pools before
 // the narrow adjacent-seed pool gets a chance to supply Bufferlab.
@@ -67,6 +70,13 @@ const structuralQuality = (result: NameResult): number => (
 )
 
 const letters = (value: string): string => value.toLowerCase().replace(/[^a-z]/g, '')
+
+const isRecruiterTrackingBrief = (terms: string[]): boolean => {
+  const normalized = new Set(terms.map(letters))
+  return ['candidate', 'applicant', 'recruit', 'recruiter', 'talent', 'hire']
+    .some((term) => normalized.has(term))
+    && ['track', 'pipeline'].some((term) => normalized.has(term))
+}
 
 export const guidedMetaphorTail = (result: NameResult): string | undefined => {
   const normalized = letters(result.name)
@@ -131,6 +141,29 @@ const addQualityNeutralGuidedAlternative = (
     .map((result, index) => ({ result, index, quality: structuralQuality(result) }))
     .filter(({ result, quality: replacedQuality }) => (
       isDirectSuffixForm(result) && replacedQuality <= quality + Number.EPSILON
+    ))
+    .sort((left, right) => left.quality - right.quality || right.index - left.index)[0]
+  if (!replacement) return page
+  const next = page.slice()
+  next[replacement.index] = candidate
+  return next
+}
+
+const addStrongGuidedPairUpgrade = (
+  page: NameResult[],
+  candidate: NameResult | undefined,
+): NameResult[] => {
+  if (
+    !candidate
+    || structuralQuality(candidate) < RESPELL_COMPANION_PAIR_QUALITY_FLOOR
+    || page.some((result) => letters(result.name) === letters(candidate.name))
+  ) return page
+  const quality = structuralQuality(candidate)
+  const replacement = page
+    .map((result, index) => ({ result, index, quality: structuralQuality(result) }))
+    .filter(({ result, quality: replacedQuality }) => (
+      isDirectSuffixForm(result)
+      && replacedQuality + GUIDED_PAIR_SET_GAIN <= quality + Number.EPSILON
     ))
     .sort((left, right) => left.quality - right.quality || right.index - left.index)[0]
   if (!replacement) return page
@@ -243,6 +276,7 @@ export async function generateBatch(cfg: Config): Promise<NameResult[]> {
       ...(cfg.description?.trim() ? await extractKeywords(cfg.description) : []),
       ...(cfg.roots ?? []),
     ]
+    const recruiterTrackingBrief = isRecruiterTrackingBrief(terms)
     const [brandableBatch, respellBatch] = await Promise.all([
       generateNames({ ...cfg, variant: undefined, compound: false, count: total }),
       respell > 0
@@ -252,7 +286,9 @@ export async function generateBatch(cfg: Config): Promise<NameResult[]> {
     const linkedRespells = respellBatch
       .filter((result) => (
         isPromptLinkedRespell(result.name, terms)
-        && structuralQuality(result) >= AUTO_ACCENT_QUALITY_FLOOR
+        && structuralQuality(result) >= (
+          recruiterTrackingBrief ? RECRUITER_RESPELL_QUALITY_FLOOR : AUTO_ACCENT_QUALITY_FLOOR
+        )
       ))
       .slice(0, respell)
     // Respell owns the single guided accent when it is genuinely derived from
@@ -260,7 +296,17 @@ export async function generateBatch(cfg: Config): Promise<NameResult[]> {
     // Brandable page instead of widening the main generator's whole first pool.
     let metaphorAccent: NameResult[] = []
     let pairAccent: NameResult[] = []
-    if (total > 0 && linkedRespells.length === 0) {
+    if (total > 0 && recruiterTrackingBrief) {
+      // The scoped hiring-workflow role is stronger than this domain's broad
+      // metaphor pool. It may coexist with a safe recruiter Respell or become
+      // the sole guided construction when the only spelling is weak.
+      pairAccent = pickGuidedPair(await generateNames({
+        ...cfg,
+        variant: 'concept_pair',
+        compound: false,
+        count: GUIDED_PAIR_POOL,
+      }))
+    } else if (total > 0 && linkedRespells.length === 0) {
       const metaphorConfig = {
         ...cfg,
         variant: 'metaphor',
@@ -308,7 +354,9 @@ export async function generateBatch(cfg: Config): Promise<NameResult[]> {
       linkedRespells,
       metaphorAccent.slice(0, 1),
     ], total), metaphorAccent[0])
-    if (linkedRespells.length > 0) return primaryPage
+    if (linkedRespells.length > 0) {
+      return addStrongGuidedPairUpgrade(primaryPage, pairAccent[0])
+    }
     if (metaphorAccent.length > 0) {
       return addQualityNeutralGuidedAlternative(primaryPage, metaphorAccent[1])
     }
