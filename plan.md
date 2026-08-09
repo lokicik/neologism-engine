@@ -1061,13 +1061,51 @@ Compound session requiring 100 unique security-linked cards with no false exhaus
 
 ---
 
+## Phase 73 — Keep focused Compound briefs alive through 100 names
+
+**Bottleneck.** Phase 72 proved 100-name capacity for six multi-concept briefs, but its compact
+domain palettes were still finite when a brief mapped to one semantic concept. The expanded
+audit kept every first-page noun relevant yet stopped at 22/100 names for `fitness`, 30 for
+travel, 18 for education, 25 for AI automation, and 30 for music. Fixed-seed first-page
+distinctness was only 20–38% for those prompts because the same small adjective×noun grid was
+being ranked repeatedly.
+
+**Rejected A/B.** Appending the neutral palette on every request raised all known prompts to
+100 and improved proxy metrics, but it also displaced focused first-page names with generic
+forms such as `KeyNom`, `CalmNym`, and `NovelShare`. That version was removed. Reopening the
+original 272-word adjective corpus for unknown domains was also rejected: returning
+`JollyResearch`-style filler would satisfy a count while lowering the product's actual quality.
+
+**What changed.** A fresh ten-name Compound request still uses only its ordered domain palette,
+so Phase 72 first pages remain byte-for-byte unchanged. A request larger than ten, or a real
+`Load more` call carrying an exclusion history, extends that palette to at most 30 restrained
+general adjectives. Domain adjectives stay first, noun roots remain semantic, and the broad
+promptless corpus remains isolated. Unknown concepts keep the honest finite fallback rather
+than receiving arbitrary filler.
+
+**Measured result.** The five newly audited known-concept briefs move from **125/500** available
+long-request names to **500/500**, while all 250 fixed-seed first-page names and their scores are
+unchanged. The original six Phase 72 briefs remain 600/600 in long requests. `legal research`,
+which has no offline concept mapping, deliberately remains 40/100 under the 12-character limit.
+
+**Verification.** The core suite is **110/110**. New regressions pin focused-palette ordering
+and simulate ten rolling `fitness` batches with exact exclusion, requiring 100 fresh semantic
+Compound names. The twelve-brief release harness remains 600/600 prompt-linked on first pages.
+WASM and the production web bundle build cleanly. Chromium now drives both a security brief and
+single-concept `fitness` through 100 unique Compound cards, with no unrelated noun, repeat, or
+false exhaustion.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
 Brandable by default and only admits a Respell accent that visibly comes from the brief; the
 broader modes remain explicit choices and still form the exploratory mix when no brief exists.
 Compound is now a genuinely brief-aware explicit alternative rather than a random adjective
-showcase, while keeping its readable two-word promise and benchmarked 100-name session capacity.
+showcase. Focused first pages stay narrow; recognized concepts open a restrained continuation
+palette only when the user asks for more, preserving 100-name session capacity without generic
+first-page dilution.
 Long prompted sessions no longer collapse into repeated suffix families or stop before 100
 names, and semantic joins no longer erase a concept at one-letter/vowel boundaries. Local taste
 feedback can already adjust structural and mode preferences, while AI Studio remains an

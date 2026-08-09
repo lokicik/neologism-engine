@@ -276,16 +276,15 @@ fn concept_adjectives(word: &str) -> &'static [&'static str] {
     }
 }
 
-/// Return a small, deterministic adjective pool for Compound mode. Unknown
-/// domains still get a restrained general-purpose palette instead of falling
-/// back to hundreds of whimsical corpus adjectives.
-pub fn compound_adjectives(keywords: &[String]) -> Vec<&'static str> {
-    const DEFAULT: &[&str] = &[
-        "clear", "bright", "bold", "open", "prime", "simple", "swift", "pure", "fresh", "smart",
-        "vivid", "lucid", "native", "ready", "steady", "direct", "modern", "novel", "rare",
-        "vital", "agile", "wise", "solid", "calm", "new", "top", "key", "one", "true", "core",
-    ];
+const GENERAL_COMPOUND_ADJECTIVES: &[&str] = &[
+    "clear", "bright", "bold", "open", "prime", "simple", "swift", "pure", "fresh", "smart",
+    "vivid", "lucid", "native", "ready", "steady", "direct", "modern", "novel", "rare", "vital",
+    "agile", "wise", "solid", "calm", "new", "top", "key", "one", "true", "core",
+];
 
+/// Return the focused adjective pool for a Compound first page. Unknown
+/// domains use the restrained general palette instead of the whimsical corpus.
+pub fn compound_adjectives(keywords: &[String]) -> Vec<&'static str> {
     let has_product_concept = keywords.iter().any(|keyword| {
         !matches!(keyword.as_str(), "friend" | "team") && !concept_adjectives(keyword).is_empty()
     });
@@ -311,7 +310,23 @@ pub fn compound_adjectives(keywords: &[String]) -> Vec<&'static str> {
         }
     }
     if adjectives.is_empty() {
-        adjectives.extend_from_slice(DEFAULT);
+        adjectives.extend_from_slice(GENERAL_COMPOUND_ADJECTIVES);
+    }
+    adjectives
+}
+
+/// Broaden a known domain for long requests and Load more. The domain words
+/// remain first; a restrained neutral tail supplies capacity without reopening
+/// the broad corpus used by promptless exploration.
+pub fn compound_continuation_adjectives(keywords: &[String]) -> Vec<&'static str> {
+    let mut adjectives = compound_adjectives(keywords);
+    for &adjective in GENERAL_COMPOUND_ADJECTIVES {
+        if !adjectives.contains(&adjective) {
+            adjectives.push(adjective);
+        }
+        if adjectives.len() == 30 {
+            break;
+        }
     }
     adjectives
 }
@@ -624,6 +639,19 @@ mod tests {
             &adjectives[..8],
             ["clear", "bright", "bold", "open", "prime", "simple", "swift", "pure"]
         );
+    }
+
+    #[test]
+    fn compound_continuation_broadens_only_after_the_focused_palette() {
+        let keywords = ["fitness".into()];
+        let focused = compound_adjectives(&keywords);
+        let continued = compound_continuation_adjectives(&keywords);
+        assert_eq!(
+            focused,
+            ["vital", "active", "well", "steady", "bright", "daily"]
+        );
+        assert_eq!(&continued[..focused.len()], focused);
+        assert_eq!(continued.len(), 30);
     }
 
     #[test]

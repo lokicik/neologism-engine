@@ -583,7 +583,11 @@ fn generate_bigtech(
     };
     let compound_adjectives =
         if cfg.compound && (!raw_desc_keywords.is_empty() || !cfg.roots.is_empty()) {
-            keywords::compound_adjectives(&raw_desc_keywords)
+            if cfg.count > 10 || !cfg.exclude.is_empty() {
+                keywords::compound_continuation_adjectives(&raw_desc_keywords)
+            } else {
+                keywords::compound_adjectives(&raw_desc_keywords)
+            }
         } else {
             Vec::new()
         };
@@ -1792,6 +1796,40 @@ mod tests {
             let results = generate(&c);
             assert_eq!(results.len(), 100, "short Compound batch for {prompt}");
         }
+    }
+
+    #[test]
+    fn single_concept_compound_session_yields_100_fresh_names() {
+        let description = "fitness";
+        let extracted = keywords::extract_keywords(description, 6);
+        let roots: HashSet<String> = keywords::compound_roots(&extracted, 16)
+            .into_iter()
+            .collect();
+        let mut excluded = Vec::new();
+
+        for batch_index in 0..10 {
+            let mut c = cfg(Style::BigTech);
+            c.compound = true;
+            c.description = Some(description.to_string());
+            c.count = 10;
+            c.seed = Some(0xA076_1D64_78BD_642Fu64.wrapping_mul(batch_index as u64 + 1));
+            c.exclude = excluded.clone();
+            let batch = generate(&c);
+            assert_eq!(batch.len(), 10, "Compound batch {batch_index} starved");
+            for result in batch {
+                let noun = result
+                    .name
+                    .char_indices()
+                    .skip(1)
+                    .find(|(_, character)| character.is_ascii_uppercase())
+                    .map(|(index, _)| result.name[index..].to_lowercase())
+                    .unwrap_or_default();
+                assert!(roots.contains(&noun), "{} lost its concept", result.name);
+                assert!(!excluded.contains(&result.name), "{} repeated", result.name);
+                excluded.push(result.name);
+            }
+        }
+        assert_eq!(excluded.len(), 100);
     }
 
     #[test]

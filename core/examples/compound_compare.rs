@@ -13,6 +13,12 @@ const PROMPTS: &[&str] = &[
     "an app for splitting expenses with friends",
     "a marketplace for vintage keyboards",
     "a fast analytics dashboard for API performance",
+    "fitness",
+    "a travel route planner",
+    "an education study app",
+    "an AI automation agent",
+    "a music app",
+    "legal research",
 ];
 const SEEDS: &[u64] = &[7, 42, 101, 2024, 9999];
 

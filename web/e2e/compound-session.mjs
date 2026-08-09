@@ -10,8 +10,18 @@ const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const DESCRIPTION = 'a secure password manager for teams'
-const SECURITY_NOUNS = new Set(['vault', 'guard', 'shield', 'lock', 'cipher'])
+const SCENARIOS = [
+  {
+    label: 'security',
+    description: 'a secure password manager for teams',
+    nouns: new Set(['vault', 'guard', 'shield', 'lock', 'cipher']),
+  },
+  {
+    label: 'single-concept fitness',
+    description: 'fitness',
+    nouns: new Set(['pulse', 'vital', 'thrive', 'fit', 'care']),
+  },
+]
 
 const server = spawn(process.execPath, [viteCli, 'preview', '--port', String(PORT), '--strictPort'], {
   cwd: WEB_DIR,
@@ -41,37 +51,39 @@ function compoundNoun(name) {
 }
 
 try {
-  const context = await browser.newContext()
-  await context.addInitScript(() => localStorage.setItem('neologism:visited', '1'))
-  const page = await context.newPage({ viewport: { width: 1440, height: 1000 } })
-  await page.goto(APP_URL)
-  await page.fill('.command-input', DESCRIPTION)
-  await page.locator('.mode-pill').filter({ hasText: 'Compound' }).click()
-  await page.click('.command-go')
-  await page.waitForFunction(() => document.querySelectorAll('.name-card').length === 10, undefined, {
-    timeout: 20000,
-  })
-  check(await page.locator('.name-card').count() === 10, 'the first Compound batch contains ten names')
+  for (const scenario of SCENARIOS) {
+    const context = await browser.newContext()
+    await context.addInitScript(() => localStorage.setItem('neologism:visited', '1'))
+    const page = await context.newPage({ viewport: { width: 1440, height: 1000 } })
+    await page.goto(APP_URL)
+    await page.fill('.command-input', scenario.description)
+    await page.locator('.mode-pill').filter({ hasText: 'Compound' }).click()
+    await page.click('.command-go')
+    await page.waitForFunction(() => document.querySelectorAll('.name-card').length === 10, undefined, {
+      timeout: 20000,
+    })
+    check(await page.locator('.name-card').count() === 10, `${scenario.label}: the first batch contains ten names`)
 
-  for (let attempt = 0; attempt < 12; attempt++) {
-    const before = await page.locator('.name-card').count()
-    if (before >= 100) break
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
-    await page.waitForFunction(
-      (previous) => document.querySelectorAll('.name-card').length > previous,
-      before,
-      { timeout: 6000 },
-    )
+    for (let attempt = 0; attempt < 12; attempt++) {
+      const before = await page.locator('.name-card').count()
+      if (before >= 100) break
+      await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+      await page.waitForFunction(
+        (previous) => document.querySelectorAll('.name-card').length > previous,
+        before,
+        { timeout: 6000 },
+      )
+    }
+
+    const names = await page.locator('.name-text').allTextContents()
+    const lowered = names.map((name) => name.toLowerCase())
+    const unrelated = names.filter((name) => !scenario.nouns.has(compoundNoun(name)))
+    check(names.length >= 100, `${scenario.label}: infinite scroll reaches at least 100 names (got ${names.length})`)
+    check(new Set(lowered).size === names.length, `${scenario.label}: the session contains no repeated names`)
+    check(unrelated.length === 0, `${scenario.label}: every noun stays tied to the brief (unrelated: ${unrelated.join(', ') || 'none'})`)
+    check(await page.locator('.exhausted-notice').count() === 0, `${scenario.label}: the brief is not falsely marked exhausted`)
+    await context.close()
   }
-
-  const names = await page.locator('.name-text').allTextContents()
-  const lowered = names.map((name) => name.toLowerCase())
-  const unrelated = names.filter((name) => !SECURITY_NOUNS.has(compoundNoun(name)))
-  check(names.length >= 100, `Compound infinite scroll reaches at least 100 names (got ${names.length})`)
-  check(new Set(lowered).size === names.length, 'the Compound session contains no repeated names')
-  check(unrelated.length === 0, `every Compound noun stays tied to security (unrelated: ${unrelated.join(', ') || 'none'})`)
-  check(await page.locator('.exhausted-notice').count() === 0, 'the Compound brief is not falsely marked exhausted')
-  await context.close()
 } catch (error) {
   console.error('SCRIPT ERROR:', error.message)
   failures++
