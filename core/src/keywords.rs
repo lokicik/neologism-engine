@@ -1006,7 +1006,7 @@ pub fn respell_source_keywords(keywords: &[String]) -> Vec<String> {
         .filter(|keyword| {
             !is_contextually_suppressed(keyword, keywords)
                 && !is_brand_context_only(keyword)
-                && !matches!(keyword.as_str(), "friend" | "team")
+                && !matches!(keyword.as_str(), "friend" | "team" | "builder")
                 && !concept_roots(keyword).is_empty()
                 && (!naming_brief
                     || matches!(
@@ -1554,6 +1554,11 @@ mod tests {
                 &["marketplace"][..],
                 &["online", "local", "seller"][..],
             ),
+            (
+                "an autonomous agent workflow builder",
+                &["agent"][..],
+                &["builder"][..],
+            ),
         ] {
             let keywords = extract_keywords(prompt, 6);
             let sources = respell_source_keywords(&keywords);
@@ -1573,6 +1578,9 @@ mod tests {
     fn respell_sources_preserve_unknown_briefs() {
         let keywords = vec!["local".into(), "bakery".into()];
         assert_eq!(respell_source_keywords(&keywords), keywords);
+
+        let builder_only = vec!["builder".into()];
+        assert_eq!(respell_source_keywords(&builder_only), builder_only);
     }
 
     #[test]

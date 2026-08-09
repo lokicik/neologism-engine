@@ -220,6 +220,13 @@ try {
     (sum, row) => sum + row.selected.reduce((pageSum, item) => pageSum + quality(item), 0),
     0,
   ) / (aiAgentRows.length * 10)
+  const autonomousBuilderRows = rows.filter((row) => (
+    row.prompt === 'an autonomous agent workflow builder'
+  ))
+  const autonomousBuilderAverage = autonomousBuilderRows.reduce(
+    (sum, row) => sum + row.selected.reduce((pageSum, item) => pageSum + quality(item), 0),
+    0,
+  ) / (autonomousBuilderRows.length * 10)
   const crmRows = rows.filter((row) => (
     row.prompt === 'a customer relationship pipeline for sales representatives'
   ))
@@ -309,6 +316,7 @@ try {
   console.log(`sub-75: ${weak.length} · near pairs ${nearPairs} · similarity ${(pairSimilarity / pairCount).toFixed(3)}`)
   console.log(`suffix leads: ${suffixLeads.length} · guided leads: ${guidedLeads.length}`)
   console.log(`AI agent average: ${aiAgentAverage.toFixed(2)} · direct semantic-pair pages ${aiAgentRows.filter((row) => row.direct.some((item) => item.name === 'CogLoop' && item.construction === 'guided_pair')).length}/${aiAgentRows.length}`)
+  console.log(`autonomous builder average: ${autonomousBuilderAverage.toFixed(2)} · CogLoop leads ${autonomousBuilderRows.filter((row) => row.selected[0]?.name === 'CogLoop').length}/${autonomousBuilderRows.length}`)
   console.log(`CRM average: ${crmAverage.toFixed(2)} · RevLoop leads ${crmRows.filter((row) => row.selected[0]?.name === 'RevLoop').length}/${crmRows.length}`)
   console.log(`formatter average: ${formatterAverage.toFixed(2)} · TidyKit leads ${formatterRows.filter((row) => row.selected[0]?.name === 'TidyKit').length}/${formatterRows.length}`)
   console.log(`guarded repair upgrades: ${guardedRepairUpgrades.length}`)
@@ -433,6 +441,19 @@ try {
           && !row.retryRequested
         )),
       'AI agent pages surface their semantic pair before the final retry',
+    ],
+    [
+      autonomousBuilderRows.length === SEEDS.length
+        && autonomousBuilderRows.every((row) => (
+          row.selected[0]?.name === 'CogLoop'
+          && row.selected[0]?.construction === 'guided_pair'
+          && row.direct.some((item) => (
+            item.name === 'CogLoop' && item.construction === 'guided_pair'
+          ))
+          && !row.selected.some((item) => item.name === 'Buylder')
+          && !row.retryRequested
+        )),
+      'generic builder roles cannot steal the AI workflow Respell accent',
     ],
     [
       crmRows.length === SEEDS.length

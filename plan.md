@@ -3084,6 +3084,34 @@ ordinary role-palette expansion, or preference-ranking change was added.
 
 ---
 
+## Phase 125 — Prefer the product subject over a generic builder role
+
+**Human-quality miss.** `an autonomous agent workflow builder` exposed a useful limit in the
+structural score: `Buylder` scores **91.0**, above `CogLoop 89.5`, but it styles a generic artifact
+role and says nothing about the product's AI-workflow identity. Because it was prompt-linked and
+well above the new 75-point floor, it legitimately owned Auto's Respell accent and blocked the
+better two-concept pair on all three independent seeds. This is exactly the kind of aesthetically
+weak high score that should be fixed by semantic source selection, not by inflating another metric.
+
+**Narrow retained rule.** When another recognized semantic anchor exists, `builder` no longer
+qualifies as a Respell source. Builder-only or otherwise unknown briefs retain the word through the
+existing fallback, and ordinary Brandable still keeps its full build/forge vocabulary. A broader
+trial also suppressed `build`, `create`, and `generator`; it removed one proven documentation
+upgrade (`Webforge -> Webmint`), so that version was rejected and only `builder` remains.
+
+**Measured result.** All three autonomous-agent pages now surface the existing `CogLoop` pair
+directly, require no final retry, and contain no `Buylder`; the three-page average improves
+**81.16 -> 81.37** despite deliberately rejecting the higher-scoring spelling. The 105-page held-out
+aggregate remains **84.08**, lead quality **86.27**, lead coverage **1.22**, seed spread
+**18.23/30**, and pair overlap **5.12/10**. All six reviewed inner-card upgrades remain present.
+
+**Verification.** The core suite remains **146/146**. The full held-out gate, fixed 90-page cold
+audit, 85-page Auto audit, fifteen namespace pages, 1,600 developer-domain names, rebuilt WASM,
+TypeScript, and production bundle all pass. No score weight, generated-name blacklist, LLM, or
+network dependency was added.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
@@ -3109,6 +3137,8 @@ the stricter aesthetic guards; generic high-scoring metaphor tails do not displa
 CRM pipeline briefs use the isolated role pattern for `RevLoop` while strong `Salelab` pages remain
 untouched. Formatter/linter briefs use the same private-role pattern for `TidyKit`, while weak
 related spellings can no longer block a stronger construction before repair.
+Generic `builder` wording likewise cannot steal the Respell accent from a recognized product
+subject; unknown builder briefs still keep their literal source.
 Compound is now a genuinely brief-aware explicit alternative rather than a random adjective
 showcase. Focused first pages stay narrow; recognized concepts open a restrained continuation
 palette only when the user asks for more, preserving 100-name session capacity without generic
