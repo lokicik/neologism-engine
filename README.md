@@ -18,7 +18,7 @@ neologism-engine/
 - **Syllable blending** (portmanteau) + tech suffix transforms for Big Tech style
 - **Sub-style phonologies** — per-variant phoneme-affinity profiles that re-rank Markov output toward a target sound (Elvish, Dwarvish, Orcish, Common; Stellar, Machine, Alien)
 - **Description-driven naming** — simplified RAKE keyword extraction turns a product description into blend roots
-- **Developer-domain semantics** — compact offline maps for databases, migrations, rate limits, terminals, logs, Git, caches, browser tools, testing, and cloud deployment keep dev briefs tied to their actual domain
+- **Developer-domain semantics** — compact offline maps for databases, queues, formatters, environment tools, filesystems, feature flags, schedulers, dependency updates, documentation, and other common dev domains keep technical briefs tied to their actual meaning
 - **Phonotactic filters** — rejects vowel-less output and over-long consonant clusters (relaxed for harsh variants), plus a Sonority Sequencing check so "soft" styles read naturally
 - **Word-likeness ranking** — big-tech blends are ranked by their probability under the real-brand Markov model, surfacing the most brand-like names
 - **Connotation tags** — each name is tagged with the "vibe" it evokes (small/large, bold/smooth/sleek, sharp/round) from sound symbolism
@@ -75,13 +75,13 @@ App runs at **http://localhost:5173/**.
 cargo test -p neologism-core
 ```
 
-114 unit tests covering Markov determinism, phonotactic filters, blend logic, score ranges, phoneme affinity, sonority sequencing, word-likeness, keyword extraction, semantic ranking, exclusion behavior, developer-domain coverage, and 100-name brief sessions.
+116 unit tests covering Markov determinism, phonotactic filters, blend logic, score ranges, phoneme affinity, sonority sequencing, word-likeness, keyword extraction, semantic ranking, exclusion behavior, developer-domain coverage, and 100-name brief sessions.
 
 > Quick quality check: `cargo run -p neologism-core --example sample` prints a batch of names for every style and variant.
 > Long-session check: `cargo run -p neologism-core --example concept_compare --release` audits ten rolling batches across seven representative briefs.
 > Compound quality check: `cargo run -p neologism-core --example compound_compare --release` audits noun relevance, adjective–noun coherence, structural scores, seed diversity, and 100-name capacity across twelve multi- and single-concept briefs.
-> Developer-domain check: `cargo run -p neologism-core --example dev_domain_compare --release` audits semantic coverage across eight held-out developer briefs and both Brandable and Compound; from `web/`, `node e2e/dev-domain-audit.mjs` pins the same behavior in Chromium/WASM.
-> Brandable morphology check: `cargo run -p neologism-core --example morphology_compare --release` audits 700 fixed-seed names plus 1,400 rolling-session names for lossy suffix and shared-overlap seams while tracking structural composite, diversity, and capacity.
+> Developer-domain check: `cargo run -p neologism-core --example dev_domain_compare --release` audits semantic coverage across sixteen held-out developer briefs and both Brandable and Compound; from `web/`, `node e2e/dev-domain-audit.mjs` pins the same behavior in Chromium/WASM.
+> Brandable morphology check: `cargo run -p neologism-core --example morphology_compare --release` audits 700 fixed-seed names plus 1,400 rolling-session names for collapsed suffixes, complete vowel-suffix seams, and lossy shared overlaps while tracking structural composite, diversity, and capacity.
 > Auto first-page check: from `web/`, `node e2e/auto-quality-audit.mjs` audits 30 deterministic guided pages (`--verbose` prints every name).
 
 ### Audit exported taste data

@@ -1235,6 +1235,47 @@ cleanly; Chromium reports no lossy semantic overlap, keeps the developer-domain 
 
 ---
 
+## Phase 78 — Cover the second wave of developer naming briefs
+
+**Bottleneck.** The first developer-domain pass was strong on its eight audited areas, but that
+did not prove the offline engine understood the wider work developers actually name. Eight new
+held-out briefs exposed the next gap: message queues, formatters/linters, environment variables,
+filesystem search, feature flags, background jobs, dependency updates, and documentation sites.
+The new set returned only **720/800** requested names and just **189/720 (26.3%)** carried a
+domain marker. Across all sixteen briefs, the baseline was **979/1,520 (64.4%)**.
+
+**What changed.** Each new domain now has a compact root family and a restrained Compound
+adjective palette. Specialized concepts lead generic artifacts such as `CLI`, `client`, and
+`service`; those artifact words remain useful context but no longer crowd out `queue`, `lint`,
+`config`, `path`, `flag`, `cron`, `dep`, or `doc`. Context disambiguation also prevents `message`
+from opening social roots in a queue brief, `automation` from opening agent roots in a dependency
+brief, and `generator` from displacing documentation/site roots. Representative first pages now
+include `Streamora`, `DirectPipe`, `Lintify`, `StrictFormat`, `Configix`, `LocalEnv`, `Pathora`,
+`QuickSeek`, `Launchify`, `SafeToggle`, `Cronix`, `ReadyJob`, `Depora`, `SafeLock`, `Guideora`,
+and `LivingSite`.
+
+**Measured result.** The new eight-brief set moves **189/720 (26.3%) → 800/800 (100%)** with
+every requested name returned. The original eight cases remain **790/800**, so the expanded native
+audit reaches **1,590/1,600 (99.4%)** rather than buying new coverage by weakening the old set.
+The Chromium/WASM gate covers the same 160 deterministic pages: the new set is also **800/800**,
+while the full sixteen-brief totals are **798/800 Brandable** and **791/800 Compound**.
+
+**Rejected scorer change.** The morphology audit now separately counts complete suffixes after
+vowel-ending roots: **63/700** fixed-seed and **40/1,400** rolling names. Penalizing that whole
+family reduced the incidence, but also lowered structural composite **81.54 → 81.23** and
+diversity **0.718 → 0.712**; a half-strength penalty still regressed both metrics. The production
+ranking therefore stays unchanged. The measurement remains so future taste data can determine
+whether forms such as `Cacheora` are actually disliked rather than treating a visible seam as a
+defect by assumption.
+
+**Verification.** The core suite is **116/116**. The seven-brief Brandable checkpoint remains
+unchanged, Compound remains **600/600** prompt-linked and pair-coherent, and the morphology audit
+returns **700/700** fixed-seed plus **1,400/1,400** rolling names with no collapsed or lossy-overlap
+forms. WASM and the production bundle build cleanly; Chromium passes the expanded developer-domain
+gate, all 30 guided Auto pages, and both 100-card Compound sessions.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

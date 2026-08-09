@@ -175,6 +175,30 @@ fn concept_roots(word: &str) -> &'static [&'static str] {
         "cloud" | "deploy" | "deployment" | "server" | "hosting" | "infrastructure" | "infra" => {
             &["cloud", "dock", "ship", "stack", "grid"]
         }
+        "queue" | "broker" | "messaging" | "event" | "stream" | "topic" => {
+            &["queue", "broker", "stream", "topic", "pipe", "bus"]
+        }
+        "format" | "formatter" | "lint" | "linter" | "style" => {
+            &["format", "lint", "style", "rule", "tidy"]
+        }
+        "environment" | "env" | "variable" | "config" | "configuration" | "setting"
+        | "settings" | "secret" => &["env", "config", "setting", "secret", "value"],
+        "filesystem" | "file" | "path" | "directory" | "folder" | "search" | "find" | "index" => {
+            &["file", "path", "find", "scan", "index", "seek"]
+        }
+        "feature" | "flag" | "toggle" | "rollout" => {
+            &["flag", "toggle", "switch", "rollout", "gate", "launch"]
+        }
+        "background" | "job" | "worker" | "scheduler" | "cron" | "timer" => {
+            &["job", "task", "worker", "cron", "timer", "run"]
+        }
+        "dependency" | "dependencies" | "update" | "updater" | "upgrade" | "bump" => {
+            &["dep", "bump", "update", "sync", "lock", "version"]
+        }
+        "documentation" | "docs" | "doc" | "guide" | "manual" | "reference" => {
+            &["doc", "guide", "page", "site", "manual"]
+        }
+        "site" | "website" | "portal" => &["site", "page", "web", "portal", "home"],
         "generate" | "generator" | "create" | "creator" | "build" | "builder" => {
             &["forge", "mint", "spark", "seed", "craft"]
         }
@@ -260,6 +284,30 @@ fn concept_adjectives(word: &str) -> &'static [&'static str] {
         "cloud" | "deploy" | "deployment" | "server" | "hosting" | "infrastructure" | "infra" => {
             &["ready", "swift", "steady", "live", "open", "solid"]
         }
+        "queue" | "broker" | "messaging" | "event" | "stream" | "topic" => {
+            &["live", "steady", "open", "fast", "durable", "direct"]
+        }
+        "format" | "formatter" | "lint" | "linter" | "style" => {
+            &["clean", "exact", "strict", "tidy", "clear", "steady"]
+        }
+        "environment" | "env" | "variable" | "config" | "configuration" | "setting"
+        | "settings" | "secret" => &["local", "safe", "clear", "private", "stable", "ready"],
+        "filesystem" | "file" | "path" | "directory" | "folder" | "search" | "find" | "index" => {
+            &["local", "quick", "deep", "exact", "smart", "fast"]
+        }
+        "feature" | "flag" | "toggle" | "rollout" => {
+            &["safe", "gradual", "smart", "ready", "live", "steady"]
+        }
+        "background" | "job" | "worker" | "scheduler" | "cron" | "timer" => {
+            &["steady", "timed", "ready", "async", "swift", "reliable"]
+        }
+        "dependency" | "dependencies" | "update" | "updater" | "upgrade" | "bump" => {
+            &["fresh", "safe", "current", "stable", "ready", "clean"]
+        }
+        "documentation" | "docs" | "doc" | "guide" | "manual" | "reference" => {
+            &["clear", "open", "simple", "ready", "living", "helpful"]
+        }
+        "site" | "website" | "portal" => &["open", "live", "clear", "fast", "public", "bright"],
         "generate" | "generator" | "create" | "creator" | "build" | "builder" => {
             &["fresh", "bright", "bold", "swift", "open", "prime"]
         }
@@ -451,6 +499,8 @@ fn is_dev_artifact(word: &str) -> bool {
             | "library"
             | "cli"
             | "api"
+            | "client"
+            | "service"
     )
 }
 
@@ -509,6 +559,58 @@ fn is_specialized_dev_domain(word: &str) -> bool {
             | "hosting"
             | "infrastructure"
             | "infra"
+            | "queue"
+            | "broker"
+            | "messaging"
+            | "event"
+            | "stream"
+            | "topic"
+            | "format"
+            | "formatter"
+            | "lint"
+            | "linter"
+            | "style"
+            | "environment"
+            | "env"
+            | "variable"
+            | "config"
+            | "configuration"
+            | "setting"
+            | "settings"
+            | "secret"
+            | "filesystem"
+            | "file"
+            | "path"
+            | "directory"
+            | "folder"
+            | "search"
+            | "find"
+            | "index"
+            | "feature"
+            | "flag"
+            | "toggle"
+            | "rollout"
+            | "background"
+            | "job"
+            | "worker"
+            | "scheduler"
+            | "cron"
+            | "timer"
+            | "dependency"
+            | "dependencies"
+            | "update"
+            | "updater"
+            | "upgrade"
+            | "bump"
+            | "documentation"
+            | "docs"
+            | "doc"
+            | "guide"
+            | "manual"
+            | "reference"
+            | "site"
+            | "website"
+            | "portal"
     )
 }
 
@@ -531,6 +633,32 @@ pub fn compound_roots(keywords: &[String], limit: usize) -> Vec<String> {
             "git" | "repo" | "repository" | "version" | "release"
         )
     });
+    let has_queue_domain = keywords.iter().any(|keyword| {
+        matches!(
+            keyword.as_str(),
+            "queue" | "broker" | "messaging" | "event" | "stream" | "topic"
+        )
+    });
+    let has_dependency_domain = keywords.iter().any(|keyword| {
+        matches!(
+            keyword.as_str(),
+            "dependency" | "dependencies" | "update" | "updater" | "upgrade" | "bump"
+        )
+    });
+    let has_docs_domain = keywords.iter().any(|keyword| {
+        matches!(
+            keyword.as_str(),
+            "documentation"
+                | "docs"
+                | "doc"
+                | "guide"
+                | "manual"
+                | "reference"
+                | "site"
+                | "website"
+                | "portal"
+        )
+    });
     let product_keywords: Vec<String> = keywords
         .iter()
         .filter(|keyword| {
@@ -540,6 +668,13 @@ pub fn compound_roots(keywords: &[String], limit: usize) -> Vec<String> {
             ) && !(has_analytics && keyword.as_str() == "api")
                 && !(has_specialized_dev_domain && is_dev_artifact(keyword))
                 && !(has_source_control && keyword.as_str() == "automation")
+                && !(has_queue_domain && keyword.as_str() == "message")
+                && !(has_dependency_domain && keyword.as_str() == "automation")
+                && !(has_docs_domain
+                    && matches!(
+                        keyword.as_str(),
+                        "generate" | "generator" | "create" | "creator" | "build" | "builder"
+                    ))
         })
         .cloned()
         .collect();
@@ -561,7 +696,15 @@ fn suppress_literal_root(word: &str) -> bool {
     !concept_roots(word).is_empty()
         || matches!(
             word,
-            "project" | "manager" | "dashboard" | "viewer" | "inspector" | "toolkit" | "planner"
+            "project"
+                | "manager"
+                | "dashboard"
+                | "viewer"
+                | "inspector"
+                | "toolkit"
+                | "planner"
+                | "client"
+                | "service"
         )
 }
 
@@ -575,7 +718,14 @@ fn concept_position(word: &str) -> u8 {
         | "classic" | "antique" | "fast" | "speed" | "performance" | "rapid" => 0,
         "migration" | "migrate" | "rate" | "limit" | "limiter" | "throttle" | "terminal"
         | "git" | "release" | "test" | "testing" | "qa" | "debug" | "cloud" | "deploy"
-        | "deployment" => 0,
+        | "deployment" | "queue" | "broker" | "messaging" | "event" | "stream" | "topic"
+        | "format" | "formatter" | "lint" | "linter" | "style" | "environment" | "env"
+        | "variable" | "config" | "configuration" | "setting" | "settings" | "secret"
+        | "filesystem" | "file" | "path" | "directory" | "folder" | "search" | "find" | "index"
+        | "feature" | "flag" | "toggle" | "rollout" | "background" | "job" | "worker"
+        | "scheduler" | "cron" | "timer" | "dependency" | "dependencies" | "update" | "updater"
+        | "upgrade" | "bump" | "documentation" | "docs" | "doc" | "guide" | "manual"
+        | "reference" | "site" | "website" | "portal" => 0,
         "generate" | "generator" | "create" | "creator" | "build" | "builder" | "friend"
         | "community" | "social" | "team" | "chat" | "message" | "data" | "analytic"
         | "analytics" | "insight" | "metric" | "market" | "marketplace" | "shop" | "sell"
@@ -588,11 +738,28 @@ fn concept_position(word: &str) -> u8 {
 /// separate lets the generator combine *different ideas* (Ink + Lens) instead
 /// of accidentally pairing synonyms from one idea (Lens + Scope).
 pub fn brand_root_groups(keywords: &[String], limit: usize) -> Vec<Vec<String>> {
+    let has_queue_domain = keywords.iter().any(|keyword| {
+        matches!(
+            keyword.as_str(),
+            "queue" | "broker" | "messaging" | "event" | "stream" | "topic"
+        )
+    });
+    let has_dependency_domain = keywords.iter().any(|keyword| {
+        matches!(
+            keyword.as_str(),
+            "dependency" | "dependencies" | "update" | "updater" | "upgrade" | "bump"
+        )
+    });
     let mut positioned_groups = Vec::new();
     let mut seen = Vec::new();
     for (source_order, keyword) in keywords.iter().enumerate() {
         if seen.len() == limit {
             break;
+        }
+        if (has_queue_domain && keyword == "message")
+            || (has_dependency_domain && keyword == "automation")
+        {
+            continue;
         }
         let mut group = Vec::new();
         if !suppress_literal_root(keyword) && !seen.contains(keyword) {
@@ -939,5 +1106,42 @@ mod tests {
         let git_roots = compound_roots(&git, 16);
         assert!(git_roots.contains(&"commit".to_string()));
         assert!(!git_roots.contains(&"agent".to_string()));
+    }
+
+    #[test]
+    fn expands_second_wave_developer_domains() {
+        for (prompt, marker) in [
+            ("a message queue client", "queue"),
+            ("a code formatter and linter", "lint"),
+            ("an environment variable manager", "config"),
+            ("a filesystem search CLI", "path"),
+            ("a feature flag service", "toggle"),
+            ("a background job scheduler", "cron"),
+            ("dependency update automation", "dep"),
+            ("a documentation site generator", "doc"),
+        ] {
+            let keywords = extract_keywords(prompt, 6);
+            let roots = brand_roots(&keywords, 16);
+            assert!(roots.contains(&marker.to_string()), "{prompt}: {roots:?}");
+        }
+    }
+
+    #[test]
+    fn specialized_context_drops_misleading_generic_concepts() {
+        let queue = extract_keywords("a message queue client", 6);
+        let queue_roots = compound_roots(&queue, 16);
+        assert!(queue_roots.contains(&"queue".to_string()));
+        assert!(!queue_roots.contains(&"kin".to_string()));
+        assert!(!queue_roots.contains(&"client".to_string()));
+
+        let dependency = extract_keywords("dependency update automation", 6);
+        let dependency_roots = compound_roots(&dependency, 16);
+        assert!(dependency_roots.contains(&"dep".to_string()));
+        assert!(!dependency_roots.contains(&"agent".to_string()));
+
+        let formatter = extract_keywords("a code formatter and linter", 6);
+        let formatter_roots = compound_roots(&formatter, 16);
+        assert!(formatter_roots.contains(&"lint".to_string()));
+        assert!(!formatter_roots.contains(&"crate".to_string()));
     }
 }

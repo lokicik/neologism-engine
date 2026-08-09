@@ -25,6 +25,7 @@ const PROMPTS: &[&str] = &[
 ];
 const SEEDS: &[u64] = &[7, 42, 101, 2024, 9999];
 const COLLAPSED_SUFFIX_TAILS: &[&str] = &["a", "o", "ra", "x", "fy"];
+const CONCEPT_SUFFIXES: &[&str] = &["ia", "io", "ora", "ix", "ify"];
 
 fn config(prompt: &str, seed: u64) -> Config {
     Config {
@@ -54,6 +55,18 @@ fn has_collapsed_suffix(name: &str, roots: &[String]) -> bool {
             && COLLAPSED_SUFFIX_TAILS
                 .iter()
                 .any(|tail| lower == format!("{root}{tail}"))
+    })
+}
+
+fn has_full_vowel_suffix(name: &str, roots: &[String]) -> bool {
+    let lower = name.to_lowercase();
+    roots.iter().any(|root| {
+        root.chars()
+            .last()
+            .is_some_and(|last| matches!(last, 'a' | 'e' | 'i' | 'o' | 'u' | 'y'))
+            && CONCEPT_SUFFIXES
+                .iter()
+                .any(|suffix| lower == format!("{root}{suffix}"))
     })
 }
 
@@ -92,13 +105,16 @@ fn record_overlap_form(
 fn main() {
     let mut total = 0usize;
     let mut collapsed = 0usize;
+    let mut full_vowel_suffixes = 0usize;
     let mut composite = 0u64;
     let mut batch_diversity = 0.0;
     let mut collapsed_examples = BTreeSet::new();
+    let mut full_vowel_suffix_examples = BTreeSet::new();
     let mut overlap_examples: BTreeMap<String, usize> = BTreeMap::new();
     let mut preserved_overlap_examples: BTreeMap<String, usize> = BTreeMap::new();
     let mut rolling_total = 0usize;
     let mut rolling_short = 0usize;
+    let mut rolling_full_vowel_suffixes = 0usize;
 
     for prompt in PROMPTS {
         let keywords = extract_keywords(prompt, 6);
@@ -114,6 +130,10 @@ fn main() {
                 if has_collapsed_suffix(&result.name, &roots) {
                     collapsed += 1;
                     collapsed_examples.insert(result.name.clone());
+                }
+                if has_full_vowel_suffix(&result.name, &roots) {
+                    full_vowel_suffixes += 1;
+                    full_vowel_suffix_examples.insert(result.name.clone());
                 }
                 record_overlap_form(&result.name, &overlaps, &mut overlap_examples);
                 record_overlap_form(
@@ -133,6 +153,8 @@ fn main() {
             rolling_short += usize::from(results.len() < cfg.count);
             rolling_total += results.len();
             for result in &results {
+                rolling_full_vowel_suffixes +=
+                    usize::from(has_full_vowel_suffix(&result.name, &roots));
                 record_overlap_form(&result.name, &overlaps, &mut overlap_examples);
                 record_overlap_form(
                     &result.name,
@@ -160,6 +182,17 @@ fn main() {
     println!(
         "collapsed examples: {}",
         collapsed_examples
+            .into_iter()
+            .collect::<Vec<_>>()
+            .join(", ")
+    );
+    println!(
+        "full vowel suffixes: {full_vowel_suffixes}/{total} ({:.1}%), rolling {rolling_full_vowel_suffixes}/{rolling_total}",
+        full_vowel_suffixes as f64 / total as f64 * 100.0
+    );
+    println!(
+        "full vowel suffix examples: {}",
+        full_vowel_suffix_examples
             .into_iter()
             .collect::<Vec<_>>()
             .join(", ")

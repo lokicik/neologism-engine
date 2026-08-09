@@ -46,6 +46,50 @@ const CASES: &[Case] = &[
         prompt: "a cloud deployment dashboard",
         semantic_markers: &["cloud", "dock", "ship", "stack", "grid"],
     },
+    Case {
+        prompt: "a message queue client",
+        semantic_markers: &["queue", "broker", "stream", "topic", "pipe", "bus"],
+    },
+    Case {
+        prompt: "a code formatter and linter",
+        semantic_markers: &["format", "lint", "style", "rule", "tidy"],
+    },
+    Case {
+        prompt: "an environment variable manager",
+        semantic_markers: &["env", "config", "setting", "secret", "value"],
+    },
+    Case {
+        prompt: "a filesystem search CLI",
+        semantic_markers: &["file", "path", "find", "scan", "index", "seek"],
+    },
+    Case {
+        prompt: "a feature flag service",
+        semantic_markers: &["flag", "toggle", "switch", "rollout", "gate", "launch"],
+    },
+    Case {
+        prompt: "a background job scheduler",
+        semantic_markers: &["job", "task", "worker", "cron", "schedule", "timer", "run"],
+    },
+    Case {
+        prompt: "dependency update automation",
+        semantic_markers: &[
+            "dependency",
+            "package",
+            "version",
+            "bump",
+            "update",
+            "sync",
+            "dep",
+            "lock",
+        ],
+    },
+    Case {
+        prompt: "a documentation site generator",
+        semantic_markers: &[
+            "doc", "guide", "page", "site", "manual", "scribe", "note", "forge", "web", "portal",
+            "home",
+        ],
+    },
 ];
 const SEEDS: &[u64] = &[7, 42, 101, 2024, 9999];
 

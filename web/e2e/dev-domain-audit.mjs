@@ -43,6 +43,38 @@ const CASES = [
     prompt: 'a cloud deployment dashboard',
     markers: ['cloud', 'dock', 'ship', 'stack', 'grid'],
   },
+  {
+    prompt: 'a message queue client',
+    markers: ['queue', 'broker', 'stream', 'topic', 'pipe', 'bus'],
+  },
+  {
+    prompt: 'a code formatter and linter',
+    markers: ['format', 'lint', 'style', 'rule', 'tidy'],
+  },
+  {
+    prompt: 'an environment variable manager',
+    markers: ['env', 'config', 'setting', 'secret', 'value'],
+  },
+  {
+    prompt: 'a filesystem search CLI',
+    markers: ['file', 'path', 'find', 'scan', 'index', 'seek'],
+  },
+  {
+    prompt: 'a feature flag service',
+    markers: ['flag', 'toggle', 'switch', 'rollout', 'gate', 'launch'],
+  },
+  {
+    prompt: 'a background job scheduler',
+    markers: ['job', 'task', 'worker', 'cron', 'schedule', 'timer', 'run'],
+  },
+  {
+    prompt: 'dependency update automation',
+    markers: ['dependency', 'package', 'version', 'bump', 'update', 'sync', 'dep', 'lock'],
+  },
+  {
+    prompt: 'a documentation site generator',
+    markers: ['doc', 'guide', 'page', 'site', 'manual', 'scribe', 'note', 'forge', 'web', 'portal', 'home'],
+  },
 ]
 const MODES = [
   { label: 'Brandable', compound: false },
