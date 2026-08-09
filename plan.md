@@ -1135,6 +1135,42 @@ build cleanly; Chromium preserves both 100-card Compound sessions and all 30 gui
 
 ---
 
+## Phase 75 — Make the offline engine understand developer domains
+
+**Bottleneck.** Developer naming is the product's positioning advantage, but the semantic map
+still understood mostly generic artifacts such as `API`, `CLI`, and `library`. An eight-brief
+held-out audit exposed the gap across database migrations, rate limiting, terminal logs, Git
+releases, caches, browser bookmarks, testing, and cloud deployment. The baseline returned only
+690 of 800 requested names, and just **165/690 (23.9%)** carried a domain marker. Database
+Brandable returned 0/0; rate limiting and testing were 0/50 in both modes.
+
+**A/B.** Adding the compact domain lexicon alone moved the audit to **663/800 (82.9%)**, but
+generic artifact roots still displaced the stronger nouns in Compound (`crate`, `stack`, and
+`kit` competing with `schema`, `quota`, and `spec`). When a recognized specialized developer
+domain is present, Compound now suppresses those generic artifact nouns. This raised the native
+audit to **768/800 (96.0%)** without broadening unknown prompts or changing the candidate pool.
+
+**What changed.** The offline semantic layer now maps ten developer concept families to compact
+brand roots and their own adjective palettes: databases/migrations, rate limiting, terminals,
+logs/observability, Git/releases, caches, browser/bookmarks, testing/debugging, and cloud
+deployment. Artifact words such as `viewer`, `inspector`, and `toolkit` remain useful brief
+context but no longer become weak literal stems. Representative results include `Relayra`,
+`DirectPort`, `Guardio`, `FairMeter`, `Promptora`, `NativeShell`, `Branchify`, `OpenForge`,
+`Heapify`, `LocalCache`, `Checkora`, `SureSpec`, `Cloudify`, and `ReadyStack`.
+
+**Measured result.** The production Chromium/WASM gate audits 800 names over 80 deterministic
+pages. Every page returns all ten names; Brandable is **378/400 (94.5%)** domain-linked and
+Compound is **388/400 (97.0%)**, or **95.8% overall**. This marker test measures semantic
+attachment, not subjective beauty: forms such as `Bridgea` and `Tagent` show that morphology is
+the next independent quality boundary rather than evidence that the domain map is complete.
+
+**Verification.** The core suite is **114/114** with direct root, modifier, and specialized-noun
+regressions. The previous Brandable and twelve-brief Compound harnesses remain unchanged at their
+Phase 74 checkpoints. WASM and the production web bundle build cleanly; Chromium passes the new
+developer-domain gate, all 30 guided Auto pages, and both 100-card Compound sessions.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

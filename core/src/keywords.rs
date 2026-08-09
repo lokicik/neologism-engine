@@ -151,6 +151,30 @@ fn concept_roots(word: &str) -> &'static [&'static str] {
         }
         "developer" | "code" | "coding" | "program" | "programming" | "package" | "library"
         | "cli" | "api" => &["crate", "stack", "byte", "node", "kit"],
+        "database" | "db" | "sql" | "query" | "schema" | "table" | "storage" | "store" => {
+            &["schema", "query", "table", "store", "base"]
+        }
+        "migration" | "migrate" => &["shift", "bridge", "relay", "port", "move"],
+        "rate" | "limit" | "limiter" | "throttle" | "quota" => {
+            &["gate", "meter", "quota", "pace", "guard"]
+        }
+        "terminal" | "shell" | "console" | "command" | "prompt" => {
+            &["term", "shell", "prompt", "cmd", "console"]
+        }
+        "log" | "logging" | "monitor" | "monitoring" | "observability" | "telemetry" => {
+            &["trace", "watch", "scope", "pulse", "beacon"]
+        }
+        "git" | "repo" | "repository" | "version" | "release" => {
+            &["commit", "branch", "tag", "forge", "ship"]
+        }
+        "cache" | "caching" | "memoize" => &["cache", "stash", "store", "heap", "buffer"],
+        "browser" | "bookmark" | "tab" | "web" | "link" => &["tab", "mark", "link", "page", "web"],
+        "test" | "testing" | "qa" | "debug" | "bug" | "assert" => {
+            &["spec", "check", "probe", "assert", "trace"]
+        }
+        "cloud" | "deploy" | "deployment" | "server" | "hosting" | "infrastructure" | "infra" => {
+            &["cloud", "dock", "ship", "stack", "grid"]
+        }
         "generate" | "generator" | "create" | "creator" | "build" | "builder" => {
             &["forge", "mint", "spark", "seed", "craft"]
         }
@@ -210,6 +234,32 @@ fn concept_adjectives(word: &str) -> &'static [&'static str] {
         }
         "developer" | "code" | "coding" | "program" | "programming" | "package" | "library"
         | "cli" | "api" => &["open", "native", "prime", "solid", "swift", "clean"],
+        "database" | "db" | "sql" | "query" | "schema" | "table" | "storage" | "store" => {
+            &["local", "solid", "clear", "fast", "open", "native"]
+        }
+        "migration" | "migrate" => &["safe", "smooth", "steady", "swift", "clean", "direct"],
+        "rate" | "limit" | "limiter" | "throttle" | "quota" => {
+            &["fair", "steady", "smart", "safe", "even", "clear"]
+        }
+        "terminal" | "shell" | "console" | "command" | "prompt" => {
+            &["native", "swift", "clean", "open", "dark", "direct"]
+        }
+        "log" | "logging" | "monitor" | "monitoring" | "observability" | "telemetry" => {
+            &["live", "clear", "deep", "sharp", "steady", "open"]
+        }
+        "git" | "repo" | "repository" | "version" | "release" => {
+            &["clean", "open", "ready", "stable", "swift", "prime"]
+        }
+        "cache" | "caching" | "memoize" => &["fast", "local", "hot", "quick", "smart", "swift"],
+        "browser" | "bookmark" | "tab" | "web" | "link" => {
+            &["open", "quick", "clear", "smart", "native", "light"]
+        }
+        "test" | "testing" | "qa" | "debug" | "bug" | "assert" => {
+            &["sure", "clean", "exact", "quick", "strict", "solid"]
+        }
+        "cloud" | "deploy" | "deployment" | "server" | "hosting" | "infrastructure" | "infra" => {
+            &["ready", "swift", "steady", "live", "open", "solid"]
+        }
         "generate" | "generator" | "create" | "creator" | "build" | "builder" => {
             &["fresh", "bright", "bold", "swift", "open", "prime"]
         }
@@ -350,6 +400,9 @@ fn is_cross_concept_modifier(word: &str) -> bool {
             | "speed"
             | "performance"
             | "rapid"
+            | "migration"
+            | "migrate"
+            | "terminal"
     )
 }
 
@@ -386,6 +439,79 @@ pub fn compound_pair_is_coherent(
     allow_general && GENERAL_COMPOUND_ADJECTIVES.contains(&adjective)
 }
 
+fn is_dev_artifact(word: &str) -> bool {
+    matches!(
+        word,
+        "developer"
+            | "code"
+            | "coding"
+            | "program"
+            | "programming"
+            | "package"
+            | "library"
+            | "cli"
+            | "api"
+    )
+}
+
+fn is_specialized_dev_domain(word: &str) -> bool {
+    matches!(
+        word,
+        "database"
+            | "db"
+            | "sql"
+            | "query"
+            | "schema"
+            | "table"
+            | "storage"
+            | "store"
+            | "migration"
+            | "migrate"
+            | "rate"
+            | "limit"
+            | "limiter"
+            | "throttle"
+            | "quota"
+            | "terminal"
+            | "shell"
+            | "console"
+            | "command"
+            | "prompt"
+            | "log"
+            | "logging"
+            | "monitor"
+            | "monitoring"
+            | "observability"
+            | "telemetry"
+            | "git"
+            | "repo"
+            | "repository"
+            | "version"
+            | "release"
+            | "cache"
+            | "caching"
+            | "memoize"
+            | "browser"
+            | "bookmark"
+            | "tab"
+            | "web"
+            | "link"
+            | "test"
+            | "testing"
+            | "qa"
+            | "debug"
+            | "bug"
+            | "assert"
+            | "cloud"
+            | "deploy"
+            | "deployment"
+            | "server"
+            | "hosting"
+            | "infrastructure"
+            | "infra"
+    )
+}
+
 /// Noun roots for Compound mode. Audience terms ("for teams", "with friends")
 /// and speed claims work better as context/adjectives than as the noun half of
 /// a product name, provided the brief contains a stronger product concept.
@@ -396,6 +522,15 @@ pub fn compound_roots(keywords: &[String], limit: usize) -> Vec<String> {
             "data" | "analytic" | "analytics" | "insight" | "metric"
         )
     });
+    let has_specialized_dev_domain = keywords
+        .iter()
+        .any(|keyword| is_specialized_dev_domain(keyword));
+    let has_source_control = keywords.iter().any(|keyword| {
+        matches!(
+            keyword.as_str(),
+            "git" | "repo" | "repository" | "version" | "release"
+        )
+    });
     let product_keywords: Vec<String> = keywords
         .iter()
         .filter(|keyword| {
@@ -403,6 +538,8 @@ pub fn compound_roots(keywords: &[String], limit: usize) -> Vec<String> {
                 keyword.as_str(),
                 "friend" | "team" | "fast" | "speed" | "performance" | "rapid"
             ) && !(has_analytics && keyword.as_str() == "api")
+                && !(has_specialized_dev_domain && is_dev_artifact(keyword))
+                && !(has_source_control && keyword.as_str() == "automation")
         })
         .cloned()
         .collect();
@@ -421,7 +558,11 @@ pub fn compound_roots(keywords: &[String], limit: usize) -> Vec<String> {
 /// Artifact words are informative in a brief but weak literal naming roots.
 /// Their concept expansions remain, avoiding Dev-/Gen-/Pack- stem walls.
 fn suppress_literal_root(word: &str) -> bool {
-    !concept_roots(word).is_empty() || matches!(word, "project" | "manager" | "dashboard")
+    !concept_roots(word).is_empty()
+        || matches!(
+            word,
+            "project" | "manager" | "dashboard" | "viewer" | "inspector" | "toolkit" | "planner"
+        )
 }
 
 /// Preferred order inside a coined compound: modifiers first, core domain
@@ -432,6 +573,9 @@ fn concept_position(word: &str) -> u8 {
         "name" | "naming" | "brand" | "title" | "word" | "identity" | "mood" | "emotion"
         | "feeling" | "split" | "share" | "sharing" | "divide" | "settle" | "vintage" | "retro"
         | "classic" | "antique" | "fast" | "speed" | "performance" | "rapid" => 0,
+        "migration" | "migrate" | "rate" | "limit" | "limiter" | "throttle" | "terminal"
+        | "git" | "release" | "test" | "testing" | "qa" | "debug" | "cloud" | "deploy"
+        | "deployment" => 0,
         "generate" | "generator" | "create" | "creator" | "build" | "builder" | "friend"
         | "community" | "social" | "team" | "chat" | "message" | "data" | "analytic"
         | "analytics" | "insight" | "metric" | "market" | "marketplace" | "shop" | "sell"
@@ -747,5 +891,53 @@ mod tests {
         );
         assert!(analytics.contains(&"signal".to_string()));
         assert!(!analytics.contains(&"bolt".to_string()));
+    }
+
+    #[test]
+    fn expands_held_out_developer_domains() {
+        let database = extract_keywords("a CLI for database migrations", 6);
+        let database_roots = brand_roots(&database, 16);
+        assert!(database_roots.iter().any(|root| root == "schema"));
+        assert!(database_roots.iter().any(|root| root == "bridge"));
+        assert!(!database_roots.iter().any(|root| root == "database"));
+
+        let testing = extract_keywords("an API testing toolkit", 6);
+        let testing_roots = brand_roots(&testing, 16);
+        assert!(testing_roots.iter().any(|root| root == "spec"));
+        assert!(testing_roots.iter().any(|root| root == "probe"));
+    }
+
+    #[test]
+    fn dev_domain_modifiers_pair_with_domain_nouns() {
+        let database = ["migration".into(), "database".into(), "cli".into()];
+        assert!(compound_pair_is_coherent(
+            "safe", "schema", &database, false
+        ));
+        assert!(compound_pair_is_coherent(
+            "native", "query", &database, false
+        ));
+
+        let terminal = ["terminal".into(), "log".into()];
+        assert!(compound_pair_is_coherent(
+            "native", "trace", &terminal, false
+        ));
+    }
+
+    #[test]
+    fn compound_prefers_specialized_dev_nouns_over_artifacts() {
+        let database = extract_keywords("a CLI for database migrations", 6);
+        let database_roots = compound_roots(&database, 16);
+        assert!(database_roots.contains(&"schema".to_string()));
+        assert!(!database_roots.contains(&"crate".to_string()));
+
+        let testing = extract_keywords("an API testing toolkit", 6);
+        let testing_roots = compound_roots(&testing, 16);
+        assert!(testing_roots.contains(&"spec".to_string()));
+        assert!(!testing_roots.contains(&"stack".to_string()));
+
+        let git = extract_keywords("git release automation", 6);
+        let git_roots = compound_roots(&git, 16);
+        assert!(git_roots.contains(&"commit".to_string()));
+        assert!(!git_roots.contains(&"agent".to_string()));
     }
 }
