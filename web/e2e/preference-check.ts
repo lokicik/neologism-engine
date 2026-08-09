@@ -4,6 +4,7 @@ import {
   buildProfile,
   buildReferencedProfile,
   coldQualityPoolCount,
+  compoundTastePoolCount,
   feedbackForContext,
   needsQualityRepair,
   parseTasteReferences,
@@ -362,6 +363,10 @@ const compoundProfile = buildProfile([
   result('TypeShelf', 2),
 ])
 if (compoundProfile) {
+  check(
+    compoundTastePoolCount(10, compoundProfile) === 3,
+    'strong two-part taste opens only a three-candidate Compound accent pool',
+  )
   const ranked = rankByPreference(
     [result('Lexora', 3), result('KeyMarket', 3)],
     compoundProfile,
@@ -373,6 +378,10 @@ const broadLikes = [result('Noma'), result('Lexa'), result('Mara')]
 const likedOnly = buildProfile(broadLikes)
 check(likedOnly !== null, 'liked-only ranking remains available')
 if (likedOnly) {
+  check(
+    compoundTastePoolCount(10, likedOnly) === 0,
+    'single-part taste keeps guided Auto Brandable-first',
+  )
   const ranked = rankByPreference([result('Vexium'), result('Vexora')], likedOnly)
   check(ranked[0].name === 'Vexora', 'positive profile alone prefers its familiar vowel ending')
 }

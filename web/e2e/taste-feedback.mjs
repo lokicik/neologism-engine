@@ -212,6 +212,29 @@ try {
     'reference names survive a reload',
   )
   await referenceContext.close()
+
+  const compoundReferenceContext = await browser.newContext()
+  await compoundReferenceContext.addInitScript(() => localStorage.setItem('neologism:visited', '1'))
+  const compoundReferencePage = await compoundReferenceContext.newPage({
+    viewport: { width: 1440, height: 600 },
+  })
+  await compoundReferencePage.goto(APP_URL)
+  await compoundReferencePage.locator('.command-input').fill('a secure password manager for teams')
+  await compoundReferencePage.locator('.chips-row .chip-wrap:last-child > .chip').click()
+  await compoundReferencePage.locator('.taste-reference-input').fill('GitHub, DoorDash, YouTube')
+  await compoundReferencePage.click('.command-go')
+  await compoundReferencePage.waitForFunction(() => document.querySelectorAll('.name-card').length === 10)
+  const compoundReferenceNames = await compoundReferencePage.locator('.name-text').allTextContents()
+  const twoPartNames = compoundReferenceNames.filter((name) => /[a-z][A-Z]/.test(name))
+  check(
+    twoPartNames.length > 0 && twoPartNames.length <= 3,
+    `strong two-part references add a bounded Compound accent (got ${twoPartNames.length})`,
+  )
+  check(
+    await storedCount(compoundReferencePage, 'neologism:recent') === compoundReferenceNames.length,
+    'mode-aware reference ranking still records only displayed names',
+  )
+  await compoundReferenceContext.close()
 } catch (error) {
   console.error('SCRIPT ERROR:', error.message)
   failures++

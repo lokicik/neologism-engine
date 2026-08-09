@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { generateBatch, generateNames, batchMetrics, extractKeywords, type BatchMetrics, type Config, type NameResult, type Style } from './lib/engine'
 import { recommendations } from './lib/recommend'
-import { buildReferencedProfile, coldQualityPoolCount, feedbackForContext, MIN_TASTE_SIGNALS, needsQualityRepair, preferencePoolCount, repairWeakShortlist, shortlistByPreference } from './lib/preferences'
+import { buildReferencedProfile, coldQualityPoolCount, compoundTastePoolCount, feedbackForContext, MIN_TASTE_SIGNALS, needsQualityRepair, preferencePoolCount, repairWeakShortlist, shortlistByPreference } from './lib/preferences'
 import { tasteContextForConfig } from './lib/taste-context'
 import { loadFavorites, toggleFavorite, removeFavorite, saveFavorites, loadRejected, toggleRejected, removeRejected, loadTasteReferences, saveTasteReferences, loadRecent, saveRecent, hasVisited, markVisited, loadJudgeConfig, saveJudgeConfig } from './lib/storage'
 import { type JudgeConfig } from './lib/judge'
@@ -160,12 +160,29 @@ export default function App() {
       }
       const requestedCount = cfg.count ?? 10
       const poolCount = preferencePoolCount(requestedCount, profile)
-      const primaryPool = await generateBatch({
-        ...cfg,
-        count: poolCount,
-        exclude: recentRef.current,
-      })
-      let pool = primaryPool
+      const hasBrief = Boolean(cfg.description?.trim() || cfg.roots?.some((root) => root.trim()))
+      const compoundPoolCount = cfg.style === 'big_tech'
+        && cfg.variant === 'auto'
+        && hasBrief
+        ? compoundTastePoolCount(requestedCount, profile)
+        : 0
+      const [primaryPool, compoundTastePool] = await Promise.all([
+        generateBatch({
+          ...cfg,
+          count: poolCount,
+          exclude: recentRef.current,
+        }),
+        compoundPoolCount > 0
+          ? generateNames({
+              ...cfg,
+              variant: undefined,
+              compound: true,
+              count: compoundPoolCount,
+              exclude: recentRef.current,
+            })
+          : Promise.resolve([]),
+      ])
+      let pool = [...primaryPool, ...compoundTastePool]
       let batch: NameResult[]
       if (
         !profile
@@ -185,7 +202,7 @@ export default function App() {
         batch = repairWeakShortlist(primaryPool, fallback, requestedCount)
       } else {
         batch = shortlistByPreference(
-          primaryPool,
+          pool,
           profile,
           requestedCount,
           preferenceSaltRef.current,
@@ -193,8 +210,9 @@ export default function App() {
       }
       setPromptKeywords(cfg.description?.trim() ? await extractKeywords(cfg.description) : [])
       setExhausted(pool.length === 0)
-      // Taste profiles select from a larger pool. Cold Auto opens its bounded
-      // fallback only for weak/missing slots or an overly repetitive page.
+      // Taste profiles select from a larger pool and may add a small Compound
+      // accent pool when positive examples strongly prefer two-part names.
+      // Cold Auto opens its fallback only for weak/missing or repetitive slots.
       const shown = append ? [...resultsRef.current, ...batch] : batch
       setResults(shown)
       // Recent history represents names the user actually saw. Keeping hidden

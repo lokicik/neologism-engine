@@ -18,6 +18,8 @@ const VISIBLE_PREFIX_SHARE = 0.2
 const VISIBLE_SUFFIX_SHARE = 0.2
 const VISIBLE_GENERAL_SUFFIX_SHARE = 0.3
 const VISIBLE_DIRECT_SUFFIX_SHARE = 0.8
+const STRONG_MODE_PREFERENCE = 0.75
+const COMPOUND_TASTE_POOL_SHARE = 0.3
 const MAX_COLD_PAIR_SIMILARITY = 0.21
 export const MIN_TASTE_SIGNALS = 3
 export const TASTE_POOL_MULTIPLIER = 6
@@ -531,6 +533,23 @@ export function preferencePoolCount(
   const count = Math.max(0, Math.floor(requested))
   if (!profile || count === 0) return count
   return Math.max(count, Math.min(MAX_TASTE_POOL, count * TASTE_POOL_MULTIPLIER))
+}
+
+// Guided Auto normally stays Brandable-first. When at least 75% of the user's
+// positive examples are visibly two-part names, add only a small Compound
+// accent pool for the local ranker to judge. Explicit Compound mode remains
+// the path for an all-Compound page.
+export function compoundTastePoolCount(
+  requested: number,
+  profile: PreferenceProfile | null,
+): number {
+  const count = Math.max(0, Math.floor(requested))
+  if (
+    count === 0
+    || !profile?.liked
+    || profile.liked.compoundRate < STRONG_MODE_PREFERENCE
+  ) return 0
+  return Math.max(1, Math.ceil(count * COMPOUND_TASTE_POOL_SHARE))
 }
 
 export function shortlistByPreference(

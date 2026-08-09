@@ -105,7 +105,11 @@ try {
             seed,
             poolRequested,
             poolReturned: pool.length,
-            engineFirstPage: pool.slice(0, requested).map((item) => item.name),
+            engineFirstPage: pool.slice(0, requested).map((item) => ({
+              name: item.name,
+              quality: quality(item),
+              taste: similarity(item, profile),
+            })),
             baseline: baseline.map((item) => item.name),
             selected: selected.map((item) => ({
               name: item.name,
@@ -146,6 +150,7 @@ try {
   }
 
   const names = rows.flatMap((row) => row.selected)
+  const engineNames = rows.flatMap((row) => row.engineFirstPage)
   let nearPairs = 0
   let pairSimilarity = 0
   let pairCount = 0
@@ -203,8 +208,13 @@ try {
   }
 
   const average = (field) => names.reduce((sum, item) => sum + item[field], 0) / names.length
+  const engineAverage = (field) => (
+    engineNames.reduce((sum, item) => sum + item[field], 0) / engineNames.length
+  )
   const averageQuality = average('quality') * 100
   const averageTaste = average('taste')
+  const engineQuality = engineAverage('quality') * 100
+  const engineTaste = engineAverage('taste')
   const meanPairSimilarity = pairSimilarity / pairCount
   const below75 = names.filter((item) => item.quality < 0.75).length
   const wrongSize = rows.filter((row) => (
@@ -237,8 +247,8 @@ try {
 
   console.log(`personalized pages: ${rows.length}`)
   console.log(`selected names: ${names.length}`)
-  console.log(`average engine quality: ${averageQuality.toFixed(2)}`)
-  console.log(`average taste affinity: ${averageTaste.toFixed(3)}`)
+  console.log(`average structural quality: ${engineQuality.toFixed(2)} -> ${averageQuality.toFixed(2)}`)
+  console.log(`average taste affinity: ${engineTaste.toFixed(3)} -> ${averageTaste.toFixed(3)} (${(averageTaste - engineTaste).toFixed(3)})`)
   console.log(`sub-75 names: ${below75}`)
   console.log(`three-plus prefix overflow: ${prefixOverTwo}`)
   console.log(`three-plus exact-ending overflow: ${endingOverTwo}`)
@@ -257,11 +267,21 @@ try {
   for (const [prompt, sizes] of poolsByPrompt) {
     console.log(`  ${[...sizes].sort((a, b) => a - b).join('/')}  ${prompt}`)
   }
+  let minReferenceTasteUplift = Number.POSITIVE_INFINITY
+  for (const references of REFERENCE_SETS) {
+    const referenceRows = rows.filter((row) => row.references === references)
+    const before = referenceRows.flatMap((row) => row.engineFirstPage)
+    const after = referenceRows.flatMap((row) => row.selected)
+    const beforeTaste = before.reduce((sum, item) => sum + item.taste, 0) / before.length
+    const afterTaste = after.reduce((sum, item) => sum + item.taste, 0) / after.length
+    minReferenceTasteUplift = Math.min(minReferenceTasteUplift, afterTaste - beforeTaste)
+    console.log(`  taste ${beforeTaste.toFixed(3)} -> ${afterTaste.toFixed(3)} (${(afterTaste - beforeTaste).toFixed(3)})  ${references}`)
+  }
   let semanticRetentionFailures = 0
   for (const testCase of CASES) {
     const caseRows = rows.filter((row) => row.prompt === testCase.prompt)
-    const engineMapped = caseRows.flatMap((row) => row.engineFirstPage).filter((name) => {
-      const normalized = name.toLowerCase().replace(/[^a-z]/g, '')
+    const engineMapped = caseRows.flatMap((row) => row.engineFirstPage).filter((item) => {
+      const normalized = item.name.toLowerCase().replace(/[^a-z]/g, '')
       return testCase.markers.some((marker) => normalized.includes(marker))
     }).length
     const mapped = caseRows.flatMap((row) => row.selected).filter((item) => {
@@ -283,6 +303,8 @@ try {
     [endingOverTwo <= 150, 'three-name ending families stay bounded across the matrix'],
     [averageQuality >= 85.2, 'average structural quality stays at or above 85.2'],
     [averageTaste >= -0.82, 'reference affinity stays within the retained floor'],
+    [averageTaste - engineTaste >= 0.3, 'local taste improves average affinity over engine order'],
+    [minReferenceTasteUplift >= 0.2, 'every reference family gains meaningful affinity'],
     [nearPairs <= 230, 'near-duplicate pairs stay at or below 230'],
     [meanPairSimilarity <= 0.22, 'mean pair similarity stays at or below 0.22'],
     [directSuffixForms <= 620, 'direct root-plus-suffix forms stay below the retained ceiling'],

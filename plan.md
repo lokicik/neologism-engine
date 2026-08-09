@@ -2330,6 +2330,48 @@ name blacklist was added.
 
 ---
 
+## Phase 106 — Let strong two-part taste influence guided Auto
+
+**Bottleneck.** Local taste already learned compound shape and source mode, but guided Auto gave
+its ranker no Compound candidates. With explicit two-part references `GitHub, DoorDash, YouTube`,
+twenty-five fixed pages selected **0/250** Compound cards, reached only **81** distinct names, and
+had **−1.548** mean affinity. The profile could describe what the user liked but could not choose
+that family unless the user manually left Auto.
+
+**A/B boundary.** Adding twenty Compound candidates proved the missing-family hypothesis:
+affinity jumped to **−0.390** and uniqueness to 171, but **234/250** cards became Compound and
+quality fell **85.04 → 82.31**. Five candidates still lowered quality to **84.76** while surfacing
+45 Compound cards. Both variants were removed. Three candidates preserve quality while giving
+the judge enough mode-relevant alternatives.
+
+**Retained correction.** A positive profile must be at least **75% visibly two-part** before
+guided Big-tech Auto opens a Compound accent pool. At the normal ten-name page size that pool is
+exactly three candidates beside the existing sixty-candidate personalized pool. They receive no
+quota: the normal local scorer, 75-point floor, semantic bonus, and family caps decide whether
+any appear. Explicit Compound remains the route for an all-Compound page. Closed compounds are
+not guessed from arbitrary spelling; the trigger uses source mode or a visible camel-case seam.
+
+**Measured result.** Across the 25 targeted pages, Compound cards move **0 → 30/250**, affinity
+**−1.548 → −1.387**, and distinct names **81 → 95**. Structural quality is effectively unchanged
+at **85.04 → 85.03**, prompt-unlinked names improve **5 → 4**, and sub-75 names remain zero. No
+page can receive more than the three supplemental candidates. The real production UI shows three
+Compound accents for the security brief while still recording only its ten displayed names.
+
+**Stronger evidence gate.** The general 1,000-name personalized matrix now compares local
+selection with raw engine order instead of relying only on an absolute affinity floor. Mean
+affinity improves **−1.138 → −0.800 (+0.337)** and structural quality **83.69 → 85.24**. Every one
+of the four established reference families gains at least **0.228** affinity; permanent gates
+require +0.30 overall and +0.20 per family.
+
+**Verification.** The preference smoke test pins the three-candidate trigger and proves
+single-part profiles stay Brandable-first. The new 25-page mode audit gates quality, affinity,
+mode share, vocabulary, semantic coverage, and the structural floor. Chromium also passes the
+1,000-name taste matrix, all four 100-name rolling sessions, all 90 cold Auto pages, and the full
+production feedback/reference/export flow. TypeScript and the production bundle build cleanly.
+No LLM, network call, corpus addition, scorer retraining, or hidden name blacklist was added.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
@@ -2351,6 +2393,8 @@ for weak slots or an overly repetitive page. Local taste feedback selects each
 visible page from up to sixty offline candidates per project, applies a structural quality floor,
 preserves additional brief concepts, restores visible stem and ending-family diversity, and
 keeps every sufficiently rich page from becoming only root-plus-suffix templates.
+Strongly two-part positive examples can also contribute a small Compound accent pool without
+turning guided Auto back into a fixed mode quota.
 AI Studio remains an optional, separate batch judge rather than a hidden dependency of Create.
 
 The next broad aesthetic scorer change is evidence-gated: collect at least ten real likes and ten passes in
