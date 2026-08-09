@@ -142,6 +142,7 @@ try {
     const retryEligible = !row.ordered.some((item) => item.sourceMode === 'respell')
       && row.ordered.filter((item) => item.construction).length < 2
     console.log(`\n${row.seed} - ${row.prompt}`)
+    console.log(`direct: ${row.direct.map(describe).join(', ')}`)
     console.log(`before: ${row.ordered.map(describe).join(', ')}`)
     console.log(`production lead: ${row.ordered[0].name} -> ${row.selected[0].name}`)
     console.log(`production set: ${productionChange}`)

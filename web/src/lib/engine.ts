@@ -45,6 +45,7 @@ export interface NameResult {
 
 const GUIDED_METAPHOR_POOL = 8
 const GUIDED_PAIR_POOL = 12
+const AUTO_ACCENT_QUALITY_FLOOR = 75
 const GUIDED_METAPHOR_QUALITY_FLOOR = 85
 const GUIDED_PAIR_QUALITY_FLOOR = 84
 const GUIDED_METAPHOR_FALLBACK_SEED_OFFSET = 16
@@ -249,7 +250,10 @@ export async function generateBatch(cfg: Config): Promise<NameResult[]> {
         : Promise.resolve([]),
     ])
     const linkedRespells = respellBatch
-      .filter((result) => isPromptLinkedRespell(result.name, terms))
+      .filter((result) => (
+        isPromptLinkedRespell(result.name, terms)
+        && structuralQuality(result) >= AUTO_ACCENT_QUALITY_FLOOR
+      ))
       .slice(0, respell)
     // Respell owns the single guided accent when it is genuinely derived from
     // the brief. Otherwise let one strong semantic metaphor compete with the

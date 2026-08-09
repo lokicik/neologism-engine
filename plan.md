@@ -3045,10 +3045,49 @@ TypeScript, and production build gates pass. No LLM or broad scorer adjustment w
 
 ---
 
+## Phase 124 — Stop weak Respell starvation and give formatters tool-shaped names
+
+**Observed starvation.** A formatter/linter page initially generated the prompt-linked Respell
+`Formattr`, so Auto correctly withheld its other accent paths. The spelling scored only **63.7**,
+however, and cold repair later removed it. That left a mechanical page while the already-isolated
+pair lane remained closed. Prompt relevance alone is no longer enough to own Auto's accent:
+a Respell must also clear the existing **75-point visible-quality floor**. This is a general
+eligibility fix, not a name blacklist or scorer change.
+
+**Isolated formatter roles.** Hand-curated probing found a genuinely readable developer-tool
+family rather than another high-scoring template: `TidyKit 94.0`, `TidyFix 92.5`, `RuleKit 86.5`,
+`LintKit 86.3`, and `LintFix 84.8`. Only a brief containing both formatting/style and lint/rule
+semantics opens the private `tidy`/`lint`/`rule` plus `kit`/`fix` pair groups. Ordinary Brandable,
+explicit modes, and unrelated developer briefs keep their existing roots; Auto can reach the new
+roles only through its already-bounded pair lane.
+Two of the three independent formatter pages now lead directly with `TidyKit`; the third preserves
+its strong `Tidylink` metaphor. All three lead with an 85+ tool-specific construction without the
+final retry, and their combined average is **83.19**.
+
+**Seed-spread guard.** The held-out audit now measures the complete 30-name union for every brief's
+three deterministic first pages, pairwise overlap, and content-identical pages. This is a regression
+guard rather than a reason to inject arbitrary randomness: real continued sessions already use the
+20,000-name exclusion history. The retained change slightly improves first-page spread from
+**18.17 -> 18.23/30** unique names and lowers pair overlap **5.16 -> 5.12/10**; the existing three
+content-identical seed pairs do not increase.
+
+**Measured result.** Across the 105-page held-out base, average structural quality improves
+**84.01 -> 84.08**, lead quality **85.94 -> 86.27**, and lead concept coverage **1.20 -> 1.22**.
+Guided leaders rise **41 -> 44**. Near pairs remain 78, mean similarity stays inside its gate at
+0.202, direct suffix leaders remain 24, and no visible result or admitted Respell falls below 75.
+
+**Verification.** The core suite is **146/146**. The fixed 90-page cold audit remains green at
+**83.25** repaired quality with zero sub-75 names; all 85 guided Auto pages, fifteen namespace
+pages, and 1,600 developer-domain names pass. The final held-out gate, prompt UI, rebuilt WASM,
+TypeScript, and production Vite bundle also pass. No LLM, network call, broad scorer adjustment,
+ordinary role-palette expansion, or preference-ranking change was added.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
-Brandable by default and only admits a Respell accent that visibly comes from the brief; when no
+Brandable by default and only admits a 75+ Respell accent that visibly comes from the brief; when no
 safe Respell exists, one quality-gated root-plus-metaphor Brandable may break the suffix wall; one
 different-ending, quality-neutral second form may replace a direct suffix card. The
 broader modes remain explicit choices and still form the exploratory mix when no brief exists.
@@ -3068,7 +3107,8 @@ can no longer starve merely because incidental words such as `assistant` appear 
 Cold repair may reuse one already-generated candidate only when its brief-specific shape survives
 the stricter aesthetic guards; generic high-scoring metaphor tails do not displace visible names.
 CRM pipeline briefs use the isolated role pattern for `RevLoop` while strong `Salelab` pages remain
-untouched.
+untouched. Formatter/linter briefs use the same private-role pattern for `TidyKit`, while weak
+related spellings can no longer block a stronger construction before repair.
 Compound is now a genuinely brief-aware explicit alternative rather than a random adjective
 showcase. Focused first pages stay narrow; recognized concepts open a restrained continuation
 palette only when the user asks for more, preserving 100-name session capacity without generic

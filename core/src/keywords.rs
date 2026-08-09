@@ -1200,6 +1200,20 @@ pub fn guided_pair_root_groups(keywords: &[String], limit: usize) -> Vec<Vec<Str
         return bounded_guided_groups(GROUPS, limit);
     }
 
+    let formatting = keywords
+        .iter()
+        .any(|keyword| matches!(keyword.as_str(), "format" | "formatter" | "style"));
+    let linting = keywords
+        .iter()
+        .any(|keyword| matches!(keyword.as_str(), "lint" | "linter" | "rule"));
+    if formatting && linting {
+        // Keep concise tool roles such as `TidyKit` and `LintFix` inside the
+        // isolated pair lane. Ordinary Brandable keeps its broader syntax and
+        // style palette instead of turning every formatter name into a kit.
+        const GROUPS: &[&[&str]] = &[&["tidy", "lint", "rule"], &["kit", "fix"]];
+        return bounded_guided_groups(GROUPS, limit);
+    }
+
     let mut groups = brand_root_groups(keywords, limit);
     let used = groups.iter().flatten().count();
     if used >= limit {
@@ -1630,6 +1644,24 @@ mod tests {
         assert!(!ordinary.iter().flatten().any(|root| root == "rev"));
         assert!(guided.iter().flatten().any(|root| root == "rev"));
         assert!(guided.iter().flatten().any(|root| root == "loop"));
+        assert_eq!(guided.len(), 2, "{guided:?}");
+        assert!(guided.iter().flatten().count() <= 16, "{guided:?}");
+    }
+
+    #[test]
+    fn guided_formatters_use_tool_roles_only_in_their_lane() {
+        let keywords = extract_keywords("a code formatter and linter", 6);
+        let ordinary = brand_root_groups(&keywords, 16);
+        let guided = guided_pair_root_groups(&keywords, 16);
+        assert!(!ordinary
+            .iter()
+            .flatten()
+            .any(|root| matches!(root.as_str(), "kit" | "fix")));
+        assert!(guided.iter().flatten().any(|root| root == "tidy"));
+        assert!(guided.iter().flatten().any(|root| root == "lint"));
+        assert!(guided.iter().flatten().any(|root| root == "rule"));
+        assert!(guided.iter().flatten().any(|root| root == "kit"));
+        assert!(guided.iter().flatten().any(|root| root == "fix"));
         assert_eq!(guided.len(), 2, "{guided:?}");
         assert!(guided.iter().flatten().count() <= 16, "{guided:?}");
     }

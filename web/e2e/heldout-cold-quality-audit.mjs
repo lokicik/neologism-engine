@@ -209,6 +209,9 @@ try {
     }
     return upgrades
   })
+  const weakRespellAccents = rows.flatMap((row) => row.direct
+    .filter((item) => item.sourceMode === 'respell' && quality(item) < 75)
+    .map((item) => ({ row, item })))
   const aiWorkflowRows = rows.filter((row) => (
     /\bai\b/i.test(row.prompt) || /\bagent\b/i.test(row.prompt)
   ) && /\b(?:automation|workflow)s?\b/i.test(row.prompt))
@@ -224,6 +227,67 @@ try {
     (sum, row) => sum + row.selected.reduce((pageSum, item) => pageSum + quality(item), 0),
     0,
   ) / (crmRows.length * 10)
+  const formatterRows = rows.filter((row) => row.prompt === 'a code formatter and linter')
+  const formatterAverage = formatterRows.reduce(
+    (sum, row) => sum + row.selected.reduce((pageSum, item) => pageSum + quality(item), 0),
+    0,
+  ) / (formatterRows.length * 10)
+  const seedDiversity = BASE_PROMPTS.map((prompt) => {
+    const promptRows = auditRows.filter((row) => row.prompt === prompt)
+    const nameSeeds = new Map()
+    for (const row of promptRows) {
+      for (const item of row.selected) {
+        const key = letters(item.name)
+        const entry = nameSeeds.get(key) ?? { name: item.name, seeds: new Set() }
+        entry.seeds.add(row.seed)
+        nameSeeds.set(key, entry)
+      }
+    }
+    let pairOverlap = 0
+    let pairTotal = 0
+    for (let i = 0; i < promptRows.length; i++) {
+      const left = new Set(promptRows[i].selected.map((item) => letters(item.name)))
+      for (let j = i + 1; j < promptRows.length; j++) {
+        const right = new Set(promptRows[j].selected.map((item) => letters(item.name)))
+        pairOverlap += [...left].filter((name) => right.has(name)).length
+        pairTotal++
+      }
+    }
+    const pageFingerprintSeeds = new Map()
+    for (const row of promptRows) {
+      const fingerprint = row.selected.map((item) => letters(item.name)).sort().join('|')
+      const fingerprintSeeds = pageFingerprintSeeds.get(fingerprint) ?? []
+      fingerprintSeeds.push(row.seed)
+      pageFingerprintSeeds.set(fingerprint, fingerprintSeeds)
+    }
+    const exactDuplicatePageSeeds = [...pageFingerprintSeeds.values()]
+      .filter((seeds) => seeds.length > 1)
+    return {
+      prompt,
+      rowCount: promptRows.length,
+      uniqueNames: nameSeeds.size,
+      averagePairOverlap: pairTotal === 0 ? 0 : pairOverlap / pairTotal,
+      sharedByEverySeed: [...nameSeeds.values()]
+        .filter((entry) => entry.seeds.size === SEEDS.length)
+        .map((entry) => entry.name),
+      exactDuplicatePages: exactDuplicatePageSeeds.reduce(
+        (sum, seeds) => sum + seeds.length - 1, 0,
+      ),
+      exactDuplicatePageSeeds,
+    }
+  }).sort((left, right) => (
+    left.uniqueNames - right.uniqueNames
+    || right.averagePairOverlap - left.averagePairOverlap
+  ))
+  const averageUniqueNames = seedDiversity.reduce(
+    (sum, row) => sum + row.uniqueNames, 0,
+  ) / seedDiversity.length
+  const averageSeedOverlap = seedDiversity.reduce(
+    (sum, row) => sum + row.averagePairOverlap, 0,
+  ) / seedDiversity.length
+  const exactDuplicateSeedPages = seedDiversity.reduce(
+    (sum, row) => sum + row.exactDuplicatePages, 0,
+  )
   const weak = allVisible.filter((item) => quality(item) < 75)
   const wrongSize = rows.filter((row) => row.selected.length !== 10)
   const wrongFallback = rows.filter((row) => row.fallbackCount < 0 || row.fallbackCount > 30)
@@ -246,7 +310,10 @@ try {
   console.log(`suffix leads: ${suffixLeads.length} · guided leads: ${guidedLeads.length}`)
   console.log(`AI agent average: ${aiAgentAverage.toFixed(2)} · direct semantic-pair pages ${aiAgentRows.filter((row) => row.direct.some((item) => item.name === 'CogLoop' && item.construction === 'guided_pair')).length}/${aiAgentRows.length}`)
   console.log(`CRM average: ${crmAverage.toFixed(2)} · RevLoop leads ${crmRows.filter((row) => row.selected[0]?.name === 'RevLoop').length}/${crmRows.length}`)
+  console.log(`formatter average: ${formatterAverage.toFixed(2)} · TidyKit leads ${formatterRows.filter((row) => row.selected[0]?.name === 'TidyKit').length}/${formatterRows.length}`)
   console.log(`guarded repair upgrades: ${guardedRepairUpgrades.length}`)
+  console.log(`weak Respell accents: ${weakRespellAccents.length}`)
+  console.log(`seed diversity: ${averageUniqueNames.toFixed(2)}/30 unique · ${averageSeedOverlap.toFixed(2)}/10 pair overlap · ${exactDuplicateSeedPages} duplicate pages`)
   console.log(`fallback counts: ${[...new Set(rows.map((row) => row.fallbackCount))].sort((a, b) => a - b).join(', ')}`)
   console.log('\nAI workflow focus')
   for (const row of aiWorkflowRows) {
@@ -260,12 +327,20 @@ try {
       + ` -> ${added.map((item) => item.name).join('/') || 'same set'}`,
     )
   }
+  console.log('\nformatter focus')
+  for (const row of formatterRows) {
+    console.log(`${row.seed} · ${row.selected.map((item) => item.name).join(', ')}`)
+  }
   console.log('\nguarded repair upgrades')
   for (const { row, replacement, candidate } of guardedRepairUpgrades) {
     console.log(
       `${row.seed} · ${row.prompt}: ${replacement.name}:${quality(replacement).toFixed(1)}`
       + ` -> ${candidate.name}:${quality(candidate).toFixed(1)}`,
     )
+  }
+  console.log('\nweak Respell accents')
+  for (const { row, item } of weakRespellAccents) {
+    console.log(`${quality(item).toFixed(1)} · ${row.seed} · ${row.prompt}: ${item.name}`)
   }
   console.log('\nremaining suffix leads')
   for (const row of suffixLeads) {
@@ -284,19 +359,52 @@ try {
   for (const row of worst) {
     console.log(`${row.average.toFixed(2)} · ${row.seed} · ${row.prompt}: ${row.selected.map((item) => item.name).join(', ')}`)
   }
+  console.log('\nlowest seed diversity')
+  for (const row of seedDiversity.slice(0, 8)) {
+    console.log(
+      `${row.uniqueNames}/30 · overlap ${row.averagePairOverlap.toFixed(2)}`
+      + ` · shared ${row.sharedByEverySeed.join('/') || 'none'} · ${row.prompt}`,
+    )
+  }
+  console.log('\nexact duplicate seed pages')
+  for (const row of seedDiversity.filter((item) => item.exactDuplicatePages > 0)) {
+    console.log(`${row.exactDuplicatePageSeeds.map((seeds) => seeds.join('/')).join(', ')} · ${row.prompt}`)
+  }
 
   const gates = [
     [wrongSize.length === 0, 'every held-out page contains ten names'],
     [wrongFallback.length === 0, 'held-out repair uses only the bounded fallback'],
     [multipleAccents.length === 0, 'held-out pages preserve the one-accent contract'],
+    [weakRespellAccents.length === 0, 'sub-75 Respells cannot block a stronger Auto accent'],
     [weak.length === 0, 'no held-out visible name falls below 75'],
     [averageQuality >= 84, 'held-out average structural quality stays at or above 84.0'],
     [leadQuality >= 85.8, 'held-out lead structural quality stays at or above 85.8'],
     [leadCoverage >= 1.19, 'held-out lead concept coverage stays at or above 1.19'],
     [nearPairs <= 78, 'held-out near-duplicate pairs stay at or below 78'],
     [pairSimilarity / pairCount <= 0.203, 'held-out mean pair similarity stays at or below 0.203'],
+    [
+      seedDiversity.every((row) => row.rowCount === SEEDS.length),
+      'every held-out brief contributes all three deterministic seed pages',
+    ],
+    [averageUniqueNames >= 18, 'held-out first pages retain at least 18/30 names across three seeds'],
+    [averageSeedOverlap <= 5.25, 'held-out seed pairs share at most 5.25/10 names on average'],
+    [exactDuplicateSeedPages <= 3, 'held-out content-identical seed pages do not increase'],
     [suffixLeads.length <= 24, 'held-out direct suffix leads stay at or below 24'],
     [guardedRepairUpgrades.length >= 6, 'held-out repair surfaces brief-specific inner-card upgrades'],
+    [
+      formatterRows.length === SEEDS.length
+        && formatterAverage >= 83
+        && formatterRows.filter((row) => (
+          row.selected[0]?.name === 'TidyKit'
+          && row.selected[0]?.construction === 'guided_pair'
+        )).length >= 2
+        && formatterRows.every((row) => (
+          Boolean(row.selected[0]?.construction)
+          && quality(row.selected[0]) >= 85
+          && !row.retryRequested
+        )),
+      'formatter pages lead with a strong tool-specific construction without retry',
+    ],
     [
       aiWorkflowRows.length === SEEDS.length * 5
         && aiWorkflowRows.filter((row) => row.selected[0]?.name === 'CogLoop').length >= 10
