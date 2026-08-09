@@ -993,14 +993,43 @@ long-session and local-taste flows.
 
 ---
 
+## Phase 71 — Keep both concepts readable at the seam
+
+**Bottleneck.** The Phase 70 page audit exposed a smaller Brandable failure class after the
+unrelated modes were removed. `semantic_join` deleted one character whenever two roots met on
+the same letter or on two vowels. That turned `Aura` + `Ink` into `Aurank`, `Pool` + `Link` into
+`Poolink`, and `Pool` + `Ledger` into `Pooledger`. The structural score still rated those names
+88, 93, and 86 because it cannot know that a semantic root disappeared.
+
+**A/B.** Rejecting every one-letter collision removed the bad names but reduced two-concept
+coverage by as much as six points. Preserving every character recovered that coverage and
+produced readable `Poollink`/`Poolledger`, but also admitted the equally awkward `Auraink`.
+The retained hybrid preserves duplicate consonants, lets the normal phonotactic filter reject
+dense clusters, and asks for another pair when two vowels collide. Genuine overlaps of two or
+more letters remain compact, so existing forms such as `Settledger` keep their prior path.
+
+**Measured result.** The six multi-concept 100-name sessions still return 600/600 unique,
+prompt-linked candidates with no short batch. Their mean composite is effectively unchanged
+(79.03 → 79.07); mean diversity moves only 0.771 → 0.769. Average two-concept coverage trades
+1.7 percentage points for roots that remain visibly intact. The 30-page Auto audit now fails
+on the known lossy seam class and reports zero occurrences.
+
+**Verification.** The full core suite remains 103/103. WASM and the production web bundle
+build cleanly. Chromium passes the 30-page Auto quality gate, reaches 100 unique cards without
+false exhaustion, and preserves the single-keyword, marketplace-prefix, keyword-trace, and
+explicit Real-word hint regressions.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
 Brandable by default and only admits a Respell accent that visibly comes from the brief; the
 broader modes remain explicit choices and still form the exploratory mix when no brief exists.
 Long prompted sessions no longer collapse into repeated suffix families or stop before 100
-names. Local taste feedback can already adjust structural and mode preferences, while AI
-Studio remains an optional, separate batch judge rather than a hidden dependency of Create.
+names, and semantic joins no longer erase a concept at one-letter/vowel boundaries. Local taste
+feedback can already adjust structural and mode preferences, while AI Studio remains an
+optional, separate batch judge rather than a hidden dependency of Create.
 
 The next scorer change is evidence-gated: collect at least ten real likes and ten passes in
 matching project contexts, audit the current composite, and require held-out pairwise

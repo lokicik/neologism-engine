@@ -56,8 +56,12 @@ pub fn overlap_blend(a: &str, b: &str) -> Option<String> {
 
 /// Join two short semantic roots without cutting away their meaning. Traditional
 /// prefix/suffix blending works for long words (pin + interest), but mangles
-/// compact morphemes such as lex/mint or nym/forge. Shared seams are still
-/// preferred; otherwise concatenate with one boundary duplicate/vowel removed.
+/// compact morphemes such as lex/mint or nym/forge. Shared seams of two or more
+/// letters are still preferred. Otherwise preserve duplicate consonants so
+/// both concepts remain visible (pool+link → "poollink"). Two colliding vowels
+/// ask the caller for another pair; concatenating aura+ink as "auraink" is no
+/// clearer than deleting one into "aurank". The normal phonotactic filter can
+/// reject any resulting consonant pile-up.
 pub fn semantic_join(a: &str, b: &str) -> Option<String> {
     if a.len() < 2 || b.len() < 2 || a.eq_ignore_ascii_case(b) {
         return None;
@@ -66,18 +70,13 @@ pub fn semantic_join(a: &str, b: &str) -> Option<String> {
         return Some(overlap);
     }
 
-    let mut left = a.to_string();
-    let mut right = b.to_string();
-    let a_last = left.chars().last()?;
-    let b_first = right.chars().next()?;
-    if a_last == b_first || (is_vowel(a_last) && is_vowel(b_first)) {
-        right.remove(0);
-    }
-    if right.is_empty() {
+    let a_last = a.chars().last()?;
+    let b_first = b.chars().next()?;
+    if is_vowel(a_last) && is_vowel(b_first) {
         return None;
     }
-    left.push_str(&right);
-    (left.len() <= 12).then_some(left)
+    let joined = format!("{a}{b}");
+    (joined.len() <= 12).then_some(joined)
 }
 
 /// Join an adjective + noun into a CamelCase compound (SwiftForge, BrightLoom).
@@ -313,7 +312,9 @@ mod tests {
     fn semantic_join_preserves_short_roots() {
         assert_eq!(semantic_join("lex", "mint"), Some("lexmint".to_string()));
         assert_eq!(semantic_join("nym", "forge"), Some("nymforge".to_string()));
-        assert_eq!(semantic_join("nova", "atlas"), Some("novatlas".to_string()));
+        assert_eq!(semantic_join("nova", "atlas"), None);
+        assert_eq!(semantic_join("pool", "link"), Some("poollink".to_string()));
+        assert_eq!(semantic_join("aura", "ink"), None);
         assert_eq!(semantic_join("mint", "mint"), None);
     }
 

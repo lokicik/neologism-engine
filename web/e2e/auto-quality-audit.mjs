@@ -20,6 +20,7 @@ const PROMPTS = [
 ]
 const SEEDS = [7, 42, 101, 2024, 9999]
 const VERBOSE = process.argv.includes('--verbose')
+const LOSSY_SEAMS = new Set(['aurank', 'poolink', 'pooledger'])
 
 const server = spawn(process.execPath, [viteCli, '--port', String(PORT), '--strictPort'], {
   cwd: WEB_DIR,
@@ -95,7 +96,8 @@ try {
   for (const row of rows) {
     const samples = row.results.filter((item) => item.sourceMode !== 'brandable')
     const badAccents = samples.filter((item) => !isPromptLinked(item, row.keywords))
-    if (row.results.length !== 10 || samples.length > 1 || badAccents.length > 0) failures++
+    const lossySeams = row.results.filter((item) => LOSSY_SEAMS.has(item.name.toLowerCase()))
+    if (row.results.length !== 10 || samples.length > 1 || badAccents.length > 0 || lossySeams.length > 0) failures++
     if (VERBOSE) {
       console.log(`\n${row.seed}  ${row.prompt}`)
       console.log(`keywords: ${row.keywords.join(', ')}`)
@@ -130,5 +132,5 @@ if (failures > 0) {
   console.error(`${failures} Auto page(s) violated the quality gate`)
   process.exitCode = 1
 } else {
-  console.log('PASS  all 30 Auto pages contain ten names and at most one prompt-linked accent')
+  console.log('PASS  all 30 Auto pages contain ten names, no lossy seams, and at most one prompt-linked accent')
 }

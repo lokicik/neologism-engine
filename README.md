@@ -113,6 +113,7 @@ npm run build        # output in web/dist/
 - **Taste data export** — Settings turns explicit likes and passes into a versioned JSON dataset, preserving each name's project brief while forming preference pairs only within the same project context. It never exports AI credentials or recent-name history.
 - **Brief-aware Auto** — a project description gets semantic Brandable names plus at most one Respell that is actually derived from the prompt; unrelated modes no longer receive forced slots. An empty brief keeps the broader four-mode sampler.
 - **Deep brief sessions** — initial semantic batches stay focused; later Brandable batches open a curated metaphor lane so repeated scrolling reaches 100 fresh, prompt-linked names instead of exhausting suffix variants.
+- **Readable semantic joins** — concept pairs keep meaningful boundary consonants (`Poolledger`, not `Pooledger`), while awkward vowel collisions such as `Aura` + `Ink` are skipped instead of being crushed into `Aurank`.
 - **Score bars** — pronounceability, novelty, and memorability per generated name
 - **Favorites** — star names; persisted across reloads via `localStorage`
 - **Domain indicator** — checks `.com` / `.io` availability via Cloudflare DNS-over-HTTPS (no API key; labeled as indicator, not authoritative)
