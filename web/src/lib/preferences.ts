@@ -15,6 +15,7 @@ const CONCEPT_COVERAGE_WEIGHT = 0.2
 const PREFERENCE_EXPLORATION_WEIGHT = 0.12
 const MIN_SHORTLIST_QUALITY = 0.75
 const VISIBLE_PREFIX_SHARE = 0.2
+const VISIBLE_DOMINANT_STEM_SHARE = 0.3
 const VISIBLE_SUFFIX_SHARE = 0.2
 const VISIBLE_GENERAL_SUFFIX_SHARE = 0.3
 const VISIBLE_DIRECT_SUFFIX_SHARE = 0.8
@@ -27,6 +28,7 @@ const COLD_PAIR_REPLACEMENT_TOLERANCE = 0.005
 const COLD_PAIR_QUALITY_FLOOR = 0.84
 const COLD_SET_GAIN = 0.02
 const COLD_BRANDABLE_SET_QUALITY_FLOOR = 0.85
+const COLD_NEAR_PAIR_THRESHOLD = 0.72
 const COLD_GENERIC_UPGRADE_TAILS = [
   'app', 'web', 'site', 'tool', 'client', 'service',
   // The broader metaphor palette not covered by guidedMetaphorTail(). These
@@ -643,7 +645,17 @@ function meanPairSimilarity(results: NameResult[]): number {
   return pairs === 0 ? 0 : similarity / pairs
 }
 
-function visibleFamilyCapsHold(results: NameResult[], namingPage: boolean): boolean {
+function nearPairCount(results: NameResult[]): number {
+  let pairs = 0
+  for (let i = 0; i < results.length; i++) {
+    for (let j = i + 1; j < results.length; j++) {
+      pairs += Number(lexicalSimilarity(results[i].name, results[j].name) >= COLD_NEAR_PAIR_THRESHOLD)
+    }
+  }
+  return pairs
+}
+
+function visibleFamilyOverflow(results: NameResult[], namingPage: boolean): number {
   const count = results.length
   const prefixCap = Math.max(1, Math.ceil(count * VISIBLE_PREFIX_SHARE))
   const suffixCap = Math.max(1, Math.ceil(count * VISIBLE_SUFFIX_SHARE))
@@ -652,13 +664,29 @@ function visibleFamilyCapsHold(results: NameResult[], namingPage: boolean): bool
   for (const result of results) {
     const prefix = letters(result.name).slice(0, 3)
     const ending = suffix(result.name)
-    const prefixCount = (prefixes.get(prefix) ?? 0) + 1
-    const suffixCount = (suffixes.get(ending) ?? 0) + 1
-    if (prefixCount > prefixCap || (namingPage && suffixCount > suffixCap)) return false
-    prefixes.set(prefix, prefixCount)
-    suffixes.set(ending, suffixCount)
+    prefixes.set(prefix, (prefixes.get(prefix) ?? 0) + 1)
+    suffixes.set(ending, (suffixes.get(ending) ?? 0) + 1)
   }
-  return true
+  const prefixOverflow = [...prefixes.values()]
+    .reduce((sum, value) => sum + Math.max(0, value - prefixCap), 0)
+  const suffixOverflow = namingPage
+    ? [...suffixes.values()].reduce((sum, value) => sum + Math.max(0, value - suffixCap), 0)
+    : 0
+  return prefixOverflow + suffixOverflow
+}
+
+function visibleFamilyCapsHold(results: NameResult[], namingPage: boolean): boolean {
+  return visibleFamilyOverflow(results, namingPage) === 0
+}
+
+function dominantStemOverflow(results: NameResult[]): number {
+  const cap = Math.max(1, Math.ceil(results.length * VISIBLE_DOMINANT_STEM_SHARE))
+  const stems = new Map<string, number>()
+  for (const result of results) {
+    const stem = letters(result.name).slice(0, 4)
+    stems.set(stem, (stems.get(stem) ?? 0) + 1)
+  }
+  return [...stems.values()].reduce((sum, value) => sum + Math.max(0, value - cap), 0)
 }
 
 // If a strong cold page is still visually repetitive, make the smallest
@@ -710,6 +738,105 @@ function diversifyColdShortlist(
   return selected
 }
 
+// A page can stay below the broad edit-similarity threshold while still
+// reading like one root repeated with different tails (Agentix, Agentlab,
+// Agentloom, Agentlink). Open the same bounded fallback only for a four-letter
+// stem above 30% of the page, then make quality-neutral, coverage-preserving
+// substitutions which improve that overflow without worsening the existing
+// family or similarity measures. Mechanical direct-suffix forms cannot game
+// the repair. The lead and every guided/mode accent stay.
+function diversifyDominantStems(
+  page: NameResult[],
+  fallback: NameResult[],
+  namingPage: boolean,
+): NameResult[] {
+  const selected = page.slice()
+  const selectedKeys = new Set(selected.map((result) => letters(result.name)))
+  const candidates = fallback.filter((candidate) => (
+    candidate.sourceMode === 'brandable'
+    && !isGuidedConstruction(candidate)
+    && !isDirectConceptSuffix(candidate)
+    && engineQuality(candidate) >= MIN_SHORTLIST_QUALITY
+    && !selectedKeys.has(letters(candidate.name))
+  ))
+  let currentStemOverflow = dominantStemOverflow(selected)
+  let currentNearPairs = nearPairCount(selected)
+  let currentFamilyOverflow = visibleFamilyOverflow(selected, namingPage)
+  let currentSimilarity = meanPairSimilarity(selected)
+
+  while (currentStemOverflow > 0 && candidates.length > 0) {
+    let best: {
+      index: number
+      candidateIndex: number
+      stemOverflow: number
+      nearPairs: number
+      familyOverflow: number
+      similarity: number
+      quality: number
+    } | null = null
+    for (let index = 1; index < selected.length; index++) {
+      const replaced = selected[index]
+      if (replaced.sourceMode !== 'brandable' || isGuidedConstruction(replaced)) continue
+      for (let candidateIndex = 0; candidateIndex < candidates.length; candidateIndex++) {
+        const candidate = candidates[candidateIndex]
+        const quality = engineQuality(candidate)
+        if (
+          quality + Number.EPSILON < engineQuality(replaced)
+          || (candidate.concept_coverage ?? 0) < (replaced.concept_coverage ?? 0)
+        ) continue
+        const trial = selected.slice()
+        trial[index] = candidate
+        const stemOverflow = dominantStemOverflow(trial)
+        if (stemOverflow >= currentStemOverflow) continue
+        const nearPairs = nearPairCount(trial)
+        if (nearPairs > currentNearPairs) continue
+        const familyOverflow = visibleFamilyOverflow(trial, namingPage)
+        if (familyOverflow > currentFamilyOverflow) continue
+        const similarity = meanPairSimilarity(trial)
+        if (similarity > currentSimilarity + Number.EPSILON) continue
+        if (
+          !best
+          || stemOverflow < best.stemOverflow
+          || (
+            stemOverflow === best.stemOverflow
+            && (
+              nearPairs < best.nearPairs
+              || (
+                nearPairs === best.nearPairs
+                && (
+                  familyOverflow < best.familyOverflow
+                  || (
+                    familyOverflow === best.familyOverflow
+                    && (
+                      similarity < best.similarity - Number.EPSILON
+                      || (
+                        Math.abs(similarity - best.similarity) <= Number.EPSILON
+                        && quality > best.quality
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
+        ) {
+          best = {
+            index, candidateIndex, stemOverflow, nearPairs, familyOverflow, similarity, quality,
+          }
+        }
+      }
+    }
+    if (!best) break
+    selected[best.index] = candidates[best.candidateIndex]
+    candidates.splice(best.candidateIndex, 1)
+    currentStemOverflow = best.stemOverflow
+    currentNearPairs = best.nearPairs
+    currentFamilyOverflow = best.familyOverflow
+    currentSimilarity = best.similarity
+  }
+  return selected
+}
+
 export function coldQualityPoolCount(requested: number): number {
   const count = Math.max(0, Math.floor(requested))
   return Math.max(count, Math.min(MAX_TASTE_POOL, count * COLD_QUALITY_POOL_MULTIPLIER))
@@ -721,6 +848,7 @@ export function needsQualityRepair(results: NameResult[], requested: number): bo
   return page.length < count
     || page.some((result) => engineQuality(result) < MIN_SHORTLIST_QUALITY)
     || meanPairSimilarity(page) > MAX_COLD_PAIR_SIMILARITY
+    || dominantStemOverflow(page) > 0
 }
 
 // Cold Auto keeps the engine's intended first-page order where possible. Weak
@@ -740,7 +868,11 @@ export function repairWeakShortlist(
   const selected = page.filter((result) => engineQuality(result) >= MIN_SHORTLIST_QUALITY)
   const namingPage = isNamingBrief([...page, ...fallback])
   const finish = (results: NameResult[]): NameResult[] => {
-    const diversified = diversifyColdShortlist(results, fallback, namingPage)
+    const diversified = diversifyDominantStems(
+      diversifyColdShortlist(results, fallback, namingPage),
+      fallback,
+      namingPage,
+    )
     // Pages that still need the targeted lead retry keep their existing
     // one-upgrade path. Every other repaired page may reuse the same fallback
     // once to improve an inner card under the stricter set guards above.

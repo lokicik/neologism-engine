@@ -540,6 +540,56 @@ check(
   'a diversified cold page does not need a second fallback generation',
 )
 
+const dominantStemPage = [
+  {
+    ...scoredResult('CogLoop', 90),
+    sourceMode: 'brandable' as const,
+    concept_coverage: 2,
+    construction: 'guided_pair' as const,
+  },
+  ...['Agentix', 'Agentlab', 'Agentloom', 'Agentlink']
+    .map((name) => ({
+      ...scoredResult(name, 88), sourceMode: 'brandable' as const, concept_coverage: 1,
+    })),
+  ...['Sparkify', 'Synthify', 'Neuralia', 'Synthia', 'Sparkora']
+    .map((name) => ({
+      ...scoredResult(name, 86), sourceMode: 'brandable' as const, concept_coverage: 1,
+    })),
+]
+check(
+  needsQualityRepair(dominantStemPage, 10),
+  'four cards from one exact stem open the bounded cold fallback',
+)
+const dominantStemRepaired = repairWeakShortlist(
+  dominantStemPage,
+  [{
+    ...scoredResult('Quartz', 90), sourceMode: 'brandable' as const, concept_coverage: 1,
+  }],
+  10,
+)
+check(
+  dominantStemRepaired[0].name === 'CogLoop'
+    && dominantStemRepaired.filter((item) => item.name.startsWith('Agent')).length === 3
+    && dominantStemRepaired.some((item) => item.name === 'Quartz'),
+  'dominant-stem repair preserves the lead and makes one quality-neutral substitution',
+)
+check(
+  !needsQualityRepair(dominantStemRepaired, 10),
+  'a repaired three-of-ten stem family does not reopen the fallback',
+)
+const mechanicalStemRepair = repairWeakShortlist(
+  dominantStemPage,
+  [{
+    ...scoredResult('Flagix', 92), sourceMode: 'brandable' as const, concept_coverage: 1,
+  }],
+  10,
+)
+check(
+  mechanicalStemRepair.filter((item) => item.name.startsWith('Agent')).length === 4
+    && !mechanicalStemRepair.some((item) => item.name === 'Flagix'),
+  'dominant-stem repair refuses a mechanical direct-suffix substitute',
+)
+
 const parsedReferences = parseTasteReferences(
   ' Vercel, linear; NOTION\nver-cel, x, A Really Long Reference Name Beyond Limit ',
 )

@@ -302,6 +302,47 @@ try {
   const exactDuplicateSeedPages = seedDiversity.reduce(
     (sum, row) => sum + row.exactDuplicatePages, 0,
   )
+  const dominantStemOverflowFor = (items) => {
+    const counts = new Map()
+    for (const item of items) {
+      const stem = letters(item.name).slice(0, 4)
+      counts.set(stem, (counts.get(stem) ?? 0) + 1)
+    }
+    return [...counts.values()].reduce((sum, count) => sum + Math.max(0, count - 3), 0)
+  }
+  const dominantStemRows = auditRows.map((row) => {
+    const counts = new Map()
+    for (const item of row.selected) {
+      const stem = letters(item.name).slice(0, 4)
+      counts.set(stem, (counts.get(stem) ?? 0) + 1)
+    }
+    const families = [...counts.entries()]
+      .filter(([, count]) => count > 3)
+      .sort((left, right) => right[1] - left[1])
+    return {
+      row,
+      families,
+      excess: families.reduce((sum, [, count]) => sum + count - 3, 0),
+    }
+  }).filter((item) => item.excess > 0)
+    .sort((left, right) => right.excess - left.excess)
+  const dominantStemExcess = dominantStemRows.reduce(
+    (sum, item) => sum + item.excess, 0,
+  )
+  const dominantStemRepairs = auditRows.flatMap((row) => {
+    const before = dominantStemOverflowFor(row.direct.slice(0, 10))
+    const after = dominantStemOverflowFor(row.repaired)
+    if (after >= before) return []
+    const directNames = new Set(row.direct.map((item) => letters(item.name)))
+    const repairedNames = new Set(row.repaired.map((item) => letters(item.name)))
+    return [{
+      row,
+      before,
+      after,
+      removed: row.direct.filter((item) => !repairedNames.has(letters(item.name))),
+      added: row.repaired.filter((item) => !directNames.has(letters(item.name))),
+    }]
+  })
   const weak = allVisible.filter((item) => quality(item) < 75)
   const wrongSize = rows.filter((row) => row.selected.length !== 10)
   const wrongFallback = rows.filter((row) => row.fallbackCount < 0 || row.fallbackCount > 30)
@@ -330,6 +371,7 @@ try {
   console.log(`guarded repair upgrades: ${guardedRepairUpgrades.length}`)
   console.log(`weak Respell accents: ${weakRespellAccents.length}`)
   console.log(`seed diversity: ${averageUniqueNames.toFixed(2)}/30 unique · ${averageSeedOverlap.toFixed(2)}/10 pair overlap · ${exactDuplicateSeedPages} duplicate pages`)
+  console.log(`dominant stem overflow: ${dominantStemRows.length}/${auditRows.length} pages · ${dominantStemExcess} excess cards`)
   console.log(`fallback counts: ${[...new Set(rows.map((row) => row.fallbackCount))].sort((a, b) => a - b).join(', ')}`)
   console.log('\nAI workflow focus')
   for (const row of aiWorkflowRows) {
@@ -386,6 +428,21 @@ try {
   for (const row of seedDiversity.filter((item) => item.exactDuplicatePages > 0)) {
     console.log(`${row.exactDuplicatePageSeeds.map((seeds) => seeds.join('/')).join(', ')} · ${row.prompt}`)
   }
+  console.log('\nworst dominant stems')
+  for (const { row, families } of dominantStemRows.slice(0, 8)) {
+    console.log(
+      `${row.seed} · ${families.map(([stem, count]) => `${stem}:${count}`).join('/')}`
+      + ` · ${row.prompt}: ${row.selected.map((item) => item.name).join(', ')}`,
+    )
+  }
+  console.log('\ndominant stem repairs')
+  for (const { row, before, after, removed, added } of dominantStemRepairs) {
+    console.log(
+      `${row.seed} · ${before}->${after} · ${row.prompt}:`
+      + ` ${removed.map((item) => `${item.name}:${quality(item).toFixed(1)}`).join('/')}`
+      + ` -> ${added.map((item) => `${item.name}:${quality(item).toFixed(1)}`).join('/')}`,
+    )
+  }
 
   const gates = [
     [wrongSize.length === 0, 'every held-out page contains ten names'],
@@ -405,6 +462,7 @@ try {
     [averageUniqueNames >= 18, 'held-out first pages retain at least 18/30 names across three seeds'],
     [averageSeedOverlap <= 5.25, 'held-out seed pairs share at most 5.25/10 names on average'],
     [exactDuplicateSeedPages <= 3, 'held-out content-identical seed pages do not increase'],
+    [dominantStemExcess <= 9, 'held-out exact-stem repetition stays at or below nine excess cards'],
     [suffixLeads.length <= 24, 'held-out direct suffix leads stay at or below 24'],
     [guardedRepairUpgrades.length >= 6, 'held-out repair surfaces brief-specific inner-card upgrades'],
     [

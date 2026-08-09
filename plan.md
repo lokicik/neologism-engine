@@ -3141,6 +3141,36 @@ expansion, or generic catalog rule was added.
 
 ---
 
+## Phase 127 — Reduce dominant visible stems without score gaming
+
+**Observed gap.** Broad edit similarity stayed inside its gate while some otherwise strong pages
+still read like one root repeated with different tails: one AI-agent page contained four `Agent...`
+cards. A three-letter family cap was tested and rejected because it flagged **66/105** pages and
+conflated readable neighboring roots such as `Stow...` and `Stock...`. The narrower exact
+four-letter measure found **12** excess cards across the held-out base.
+
+**Guarded repair.** Four matching stems on a ten-card page now open only the existing bounded
+Brandable fallback. The lead, guided constructions, and mode accent cannot move. A replacement
+must preserve or improve structural quality and concept coverage, strictly reduce exact-stem
+overflow, and not worsen near-pair count, the existing prefix/ending overflow, or mean similarity.
+Direct concept-plus-suffix forms are ineligible: the first trial improved numeric scores with
+`Flagix`, `Probeix`, and `Traceix`, but manual review correctly rejected those as aesthetic
+regressions. The retained path instead makes narrow readable substitutions such as
+`Speccrate 77.0 -> Probekit 84.5` on API-toolkit pages.
+
+**Measured result.** Exact-stem excess drops **12 -> 9** across 105 held-out pages. Aggregate
+quality moves **84.10 -> 84.11**, lead quality remains **86.49**, lead concept coverage remains
+**1.25**, near pairs remain **78**, and mean similarity remains **0.202**. Seed spread changes only
+slightly (**18.20 -> 18.17/30** unique; pair overlap stays **5.14/10**) and remains inside the
+existing gates. No visible result falls below 75 and direct-suffix leaders remain at 24.
+
+**Verification.** The core suite remains **147/147**. The preference smoke suite, full held-out
+gate, fixed 90-page cold audit, 85-page Auto audit, fifteen namespace pages, 1,600 developer-domain
+names, TypeScript, and production Vite bundle all pass. No LLM, network call, score change, new
+vocabulary, or additional generation request was added.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
@@ -3170,6 +3200,8 @@ Generic `builder` wording likewise cannot steal the Respell accent from a recogn
 subject; unknown builder briefs still keep their literal source.
 Household inventory briefs can express the job directly through the isolated `StowLog` family
 without teaching ordinary catalogs another global template.
+Cold Auto also limits exact four-letter stem repetition on a visible page, but only through a
+quality-neutral, coverage-preserving non-suffix substitution from the fallback it already opened.
 Compound is now a genuinely brief-aware explicit alternative rather than a random adjective
 showcase. Focused first pages stay narrow; recognized concepts open a restrained continuation
 palette only when the user asks for more, preserving 100-name session capacity without generic
