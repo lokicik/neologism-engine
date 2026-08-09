@@ -175,6 +175,11 @@ try {
   const aiWorkflowRows = rows.filter((row) => (
     /\bai\b/i.test(row.prompt) || /\bagent\b/i.test(row.prompt)
   ) && /\b(?:automation|workflow)s?\b/i.test(row.prompt))
+  const aiAgentRows = rows.filter((row) => row.prompt === 'an AI automation agent')
+  const aiAgentAverage = aiAgentRows.reduce(
+    (sum, row) => sum + row.selected.reduce((pageSum, item) => pageSum + quality(item), 0),
+    0,
+  ) / (aiAgentRows.length * 10)
   const weak = allVisible.filter((item) => quality(item) < 75)
   const wrongSize = rows.filter((row) => row.selected.length !== 10)
   const wrongFallback = rows.filter((row) => row.fallbackCount < 0 || row.fallbackCount > 30)
@@ -195,6 +200,7 @@ try {
   console.log(`average quality: ${averageQuality.toFixed(2)} · lead ${leadQuality.toFixed(2)} · coverage ${leadCoverage.toFixed(2)}`)
   console.log(`sub-75: ${weak.length} · near pairs ${nearPairs} · similarity ${(pairSimilarity / pairCount).toFixed(3)}`)
   console.log(`suffix leads: ${suffixLeads.length} · guided leads: ${guidedLeads.length}`)
+  console.log(`AI agent average: ${aiAgentAverage.toFixed(2)} · direct semantic-pair pages ${aiAgentRows.filter((row) => row.direct.some((item) => item.name === 'CogLoop' && item.construction === 'guided_pair')).length}/${aiAgentRows.length}`)
   console.log(`fallback counts: ${[...new Set(rows.map((row) => row.fallbackCount))].sort((a, b) => a - b).join(', ')}`)
   console.log('\nAI workflow focus')
   for (const row of aiWorkflowRows) {
@@ -254,6 +260,17 @@ try {
         .filter((row) => row.prompt === 'workflow automation assistant powered by AI')
         .every((row) => row.selected[0]?.name === 'CogLoop'),
       'recognized AI semantics cannot starve when context words come first',
+    ],
+    [
+      aiAgentRows.length === SEEDS.length
+        && aiAgentRows.every((row) => (
+          row.selected[0]?.name === 'CogLoop'
+          && row.direct.some((item) => (
+            item.name === 'CogLoop' && item.construction === 'guided_pair'
+          ))
+          && !row.retryRequested
+        )),
+      'AI agent pages surface their semantic pair before the final retry',
     ],
   ]
   let failures = 0

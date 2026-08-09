@@ -148,7 +148,11 @@ const preserveGuidedConstruction = (
   const candidateName = letters(candidate.name)
   return page.map((result) => (
     letters(result.name) === candidateName
-      ? { ...result, construction: 'guided_metaphor', constructionRank: 1 }
+      ? {
+          ...result,
+          construction: candidate.construction ?? 'guided_metaphor',
+          constructionRank: candidate.constructionRank ?? 1,
+        }
       : result
   ))
 }
@@ -251,6 +255,7 @@ export async function generateBatch(cfg: Config): Promise<NameResult[]> {
     // the brief. Otherwise let one strong semantic metaphor compete with the
     // Brandable page instead of widening the main generator's whole first pool.
     let metaphorAccent: NameResult[] = []
+    let pairAccent: NameResult[] = []
     if (total > 0 && linkedRespells.length === 0) {
       const metaphorConfig = {
         ...cfg,
@@ -281,6 +286,17 @@ export async function generateBatch(cfg: Config): Promise<NameResult[]> {
           if (metaphorAccent.length === 2) break
         }
       }
+      // If no metaphor survives the 85-point gate, try one explicit semantic
+      // pair. It may enter only through the quality-neutral suffix replacement
+      // below, so ordinary pages cannot lose a stronger card to fill a quota.
+      if (metaphorAccent.length === 0) {
+        pairAccent = pickGuidedPair(await generateNames({
+          ...cfg,
+          variant: 'concept_pair',
+          compound: false,
+          count: GUIDED_PAIR_POOL,
+        }))
+      }
     }
     const primaryPage = preserveGuidedConstruction(mergeAutoBatches([
       brandableBatch,
@@ -288,9 +304,14 @@ export async function generateBatch(cfg: Config): Promise<NameResult[]> {
       linkedRespells,
       metaphorAccent.slice(0, 1),
     ], total), metaphorAccent[0])
-    return linkedRespells.length === 0
-      ? addQualityNeutralGuidedAlternative(primaryPage, metaphorAccent[1])
-      : primaryPage
+    if (linkedRespells.length > 0) return primaryPage
+    if (metaphorAccent.length > 0) {
+      return addQualityNeutralGuidedAlternative(primaryPage, metaphorAccent[1])
+    }
+    return addQualityNeutralGuidedAlternative(
+      preserveGuidedConstruction(primaryPage, pairAccent[0]),
+      pairAccent[0],
+    )
   }
 
   const subs: Config[] = [
