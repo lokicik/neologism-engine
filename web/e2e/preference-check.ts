@@ -6,6 +6,8 @@ import {
   coldQualityPoolCount,
   compoundTastePoolCount,
   feedbackForContext,
+  fillColdLeadRetry,
+  needsColdLeadRetry,
   needsQualityRepair,
   parseTasteReferences,
   preferencePoolCount,
@@ -217,6 +219,63 @@ check(
     { ...scoredResult('Keyspark', 86.3), sourceMode: 'brandable', concept_coverage: 2 },
   ])[0].name === 'Lexia',
   'a semantic alternative outside the half-point tolerance stays behind',
+)
+const coldLeadGap = [
+  { ...scoredResult('Vaultio', 85.3), sourceMode: 'brandable' as const, concept_coverage: 1 },
+  { ...scoredResult('Shieldora', 77), sourceMode: 'brandable' as const, concept_coverage: 1 },
+  { ...scoredResult('Guardbond', 81.2), sourceMode: 'brandable' as const, concept_coverage: 2 },
+]
+check(
+  needsColdLeadRetry(coldLeadGap),
+  'a remaining cold suffix lead with guided capacity requests the targeted retry',
+)
+const retriedColdLead = fillColdLeadRetry(coldLeadGap, [
+  { ...scoredResult('Kinsignal', 85.5), sourceMode: 'brandable', concept_coverage: 1 },
+])
+check(
+  retriedColdLead[0].name === 'Kinsignal'
+    && retriedColdLead.length === coldLeadGap.length
+    && retriedColdLead.some((item) => item.name === 'Guardbond')
+    && !retriedColdLead.some((item) => item.name === 'Shieldora'),
+  'the targeted retry replaces only a no-stronger suffix and closes the lead gap',
+)
+check(
+  fillColdLeadRetry(coldLeadGap, [
+    { ...scoredResult('Kinflow', 84.9), sourceMode: 'brandable', concept_coverage: 1 },
+  ])[0].name === 'Vaultio',
+  'a sub-85 retry candidate cannot enter the cold page',
+)
+check(
+  fillColdLeadRetry([
+    { ...scoredResult('Dashify', 89.8), sourceMode: 'brandable', concept_coverage: 1 },
+    { ...scoredResult('Dashnode', 82), sourceMode: 'brandable', concept_coverage: 2 },
+    { ...scoredResult('Dashatlas', 85.5), sourceMode: 'brandable', concept_coverage: 1 },
+    { ...scoredResult('Surgeora', 80), sourceMode: 'brandable', concept_coverage: 1 },
+  ], [
+    { ...scoredResult('Dashlab', 89.3), sourceMode: 'brandable', concept_coverage: 1 },
+  ])[0].name === 'Dashify',
+  'a retry candidate cannot deepen an already-overflowing prefix family',
+)
+check(
+  !needsColdLeadRetry([
+    ...coldLeadGap,
+    { ...scoredResult('Passwrd', 88), sourceMode: 'respell', concept_coverage: 0 },
+  ]),
+  'an earned Respell keeps ownership instead of opening the targeted metaphor retry',
+)
+check(
+  !needsColdLeadRetry([
+    ...coldLeadGap,
+    {
+      ...scoredResult('Kinloom', 84), sourceMode: 'brandable', concept_coverage: 1,
+      construction: 'guided_metaphor', constructionRank: 1,
+    },
+    {
+      ...scoredResult('Kinsignal', 84), sourceMode: 'brandable', concept_coverage: 1,
+      construction: 'guided_metaphor', constructionRank: 2,
+    },
+  ]),
+  'two existing guided forms keep their capacity instead of opening the retry',
 )
 check(
   prioritizeColdStrongLead([

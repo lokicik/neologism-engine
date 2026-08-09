@@ -1,4 +1,4 @@
-import type { NameResult, NamingMode } from './engine'
+import { guidedMetaphorTail, type NameResult, type NamingMode } from './engine'
 
 // Client-side preference learning. The profile stays transparent and tiny: it
 // contrasts saved names with explicit passes (including their source naming
@@ -351,6 +351,70 @@ export function prioritizeColdStrongLead(results: NameResult[]): NameResult[] {
   const [lead] = selected.splice(candidate.index, 1)
   selected.unshift(lead)
   return selected
+}
+
+export function needsColdLeadRetry(results: NameResult[]): boolean {
+  return results.length > 0
+    && isDirectConceptSuffix(results[0])
+    && !results.some((result) => result.sourceMode === 'respell')
+    && results.filter((result) => result.construction === 'guided_metaphor').length < 2
+}
+
+// Targeted deterministic metaphor pools may close a true cold-page gap, but a
+// candidate earns a place only by replacing a no-stronger suffix and satisfying the
+// same guarded lead selector. Existing Respell accents and two-form pages own
+// their current direction, so this cannot broaden the normal Auto mix.
+export function fillColdLeadRetry(
+  results: NameResult[],
+  candidates: NameResult[],
+): NameResult[] {
+  if (!needsColdLeadRetry(results)) return results.slice()
+  const guided = results.filter((result) => result.construction === 'guided_metaphor')
+  const usedNames = new Set(results.map((result) => letters(result.name)))
+  const usedTails = new Set(guided
+    .map(guidedMetaphorTail)
+    .filter((tail): tail is string => Boolean(tail)))
+  const constructionRank: 1 | 2 = guided.length === 0 ? 1 : 2
+
+  for (const candidate of candidates) {
+    const name = letters(candidate.name)
+    const tail = guidedMetaphorTail(candidate)
+    if (
+      !tail
+      || usedNames.has(name)
+      || usedTails.has(tail)
+      || (candidate.concept_coverage ?? 0) === 0
+      || engineQuality(candidate) < 0.85
+    ) continue
+
+    const replacement = results
+      .map((result, index) => ({ result, index, quality: engineQuality(result) }))
+      .filter(({ result, quality }) => (
+        isDirectConceptSuffix(result)
+        && quality <= engineQuality(candidate) + Number.EPSILON
+      ))
+      .sort((left, right) => left.quality - right.quality || right.index - left.index)[0]
+    if (!replacement) continue
+
+    const prefix = name.slice(0, 3)
+    const prefixCap = Math.max(1, Math.ceil(results.length * VISIBLE_PREFIX_SHARE))
+    const prefixBefore = results.filter((result) => letters(result.name).startsWith(prefix)).length
+    const prefixAfter = prefixBefore
+      + 1
+      - Number(letters(replacement.result.name).startsWith(prefix))
+    if (prefixAfter > Math.max(prefixCap, prefixBefore)) continue
+
+    const trial = results.slice()
+    trial[replacement.index] = {
+      ...candidate,
+      construction: 'guided_metaphor',
+      constructionRank,
+    }
+    if (meanPairSimilarity(trial) > meanPairSimilarity(results) + Number.EPSILON) continue
+    const ordered = prioritizeColdStrongLead(trial)
+    if (!isDirectConceptSuffix(ordered[0])) return ordered
+  }
+  return results.slice()
 }
 
 // Stable noise in [-0.5, 0.5]. It only separates close personalized choices:

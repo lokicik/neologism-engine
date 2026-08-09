@@ -46,6 +46,7 @@ export interface NameResult {
 const GUIDED_METAPHOR_POOL = 8
 const GUIDED_METAPHOR_QUALITY_FLOOR = 85
 const GUIDED_METAPHOR_FALLBACK_SEED_OFFSET = 16
+const COLD_LEAD_METAPHOR_RETRY_SEED_OFFSETS = [13, 521]
 const UINT32_RANGE = 0x1_0000_0000
 const GUIDED_METAPHOR_TAILS = [
   'flow', 'forge', 'spark', 'seed', 'craft', 'lab', 'wave', 'link', 'pulse', 'beam',
@@ -62,7 +63,7 @@ const structuralQuality = (result: NameResult): number => (
 
 const letters = (value: string): string => value.toLowerCase().replace(/[^a-z]/g, '')
 
-const guidedMetaphorTail = (result: NameResult): string | undefined => {
+export const guidedMetaphorTail = (result: NameResult): string | undefined => {
   const normalized = letters(result.name)
   return GUIDED_METAPHOR_TAILS.find((tail) => normalized.endsWith(tail))
 }
@@ -74,10 +75,13 @@ const isDirectSuffixForm = (result: NameResult): boolean => {
     && DIRECT_SUFFIX_TAILS.some((tail) => normalized.endsWith(tail))
 }
 
-const guidedMetaphorFallbackSeed = (seed: number | undefined): number | undefined => (
+const guidedMetaphorFallbackSeed = (
+  seed: number | undefined,
+  offset: number,
+): number | undefined => (
   seed === undefined
     ? undefined
-    : (Math.trunc(seed) % UINT32_RANGE + GUIDED_METAPHOR_FALLBACK_SEED_OFFSET + UINT32_RANGE) % UINT32_RANGE
+    : (Math.trunc(seed) % UINT32_RANGE + offset + UINT32_RANGE) % UINT32_RANGE
 )
 
 const pickGuidedMetaphor = (results: NameResult[]): NameResult[] => {
@@ -177,6 +181,22 @@ export async function generateNames(cfg: Config): Promise<NameResult[]> {
   return contextual.map((result) => ({ ...result, sourceMode }))
 }
 
+// A cold-page retry is requested only after normal generation, repair, and
+// lead ordering still leave a direct suffix first. Keep this pool separate so
+// ordinary pages and continued sessions do not absorb another broad fallback.
+export async function generateColdLeadRetry(cfg: Config): Promise<NameResult[]> {
+  const batches = await Promise.all(COLD_LEAD_METAPHOR_RETRY_SEED_OFFSETS.map(async (offset) => (
+    pickGuidedMetaphor(await generateNames({
+      ...cfg,
+      variant: 'metaphor',
+      compound: false,
+      count: GUIDED_METAPHOR_POOL,
+      seed: guidedMetaphorFallbackSeed(cfg.seed, offset),
+    }))
+  )))
+  return batches.flat()
+}
+
 // Auto mode (web-only meta-mode): choose a brief-aware mode mix. The engine
 // never sees variant:'auto'. A guided batch uses Brandable plus at most one
 // prompt-derived Respell; an empty brief keeps the broad four-mode sampler.
@@ -219,7 +239,7 @@ export async function generateBatch(cfg: Config): Promise<NameResult[]> {
         const usedTails = new Set(metaphorAccent.map(guidedMetaphorTail))
         const fallback = pickGuidedMetaphor(await generateNames({
           ...metaphorConfig,
-          seed: guidedMetaphorFallbackSeed(cfg.seed),
+          seed: guidedMetaphorFallbackSeed(cfg.seed, GUIDED_METAPHOR_FALLBACK_SEED_OFFSET),
         }))
         for (const result of fallback) {
           const name = letters(result.name)

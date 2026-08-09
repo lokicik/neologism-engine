@@ -1,6 +1,6 @@
-// Compare first-card ordering strategies on production cold Auto pages.
-// Every strategy keeps the exact same ten-name set; this isolates first
-// impression from generation, quality repair, and diversity changes.
+// Compare first-card ordering strategies on repaired cold Auto pages before
+// the targeted final-gap retry. Every strategy keeps the same ten-name set;
+// this isolates ordering from generation, quality repair, and set changes.
 import { chromium } from 'playwright'
 import { spawn } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
@@ -121,6 +121,23 @@ const strategies = {
       .sort((left, right) => quality(right.item) - quality(left.item))
     return move(items, candidates[0]?.index ?? -1, 0)
   },
+  qualified_guided_coverage_first: (items) => {
+    const firstQuality = quality(items[0])
+    const firstCoverage = items[0].concept_coverage ?? 0
+    const candidates = items
+      .map((item, index) => ({ item, index }))
+      .filter(({ item }) => (
+        item.construction === 'guided_metaphor'
+        && quality(item) >= firstQuality
+        && (item.concept_coverage ?? 0) >= firstCoverage
+      ))
+      .sort((left, right) => (
+        (right.item.concept_coverage ?? 0) - (left.item.concept_coverage ?? 0)
+        || quality(right.item) - quality(left.item)
+        || left.index - right.index
+      ))
+    return move(items, candidates[0]?.index ?? -1, 0)
+  },
   qualified_non_suffix_first: (items) => promoteQualifiedNonSuffix(items),
   guided_then_non_suffix: (items) => {
     const guided = strategies.qualified_guided_first(items)
@@ -138,6 +155,31 @@ const strategies = {
     if (guided[0].name !== items[0].name || !isDirectSuffix(guided[0])) return guided
     return promoteQualifiedNonSuffix(items, 2)
   },
+  guided_coverage_then_non_suffix_plus_two: (items) => {
+    const guided = strategies.qualified_guided_coverage_first(items)
+    if (guided[0].name !== items[0].name || !isDirectSuffix(guided[0])) return guided
+    return promoteQualifiedNonSuffix(items, 2)
+  },
+  strong_coverage_first: (items) => {
+    if (!isDirectSuffix(items[0])) return strategies.qualified_guided_first(items)
+    const firstQuality = quality(items[0])
+    const firstCoverage = items[0].concept_coverage ?? 0
+    const candidates = items
+      .map((item, index) => ({ item, index }))
+      .filter(({ item }) => (
+        (item.concept_coverage ?? 0) >= firstCoverage
+        && (
+          (item.construction === 'guided_metaphor' && quality(item) >= firstQuality)
+          || (!isDirectSuffix(item) && quality(item) >= firstQuality + 2)
+        )
+      ))
+      .sort((left, right) => (
+        (right.item.concept_coverage ?? 0) - (left.item.concept_coverage ?? 0)
+        || quality(right.item) - quality(left.item)
+        || left.index - right.index
+      ))
+    return move(items, candidates[0]?.index ?? -1, 0)
+  },
   retained_then_semantic_half: (items) => promoteAestheticAlternative(
     strategies.guided_then_non_suffix_plus_two(items), 0.5, false,
   ),
@@ -146,6 +188,12 @@ const strategies = {
   ),
   retained_then_semantic_or_guided_half: (items) => promoteAestheticAlternative(
     strategies.guided_then_non_suffix_plus_two(items), 0.5, true,
+  ),
+  coverage_first_then_semantic_or_guided_half: (items) => promoteAestheticAlternative(
+    strategies.guided_coverage_then_non_suffix_plus_two(items), 0.5, true,
+  ),
+  strong_coverage_then_semantic_or_guided_half: (items) => promoteAestheticAlternative(
+    strategies.strong_coverage_first(items), 0.5, true,
   ),
   retained_then_semantic_or_guided_one: (items) => promoteAestheticAlternative(
     strategies.guided_then_non_suffix_plus_two(items), 1, true,
@@ -310,6 +358,18 @@ try {
         + `/c${selected[0].concept_coverage ?? 0}`,
       )
     }
+  }
+
+  console.log('\nstrong coverage-first changes versus guided-first production')
+  for (const row of rows) {
+    const guidedFirst = strategies.retained_then_semantic_or_guided_half(row.items)
+    const coverageFirst = strategies.strong_coverage_then_semantic_or_guided_half(row.items)
+    if (guidedFirst[0].name === coverageFirst[0].name) continue
+    console.log(
+      `${row.seed} · ${row.prompt}: ${guidedFirst[0].name}:${quality(guidedFirst[0]).toFixed(1)}`
+      + `/c${guidedFirst[0].concept_coverage ?? 0} -> ${coverageFirst[0].name}:${quality(coverageFirst[0]).toFixed(1)}`
+      + `/c${coverageFirst[0].concept_coverage ?? 0}`,
+    )
   }
 
   const own = rows.find((row) => row.prompt.startsWith('an offline naming engine') && row.seed === 42)

@@ -2696,6 +2696,59 @@ feedback/reference/export flow also pass unchanged.
 
 ---
 
+## Phase 114 — Search only the true cold-page gaps
+
+**Bottleneck classification.** Phase 113 left **14/90** cold pages with a direct-suffix lead. Five
+were correctly owned by an earned Respell, three already used both guided-form slots, and three of
+the six searchable pages had no qualifying candidate in any tested pool. A dedicated diagnostic
+therefore searched 72 deterministic seed offsets only against the six real open gaps, simulating
+the existing 85+ quality floor, distinct-tail rule, quality-neutral replacement, and guarded lead
+selector.
+
+**Rejected broad fallback.** Offset `+58` appeared to close three gaps, but two wins were false
+economies: `Dashlab` grew an already-overflowing `Dash` family **3 → 4** and raised page similarity
+by 0.016; `Bufferlab` grew `Buf` **2 → 3**. Adding `+58` to normal Auto globally improved aggregate
+quality but spread new guided forms beyond the actual gaps, lowered mean lead coverage
+**1.22 → 1.19**, and exposed one orphaned construction rank. Making semantic joins outrank every
+guided winner recovered coverage to 1.27 but caused poor trades such as
+`Kinloom 92.5 → Guardbond 81.2` and `Keyloom → Keyseed`. Both broad variants were removed.
+
+**Retained search.** The safe sweep found two complementary pools. Offset `+13` supplies
+`Kinloom 92.5` for the secure-team gap while introducing a new prefix family and reducing mean
+similarity by 0.026. Offset `+521` supplies `Kitwave 89.8` for the analytics gap, also with a new
+prefix and a 0.019 similarity reduction. The web app opens these two eight-candidate local pools
+in parallel only after a fresh, unpersonalized briefed Auto page has completed normal generation,
+quality repair, and lead ordering and still starts with a direct suffix. Any Respell or two existing
+guided forms blocks the retry. A candidate must remain 85+, carry a recognized metaphor ending
+and brief concept, replace a no-stronger direct suffix, avoid increasing an overflowing three-letter
+prefix family, avoid increasing mean similarity, and finally pass the same guarded lead selector.
+Each UI generation click now draws one random 32-bit seed and shares it across that click's local
+sub-pools, so the measured offsets exist in the real app while every unseeded click still produces
+a fresh page.
+Local taste, Load more/recent-history sessions, AI Studio, and ordinary successful pages never open
+the retry.
+
+**Measured result.** Exactly two of ninety fixed pages change set: `Shieldora → Kinloom` and
+`Surgeora → Kitwave`; their visible leads improve `Vaultio → Kinloom` and
+`Dashify → Kitwave`. Relative to Phase 113, reordered pages rise **46 → 48**, mean lead quality
+**85.33 → 85.41**, suffix-first pages **14 → 12**, and guided leads **40 → 42**, while mean lead
+coverage holds at **1.22**. Aggregate visible quality improves **83.17 → 83.20**; near-duplicate
+pairs stay 43 and mean similarity stays 0.201. Repair activation remains 34/90, the product's
+`Keyloom` page is unchanged, and all fifteen developer-namespace pages retain their prior metrics
+and pass.
+
+**Verification.** The deterministic preference suite pins retry eligibility, a successful
+quality-neutral swap, sub-85 rejection, Respell/two-form ownership, and overflowing-prefix
+rejection. The
+90-page production audit requires exactly two retry set changes, validates each removed/added card,
+keeps the three Phase 113 near-ties bounded to half a point, and gates lead quality, coverage,
+suffix count, near pairs, and similarity. The 72-offset diagnostic remains reproducible evidence
+for both selected and rejected seeds. The 85-page Auto construction audit, fifteen-page namespace
+audit, 1,000-name taste matrix, four 100-name continuation sessions, mode-aware taste matrix,
+real feedback/reference/export flow, actual prompt UI, TypeScript, and production bundle all pass.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
@@ -2706,7 +2759,8 @@ broader modes remain explicit choices and still form the exploratory mix when no
 Cold first pages now lead with that stronger guided form only when quality and brief coverage are
 both non-decreasing. A remaining direct suffix yields only to a same-coverage non-suffix form with
 a two-point quality advantage, or to a half-point near-tie that adds a concept or already passed
-the guided-form quality gate; the underlying ten-name set remains intact.
+the guided-form quality gate. If that still leaves a mechanical lead, a final diversity-safe local
+retry may replace one weaker suffix on a proven gap page.
 Compound is now a genuinely brief-aware explicit alternative rather than a random adjective
 showcase. Focused first pages stay narrow; recognized concepts open a restrained continuation
 palette only when the user asks for more, preserving 100-name session capacity without generic

@@ -79,9 +79,11 @@ try {
   const page = await browser.newPage()
   await page.goto(`http://localhost:${PORT}`)
   const rows = await page.evaluate(async ({ prompts, seeds }) => {
-    const { generateBatch, generateNames } = await import('/src/lib/engine.ts')
+    const { generateBatch, generateColdLeadRetry, generateNames } = await import('/src/lib/engine.ts')
     const {
       coldQualityPoolCount,
+      fillColdLeadRetry,
+      needsColdLeadRetry,
       needsQualityRepair,
       prioritizeColdStrongLead,
       repairWeakShortlist,
@@ -102,7 +104,11 @@ try {
               count: coldQualityPoolCount(10), exclude: direct.map((item) => item.name),
             })
           : []
-        pages.push(prioritizeColdStrongLead(repairWeakShortlist(direct, fallback, 10)))
+        const ordered = prioritizeColdStrongLead(repairWeakShortlist(direct, fallback, 10))
+        const retry = needsColdLeadRetry(ordered)
+          ? await generateColdLeadRetry(config)
+          : []
+        pages.push(fillColdLeadRetry(ordered, retry))
       }
       output.push({ prompt, pages })
     }

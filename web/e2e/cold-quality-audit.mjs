@@ -55,9 +55,11 @@ try {
   const page = await browser.newPage()
   await page.goto(`http://localhost:${PORT}`)
   const rows = await page.evaluate(async ({ prompts, seeds }) => {
-    const { generateBatch, generateNames } = await import('/src/lib/engine.ts')
+    const { generateBatch, generateColdLeadRetry, generateNames } = await import('/src/lib/engine.ts')
     const {
       coldQualityPoolCount,
+      fillColdLeadRetry,
+      needsColdLeadRetry,
       needsQualityRepair,
       prioritizeColdStrongLead,
       repairWeakShortlist,
@@ -82,12 +84,18 @@ try {
             })
           : []
         const repaired = repairWeakShortlist(direct, fallback, 10)
+        const ordered = prioritizeColdStrongLead(repaired)
+        const retry = needsColdLeadRetry(ordered)
+          ? await generateColdLeadRetry(config)
+          : []
+        const selected = fillColdLeadRetry(ordered, retry)
         output.push({
           prompt,
           seed,
           direct,
           repaired,
-          selected: prioritizeColdStrongLead(repaired),
+          selected,
+          retryUsed: ordered.map((item) => item.name).join('|') !== selected.map((item) => item.name).join('|'),
           fallbackCount: fallback.length,
         })
       }
@@ -170,6 +178,25 @@ try {
   const orderingChangedSet = rows.filter((row) => (
     row.repaired.map(normalized).sort().join('|') !== row.selected.map(normalized).sort().join('|')
   )).length
+  const retryRows = rows.filter((row) => row.retryUsed)
+  const retryChanges = retryRows.map((row) => {
+    const repairedNames = new Set(row.repaired.map(normalized))
+    const selectedNames = new Set(row.selected.map(normalized))
+    const removed = row.repaired.filter((item) => !selectedNames.has(normalized(item)))
+    const added = row.selected.filter((item) => !repairedNames.has(normalized(item)))
+    const valid = removed.length === 1
+      && added.length === 1
+      && isDirectSuffix(removed[0])
+      && added[0].construction === 'guided_metaphor'
+      && quality(added[0]) + Number.EPSILON >= quality(removed[0])
+      && !row.repaired.some((item) => item.sourceMode === 'respell')
+      && row.selected.filter((item) => item.construction === 'guided_metaphor').length <= 2
+    return {
+      valid,
+      label: `${removed[0]?.name ?? '?'} -> ${added[0]?.name ?? '?'}`,
+    }
+  })
+  const retryContractViolations = retryChanges.filter((change) => !change.valid).length
   const weakenedLeadRows = rows.filter((row) => (
     quality(row.selected[0]) + Number.EPSILON < quality(row.repaired[0])
   ))
@@ -201,24 +228,27 @@ try {
   console.log(`multiple-accent pages: ${multipleAccentPages}/${rows.length} (max ${maxAccents})`)
   console.log(`strong lead reorder: ${reorderedPages}/${rows.length} · quality ${originalLeadQuality.toFixed(2)} -> ${selectedLeadQuality.toFixed(2)} · coverage ${selectedLeadCoverage.toFixed(2)} · suffix first ${originalSuffixLeads} -> ${selectedSuffixLeads} · guided first ${selectedGuidedLeads}`)
   console.log(`justified near-tie trades: ${justifiedNearTies.length} · max quality loss ${(maxLeadQualityLoss * 100).toFixed(2)}`)
+  console.log(`targeted retry changes: ${retryChanges.map((change) => change.label).join(', ') || 'none'}`)
   console.log(`own brief: ${ownBrief.selected.map((item) => `${item.sourceMode}:${item.name}`).join(', ')}`)
 
   const gates = [
     [wrongSize === 0, 'every repaired cold page contains ten names'],
     [wrongFallback === 0, 'repair uses either no fallback or the bounded 30-name pool'],
     [multipleAccentPages === 0, 'cold repair preserves Auto\'s one-accent visible-page contract'],
-    [orderingChangedSet === 0, 'strong lead ordering preserves the exact repaired name set'],
+    [retryRows.length === 2, 'the targeted retry closes exactly two fixed cold-page gaps'],
+    [orderingChangedSet === retryRows.length, 'only targeted retry pages change the repaired name set'],
+    [retryContractViolations === 0, 'each targeted retry replaces one no-stronger suffix within the guided-form contract'],
     [unjustifiedWeakenedLeads === 0, 'any first-card quality trade stays inside the semantic/guided near-tie rule'],
     [justifiedNearTies.length === 3, 'the fixed matrix contains exactly three justified near-tie promotions'],
     [maxLeadQualityLoss <= NEAR_TIE_TOLERANCE + Number.EPSILON, 'first-card structural quality loss never exceeds half a point'],
     [weakenedLeadCoverage === 0, 'strong lead ordering never lowers first-card concept coverage'],
-    [selectedLeadQuality >= 85.3, 'ordered first-card structural quality stays at or above 85.3'],
+    [selectedLeadQuality >= 85.4, 'ordered first-card structural quality stays at or above 85.4'],
     [selectedLeadCoverage >= 1.22, 'ordered first-card concept coverage stays at or above 1.22'],
-    [selectedSuffixLeads <= 14, 'direct suffix leads stay at or below fourteen of ninety pages'],
+    [selectedSuffixLeads <= 12, 'direct suffix leads stay at or below twelve of ninety pages'],
     [direct.below75 === 0 || repairedPages > 0, 'weak pages activate the offline repair pool'],
     [repaired.below75 === 0, 'no repaired cold Auto name falls below 75 structural quality'],
     [repaired.averageQuality >= 82.5, 'repaired cold Auto quality stays at or above 82.5'],
-    [repaired.nearPairs <= 60, 'repaired cold Auto near-duplicate pairs stay at or below 60'],
+    [repaired.nearPairs <= 43, 'repaired cold Auto near-duplicate pairs do not exceed the prior baseline'],
     [repaired.meanPairSimilarity <= 0.21, 'repaired cold Auto mean pair similarity stays at or below 0.21'],
   ]
   for (const [ok, label] of gates) {
