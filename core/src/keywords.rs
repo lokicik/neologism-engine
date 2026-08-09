@@ -211,7 +211,7 @@ fn concept_adjectives(word: &str) -> &'static [&'static str] {
         "developer" | "code" | "coding" | "program" | "programming" | "package" | "library"
         | "cli" | "api" => &["open", "native", "prime", "solid", "swift", "clean"],
         "generate" | "generator" | "create" | "creator" | "build" | "builder" => {
-            &["fresh", "bright", "bold", "rapid", "open", "prime"]
+            &["fresh", "bright", "bold", "swift", "open", "prime"]
         }
         "secure" | "security" | "private" | "privacy" | "password" | "auth" | "encrypt"
         | "encrypted" => &[
@@ -329,6 +329,61 @@ pub fn compound_continuation_adjectives(keywords: &[String]) -> Vec<&'static str
         }
     }
     adjectives
+}
+
+fn is_cross_concept_modifier(word: &str) -> bool {
+    matches!(
+        word,
+        "mood"
+            | "emotion"
+            | "feeling"
+            | "split"
+            | "share"
+            | "sharing"
+            | "divide"
+            | "settle"
+            | "vintage"
+            | "retro"
+            | "classic"
+            | "antique"
+            | "fast"
+            | "speed"
+            | "performance"
+            | "rapid"
+    )
+}
+
+/// Check whether a Compound adjective and noun express compatible parts of
+/// the brief. Modifiers such as Retro, Fair, Vivid, and Swift may describe any
+/// product noun; other adjectives stay with the concept that supplied them.
+pub fn compound_pair_is_coherent(
+    adjective: &str,
+    noun: &str,
+    keywords: &[String],
+    allow_general: bool,
+) -> bool {
+    let has_known_concept = keywords
+        .iter()
+        .any(|keyword| !concept_adjectives(keyword).is_empty());
+    if !has_known_concept {
+        return true;
+    }
+    if !compound_roots(keywords, 16).iter().any(|root| root == noun) {
+        return false;
+    }
+
+    for keyword in keywords {
+        if !concept_adjectives(keyword).contains(&adjective) {
+            continue;
+        }
+        let owns_noun = (!suppress_literal_root(keyword) && keyword == noun)
+            || concept_roots(keyword).contains(&noun);
+        if owns_noun || is_cross_concept_modifier(keyword) {
+            return true;
+        }
+    }
+
+    allow_general && GENERAL_COMPOUND_ADJECTIVES.contains(&adjective)
 }
 
 /// Noun roots for Compound mode. Audience terms ("for teams", "with friends")
@@ -652,6 +707,19 @@ mod tests {
         );
         assert_eq!(&continued[..focused.len()], focused);
         assert_eq!(continued.len(), 30);
+    }
+
+    #[test]
+    fn compound_pairing_keeps_roles_coherent() {
+        let dev = ["name".into(), "developer".into(), "generate".into()];
+        assert!(compound_pair_is_coherent("prime", "lex", &dev, false));
+        assert!(compound_pair_is_coherent("open", "forge", &dev, false));
+        assert!(!compound_pair_is_coherent("bold", "nom", &dev, false));
+
+        let journal = ["mood".into(), "journal".into(), "insight".into()];
+        assert!(compound_pair_is_coherent("vivid", "lens", &journal, false));
+        assert!(!compound_pair_is_coherent("smart", "ink", &journal, false));
+        assert!(compound_pair_is_coherent("smart", "ink", &journal, true));
     }
 
     #[test]

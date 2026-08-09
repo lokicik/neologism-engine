@@ -581,9 +581,10 @@ fn generate_bigtech(
     } else {
         Vec::new()
     };
+    let compound_continuation = cfg.compound && (cfg.count > 10 || !cfg.exclude.is_empty());
     let compound_adjectives =
         if cfg.compound && (!raw_desc_keywords.is_empty() || !cfg.roots.is_empty()) {
-            if cfg.count > 10 || !cfg.exclude.is_empty() {
+            if compound_continuation {
                 keywords::compound_continuation_adjectives(&raw_desc_keywords)
             } else {
                 keywords::compound_adjectives(&raw_desc_keywords)
@@ -709,6 +710,14 @@ fn generate_bigtech(
                 st.roots[rand::Rng::gen_range(rng, 0..st.roots.len())]
             };
             if adj.eq_ignore_ascii_case(noun) {
+                continue;
+            }
+            if !keywords::compound_pair_is_coherent(
+                adj,
+                noun,
+                &raw_desc_keywords,
+                compound_continuation,
+            ) {
                 continue;
             }
             let adj_lower = adj.to_ascii_lowercase();
@@ -1757,23 +1766,30 @@ mod tests {
         let mut c = cfg(Style::BigTech);
         c.compound = true;
         c.description = Some("a journaling app with mood insights".to_string());
-        c.count = 20;
+        c.count = 10;
         c.max_len = 16;
         let results = generate(&c);
-        assert_eq!(results.len(), 20);
+        assert_eq!(results.len(), 10);
         let extracted = keywords::extract_keywords(c.description.as_deref().unwrap(), 6);
         let roots: HashSet<String> = keywords::compound_roots(&extracted, 16)
             .into_iter()
             .collect();
         for result in results {
-            let noun = result
+            let boundary = result
                 .name
                 .char_indices()
                 .skip(1)
                 .find(|(_, character)| character.is_ascii_uppercase())
-                .map(|(index, _)| result.name[index..].to_lowercase())
-                .unwrap_or_default();
+                .map(|(index, _)| index)
+                .unwrap_or(result.name.len());
+            let adjective = result.name[..boundary].to_lowercase();
+            let noun = result.name[boundary..].to_lowercase();
             assert!(roots.contains(&noun), "unrelated compound: {}", result.name);
+            assert!(
+                keywords::compound_pair_is_coherent(&adjective, &noun, &extracted, false),
+                "incoherent compound: {}",
+                result.name
+            );
         }
     }
 

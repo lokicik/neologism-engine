@@ -1097,6 +1097,44 @@ false exhaustion.
 
 ---
 
+## Phase 74 — Keep both words in a Compound semantically compatible
+
+**Bottleneck.** Phase 72 guaranteed that every Compound noun came from the brief, but it still
+sampled adjectives and nouns independently. Both halves could therefore be individually relevant
+yet awkward together: `BoldNom`, `TrueByte`, `SmartInk`, `AgileTone`, `DailyPool`, and
+`OpenRelic`. A new role-aware audit found only **211/300 (70.3%)** compatible pairs across the
+original six first-page benchmarks; dev naming was 27/50 and journaling 21/50.
+
+**A/B.** A 3x focused candidate pool made fixed seeds converge harder and lowered batch
+diversity, so it was removed. A 1.5x pool recovered 6.7 points of cross-seed distinctness but
+lost 1.6 composite points without improving intra-batch diversity. The measured 2x pool remains.
+The generation palette also replaces `Rapid` with `Swift`; this removes combinations such as
+`RapidMint` while keeping useful forms such as `SwiftSeed` and `SwiftForge`.
+
+**What changed.** Focused Compound generation now checks adjective ownership before accepting a
+pair. Ordinary adjectives stay with the concept that supplied their noun (`PrimeLex`,
+`CleanNode`, `QuietInk`, `ClearDraft`). True modifier concepts may cross groups where English
+meaning supports it: mood adjectives can describe journal/insight nouns (`VividLens`), split
+adjectives can describe finance nouns (`FairLedger`), vintage can describe keyboard/market nouns
+(`RetroBoard`), and speed can describe analytics nouns (`SwiftSignal`). Unknown briefs and the
+Phase 73 continuation palette remain permissive so the gate does not fake semantic knowledge or
+break deep-session capacity.
+
+**Measured result.** Pair coherence moves **211/300 → 300/300** on the original benchmarks and
+**511/600 → 600/600** across all twelve audited first-page briefs. Mean structural composite
+trades 76.57 → 75.87, mean diversity 0.780 → 0.765, and fixed-seed distinctness 82.7% → 74.3%.
+This is deliberate: the old structural score cannot see semantic mismatch and previously rated
+unrelated names very highly. Representative first pages now favor `PrimeLex`, `SwiftKit`,
+`QuietInk`, `FairLedger`, `RetroBoard`, and `KeenLens`; all eleven known-concept long audits still
+return 100/100 names.
+
+**Verification.** The core suite is **111/111**, with direct role-pair tests and a production
+regression requiring every focused journaling result to carry both a semantic noun and a coherent
+adjective. The Brandable `concept_compare` remains unchanged. WASM and the production bundle
+build cleanly; Chromium preserves both 100-card Compound sessions and all 30 guided Auto pages.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
@@ -1105,7 +1143,8 @@ broader modes remain explicit choices and still form the exploratory mix when no
 Compound is now a genuinely brief-aware explicit alternative rather than a random adjective
 showcase. Focused first pages stay narrow; recognized concepts open a restrained continuation
 palette only when the user asks for more, preserving 100-name session capacity without generic
-first-page dilution.
+first-page dilution. Its focused two-word names now also reject cross-concept adjective–noun
+pairings that are individually relevant but read poorly together.
 Long prompted sessions no longer collapse into repeated suffix families or stop before 100
 names, and semantic joins no longer erase a concept at one-letter/vowel boundaries. Local taste
 feedback can already adjust structural and mode preferences, while AI Studio remains an

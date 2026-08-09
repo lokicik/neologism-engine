@@ -74,11 +74,11 @@ App runs at **http://localhost:5173/**.
 cargo test -p neologism-core
 ```
 
-110 unit tests covering Markov determinism, phonotactic filters, blend logic, score ranges, phoneme affinity, sonority sequencing, word-likeness, keyword extraction, semantic ranking, exclusion behavior, and 100-name brief sessions.
+111 unit tests covering Markov determinism, phonotactic filters, blend logic, score ranges, phoneme affinity, sonority sequencing, word-likeness, keyword extraction, semantic ranking, exclusion behavior, and 100-name brief sessions.
 
 > Quick quality check: `cargo run -p neologism-core --example sample` prints a batch of names for every style and variant.
 > Long-session check: `cargo run -p neologism-core --example concept_compare --release` audits ten rolling batches across seven representative briefs.
-> Compound quality check: `cargo run -p neologism-core --example compound_compare --release` audits relevance, structural scores, seed diversity, and 100-name capacity across twelve multi- and single-concept briefs.
+> Compound quality check: `cargo run -p neologism-core --example compound_compare --release` audits noun relevance, adjective–noun coherence, structural scores, seed diversity, and 100-name capacity across twelve multi- and single-concept briefs.
 > Auto first-page check: from `web/`, `node e2e/auto-quality-audit.mjs` audits 30 deterministic guided pages (`--verbose` prints every name).
 
 ### Audit exported taste data
@@ -109,7 +109,7 @@ npm run build        # output in web/dist/
 - **Style selector** — Big Tech / Sci-Fi / Fantasy
 - **Sub-styles** — Sci-Fi (Stellar / Machine / Alien) and Fantasy (Elvish / Dwarvish / Orcish / Common), plus "Mixed"
 - **Controls** — count, min/max length, randomness (temperature), seed words, product description, starts-with / contains constraints
-- **Brief-aware Compound mode** — readable two-word names use project-specific adjective palettes and semantic noun roots (`QuietInk`, `FairTally`, `SwiftSignal`) instead of arbitrary corpus pairings; recognized concepts keep their focused first page and expand to 100 fresh names on continued exploration
+- **Brief-aware Compound mode** — readable two-word names use project-specific adjective palettes, semantic noun roots, and role-compatible pairings (`QuietInk`, `FairTally`, `SwiftSignal`) instead of arbitrary corpus combinations; recognized concepts keep their focused first page and expand to 100 fresh names on continued exploration
 - **Local taste learning** — star or pass on 3+ names; future batches are automatically re-ranked toward liked structures and naming modes or away from repeatedly rejected ones. Feedback stays in `localStorage`.
 - **Taste data export** — Settings turns explicit likes and passes into a versioned JSON dataset, preserving each name's project brief while forming preference pairs only within the same project context. It never exports AI credentials or recent-name history.
 - **Brief-aware Auto** — a project description gets semantic Brandable names plus at most one Respell that is actually derived from the prompt; unrelated modes no longer receive forced slots. An empty brief keeps the broader four-mode sampler.
