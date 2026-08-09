@@ -1171,6 +1171,39 @@ developer-domain gate, all 30 guided Auto pages, and both 100-card Compound sess
 
 ---
 
+## Phase 76 — Stop concept suffixes from erasing the root
+
+**Bottleneck.** Semantic coverage exposed a separate morphology defect. When a concept root ended
+in a vowel, `concept_transform` removed the first vowel of its suffix. That turned `bridge + ia`
+into `Bridgea`, `cache + ix` into `Cachex`, `forge + ora` into `Forgera`, and `page + io` into
+`Pageo`. Across fourteen established and held-out briefs, five seeds each, a new 700-name audit
+found **77/700 (11.0%)** of these mechanically collapsed suffixes.
+
+**Rejected alternatives.** Removing the root's final vowel instead eliminated the collapsed
+forms and raised the structural composite, but developer-domain coverage fell **96.0% → 86.6%**:
+`quota + ify` became `Quotify` and `store + ia` became `Storia`, changing the visible concept.
+Keeping only two suffixes for vowel-ending roots did not improve the already-zero defect rate
+and lowered diversity **0.717 → 0.709**, so that restriction was also removed.
+
+**What changed.** Concept suffixing now preserves both the complete root and the complete suffix.
+The same families become `Bridgeora`, `Cacheora`, `Forgeora`, `Pageora`, and `Traceora`. A direct
+unit regression pins every `scope` suffix form so neither side of the vowel seam can silently
+disappear again. The morphology harness derives the active semantic roots for all fourteen briefs
+rather than relying on a fixed list of forbidden output strings.
+
+**Measured result.** Collapsed suffixes move **77/700 → 0/700** while all 700 requested names
+still return. Mean structural composite trades **81.96 → 81.63** and diversity holds
+**0.716 → 0.717**. On the seven unchanged non-cache developer cases, Chromium Brandable semantic
+coverage also moves **338/350 → 348/350** because roots remain visible. The cache audit was found
+to omit its valid `buffer` root; correcting that measurement gives the current production gate
+**398/400 Brandable** and **391/400 Compound** without lowering any threshold.
+
+**Verification.** The core suite remains **114/114**; the twelve-brief Compound audit stays
+600/600 prompt-linked and pair-coherent. WASM and the production bundle build cleanly. Chromium
+passes the 80-page developer-domain gate, all 30 Auto pages, and both 100-card Compound sessions.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

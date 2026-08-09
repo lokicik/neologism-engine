@@ -29,7 +29,7 @@ const CASES = [
   },
   {
     prompt: 'a local cache inspector',
-    markers: ['cache', 'stash', 'store', 'heap'],
+    markers: ['cache', 'stash', 'store', 'heap', 'buffer'],
   },
   {
     prompt: 'a browser bookmark manager',

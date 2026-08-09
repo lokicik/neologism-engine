@@ -32,7 +32,7 @@ const CASES: &[Case] = &[
     },
     Case {
         prompt: "a local cache inspector",
-        semantic_markers: &["cache", "stash", "store", "heap"],
+        semantic_markers: &["cache", "stash", "store", "heap", "buffer"],
     },
     Case {
         prompt: "a browser bookmark manager",

@@ -136,12 +136,9 @@ pub fn concept_transform<R: Rng>(rng: &mut R, name: &str) -> String {
     if name.ends_with(suffix) {
         name.to_string()
     } else {
-        // Avoid a doubled vowel seam (scope + ora -> scopora).
-        let mut suffix = suffix.to_string();
-        if name.chars().last().is_some_and(is_vowel) && suffix.chars().next().is_some_and(is_vowel)
-        {
-            suffix.remove(0);
-        }
+        // Keep the semantic root intact at a vowel seam. Removing either side
+        // produced generator artifacts (bridge + ia -> bridgea) or changed the
+        // concept itself (quota + ify -> quotify).
         format!("{}{}", name, suffix)
     }
 }
@@ -383,14 +380,21 @@ mod tests {
     }
 
     #[test]
-    fn concept_transform_never_drops_the_root() {
+    fn concept_transform_keeps_the_full_root_at_a_vowel_seam() {
         use rand::SeedableRng;
         use rand_chacha::ChaCha8Rng;
+        use std::collections::HashSet;
+
         let mut rng = ChaCha8Rng::seed_from_u64(9);
+        let expected = ["scopeia", "scopeio", "scopeora", "scopeix", "scopeify"];
+        let mut observed = HashSet::new();
         for _ in 0..50 {
             let name = concept_transform(&mut rng, "scope");
             assert!(name.starts_with("scop"));
             assert!(name.len() >= "scope".len());
+            assert!(expected.contains(&name.as_str()), "lossy seam: {name}");
+            observed.insert(name);
         }
+        assert!(expected.iter().all(|name| observed.contains(*name)));
     }
 }
