@@ -474,7 +474,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: .6rem;
-  transition: border-color .15s;
+  transition: border-color .15s, box-shadow .15s;
   /* Phase 49: slide/fade entrance — staggered per card via inline
      animation-delay; cards only animate on mount (stable keys), so
      scrolled-in batches appear one after another. */
@@ -486,6 +486,10 @@ body {
 }
 .name-card:hover { border-color: rgba(255, 255, 255, .14); }
 .name-card.favorited { border-color: #f59e0b66; }
+.name-card.rejected {
+  border-color: rgba(248, 113, 113, .34);
+  box-shadow: inset 0 0 0 1px rgba(248, 113, 113, .04);
+}
 
 .card-top {
   display: flex;
@@ -597,6 +601,7 @@ body {
 .icon-btn:hover { color: var(--text); background: var(--surface2); }
 .icon-btn:active { transform: scale(.96); }
 .star-btn.starred { color: #f59e0b; }
+.pass-btn.passed { color: var(--danger); background: rgba(248, 113, 113, .08); }
 
 /* Availability badges (inside the card expansion) — quiet outline style */
 .domain-row {
@@ -920,6 +925,23 @@ body {
 .nav-note {
   font-size: .8rem;
   color: var(--muted);
+}
+
+.taste-note {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: .28rem .65rem;
+  border-radius: 999px;
+  background: var(--surface);
+  box-shadow: 0 0 0 1px var(--border);
+  font-variant-numeric: tabular-nums;
+  text-wrap: pretty;
+}
+.taste-note.active {
+  color: var(--accent2);
+  box-shadow: 0 0 0 1px rgba(78, 204, 163, .24);
 }
 
 .canvas {

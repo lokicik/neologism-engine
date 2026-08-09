@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react'
 import { generateBatch, batchMetrics, extractKeywords, type BatchMetrics, type Config, type NameResult, type Style } from './lib/engine'
 import { recommendations } from './lib/recommend'
 import { buildProfile, rankByPreference } from './lib/preferences'
-import { loadFavorites, toggleFavorite, saveFavorites, loadRecent, saveRecent, hasVisited, markVisited, loadJudgeConfig, saveJudgeConfig } from './lib/storage'
+import { loadFavorites, toggleFavorite, removeFavorite, saveFavorites, loadRejected, toggleRejected, removeRejected, loadRecent, saveRecent, hasVisited, markVisited, loadJudgeConfig, saveJudgeConfig } from './lib/storage'
 import { type JudgeConfig } from './lib/judge'
 import { decodeShareUrl } from './lib/share'
 import { CommandBar } from './components/CommandBar'
@@ -49,6 +49,7 @@ export default function App() {
   const [results, setResults] = useState<NameResult[]>([])
   const [metrics, setMetrics] = useState<BatchMetrics | null>(null)
   const [favorites, setFavorites] = useState<NameResult[]>(loadFavorites)
+  const [rejected, setRejected] = useState<NameResult[]>(loadRejected)
   const [loading, setLoading] = useState(false)
   // True when a generate/append produced zero names — the prompt's reachable
   // space is exhausted against the seen-names history.
@@ -85,6 +86,10 @@ export default function App() {
   useEffect(() => {
     favoritesRef.current = favorites
   }, [favorites])
+  const rejectedRef = useRef<NameResult[]>(rejected)
+  useEffect(() => {
+    rejectedRef.current = rejected
+  }, [rejected])
 
   // On mount: if a #names= share URL is present, union those names into favorites.
   useEffect(() => {
@@ -133,7 +138,7 @@ export default function App() {
       // Preference ranking is applied to the incoming batch only, at insert
       // time — re-ranking the whole list on every append (the old render-time
       // rankByPreference) made already-visible cards jump around the grid.
-      const profile = buildProfile(favoritesRef.current)
+      const profile = buildProfile(favoritesRef.current, rejectedRef.current)
       const ranked = profile ? rankByPreference(batch, profile) : batch
       const shown = append ? [...resultsRef.current, ...ranked] : ranked
       setResults(shown)
@@ -147,7 +152,35 @@ export default function App() {
   }, [config])
 
   const handleToggleFavorite = useCallback((item: NameResult) => {
-    setFavorites((prev) => toggleFavorite(prev, item))
+    const wasFavorite = favoritesRef.current.some(
+      (favorite) => favorite.name.toLowerCase() === item.name.toLowerCase(),
+    )
+    const nextFavorites = toggleFavorite(favoritesRef.current, item)
+    favoritesRef.current = nextFavorites
+    setFavorites(nextFavorites)
+
+    // A name cannot be both a positive and negative signal. Saving a passed
+    // name is also the undo path for an accidental rejection.
+    if (!wasFavorite) {
+      const nextRejected = removeRejected(rejectedRef.current, item)
+      rejectedRef.current = nextRejected
+      setRejected(nextRejected)
+    }
+  }, [])
+
+  const handleToggleRejected = useCallback((item: NameResult) => {
+    const wasRejected = rejectedRef.current.some(
+      (candidate) => candidate.name.toLowerCase() === item.name.toLowerCase(),
+    )
+    const nextRejected = toggleRejected(rejectedRef.current, item)
+    rejectedRef.current = nextRejected
+    setRejected(nextRejected)
+
+    if (!wasRejected) {
+      const nextFavorites = removeFavorite(favoritesRef.current, item)
+      favoritesRef.current = nextFavorites
+      setFavorites(nextFavorites)
+    }
   }, [])
 
   const saveSettings = useCallback((cfg: JudgeConfig) => {
@@ -216,13 +249,14 @@ export default function App() {
     void handleGenerate(false, next)
   }
 
-  const favoriteNames = new Set(favorites.map((f) => f.name))
+  const favoriteNames = new Set(favorites.map((item) => item.name.toLowerCase()))
+  const rejectedNames = new Set(rejected.map((item) => item.name.toLowerCase()))
 
-  // Preference profile learned from favorites (Namelix-style); needs ≥3.
+  // Preference profile contrasts favorites with explicit passes; needs ≥3 likes.
   // Phase 37: applied automatically once it exists — no toggle. Phase 49:
   // ranking happens per batch inside handleGenerate (insert order is final);
-  // this render-time profile only drives the "tuned to favorites" note.
-  const profile = buildProfile(favorites)
+  // this render-time profile only drives the local-taste status note.
+  const profile = buildProfile(favorites, rejected)
   const displayResults = results
 
   // Top pick of the batch (compared by name, so re-ranking doesn't break it).
@@ -292,9 +326,14 @@ export default function App() {
               {metrics && (
                 <div className="stats-area">
                   <StatsPanel stats={metrics.stats} tips={tips} />
-                  {profile && results.length > 0 && (
-                    <span className="nav-note" title="Results re-ranked toward your saved names">
-                      ✨ tuned to your favorites
+                  {results.length > 0 && (
+                    <span
+                      className={`nav-note taste-note${profile ? ' active' : ''}`}
+                      title="Star names you like and use Not for me on misses. New batches are ranked locally; nothing leaves your browser."
+                    >
+                      {profile
+                        ? `Local taste · ${favorites.length} liked · ${rejected.length} passed`
+                        : `Teach local taste · star ${Math.max(0, 3 - favorites.length)} more · pass misses`}
                     </span>
                   )}
                 </div>
@@ -307,8 +346,10 @@ export default function App() {
                       <NameCard
                         key={r.name}
                         result={r}
-                        isFavorite={favoriteNames.has(r.name)}
+                        isFavorite={favoriteNames.has(r.name.toLowerCase())}
                         onToggleFavorite={handleToggleFavorite}
+                        isRejected={rejectedNames.has(r.name.toLowerCase())}
+                        onToggleRejected={handleToggleRejected}
                         isBest={r.name === bestName}
                         appearDelay={(i % (config.count ?? 10)) * 45}
                       />

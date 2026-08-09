@@ -3,12 +3,15 @@ import { explainName, type Explanation, type NameResult } from '../lib/engine'
 import { checkDomains, checkHandles, isAuthoritative, trademarkLinks, HANDLES, TLDS, type DomainStatus } from '../lib/domain'
 import { composite } from '../lib/score'
 import { Monogram } from './Monogram'
-import { IconCopy, IconCheck, IconStar } from './icons'
+import { IconCopy, IconCheck, IconStar, IconThumbDown } from './icons'
 
 interface Props {
   result: NameResult
   isFavorite: boolean
   onToggleFavorite: (r: NameResult) => void
+  /// Explicit negative taste signal used by the local preference ranker.
+  isRejected?: boolean
+  onToggleRejected?: (r: NameResult) => void
   /// Highest composite in the batch — gets the crown.
   isBest?: boolean
   /// Entrance-animation stagger (ms) — set by the results grid so freshly
@@ -45,7 +48,7 @@ function whyParts(e: Explanation): string[] {
   return parts
 }
 
-export function NameCard({ result, isFavorite, onToggleFavorite, isBest = false, appearDelay = 0, reason, isAiPick = false }: Props) {
+export function NameCard({ result, isFavorite, onToggleFavorite, isRejected = false, onToggleRejected, isBest = false, appearDelay = 0, reason, isAiPick = false }: Props) {
   const [copied, setCopied] = useState(false)
   const [domains, setDomains] = useState<Record<string, DomainStatus>>(idleMap)
   const [showAvail, setShowAvail] = useState(false)
@@ -115,7 +118,7 @@ export function NameCard({ result, isFavorite, onToggleFavorite, isBest = false,
   if (STYLE_LABEL[result.style]) metaParts.unshift(STYLE_LABEL[result.style])
 
   return (
-    <div className={`name-card${isFavorite ? ' favorited' : ''}`} style={{ animationDelay: `${appearDelay}ms` }}>
+    <div className={`name-card${isFavorite ? ' favorited' : ''}${isRejected ? ' rejected' : ''}`} style={{ animationDelay: `${appearDelay}ms` }}>
       <div className="card-top">
         <Monogram name={result.name} size={36} />
         <span className="name-text">{result.name}</span>
@@ -207,10 +210,23 @@ export function NameCard({ result, isFavorite, onToggleFavorite, isBest = false,
               <span className="copy-check"><IconCheck /></span>
             </span>
           </button>
+          {onToggleRejected && (
+            <button
+              className={`icon-btn pass-btn${isRejected ? ' passed' : ''}`}
+              onClick={() => onToggleRejected(result)}
+              title={isRejected ? 'Undo pass' : 'Not for me — tune future batches'}
+              aria-label={isRejected ? `Undo pass on ${result.name}` : `${result.name} is not for me`}
+              aria-pressed={isRejected}
+            >
+              <IconThumbDown />
+            </button>
+          )}
           <button
             className={`icon-btn star-btn${isFavorite ? ' starred' : ''}`}
             onClick={() => onToggleFavorite(result)}
             title={isFavorite ? 'Remove from favorites' : 'Save to favorites'}
+            aria-label={isFavorite ? `Remove ${result.name} from favorites` : `Save ${result.name} to favorites`}
+            aria-pressed={isFavorite}
           >
             <IconStar filled={isFavorite} />
           </button>

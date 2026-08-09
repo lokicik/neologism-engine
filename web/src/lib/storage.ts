@@ -2,6 +2,12 @@ import type { NameResult } from './engine'
 import { defaultJudgeConfig, type JudgeConfig } from './judge'
 
 const KEY = 'neologism:favorites'
+const REJECTED_KEY = 'neologism:rejected'
+const MAX_REJECTED = 200
+
+function sameName(a: NameResult, b: NameResult): boolean {
+  return a.name.toLowerCase() === b.name.toLowerCase()
+}
 
 export function loadFavorites(): NameResult[] {
   try {
@@ -17,9 +23,45 @@ export function saveFavorites(favorites: NameResult[]): void {
 }
 
 export function toggleFavorite(favorites: NameResult[], item: NameResult): NameResult[] {
-  const exists = favorites.some((f) => f.name === item.name)
-  const next = exists ? favorites.filter((f) => f.name !== item.name) : [...favorites, item]
+  const exists = favorites.some((favorite) => sameName(favorite, item))
+  const next = exists ? favorites.filter((favorite) => !sameName(favorite, item)) : [...favorites, item]
   saveFavorites(next)
+  return next
+}
+
+export function removeFavorite(favorites: NameResult[], item: NameResult): NameResult[] {
+  const next = favorites.filter((favorite) => !sameName(favorite, item))
+  if (next.length !== favorites.length) saveFavorites(next)
+  return next
+}
+
+// Explicit negative taste signals. Keeping the latest 200 is enough to learn
+// recurring shapes without letting a years-old pass history dominate forever.
+export function loadRejected(): NameResult[] {
+  try {
+    const raw = localStorage.getItem(REJECTED_KEY)
+    return raw ? (JSON.parse(raw) as NameResult[]) : []
+  } catch {
+    return []
+  }
+}
+
+export function saveRejected(rejected: NameResult[]): void {
+  localStorage.setItem(REJECTED_KEY, JSON.stringify(rejected.slice(-MAX_REJECTED)))
+}
+
+export function toggleRejected(rejected: NameResult[], item: NameResult): NameResult[] {
+  const exists = rejected.some((candidate) => sameName(candidate, item))
+  const next = exists
+    ? rejected.filter((candidate) => !sameName(candidate, item))
+    : [...rejected, item].slice(-MAX_REJECTED)
+  saveRejected(next)
+  return next
+}
+
+export function removeRejected(rejected: NameResult[], item: NameResult): NameResult[] {
+  const next = rejected.filter((candidate) => !sameName(candidate, item))
+  if (next.length !== rejected.length) saveRejected(next)
   return next
 }
 

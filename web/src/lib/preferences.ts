@@ -1,8 +1,8 @@
 import type { NameResult } from './engine'
 
 // Client-side preference learning. The profile stays transparent and tiny: it
-// learns structural taste from saved names, never sends them anywhere, and is
-// rebuilt locally whenever favorites change.
+// contrasts saved names with explicit passes, never sends either set anywhere,
+// and is rebuilt locally whenever feedback changes.
 
 const FRONT = new Set(['e', 'i', 'y'])
 const BACK = new Set(['o', 'u'])
@@ -10,7 +10,7 @@ const VOWELS = new Set(['a', 'e', 'i', 'o', 'u', 'y'])
 const SHARP = new Set(['k', 't', 'x', 'z', 'q', 'v'])
 const KNOWN_SUFFIXES = ['ify', 'ora', 'ium', 'io', 'ia', 'ix', 'ly', 'ai']
 
-export interface PreferenceProfile {
+interface ShapeProfile {
   avgLength: number
   avgSyllables: number
   frontLean: number // share of (front - back) vowels, -1..1
@@ -20,6 +20,12 @@ export interface PreferenceProfile {
   suffixes: Record<string, number>
   onsets: Record<string, number>
   bigrams: Record<string, number>
+}
+
+export interface PreferenceProfile extends ShapeProfile {
+  avoided: ShapeProfile | null
+  likedCount: number
+  rejectedCount: number
 }
 
 function letters(name: string): string {
@@ -74,29 +80,41 @@ function normalizedCounts(values: string[]): Record<string, number> {
   return counts
 }
 
-export function buildProfile(favorites: NameResult[]): PreferenceProfile | null {
-  if (favorites.length < 3) return null
-  const n = favorites.length
+function buildShapeProfile(items: NameResult[]): ShapeProfile {
+  const n = items.length
   return {
-    avgLength: favorites.reduce((sum, item) => sum + letters(item.name).length, 0) / n,
-    avgSyllables: favorites.reduce((sum, item) => sum + item.syllables, 0) / n,
-    frontLean: favorites.reduce((sum, item) => sum + frontLean(item.name), 0) / n,
-    vowelEndRate: favorites.reduce(
+    avgLength: items.reduce((sum, item) => sum + letters(item.name).length, 0) / n,
+    avgSyllables: items.reduce((sum, item) => sum + item.syllables, 0) / n,
+    frontLean: items.reduce((sum, item) => sum + frontLean(item.name), 0) / n,
+    vowelEndRate: items.reduce(
       (sum, item) => sum + Number(VOWELS.has(letters(item.name).slice(-1))),
       0,
     ) / n,
-    sharpness: favorites.reduce((sum, item) => sum + sharpness(item.name), 0) / n,
-    compoundRate: favorites.reduce((sum, item) => sum + Number(isCompound(item.name)), 0) / n,
-    suffixes: normalizedCounts(favorites.map((item) => suffix(item.name))),
-    onsets: normalizedCounts(favorites.map((item) => onset(item.name))),
-    bigrams: normalizedCounts(favorites.flatMap((item) => bigrams(item.name))),
+    sharpness: items.reduce((sum, item) => sum + sharpness(item.name), 0) / n,
+    compoundRate: items.reduce((sum, item) => sum + Number(isCompound(item.name)), 0) / n,
+    suffixes: normalizedCounts(items.map((item) => suffix(item.name))),
+    onsets: normalizedCounts(items.map((item) => onset(item.name))),
+    bigrams: normalizedCounts(items.flatMap((item) => bigrams(item.name))),
+  }
+}
+
+export function buildProfile(
+  favorites: NameResult[],
+  rejected: NameResult[] = [],
+): PreferenceProfile | null {
+  if (favorites.length < 3) return null
+  return {
+    ...buildShapeProfile(favorites),
+    avoided: rejected.length > 0 ? buildShapeProfile(rejected) : null,
+    likedCount: favorites.length,
+    rejectedCount: rejected.length,
   }
 }
 
 // Higher = closer to the learned profile. Continuous shape penalties prevent
 // overfitting to one saved name; suffix/onset/bigram affinity captures recurring
 // taste such as Nomix + Lexix -> short, front-vowel, -ix coinages.
-export function similarity(name: NameResult, profile: PreferenceProfile): number {
+function shapeSimilarity(name: NameResult, profile: ShapeProfile): number {
   const lower = letters(name.name)
   const lenDiff = Math.abs(lower.length - profile.avgLength) / 6
   const syllableDiff = Math.abs(name.syllables - profile.avgSyllables) / 2
@@ -121,6 +139,19 @@ export function similarity(name: NameResult, profile: PreferenceProfile): number
     - vowelEndDiff
     - sharpDiff
     - compoundDiff
+}
+
+export function similarity(name: NameResult, profile: PreferenceProfile): number {
+  const liked = shapeSimilarity(name, profile)
+  if (!profile.avoided) return liked
+
+  // Compare the candidate with both centroids instead of applying an absolute
+  // blacklist. The tanh bound prevents a narrow rejected cluster from
+  // overpowering engine quality, while evidence scaling makes one accidental
+  // pass a weak signal and five passes a full-strength signal.
+  const avoided = shapeSimilarity(name, profile.avoided)
+  const evidence = Math.min(1, profile.rejectedCount / 5)
+  return liked + Math.tanh(liked - avoided) * evidence
 }
 
 function engineQuality(result: NameResult): number {

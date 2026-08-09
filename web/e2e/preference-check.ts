@@ -42,3 +42,24 @@ if (compoundProfile) {
   )
   check(ranked[0].name === 'KeyMarket', 'compound-family taste stays in the compound family')
 }
+
+const broadLikes = [result('Noma'), result('Lexa'), result('Mara')]
+const likedOnly = buildProfile(broadLikes)
+check(likedOnly !== null, 'liked-only ranking remains available')
+if (likedOnly) {
+  const ranked = rankByPreference([result('Vexium'), result('Vexora')], likedOnly)
+  check(ranked[0].name === 'Vexora', 'positive profile alone prefers its familiar vowel ending')
+}
+
+const contrastProfile = buildProfile(broadLikes, [
+  result('Nomora'),
+  result('Lexora'),
+  result('Markora'),
+  result('Velora'),
+  result('Zenora'),
+])
+check(contrastProfile?.rejectedCount === 5, 'rejected feedback is represented in the local profile')
+if (contrastProfile) {
+  const ranked = rankByPreference([result('Vexora'), result('Vexium')], contrastProfile)
+  check(ranked[0].name === 'Vexium', 'repeatedly rejected -ora shapes are pushed below alternatives')
+}

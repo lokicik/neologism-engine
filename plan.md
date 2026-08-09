@@ -705,6 +705,28 @@ skeletons show during appends. `repro.mjs` converted from button clicks to scrol
 
 ---
 
+## Phase 61 — Two-sided local taste learning
+
+**Bottleneck.** The Phase 59 profile learned only from favorites. It could pull future
+batches toward a liked suffix or sound, but it had no way to learn that a recurring shape
+was specifically unwanted.
+
+**What shipped.** Create cards now expose a reversible **Not for me** action beside save.
+Positive and negative signals are mutually exclusive, persisted locally, and summarized by
+an always-visible taste status after generation. The ranker compares each new candidate with
+both the liked and avoided structural profiles (length, syllables, vowel lean/endings,
+sharpness, compound family, suffix, onset, and bigrams). Rejection strength ramps from one to
+five passes and is bounded, so an accidental click cannot overwhelm engine quality. Existing
+cards never jump; feedback affects the next generated batch.
+
+**Verification.** The deterministic preference harness proves liked-only behavior remains
+intact and that five rejected `-ora` examples reverse an otherwise-positive `-ora` ranking.
+The production TypeScript/Vite build is clean. A Chromium flow verifies persistence,
+like/pass mutual exclusion, accessible pressed state, the visible model summary, and reload
+restoration; visual review confirms the extra action fits the existing card hierarchy.
+
+---
+
 ## Bottom line
 
 Big-tech is the strongest style, tuned through Phase 25 and extended since:

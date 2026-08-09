@@ -92,7 +92,7 @@ npm run build        # output in web/dist/
 - **Sub-styles** — Sci-Fi (Stellar / Machine / Alien) and Fantasy (Elvish / Dwarvish / Orcish / Common), plus "Mixed"
 - **Controls** — count, min/max length, randomness (temperature), seed words, product description, starts-with / contains constraints
 - **Compound mode** — big-tech adjective+noun names (SwiftForge, NobleFrost) alongside blends
-- **Preference learning** — once you've starred 3+ names, a "Tuned to your favorites" toggle re-ranks results toward what you've liked (length, syllables, vowel profile)
+- **Local taste learning** — star 3+ names and pass on misses; future batches are automatically re-ranked toward liked structures and away from repeatedly rejected ones. Feedback stays in `localStorage`.
 - **Score bars** — pronounceability, novelty, and memorability per generated name
 - **Favorites** — star names; persisted across reloads via `localStorage`
 - **Domain indicator** — checks `.com` / `.io` availability via Cloudflare DNS-over-HTTPS (no API key; labeled as indicator, not authoritative)
