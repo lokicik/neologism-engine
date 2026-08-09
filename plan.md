@@ -1623,6 +1623,51 @@ sessions still reach 100 unique names without false exhaustion.
 
 ---
 
+## Phase 87 — Separate broad-domain naming neighborhoods
+
+**Bottleneck.** The 48-domain matrix from Phase 86 had full capacity, but its exact-name report
+still contained **50 shared names across 54 domain pairs**. The largest avoidable clusters came
+from broad roots rather than the generator itself: bookmark names reused naming/social
+`mark`/`link` forms, finance reused naming/security `mint`/`vault`, dependencies reused security
+`lock`, and cloud deployment and git release both emitted six identical `ship…` names. These
+collisions made different briefs feel as if they were drawing from the same product-name bag.
+
+**Measured A/B correction.** Each replacement was tested over five fixed seeds with per-domain
+composite, diversity, session uniqueness, first-page inspection, and the full collision graph.
+Inventory now favors `count`/`asset`; finance `coin`/`cash`/`balance`; rate limiting `burst`;
+bookmarks `pin`/`clip`/`ribbon`/`star`; background jobs `tick`; dependencies `graph`/`module`;
+and git release `push`/`patch`. We rejected weaker alternatives including `fence`, `valve`,
+`brake`, module-only and tree-only dependency palettes, and a fully disjoint cloud palette.
+Replacing cloud's strong deployment vocabulary cut collisions but lowered its composite by 2.8
+points, so the retained fix separates git vocabulary instead.
+
+**Measured result.** Exact cross-domain reuse falls from **50 names / 54 domain pairs to 20 / 20**
+while all **2,400/2,400** requested names remain available. Broad composite improves
+**79.97 → 80.16**. Average diversity moves **0.727 → 0.726** and average per-domain session
+uniqueness **46.8% → 46.5%**: a small explicit spread trade for removing 34 repeated domain
+pairs, not a hidden claim that all overlap is bad. The remaining pairs are visible adjacent or
+nested meanings such as weather/deployment `cloud`, travel/delivery `route`, naming/developer
+naming, and fitness/pet-health `vital`. The audit now fails closed above 20 collision pairs or
+below its aggregate composite, diversity, and uniqueness floors.
+
+The retained first pages include `Countify`, `Assetflow`, and `Stockora` for inventory;
+`Cashify`, `Ledgeria`, and `Balanceix` for finance; `Burstora` and `Quotaify` for rate limiting;
+`Starsignal`, `Clipora`, and `Pinnova` for bookmarks; `Versionia`, `Graphia`, and `Syncrelay` for
+dependencies; and `Patchify`, `Pushify`, and `Forgeora` for git release. The established
+morphology matrix also improves from **80.17 → 80.48** composite at **0.728** diversity, with
+**1,100/1,100** first-page and **2,200/2,200** rolling names.
+
+**Verification.** The workspace suite is **127/127**. General-domain calibration remains
+**1,069/1,100** semantic and holdout **1,067/1,100**, with zero guarded cross-domain collision;
+the modifier corpus remains **550/550**, developer coverage **1,591/1,600**, and Compound
+**1,000/1,000** prompt-linked and pair-coherent with zero lexical echoes. WASM, TypeScript, and
+the production bundle build cleanly. Chromium passes all **85** Auto pages with **45/45**
+prompt-linked accents, developer coverage remains **800/800 Brandable** and **791/800 Compound**,
+and the 100-name Brandable session plus all five 100-name Compound sessions remain duplicate-free
+without false exhaustion.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

@@ -2,8 +2,9 @@
 // Run: cargo run -p neologism-core --example cross_domain_compare --release
 use neologism_core::generate;
 use neologism_core::keywords::{brand_roots, extract_keywords};
+use neologism_core::metrics::{composite_score, diversity};
 use neologism_core::style::{Config, Style};
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::{BTreeMap, BTreeSet, HashSet};
 
 struct Case {
     label: &'static str,
@@ -207,7 +208,19 @@ const CASES: &[Case] = &[
 
 const SEEDS: &[u64] = &[7, 42, 101, 2024, 9999];
 const WEAK_CONTEXT_ROOTS: &[&str] = &["edit", "online", "seller"];
-const FOCUS_CASES: &[&str] = &["marketplace", "travel", "media", "git release"];
+const FOCUS_CASES: &[&str] = &[
+    "inventory",
+    "finance",
+    "marketplace",
+    "travel",
+    "media",
+    "rate limiting",
+    "git release",
+    "bookmarks",
+    "cloud deployment",
+    "background jobs",
+    "dependencies",
+];
 
 fn config(prompt: &str, seed: u64) -> Config {
     Config {
@@ -255,6 +268,9 @@ fn main() {
     let mut short_pages = Vec::new();
     let mut weak_root_uses = Vec::new();
     let mut weak_name_forms = BTreeSet::new();
+    let mut audit_composite = 0u64;
+    let mut audit_diversity = 0.0f64;
+    let mut audit_domain_unique = 0.0f64;
 
     for case in CASES {
         let keywords = extract_keywords(case.prompt, 6);
@@ -264,6 +280,10 @@ fn main() {
             .filter(|root| weak_context_root(case, root))
             .cloned()
             .collect::<Vec<_>>();
+        let mut case_total = 0usize;
+        let mut case_composite = 0u64;
+        let mut case_diversity = 0.0f64;
+        let mut case_unique = HashSet::new();
         println!("{:<18} {:?}", case.label, roots);
         for root in &case_weak_roots {
             weak_root_uses.push(format!("{}:{root}", case.label));
@@ -276,6 +296,9 @@ fn main() {
         }
         for seed in SEEDS {
             let results = generate(&config(case.prompt, *seed));
+            let page_diversity = diversity(&results);
+            case_diversity += page_diversity;
+            audit_diversity += page_diversity;
             if *seed == SEEDS[0] && FOCUS_CASES.contains(&case.label) {
                 println!(
                     "  first             {}",
@@ -300,7 +323,12 @@ fn main() {
             }
             for result in results {
                 total += 1;
+                case_total += 1;
+                let score = composite_score(&result) as u64;
+                case_composite += score;
+                audit_composite += score;
                 let lower = result.name.to_lowercase();
+                case_unique.insert(lower.clone());
                 if case_weak_roots
                     .iter()
                     .any(|root| lower.starts_with(root) || lower.ends_with(root))
@@ -310,6 +338,14 @@ fn main() {
                 name_domains.entry(lower).or_default().insert(case.label);
             }
         }
+        let case_unique_ratio = case_unique.len() as f64 / case_total as f64;
+        audit_domain_unique += case_unique_ratio;
+        println!(
+            "  quality           comp {:.2}, div {:.3}, unique {:.1}%",
+            case_composite as f64 / case_total as f64,
+            case_diversity / SEEDS.len() as f64,
+            case_unique_ratio * 100.0
+        );
     }
 
     let mut shared_roots: Vec<_> = root_domains
@@ -323,6 +359,10 @@ fn main() {
         .filter(|(_, domains)| domains.len() >= 2)
         .collect();
     collisions.sort_by(|a, b| b.1.len().cmp(&a.1.len()).then_with(|| a.0.cmp(&b.0)));
+    let collision_pairs = collisions
+        .iter()
+        .map(|(_, domains)| domains.len() * (domains.len() - 1) / 2)
+        .sum::<usize>();
 
     println!(
         "\naudited: {total}/{} names",
@@ -354,9 +394,15 @@ fn main() {
         format_shared(&shared_roots)
     );
     println!(
-        "cross-domain exact collisions: {}: {}",
+        "cross-domain exact collisions: {} names, {collision_pairs} domain pairs: {}",
         collisions.len(),
         format_shared(&collisions)
+    );
+    println!(
+        "quality summary: comp {:.2}, div {:.3}, domain unique {:.1}%",
+        audit_composite as f64 / total as f64,
+        audit_diversity / (CASES.len() * SEEDS.len()) as f64,
+        audit_domain_unique / CASES.len() as f64 * 100.0
     );
     assert_eq!(
         total,
@@ -381,5 +427,21 @@ fn main() {
             .cloned()
             .collect::<Vec<_>>()
             .join(", ")
+    );
+    assert!(
+        collision_pairs <= 20,
+        "cross-domain exact collision pairs regressed: {collision_pairs} > 20"
+    );
+    assert!(
+        audit_composite as f64 / total as f64 >= 80.1,
+        "broad-domain composite quality regressed"
+    );
+    assert!(
+        audit_diversity / (CASES.len() * SEEDS.len()) as f64 >= 0.72,
+        "broad-domain diversity regressed"
+    );
+    assert!(
+        audit_domain_unique / CASES.len() as f64 >= 0.46,
+        "broad-domain uniqueness regressed"
     );
 }

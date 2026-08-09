@@ -156,7 +156,7 @@ fn concept_roots(word: &str) -> &'static [&'static str] {
         }
         "migration" | "migrate" => &["shift", "bridge", "relay", "port", "move"],
         "rate" | "limit" | "limiter" | "throttle" | "quota" => {
-            &["gate", "meter", "quota", "pace", "guard"]
+            &["gate", "meter", "quota", "pace", "burst"]
         }
         "terminal" | "shell" | "console" | "command" | "prompt" => {
             &["term", "shell", "prompt", "cmd", "console"]
@@ -165,10 +165,12 @@ fn concept_roots(word: &str) -> &'static [&'static str] {
             &["trace", "watch", "scope", "pulse", "beacon"]
         }
         "git" | "repo" | "repository" | "version" | "release" => {
-            &["commit", "branch", "tag", "forge", "ship"]
+            &["commit", "branch", "tag", "forge", "push", "patch"]
         }
         "cache" | "caching" | "memoize" => &["cache", "stash", "store", "heap", "buffer"],
-        "browser" | "bookmark" | "tab" | "web" | "link" => &["tab", "mark", "link", "page", "web"],
+        "browser" | "bookmark" | "tab" | "web" | "link" => {
+            &["tab", "pin", "clip", "ribbon", "star"]
+        }
         "test" | "testing" | "qa" | "debug" | "bug" | "assert" => {
             &["spec", "check", "probe", "assert", "trace"]
         }
@@ -190,11 +192,11 @@ fn concept_roots(word: &str) -> &'static [&'static str] {
             &["flag", "toggle", "switch", "rollout", "gate", "launch"]
         }
         "background" | "job" | "worker" | "scheduler" | "cron" | "timer" => {
-            &["job", "task", "worker", "cron", "timer", "run"]
+            &["job", "tick", "worker", "cron", "timer", "run"]
         }
-        "dependency" | "dependencies" | "update" | "updater" | "upgrade" | "bump" => {
-            &["dep", "bump", "update", "sync", "lock", "version"]
-        }
+        "dependency" | "dependencies" | "update" | "updater" | "upgrade" | "bump" => &[
+            "dep", "bump", "update", "sync", "graph", "module", "version",
+        ],
         "documentation" | "docs" | "doc" | "guide" | "manual" | "reference" => {
             &["doc", "guide", "page", "site", "manual"]
         }
@@ -212,7 +214,7 @@ fn concept_roots(word: &str) -> &'static [&'static str] {
             &["dish", "plate", "pantry", "menu", "meal", "table"]
         }
         "inventory" | "catalog" | "belonging" | "household" => {
-            &["item", "stock", "shelf", "catalog", "crate", "keep"]
+            &["item", "stock", "count", "catalog", "asset", "keep"]
         }
         "support" | "helpdesk" | "inbox" => {
             &["desk", "reply", "inbox", "resolve", "assist", "answer"]
@@ -242,7 +244,7 @@ fn concept_roots(word: &str) -> &'static [&'static str] {
         "secure" | "security" | "private" | "privacy" | "password" | "auth" | "encrypt"
         | "encrypted" => &["vault", "guard", "shield", "lock", "cipher"],
         "finance" | "money" | "payment" | "expense" | "budget" | "bank" | "invoice" => {
-            &["ledger", "tally", "mint", "vault", "fund"]
+            &["ledger", "tally", "coin", "cash", "fund", "balance"]
         }
         "health" | "fitness" | "workout" | "exercise" | "medical" | "care" => {
             &["pulse", "vital", "thrive", "fit", "care"]
@@ -1417,6 +1419,48 @@ mod tests {
         let testing_roots = brand_roots(&testing, 16);
         assert!(testing_roots.iter().any(|root| root == "spec"));
         assert!(testing_roots.iter().any(|root| root == "probe"));
+    }
+
+    #[test]
+    fn broad_domains_use_distinctive_semantic_roots() {
+        let inventory = brand_roots(&extract_keywords("a home inventory tracker", 6), 16);
+        assert!(inventory.contains(&"asset".to_string()));
+        assert!(inventory.contains(&"count".to_string()));
+        assert!(!inventory.contains(&"crate".to_string()));
+        assert!(!inventory.contains(&"shelf".to_string()));
+
+        let finance = brand_roots(
+            &extract_keywords("a personal budget and expense tracker", 6),
+            16,
+        );
+        assert!(finance.contains(&"cash".to_string()));
+        assert!(finance.contains(&"balance".to_string()));
+        assert!(!finance.contains(&"mint".to_string()));
+        assert!(!finance.contains(&"vault".to_string()));
+
+        let rate_limit = brand_roots(&extract_keywords("an API rate limiting library", 6), 16);
+        assert!(rate_limit.contains(&"burst".to_string()));
+        assert!(!rate_limit.contains(&"guard".to_string()));
+
+        let bookmarks = brand_roots(&extract_keywords("a browser bookmark manager", 6), 16);
+        assert!(bookmarks.contains(&"pin".to_string()));
+        assert!(bookmarks.contains(&"ribbon".to_string()));
+        assert!(!bookmarks.contains(&"mark".to_string()));
+        assert!(!bookmarks.contains(&"link".to_string()));
+
+        let jobs = brand_roots(&extract_keywords("a background job scheduler", 6), 16);
+        assert!(jobs.contains(&"tick".to_string()));
+        assert!(!jobs.contains(&"task".to_string()));
+
+        let dependencies = brand_roots(&extract_keywords("dependency update automation", 6), 16);
+        assert!(dependencies.contains(&"graph".to_string()));
+        assert!(dependencies.contains(&"module".to_string()));
+        assert!(!dependencies.contains(&"lock".to_string()));
+
+        let release = brand_roots(&extract_keywords("git release automation", 6), 16);
+        assert!(release.contains(&"push".to_string()));
+        assert!(release.contains(&"patch".to_string()));
+        assert!(!release.contains(&"ship".to_string()));
     }
 
     #[test]

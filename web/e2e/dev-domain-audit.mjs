@@ -17,7 +17,7 @@ const CASES = [
   },
   {
     prompt: 'an API rate limiting library',
-    markers: ['gate', 'meter', 'quota', 'pace', 'guard'],
+    markers: ['gate', 'meter', 'quota', 'pace', 'burst'],
   },
   {
     prompt: 'a terminal log viewer',
@@ -25,7 +25,7 @@ const CASES = [
   },
   {
     prompt: 'git release automation',
-    markers: ['commit', 'branch', 'tag', 'forge', 'ship'],
+    markers: ['commit', 'branch', 'tag', 'forge', 'push', 'patch'],
   },
   {
     prompt: 'a local cache inspector',
@@ -33,7 +33,7 @@ const CASES = [
   },
   {
     prompt: 'a browser bookmark manager',
-    markers: ['tab', 'mark', 'link', 'page', 'web'],
+    markers: ['tab', 'pin', 'clip', 'ribbon', 'star'],
   },
   {
     prompt: 'an API testing toolkit',
@@ -65,11 +65,11 @@ const CASES = [
   },
   {
     prompt: 'a background job scheduler',
-    markers: ['job', 'task', 'worker', 'cron', 'schedule', 'timer', 'run'],
+    markers: ['job', 'tick', 'worker', 'cron', 'schedule', 'timer', 'run'],
   },
   {
     prompt: 'dependency update automation',
-    markers: ['dependency', 'package', 'version', 'bump', 'update', 'sync', 'dep', 'lock'],
+    markers: ['dependency', 'package', 'version', 'bump', 'update', 'sync', 'dep', 'graph', 'module'],
   },
   {
     prompt: 'a documentation site generator',

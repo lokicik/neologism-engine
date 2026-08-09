@@ -18,7 +18,7 @@ const CASES: &[Case] = &[
     },
     Case {
         prompt: "an API rate limiting library",
-        semantic_markers: &["gate", "meter", "quota", "pace", "guard"],
+        semantic_markers: &["gate", "meter", "quota", "pace", "burst"],
     },
     Case {
         prompt: "a terminal log viewer",
@@ -28,7 +28,7 @@ const CASES: &[Case] = &[
     },
     Case {
         prompt: "git release automation",
-        semantic_markers: &["commit", "branch", "tag", "forge", "ship"],
+        semantic_markers: &["commit", "branch", "tag", "forge", "push", "patch"],
     },
     Case {
         prompt: "a local cache inspector",
@@ -36,7 +36,7 @@ const CASES: &[Case] = &[
     },
     Case {
         prompt: "a browser bookmark manager",
-        semantic_markers: &["tab", "mark", "link", "page", "web"],
+        semantic_markers: &["tab", "pin", "clip", "ribbon", "star"],
     },
     Case {
         prompt: "an API testing toolkit",
@@ -68,7 +68,7 @@ const CASES: &[Case] = &[
     },
     Case {
         prompt: "a background job scheduler",
-        semantic_markers: &["job", "task", "worker", "cron", "schedule", "timer", "run"],
+        semantic_markers: &["job", "tick", "worker", "cron", "schedule", "timer", "run"],
     },
     Case {
         prompt: "dependency update automation",
@@ -80,7 +80,8 @@ const CASES: &[Case] = &[
             "update",
             "sync",
             "dep",
-            "lock",
+            "graph",
+            "module",
         ],
     },
     Case {

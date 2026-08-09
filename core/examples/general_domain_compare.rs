@@ -37,7 +37,7 @@ const CASES: &[Case] = &[
         calibration: "a home inventory tracker",
         holdout: "a catalog for household belongings",
         semantic_markers: &[
-            "item", "stock", "shelf", "catalog", "crate", "list", "home", "house", "keep",
+            "item", "stock", "count", "catalog", "asset", "list", "home", "house", "keep",
         ],
         wrong_domain_markers: &[],
     },

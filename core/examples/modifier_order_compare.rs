@@ -30,7 +30,7 @@ const CASES: &[Case] = &[
     Case {
         prompt: "a personal finance tracker",
         weak_words: &["personal", "tracker"],
-        semantic_markers: &["ledger", "tally", "mint", "vault", "fund"],
+        semantic_markers: &["ledger", "tally", "coin", "cash", "fund", "balance"],
     },
     Case {
         prompt: "a collaborative document editor",
@@ -53,7 +53,7 @@ const CASES: &[Case] = &[
     Case {
         prompt: "automatic invoice reminders",
         weak_words: &["automatic", "reminder"],
-        semantic_markers: &["ledger", "tally", "mint", "vault", "fund"],
+        semantic_markers: &["ledger", "tally", "coin", "cash", "fund", "balance"],
     },
     Case {
         prompt: "a modern photo editor",
