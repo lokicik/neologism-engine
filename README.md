@@ -17,7 +17,7 @@ neologism-engine/
 - **Markov chains** (order-3, character-level) for Sci-Fi and Fantasy styles
 - **Syllable blending** (portmanteau) + tech suffix transforms for Big Tech style
 - **Sub-style phonologies** — per-variant phoneme-affinity profiles that re-rank Markov output toward a target sound (Elvish, Dwarvish, Orcish, Common; Stellar, Machine, Alien)
-- **Description-driven naming** — simplified RAKE keyword extraction turns a product description into blend roots, with distinct offline semantic families for developer tools and common domains such as legal work, recruiting, meals, support, events, weather, habits, sales, and pet care
+- **Description-driven naming** — simplified RAKE keyword extraction turns a product description into blend roots, with distinct offline semantic families for developer tools and common domains such as legal work, recruiting, meals, support, events, weather, habits, sales, and pet care; naming briefs get a scoped smoother-ending palette without changing other domains
 - **Developer-domain semantics** — compact offline maps for databases, queues, formatters, environment tools, filesystems, feature flags, schedulers, dependency updates, documentation, and other common dev domains keep technical briefs tied to their actual meaning
 - **Phonotactic filters** — rejects vowel-less output and over-long consonant clusters (relaxed for harsh variants), plus a Sonority Sequencing check so "soft" styles read naturally
 - **Word-likeness ranking** — big-tech blends are ranked by their probability under the real-brand Markov model, surfacing the most brand-like names
@@ -75,7 +75,7 @@ App runs at **http://localhost:5173/**.
 cargo test -p neologism-core
 ```
 
-123 unit tests covering Markov determinism, phonotactic filters, blend logic, score ranges, phoneme affinity, sonority sequencing, word-likeness, keyword extraction, semantic ranking, exclusion behavior, developer-domain coverage, first-page shape balance, and 100-name brief sessions.
+132 unit tests covering Markov determinism, phonotactic filters, blend logic, score ranges, phoneme affinity, sonority sequencing, word-likeness, keyword extraction, semantic ranking, exclusion behavior, developer-domain coverage, first-page shape balance, and 100-name brief sessions.
 
 > Quick quality check: `cargo run -p neologism-core --example sample` prints a batch of names for every style and variant.
 > Long-session check: `cargo run -p neologism-core --example concept_compare --release` audits ten rolling batches across eight representative briefs.
@@ -84,6 +84,7 @@ cargo test -p neologism-core
 > General-domain check: `cargo run -p neologism-core --example general_domain_compare --release` audits calibration and synonym-holdout prompts across eleven common product domains, independent seed sets, wrong-domain leakage, and rolling 100-name capacity in both Brandable and Compound.
 > Brandable morphology check: `cargo run -p neologism-core --example morphology_compare --release` audits 1,100 fixed-seed names plus 2,200 rolling-session names for transformation-family balance, collapsed suffixes, consonant metaphor seams, complete vowel-suffix seams, and lossy shared overlaps while tracking structural composite, diversity, and capacity.
 > Auto first-page check: from `web/`, `node e2e/auto-quality-audit.mjs` audits 30 deterministic guided pages (`--verbose` prints every name).
+> Cold Auto quality check: from `web/`, `node e2e/cold-quality-audit.mjs` audits 90 fixed pages, including the bounded weak-slot repair, structural floor, and within-page similarity.
 > Personalized shortlist check: from `web/`, `node e2e/taste-quality-audit.mjs` audits 100 fixed pages across five briefs, four reference-name sets, and five seeds, gating structural quality, taste affinity, and within-page family diversity.
 
 ### Audit exported taste data
@@ -115,9 +116,9 @@ npm run build        # output in web/dist/
 - **Sub-styles** — Sci-Fi (Stellar / Machine / Alien) and Fantasy (Elvish / Dwarvish / Orcish / Common), plus "Mixed"
 - **Controls** — count, min/max length, randomness (temperature), seed words, product description, starts-with / contains constraints
 - **Brief-aware Compound mode** — readable two-word names use project-specific adjective palettes, semantic noun roots, and role-compatible pairings (`QuietInk`, `FairTally`, `SwiftSignal`) instead of arbitrary corpus combinations; recognized concepts keep their focused first page and expand to 100 fresh names on continued exploration
-- **Project-scoped local taste selection** — add 3–8 example names you already like for an immediate local profile, or teach each project by starring/passing on 3+ generated names. Future batches request up to a 6× offline candidate pool, reject structurally weak options when enough stronger names exist, and keep any one stem family to 20% of the visible page. References stay separate from feedback/export data, and everything remains in `localStorage`.
+- **Project-scoped local taste selection** — add 3–8 example names you already like for an immediate local profile, or teach each project by starring/passing on 3+ generated names. Future batches request up to a 6× offline candidate pool, reject structurally weak options when enough stronger names exist, and keep any one stem family — plus one exact ending on naming briefs — to 20% of the visible page when the pool allows it. References stay separate from feedback/export data, and everything remains in `localStorage`.
 - **Taste data export** — Settings turns explicit likes and passes into a versioned JSON dataset, preserving each name's project brief while forming preference pairs only within the same project context. It never exports AI credentials or recent-name history.
-- **Brief-aware Auto** — a project description gets semantic Brandable names plus at most one Respell that is actually derived from the prompt; unrelated modes no longer receive forced slots. An empty brief keeps the broader four-mode sampler.
+- **Brief-aware Auto** — a project description gets semantic Brandable names plus at most one Respell that is actually derived from the prompt; unrelated modes no longer receive forced slots. On a cold page, strong names keep their order and a bounded offline fallback replaces only missing or sub-75 slots. An empty brief keeps the broader four-mode sampler.
 - **Deep brief sessions** — initial semantic batches stay focused; later Brandable batches open a curated metaphor lane so repeated scrolling reaches 100 fresh, prompt-linked names instead of exhausting suffix variants.
 - **Root-preserving coinages** — concept suffixes keep the full semantic root at vowel boundaries (`Bridgeora`, not the lossy `Bridgea`; `Cacheora`, not `Cachera`)
 - **Readable semantic joins** — concept pairs keep meaningful boundary consonants (`Poolledger`, not `Pooledger`); awkward vowel collisions and shared-overlap typos such as `Aurank`, `Settledger`, and `Tagent` are skipped for a cleaner pair.

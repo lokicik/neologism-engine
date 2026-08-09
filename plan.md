@@ -1901,6 +1901,60 @@ expanded-pool selection.
 
 ---
 
+## Phase 94 — Raise the offline first-page quality floor
+
+**Bottleneck.** Aggregate semantic and structural scores were no longer enough to explain why
+the app's own lists still felt mechanical. The expanded naming pool exposed two concrete
+patterns: short naming roots repeatedly recycled the old `-ix`/`-io`/`-ify` palette, and a cold
+Auto page could still contain one or two structurally weak names even when the engine had better
+unused alternatives. The personalized naming page could also show three copies of one exact
+ending after taste ranking, despite respecting the existing two-per-prefix limit.
+
+**Measured exploration.** The correction stayed narrow after rejecting broader experiments.
+Global suffix expansion produced forms such as `Talenter`, `Plateer`, and `Assister`; abstract
+coinage and semantic real-word lanes either became noisy (`Tascil`, `Infurts`) or failed to cover
+non-naming briefs; rebuilding every cold page from a thirty-name pool raised proxy scores but
+made the result more mechanical; and changing recent-history behavior damaged both structural
+quality and taste affinity. A generic suffix cap also reduced taste fit, while an extra
+clean-ending score bonus had no meaningful effect. None of those variants remains.
+
+**Retained correction.** Naming briefs alone now give short roots such as `lex`, `nym`, and `nom`
+a wider smooth-ending palette (`-el`, `-en`, `-on`, `-ion`, `-era`); longer naming roots receive
+the restrained subset. Other product domains retain their previous morphology. Personalized
+naming pages restore a two-per-exact-ending boundary in addition to the existing prefix-family
+boundary, relaxing only if a genuinely constrained pool cannot fill the requested count.
+
+Cold Auto still generates the requested ten names first. Only when that page is short or contains
+a candidate below the 75 structural floor does the browser request one bounded thirty-name
+offline fallback. Strong primary names keep their order; only weak or missing slots are filled,
+with prefix and naming-ending diversity observed where the available pool permits it. Explicit
+modes and active local-taste flows are unchanged, and no LLM, API call, or key is involved.
+
+**Measured result.** Across 90 fixed cold Auto pages (18 briefs × 5 seeds), the visible average
+quality rises **80.78 → 82.87** and sub-75 names fall **133 → 0**. Repair activates on **55/90**
+pages, uses either zero or exactly thirty fallback candidates, keeps near-duplicate pairs at
+**50**, and holds mean pair similarity at **0.202**. On the 100-page personalized matrix,
+average quality is **85.61**, sub-75 names and prefix overflow remain **0**, near pairs are
+**251**, and mean pair similarity improves **0.233 → 0.228**; mean reference affinity moves only
+**-0.786 → -0.794**. The app's fixed reference-name page changes from a hard repeated
+`Nymtag`/`Markix`/`Nomix` cadence to a mix including `Lexion`, `Nymion`, `Markel`, `Mintel`,
+`Minten`, and `Marken`.
+
+**Verification.** The workspace suite is **132/132**. The morphology matrix remains effectively
+flat at **80.92** composite and **0.730** diversity versus the previous **80.95/0.730**, with all
+**1,100/1,100** first-page and **2,200/2,200** rolling names. General-domain calibration and
+holdout stay at **1,069/1,100** and **1,067/1,100** semantic names with zero cross-domain exact
+collisions. WASM, TypeScript, and the production bundle build cleanly. Chromium passes all
+**85** Auto pages, the 90-page cold-quality audit, the 1,000-name personalized audit,
+**800/800** developer Brandable and **791/800** developer Compound names, the real feedback and
+reference flows, and the duplicate-free 100-name app-brief session.
+
+This raises the LLM-free floor; it does not turn the heuristic score into a universal beauty
+judge. The remaining broad aesthetic work should be learned from real liked-versus-passed pairs,
+then accepted only on held-out preference data rather than hand-tuned from a few memorable names.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
@@ -1912,10 +1966,12 @@ palette only when the user asks for more, preserving 100-name session capacity w
 first-page dilution. Its focused two-word names now also reject cross-concept adjective–noun
 pairings that are individually relevant but read poorly together.
 Long prompted sessions no longer collapse into repeated suffix families or stop before 100
-names, and semantic joins no longer erase a concept at one-letter/vowel boundaries. Local taste
-feedback now selects each visible page from up to sixty offline candidates per project, applies a
-structural quality floor, and restores visible stem-family diversity. AI Studio remains an
-optional, separate batch judge rather than a hidden dependency of Create.
+names, and semantic joins no longer erase a concept at one-letter/vowel boundaries. Naming briefs
+now use a smoother, deliberately scoped ending palette. Cold Auto preserves strong first-page
+names and opens a bounded offline fallback only for weak slots. Local taste feedback selects each
+visible page from up to sixty offline candidates per project, applies a structural quality floor,
+and restores visible stem and naming-ending diversity. AI Studio remains an optional, separate
+batch judge rather than a hidden dependency of Create.
 
 The next broad aesthetic scorer change is evidence-gated: collect at least ten real likes and ten passes in
 matching project contexts, audit the current composite, and require held-out pairwise

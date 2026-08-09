@@ -15,7 +15,10 @@ use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 use std::sync::OnceLock;
 
-use blend::{blend, compound, concept_transform, overlap_blend, semantic_join, tech_transform};
+use blend::{
+    blend, compound, concept_transform, naming_transform, overlap_blend, semantic_join,
+    tech_transform,
+};
 use exclude::ExcludeSet;
 use markov::Model;
 use phonemes::{affinity_score, Variant};
@@ -584,6 +587,7 @@ fn generate_bigtech(
         .filter(|d| !d.trim().is_empty())
         .map(|d| keywords::extract_keywords(d, 6))
         .unwrap_or_default();
+    let naming_brief = keywords::is_naming_brief(&raw_desc_keywords);
     // Brandable uses semantic groups to coin new forms. Compound keeps its
     // two-word shape but uses the same transparent lexicon for readable noun
     // halves (QuietInk instead of a random adjective + raw "journaling").
@@ -805,7 +809,11 @@ fn generate_bigtech(
                     all_roots[rand::Rng::gen_range(rng, 0..all_roots.len())]
                 };
                 if concept_expanded {
-                    concept_transform(rng, root)
+                    if naming_brief {
+                        naming_transform(rng, root)
+                    } else {
+                        concept_transform(rng, root)
+                    }
                 } else {
                     tech_transform(rng, root, 1.0)
                 }
@@ -1810,6 +1818,33 @@ mod tests {
         let names: Vec<&String> = results.iter().map(|result| &result.name).collect();
         assert!(single >= 3, "only {single} compact coinages: {names:?}");
         assert!(joined >= 3, "only {joined} semantic joins: {names:?}");
+    }
+
+    #[test]
+    fn naming_brief_reaches_smoother_coined_endings() {
+        let mut c = cfg(Style::BigTech);
+        c.description = Some(
+            "a developer tool that generates names for packages CLIs libraries and projects"
+                .to_string(),
+        );
+        c.count = 60;
+        c.temperature = 0.85;
+        c.variety = 0.3;
+        c.seed = Some(42);
+        let results = generate(&c);
+        let naming_roots = ["lex", "nym", "nom", "mark", "mint"];
+        let smooth_endings = ["el", "en", "on", "ion", "era"];
+        assert!(
+            results.iter().any(|result| {
+                let lower = result.name.to_lowercase();
+                naming_roots.iter().any(|root| {
+                    smooth_endings
+                        .iter()
+                        .any(|ending| lower == format!("{root}{ending}"))
+                })
+            }),
+            "naming brief did not reach its smoother ending palette"
+        );
     }
 
     #[test]

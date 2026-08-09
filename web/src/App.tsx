@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { generateBatch, batchMetrics, extractKeywords, type BatchMetrics, type Config, type NameResult, type Style } from './lib/engine'
 import { recommendations } from './lib/recommend'
-import { buildReferencedProfile, feedbackForContext, MIN_TASTE_SIGNALS, preferencePoolCount, shortlistByPreference } from './lib/preferences'
+import { buildReferencedProfile, coldQualityPoolCount, feedbackForContext, MIN_TASTE_SIGNALS, needsQualityRepair, preferencePoolCount, repairWeakShortlist, shortlistByPreference } from './lib/preferences'
 import { tasteContextForConfig } from './lib/taste-context'
 import { loadFavorites, toggleFavorite, removeFavorite, saveFavorites, loadRejected, toggleRejected, removeRejected, loadTasteReferences, saveTasteReferences, loadRecent, saveRecent, hasVisited, markVisited, loadJudgeConfig, saveJudgeConfig } from './lib/storage'
 import { type JudgeConfig } from './lib/judge'
@@ -147,16 +147,32 @@ export default function App() {
       )
       const requestedCount = cfg.count ?? 10
       const poolCount = preferencePoolCount(requestedCount, profile)
-      const pool = await generateBatch({
+      const primaryPool = await generateBatch({
         ...cfg,
         count: poolCount,
         exclude: recentRef.current,
       })
+      let pool = primaryPool
+      let batch: NameResult[]
+      if (
+        !profile
+        && cfg.variant === 'auto'
+        && needsQualityRepair(primaryPool, requestedCount)
+      ) {
+        const fallback = await generateBatch({
+          ...cfg,
+          count: coldQualityPoolCount(requestedCount),
+          exclude: [...recentRef.current, ...primaryPool.map((result) => result.name)],
+        })
+        pool = [...primaryPool, ...fallback]
+        batch = repairWeakShortlist(primaryPool, fallback, requestedCount)
+      } else {
+        batch = shortlistByPreference(primaryPool, profile, requestedCount)
+      }
       setPromptKeywords(cfg.description?.trim() ? await extractKeywords(cfg.description) : [])
       setExhausted(pool.length === 0)
-      // An active profile selects a visible page from a larger fresh pool.
-      // Existing cards stay fixed; only the incoming page is personalized.
-      const batch = shortlistByPreference(pool, profile, requestedCount)
+      // Taste profiles select from a larger pool. Cold Auto opens its fallback
+      // only when the primary page has a weak slot. Existing cards stay fixed.
       const shown = append ? [...resultsRef.current, ...batch] : batch
       setResults(shown)
       // Hidden pool candidates count as explored. Otherwise the deterministic

@@ -12,6 +12,10 @@ const TECH_SUFFIXES: &[&str] = &[
 /// Softer endings for semantic prompt roots. These create coined names rather
 /// than generic product labels such as -hub/-app/-net.
 const CONCEPT_SUFFIXES: &[&str] = &["ia", "io", "ora", "ix", "ify"];
+const SHORT_NAMING_SUFFIXES: &[&str] = &[
+    "ia", "io", "ora", "ix", "ify", "el", "en", "on", "ion", "era",
+];
+const LONG_NAMING_SUFFIXES: &[&str] = &["ia", "io", "ora", "ix", "ify", "el", "en", "on"];
 
 /// Blend two root words: take a prefix of `a` and a suffix of `b`.
 /// Returns None if inputs are too short.
@@ -138,6 +142,26 @@ pub fn concept_transform<R: Rng>(rng: &mut R, name: &str) -> String {
         // Keep the semantic root intact at a vowel seam. Removing either side
         // produced generator artifacts (bridge + ia -> bridgea) or changed the
         // concept itself (quota + ify -> quotify).
+        format!("{}{}", name, suffix)
+    }
+}
+
+/// Naming briefs use unusually short semantic morphemes (`lex`, `nym`, `nom`).
+/// Give those roots a wider corpus-backed ending palette while keeping every
+/// other product concept on the established conservative transform.
+pub fn naming_transform<R: Rng>(rng: &mut R, name: &str) -> String {
+    if name.len() >= 9 {
+        return name.to_string();
+    }
+    let suffixes = if name.len() <= 3 {
+        SHORT_NAMING_SUFFIXES
+    } else {
+        LONG_NAMING_SUFFIXES
+    };
+    let suffix = suffixes[rng.gen_range(0..suffixes.len())];
+    if name.ends_with(suffix) {
+        name.to_string()
+    } else {
         format!("{}{}", name, suffix)
     }
 }
@@ -394,6 +418,51 @@ mod tests {
             assert!(name.starts_with("scop"));
             assert!(name.len() >= "scope".len());
             assert!(expected.contains(&name.as_str()), "lossy seam: {name}");
+            observed.insert(name);
+        }
+        assert!(expected.iter().all(|name| observed.contains(*name)));
+    }
+
+    #[test]
+    fn naming_transform_gives_short_naming_roots_a_wider_palette() {
+        use rand::SeedableRng;
+        use rand_chacha::ChaCha8Rng;
+        use std::collections::HashSet;
+
+        let mut rng = ChaCha8Rng::seed_from_u64(94);
+        let expected = [
+            "lexia", "lexio", "lexora", "lexix", "lexify", "lexel", "lexen", "lexon", "lexion",
+            "lexera",
+        ];
+        let mut observed = HashSet::new();
+        for _ in 0..100 {
+            let name = naming_transform(&mut rng, "lex");
+            assert!(
+                expected.contains(&name.as_str()),
+                "unexpected ending: {name}"
+            );
+            observed.insert(name);
+        }
+        assert!(expected.iter().all(|name| observed.contains(*name)));
+    }
+
+    #[test]
+    fn naming_transform_keeps_longer_roots_conservative() {
+        use rand::SeedableRng;
+        use rand_chacha::ChaCha8Rng;
+        use std::collections::HashSet;
+
+        let mut rng = ChaCha8Rng::seed_from_u64(94);
+        let expected = [
+            "markia", "markio", "markora", "markix", "markify", "markel", "marken", "markon",
+        ];
+        let mut observed = HashSet::new();
+        for _ in 0..100 {
+            let name = naming_transform(&mut rng, "mark");
+            assert!(
+                expected.contains(&name.as_str()),
+                "unexpected ending: {name}"
+            );
             observed.insert(name);
         }
         assert!(expected.iter().all(|name| observed.contains(*name)));

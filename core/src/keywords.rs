@@ -950,14 +950,18 @@ fn concept_position(word: &str) -> u8 {
 /// Expand extracted keywords into distinct semantic groups. Keeping groups
 /// separate lets the generator combine *different ideas* (Ink + Lens) instead
 /// of accidentally pairing synonyms from one idea (Lens + Scope).
-pub fn brand_root_groups(keywords: &[String], limit: usize) -> Vec<Vec<String>> {
-    const DEV_NAMING_ROOTS: &[&str] = &["key", "tag", "alias", "slug"];
-    let has_naming_domain = keywords.iter().any(|keyword| {
+pub fn is_naming_brief(keywords: &[String]) -> bool {
+    keywords.iter().any(|keyword| {
         matches!(
             keyword.as_str(),
             "name" | "naming" | "brand" | "title" | "word" | "identity"
         )
-    });
+    })
+}
+
+pub fn brand_root_groups(keywords: &[String], limit: usize) -> Vec<Vec<String>> {
+    const DEV_NAMING_ROOTS: &[&str] = &["key", "tag", "alias", "slug"];
+    let has_naming_domain = is_naming_brief(keywords);
     let has_rich_dev_palette = keywords.iter().any(|keyword| {
         matches!(
             keyword.as_str(),
@@ -1232,6 +1236,7 @@ mod tests {
             "a developer tool that generates names for packages CLIs libraries and projects",
             8,
         );
+        assert!(is_naming_brief(&kws));
         let roots = brand_roots(&kws, 16);
         assert!(roots.iter().any(|r| r == "lex" || r == "nym"));
         assert!(roots.iter().any(|r| r == "key" || r == "tag"));
@@ -1241,7 +1246,9 @@ mod tests {
         assert!(roots.iter().any(|r| r == "forge" || r == "mint"));
         assert!(!roots.iter().any(|r| r == "developer" || r == "package"));
 
-        let generic = brand_roots(&extract_keywords("a developer toolkit for APIs", 6), 16);
+        let generic_kws = extract_keywords("a developer toolkit for APIs", 6);
+        assert!(!is_naming_brief(&generic_kws));
+        let generic = brand_roots(&generic_kws, 16);
         assert!(generic.contains(&"crate".to_string()));
         assert!(generic.contains(&"kit".to_string()));
     }

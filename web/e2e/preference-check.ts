@@ -3,10 +3,13 @@
 import {
   buildProfile,
   buildReferencedProfile,
+  coldQualityPoolCount,
   feedbackForContext,
+  needsQualityRepair,
   parseTasteReferences,
   preferencePoolCount,
   rankByPreference,
+  repairWeakShortlist,
   shortlistByPreference,
 } from '../src/lib/preferences'
 import type { NameResult, NamingMode } from '../src/lib/engine'
@@ -77,6 +80,36 @@ if (ixProfile) {
   )
 }
 check(preferencePoolCount(10, null) === 10, 'cold start keeps the requested candidate count')
+check(coldQualityPoolCount(10) === 30, 'a weak cold Auto page opens a three-page repair pool')
+
+const weakColdPage = [
+  scoredResult('Lexion', 88),
+  scoredResult('Marken', 88),
+  scoredResult('Nomera', 88),
+  scoredResult('Mintora', 68),
+  scoredResult('Checkalias', 62),
+  scoredResult('Developr', 86),
+  scoredResult('Mintel', 88),
+  scoredResult('Lexia', 88),
+  scoredResult('Nomio', 88),
+  scoredResult('Markel', 88),
+]
+check(needsQualityRepair(weakColdPage, 10), 'a sub-75 cold candidate activates repair')
+const repairedColdPage = repairWeakShortlist(
+  weakColdPage,
+  [scoredResult('Mintalias', 82), scoredResult('Nymera', 88)],
+  10,
+)
+check(
+  repairedColdPage.length === 10
+    && !repairedColdPage.some((item) => item.name === 'Mintora' || item.name === 'Checkalias')
+    && repairedColdPage.slice(0, 3).map((item) => item.name).join('|') === 'Lexion|Marken|Nomera',
+  'cold repair preserves strong order and replaces only weak slots',
+)
+check(
+  !needsQualityRepair(repairedColdPage, 10),
+  'a fully strong cold page avoids a second fallback generation',
+)
 
 const parsedReferences = parseTasteReferences(
   ' Vercel, linear; NOTION\nver-cel, x, A Really Long Reference Name Beyond Limit ',
@@ -161,6 +194,28 @@ if (mintProfile) {
       2,
     ).length === 2,
     'a constrained pool relaxes quality and family preferences instead of starving',
+  )
+}
+
+const namingEndingProfile = buildProfile([result('Lexion'), result('Nymion'), result('Nomion')])
+if (namingEndingProfile) {
+  const namingContext = {
+    id: 'naming-project',
+    description: 'a naming engine for developer projects',
+    roots: [],
+  }
+  const namingShortlist = shortlistByPreference(
+    [
+      'Lexion', 'Nymion', 'Nomion', 'Markel', 'Mintel',
+      'Lexen', 'Nymen', 'Nomix', 'Markix', 'Mintio', 'Marken', 'Tagora',
+      'Velora', 'Sageia', 'Kiteify',
+    ].map((name) => ({ ...scoredResult(name, 88), tasteContext: namingContext })),
+    namingEndingProfile,
+    10,
+  )
+  check(
+    namingShortlist.filter((item) => item.name.endsWith('ion')).length <= 2,
+    'a personalized naming page limits one exact ending family to two names',
   )
 }
 

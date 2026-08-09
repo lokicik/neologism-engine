@@ -9,14 +9,16 @@ const FRONT = new Set(['e', 'i', 'y'])
 const BACK = new Set(['o', 'u'])
 const VOWELS = new Set(['a', 'e', 'i', 'o', 'u', 'y'])
 const SHARP = new Set(['k', 't', 'x', 'z', 'q', 'v'])
-const KNOWN_SUFFIXES = ['ify', 'ora', 'ium', 'io', 'ia', 'ix', 'ly', 'ai']
+const KNOWN_SUFFIXES = ['ify', 'ora', 'ium', 'ion', 'io', 'ia', 'ix', 'ly', 'ai']
 const ENGINE_QUALITY_WEIGHT = 1.1
 const MIN_SHORTLIST_QUALITY = 0.75
 const VISIBLE_PREFIX_SHARE = 0.2
+const VISIBLE_SUFFIX_SHARE = 0.2
 export const MIN_TASTE_SIGNALS = 3
 export const TASTE_POOL_MULTIPLIER = 6
 export const MAX_TASTE_POOL = 60
 export const MAX_TASTE_REFERENCES = 8
+export const COLD_QUALITY_POOL_MULTIPLIER = 3
 
 interface ShapeProfile {
   avgLength: number
@@ -94,6 +96,12 @@ function bigrams(name: string): string[] {
   const grams: string[] = []
   for (let i = 0; i + 1 < lower.length; i++) grams.push(lower.slice(i, i + 2))
   return grams
+}
+
+function isNamingBrief(results: NameResult[]): boolean {
+  const description = results.find((result) => result.tasteContext?.description)
+    ?.tasteContext?.description?.toLowerCase() ?? ''
+  return /\b(names?|naming|brands?|title|word|identity)\b/.test(description)
 }
 
 export function parseTasteReferences(input: string): string[] {
@@ -274,6 +282,84 @@ function engineQuality(result: NameResult): number {
   ) / 100
 }
 
+export function coldQualityPoolCount(requested: number): number {
+  const count = Math.max(0, Math.floor(requested))
+  return Math.max(count, Math.min(MAX_TASTE_POOL, count * COLD_QUALITY_POOL_MULTIPLIER))
+}
+
+export function needsQualityRepair(results: NameResult[], requested: number): boolean {
+  const count = Math.max(0, Math.floor(requested))
+  const page = results.slice(0, count)
+  return page.length < count || page.some((result) => engineQuality(result) < MIN_SHORTLIST_QUALITY)
+}
+
+// Cold Auto keeps the engine's intended first-page order. Only an explicitly
+// weak or missing slot is replaced from a larger offline fallback pool.
+export function repairWeakShortlist(
+  primary: NameResult[],
+  fallback: NameResult[],
+  requested: number,
+): NameResult[] {
+  const count = Math.max(0, Math.floor(requested))
+  if (count === 0) return []
+
+  const page = primary.slice(0, count)
+  const selected = page.filter((result) => engineQuality(result) >= MIN_SHORTLIST_QUALITY)
+  if (selected.length === count) return selected
+
+  const namingPage = isNamingBrief([...page, ...fallback])
+  const prefixCap = Math.max(1, Math.ceil(count * VISIBLE_PREFIX_SHARE))
+  const suffixCap = Math.max(1, Math.ceil(count * VISIBLE_SUFFIX_SHARE))
+  const seen = new Set(selected.map((result) => letters(result.name)))
+  const prefixCounts = new Map<string, number>()
+  const suffixCounts = new Map<string, number>()
+  for (const result of selected) {
+    const prefix = letters(result.name).slice(0, 3)
+    const ending = suffix(result.name)
+    prefixCounts.set(prefix, (prefixCounts.get(prefix) ?? 0) + 1)
+    suffixCounts.set(ending, (suffixCounts.get(ending) ?? 0) + 1)
+  }
+
+  const deferred: NameResult[] = []
+  for (const candidate of fallback) {
+    const key = letters(candidate.name)
+    if (seen.has(key) || engineQuality(candidate) < MIN_SHORTLIST_QUALITY) continue
+    const prefix = key.slice(0, 3)
+    const ending = suffix(candidate.name)
+    if (
+      (prefixCounts.get(prefix) ?? 0) >= prefixCap
+      || (namingPage && (suffixCounts.get(ending) ?? 0) >= suffixCap)
+    ) {
+      deferred.push(candidate)
+      continue
+    }
+    selected.push(candidate)
+    seen.add(key)
+    prefixCounts.set(prefix, (prefixCounts.get(prefix) ?? 0) + 1)
+    suffixCounts.set(ending, (suffixCounts.get(ending) ?? 0) + 1)
+    if (selected.length === count) return selected
+  }
+
+  for (const candidate of deferred) {
+    const key = letters(candidate.name)
+    if (seen.has(key)) continue
+    selected.push(candidate)
+    seen.add(key)
+    if (selected.length === count) return selected
+  }
+
+  // A genuinely constrained mode may lack enough strong alternatives. Keep
+  // the requested count with the original order as the final fallback.
+  for (const candidate of [...page, ...fallback]) {
+    const key = letters(candidate.name)
+    if (seen.has(key)) continue
+    selected.push(candidate)
+    seen.add(key)
+    if (selected.length === count) return selected
+  }
+  return selected
+}
+
 export function rankByPreference(results: NameResult[], profile: PreferenceProfile): NameResult[] {
   return results
     .map((result, index) => ({
@@ -318,17 +404,26 @@ export function shortlistByPreference(
   // batch. A larger personalization pool relaxes that cap internally, so
   // restore it after taste ranking instead of showing ten variants of one root.
   const prefixCap = Math.max(1, Math.ceil(count * VISIBLE_PREFIX_SHARE))
+  const suffixCap = isNamingBrief(candidates)
+    ? Math.max(1, Math.ceil(count * VISIBLE_SUFFIX_SHARE))
+    : Number.POSITIVE_INFINITY
   const selected: NameResult[] = []
   const deferred: NameResult[] = []
   const prefixCounts = new Map<string, number>()
+  const suffixCounts = new Map<string, number>()
   for (const candidate of candidates) {
     const prefix = letters(candidate.name).slice(0, 3)
-    if ((prefixCounts.get(prefix) ?? 0) >= prefixCap) {
+    const ending = suffix(candidate.name)
+    if (
+      (prefixCounts.get(prefix) ?? 0) >= prefixCap
+      || (suffixCounts.get(ending) ?? 0) >= suffixCap
+    ) {
       deferred.push(candidate)
       continue
     }
     selected.push(candidate)
     prefixCounts.set(prefix, (prefixCounts.get(prefix) ?? 0) + 1)
+    suffixCounts.set(ending, (suffixCounts.get(ending) ?? 0) + 1)
     if (selected.length === count) return selected
   }
 
