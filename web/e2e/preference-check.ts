@@ -1,6 +1,12 @@
 // Deterministic smoke test for the local favorite-profile ranker.
 // Bundle with esbuild, then run with Node (see Phase 59 verification notes).
-import { buildProfile, feedbackForContext, rankByPreference } from '../src/lib/preferences'
+import {
+  buildProfile,
+  feedbackForContext,
+  preferencePoolCount,
+  rankByPreference,
+  shortlistByPreference,
+} from '../src/lib/preferences'
 import type { NameResult, NamingMode } from '../src/lib/engine'
 
 function result(
@@ -35,7 +41,31 @@ if (ixProfile) {
     ixProfile,
   )
   check(ranked[0].name === 'Nymix', 'repeated -ix taste outranks an unrelated shape')
+
+  check(preferencePoolCount(10, ixProfile) === 30, 'active taste opens a three-page candidate pool')
+  const shortlist = shortlistByPreference(
+    [
+      result('Velora'),
+      result('Melora'),
+      result('Telora'),
+      result('Pelora'),
+      result('Delora'),
+      result('Selora'),
+      result('Relora'),
+      result('Belora'),
+      result('Kelora'),
+      result('Helora'),
+      result('Nymix'),
+    ],
+    ixProfile,
+    10,
+  )
+  check(
+    shortlist.length === 10 && shortlist[0].name === 'Nymix',
+    'taste can pull a better candidate from outside the original first page',
+  )
 }
+check(preferencePoolCount(10, null) === 10, 'cold start keeps the requested candidate count')
 
 const projectALikes = [
   result('Nomix', 2, 'brandable', 'project-a'),

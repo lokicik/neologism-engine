@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { generateBatch, batchMetrics, extractKeywords, type BatchMetrics, type Config, type NameResult, type Style } from './lib/engine'
 import { recommendations } from './lib/recommend'
-import { buildProfile, feedbackForContext, MIN_TASTE_SIGNALS, rankByPreference } from './lib/preferences'
+import { buildProfile, feedbackForContext, MIN_TASTE_SIGNALS, preferencePoolCount, shortlistByPreference } from './lib/preferences'
 import { tasteContextForConfig } from './lib/taste-context'
 import { loadFavorites, toggleFavorite, removeFavorite, saveFavorites, loadRejected, toggleRejected, removeRejected, loadRecent, saveRecent, hasVisited, markVisited, loadJudgeConfig, saveJudgeConfig } from './lib/storage'
 import { type JudgeConfig } from './lib/judge'
@@ -133,22 +133,29 @@ export default function App() {
     setLoading(true)
     setError(null)
     try {
-      const batch = await generateBatch({ ...cfg, exclude: recentRef.current })
-      setPromptKeywords(cfg.description?.trim() ? await extractKeywords(cfg.description) : [])
-      setExhausted(batch.length === 0)
-      // Preference ranking is applied to the incoming batch only, at insert
-      // time — re-ranking the whole list on every append (the old render-time
-      // rankByPreference) made already-visible cards jump around the grid.
       const feedback = feedbackForContext(
         favoritesRef.current,
         rejectedRef.current,
         tasteContextForConfig(cfg).id,
       )
       const profile = buildProfile(feedback.favorites, feedback.rejected)
-      const ranked = profile ? rankByPreference(batch, profile) : batch
-      const shown = append ? [...resultsRef.current, ...ranked] : ranked
+      const requestedCount = cfg.count ?? 10
+      const poolCount = preferencePoolCount(requestedCount, profile)
+      const pool = await generateBatch({
+        ...cfg,
+        count: poolCount,
+        exclude: recentRef.current,
+      })
+      setPromptKeywords(cfg.description?.trim() ? await extractKeywords(cfg.description) : [])
+      setExhausted(pool.length === 0)
+      // An active profile selects a visible page from a larger fresh pool.
+      // Existing cards stay fixed; only the incoming page is personalized.
+      const batch = shortlistByPreference(pool, profile, requestedCount)
+      const shown = append ? [...resultsRef.current, ...batch] : batch
       setResults(shown)
-      markSeen(batch)
+      // Hidden pool candidates count as explored. Otherwise the deterministic
+      // engine could keep offering the same passed-over names on every click.
+      markSeen(pool)
       setMetrics(shown.length > 0 ? await batchMetrics(shown) : null)
       setLoading(false)
     } catch (err) {

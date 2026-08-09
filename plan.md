@@ -1795,6 +1795,38 @@ and the established Auto/developer/session gates all remain green.
 
 ---
 
+## Phase 91 — Let local taste choose, not just reorder
+
+**Bottleneck.** Project scoping made feedback trustworthy, but the live ranker still received
+exactly the ten names the user was going to see. It could change card order but could not replace
+a weak first-page name with a stronger candidate outside that page. Once a profile existed, the
+app was paying the interaction cost of taste learning without giving the judge a real choice.
+
+**Rejected generator/scorer experiments.** Two cold-start ideas were prototyped outside the
+retained path. Prefix-conditioned brand-Markov completion raised the legacy composite and
+edit-distance diversity, but produced forms such as `Contern`, `Commode`, and `Routsy`; three-letter
+prefixes raised cross-domain collision pairs **20 → 65**, while four-letter prefixes still reached
+**38**. A contrastive brand-corpus-versus-English likelihood score demoted some plain joins but
+continued to prefer mechanical names such as `Keyforge`, `Ledgerbeam`, and `Lintwave`. Both probes
+were removed; there is no new universal aesthetic rule or core-engine diff.
+
+**Retained correction.** Cold start still generates the requested count. Once the current project
+has a valid local profile, Create asks the existing offline engine for a **3× candidate pool**
+(ten visible names means thirty candidates, capped at sixty), ranks that pool with the user's
+positive/negative shape and mode evidence, and shows only the requested page. Pool candidates that
+were not shown count as explored so deterministic generation cannot keep cycling through the same
+passed-over set. Existing cards never jump; personalization applies only to each incoming page.
+
+**Verification.** Twenty-one deterministic preference checks prove cold-start count preservation,
+the three-page pool, and the key selection contract: an `-ix` candidate outside the original first
+ten enters the personalized shortlist. TypeScript and the Vite production bundle build cleanly.
+Twenty-one Chromium checks exercise real WASM generation and verify that an active profile adds
+exactly thirty recent candidates while rendering ten cards, preserves all feedback/export behavior,
+and does not transfer the profile to another project. This is a measured post-feedback quality
+gain, not a claim that cold-start aesthetics have been solved.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
@@ -1807,7 +1839,7 @@ first-page dilution. Its focused two-word names now also reject cross-concept ad
 pairings that are individually relevant but read poorly together.
 Long prompted sessions no longer collapse into repeated suffix families or stop before 100
 names, and semantic joins no longer erase a concept at one-letter/vowel boundaries. Local taste
-feedback adjusts structural and mode preferences per project, while AI Studio remains an
+feedback now selects each visible page from a larger offline pool per project, while AI Studio remains an
 optional, separate batch judge rather than a hidden dependency of Create.
 
 The next broad aesthetic scorer change is evidence-gated: collect at least ten real likes and ten passes in

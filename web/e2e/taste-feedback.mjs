@@ -86,6 +86,19 @@ try {
 
   const status = (await page.locator('.taste-note').textContent()) ?? ''
   check(/Local taste.*3 liked.*2 passed/.test(status), `taste status explains the active model (got "${status.trim()}")`)
+
+  const recentBeforeTastePool = await storedCount(page, 'neologism:recent')
+  await page.click('.command-go')
+  await page.waitForFunction((before) => {
+    const raw = localStorage.getItem('neologism:recent')
+    return raw ? JSON.parse(raw).length >= before + 30 : false
+  }, recentBeforeTastePool)
+  const recentAfterTastePool = await storedCount(page, 'neologism:recent')
+  check(await cards.count() === 10, 'personalized generation still shows the requested ten names')
+  check(
+    recentAfterTastePool - recentBeforeTastePool === 30,
+    'active local taste selects ten names from a thirty-name offline pool',
+  )
   await page.screenshot({ path: join(SHOTS, 'taste-feedback.png'), fullPage: true })
 
   await page.fill('.command-input', 'a secure password manager for a new project')

@@ -11,6 +11,8 @@ const VOWELS = new Set(['a', 'e', 'i', 'o', 'u', 'y'])
 const SHARP = new Set(['k', 't', 'x', 'z', 'q', 'v'])
 const KNOWN_SUFFIXES = ['ify', 'ora', 'ium', 'io', 'ia', 'ix', 'ly', 'ai']
 export const MIN_TASTE_SIGNALS = 3
+export const TASTE_POOL_MULTIPLIER = 3
+export const MAX_TASTE_POOL = 60
 
 interface ShapeProfile {
   avgLength: number
@@ -225,4 +227,26 @@ export function rankByPreference(results: NameResult[], profile: PreferenceProfi
     }))
     .sort((a, b) => b.score - a.score || a.index - b.index)
     .map(({ result }) => result)
+}
+
+// Once the user has taught us a real preference profile, give that judge
+// enough alternatives to make a selection rather than merely reshuffling the
+// same visible page. The cap keeps unusually large custom batches bounded.
+export function preferencePoolCount(
+  requested: number,
+  profile: PreferenceProfile | null,
+): number {
+  const count = Math.max(0, Math.floor(requested))
+  if (!profile || count === 0) return count
+  return Math.max(count, Math.min(MAX_TASTE_POOL, count * TASTE_POOL_MULTIPLIER))
+}
+
+export function shortlistByPreference(
+  results: NameResult[],
+  profile: PreferenceProfile | null,
+  requested: number,
+): NameResult[] {
+  const count = Math.max(0, Math.floor(requested))
+  const ranked = profile ? rankByPreference(results, profile) : results
+  return ranked.slice(0, count)
 }
