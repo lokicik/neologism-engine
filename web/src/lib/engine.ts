@@ -43,12 +43,28 @@ export interface NameResult {
 
 const GUIDED_METAPHOR_POOL = 8
 const GUIDED_METAPHOR_QUALITY_FLOOR = 85
+const GUIDED_METAPHOR_FALLBACK_SEED_OFFSET = 16
+const UINT32_RANGE = 0x1_0000_0000
 
 const structuralQuality = (result: NameResult): number => (
   result.score_pronounce * 0.4
   + result.score_memorability * 0.3
   + result.score_novelty * 0.3
 )
+
+const guidedMetaphorFallbackSeed = (seed: number | undefined): number | undefined => (
+  seed === undefined
+    ? undefined
+    : (Math.trunc(seed) % UINT32_RANGE + GUIDED_METAPHOR_FALLBACK_SEED_OFFSET + UINT32_RANGE) % UINT32_RANGE
+)
+
+const pickGuidedMetaphor = (results: NameResult[]): NameResult[] => results
+  .filter((result) => (
+    (result.concept_coverage ?? 0) > 0
+    && structuralQuality(result) >= GUIDED_METAPHOR_QUALITY_FLOOR
+  ))
+  .sort((left, right) => structuralQuality(right) - structuralQuality(left))
+  .slice(0, 1)
 
 let initialized = false
 
@@ -117,20 +133,22 @@ export async function generateBatch(cfg: Config): Promise<NameResult[]> {
     // Respell owns the single guided accent when it is genuinely derived from
     // the brief. Otherwise let one strong semantic metaphor compete with the
     // Brandable page instead of widening the main generator's whole first pool.
-    const metaphorAccent = total > 0 && linkedRespells.length === 0
-      ? (await generateNames({
-          ...cfg,
-          variant: 'metaphor',
-          compound: false,
-          count: GUIDED_METAPHOR_POOL,
+    let metaphorAccent: NameResult[] = []
+    if (total > 0 && linkedRespells.length === 0) {
+      const metaphorConfig = {
+        ...cfg,
+        variant: 'metaphor',
+        compound: false,
+        count: GUIDED_METAPHOR_POOL,
+      }
+      metaphorAccent = pickGuidedMetaphor(await generateNames(metaphorConfig))
+      if (metaphorAccent.length === 0 && (cfg.exclude?.length ?? 0) === 0) {
+        metaphorAccent = pickGuidedMetaphor(await generateNames({
+          ...metaphorConfig,
+          seed: guidedMetaphorFallbackSeed(cfg.seed),
         }))
-          .filter((result) => (
-            (result.concept_coverage ?? 0) > 0
-            && structuralQuality(result) >= GUIDED_METAPHOR_QUALITY_FLOOR
-          ))
-          .sort((left, right) => structuralQuality(right) - structuralQuality(left))
-          .slice(0, 1)
-      : []
+      }
+    }
     return mergeAutoBatches([brandableBatch, [], linkedRespells, metaphorAccent], total)
   }
 

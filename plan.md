@@ -2427,6 +2427,51 @@ matrix, WASM build, TypeScript, and production bundle are green.
 
 ---
 
+## Phase 108 — Fill cold Auto seed blind spots
+
+**Bottleneck.** Phase 107's bounded pool improved construction variety without weakening the
+main generator, but it found an 85+ metaphor accent on only **9/15** fixed namespace pages. The
+remaining six were deterministic seed blind spots rather than missing semantics: for example,
+the product's own seed-42 page understood the brief, but its best eight-candidate metaphor scored
+only **81.8** and therefore correctly stayed hidden.
+
+**Measured search and rejected alternatives.** A dedicated browser sweep compared 74 deterministic
+offsets against the six missed pages. Offset **16** was the only candidate to fill **6/6** gaps;
+its fallback set retained five distinct forms (`Keyloom`, `Lexwave`, `Keylink`, `Nombeam`,
+`Tagseed`). Replacing the primary seed wholesale was not safe. Offsets 3, 64, and 65,537 reached
+13/15 pages, but changed already-good pages, moved namespace coverage down to 52–54, direct suffix
+forms between 90–95, and cold repair counts as high as 41. Applying the second pool on later pages
+also lowered personalized tenth-page quality to **83.21**, so both broader variants were removed.
+
+**Retained correction.** The original eight-candidate pool still gets first refusal. Only when it
+has no brief-linked 85+ candidate, there is no safe Respell, and the exclusion history is empty,
+Auto tries the same bounded pool at `seed + 16` modulo 2^32. At most one winning Brandable enters
+the normal selector. The rule is deterministic, limited to a fresh first page, and neither lowers
+the quality floor nor changes continuation sessions, scorer weights, or the Rust generator.
+
+**Measured result.** Every one of the fifteen namespace pages now earns exactly one strong
+non-template form, up from **9/15**. Direct suffix forms improve **93 → 91**, namespace markers
+remain **54**, the three five-seed unions grow **69 → 73**, mean quality rises **85.62 → 85.96**,
+and similarity improves **0.168 → 0.167**. Across 90 cold pages, pages needing repair fall
+**38 → 37**, repaired quality rises **83.02 → 83.04**, mean similarity improves **0.203 → 0.201**,
+and every selected name remains at or above 75.
+
+The 1,000-name personalized matrix also moves in the intended direction: selected quality
+**85.33 → 85.40**, affinity **-0.797 → -0.793**, direct suffix forms **610 → 608**, near pairs
+**198 → 195**, similarity **0.203 → 0.202**, and fresh-session coverage **300 → 306**. All four
+visible-only sessions still reach 100 unique, prompt-linked names, with **85.28** mean quality and
+**84.36** tenth-page quality. The mode-aware taste matrix grows **85 → 99** unique names and
+reduces unlinked forms **5 → 4** while preserving its quality and affinity gates.
+
+**Verification.** The namespace audit now requires one qualifying metaphor on every fixed page.
+The 74-offset sweep remains as a reproducible diagnostic rather than a production gate. All 90
+cold pages, all 85 guided pages, the 1,000-name taste matrix, four 100-name personalized sessions,
+mode-aware taste, feedback/reference/export behavior, TypeScript, and the production bundle pass.
+The Rust engine is unchanged; Phase 107's **139/139** unit suite and morphology, cross-domain, and
+developer-domain gates therefore remain the current core baseline.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

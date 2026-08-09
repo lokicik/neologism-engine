@@ -133,7 +133,7 @@ try {
     check(row.pages.every((batch) => batch.length === 10), 'every cold Auto page contains ten names')
     check(scopePages === SEEDS.length, 'every fixed page carries the developer-namespace concept')
     check(markerHits >= 15, 'at least 30% of names carry a namespace naming root')
-    check(guidedMetaphorHits >= 2, 'each brief earns at least two strong non-template metaphor forms')
+    check(guidedMetaphorHits === SEEDS.length, 'every fixed page earns one strong non-template metaphor form')
     check(wrongForms.length === 0, `no delivery/filesystem context leaks (${wrongForms.join(', ') || 'none'})`)
     check(all.every((item) => quality(item) >= 75), 'no visible name falls below the structural floor')
     check(averageQuality >= 85, 'visible structural quality stays at or above 85')
