@@ -1531,6 +1531,53 @@ Brandable session still reach 100 unique names without false exhaustion.
 
 ---
 
+## Phase 85 — Give neighboring product domains distinct vocabularies
+
+**Bottleneck and rejected hypothesis.** The first suspicion was that the readable metaphor lane
+had become a generic `flow`/`link`/`loom` monoculture. A new exact-tail audit first separates real
+root+metaphor forms from two-concept joins that merely share a palette word. Across the fixed
+1,100-name morphology matrix, only **216** names on **40/110** pages are exact metaphor forms;
+**22/40** such pages repeat a tail, but the maximum is **3/10** on one cloud page. Long sessions
+exercise **33/34** curated tails. A broad metaphor penalty or tighter global cap would therefore
+remove useful variety to fix a concentration problem the measured pages do not have, so that
+change was rejected.
+
+The real repetition was semantic. The general-domain audit now records aggregate composite and
+ILAD diversity for both modes and fails closed when an exact Brandable name appears in multiple
+product domains. The Phase 84 baseline found **12** cross-domain collisions: six `care…` names
+shared by customer support and pet care, and six `ticket…` names shared by customer support and
+events. These were not random tail collisions; two neighboring domains owned the same naming
+roots.
+
+**Bounded correction.** Customer support now expands to `desk`, `reply`, `inbox`, `resolve`,
+`assist`, and `answer`. A raw `ticket` is suppressed only when a support/helpdesk/inbox concept is
+present, so event naming still keeps `ticket`. Pet care now uses `paw`, `tail`, `pet`, `vet`,
+`vital`, and `buddy` instead of the shared `care` root and an unproductive long `companion` root.
+Three narrow A/B alternatives using `solve`, `guide`, or `help` recovered some edit-distance
+spread but produced visibly weaker forms and lower composite scores; they were rejected.
+
+**Measured result.** Exact cross-domain collisions fall **12 → 0**. Calibration semantic coverage
+rises **1,053/1,100 (95.7%) → 1,069/1,100 (97.2%)** and holdout rises
+**1,050/1,100 (95.5%) → 1,067/1,100 (97.0%)**, while wrong-domain counts stay at one and zero.
+Brandable composite improves **79.32 → 79.78** on calibration and **79.21 → 79.69** on holdout.
+ILAD moves **0.735 → 0.726** and **0.743 → 0.737** respectively: a small, explicit trade for
+longer domain-specific roots rather than shared short words. Both splits still deliver
+**2,200/2,200** rolling names, and the tested support/pet pages maintain or improve session
+distinctness. Compound quality and diversity remain stable.
+
+**Verification.** The workspace suite is **126/126**. The morphology matrix remains
+**1,100/1,100**, composite **80.03**, diversity **0.726**, with **487 suffix / 397 multi-concept /
+216 metaphor** forms and no suffix-only page. The new morphology gates cap any one exact metaphor
+tail at three names per page and require at least 90% of the palette in rolling sessions.
+Developer coverage remains **1,591/1,600 (99.4%)**; the modifier corpus is **550/550** semantic;
+Compound is **1,000/1,000** prompt-linked and pair-coherent with zero lexical echoes across
+2,000 rolling names. WASM and the production bundle build cleanly. Chromium now covers **65** Auto
+pages with zero weak context forms and **40/40** prompt-linked accents; developer gates remain
+**800/800 Brandable** and **791/800 Compound**, and all established 100-name Brandable/Compound
+sessions pass without repeats or false exhaustion.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

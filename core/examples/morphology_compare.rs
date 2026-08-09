@@ -94,6 +94,38 @@ fn has_concept_suffix(name: &str, roots: &[String]) -> bool {
     })
 }
 
+fn concept_metaphor_tail(name: &str, roots: &[String]) -> Option<&'static str> {
+    let lower = name.to_lowercase();
+    for &metaphor in CONCEPT_METAPHORS {
+        for root in roots {
+            let mut joined = root.clone();
+            let same_vowel_seam = root.chars().last().is_some_and(|last| {
+                metaphor.starts_with(last) && matches!(last, 'a' | 'e' | 'i' | 'o' | 'u' | 'y')
+            });
+            if same_vowel_seam {
+                joined.extend(metaphor.chars().skip(1));
+            } else {
+                joined.push_str(metaphor);
+            }
+            if lower == joined {
+                return Some(metaphor);
+            }
+        }
+    }
+    None
+}
+
+fn tail_histogram(counts: &BTreeMap<&'static str, usize>) -> String {
+    let mut entries: Vec<(&str, usize)> =
+        counts.iter().map(|(&tail, &count)| (tail, count)).collect();
+    entries.sort_by(|a, b| b.1.cmp(&a.1).then(a.0.cmp(b.0)));
+    entries
+        .into_iter()
+        .map(|(tail, count)| format!("{tail} {count}"))
+        .collect::<Vec<_>>()
+        .join(", ")
+}
+
 fn concept_coverage(name: &str, groups: &[Vec<String>]) -> usize {
     let lower = name.to_lowercase();
     groups
@@ -176,6 +208,13 @@ fn main() {
     let mut suffix_heavy_pages = 0usize;
     let mut suffix_only_pages = 0usize;
     let mut collapsed_consonant_metaphor_examples = BTreeSet::new();
+    let mut metaphor_tail_counts = BTreeMap::new();
+    let mut metaphor_tail_prompts: BTreeMap<&'static str, BTreeSet<&'static str>> = BTreeMap::new();
+    let mut metaphor_pages = 0usize;
+    let mut repeated_metaphor_tail_pages = 0usize;
+    let mut max_metaphor_tail_share = 0usize;
+    let mut rolling_metaphor_tail_counts = BTreeMap::new();
+    let mut heavy_metaphor_tail_pages = BTreeSet::new();
 
     for prompt in PROMPTS {
         let keywords = extract_keywords(prompt, 6);
@@ -185,6 +224,42 @@ fn main() {
         for seed in SEEDS {
             let results = generate(&config(prompt, *seed));
             batch_diversity += diversity(&results);
+            let mut page_metaphor_tails = BTreeMap::new();
+            for result in &results {
+                if concept_coverage(&result.name, &groups) < 2 {
+                    if let Some(tail) = concept_metaphor_tail(&result.name, &roots) {
+                        *page_metaphor_tails.entry(tail).or_default() += 1;
+                        *metaphor_tail_counts.entry(tail).or_default() += 1;
+                        metaphor_tail_prompts
+                            .entry(tail)
+                            .or_default()
+                            .insert(prompt);
+                    }
+                }
+            }
+            metaphor_pages += usize::from(!page_metaphor_tails.is_empty());
+            repeated_metaphor_tail_pages +=
+                usize::from(page_metaphor_tails.values().any(|count| *count >= 2));
+            let page_max = page_metaphor_tails
+                .values()
+                .copied()
+                .max()
+                .unwrap_or_default();
+            max_metaphor_tail_share = max_metaphor_tail_share.max(page_max);
+            if page_max >= 3 {
+                let forms = results
+                    .iter()
+                    .filter_map(|result| {
+                        if concept_coverage(&result.name, &groups) >= 2 {
+                            return None;
+                        }
+                        concept_metaphor_tail(&result.name, &roots)
+                            .map(|tail| format!("{}:{tail}", result.name))
+                    })
+                    .collect::<Vec<_>>()
+                    .join(", ");
+                heavy_metaphor_tail_pages.insert(format!("{prompt} / {seed}: {forms}"));
+            }
             let page_suffixes = results
                 .iter()
                 .filter(|result| has_concept_suffix(&result.name, &roots))
@@ -231,6 +306,11 @@ fn main() {
             rolling_short += usize::from(results.len() < cfg.count);
             rolling_total += results.len();
             for result in &results {
+                if concept_coverage(&result.name, &groups) < 2 {
+                    if let Some(tail) = concept_metaphor_tail(&result.name, &roots) {
+                        *rolling_metaphor_tail_counts.entry(tail).or_default() += 1;
+                    }
+                }
                 rolling_full_vowel_suffixes +=
                     usize::from(has_full_vowel_suffix(&result.name, &roots));
                 if has_concept_suffix(&result.name, &roots) {
@@ -286,6 +366,54 @@ fn main() {
     );
     println!(
         "rolling shape mix: suffix {rolling_concept_suffixes}/{rolling_total}, multi-concept {rolling_multi_concept_joins}/{rolling_total}, metaphor {rolling_metaphor_forms}/{rolling_total}",
+    );
+    println!(
+        "metaphor tails: {} exact forms across {metaphor_pages}/{} pages; repeated-tail pages {repeated_metaphor_tail_pages}/{metaphor_pages}, max same tail {max_metaphor_tail_share}/10",
+        metaphor_tail_counts.values().sum::<usize>(),
+        PROMPTS.len() * SEEDS.len(),
+    );
+    println!(
+        "metaphor tail histogram: {}",
+        tail_histogram(&metaphor_tail_counts)
+    );
+    println!(
+        "metaphor prompt spread: {}",
+        tail_histogram(
+            &metaphor_tail_prompts
+                .iter()
+                .map(|(&tail, prompts)| (tail, prompts.len()))
+                .collect(),
+        )
+    );
+    println!(
+        "rolling metaphor tail histogram: {}",
+        tail_histogram(&rolling_metaphor_tail_counts)
+    );
+    let unused_rolling_metaphor_tails = CONCEPT_METAPHORS
+        .iter()
+        .filter(|tail| !rolling_metaphor_tail_counts.contains_key(**tail))
+        .copied()
+        .collect::<Vec<_>>();
+    println!(
+        "unused rolling metaphor tails: {}",
+        unused_rolling_metaphor_tails.join(", ")
+    );
+    assert!(
+        max_metaphor_tail_share <= 3,
+        "one metaphor tail occupied {max_metaphor_tail_share}/10 names on a page"
+    );
+    assert!(
+        rolling_metaphor_tail_counts.len() >= CONCEPT_METAPHORS.len() * 9 / 10,
+        "rolling sessions exercised only {}/{} metaphor tails",
+        rolling_metaphor_tail_counts.len(),
+        CONCEPT_METAPHORS.len()
+    );
+    println!(
+        "heavy metaphor-tail pages: {}",
+        heavy_metaphor_tail_pages
+            .into_iter()
+            .collect::<Vec<_>>()
+            .join(" | ")
     );
     println!(
         "collapsed consonant metaphor seams: {collapsed_consonant_metaphor_seams}/{total}, rolling {rolling_collapsed_consonant_metaphor_seams}/{rolling_total} ({})",

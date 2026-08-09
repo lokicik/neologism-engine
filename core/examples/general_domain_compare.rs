@@ -4,7 +4,7 @@ use neologism_core::keywords::{brand_root_groups, extract_keywords};
 use neologism_core::metrics::{composite_score, diversity};
 use neologism_core::style::{Config, Style};
 use neologism_core::{generate_with_tuning, BigTechTuning};
-use std::collections::HashSet;
+use std::collections::{BTreeMap, BTreeSet, HashSet};
 
 struct Case {
     label: &'static str,
@@ -46,7 +46,7 @@ const CASES: &[Case] = &[
         calibration: "a customer support helpdesk",
         holdout: "a ticket inbox for customer service agents",
         semantic_markers: &[
-            "support", "help", "ticket", "desk", "reply", "inbox", "resolve",
+            "support", "help", "ticket", "desk", "reply", "inbox", "resolve", "assist", "answer",
         ],
         wrong_domain_markers: &["mind", "synth", "neural"],
     },
@@ -121,6 +121,7 @@ const CASES: &[Case] = &[
             "animal",
             "vet",
             "companion",
+            "buddy",
         ],
         wrong_domain_markers: &[],
     },
@@ -257,6 +258,10 @@ fn main() {
     const EXPECTED_ROLLING_PER_SPLIT: usize = CASES.len() * 2 * 100;
     let mut totals = [[0usize; 4]; 2];
     let mut shape_totals = [[0usize; 3]; 2];
+    let mut composite_totals = [[0u64; 2]; 2];
+    let mut diversity_totals = [[0.0f64; 2]; 2];
+    let mut batch_totals = [[0usize; 2]; 2];
+    let mut name_domains: BTreeMap<String, BTreeSet<&'static str>> = BTreeMap::new();
     let mut tuning = BigTechTuning::from_variety(0.3);
     if let Some(value) = std::env::args().nth(1) {
         tuning.single_concept_metaphor_w = value
@@ -290,12 +295,26 @@ fn main() {
                 "               roots {:?}",
                 brand_root_groups(&keywords, 16)
             );
-            for (label, compound) in [("brandable", false), ("compound", true)] {
+            for (mode_index, (label, compound)) in [("brandable", false), ("compound", true)]
+                .into_iter()
+                .enumerate()
+            {
                 let result = audit(prompt, compound, case, seeds, &tuning);
+                if !compound {
+                    for name in &result.unique {
+                        name_domains
+                            .entry(name.clone())
+                            .or_default()
+                            .insert(case.label);
+                    }
+                }
                 totals[split_index][0] += result.total;
                 totals[split_index][1] += result.semantic;
                 totals[split_index][2] += result.wrong_domain;
                 totals[split_index][3] += result.rolling_count;
+                composite_totals[split_index][mode_index] += result.composite;
+                diversity_totals[split_index][mode_index] += result.diversity;
+                batch_totals[split_index][mode_index] += seeds.len();
                 println!("               {label:<9} {}", result.first.join(", "));
                 println!(
                     "                         {}/{} semantic  {}/{} wrong-domain  comp {:.1}  div {:.3}  unique {:.1}%  long {}/100",
@@ -343,5 +362,38 @@ fn main() {
             shape_totals[index][1],
             shape_totals[index][2] - shape_totals[index][0] - shape_totals[index][1],
         );
+        for (mode_index, mode) in ["Brandable", "Compound"].into_iter().enumerate() {
+            println!(
+                "{split} {mode} quality: comp {:.2}, div {:.3}",
+                composite_totals[index][mode_index] as f64
+                    / (batch_totals[index][mode_index] * 10) as f64,
+                diversity_totals[index][mode_index] / batch_totals[index][mode_index] as f64,
+            );
+        }
     }
+
+    let mut collisions: Vec<_> = name_domains
+        .into_iter()
+        .filter(|(_, domains)| domains.len() >= 2)
+        .collect();
+    collisions.sort_by(|a, b| b.1.len().cmp(&a.1.len()).then_with(|| a.0.cmp(&b.0)));
+    let collision_summary = collisions
+        .iter()
+        .map(|(name, domains)| {
+            format!(
+                "{name} [{}]",
+                domains.iter().copied().collect::<Vec<_>>().join("/")
+            )
+        })
+        .collect::<Vec<_>>()
+        .join(", ");
+    println!(
+        "cross-domain exact collisions: {} names: {}",
+        collisions.len(),
+        collision_summary,
+    );
+    assert!(
+        collisions.is_empty(),
+        "Brandable names leaked across audited domains: {collision_summary}"
+    );
 }

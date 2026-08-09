@@ -215,7 +215,7 @@ fn concept_roots(word: &str) -> &'static [&'static str] {
             &["item", "stock", "shelf", "catalog", "crate", "keep"]
         }
         "support" | "helpdesk" | "inbox" => {
-            &["ticket", "desk", "reply", "inbox", "care", "resolve"]
+            &["desk", "reply", "inbox", "resolve", "assist", "answer"]
         }
         "estate" | "property" | "listing" | "realtor" | "housing" => {
             &["home", "key", "door", "nest", "roof", "place"]
@@ -235,9 +235,7 @@ fn concept_roots(word: &str) -> &'static [&'static str] {
         "meditation" | "meditate" | "sleep" | "breath" | "rest" => {
             &["calm", "breath", "still", "rest", "dream", "pause"]
         }
-        "pet" | "animal" | "vet" | "veterinary" => {
-            &["paw", "tail", "care", "companion", "vital", "pet"]
-        }
+        "pet" | "animal" | "vet" | "veterinary" => &["paw", "tail", "pet", "vet", "vital", "buddy"],
         "generate" | "generator" | "create" | "creator" | "build" | "builder" => {
             &["forge", "mint", "spark", "seed", "craft"]
         }
@@ -507,7 +505,7 @@ fn is_contextually_suppressed(word: &str, keywords: &[String]) -> bool {
     (recruiting && matches!(word, "team" | "pipeline" | "track"))
         || (meals && matches!(word, "plan" | "weekly" | "organizer"))
         || (inventory && matches!(word, "home" | "tracker"))
-        || (support && matches!(word, "agent" | "customer" | "service"))
+        || (support && matches!(word, "agent" | "customer" | "service" | "ticket"))
         || (real_estate
             && matches!(
                 word,
@@ -1281,6 +1279,7 @@ mod tests {
         let event = extract_keywords("an event ticketing platform", 6);
         let event_roots = brand_roots(&event, 16);
         assert!(event_roots.contains(&"venue".to_string()));
+        assert!(event_roots.contains(&"ticket".to_string()));
         assert!(!event_roots.contains(&"queue".to_string()));
 
         let event_bus = extract_keywords("an event bus for services", 6);
@@ -1296,7 +1295,18 @@ mod tests {
         let support = extract_keywords("a ticket inbox for customer service agents", 6);
         let support_roots = brand_roots(&support, 16);
         assert!(support_roots.contains(&"reply".to_string()));
+        assert!(support_roots.contains(&"assist".to_string()));
+        assert!(support_roots.contains(&"answer".to_string()));
+        assert!(!support_roots.contains(&"ticket".to_string()));
+        assert!(!support_roots.contains(&"care".to_string()));
         assert!(!support_roots.contains(&"neural".to_string()));
+
+        let pets = extract_keywords("animal health reminders for pet owners", 6);
+        let pet_roots = brand_roots(&pets, 16);
+        assert!(pet_roots.contains(&"paw".to_string()));
+        assert!(pet_roots.contains(&"vet".to_string()));
+        assert!(pet_roots.contains(&"buddy".to_string()));
+        assert!(!pet_roots.contains(&"care".to_string()));
     }
 
     #[test]
