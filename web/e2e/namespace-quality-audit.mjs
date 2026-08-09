@@ -80,7 +80,12 @@ try {
   await page.goto(`http://localhost:${PORT}`)
   const rows = await page.evaluate(async ({ prompts, seeds }) => {
     const { generateBatch, generateNames } = await import('/src/lib/engine.ts')
-    const { coldQualityPoolCount, needsQualityRepair, repairWeakShortlist } = await import('/src/lib/preferences.ts')
+    const {
+      coldQualityPoolCount,
+      needsQualityRepair,
+      prioritizeColdGuidedLead,
+      repairWeakShortlist,
+    } = await import('/src/lib/preferences.ts')
     const output = []
     for (const prompt of prompts) {
       const pages = []
@@ -97,7 +102,7 @@ try {
               count: coldQualityPoolCount(10), exclude: direct.map((item) => item.name),
             })
           : []
-        pages.push(repairWeakShortlist(direct, fallback, 10))
+        pages.push(prioritizeColdGuidedLead(repairWeakShortlist(direct, fallback, 10)))
       }
       output.push({ prompt, pages })
     }

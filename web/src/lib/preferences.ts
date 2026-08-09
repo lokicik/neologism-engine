@@ -298,6 +298,28 @@ function engineQuality(result: NameResult): number {
   ) / 100
 }
 
+// Cold first impressions should not lead with a mechanical suffix card when
+// the same page already contains a stronger, equally relevant guided form.
+// Reorder only; personalized ranking and the ten-name set remain untouched.
+export function prioritizeColdGuidedLead(results: NameResult[]): NameResult[] {
+  if (results.length < 2) return results.slice()
+  const firstQuality = engineQuality(results[0])
+  const firstCoverage = results[0].concept_coverage ?? 0
+  const candidate = results
+    .map((result, index) => ({ result, index, quality: engineQuality(result) }))
+    .filter(({ result, quality }) => (
+      result.construction === 'guided_metaphor'
+      && quality >= firstQuality
+      && (result.concept_coverage ?? 0) >= firstCoverage
+    ))
+    .sort((left, right) => right.quality - left.quality || left.index - right.index)[0]
+  if (!candidate || candidate.index === 0) return results.slice()
+  const selected = results.slice()
+  const [lead] = selected.splice(candidate.index, 1)
+  selected.unshift(lead)
+  return selected
+}
+
 // Stable noise in [-0.5, 0.5]. It only separates close personalized choices:
 // engine quality, learned shape, brief coverage, and visible family caps still
 // own the selection. A fresh salt makes Retry explore a nearby good shortlist

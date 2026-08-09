@@ -2570,6 +2570,48 @@ cross-domain, and explicit developer-domain baselines remain applicable.
 
 ---
 
+## Phase 111 — Put a stronger name first without changing the set
+
+**Bottleneck.** Phases 107–110 improved the ten visible names, but the order still gave users a
+mechanical first impression. On the product's fixed seed-42 page, `Keyloom` scored **92.5** and
+`Tagsignal` was already visible, yet `Lexify` remained the lead card. Across 90 repaired cold Auto
+pages, the first card averaged **82.90** structural quality, trailed the best visible card by
+**6.43** points, was a direct suffix form on **41/90** pages, and was guided on only 3/90. A strong
+set could therefore look weaker than it was before the user read past card one.
+
+**Rejected ordering rules.** Sorting by structural quality looked compelling in isolation: first
+quality reached **89.32** and regret reached zero. It also made the problem more mechanical,
+raising suffix-first pages **41 → 59** and lowering first-card concept coverage **1.17 → 1.09**.
+Blind guided-first reduced suffix leads to 14 and raised quality to 85.47, but coverage fell to
+1.07. Merely ensuring a guided form in the first three preserved all metrics, yet left the product
+page unchanged because `Tagsignal` was already second while the stronger `Keyloom` stayed sixth.
+All three variants were rejected.
+
+**Retained correction.** Fresh, unpersonalized Auto pages may promote the strongest existing
+guided form to card one only when it scores at least as high as the current lead and represents at
+least as many brief concepts. The selector only moves one card; it cannot add, remove, or rescore a
+name. Local taste keeps full ownership after the user supplies references/feedback, AI Studio is
+unchanged, and Load more preserves its continuation order. A focused regression pins promotion,
+exact-set preservation, quality protection, and concept-coverage protection.
+
+**Measured result.** The guarded rule reorders **37/90** cold pages. Mean first-card quality rises
+**82.90 → 85.05**, regret falls **6.43 → 4.27**, guided leads rise **3 → 38**, guided presence in the
+first row rises **11 → 40**, and suffix-first pages fall **41 → 23**. Mean first-card coverage stays
+exactly **1.17**. The product page now opens `Keyloom, Lexify, Tagsignal, Keyscope, ...`; other fixed
+pages gain leads such as `Tagseed`, `Tagwave`, `Nombeam`, and `Keylink`. Every page retains the exact
+same ten names, so aggregate quality, diversity, namespace coverage, and long-session capacity are
+unchanged by construction.
+
+**Verification.** The new 90-page first-impression sweep records all rejected and retained A/B
+strategies. The cold production audit now requires exact-set preservation and zero first-card
+quality/coverage regressions; all gates pass. The fifteen-page namespace audit passes with the
+user-visible order, the deterministic preference smoke suite passes all three new lead-order
+regressions, and all 85 Auto pages, the 1,000-name taste matrix, and the real feedback/reference/
+export flow remain green. TypeScript and the production bundle build cleanly. No Rust/WASM,
+generator score, candidate pool, personalized ranker, or AI path changed.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
@@ -2577,6 +2619,8 @@ Brandable by default and only admits a Respell accent that visibly comes from th
 safe Respell exists, one quality-gated root-plus-metaphor Brandable may break the suffix wall; one
 different-ending, quality-neutral second form may replace a direct suffix card. The
 broader modes remain explicit choices and still form the exploratory mix when no brief exists.
+Cold first pages now lead with that stronger guided form only when quality and brief coverage are
+both non-decreasing; the underlying ten-name set remains intact.
 Compound is now a genuinely brief-aware explicit alternative rather than a random adjective
 showcase. Focused first pages stay narrow; recognized concepts open a restrained continuation
 palette only when the user asks for more, preserving 100-name session capacity without generic

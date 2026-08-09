@@ -9,6 +9,7 @@ import {
   needsQualityRepair,
   parseTasteReferences,
   preferencePoolCount,
+  prioritizeColdGuidedLead,
   rankByPreference,
   repairWeakShortlist,
   shortlistByPreference,
@@ -142,6 +143,39 @@ check(
 check(
   !needsQualityRepair(repairedColdPage, 10),
   'a fully strong cold page avoids a second fallback generation',
+)
+
+const coldGuidedPage = [
+  { ...scoredResult('Lexify', 82), sourceMode: 'brandable' as const, concept_coverage: 1 },
+  {
+    ...scoredResult('Keyloom', 90),
+    sourceMode: 'brandable' as const,
+    concept_coverage: 1,
+    construction: 'guided_metaphor' as const,
+    constructionRank: 1 as const,
+  },
+  { ...scoredResult('Keyscope', 88), sourceMode: 'brandable' as const, concept_coverage: 2 },
+]
+const guidedLead = prioritizeColdGuidedLead(coldGuidedPage)
+check(
+  guidedLead[0].name === 'Keyloom'
+    && guidedLead.map((item) => item.name).sort().join('|')
+      === coldGuidedPage.map((item) => item.name).sort().join('|'),
+  'cold first impression promotes a stronger equally relevant guided form without changing the set',
+)
+check(
+  prioritizeColdGuidedLead([
+    { ...scoredResult('Keyscope', 82), concept_coverage: 2 },
+    coldGuidedPage[1],
+  ])[0].name === 'Keyscope',
+  'cold first impression never trades away first-card concept coverage',
+)
+check(
+  prioritizeColdGuidedLead([
+    { ...scoredResult('Lexify', 92), concept_coverage: 1 },
+    coldGuidedPage[1],
+  ])[0].name === 'Lexify',
+  'cold first impression never trades away first-card structural quality',
 )
 
 const repetitiveColdPage = [

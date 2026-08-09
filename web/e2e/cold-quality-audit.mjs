@@ -1,4 +1,5 @@
-// Fixed-seed production audit for cold Auto's structural quality repair.
+// Fixed-seed production audit for cold Auto's structural quality repair and
+// quality/coverage-neutral first-card ordering.
 // Run from web/: node e2e/cold-quality-audit.mjs
 import { chromium } from 'playwright'
 import { spawn } from 'node:child_process'
@@ -30,6 +31,7 @@ const PROMPTS = [
   'git release automation',
 ]
 const SEEDS = [7, 42, 101, 2024, 9999]
+const DIRECT_SUFFIXES = ['ify', 'ora', 'ion', 'era', 'io', 'ia', 'ix', 'el', 'en', 'on']
 
 const server = spawn(process.execPath, [viteCli, '--port', String(PORT), '--strictPort'], {
   cwd: WEB_DIR,
@@ -56,6 +58,7 @@ try {
     const {
       coldQualityPoolCount,
       needsQualityRepair,
+      prioritizeColdGuidedLead,
       repairWeakShortlist,
     } = await import('/src/lib/preferences.ts')
     const output = []
@@ -77,11 +80,13 @@ try {
               exclude: direct.map((item) => item.name),
             })
           : []
+        const repaired = repairWeakShortlist(direct, fallback, 10)
         output.push({
           prompt,
           seed,
           direct,
-          selected: repairWeakShortlist(direct, fallback, 10),
+          repaired,
+          selected: prioritizeColdGuidedLead(repaired),
           fallbackCount: fallback.length,
         })
       }
@@ -146,6 +151,25 @@ try {
   const multipleAccentPages = accentCounts.filter((count) => count > 1).length
   const maxAccents = Math.max(...accentCounts)
   const ownBrief = rows.find((row) => row.prompt.startsWith('an offline naming engine') && row.seed === 42)
+  const normalized = (item) => item.name.toLowerCase().replace(/[^a-z]/g, '')
+  const isDirectSuffix = (item) => (
+    item.sourceMode === 'brandable'
+    && item.concept_coverage === 1
+    && DIRECT_SUFFIXES.some((suffix) => normalized(item).endsWith(suffix))
+  )
+  const reorderedPages = rows.filter((row) => row.repaired[0].name !== row.selected[0].name).length
+  const originalLeadQuality = rows.reduce((sum, row) => sum + quality(row.repaired[0]), 0) / rows.length * 100
+  const selectedLeadQuality = rows.reduce((sum, row) => sum + quality(row.selected[0]), 0) / rows.length * 100
+  const originalSuffixLeads = rows.filter((row) => isDirectSuffix(row.repaired[0])).length
+  const selectedSuffixLeads = rows.filter((row) => isDirectSuffix(row.selected[0])).length
+  const selectedGuidedLeads = rows.filter((row) => row.selected[0].construction === 'guided_metaphor').length
+  const orderingChangedSet = rows.filter((row) => (
+    row.repaired.map(normalized).sort().join('|') !== row.selected.map(normalized).sort().join('|')
+  )).length
+  const weakenedLeads = rows.filter((row) => quality(row.selected[0]) < quality(row.repaired[0])).length
+  const weakenedLeadCoverage = rows.filter((row) => (
+    (row.selected[0].concept_coverage ?? 0) < (row.repaired[0].concept_coverage ?? 0)
+  )).length
 
   console.log(`cold Auto pages: ${rows.length}`)
   console.log(`repaired pages: ${repairedPages}/${rows.length}`)
@@ -155,12 +179,16 @@ try {
   console.log(`repaired near-duplicate pairs: ${repaired.nearPairs}`)
   console.log(`repaired mean pair similarity: ${repaired.meanPairSimilarity.toFixed(3)}`)
   console.log(`multiple-accent pages: ${multipleAccentPages}/${rows.length} (max ${maxAccents})`)
+  console.log(`guided lead reorder: ${reorderedPages}/${rows.length} · quality ${originalLeadQuality.toFixed(2)} -> ${selectedLeadQuality.toFixed(2)} · suffix first ${originalSuffixLeads} -> ${selectedSuffixLeads} · guided first ${selectedGuidedLeads}`)
   console.log(`own brief: ${ownBrief.selected.map((item) => `${item.sourceMode}:${item.name}`).join(', ')}`)
 
   const gates = [
     [wrongSize === 0, 'every repaired cold page contains ten names'],
     [wrongFallback === 0, 'repair uses either no fallback or the bounded 30-name pool'],
     [multipleAccentPages === 0, 'cold repair preserves Auto\'s one-accent visible-page contract'],
+    [orderingChangedSet === 0, 'guided lead ordering preserves the exact repaired name set'],
+    [weakenedLeads === 0, 'guided lead ordering never lowers first-card structural quality'],
+    [weakenedLeadCoverage === 0, 'guided lead ordering never lowers first-card concept coverage'],
     [direct.below75 === 0 || repairedPages > 0, 'weak pages activate the offline repair pool'],
     [repaired.below75 === 0, 'no repaired cold Auto name falls below 75 structural quality'],
     [repaired.averageQuality >= 82.5, 'repaired cold Auto quality stays at or above 82.5'],

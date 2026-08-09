@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { generateBatch, generateNames, batchMetrics, extractKeywords, type BatchMetrics, type Config, type NameResult, type Style } from './lib/engine'
 import { recommendations } from './lib/recommend'
-import { buildReferencedProfile, coldQualityPoolCount, compoundTastePoolCount, feedbackForContext, MIN_TASTE_SIGNALS, needsQualityRepair, preferencePoolCount, repairWeakShortlist, shortlistByPreference } from './lib/preferences'
+import { buildReferencedProfile, coldQualityPoolCount, compoundTastePoolCount, feedbackForContext, MIN_TASTE_SIGNALS, needsQualityRepair, preferencePoolCount, prioritizeColdGuidedLead, repairWeakShortlist, shortlistByPreference } from './lib/preferences'
 import { tasteContextForConfig } from './lib/taste-context'
 import { loadFavorites, toggleFavorite, removeFavorite, saveFavorites, loadRejected, toggleRejected, removeRejected, loadTasteReferences, saveTasteReferences, loadRecent, saveRecent, hasVisited, markVisited, loadJudgeConfig, saveJudgeConfig } from './lib/storage'
 import { type JudgeConfig } from './lib/judge'
@@ -207,6 +207,9 @@ export default function App() {
           requestedCount,
           preferenceSaltRef.current,
         )
+      }
+      if (!append && !profile && cfg.variant === 'auto') {
+        batch = prioritizeColdGuidedLead(batch)
       }
       setPromptKeywords(cfg.description?.trim() ? await extractKeywords(cfg.description) : [])
       setExhausted(pool.length === 0)
