@@ -51,6 +51,20 @@ function move(items, from, to) {
   return next
 }
 
+function promoteQualifiedNonSuffix(items, qualityMargin = 0) {
+  const firstQuality = quality(items[0])
+  const firstCoverage = items[0].concept_coverage ?? 0
+  const candidates = items
+    .map((item, index) => ({ item, index }))
+    .filter(({ item }) => (
+      !isDirectSuffix(item)
+      && quality(item) >= firstQuality + qualityMargin
+      && (item.concept_coverage ?? 0) >= firstCoverage
+    ))
+    .sort((left, right) => quality(right.item) - quality(left.item))
+  return move(items, candidates[0]?.index ?? -1, 0)
+}
+
 const strategies = {
   baseline: (items) => items.slice(),
   best_first: (items) => {
@@ -83,6 +97,23 @@ const strategies = {
       ))
       .sort((left, right) => quality(right.item) - quality(left.item))
     return move(items, candidates[0]?.index ?? -1, 0)
+  },
+  qualified_non_suffix_first: (items) => promoteQualifiedNonSuffix(items),
+  guided_then_non_suffix: (items) => {
+    const guided = strategies.qualified_guided_first(items)
+    if (guided[0].name !== items[0].name) return guided
+    if (!isDirectSuffix(guided[0])) return guided
+    return strategies.qualified_non_suffix_first(items)
+  },
+  guided_then_non_suffix_plus_one: (items) => {
+    const guided = strategies.qualified_guided_first(items)
+    if (guided[0].name !== items[0].name || !isDirectSuffix(guided[0])) return guided
+    return promoteQualifiedNonSuffix(items, 1)
+  },
+  guided_then_non_suffix_plus_two: (items) => {
+    const guided = strategies.qualified_guided_first(items)
+    if (guided[0].name !== items[0].name || !isDirectSuffix(guided[0])) return guided
+    return promoteQualifiedNonSuffix(items, 2)
   },
   guided_in_top_three: (items) => {
     if (items.slice(0, 3).some((item) => item.construction === 'guided_metaphor')) return items.slice()
@@ -170,15 +201,45 @@ try {
     )
   }
 
+  const guardedSuffixPages = rows.filter((row) => (
+    isDirectSuffix(strategies.qualified_guided_first(row.items)[0])
+  ))
+  const blockerCounts = { no_guided: 0, quality: 0, coverage: 0, quality_and_coverage: 0 }
+  for (const row of guardedSuffixPages) {
+    const first = row.items[0]
+    const guided = row.items.filter((item) => item.construction === 'guided_metaphor')
+    if (guided.length === 0) {
+      blockerCounts.no_guided++
+      continue
+    }
+    const qualityPass = guided.some((item) => quality(item) >= quality(first))
+    const coveragePass = guided.some((item) => (
+      (item.concept_coverage ?? 0) >= (first.concept_coverage ?? 0)
+    ))
+    if (!qualityPass && !coveragePass) blockerCounts.quality_and_coverage++
+    else if (!qualityPass) blockerCounts.quality++
+    else blockerCounts.coverage++
+  }
+  console.log(`guided blockers on ${guardedSuffixPages.length} remaining suffix leads: ${JSON.stringify(blockerCounts)}`)
+
+  console.log('\nadditional suffix-only promotions')
+  for (const row of rows) {
+    const guided = strategies.qualified_guided_first(row.items)
+    const expanded = strategies.guided_then_non_suffix(row.items)
+    if (guided[0].name !== expanded[0].name) {
+      console.log(`${row.seed} · ${row.prompt}: ${guided[0].name}:${quality(guided[0]).toFixed(1)}/c${guided[0].concept_coverage ?? 0} -> ${expanded[0].name}:${quality(expanded[0]).toFixed(1)}/c${expanded[0].concept_coverage ?? 0}`)
+    }
+  }
+
   const own = rows.find((row) => row.prompt.startsWith('an offline naming engine') && row.seed === 42)
   console.log('\nown page')
   for (const [label, strategy] of Object.entries(strategies)) {
     console.log(`${label}: ${strategy(own.items).map((item) => item.name).join(', ')}`)
   }
 
-  console.log('\nseed 42 · baseline -> qualified guided first')
+  console.log('\nseed 42 · baseline -> guided then non-suffix')
   for (const row of rows.filter((item) => item.seed === 42)) {
-    const selected = strategies.qualified_guided_first(row.items)
+    const selected = strategies.guided_then_non_suffix(row.items)
     console.log(`${row.prompt}: ${row.items[0].name} -> ${selected[0].name}`)
   }
 } finally {

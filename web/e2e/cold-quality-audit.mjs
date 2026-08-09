@@ -58,7 +58,7 @@ try {
     const {
       coldQualityPoolCount,
       needsQualityRepair,
-      prioritizeColdGuidedLead,
+      prioritizeColdStrongLead,
       repairWeakShortlist,
     } = await import('/src/lib/preferences.ts')
     const output = []
@@ -86,7 +86,7 @@ try {
           seed,
           direct,
           repaired,
-          selected: prioritizeColdGuidedLead(repaired),
+          selected: prioritizeColdStrongLead(repaired),
           fallbackCount: fallback.length,
         })
       }
@@ -179,16 +179,16 @@ try {
   console.log(`repaired near-duplicate pairs: ${repaired.nearPairs}`)
   console.log(`repaired mean pair similarity: ${repaired.meanPairSimilarity.toFixed(3)}`)
   console.log(`multiple-accent pages: ${multipleAccentPages}/${rows.length} (max ${maxAccents})`)
-  console.log(`guided lead reorder: ${reorderedPages}/${rows.length} · quality ${originalLeadQuality.toFixed(2)} -> ${selectedLeadQuality.toFixed(2)} · suffix first ${originalSuffixLeads} -> ${selectedSuffixLeads} · guided first ${selectedGuidedLeads}`)
+  console.log(`strong lead reorder: ${reorderedPages}/${rows.length} · quality ${originalLeadQuality.toFixed(2)} -> ${selectedLeadQuality.toFixed(2)} · suffix first ${originalSuffixLeads} -> ${selectedSuffixLeads} · guided first ${selectedGuidedLeads}`)
   console.log(`own brief: ${ownBrief.selected.map((item) => `${item.sourceMode}:${item.name}`).join(', ')}`)
 
   const gates = [
     [wrongSize === 0, 'every repaired cold page contains ten names'],
     [wrongFallback === 0, 'repair uses either no fallback or the bounded 30-name pool'],
     [multipleAccentPages === 0, 'cold repair preserves Auto\'s one-accent visible-page contract'],
-    [orderingChangedSet === 0, 'guided lead ordering preserves the exact repaired name set'],
-    [weakenedLeads === 0, 'guided lead ordering never lowers first-card structural quality'],
-    [weakenedLeadCoverage === 0, 'guided lead ordering never lowers first-card concept coverage'],
+    [orderingChangedSet === 0, 'strong lead ordering preserves the exact repaired name set'],
+    [weakenedLeads === 0, 'strong lead ordering never lowers first-card structural quality'],
+    [weakenedLeadCoverage === 0, 'strong lead ordering never lowers first-card concept coverage'],
     [direct.below75 === 0 || repairedPages > 0, 'weak pages activate the offline repair pool'],
     [repaired.below75 === 0, 'no repaired cold Auto name falls below 75 structural quality'],
     [repaired.averageQuality >= 82.5, 'repaired cold Auto quality stays at or above 82.5'],

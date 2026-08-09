@@ -9,7 +9,7 @@ import {
   needsQualityRepair,
   parseTasteReferences,
   preferencePoolCount,
-  prioritizeColdGuidedLead,
+  prioritizeColdStrongLead,
   rankByPreference,
   repairWeakShortlist,
   shortlistByPreference,
@@ -156,7 +156,7 @@ const coldGuidedPage = [
   },
   { ...scoredResult('Keyscope', 88), sourceMode: 'brandable' as const, concept_coverage: 2 },
 ]
-const guidedLead = prioritizeColdGuidedLead(coldGuidedPage)
+const guidedLead = prioritizeColdStrongLead(coldGuidedPage)
 check(
   guidedLead[0].name === 'Keyloom'
     && guidedLead.map((item) => item.name).sort().join('|')
@@ -164,18 +164,39 @@ check(
   'cold first impression promotes a stronger equally relevant guided form without changing the set',
 )
 check(
-  prioritizeColdGuidedLead([
+  prioritizeColdStrongLead([
     { ...scoredResult('Keyscope', 82), concept_coverage: 2 },
     coldGuidedPage[1],
   ])[0].name === 'Keyscope',
   'cold first impression never trades away first-card concept coverage',
 )
 check(
-  prioritizeColdGuidedLead([
+  prioritizeColdStrongLead([
     { ...scoredResult('Lexify', 92), concept_coverage: 1 },
     coldGuidedPage[1],
   ])[0].name === 'Lexify',
   'cold first impression never trades away first-card structural quality',
+)
+check(
+  prioritizeColdStrongLead([
+    { ...scoredResult('Stashify', 82), sourceMode: 'brandable', concept_coverage: 1 },
+    { ...scoredResult('Bufferlab', 85), sourceMode: 'brandable', concept_coverage: 1 },
+  ])[0].name === 'Bufferlab',
+  'a remaining suffix lead yields to a non-suffix form with a meaningful quality margin',
+)
+check(
+  prioritizeColdStrongLead([
+    { ...scoredResult('Draftify', 82), sourceMode: 'brandable', concept_coverage: 1 },
+    { ...scoredResult('Inklink', 83), sourceMode: 'brandable', concept_coverage: 1 },
+  ])[0].name === 'Draftify',
+  'a marginal non-suffix score difference does not churn the cold lead',
+)
+check(
+  prioritizeColdStrongLead([
+    { ...scoredResult('Retroboard', 82), sourceMode: 'brandable', concept_coverage: 1 },
+    { ...scoredResult('Keyshelf', 92), sourceMode: 'brandable', concept_coverage: 1 },
+  ])[0].name === 'Retroboard',
+  'an existing non-suffix lead is not reordered by the fallback rule',
 )
 
 const repetitiveColdPage = [

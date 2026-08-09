@@ -83,7 +83,7 @@ try {
     const {
       coldQualityPoolCount,
       needsQualityRepair,
-      prioritizeColdGuidedLead,
+      prioritizeColdStrongLead,
       repairWeakShortlist,
     } = await import('/src/lib/preferences.ts')
     const output = []
@@ -102,7 +102,7 @@ try {
               count: coldQualityPoolCount(10), exclude: direct.map((item) => item.name),
             })
           : []
-        pages.push(prioritizeColdGuidedLead(repairWeakShortlist(direct, fallback, 10)))
+        pages.push(prioritizeColdStrongLead(repairWeakShortlist(direct, fallback, 10)))
       }
       output.push({ prompt, pages })
     }

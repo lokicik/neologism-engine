@@ -2612,6 +2612,47 @@ generator score, candidate pool, personalized ranker, or AI path changed.
 
 ---
 
+## Phase 112 — Replace only the remaining weak suffix leads
+
+**Bottleneck.** Phase 111 left **23/90** cold pages opening with a direct suffix. Thirteen had no
+guided candidate in the repaired set; ten had a guided form whose structural score was below the
+lead. None were blocked by concept coverage. The guarded guided rule was therefore already using
+all safe candidates it knew how to recognize, while clean main-pool semantic joins remained
+eligible nowhere simply because they lacked guided construction metadata.
+
+**Rejected breadth and calibrated margin.** Promoting the strongest qualified non-suffix on every
+page looked excellent numerically—first quality **86.96**, suffix-first 16, coverage 1.22—but
+changed **70/90** pages and replaced already-good leads such as `Retroboard → Keyshelf` and
+`Dashnode → Fluxkit`. Restricting it to the remaining suffix leads produced seven extra changes,
+but included the marginal **84.8 → 85.1** `Draftify → Inklink`. A one- and two-point margin retained
+the same other six pages in the fixed matrix; the stricter two-point rule was kept as the safer
+future boundary.
+
+**Retained correction.** Guided forms still get first refusal under Phase 111's no-loss rule. Only
+if no guided promotion occurs and the current first card is a direct single-concept suffix may a
+broader non-suffix card compete. It must preserve or improve concept coverage and beat the lead by
+at least **2.0** structural points. Existing non-suffix leads are never reconsidered. The operation
+still moves one existing card only, and remains cold/fresh Auto-only: local taste, AI Studio, and
+Load more do not use it.
+
+**Measured result.** Relative to Phase 111, total reordered pages rise **37 → 43**, first-card
+quality **85.05 → 85.35**, regret **4.27 → 3.97**, and suffix-first pages **23 → 17**. Mean first-card
+coverage improves **1.17 → 1.20**; guided leads/top-three presence stay 38/40 because this phase
+fills only their remaining gap. The six additional page changes are five distinct improvements:
+`Marken → Keyseed`, `Vaultify → Guardbond` on two seeds, `Stashify → Bufferlab`,
+`Vitalix → Taillab`, and `Marketix → Bazaarbeam`. Each wins by at least 2.4 points. The product's
+`Keyloom` lead and all fifteen namespace-page sets remain unchanged.
+
+**Verification.** The deterministic preference smoke suite now pins the two-point promotion,
+marginal-difference rejection, and protection of existing non-suffix leads in addition to Phase
+111's set/quality/coverage gates. The 90-page cold audit passes with **43** reordered pages, zero
+set changes, zero quality/coverage regressions, and the exact prior aggregate metrics. The full
+first-impression sweep, namespace audit, 1,000-name personalized matrix, and real feedback/
+reference/export flow pass. TypeScript and the production bundle build cleanly. No candidate,
+score, personalized order, continuation order, Rust/WASM, or AI behavior changed.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
@@ -2620,7 +2661,8 @@ safe Respell exists, one quality-gated root-plus-metaphor Brandable may break th
 different-ending, quality-neutral second form may replace a direct suffix card. The
 broader modes remain explicit choices and still form the exploratory mix when no brief exists.
 Cold first pages now lead with that stronger guided form only when quality and brief coverage are
-both non-decreasing; the underlying ten-name set remains intact.
+both non-decreasing. A remaining direct suffix yields only to a same-coverage non-suffix form with
+a two-point quality advantage; the underlying ten-name set remains intact.
 Compound is now a genuinely brief-aware explicit alternative rather than a random adjective
 showcase. Focused first pages stay narrow; recognized concepts open a restrained continuation
 palette only when the user asks for more, preserving 100-name session capacity without generic

@@ -21,6 +21,7 @@ const VISIBLE_DIRECT_SUFFIX_SHARE = 0.8
 const STRONG_MODE_PREFERENCE = 0.75
 const COMPOUND_TASTE_POOL_SHARE = 0.3
 const MAX_COLD_PAIR_SIMILARITY = 0.21
+const COLD_NON_SUFFIX_LEAD_MARGIN = 0.02
 export const MIN_TASTE_SIGNALS = 3
 export const TASTE_POOL_MULTIPLIER = 6
 export const MAX_TASTE_POOL = 60
@@ -299,20 +300,31 @@ function engineQuality(result: NameResult): number {
 }
 
 // Cold first impressions should not lead with a mechanical suffix card when
-// the same page already contains a stronger, equally relevant guided form.
+// the same page already contains a stronger, equally relevant form. Guided
+// forms get first refusal; broader non-suffix forms need a two-point margin.
 // Reorder only; personalized ranking and the ten-name set remain untouched.
-export function prioritizeColdGuidedLead(results: NameResult[]): NameResult[] {
+export function prioritizeColdStrongLead(results: NameResult[]): NameResult[] {
   if (results.length < 2) return results.slice()
   const firstQuality = engineQuality(results[0])
   const firstCoverage = results[0].concept_coverage ?? 0
-  const candidate = results
+  const eligible = results
     .map((result, index) => ({ result, index, quality: engineQuality(result) }))
     .filter(({ result, quality }) => (
-      result.construction === 'guided_metaphor'
-      && quality >= firstQuality
+      quality >= firstQuality
       && (result.concept_coverage ?? 0) >= firstCoverage
     ))
+  const guided = eligible
+    .filter(({ result }) => result.construction === 'guided_metaphor')
     .sort((left, right) => right.quality - left.quality || left.index - right.index)[0]
+  const nonSuffix = isDirectConceptSuffix(results[0])
+    ? eligible
+      .filter(({ result, quality }) => (
+        !isDirectConceptSuffix(result)
+        && quality >= firstQuality + COLD_NON_SUFFIX_LEAD_MARGIN
+      ))
+      .sort((left, right) => right.quality - left.quality || left.index - right.index)[0]
+    : undefined
+  const candidate = guided ?? nonSuffix
   if (!candidate || candidate.index === 0) return results.slice()
   const selected = results.slice()
   const [lead] = selected.splice(candidate.index, 1)
