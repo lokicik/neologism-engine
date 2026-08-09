@@ -999,6 +999,25 @@ pub fn is_naming_brief(keywords: &[String]) -> bool {
     })
 }
 
+fn is_naming_tool_brief(keywords: &[String]) -> bool {
+    has_any_keyword(keywords, &["name", "naming", "word"])
+        && has_any_keyword(
+            keywords,
+            &[
+                "engine",
+                "generate",
+                "generator",
+                "product",
+                "package",
+                "available",
+                "availability",
+                "registry",
+                "namespace",
+                "developer",
+            ],
+        )
+}
+
 /// Choose literal source words that are worth styling in Respell mode. A
 /// recognizable spelling change should carry the product's subject, not its
 /// delivery method, audience, or an incidental role (Companyon, Remynder,
@@ -1145,6 +1164,13 @@ fn bounded_guided_groups(groups: &[&[&str]], limit: usize) -> Vec<Vec<String>> {
 }
 
 pub fn guided_pair_root_groups(keywords: &[String], limit: usize) -> Vec<Vec<String>> {
+    if is_naming_tool_brief(keywords) {
+        // `LexLoom` gives naming tools one deliberate word-making role without
+        // adding another suffix family to ordinary Brandable output.
+        const GROUPS: &[&[&str]] = &[&["lex"], &["loom", "mint"]];
+        return bounded_guided_groups(GROUPS, limit);
+    }
+
     // Shared-expense briefs benefit from role words that are more concrete than
     // the broad finance/social palettes. Keep this vocabulary private to the
     // final-gap pair lane: ordinary Brandable still explores the wider roots.
@@ -1499,6 +1525,36 @@ mod tests {
         let generic = brand_roots(&generic_kws, 16);
         assert!(generic.contains(&"crate".to_string()));
         assert!(generic.contains(&"kit".to_string()));
+    }
+
+    #[test]
+    fn guided_naming_tools_use_lex_roles_only_in_their_lane() {
+        for prompt in [
+            "an offline naming engine for developer projects",
+            "a tool that finds available package names",
+            "a naming tool for new products",
+        ] {
+            let keywords = extract_keywords(prompt, 6);
+            let ordinary = brand_root_groups(&keywords, 16);
+            let guided = guided_pair_root_groups(&keywords, 16);
+            assert!(ordinary.iter().flatten().any(|root| root == "lex"));
+            assert!(!ordinary.iter().flatten().any(|root| root == "loom"));
+            assert_eq!(guided, vec![vec!["lex"], vec!["loom", "mint"]], "{prompt}");
+        }
+
+        for prompt in [
+            "a baby name journal",
+            "a word puzzle",
+            "a product analytics tool",
+            "a brand analytics product",
+        ] {
+            let keywords = extract_keywords(prompt, 6);
+            assert_ne!(
+                guided_pair_root_groups(&keywords, 16),
+                vec![vec!["lex"], vec!["loom", "mint"]],
+                "{prompt}",
+            );
+        }
     }
 
     #[test]

@@ -63,11 +63,17 @@ const FEATURE_FLAG_VARIANTS = [
   'a feature rollout control service',
   'a platform for feature flags',
 ]
+const NAMING_TOOL_VARIANTS = [
+  'an offline naming engine for developer projects',
+  'a tool that generates product names',
+  'find available package names for developers',
+]
 const PROMPTS = [
   ...BASE_PROMPTS,
   ...AI_VARIANTS,
   ...RECRUITER_VARIANTS,
   ...FEATURE_FLAG_VARIANTS,
+  ...NAMING_TOOL_VARIANTS,
 ]
 const SEEDS = [13, 67, 313]
 const DIRECT_SUFFIXES = ['ify', 'ora', 'ion', 'era', 'io', 'ia', 'ix', 'el', 'en', 'on']
@@ -275,6 +281,12 @@ try {
     0,
   ) / (featureFlagRows.length * 10)
   const featureFlagVariantRows = rows.filter((row) => FEATURE_FLAG_VARIANTS.includes(row.prompt))
+  const namingToolRows = rows.filter((row) => row.prompt === 'a naming tool for new products')
+  const namingToolAverage = namingToolRows.reduce(
+    (sum, row) => sum + row.selected.reduce((pageSum, item) => pageSum + quality(item), 0),
+    0,
+  ) / (namingToolRows.length * 10)
+  const namingToolVariantRows = rows.filter((row) => NAMING_TOOL_VARIANTS.includes(row.prompt))
   const seedDiversity = BASE_PROMPTS.map((prompt) => {
     const promptRows = auditRows.filter((row) => row.prompt === prompt)
     const nameSeeds = new Map()
@@ -399,6 +411,7 @@ try {
   console.log(`household catalog average: ${householdCatalogAverage.toFixed(2)} · StowLog leads ${householdCatalogRows.filter((row) => row.selected[0]?.name === 'StowLog').length}/${householdCatalogRows.length}`)
   console.log(`recruiter tracking average: ${recruiterTrackingAverage.toFixed(2)}`)
   console.log(`feature flag average: ${featureFlagAverage.toFixed(2)}`)
+  console.log(`naming tool average: ${namingToolAverage.toFixed(2)}`)
   console.log(`guarded repair upgrades: ${guardedRepairUpgrades.length}`)
   console.log(`weak Respell accents: ${weakRespellAccents.length}`)
   console.log(`seed diversity: ${averageUniqueNames.toFixed(2)}/30 unique · ${averageSeedOverlap.toFixed(2)}/10 pair overlap · ${exactDuplicateSeedPages} duplicate pages`)
@@ -429,6 +442,10 @@ try {
   }
   console.log('\nfeature flag focus')
   for (const row of [...featureFlagRows, ...featureFlagVariantRows]) {
+    console.log(`${row.seed} · ${row.prompt} · ${row.selected.map((item) => item.name).join(', ')}`)
+  }
+  console.log('\nnaming tool focus')
+  for (const row of [...namingToolRows, ...namingToolVariantRows]) {
     console.log(`${row.seed} · ${row.prompt} · ${row.selected.map((item) => item.name).join(', ')}`)
   }
   console.log('\nguarded repair upgrades')
@@ -566,6 +583,35 @@ try {
           )
         )),
       'feature flag wording variants keep FlipOps and reject audience Respells',
+    ],
+    [
+      namingToolRows.length === SEEDS.length
+        && namingToolAverage >= 87.4
+        && namingToolRows.every((row) => (
+          row.selected[0]?.name === 'LexLoom'
+          && row.selected[0]?.construction === 'guided_pair'
+          && row.direct.some((item) => (
+            item.name === 'LexLoom' && item.construction === 'guided_pair'
+          ))
+          && row.selected.filter((item) => letters(item.name).startsWith('lex')).length <= 3
+          && !row.retryRequested
+        )),
+      'naming tool pages lead with the scoped LexLoom word-making role',
+    ],
+    [
+      namingToolVariantRows.length === NAMING_TOOL_VARIANTS.length * SEEDS.length
+        && namingToolVariantRows.filter((row) => row.selected[0]?.name === 'LexLoom').length >= 6
+        && namingToolVariantRows.every((row) => (
+          row.selected.length === 10
+          && row.selected.some((item) => (
+            (['LexLoom', 'LexMint'].includes(item.name) && item.construction === 'guided_pair')
+            || (item.name === 'Keyloom' && item.construction === 'guided_metaphor')
+          ))
+          && row.selected.filter((item) => letters(item.name).endsWith('loom')).length <= 1
+          && row.selected.filter((item) => letters(item.name).startsWith('lex')).length <= 3
+          && !row.retryRequested
+        )),
+      'naming tool wording variants retain a tail-safe word-making role without retry',
     ],
     [
       formatterRows.length === SEEDS.length

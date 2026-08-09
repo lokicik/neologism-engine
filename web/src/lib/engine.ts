@@ -51,6 +51,7 @@ const GUIDED_PAIR_QUALITY_FLOOR = 84
 const RECRUITER_RESPELL_QUALITY_FLOOR = 80
 const RESPELL_COMPANION_PAIR_QUALITY_FLOOR = 85
 const GUIDED_PAIR_SET_GAIN = 2
+const NAMING_VISIBLE_PREFIX_CAP = 3
 const GUIDED_METAPHOR_FALLBACK_SEED_OFFSET = 16
 // Order is deliberate: preserve the stronger Kinloom and Kitwave pools before
 // the narrow adjacent-seed pool gets a chance to supply Bufferlab.
@@ -82,6 +83,16 @@ const isFeatureFlagBrief = (terms: string[]): boolean => {
   const normalized = new Set(terms.map(letters))
   return normalized.has('feature')
     && ['flag', 'toggle', 'rollout', 'switch', 'gate'].some((term) => normalized.has(term))
+}
+
+const isNamingToolBrief = (terms: string[]): boolean => {
+  const normalized = new Set(terms.map(letters))
+  return ['name', 'naming', 'word']
+    .some((term) => normalized.has(term))
+    && [
+      'engine', 'generate', 'generator', 'product', 'package',
+      'available', 'availability', 'registry', 'namespace', 'developer',
+    ].some((term) => normalized.has(term))
 }
 
 export const guidedMetaphorTail = (result: NameResult): string | undefined => {
@@ -140,15 +151,23 @@ const pickGuidedPair = (results: NameResult[]): NameResult[] => results
 const addQualityNeutralGuidedAlternative = (
   page: NameResult[],
   candidate: NameResult | undefined,
+  preservePrefixBalance = false,
 ): NameResult[] => {
   if (!candidate || page.some((result) => letters(result.name) === letters(candidate.name))) return page
   const quality = structuralQuality(candidate)
-  const replacement = page
+  const replacements = page
     .map((result, index) => ({ result, index, quality: structuralQuality(result) }))
     .filter(({ result, quality: replacedQuality }) => (
       isDirectSuffixForm(result) && replacedQuality <= quality + Number.EPSILON
     ))
-    .sort((left, right) => left.quality - right.quality || right.index - left.index)[0]
+    .sort((left, right) => left.quality - right.quality || right.index - left.index)
+  const candidatePrefix = letters(candidate.name).slice(0, 3)
+  const samePrefixCount = preservePrefixBalance
+    ? page.filter((result) => letters(result.name).startsWith(candidatePrefix)).length
+    : 0
+  const replacement = preservePrefixBalance && samePrefixCount >= NAMING_VISIBLE_PREFIX_CAP
+    ? replacements.find(({ result }) => letters(result.name).startsWith(candidatePrefix))
+    : replacements[0]
   if (!replacement) return page
   const next = page.slice()
   next[replacement.index] = candidate
@@ -158,6 +177,7 @@ const addQualityNeutralGuidedAlternative = (
 const addStrongGuidedPairUpgrade = (
   page: NameResult[],
   candidate: NameResult | undefined,
+  preservePrefixBalance = false,
 ): NameResult[] => {
   if (
     !candidate
@@ -165,13 +185,23 @@ const addStrongGuidedPairUpgrade = (
     || page.some((result) => letters(result.name) === letters(candidate.name))
   ) return page
   const quality = structuralQuality(candidate)
-  const replacement = page
+  const replacements = page
     .map((result, index) => ({ result, index, quality: structuralQuality(result) }))
     .filter(({ result, quality: replacedQuality }) => (
       isDirectSuffixForm(result)
       && replacedQuality + GUIDED_PAIR_SET_GAIN <= quality + Number.EPSILON
     ))
-    .sort((left, right) => left.quality - right.quality || right.index - left.index)[0]
+    .sort((left, right) => left.quality - right.quality || right.index - left.index)
+  const candidatePrefix = letters(candidate.name).slice(0, 3)
+  const samePrefixReplacement = preservePrefixBalance
+    ? replacements.find(({ result }) => letters(result.name).startsWith(candidatePrefix))
+    : undefined
+  const samePrefixCount = preservePrefixBalance
+    ? page.filter((result) => letters(result.name).startsWith(candidatePrefix)).length
+    : 0
+  const replacement = preservePrefixBalance && samePrefixCount >= NAMING_VISIBLE_PREFIX_CAP
+    ? samePrefixReplacement
+    : replacements[0]
   if (!replacement) return page
   const next = page.slice()
   next[replacement.index] = candidate
@@ -284,6 +314,7 @@ export async function generateBatch(cfg: Config): Promise<NameResult[]> {
     ]
     const recruiterTrackingBrief = isRecruiterTrackingBrief(terms)
     const featureFlagBrief = isFeatureFlagBrief(terms)
+    const namingToolBrief = isNamingToolBrief(terms)
     const [brandableBatch, respellBatch] = await Promise.all([
       generateNames({ ...cfg, variant: undefined, compound: false, count: total }),
       respell > 0
@@ -344,9 +375,9 @@ export async function generateBatch(cfg: Config): Promise<NameResult[]> {
         }
       }
       // If no metaphor survives the 85-point gate, try one explicit semantic
-      // pair. Feature flags may also compare their private Flip role against
-      // the second metaphor slot while preserving the first metaphor.
-      if (metaphorAccent.length === 0 || featureFlagBrief) {
+      // pair. Scoped product roles may also compare against the second
+      // metaphor slot while preserving the first metaphor.
+      if (metaphorAccent.length === 0 || featureFlagBrief || namingToolBrief) {
         pairAccent = pickGuidedPair(await generateNames({
           ...cfg,
           variant: 'concept_pair',
@@ -354,9 +385,9 @@ export async function generateBatch(cfg: Config): Promise<NameResult[]> {
           count: GUIDED_PAIR_POOL,
         }))
       }
-    } else if (total > 0 && featureFlagBrief) {
-      // Keep the scoped control-role candidate available even if a future
-      // keyword rule lets a safe Respell survive this brief.
+    } else if (total > 0 && (featureFlagBrief || namingToolBrief)) {
+      // Keep a scoped product-role candidate available even if a future
+      // keyword rule lets a safe Respell survive one of these briefs.
       pairAccent = pickGuidedPair(await generateNames({
         ...cfg,
         variant: 'concept_pair',
@@ -370,18 +401,31 @@ export async function generateBatch(cfg: Config): Promise<NameResult[]> {
       linkedRespells,
       metaphorAccent.slice(0, 1),
     ], total), metaphorAccent[0])
+    const existingNamingPair = namingToolBrief
+      ? pairAccent.find((candidate) => primaryPage.some((result) => (
+          letters(result.name) === letters(candidate.name)
+        )))
+      : undefined
+    const guidedPairCandidate = namingToolBrief
+      ? existingNamingPair ?? pairAccent.find((candidate) => {
+          const tail = ['loom', 'mint'].find((ending) => letters(candidate.name).endsWith(ending))
+          return !tail || primaryPage.every((result) => !letters(result.name).endsWith(tail))
+        })
+      : pairAccent[0]
+    const rolePreservedPage = preserveGuidedConstruction(primaryPage, existingNamingPair)
     if (linkedRespells.length > 0) {
-      return addStrongGuidedPairUpgrade(primaryPage, pairAccent[0])
+      return addStrongGuidedPairUpgrade(rolePreservedPage, guidedPairCandidate, namingToolBrief)
     }
     if (metaphorAccent.length > 0) {
-      if (featureFlagBrief) {
-        return addStrongGuidedPairUpgrade(primaryPage, pairAccent[0])
+      if (featureFlagBrief || namingToolBrief) {
+        return addStrongGuidedPairUpgrade(rolePreservedPage, guidedPairCandidate, namingToolBrief)
       }
-      return addQualityNeutralGuidedAlternative(primaryPage, metaphorAccent[1])
+      return addQualityNeutralGuidedAlternative(rolePreservedPage, metaphorAccent[1])
     }
     return addQualityNeutralGuidedAlternative(
-      preserveGuidedConstruction(primaryPage, pairAccent[0]),
-      pairAccent[0],
+      preserveGuidedConstruction(rolePreservedPage, guidedPairCandidate),
+      guidedPairCandidate,
+      namingToolBrief,
     )
   }
 

@@ -123,9 +123,19 @@ try {
       NAMING_ROOTS.some((root) => NAMING_SUFFIXES.some((suffix) => name === `${root}${suffix}`))
     )).length
     const guidedMetaphorHits = all.filter((item) => item.construction === 'guided_metaphor').length
+    const guidedPairHits = all.filter((item) => item.construction === 'guided_pair').length
     const guidedMetaphorsPerPage = row.pages.map((batch) => (
       batch.filter((item) => item.construction === 'guided_metaphor').length
     ))
+    const namingRolePages = row.pages.filter((batch) => batch.some((item) => (
+      ['LexLoom', 'LexMint'].includes(item.name) && item.construction === 'guided_pair'
+    ))).length
+    const repeatedLoomPages = row.pages.filter((batch) => (
+      batch.filter((item) => item.name.toLowerCase().endsWith('loom')).length > 1
+    )).length
+    const crowdedLexPages = row.pages.filter((batch) => (
+      batch.filter((item) => item.name.toLowerCase().startsWith('lex')).length > 3
+    )).length
     const wrongForms = normalized.filter((name) => WRONG_CONTEXT.some((word) => name.includes(word)))
     const averageQuality = all.reduce((sum, item) => sum + quality(item), 0) / all.length
     const averageSimilarity = row.pages.reduce((sum, batch) => sum + pageSimilarity(batch), 0) / row.pages.length
@@ -133,7 +143,7 @@ try {
     const scopePages = row.pages.filter((batch) => batch.some((item) => item.name.toLowerCase().includes('scope'))).length
 
     console.log(`\n${row.prompt}`)
-    console.log(`namespace ${markerHits}/50 · direct suffix ${directSuffixHits}/50 · guided metaphor ${guidedMetaphorHits}/50 · quality ${averageQuality.toFixed(2)} · similarity ${averageSimilarity.toFixed(3)} · unique ${unique}/50`)
+    console.log(`namespace ${markerHits}/50 · direct suffix ${directSuffixHits}/50 · guided metaphor ${guidedMetaphorHits}/50 · guided pair ${guidedPairHits}/50 · quality ${averageQuality.toFixed(2)} · similarity ${averageSimilarity.toFixed(3)} · unique ${unique}/50`)
     if (VERBOSE) {
       row.pages.forEach((batch, index) => console.log(`${SEEDS[index]}: ${batch.map((item) => item.name).join(', ')}`))
     }
@@ -144,6 +154,9 @@ try {
       guidedMetaphorsPerPage.every((count) => count >= 1 && count <= 2),
       'every fixed page earns one or two strong non-template metaphor forms',
     )
+    check(namingRolePages === SEEDS.length, 'every fixed page includes a scoped Lex naming role')
+    check(repeatedLoomPages === 0, 'scoped naming roles do not duplicate an existing Loom tail')
+    check(crowdedLexPages === 0, 'scoped naming roles never create a fourth Lex-prefixed card')
     check(wrongForms.length === 0, `no delivery/filesystem context leaks (${wrongForms.join(', ') || 'none'})`)
     check(all.every((item) => quality(item) >= 75), 'no visible name falls below the structural floor')
     check(averageQuality >= 85, 'visible structural quality stays at or above 85')

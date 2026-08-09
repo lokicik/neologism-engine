@@ -3250,6 +3250,66 @@ regression accepted only for a higher numeric score was added.
 
 ---
 
+## Phase 130 — Give the naming engine one name worth keeping
+
+**Observed product gap.** The app's own namespace briefs cleared every structural gate at roughly
+86 quality, yet manual review still found pages dominated by mechanical forms such as `Lexify`,
+`Mintix`, `Nomion`, and `Markora`. The score was accurately measuring pronounceability and shape,
+but it did not guarantee that a naming product would surface one candidate a person might actually
+choose. This is a first-impression problem in the product's core use case, not a reason to raise a
+global score weight.
+
+**Candidate review.** Literal compounds were rejected despite their obvious semantics:
+`NameMint 66.5`, `WordMint 60.7`, and `NameForge 60.8` lose too much novelty, while
+`LexForge 80.3` does not clear the existing pair threshold. The smaller word-making direction is
+both cleaner and structurally strong: `LexLoom 89.5` and `LexMint 86.5`. Only an explicit
+name/naming/word brief that also carries an engine, generation, product, package, availability,
+registry, namespace, or developer marker receives these private groups. Baby-name journals, word
+puzzles, brand analytics, and unrelated product tools are pinned as negative cases.
+
+**Rejected first integrations.** The first Auto trial put `LexLoom` on every matching page. It made
+the intended candidate visible, but manual review caught `Keyloom` and `LexLoom` together on two
+seeds and saw the first namespace brief fall from 29 to 25 unique names. A tail-aware revision
+switched those pages to `LexMint`, but another manual pass still found four `Lex...` cards on one
+canonical page. The retained selector preserves an existing exact pair, rejects a candidate whose
+`loom` or `mint` tail is already present, and applies same-prefix replacement only when adding the
+role would create a fourth Lex card. The first prefix gate covered the two-point companion path but
+missed the quality-neutral path used when no metaphor exists; a wording-stress seed exposed the
+fourth Lex there. A scoped `NeoMint 88.0` reserve was A/B-tested, then removed because it did not
+address the cause. The retained fix applies the same prefix choice in both insertion paths: the
+companion still needs its two-point gain, while a sole role still cannot replace a stronger card.
+If no eligible Lex suffix can leave, the role stays out. No second role family, quota, or final
+retry is used.
+
+**Measured result.** The three canonical naming-tool pages now lead with `LexLoom`; their average
+improves **87.31 -> 87.40**. Across nine independent wording-stress pages, six lead with
+`LexLoom` and every page retains a tail-safe word-making role. All fifteen npm/crates/registry
+namespace pages contain one scoped `LexLoom` or `LexMint` pair; none repeats a Loom tail or shows a
+fourth Lex prefix. The retained revision recovers one unique name on the affected first namespace
+brief (**25 -> 26**) and lowers its first-trial similarity **0.168 -> 0.167**. Across all three
+namespace suites, aggregate structural quality improves **86.25 -> 86.33**. The reviewed role
+tradeoff reduces explicit namespace-marker cards **57/150 -> 52/150** and moves mean within-page
+similarity **0.159 -> 0.161**, while every page still carries `Scope` semantics and all three suites
+remain comfortably inside their marker, similarity, quality, and 20-name spread gates.
+
+Across the unchanged 105-page held-out base, average quality remains **84.18**, lead quality
+improves **86.74 -> 86.77**, lead concept coverage **1.30 -> 1.33**, and mean similarity
+**0.201 -> 0.200**. Near pairs remain 77, suffix leaders remain 23, and exact-stem excess remains
+8. The final prefix guard restores three-seed spread and pair overlap to their baseline
+**18.17/30** and **5.15/10**. On the fixed cold matrix, lead quality improves
+**85.76 -> 85.84**, lead coverage **1.28 -> 1.29**, and justified half-point near-tie trades fall
+**3 -> 2**; repaired average remains 83.25.
+
+**Verification.** The core suite is **150/150**. The 105-page held-out base plus 39 wording-stress
+pages, 90 fixed cold pages, 85 Auto pages, fifteen namespace pages, and 1,600 developer-domain
+names pass. The own-brief 100-page/1,000-selection taste matrix, four independent 100-name
+personalized sessions, real 100-name UI session, 25-page mode-aware taste audit, and unpersonalized
+100-name brief session also pass. Rebuilt WASM, TypeScript, and the production Vite bundle are
+green. No LLM, network call, global scorer change, or ordinary Brandable vocabulary expansion was
+added.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
@@ -3283,6 +3343,8 @@ Recruiter tracking briefs likewise gain the isolated `JobLoop` hiring-workflow r
 can improve an inner suffix card without removing the page's one earned Respell accent.
 Feature-flag briefs use an isolated `FlipOps` control role instead of adding another high-scoring
 `Gate...` variant, while audience words such as `developer` cannot take the Respell slot.
+Naming-engine briefs now surface a scoped `LexLoom` or `LexMint` word-making role while preserving
+a stronger existing metaphor and refusing duplicate Loom tails.
 Cold Auto also limits exact four-letter stem repetition on a visible page, but only through a
 quality-neutral, coverage-preserving non-suffix substitution from the fallback it already opened.
 Compound is now a genuinely brief-aware explicit alternative rather than a random adjective
