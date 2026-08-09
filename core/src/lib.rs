@@ -471,14 +471,16 @@ fn join_root_groups(rng: &mut ChaCha8Rng, groups: &[Vec<String>]) -> Option<Stri
 
 /// Number of prompt concepts visibly represented by a candidate. Root joins
 /// can lose one seam letter, so a stable three-letter fragment counts too.
+fn concept_group_covered(lower: &str, group: &[String]) -> bool {
+    group
+        .iter()
+        .any(|root| lower.contains(root) || (root.len() >= 3 && lower.contains(&root[..3])))
+}
+
 fn concept_coverage(lower: &str, groups: &[Vec<String>]) -> usize {
     groups
         .iter()
-        .filter(|group| {
-            group
-                .iter()
-                .any(|root| lower.contains(root) || (root.len() >= 3 && lower.contains(&root[..3])))
-        })
+        .filter(|group| concept_group_covered(lower, group))
         .count()
 }
 
@@ -542,11 +544,7 @@ fn brand_appeal(lower: &str, common: &HashSet<String>, t: &BigTechTuning, suffix
         - if harsh { t.harsh_w } else { 0.0 }
 }
 
-fn suffix_rank_weight(
-    tuning: &BigTechTuning,
-    concept_expanded: bool,
-    concept_count: usize,
-) -> f64 {
+fn suffix_rank_weight(tuning: &BigTechTuning, concept_expanded: bool, concept_count: usize) -> f64 {
     if concept_expanded && concept_count >= 2 {
         tuning.concept_suffix_w
     } else if concept_expanded {
@@ -971,9 +969,24 @@ fn generate_bigtech(
     };
     let suffix_rank_w = suffix_rank_weight(tuning, concept_expanded, concept_groups.len());
     let rank = |r: &NameResult| {
+        let lower = r.name.to_lowercase();
         let coverage_bonus = if concept_expanded {
-            concept_coverage(&r.name.to_lowercase(), &concept_groups).saturating_sub(1) as f64
+            concept_coverage(&lower, &concept_groups).saturating_sub(1) as f64
                 * tuning.concept_coverage_w
+        } else {
+            0.0
+        };
+        // The first group is the brief's preferred semantic anchor (modifier or
+        // core domain), not just another context word. Keep it visible when two
+        // equally broad candidates compete: RetroKey over KeyMarket, LexForge
+        // over KeySeed for a developer naming tool.
+        let lead_concept_bonus = if concept_expanded
+            && concept_groups.len() >= 2
+            && concept_groups
+                .first()
+                .map_or(false, |group| concept_group_covered(&lower, group))
+        {
+            0.20
         } else {
             0.0
         };
@@ -988,14 +1001,9 @@ fn generate_bigtech(
         st.model.log_likelihood(&r.name)
             + (r.score_pronounce as f64 / 100.0) * fluency_w
             + (r.score_memorability as f64 / 100.0) * brevity_w
-            + appeal_w
-                * brand_appeal(
-                    &r.name.to_lowercase(),
-                    &st.common_words,
-                    tuning,
-                    suffix_rank_w,
-                )
+            + appeal_w * brand_appeal(&lower, &st.common_words, tuning, suffix_rank_w)
             + coverage_bonus
+            + lead_concept_bonus
             + rank_jitter(&r.name, concept_rank_salt) * exploration_w
             - typo_penalty
     };
@@ -1613,6 +1621,17 @@ mod tests {
                 "description session starved at batch {batch_index}: {:?}",
                 batch.iter().map(|result| &result.name).collect::<Vec<_>>()
             );
+            if batch_index == 0 {
+                let lead_count = batch
+                    .iter()
+                    .filter(|result| concept_group_covered(&result.name.to_lowercase(), &groups[0]))
+                    .count();
+                assert!(
+                    lead_count >= 5,
+                    "first page lost the brief's naming anchor ({lead_count}/10): {:?}",
+                    batch.iter().map(|result| &result.name).collect::<Vec<_>>()
+                );
+            }
             for result in batch {
                 let lower = result.name.to_lowercase();
                 assert!(
@@ -1789,8 +1808,8 @@ mod tests {
             .filter(|result| concept_coverage(&result.name.to_lowercase(), &groups) >= 2)
             .count();
         let names: Vec<&String> = results.iter().map(|result| &result.name).collect();
-        assert!(single >= 4, "only {single} compact coinages: {names:?}");
-        assert!(joined >= 2, "only {joined} semantic joins: {names:?}");
+        assert!(single >= 3, "only {single} compact coinages: {names:?}");
+        assert!(joined >= 3, "only {joined} semantic joins: {names:?}");
     }
 
     #[test]

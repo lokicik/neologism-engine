@@ -1718,6 +1718,48 @@ remain duplicate-free without false exhaustion.
 
 ---
 
+## Phase 89 — Make the app's own naming brief feel intentional
+
+**Bottleneck.** The app's own brief — “a developer tool that generates names for packages,
+CLIs, libraries and projects” — still exposed a taste problem hidden by aggregate semantic
+coverage. Its first Brandable page opened with `Kitpeak`, `Kitseed`, and `Kithive`; those names
+were technically developer-related, but the generic `crate`/`stack`/`byte`/`node`/`kit` palette
+overpowered the actual naming intent. The fixed-seed developer-naming case scored **82.62**
+composite, **0.691** diversity, and **42%** session uniqueness.
+
+**Bounded correction.** Developer artifacts now expand to `key`, `tag`, `alias`, and `slug` only
+when the same brief explicitly contains a naming concept. A normal developer/API brief still
+keeps the generic artifact vocabulary. Ranking also gives a small **0.20** preference to a
+candidate that visibly carries the brief's first, deliberately ordered semantic group. This is
+a general rule: it favors the principal modifier or domain over incidental context rather than
+hard-coding a list of preferred final names.
+
+The alternatives were measured and rejected. `token` raised the structural score but promoted
+`Tokenseed`; `label` increased exact cross-domain collisions from **20 to 21**; and a stronger
+**0.35** lead preference lowered developer-naming diversity to **0.722**. Removing developer
+artifacts entirely also collapsed session uniqueness. The retained setting keeps a first-page
+mix of at least three compact coinages and three semantic joins, while requiring at least half
+of the app brief's first page to carry its naming anchor.
+
+**Measured result.** The developer-naming first page now opens with `Lexify`, `Nomforge`,
+`Markseed`, `Markforge`, and `Nomio`. Composite rises **82.62 → 85.02**, diversity
+**0.691 → 0.735**, and session uniqueness **42% → 44%**. Across all 48 domains, composite rises
+**80.53 → 80.61**, diversity holds at **0.729**, average domain uniqueness reaches **47.2%**,
+and exact collision pairs remain capped at **20**. The morphology matrix improves
+**80.74 → 80.95** composite at **0.730** diversity, with all **1,100/1,100** first-page and
+**2,200/2,200** rolling names available.
+
+**Verification.** The workspace suite is **129/129**. General-domain coverage remains
+**1,069/1,100** calibration and **1,067/1,100** holdout; modifier coverage remains **550/550**;
+developer coverage remains **1,594/1,600**; and Compound remains **1,000/1,000** prompt-linked
+and pair-coherent with zero lexical echoes. WASM, TypeScript, and the production bundle build
+cleanly. Chromium passes all **85** Auto pages with **45/45** prompt-linked accents,
+**800/800** developer Brandable names and **791/800** developer Compound names. The app's
+100-name Brandable session and all five 100-name Compound sessions remain duplicate-free and
+never falsely exhaust.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

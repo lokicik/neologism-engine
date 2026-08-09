@@ -220,6 +220,7 @@ const FOCUS_CASES: &[&str] = &[
     "git release",
     "bookmarks",
     "cloud deployment",
+    "developer naming",
     "background jobs",
     "dependencies",
     "database",
@@ -265,6 +266,8 @@ fn weak_context_root(case: &Case, root: &str) -> bool {
         || (case.label == "travel" && matches!(root, "focus" | "flow" | "tempo" | "task" | "plan"))
         || (case.label == "git release"
             && matches!(root, "mind" | "synth" | "agent" | "spark" | "neural"))
+        || (case.label == "developer naming"
+            && matches!(root, "crate" | "stack" | "byte" | "node" | "kit"))
 }
 
 fn main() {

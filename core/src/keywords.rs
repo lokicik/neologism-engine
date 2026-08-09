@@ -951,6 +951,13 @@ fn concept_position(word: &str) -> u8 {
 /// separate lets the generator combine *different ideas* (Ink + Lens) instead
 /// of accidentally pairing synonyms from one idea (Lens + Scope).
 pub fn brand_root_groups(keywords: &[String], limit: usize) -> Vec<Vec<String>> {
+    const DEV_NAMING_ROOTS: &[&str] = &["key", "tag", "alias", "slug"];
+    let has_naming_domain = keywords.iter().any(|keyword| {
+        matches!(
+            keyword.as_str(),
+            "name" | "naming" | "brand" | "title" | "word" | "identity"
+        )
+    });
     let has_rich_dev_palette = keywords.iter().any(|keyword| {
         matches!(
             keyword.as_str(),
@@ -1010,7 +1017,12 @@ pub fn brand_root_groups(keywords: &[String], limit: usize) -> Vec<Vec<String>> 
         if !suppress_literal_root(keyword) && !seen.contains(keyword) {
             group.push(keyword.clone());
         }
-        for &root in concept_roots(keyword) {
+        let expanded_roots = if has_naming_domain && is_dev_artifact(keyword) {
+            DEV_NAMING_ROOTS
+        } else {
+            concept_roots(keyword)
+        };
+        for &root in expanded_roots {
             let root = root.to_string();
             if !seen.contains(&root) && !group.contains(&root) {
                 group.push(root);
@@ -1215,16 +1227,23 @@ mod tests {
     }
 
     #[test]
-    fn expands_generic_dev_brief_into_brand_roots() {
+    fn expands_developer_naming_brief_into_contextual_roots() {
         let kws = extract_keywords(
             "a developer tool that generates names for packages CLIs libraries and projects",
             8,
         );
         let roots = brand_roots(&kws, 16);
         assert!(roots.iter().any(|r| r == "lex" || r == "nym"));
-        assert!(roots.iter().any(|r| r == "crate" || r == "stack"));
+        assert!(roots.iter().any(|r| r == "key" || r == "tag"));
+        assert!(!roots
+            .iter()
+            .any(|r| matches!(r.as_str(), "crate" | "stack" | "byte" | "node" | "kit")));
         assert!(roots.iter().any(|r| r == "forge" || r == "mint"));
         assert!(!roots.iter().any(|r| r == "developer" || r == "package"));
+
+        let generic = brand_roots(&extract_keywords("a developer toolkit for APIs", 6), 16);
+        assert!(generic.contains(&"crate".to_string()));
+        assert!(generic.contains(&"kit".to_string()));
     }
 
     #[test]
