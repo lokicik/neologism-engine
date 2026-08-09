@@ -1307,6 +1307,51 @@ keeps semantic coverage at **791/800**, passes all 30 guided Auto pages, and pre
 
 ---
 
+## Phase 80 — Break the first-page suffix monoculture
+
+**Bottleneck.** Semantic relevance was strong, but the first page still explained why many names
+felt mechanically similar. Expanding the morphology audit to twenty-two briefs found
+**773/1,100** direct root-plus-suffix forms, **327/1,100** multi-concept joins, and **0/1,100**
+metaphor forms. Of 110 deterministic pages, **55** carried at least eight suffix forms and **41**
+were suffix-only. The more varied metaphor lane already dominated Load more, but was unreachable
+on a single-concept first page.
+
+**A/B.** Opening that lane for every prompt raised diversity but weakened developer specificity
+**1,590/1,600 → 1,532/1,600**; forcing every metaphor to the lead concept recovered meaning but
+starved four long-session batches. Both variants were rejected. The retained rule leaves every
+multi-concept first page unchanged and reserves a measured 20% candidate lane only for
+single-concept briefs. After the first page, the existing broad continuation behavior remains
+unchanged. A 30% lane was less balanced and a 10% lane left more suffix-heavy pages; 20% performed
+best across the fixed seed matrix.
+
+**Seam correction.** Exercising the metaphor lane exposed a separate morphology bug. When a root
+ended with the same consonant that began the metaphor, the join deleted one side and produced
+`Bumpulse`, `Shellink`, `Flagrid`, `Configlow`, and `Agentrail`. The expanded audit found
+**13/1,100** fixed-page and **97/2,200** rolling examples. Identical vowels may still merge
+cleanly (`nova + atlas → Novatlas`), but consonants now preserve both readable roots; collapsed
+consonant seams move to **0/1,100** and **0/2,200**.
+
+**Measured result.** Direct suffix forms fall **773 → 658**, readable metaphor forms move
+**0 → 115**, suffix-heavy pages fall **55 → 30**, and suffix-only pages fall **41 → 6**.
+First-page diversity rises **0.715 → 0.725**. The structural composite trades
+**81.51 → 80.87**, expected because that legacy score explicitly rewards clean suffixes; unlike
+the rejected blanket penalty, this change adds a distinct naming family instead of merely
+reordering the same forms. All **2,200/2,200** rolling names still return, the old multi-concept
+first pages remain byte-identical, and developer-domain coverage stays **1,590/1,600**.
+
+Representative single-concept pages now mix compact coinages with forms such as `Careflow`,
+`Pulsevault`, `Valuevault`, `Envatlas`, `Gatevault`, `Flagwave`, `Workerloom`, and `Timerflow`
+instead of presenting ten near-identical suffix treatments.
+
+**Verification.** The core suite is **119/119** with a direct first-page shape regression.
+Compound remains **1,000/1,000** prompt-linked and pair-coherent with zero lexical echoes across
+both 1,000 fixed-page and 1,940 long-session names. WASM and the production bundle build cleanly;
+Chromium reports only **6/80** suffix-only developer Brandable pages, preserves **798/800**
+Brandable and **791/800** Compound semantic coverage, passes all 30 guided Auto pages, and keeps
+both 100-card Compound sessions intact.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

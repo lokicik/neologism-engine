@@ -83,6 +83,12 @@ const MODES = [
 const SEEDS = [7, 42, 101, 2024, 9999]
 const EXPECTED_PER_CASE = SEEDS.length * 10
 const LOSSY_OVERLAPS = new Set(['settledger', 'tagent'])
+const CONCEPT_SUFFIXES = ['ia', 'io', 'ora', 'ix', 'ify']
+
+const isConceptSuffix = (name, markers) => {
+  const normalized = name.toLowerCase().replace(/[^a-z]/g, '')
+  return markers.some((marker) => CONCEPT_SUFFIXES.some((suffix) => normalized === marker + suffix))
+}
 
 const hasCompoundLexicalEcho = (name) => {
   const boundaryOffset = name.slice(1).search(/[A-Z]/)
@@ -167,6 +173,11 @@ try {
     .flatMap((row) => row.names)
     .filter(hasCompoundLexicalEcho)
   check(lexicalEchoes.length === 0, `no Compound lexical echoes (${lexicalEchoes.join(', ') || 'none'})`)
+  const brandableRows = rows.filter((row) => row.mode === 'Brandable')
+  const suffixOnlyPages = brandableRows.filter((row) =>
+    row.names.every((name) => isConceptSuffix(name, row.markers)))
+  console.log(`Brandable suffix-only pages: ${suffixOnlyPages.length}/${brandableRows.length}`)
+  check(suffixOnlyPages.length <= 10, 'Brandable first pages do not collapse back to suffix-only forms')
   for (const testCase of CASES) {
     for (const mode of MODES) {
       const batches = rows.filter((row) => row.prompt === testCase.prompt && row.mode === mode.label)

@@ -19,7 +19,7 @@ use blend::{blend, compound, concept_transform, overlap_blend, semantic_join, te
 use exclude::ExcludeSet;
 use markov::Model;
 use phonemes::{affinity_score, Variant};
-use phonotactics::{is_valid, is_valid_clustered, respects_sonority, syllable_count};
+use phonotactics::{is_valid, is_valid_clustered, is_vowel, respects_sonority, syllable_count};
 use score::{score_memorability, score_novelty, score_pronounceability};
 use style::{Config, Style};
 
@@ -480,8 +480,9 @@ fn metaphor_join(a: &str, b: &str) -> Option<String> {
     }
 
     let mut joined = a.to_string();
+    let a_last = joined.chars().last()?;
     let b_first = b.chars().next()?;
-    if joined.chars().last()? == b_first {
+    if a_last == b_first && is_vowel(a_last) {
         joined.extend(b.chars().skip(1));
     } else {
         joined.push_str(b);
@@ -752,7 +753,7 @@ fn generate_bigtech(
                 if concept_groups.len() >= 2 || has_prompt_history {
                     0.25
                 } else {
-                    1.0
+                    0.80
                 }
             } else if all_roots.len() >= 2 {
                 0.30
@@ -785,7 +786,12 @@ fn generate_bigtech(
                     tech_transform(rng, root, 1.0)
                 }
             } else {
-                let a = all_roots[rand::Rng::gen_range(rng, 0..all_roots.len())];
+                let a = if concept_expanded && !has_prompt_history {
+                    let lead_group = &concept_groups[0];
+                    lead_group[rand::Rng::gen_range(rng, 0..lead_group.len())].as_str()
+                } else {
+                    all_roots[rand::Rng::gen_range(rng, 0..all_roots.len())]
+                };
                 let b = if concept_expanded {
                     CONCEPT_METAPHORS[rand::Rng::gen_range(rng, 0..CONCEPT_METAPHORS.len())]
                 } else {
@@ -1582,6 +1588,14 @@ mod tests {
             Some("forgeatlas".to_string())
         );
         assert_eq!(metaphor_join("nova", "atlas"), Some("novatlas".to_string()));
+        assert_eq!(
+            metaphor_join("shell", "link"),
+            Some("shelllink".to_string())
+        );
+        assert_eq!(
+            metaphor_join("bump", "pulse"),
+            Some("bumppulse".to_string())
+        );
         assert_eq!(metaphor_join("mint", "mint"), None);
     }
 
@@ -1730,6 +1744,42 @@ mod tests {
         let names: Vec<&String> = results.iter().map(|result| &result.name).collect();
         assert!(single >= 4, "only {single} compact coinages: {names:?}");
         assert!(joined >= 2, "only {joined} semantic joins: {names:?}");
+    }
+
+    #[test]
+    fn single_concept_first_page_varies_its_shape() {
+        let mut c = cfg(Style::BigTech);
+        c.description = Some("fitness".to_string());
+        c.count = 10;
+        c.temperature = 0.85;
+        c.variety = 0.3;
+        c.seed = Some(7);
+        let results = generate(&c);
+        assert_eq!(results.len(), 10);
+
+        let keywords = keywords::extract_keywords("fitness", 6);
+        let roots = keywords::brand_roots(&keywords, 16);
+        let concept_suffixes = ["ia", "io", "ora", "ix", "ify"];
+        let suffix_count = results
+            .iter()
+            .filter(|result| {
+                let lower = result.name.to_lowercase();
+                roots.iter().any(|root| {
+                    concept_suffixes
+                        .iter()
+                        .any(|suffix| lower == format!("{root}{suffix}"))
+                })
+            })
+            .count();
+        assert!(suffix_count > 0, "lost the compact coined-name lane");
+        assert!(
+            suffix_count < results.len(),
+            "first page collapsed to suffix-only forms: {:?}",
+            results
+                .iter()
+                .map(|result| &result.name)
+                .collect::<Vec<_>>()
+        );
     }
 
     #[test]
