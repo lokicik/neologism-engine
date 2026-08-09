@@ -53,7 +53,7 @@ if (ixProfile) {
   )
   check(ranked[0].name === 'Nymix', 'repeated -ix taste outranks an unrelated shape')
 
-  check(preferencePoolCount(10, ixProfile) === 30, 'active taste opens a three-page candidate pool')
+  check(preferencePoolCount(10, ixProfile) === 60, 'active taste opens a six-page candidate pool')
   const shortlist = shortlistByPreference(
     [
       result('Velora'),
@@ -96,7 +96,7 @@ check(
   'three reference names can initialize local taste before any feedback',
 )
 check(
-  preferencePoolCount(10, referencedTaste.profile) === 30,
+  preferencePoolCount(10, referencedTaste.profile) === 60,
   'reference-initialized taste opens the larger local candidate pool',
 )
 if (referencedTaste.profile) {
@@ -107,6 +107,20 @@ if (referencedTaste.profile) {
   check(
     ranked[0].name === 'Nomio',
     'reference affinity cannot promote a structurally weak name over a strong one',
+  )
+
+  const qualityShortlist = shortlistByPreference(
+    [
+      scoredResult('Checktag', 62),
+      ...['Nomio', 'Lexia', 'Vercel', 'Tandem', 'Sentry', 'Prisma', 'Figma', 'Docker', 'Linear', 'Notion']
+        .map((name) => scoredResult(name, 88)),
+    ],
+    referencedTaste.profile,
+    10,
+  )
+  check(
+    qualityShortlist.length === 10 && !qualityShortlist.some((item) => item.name === 'Checktag'),
+    'a full strong pool keeps sub-75 structural names out of the visible page',
   )
 }
 
@@ -119,6 +133,36 @@ check(
   deduplicatedTaste.references.length === 2 && deduplicatedTaste.profile?.likedCount === 3,
   'a starred reference is counted only once in the positive profile',
 )
+
+const mintProfile = buildProfile([result('Mintix'), result('Mintio'), result('Mintia')])
+if (mintProfile) {
+  const familyShortlist = shortlistByPreference(
+    [
+      result('Mintora'), result('Mintify'), result('Mintix'), result('Mintio'),
+      result('Nomora'), result('Lexora'), result('Vexora'), result('Sentry'),
+      result('Prisma'), result('Docker'), result('Linear'), result('Notion'),
+    ],
+    mintProfile,
+    10,
+  )
+  check(
+    familyShortlist.length === 10
+      && familyShortlist.filter((item) => item.name.startsWith('Mint')).length <= 2,
+    'the visible personalized page restores the engine two-per-prefix limit',
+  )
+  check(
+    shortlistByPreference([result('Mintix')], mintProfile, 0).length === 0,
+    'a zero-size personalized request stays empty',
+  )
+  check(
+    shortlistByPreference(
+      [scoredResult('Mintix', 88), scoredResult('Mintio', 60)],
+      mintProfile,
+      2,
+    ).length === 2,
+    'a constrained pool relaxes quality and family preferences instead of starving',
+  )
+}
 
 const projectALikes = [
   result('Nomix', 2, 'brandable', 'project-a'),

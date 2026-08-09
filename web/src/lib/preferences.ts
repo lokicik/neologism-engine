@@ -11,8 +11,10 @@ const VOWELS = new Set(['a', 'e', 'i', 'o', 'u', 'y'])
 const SHARP = new Set(['k', 't', 'x', 'z', 'q', 'v'])
 const KNOWN_SUFFIXES = ['ify', 'ora', 'ium', 'io', 'ia', 'ix', 'ly', 'ai']
 const ENGINE_QUALITY_WEIGHT = 1.1
+const MIN_SHORTLIST_QUALITY = 0.75
+const VISIBLE_PREFIX_SHARE = 0.2
 export const MIN_TASTE_SIGNALS = 3
-export const TASTE_POOL_MULTIPLIER = 3
+export const TASTE_POOL_MULTIPLIER = 6
 export const MAX_TASTE_POOL = 60
 export const MAX_TASTE_REFERENCES = 8
 
@@ -303,6 +305,36 @@ export function shortlistByPreference(
   requested: number,
 ): NameResult[] {
   const count = Math.max(0, Math.floor(requested))
-  const ranked = profile ? rankByPreference(results, profile) : results
-  return ranked.slice(0, count)
+  if (count === 0) return []
+  if (!profile) return results.slice(0, count)
+
+  const ranked = rankByPreference(results, profile)
+  const qualified = ranked.filter((result) => engineQuality(result) >= MIN_SHORTLIST_QUALITY)
+  const candidates = qualified.length >= count
+    ? qualified
+    : [...qualified, ...ranked.filter((result) => engineQuality(result) < MIN_SHORTLIST_QUALITY)]
+
+  // The Rust generator caps one 3-letter stem family at 20% of a visible
+  // batch. A larger personalization pool relaxes that cap internally, so
+  // restore it after taste ranking instead of showing ten variants of one root.
+  const prefixCap = Math.max(1, Math.ceil(count * VISIBLE_PREFIX_SHARE))
+  const selected: NameResult[] = []
+  const deferred: NameResult[] = []
+  const prefixCounts = new Map<string, number>()
+  for (const candidate of candidates) {
+    const prefix = letters(candidate.name).slice(0, 3)
+    if ((prefixCounts.get(prefix) ?? 0) >= prefixCap) {
+      deferred.push(candidate)
+      continue
+    }
+    selected.push(candidate)
+    prefixCounts.set(prefix, (prefixCounts.get(prefix) ?? 0) + 1)
+    if (selected.length === count) return selected
+  }
+
+  // Tiny or heavily constrained pools may not contain enough families. Keep
+  // the requested count rather than turning a diversity preference into false
+  // exhaustion.
+  selected.push(...deferred.slice(0, count - selected.length))
+  return selected
 }

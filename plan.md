@@ -1860,6 +1860,47 @@ copy, and separation from explicit feedback.
 
 ---
 
+## Phase 93 — Keep personalized pages strong and structurally varied
+
+**Bottleneck.** The larger local pool exposed a boundary error between the Rust generator and
+the web selector. The engine limits one three-letter stem family to 20% of the requested batch,
+so a normal ten-name page allows two. Personalization requested thirty names first, which relaxed
+that internal cap to six; the web ranker could then put most of those six variants back into its
+visible ten. Across five briefs, four reference sets, and five seeds, the 100 personalized pages
+contained **190** names beyond the intended two-per-prefix limit and **104/1,000** selected names
+below a 75 structural composite. The app brief visibly collapsed into `Mint…`, `Mark…`, `Lex…`,
+and `Nom…` variants.
+
+**Rejected alternatives.** A generic edit-distance MMR penalty reduced near-duplicate pairs but
+admitted more low-quality candidates, including `Lexcheck`; it was removed. Hard two-per-suffix
+limits reduced reference affinity too sharply and surfaced `Nymslug`. A deeper pool without a
+visible-page family cap increased concentration. No new naming root, suffix palette, or aesthetic
+blacklist was retained.
+
+**Retained correction.** An active local profile now requests up to sixty offline candidates.
+The engine may honestly return fewer when a brief's reachable space is narrower (the audit spans
+29–60), but the visible page still contains ten. Selection first uses candidates at or above a
+75 structural composite when at least ten are available, then restores the generator's 20%
+three-letter-prefix boundary at the visible-page size. If a constrained pool lacks enough strong
+names or prefix families, ranked fallbacks preserve result count rather than causing false
+exhaustion. Cold start remains byte-for-byte on the old requested-count path.
+
+**Measured result.** On the fixed 100-page matrix, average engine quality rises
+**84.16 → 85.46**; sub-75 selections fall **104 → 0**; three-plus prefix overflow falls
+**190 → 0**; near-duplicate pairs fall **315 → 245**; and mean pair similarity falls
+**0.260 → 0.233**. Mean reference affinity is effectively held (**-0.783 → -0.786**).
+The retained production audit fails closed below **85.2** average quality, above **260** near
+pairs, above **0.24** mean pair similarity, or on any sub-75 name/prefix overflow.
+
+**Verification.** Thirty-one deterministic preference checks cover the six-page request, quality
+floor, visible family limit, constrained fallback, and zero-size behavior alongside all prior
+taste contracts. TypeScript and the Vite production build are clean. The new
+`taste-quality-audit.mjs` passes all seven gates over 1,000 selected names, and the existing 28
+Chromium checks preserve real-WASM feedback, references, persistence, export separation, and
+expanded-pool selection.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
@@ -1872,7 +1913,8 @@ first-page dilution. Its focused two-word names now also reject cross-concept ad
 pairings that are individually relevant but read poorly together.
 Long prompted sessions no longer collapse into repeated suffix families or stop before 100
 names, and semantic joins no longer erase a concept at one-letter/vowel boundaries. Local taste
-feedback now selects each visible page from a larger offline pool per project, while AI Studio remains an
+feedback now selects each visible page from up to sixty offline candidates per project, applies a
+structural quality floor, and restores visible stem-family diversity. AI Studio remains an
 optional, separate batch judge rather than a hidden dependency of Create.
 
 The next broad aesthetic scorer change is evidence-gated: collect at least ten real likes and ten passes in
