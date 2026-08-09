@@ -33,11 +33,15 @@ const SEEDS = [7, 42, 101, 2024, 9999]
 const VERBOSE = process.argv.includes('--verbose')
 const LOSSY_SEAMS = new Set(['aurank', 'poolink', 'pooledger', 'settledger', 'tagent'])
 const CONTEXT_ONLY_WORDS = new Map([
+  ['a developer tool that generates names for packages CLIs libraries and projects', ['developer', 'generate', 'package', 'library', 'cli']],
+  ['an app for splitting expenses with friends', ['friend']],
   ['a local cache inspector', ['local']],
   ['a guided breathing and rest companion', ['guided', 'companion']],
-  ['a simple workout planner', ['simple']],
+  ['a simple workout planner', ['simple', 'planner']],
   ['a collaborative document editor', ['collaborative']],
   ['automatic invoice reminders', ['automatic', 'reminder']],
+  ['animal health reminders for pet owners', ['health', 'reminder', 'owner']],
+  ['an online marketplace for local sellers', ['online', 'local', 'seller']],
 ])
 
 const server = spawn(process.execPath, [viteCli, '--port', String(PORT), '--strictPort'], {
@@ -118,8 +122,11 @@ try {
     const lossySeams = row.results.filter((item) => LOSSY_SEAMS.has(item.name.toLowerCase()))
     const weakWords = CONTEXT_ONLY_WORDS.get(row.prompt) ?? []
     const weakForms = row.results.filter((item) => {
-      if (item.sourceMode !== 'brandable') return false
       const name = item.name.toLowerCase().replace(/[^a-z]/g, '')
+      if (item.sourceMode === 'respell') {
+        return weakWords.some((word) => editDistance(name, word) === 1)
+      }
+      if (item.sourceMode !== 'brandable') return false
       return weakWords.some((word) => name.startsWith(word) || name.endsWith(word))
     })
     weakContextForms += weakForms.length

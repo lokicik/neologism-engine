@@ -959,6 +959,43 @@ pub fn is_naming_brief(keywords: &[String]) -> bool {
     })
 }
 
+/// Choose literal source words that are worth styling in Respell mode. A
+/// recognizable spelling change should carry the product's subject, not its
+/// delivery method, audience, or an incidental role (Companyon, Remynder,
+/// Plannr). Unknown briefs keep every extracted word so this remains a filter,
+/// not a closed vocabulary.
+pub fn respell_source_keywords(keywords: &[String]) -> Vec<String> {
+    let has_semantic_anchor = keywords.iter().any(|keyword| {
+        !concept_roots(keyword).is_empty() && !is_contextually_suppressed(keyword, keywords)
+    });
+    if !has_semantic_anchor {
+        return keywords.to_vec();
+    }
+
+    let naming_brief = is_naming_brief(keywords);
+    let focused: Vec<String> = keywords
+        .iter()
+        .filter(|keyword| {
+            !is_contextually_suppressed(keyword, keywords)
+                && !is_brand_context_only(keyword)
+                && !matches!(keyword.as_str(), "friend" | "team")
+                && !concept_roots(keyword).is_empty()
+                && (!naming_brief
+                    || matches!(
+                        keyword.as_str(),
+                        "name" | "naming" | "brand" | "title" | "word" | "identity"
+                    ))
+        })
+        .cloned()
+        .collect();
+
+    if focused.is_empty() {
+        keywords.to_vec()
+    } else {
+        focused
+    }
+}
+
 pub fn brand_root_groups(keywords: &[String], limit: usize) -> Vec<Vec<String>> {
     const DEV_NAMING_ROOTS: &[&str] = &["key", "tag", "alias", "slug"];
     let has_naming_domain = is_naming_brief(keywords);
@@ -1278,6 +1315,65 @@ mod tests {
             assert!(!roots.contains(&dropped.to_string()), "{prompt}: {roots:?}");
             assert!(roots.contains(&expected.to_string()), "{prompt}: {roots:?}");
         }
+    }
+
+    #[test]
+    fn focuses_respell_sources_on_the_product_subject() {
+        for (prompt, kept, dropped) in [
+            (
+                "a developer tool that generates names for packages CLIs libraries and projects",
+                &["name"][..],
+                &["developer", "generate", "package", "library", "cli"][..],
+            ),
+            (
+                "an app for splitting expenses with friends",
+                &["split", "expense"][..],
+                &["friend"][..],
+            ),
+            (
+                "a guided breathing and rest companion",
+                &["breath", "rest"][..],
+                &["guided", "companion"][..],
+            ),
+            (
+                "a simple workout planner",
+                &["workout"][..],
+                &["simple", "planner"][..],
+            ),
+            (
+                "automatic invoice reminders",
+                &["invoice"][..],
+                &["automatic", "reminder"][..],
+            ),
+            (
+                "animal health reminders for pet owners",
+                &["animal", "pet"][..],
+                &["health", "reminder", "owner"][..],
+            ),
+            (
+                "an online marketplace for local sellers",
+                &["marketplace"][..],
+                &["online", "local", "seller"][..],
+            ),
+        ] {
+            let keywords = extract_keywords(prompt, 6);
+            let sources = respell_source_keywords(&keywords);
+            for word in kept {
+                assert!(sources.iter().any(|source| source == word), "{prompt}: {sources:?}");
+            }
+            for word in dropped {
+                assert!(
+                    !sources.iter().any(|source| source == word),
+                    "{prompt}: {sources:?}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn respell_sources_preserve_unknown_briefs() {
+        let keywords = vec!["local".into(), "bakery".into()];
+        assert_eq!(respell_source_keywords(&keywords), keywords);
     }
 
     #[test]

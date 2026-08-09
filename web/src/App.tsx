@@ -175,8 +175,8 @@ export default function App() {
       }
       setPromptKeywords(cfg.description?.trim() ? await extractKeywords(cfg.description) : [])
       setExhausted(pool.length === 0)
-      // Taste profiles select from a larger pool. Cold Auto opens its fallback
-      // only when the primary page has a weak slot. Existing cards stay fixed.
+      // Taste profiles select from a larger pool. Cold Auto opens its bounded
+      // fallback only for weak/missing slots or an overly repetitive page.
       const shown = append ? [...resultsRef.current, ...batch] : batch
       setResults(shown)
       // Hidden pool candidates count as explored. Otherwise the deterministic

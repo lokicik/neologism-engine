@@ -111,6 +111,35 @@ check(
   'a fully strong cold page avoids a second fallback generation',
 )
 
+const repetitiveColdPage = [
+  { ...scoredResult('Vyntage', 88), sourceMode: 'respell' as const },
+  ...['Lexia', 'Nexia', 'Vexia', 'Dexia', 'Rexia', 'Texia', 'Mexia', 'Pexia', 'Kexia']
+    .map((name) => ({ ...scoredResult(name, 88), sourceMode: 'brandable' as const })),
+]
+check(
+  needsQualityRepair(repetitiveColdPage, 10),
+  'a strong but repetitive cold page activates the bounded diversity repair',
+)
+const diversityFallbackNames = ['Quartz', 'Mallow', 'Nimbus', 'Cedar', 'Vexel', 'Orbit', 'Fable', 'Prism', 'Tandem', 'Sentry']
+const diversifiedColdPage = repairWeakShortlist(
+  repetitiveColdPage,
+  diversityFallbackNames
+    .map((name) => ({ ...scoredResult(name, 88), sourceMode: 'brandable' as const })),
+  10,
+)
+check(
+  diversifiedColdPage[0].name === 'Vyntage',
+  'cold diversity repair preserves the earned Respell accent',
+)
+check(
+  diversifiedColdPage.some((item) => diversityFallbackNames.includes(item.name)),
+  'cold diversity repair substitutes a same-quality Brandable alternative',
+)
+check(
+  !needsQualityRepair(diversifiedColdPage, 10),
+  'a diversified cold page does not need a second fallback generation',
+)
+
 const parsedReferences = parseTasteReferences(
   ' Vercel, linear; NOTION\nver-cel, x, A Really Long Reference Name Beyond Limit ',
 )

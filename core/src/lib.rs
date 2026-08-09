@@ -600,6 +600,8 @@ fn generate_bigtech(
     };
     let expanded_desc_keywords = if use_concept_roots {
         concept_groups.iter().flatten().cloned().collect()
+    } else if respell_mode {
+        keywords::respell_source_keywords(&raw_desc_keywords)
     } else {
         raw_desc_keywords.clone()
     };
@@ -2048,11 +2050,11 @@ mod tests {
     }
 
     #[test]
-    fn single_viable_respell_accent_stays_tied_to_the_description() {
+    fn single_viable_respell_accent_stays_tied_to_the_product_subject() {
         let prompts = [
-            "a developer tool that generates names for packages CLIs libraries and projects",
-            "an app for splitting expenses with friends",
             "a marketplace for vintage keyboards",
+            "fitness coaching for athletes",
+            "animal health reminders for pet owners",
         ];
 
         for (index, description) in prompts.iter().enumerate() {
@@ -2061,7 +2063,9 @@ mod tests {
             c.description = Some((*description).to_string());
             c.count = 1;
             c.seed = Some(0xA076_1D64_78BD_642Fu64.wrapping_mul(index as u64 + 1));
-            let expected: HashSet<String> = keywords::extract_keywords(description, 6)
+            let expected: HashSet<String> = keywords::respell_source_keywords(
+                &keywords::extract_keywords(description, 6),
+            )
                 .iter()
                 .flat_map(|keyword| blend::respell_options(keyword))
                 .collect();

@@ -1985,6 +1985,46 @@ not change Rust or WASM generation.
 
 ---
 
+## Phase 96 — Focus Respell on the product subject
+
+**Bottleneck.** The remaining Auto accent was edit-distance-linked to the brief but could still
+style the wrong part of it. Across the fixed prompt matrix, the same structurally credible yet
+incidental forms repeated on every seed: `Developr` for a naming tool, `Fryend` for expense
+splitting, `Companyon` for breathing, `Plannr` for workouts, `Remynder` for invoices and pets,
+and `Onlyne` for a marketplace. This was a source-selection problem, not evidence that Respell's
+one-transform spelling rules needed another broad mutation or name blacklist.
+
+**Retained correction.** Prompted Respell now reuses the engine's established semantic-domain
+knowledge before producing variants. When a recognized product concept exists, delivery words,
+audience terms, contextually suppressed words, and unknown role nouns are excluded; unknown
+briefs retain their original literal fallback. Naming briefs focus specifically on naming words,
+so the app's own brief receives no Respell accent when `name` has no safe transform instead of
+falling through to `Developr`. Explicit seed roots and every non-Respell mode remain unchanged.
+
+Removing an unearned accent can expose one more same-family Brandable on a cold page. The bounded
+offline repair therefore also opens when mean pair similarity exceeds **0.21**. It preserves any
+earned accent and only substitutes a Brandable fallback whose structural quality is at least as
+high as the name it replaces; it stops as soon as the page meets the diversity boundary. This is
+still local WASM work, and the fallback remains capped at thirty candidates.
+
+**Measured result.** The 85-page guided matrix moves from **45** prompt-linked Respell accents to
+**20** product-subject accents: all 25 context/role-word cases disappear, while `Vyntage`,
+`Edytor`, and `Anymal` remain available where the styled source is the product concept. Weak
+context forms stay at **0** and all visible accents remain prompt-linked. On the 90-page cold
+matrix, the source filter alone would raise mean pair similarity to **0.213**; the quality-neutral
+diversity pass brings it to **0.207**. Visible average structural quality is **82.89**, sub-75
+names remain **0**, near-duplicate pairs remain under the retained limit at **58**, and no page
+contains more than one accent. Repair activates on **75/90** fixed pages.
+
+**Verification.** The focused Rust source-selection tests cover naming, expense, breathing,
+fitness, invoice, pet, marketplace, and unknown briefs. The complete Respell test family passes,
+the deterministic browser preference check pins quality-neutral substitution and accent
+preservation, TypeScript and the production bundle build cleanly, and both the 85-page Auto audit
+and all eight 90-page cold-quality gates pass. No LLM, network call, scorer-weight change, or
+per-name rejection list was introduced.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
@@ -1997,8 +2037,10 @@ first-page dilution. Its focused two-word names now also reject cross-concept ad
 pairings that are individually relevant but read poorly together.
 Long prompted sessions no longer collapse into repeated suffix families or stop before 100
 names, and semantic joins no longer erase a concept at one-letter/vowel boundaries. Naming briefs
-now use a smoother, deliberately scoped ending palette. Cold Auto preserves strong first-page
-names and opens a bounded offline fallback only for weak slots. Local taste feedback selects each
+now use a smoother, deliberately scoped ending palette. Respell accents style a recognized
+product subject instead of incidental context, and disappear when the brief has no safe literal
+transformation. Cold Auto preserves strong first-page names and opens a bounded offline fallback
+for weak slots or an overly repetitive page. Local taste feedback selects each
 visible page from up to sixty offline candidates per project, applies a structural quality floor,
 and restores visible stem and naming-ending diversity. AI Studio remains an optional, separate
 batch judge rather than a hidden dependency of Create.

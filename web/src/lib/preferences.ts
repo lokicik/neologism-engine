@@ -14,6 +14,7 @@ const ENGINE_QUALITY_WEIGHT = 1.1
 const MIN_SHORTLIST_QUALITY = 0.75
 const VISIBLE_PREFIX_SHARE = 0.2
 const VISIBLE_SUFFIX_SHARE = 0.2
+const MAX_COLD_PAIR_SIMILARITY = 0.21
 export const MIN_TASTE_SIGNALS = 3
 export const TASTE_POOL_MULTIPLIER = 6
 export const MAX_TASTE_POOL = 60
@@ -282,6 +283,110 @@ function engineQuality(result: NameResult): number {
   ) / 100
 }
 
+function editDistance(left: string, right: string): number {
+  const row = Array.from({ length: right.length + 1 }, (_, index) => index)
+  for (let i = 1; i <= left.length; i++) {
+    let previous = row[0]
+    row[0] = i
+    for (let j = 1; j <= right.length; j++) {
+      const old = row[j]
+      row[j] = Math.min(
+        row[j] + 1,
+        row[j - 1] + 1,
+        previous + Number(left[i - 1] !== right[j - 1]),
+      )
+      previous = old
+    }
+  }
+  return row[right.length]
+}
+
+function lexicalSimilarity(left: string, right: string): number {
+  const a = letters(left)
+  const b = letters(right)
+  const length = Math.max(a.length, b.length)
+  return length === 0 ? 1 : 1 - editDistance(a, b) / length
+}
+
+function meanPairSimilarity(results: NameResult[]): number {
+  let similarity = 0
+  let pairs = 0
+  for (let i = 0; i < results.length; i++) {
+    for (let j = i + 1; j < results.length; j++) {
+      similarity += lexicalSimilarity(results[i].name, results[j].name)
+      pairs++
+    }
+  }
+  return pairs === 0 ? 0 : similarity / pairs
+}
+
+function visibleFamilyCapsHold(results: NameResult[], namingPage: boolean): boolean {
+  const count = results.length
+  const prefixCap = Math.max(1, Math.ceil(count * VISIBLE_PREFIX_SHARE))
+  const suffixCap = Math.max(1, Math.ceil(count * VISIBLE_SUFFIX_SHARE))
+  const prefixes = new Map<string, number>()
+  const suffixes = new Map<string, number>()
+  for (const result of results) {
+    const prefix = letters(result.name).slice(0, 3)
+    const ending = suffix(result.name)
+    const prefixCount = (prefixes.get(prefix) ?? 0) + 1
+    const suffixCount = (suffixes.get(ending) ?? 0) + 1
+    if (prefixCount > prefixCap || (namingPage && suffixCount > suffixCap)) return false
+    prefixes.set(prefix, prefixCount)
+    suffixes.set(ending, suffixCount)
+  }
+  return true
+}
+
+// If a strong cold page is still visually repetitive, make the smallest
+// quality-neutral substitutions available from the bounded fallback pool.
+// Respell/Compound accents keep their slots; every replacement must be at
+// least as strong as the Brandable name it replaces.
+function diversifyColdShortlist(
+  page: NameResult[],
+  fallback: NameResult[],
+  namingPage: boolean,
+): NameResult[] {
+  const selected = page.slice()
+  const selectedKeys = new Set(selected.map((result) => letters(result.name)))
+  const candidates = fallback.filter((candidate) => (
+    candidate.sourceMode === 'brandable'
+    && engineQuality(candidate) >= MIN_SHORTLIST_QUALITY
+    && !selectedKeys.has(letters(candidate.name))
+  ))
+  let currentSimilarity = meanPairSimilarity(selected)
+
+  while (currentSimilarity > MAX_COLD_PAIR_SIMILARITY && candidates.length > 0) {
+    let best: { index: number; candidateIndex: number; similarity: number; quality: number } | null = null
+    for (let index = 0; index < selected.length; index++) {
+      const replaced = selected[index]
+      if (replaced.sourceMode && replaced.sourceMode !== 'brandable') continue
+      for (let candidateIndex = 0; candidateIndex < candidates.length; candidateIndex++) {
+        const candidate = candidates[candidateIndex]
+        const quality = engineQuality(candidate)
+        if (quality + Number.EPSILON < engineQuality(replaced)) continue
+        const trial = selected.slice()
+        trial[index] = candidate
+        if (!visibleFamilyCapsHold(trial, namingPage)) continue
+        const similarity = meanPairSimilarity(trial)
+        if (similarity + Number.EPSILON >= currentSimilarity) continue
+        if (
+          !best
+          || similarity < best.similarity - Number.EPSILON
+          || (Math.abs(similarity - best.similarity) <= Number.EPSILON && quality > best.quality)
+        ) {
+          best = { index, candidateIndex, similarity, quality }
+        }
+      }
+    }
+    if (!best) break
+    selected[best.index] = candidates[best.candidateIndex]
+    candidates.splice(best.candidateIndex, 1)
+    currentSimilarity = best.similarity
+  }
+  return selected
+}
+
 export function coldQualityPoolCount(requested: number): number {
   const count = Math.max(0, Math.floor(requested))
   return Math.max(count, Math.min(MAX_TASTE_POOL, count * COLD_QUALITY_POOL_MULTIPLIER))
@@ -290,11 +395,14 @@ export function coldQualityPoolCount(requested: number): number {
 export function needsQualityRepair(results: NameResult[], requested: number): boolean {
   const count = Math.max(0, Math.floor(requested))
   const page = results.slice(0, count)
-  return page.length < count || page.some((result) => engineQuality(result) < MIN_SHORTLIST_QUALITY)
+  return page.length < count
+    || page.some((result) => engineQuality(result) < MIN_SHORTLIST_QUALITY)
+    || meanPairSimilarity(page) > MAX_COLD_PAIR_SIMILARITY
 }
 
-// Cold Auto keeps the engine's intended first-page order. Only an explicitly
-// weak or missing slot is replaced from a larger offline fallback pool.
+// Cold Auto keeps the engine's intended first-page order where possible. Weak
+// or missing slots are replaced first; a repetitive strong page permits only
+// same-or-better-quality substitutions from the bounded offline fallback.
 export function repairWeakShortlist(
   primary: NameResult[],
   fallback: NameResult[],
@@ -305,9 +413,9 @@ export function repairWeakShortlist(
 
   const page = primary.slice(0, count)
   const selected = page.filter((result) => engineQuality(result) >= MIN_SHORTLIST_QUALITY)
-  if (selected.length === count) return selected
-
   const namingPage = isNamingBrief([...page, ...fallback])
+  if (selected.length === count) return diversifyColdShortlist(selected, fallback, namingPage)
+
   const prefixCap = Math.max(1, Math.ceil(count * VISIBLE_PREFIX_SHARE))
   const suffixCap = Math.max(1, Math.ceil(count * VISIBLE_SUFFIX_SHARE))
   const seen = new Set(selected.map((result) => letters(result.name)))
@@ -337,7 +445,7 @@ export function repairWeakShortlist(
     seen.add(key)
     prefixCounts.set(prefix, (prefixCounts.get(prefix) ?? 0) + 1)
     suffixCounts.set(ending, (suffixCounts.get(ending) ?? 0) + 1)
-    if (selected.length === count) return selected
+    if (selected.length === count) return diversifyColdShortlist(selected, fallback, namingPage)
   }
 
   for (const candidate of deferred) {
@@ -345,7 +453,7 @@ export function repairWeakShortlist(
     if (seen.has(key)) continue
     selected.push(candidate)
     seen.add(key)
-    if (selected.length === count) return selected
+    if (selected.length === count) return diversifyColdShortlist(selected, fallback, namingPage)
   }
 
   // A genuinely constrained mode may lack enough strong alternatives. Keep
@@ -355,9 +463,9 @@ export function repairWeakShortlist(
     if (seen.has(key)) continue
     selected.push(candidate)
     seen.add(key)
-    if (selected.length === count) return selected
+    if (selected.length === count) return diversifyColdShortlist(selected, fallback, namingPage)
   }
-  return selected
+  return diversifyColdShortlist(selected, fallback, namingPage)
 }
 
 export function rankByPreference(results: NameResult[], profile: PreferenceProfile): NameResult[] {
