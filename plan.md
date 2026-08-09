@@ -1276,6 +1276,37 @@ gate, all 30 guided Auto pages, and both 100-card Compound sessions.
 
 ---
 
+## Phase 79 — Reject same-stem Compound echoes
+
+**Bottleneck.** The expanded developer audit surfaced `TimedTimer`: both halves were individually
+valid for a background scheduler, so the semantic role check accepted a name that visibly said
+the same thing twice. Expanding the Compound harness from twelve to twenty briefs made the defect
+measurable. It appeared **3/1,000** times across five fixed seeds, always as `TimedTimer`; the
+other 997 names were clean.
+
+**A/B.** A broad semantic-similarity filter would also erase intentional, brandable pairings.
+The retained rule is lexical and deliberately narrow: reject pairs whose halves share at least
+four leading letters and leave at most two letters on either side of that shared stem. It also
+consolidates the existing exact-match and full-prefix guards. Direct counterexamples preserve
+`FairHair`, `PrimePrint`, and `QuietInk`, while `TimedTimer`, `TidyTidy`, and prefix repetition
+remain rejected.
+
+**Measured result.** Fixed-seed lexical echoes move **3/1,000 → 0/1,000** while noun relevance
+and adjective–noun coherence remain **1,000/1,000**. The affected scheduler brief replaces
+`TimedTimer` with `SwiftTask` and `TimedWorker`; its structural composite improves
+**70.9 → 71.5**, diversity trades **0.751 → 0.744**, and its 100-name capacity remains intact.
+Across twenty long audit batches, **0/1,940** generated names contain an echo; no previously full
+session becomes short.
+
+**Verification.** The core suite is **118/118**, including a direct 100-name scheduler
+regression. Brandable quality remains byte-identical, developer semantics stay **1,590/1,600**,
+and morphology remains free of collapsed suffixes and lossy overlaps. WASM and the production
+bundle build cleanly; Chromium finds no lexical echo in 800 Compound developer-domain names,
+keeps semantic coverage at **791/800**, passes all 30 guided Auto pages, and preserves both
+100-card Compound sessions.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

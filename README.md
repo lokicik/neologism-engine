@@ -75,11 +75,11 @@ App runs at **http://localhost:5173/**.
 cargo test -p neologism-core
 ```
 
-116 unit tests covering Markov determinism, phonotactic filters, blend logic, score ranges, phoneme affinity, sonority sequencing, word-likeness, keyword extraction, semantic ranking, exclusion behavior, developer-domain coverage, and 100-name brief sessions.
+118 unit tests covering Markov determinism, phonotactic filters, blend logic, score ranges, phoneme affinity, sonority sequencing, word-likeness, keyword extraction, semantic ranking, exclusion behavior, developer-domain coverage, and 100-name brief sessions.
 
 > Quick quality check: `cargo run -p neologism-core --example sample` prints a batch of names for every style and variant.
 > Long-session check: `cargo run -p neologism-core --example concept_compare --release` audits ten rolling batches across seven representative briefs.
-> Compound quality check: `cargo run -p neologism-core --example compound_compare --release` audits noun relevance, adjective–noun coherence, structural scores, seed diversity, and 100-name capacity across twelve multi- and single-concept briefs.
+> Compound quality check: `cargo run -p neologism-core --example compound_compare --release` audits noun relevance, adjective–noun coherence, lexical echoes, structural scores, seed diversity, and 100-name capacity across twenty multi- and single-concept briefs.
 > Developer-domain check: `cargo run -p neologism-core --example dev_domain_compare --release` audits semantic coverage across sixteen held-out developer briefs and both Brandable and Compound; from `web/`, `node e2e/dev-domain-audit.mjs` pins the same behavior in Chromium/WASM.
 > Brandable morphology check: `cargo run -p neologism-core --example morphology_compare --release` audits 700 fixed-seed names plus 1,400 rolling-session names for collapsed suffixes, complete vowel-suffix seams, and lossy shared overlaps while tracking structural composite, diversity, and capacity.
 > Auto first-page check: from `web/`, `node e2e/auto-quality-audit.mjs` audits 30 deterministic guided pages (`--verbose` prints every name).

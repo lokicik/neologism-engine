@@ -84,6 +84,25 @@ const SEEDS = [7, 42, 101, 2024, 9999]
 const EXPECTED_PER_CASE = SEEDS.length * 10
 const LOSSY_OVERLAPS = new Set(['settledger', 'tagent'])
 
+const hasCompoundLexicalEcho = (name) => {
+  const boundaryOffset = name.slice(1).search(/[A-Z]/)
+  if (boundaryOffset < 0) return false
+  const boundary = boundaryOffset + 1
+  const adjective = name.slice(0, boundary).toLowerCase()
+  const noun = name.slice(boundary).toLowerCase()
+  if (adjective === noun) return true
+
+  const shorter = Math.min(adjective.length, noun.length)
+  if (shorter < 4) return false
+  if (adjective.startsWith(noun) || noun.startsWith(adjective)) return true
+
+  let sharedPrefix = 0
+  while (sharedPrefix < shorter && adjective[sharedPrefix] === noun[sharedPrefix]) sharedPrefix++
+  return sharedPrefix >= 4
+    && adjective.length - sharedPrefix <= 2
+    && noun.length - sharedPrefix <= 2
+}
+
 const server = spawn(process.execPath, [viteCli, '--port', String(PORT), '--strictPort'], {
   cwd: WEB_DIR,
   stdio: 'pipe',
@@ -143,6 +162,11 @@ try {
   const aggregate = Object.fromEntries(MODES.map((mode) => [mode.label, { mapped: 0, total: 0 }]))
   const lossyOverlaps = rows.flatMap((row) => row.names).filter((name) => LOSSY_OVERLAPS.has(name.toLowerCase()))
   check(lossyOverlaps.length === 0, `no lossy semantic overlaps (${lossyOverlaps.join(', ') || 'none'})`)
+  const lexicalEchoes = rows
+    .filter((row) => row.mode === 'Compound')
+    .flatMap((row) => row.names)
+    .filter(hasCompoundLexicalEcho)
+  check(lexicalEchoes.length === 0, `no Compound lexical echoes (${lexicalEchoes.join(', ') || 'none'})`)
   for (const testCase of CASES) {
     for (const mode of MODES) {
       const batches = rows.filter((row) => row.prompt === testCase.prompt && row.mode === mode.label)

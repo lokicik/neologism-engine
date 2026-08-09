@@ -454,6 +454,33 @@ fn is_cross_concept_modifier(word: &str) -> bool {
     )
 }
 
+/// Detect adjective–noun pairs that visibly repeat the same lexical stem.
+/// This stays narrower than a semantic-similarity rule so legitimate
+/// alliteration such as FairHair is not rejected with obvious echoes such as
+/// TimedTimer.
+pub fn compound_pair_has_lexical_echo(adjective: &str, noun: &str) -> bool {
+    let adjective = adjective.to_ascii_lowercase();
+    let noun = noun.to_ascii_lowercase();
+    if adjective == noun {
+        return true;
+    }
+
+    let shorter = adjective.len().min(noun.len());
+    if shorter < 4 {
+        return false;
+    }
+    if adjective.starts_with(&noun) || noun.starts_with(&adjective) {
+        return true;
+    }
+
+    let shared_prefix = adjective
+        .bytes()
+        .zip(noun.bytes())
+        .take_while(|(left, right)| left == right)
+        .count();
+    shared_prefix >= 4 && adjective.len() - shared_prefix <= 2 && noun.len() - shared_prefix <= 2
+}
+
 /// Check whether a Compound adjective and noun express compatible parts of
 /// the brief. Modifiers such as Retro, Fair, Vivid, and Swift may describe any
 /// product noun; other adjectives stay with the concept that supplied them.
@@ -1031,6 +1058,16 @@ mod tests {
         assert!(compound_pair_is_coherent("vivid", "lens", &journal, false));
         assert!(!compound_pair_is_coherent("smart", "ink", &journal, false));
         assert!(compound_pair_is_coherent("smart", "ink", &journal, true));
+    }
+
+    #[test]
+    fn compound_lexical_echoes_stay_narrow() {
+        assert!(compound_pair_has_lexical_echo("timed", "timer"));
+        assert!(compound_pair_has_lexical_echo("clear", "clearly"));
+        assert!(compound_pair_has_lexical_echo("tidy", "tidy"));
+        assert!(!compound_pair_has_lexical_echo("fair", "hair"));
+        assert!(!compound_pair_has_lexical_echo("prime", "print"));
+        assert!(!compound_pair_has_lexical_echo("quiet", "ink"));
     }
 
     #[test]

@@ -709,7 +709,7 @@ fn generate_bigtech(
             } else {
                 st.roots[rand::Rng::gen_range(rng, 0..st.roots.len())]
             };
-            if adj.eq_ignore_ascii_case(noun) {
+            if keywords::compound_pair_has_lexical_echo(adj, noun) {
                 continue;
             }
             if !keywords::compound_pair_is_coherent(
@@ -718,13 +718,6 @@ fn generate_bigtech(
                 &raw_desc_keywords,
                 compound_continuation,
             ) {
-                continue;
-            }
-            let adj_lower = adj.to_ascii_lowercase();
-            let noun_lower = noun.to_ascii_lowercase();
-            if adj_lower.len().min(noun_lower.len()) >= 4
-                && (adj_lower.starts_with(&noun_lower) || noun_lower.starts_with(&adj_lower))
-            {
                 continue;
             }
             compound(adj, noun)
@@ -1811,6 +1804,34 @@ mod tests {
             c.max_len = 12;
             let results = generate(&c);
             assert_eq!(results.len(), 100, "short Compound batch for {prompt}");
+        }
+    }
+
+    #[test]
+    fn prompted_compound_rejects_lexical_echoes() {
+        let mut c = cfg(Style::BigTech);
+        c.compound = true;
+        c.description = Some("a background job scheduler".to_string());
+        c.count = 100;
+        c.max_len = 16;
+        let results = generate(&c);
+        assert_eq!(results.len(), 100);
+        for result in results {
+            let boundary = result
+                .name
+                .char_indices()
+                .skip(1)
+                .find(|(_, character)| character.is_ascii_uppercase())
+                .map(|(index, _)| index)
+                .unwrap_or(result.name.len());
+            assert!(
+                !keywords::compound_pair_has_lexical_echo(
+                    &result.name[..boundary],
+                    &result.name[boundary..],
+                ),
+                "lexical echo: {}",
+                result.name
+            );
         }
     }
 
