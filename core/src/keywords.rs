@@ -1214,6 +1214,19 @@ pub fn guided_pair_root_groups(keywords: &[String], limit: usize) -> Vec<Vec<Str
         return bounded_guided_groups(GROUPS, limit);
     }
 
+    let household = keywords
+        .iter()
+        .any(|keyword| matches!(keyword.as_str(), "household" | "belonging" | "belongings"));
+    let inventory = keywords
+        .iter()
+        .any(|keyword| matches!(keyword.as_str(), "catalog" | "inventory"));
+    if household && inventory {
+        // `StowLog` and `StowTag` describe a household inventory without
+        // spreading another generic metaphor tail through ordinary Brandable.
+        const GROUPS: &[&[&str]] = &[&["stow"], &["log", "tag", "map"]];
+        return bounded_guided_groups(GROUPS, limit);
+    }
+
     let mut groups = brand_root_groups(keywords, limit);
     let used = groups.iter().flatten().count();
     if used >= limit {
@@ -1672,6 +1685,25 @@ mod tests {
         assert!(guided.iter().flatten().any(|root| root == "fix"));
         assert_eq!(guided.len(), 2, "{guided:?}");
         assert!(guided.iter().flatten().count() <= 16, "{guided:?}");
+    }
+
+    #[test]
+    fn guided_household_catalogs_use_inventory_roles_only_in_their_lane() {
+        let keywords = extract_keywords("a catalog for household belongings", 6);
+        let ordinary = brand_root_groups(&keywords, 16);
+        let guided = guided_pair_root_groups(&keywords, 16);
+        assert!(!ordinary.iter().flatten().any(|root| root == "stow"));
+        assert!(guided.iter().flatten().any(|root| root == "stow"));
+        assert!(guided.iter().flatten().any(|root| root == "log"));
+        assert!(guided.iter().flatten().any(|root| root == "tag"));
+        assert!(guided.iter().flatten().any(|root| root == "map"));
+        assert_eq!(guided.len(), 2, "{guided:?}");
+
+        let unrelated = extract_keywords("a software catalog", 6);
+        assert!(!guided_pair_root_groups(&unrelated, 16)
+            .iter()
+            .flatten()
+            .any(|root| root == "stow"));
     }
 
     #[test]

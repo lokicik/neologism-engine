@@ -239,6 +239,13 @@ try {
     (sum, row) => sum + row.selected.reduce((pageSum, item) => pageSum + quality(item), 0),
     0,
   ) / (formatterRows.length * 10)
+  const householdCatalogRows = rows.filter((row) => (
+    row.prompt === 'a catalog for household belongings'
+  ))
+  const householdCatalogAverage = householdCatalogRows.reduce(
+    (sum, row) => sum + row.selected.reduce((pageSum, item) => pageSum + quality(item), 0),
+    0,
+  ) / (householdCatalogRows.length * 10)
   const seedDiversity = BASE_PROMPTS.map((prompt) => {
     const promptRows = auditRows.filter((row) => row.prompt === prompt)
     const nameSeeds = new Map()
@@ -319,6 +326,7 @@ try {
   console.log(`autonomous builder average: ${autonomousBuilderAverage.toFixed(2)} · CogLoop leads ${autonomousBuilderRows.filter((row) => row.selected[0]?.name === 'CogLoop').length}/${autonomousBuilderRows.length}`)
   console.log(`CRM average: ${crmAverage.toFixed(2)} · RevLoop leads ${crmRows.filter((row) => row.selected[0]?.name === 'RevLoop').length}/${crmRows.length}`)
   console.log(`formatter average: ${formatterAverage.toFixed(2)} · TidyKit leads ${formatterRows.filter((row) => row.selected[0]?.name === 'TidyKit').length}/${formatterRows.length}`)
+  console.log(`household catalog average: ${householdCatalogAverage.toFixed(2)} · StowLog leads ${householdCatalogRows.filter((row) => row.selected[0]?.name === 'StowLog').length}/${householdCatalogRows.length}`)
   console.log(`guarded repair upgrades: ${guardedRepairUpgrades.length}`)
   console.log(`weak Respell accents: ${weakRespellAccents.length}`)
   console.log(`seed diversity: ${averageUniqueNames.toFixed(2)}/30 unique · ${averageSeedOverlap.toFixed(2)}/10 pair overlap · ${exactDuplicateSeedPages} duplicate pages`)
@@ -412,6 +420,19 @@ try {
           && !row.retryRequested
         )),
       'formatter pages lead with a strong tool-specific construction without retry',
+    ],
+    [
+      householdCatalogRows.length === SEEDS.length
+        && householdCatalogAverage >= 81.9
+        && householdCatalogRows.every((row) => (
+          row.selected[0]?.name === 'StowLog'
+          && row.selected[0]?.construction === 'guided_pair'
+          && row.direct.some((item) => (
+            item.name === 'StowLog' && item.construction === 'guided_pair'
+          ))
+          && !row.retryRequested
+        )),
+      'household catalog pages lead with their StowLog inventory role without retry',
     ],
     [
       aiWorkflowRows.length === SEEDS.length * 5

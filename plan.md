@@ -3112,6 +3112,35 @@ network dependency was added.
 
 ---
 
+## Phase 126 — Give household inventories a concrete Stow role
+
+**Observed gap.** The three household-catalog pages were dominated by interchangeable forms such
+as `Itembeam`, `Countify`, `Assetix`, and `Stockseed`. The brief's `belonging`, `household`, and
+`catalog` terms intentionally collapse into one ordinary semantic group, so the pair lane had no
+second function to express. High-scoring Compound probes such as `KeyItem` were rejected as metric
+gaming rather than promoted into Auto.
+
+**Curated role family.** Manual candidate probing found a smaller, readable inventory direction:
+`StowLog 88.0`, `StowTag 88.0`, and `StowMap 86.5`. Only a prompt containing both a household or
+belongings marker and a catalog or inventory marker receives the private `stow` plus
+`log`/`tag`/`map` pair groups. A generic software catalog does not receive them, and ordinary
+Brandable remains unchanged.
+
+**Measured result.** All three independent household pages now lead directly with
+`StowLog 88.0/c2`, preserve ten cards, and skip the final retry. Their average improves
+**81.11 -> 81.97**. Across the 105-page held-out base, average quality improves **84.08 -> 84.10**,
+lead quality **86.27 -> 86.49**, lead coverage **1.22 -> 1.25**, and guided leaders **44 -> 47**.
+The deliberate stable role costs a negligible amount of raw seed spread (**18.23 -> 18.20/30**;
+pair overlap **5.12 -> 5.14/10**) while remaining inside the diversity gates; near pairs, mean
+similarity, suffix leaders, duplicate pages, and all six reviewed inner-card upgrades hold.
+
+**Verification.** The core suite is **147/147**. The full held-out gate, fixed 90-page cold audit,
+85-page Auto audit, fifteen namespace pages, 1,600 developer-domain names, rebuilt WASM,
+TypeScript, and production bundle all pass. No LLM, network call, score adjustment, ordinary-pool
+expansion, or generic catalog rule was added.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
@@ -3139,6 +3168,8 @@ untouched. Formatter/linter briefs use the same private-role pattern for `TidyKi
 related spellings can no longer block a stronger construction before repair.
 Generic `builder` wording likewise cannot steal the Respell accent from a recognized product
 subject; unknown builder briefs still keep their literal source.
+Household inventory briefs can express the job directly through the isolated `StowLog` family
+without teaching ordinary catalogs another global template.
 Compound is now a genuinely brief-aware explicit alternative rather than a random adjective
 showcase. Focused first pages stay narrow; recognized concepts open a restrained continuation
 palette only when the user asks for more, preserving 100-name session capacity without generic
