@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
-import { generateBatch, batchMetrics, extractKeywords, type BatchMetrics, type Config, type NameResult, type Style } from './lib/engine'
+import { generateBatch, generateNames, batchMetrics, extractKeywords, type BatchMetrics, type Config, type NameResult, type Style } from './lib/engine'
 import { recommendations } from './lib/recommend'
 import { buildReferencedProfile, coldQualityPoolCount, feedbackForContext, MIN_TASTE_SIGNALS, needsQualityRepair, preferencePoolCount, repairWeakShortlist, shortlistByPreference } from './lib/preferences'
 import { tasteContextForConfig } from './lib/taste-context'
@@ -159,8 +159,12 @@ export default function App() {
         && cfg.variant === 'auto'
         && needsQualityRepair(primaryPool, requestedCount)
       ) {
-        const fallback = await generateBatch({
+        // The primary Auto page already owns its optional Respell accent.
+        // Repair from Brandable only so a larger fallback cannot add a second.
+        const fallback = await generateNames({
           ...cfg,
+          variant: undefined,
+          compound: false,
           count: coldQualityPoolCount(requestedCount),
           exclude: [...recentRef.current, ...primaryPool.map((result) => result.name)],
         })

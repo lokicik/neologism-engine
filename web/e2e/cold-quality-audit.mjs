@@ -52,7 +52,7 @@ try {
   const page = await browser.newPage()
   await page.goto(`http://localhost:${PORT}`)
   const rows = await page.evaluate(async ({ prompts, seeds }) => {
-    const { generateBatch } = await import('/src/lib/engine.ts')
+    const { generateBatch, generateNames } = await import('/src/lib/engine.ts')
     const {
       coldQualityPoolCount,
       needsQualityRepair,
@@ -69,8 +69,10 @@ try {
         const direct = await generateBatch(config)
         const repair = needsQualityRepair(direct, 10)
         const fallback = repair
-          ? await generateBatch({
+          ? await generateNames({
               ...config,
+              variant: undefined,
+              compound: false,
               count: coldQualityPoolCount(10),
               exclude: direct.map((item) => item.name),
             })
@@ -138,6 +140,11 @@ try {
   const repairedPages = rows.filter((row) => row.fallbackCount > 0).length
   const wrongSize = rows.filter((row) => row.selected.length !== 10).length
   const wrongFallback = rows.filter((row) => ![0, 30].includes(row.fallbackCount)).length
+  const accentCounts = rows.map((row) => (
+    row.selected.filter((item) => item.sourceMode !== 'brandable').length
+  ))
+  const multipleAccentPages = accentCounts.filter((count) => count > 1).length
+  const maxAccents = Math.max(...accentCounts)
   const ownBrief = rows.find((row) => row.prompt.startsWith('an offline naming engine') && row.seed === 42)
 
   console.log(`cold Auto pages: ${rows.length}`)
@@ -147,11 +154,13 @@ try {
   console.log(`direct / repaired sub-75: ${direct.below75} / ${repaired.below75}`)
   console.log(`repaired near-duplicate pairs: ${repaired.nearPairs}`)
   console.log(`repaired mean pair similarity: ${repaired.meanPairSimilarity.toFixed(3)}`)
-  console.log(`own brief: ${ownBrief.selected.map((item) => item.name).join(', ')}`)
+  console.log(`multiple-accent pages: ${multipleAccentPages}/${rows.length} (max ${maxAccents})`)
+  console.log(`own brief: ${ownBrief.selected.map((item) => `${item.sourceMode}:${item.name}`).join(', ')}`)
 
   const gates = [
     [wrongSize === 0, 'every repaired cold page contains ten names'],
     [wrongFallback === 0, 'repair uses either no fallback or the bounded 30-name pool'],
+    [multipleAccentPages === 0, 'cold repair preserves Auto\'s one-accent visible-page contract'],
     [direct.below75 === 0 || repairedPages > 0, 'weak pages activate the offline repair pool'],
     [repaired.below75 === 0, 'no repaired cold Auto name falls below 75 structural quality'],
     [repaired.averageQuality >= 82.5, 'repaired cold Auto quality stays at or above 82.5'],

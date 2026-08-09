@@ -1955,6 +1955,36 @@ then accepted only on held-out preference data rather than hand-tuned from a few
 
 ---
 
+## Phase 95 — Keep cold repair inside Auto's one-accent contract
+
+**Bottleneck.** Phase 94 repaired weak cold Auto slots from a thirty-name fallback, but that
+fallback accidentally ran the full Auto mix again. A guided thirty-name Auto pool may contain
+three Respell candidates, so the repair selector could add another accent to a primary page that
+already had one. The new production audit first failed on **7/90** pages, with a maximum of two
+visible accents. The app's own fixed page demonstrated the quality cost directly: both
+`Developr` and `Offlyne` appeared even though guided Auto promises at most one Respell accent.
+
+**Retained correction.** The primary page remains unchanged Auto. Only the hidden repair pool is
+now generated through Brandable directly; it still uses the same brief, exclusions, candidate
+count, and local-only engine. This keeps repair focused on replacing structurally weak slots
+instead of silently rerunning the mode schedule. No broad Respell blacklist or scorer adjustment
+was added: deciding whether the remaining single `Developr` accent is aesthetically desirable
+requires real preference evidence, not another hand-tuned proxy.
+
+**Measured result.** Multi-accent repaired pages fall **7/90 → 0/90** and the maximum visible
+accent falls **2 → 1**. The app-brief page replaces the second accent `Offlyne` with Brandable
+`Nymera`. The trade-off is negligible and remains inside every retained gate: average structural
+quality **82.87 → 82.84**, near-duplicate pairs **50 → 51**, mean pair similarity
+**0.202 → 0.205**, and sub-75 names remain **0**.
+
+**Verification.** The production build is clean. The 90-page cold audit now fails closed on any
+page with multiple accents and passes all eight gates. Chromium also preserves the original
+**85/85** guided Auto pages with **45/45** prompt-linked accents, plus all real App feedback,
+project scoping, reference-name, persistence, Settings, and taste-export checks. This phase does
+not change Rust or WASM generation.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
