@@ -218,7 +218,7 @@ export default function App() {
           batch = fillColdLeadRetry(batch, await generateColdLeadRetry({
             ...generationCfg,
             exclude: recentRef.current,
-          }))
+          }), pool)
         }
       }
       setPromptKeywords(cfg.description?.trim() ? await extractKeywords(cfg.description) : [])

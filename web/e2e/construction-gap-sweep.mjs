@@ -68,7 +68,7 @@ try {
       const repaired = repairWeakShortlist(direct, fallback, 10)
       const ordered = prioritizeColdStrongLead(repaired)
       const retry = needsColdLeadRetry(ordered) ? await generateColdLeadRetry(config) : []
-      const selected = fillColdLeadRetry(ordered, retry)
+      const selected = fillColdLeadRetry(ordered, retry, [...direct, ...fallback])
       const [deep, conceptPair, compound, metaphor] = await Promise.all([
         generateNames({ ...config, variant: undefined, compound: false, count: 60 }),
         generateNames({ ...config, variant: 'concept_pair', compound: false, count: 12 }),
@@ -130,8 +130,8 @@ try {
     const selectedNames = new Set(row.selected.map((item) => letters(item.name)))
     const removed = row.ordered.filter((item) => !selectedNames.has(letters(item.name)))
     const added = row.selected.filter((item) => !pageNames.has(letters(item.name)))
-    const productionChange = removed.length === 1 && added.length === 1
-      ? `${removed[0].name} -> ${added[0].name}`
+    const productionChange = removed.length > 0 && removed.length === added.length
+      ? `${removed.map((item) => item.name).join('/')} -> ${added.map((item) => item.name).join('/')}`
       : 'unchanged'
     const retryEligible = !row.ordered.some((item) => item.sourceMode === 'respell')
       && row.ordered.filter((item) => item.construction).length < 2
@@ -141,12 +141,14 @@ try {
     console.log(`production set: ${productionChange}`)
     console.log(`fallback count: ${row.fallback.length}`)
     for (const [label, pool] of [
+      ['repair brandable', row.fallback],
       ['deep brandable', row.deep],
       ['concept pair', row.conceptPair],
       ['compound', row.compound],
       ['metaphor', row.metaphor],
     ]) {
       const pairPool = label === 'concept pair'
+      const setUpgradePool = pairPool || label.endsWith('brandable')
       const candidates = pool
         .filter((candidate) => !pageNames.has(letters(candidate.name)) && !isDirectSuffix(candidate))
         .map((candidate) => {
@@ -171,7 +173,11 @@ try {
             }
           }
           let upgrade
-          if (pairPool && retryEligible && quality(candidate) >= 84) {
+          if (
+            setUpgradePool
+            && retryEligible
+            && quality(candidate) >= (pairPool ? 84 : 85)
+          ) {
             const weaker = row.ordered
               .map((item, index) => ({ item, index }))
               .filter(({ item, index }) => (

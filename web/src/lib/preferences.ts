@@ -25,7 +25,8 @@ const COLD_NON_SUFFIX_LEAD_MARGIN = 0.02
 const COLD_NEAR_TIE_LEAD_TOLERANCE = 0.005
 const COLD_PAIR_REPLACEMENT_TOLERANCE = 0.005
 const COLD_PAIR_QUALITY_FLOOR = 0.84
-const COLD_PAIR_SET_GAIN = 0.02
+const COLD_SET_GAIN = 0.02
+const COLD_BRANDABLE_SET_QUALITY_FLOOR = 0.85
 export const MIN_TASTE_SIGNALS = 3
 export const TASTE_POOL_MULTIPLIER = 6
 export const MAX_TASTE_POOL = 60
@@ -367,16 +368,86 @@ export function needsColdLeadRetry(results: NameResult[]): boolean {
     && results.filter(isGuidedConstruction).length < 2
 }
 
+function upgradeColdRetryBrandableSet(
+  results: NameResult[],
+  candidates: NameResult[],
+): NameResult[] {
+  const usedNames = new Set(results.map((result) => letters(result.name)))
+  const currentSimilarity = meanPairSimilarity(results)
+  let best: { results: NameResult[]; gain: number; similarity: number } | undefined
+
+  for (const candidate of candidates) {
+    const name = letters(candidate.name)
+    const candidateQuality = engineQuality(candidate)
+    if (
+      candidate.sourceMode !== 'brandable'
+      || isGuidedConstruction(candidate)
+      || isDirectConceptSuffix(candidate)
+      || (candidate.concept_coverage ?? 0) === 0
+      || candidateQuality < COLD_BRANDABLE_SET_QUALITY_FLOOR
+      || usedNames.has(name)
+    ) continue
+
+    const replacements = results
+      .map((result, index) => ({ result, index, quality: engineQuality(result) }))
+      .filter(({ result, index, quality }) => (
+        index > 0
+        && result.sourceMode === 'brandable'
+        && !isGuidedConstruction(result)
+        && (result.concept_coverage ?? 0) <= (candidate.concept_coverage ?? 0)
+        && quality + COLD_SET_GAIN <= candidateQuality
+      ))
+      .sort((left, right) => left.quality - right.quality || right.index - left.index)
+
+    for (const replacement of replacements) {
+      const prefix = name.slice(0, 3)
+      const ending = suffix(candidate.name)
+      const prefixCap = Math.max(1, Math.ceil(results.length * VISIBLE_PREFIX_SHARE))
+      const endingCap = Math.max(1, Math.ceil(results.length * VISIBLE_SUFFIX_SHARE))
+      const prefixBefore = results.filter((result) => letters(result.name).startsWith(prefix)).length
+      const prefixAfter = prefixBefore
+        + 1
+        - Number(letters(replacement.result.name).startsWith(prefix))
+      const endingBefore = results.filter((result) => suffix(result.name) === ending).length
+      const endingAfter = endingBefore + 1 - Number(suffix(replacement.result.name) === ending)
+      if (
+        prefixAfter > Math.max(prefixCap, prefixBefore)
+        || endingAfter > Math.max(endingCap, endingBefore)
+      ) continue
+
+      const trial = results.slice()
+      trial[replacement.index] = candidate
+      const trialSimilarity = meanPairSimilarity(trial)
+      if (trialSimilarity > currentSimilarity + Number.EPSILON) continue
+      const gain = candidateQuality - replacement.quality
+      if (
+        !best
+        || gain > best.gain + Number.EPSILON
+        || (
+          Math.abs(gain - best.gain) <= Number.EPSILON
+          && trialSimilarity < best.similarity
+        )
+      ) {
+        best = { results: trial, gain, similarity: trialSimilarity }
+      }
+    }
+  }
+  return best?.results ?? results.slice()
+}
+
 // Targeted deterministic semantic pools may close a true cold-page gap, but a
 // candidate earns the lead only by replacing a suffix and satisfying the same
 // guarded selector. Metaphors remain quality-neutral; a two-concept pair may
 // trade at most the same half point allowed by the semantic lead rule. An 84+
 // pair that cannot lead may instead upgrade a non-leading Brandable by at least
-// two points without losing coverage or diversity. Existing Respell accents
-// and two-form pages keep their current direction.
+// two points without losing coverage or diversity. The already-generated
+// repair pool may contribute one 85+ non-template Brandable under the same set
+// guards, without another engine call. Existing Respell accents and two-form
+// pages keep their current direction.
 export function fillColdLeadRetry(
   results: NameResult[],
   candidates: NameResult[],
+  setCandidates: NameResult[] = [],
 ): NameResult[] {
   if (!needsColdLeadRetry(results)) return results.slice()
   const guided = results.filter(isGuidedConstruction)
@@ -427,7 +498,9 @@ export function fillColdLeadRetry(
         }
         if (meanPairSimilarity(trial) > currentSimilarity + Number.EPSILON) continue
         const ordered = prioritizeColdStrongLead(trial)
-        if (!isDirectConceptSuffix(ordered[0])) return ordered
+        if (!isDirectConceptSuffix(ordered[0])) {
+          return upgradeColdRetryBrandableSet(ordered, setCandidates)
+        }
       }
     }
 
@@ -439,7 +512,7 @@ export function fillColdLeadRetry(
           && result.sourceMode === 'brandable'
           && !isGuidedConstruction(result)
           && (result.concept_coverage ?? 0) <= (candidate.concept_coverage ?? 0)
-          && quality + COLD_PAIR_SET_GAIN <= candidateQuality
+          && quality + COLD_SET_GAIN <= candidateQuality
         ))
         .sort((left, right) => left.quality - right.quality || right.index - left.index)
 
@@ -481,7 +554,10 @@ export function fillColdLeadRetry(
       }
     }
   }
-  return bestPairUpgrade?.results ?? results.slice()
+  return upgradeColdRetryBrandableSet(
+    bestPairUpgrade?.results ?? results.slice(),
+    setCandidates,
+  )
 }
 
 // Stable noise in [-0.5, 0.5]. It only separates close personalized choices:

@@ -35,6 +35,7 @@ const DIRECT_SUFFIXES = ['ify', 'ora', 'ion', 'era', 'io', 'ia', 'ix', 'el', 'en
 const KNOWN_SUFFIXES = ['ify', 'ora', 'ium', 'ion', 'io', 'ia', 'ix', 'ly', 'ai']
 const NEAR_TIE_TOLERANCE = 0.005
 const PAIR_SET_QUALITY_FLOOR = 0.84
+const BRANDABLE_SET_QUALITY_FLOOR = 0.85
 const PAIR_SET_GAIN = 0.02
 const EXPECTED_RETRY_CHANGES = [
   'Shieldora -> Kinloom',
@@ -42,6 +43,7 @@ const EXPECTED_RETRY_CHANGES = [
   'Surgeora -> Kitwave',
   'Bufferia -> Bufferlab',
   'Fitio -> FitPath',
+  'Pulsetrail -> Pulselab',
 ]
 
 const server = spawn(process.execPath, [viteCli, '--port', String(PORT), '--strictPort'], {
@@ -98,7 +100,7 @@ try {
         const retry = needsColdLeadRetry(ordered)
           ? await generateColdLeadRetry(config)
           : []
-        const selected = fillColdLeadRetry(ordered, retry)
+        const selected = fillColdLeadRetry(ordered, retry, [...direct, ...fallback])
         output.push({
           prompt,
           seed,
@@ -209,53 +211,79 @@ try {
   const retryChanges = retryRows.map((row) => {
     const repairedNames = new Set(row.repaired.map(normalized))
     const selectedNames = new Set(row.selected.map(normalized))
-    const removed = row.repaired.filter((item) => !selectedNames.has(normalized(item)))
-    const added = row.selected.filter((item) => !repairedNames.has(normalized(item)))
-    const label = `${removed[0]?.name ?? '?'} -> ${added[0]?.name ?? '?'}`
-    if (removed.length !== 1 || added.length !== 1) return { valid: false, label }
-    const semanticPair = added[0]?.construction === 'guided_pair'
-    const sharedContract = isGuided(added[0])
-      && !row.repaired.some((item) => item.sourceMode === 'respell')
-      && row.selected.filter(isGuided).length <= 2
-    const prefix = normalized(added[0]).slice(0, 3)
-    const ending = familySuffix(added[0])
-    const prefixBefore = row.repaired.filter((item) => normalized(item).startsWith(prefix)).length
-    const prefixAfter = row.selected.filter((item) => normalized(item).startsWith(prefix)).length
-    const endingBefore = row.repaired.filter((item) => familySuffix(item) === ending).length
-    const endingAfter = row.selected.filter((item) => familySuffix(item) === ending).length
-    const replacementIndex = row.repaired.findIndex((item) => normalized(item) === normalized(removed[0]))
-    const addedIndex = row.selected.findIndex((item) => normalized(item) === normalized(added[0]))
+    const unmatchedRemoved = row.repaired.filter((item) => !selectedNames.has(normalized(item)))
+    const unmatchedAdded = row.selected.filter((item) => !repairedNames.has(normalized(item)))
+    const labels = []
     const similarityPreserved = meanSimilarity(row.selected)
       <= meanSimilarity(row.repaired) + Number.EPSILON
-    const leadRetry = sharedContract
-      && isDirectSuffix(removed[0])
-      && quality(added[0]) >= 0.85
-      && quality(added[0]) + (semanticPair ? NEAR_TIE_TOLERANCE : Number.EPSILON)
-        >= quality(removed[0])
-      && (!semanticPair || (added[0].concept_coverage ?? 0) >= 2)
-      && prefixAfter <= Math.max(2, prefixBefore)
+    let valid = unmatchedRemoved.length > 0
+      && unmatchedRemoved.length === unmatchedAdded.length
+      && !row.repaired.some((item) => item.sourceMode === 'respell')
+      && row.selected.filter(isGuided).length <= 2
       && similarityPreserved
-    const setUpgrade = sharedContract
-      && semanticPair
-      && normalized(row.repaired[0]) === normalized(row.selected[0])
-      && replacementIndex > 0
-      && replacementIndex === addedIndex
-      && removed[0].sourceMode === 'brandable'
-      && !isGuided(removed[0])
-      && quality(added[0]) >= PAIR_SET_QUALITY_FLOOR
-      && quality(added[0]) + Number.EPSILON >= quality(removed[0]) + PAIR_SET_GAIN
-      && (added[0].concept_coverage ?? 0) >= (removed[0].concept_coverage ?? 0)
-      && prefixAfter <= Math.max(2, prefixBefore)
-      && endingAfter <= Math.max(2, endingBefore)
-      && similarityPreserved
-    const valid = leadRetry || setUpgrade
-    return {
-      valid,
-      label,
+    const familySafe = (candidate, includeEnding) => {
+      const prefix = normalized(candidate).slice(0, 3)
+      const ending = familySuffix(candidate)
+      const prefixBefore = row.repaired.filter((item) => normalized(item).startsWith(prefix)).length
+      const prefixAfter = row.selected.filter((item) => normalized(item).startsWith(prefix)).length
+      const endingBefore = row.repaired.filter((item) => familySuffix(item) === ending).length
+      const endingAfter = row.selected.filter((item) => familySuffix(item) === ending).length
+      return prefixAfter <= Math.max(2, prefixBefore)
+        && (!includeEnding || endingAfter <= Math.max(2, endingBefore))
     }
+    const takeMatch = (items, predicate) => {
+      const index = items.findIndex(predicate)
+      return index < 0 ? undefined : items.splice(index, 1)[0]
+    }
+
+    if (normalized(row.repaired[0]) !== normalized(row.selected[0])) {
+      const lead = takeMatch(unmatchedAdded, (item) => normalized(item) === normalized(row.selected[0]))
+      const semanticPair = lead?.construction === 'guided_pair'
+      const replacement = lead && takeMatch(unmatchedRemoved, (item) => (
+        isDirectSuffix(item)
+        && quality(lead) + (semanticPair ? NEAR_TIE_TOLERANCE : Number.EPSILON)
+          >= quality(item)
+      ))
+      valid = valid
+        && Boolean(lead && replacement)
+        && isGuided(lead)
+        && quality(lead) >= 0.85
+        && (lead.concept_coverage ?? 0) >= (replacement?.concept_coverage ?? 0)
+        && (!semanticPair || (lead.concept_coverage ?? 0) >= 2)
+        && familySafe(lead, false)
+      if (lead && replacement) labels.push(`${replacement.name} -> ${lead.name}`)
+    }
+
+    while (unmatchedAdded.length > 0) {
+      const candidate = unmatchedAdded.shift()
+      const semanticPair = candidate.construction === 'guided_pair'
+      const ordinaryBrandable = candidate.sourceMode === 'brandable'
+        && !isGuided(candidate)
+        && !isDirectSuffix(candidate)
+        && (candidate.concept_coverage ?? 0) > 0
+      const candidateValid = semanticPair
+        ? quality(candidate) >= PAIR_SET_QUALITY_FLOOR
+          && (candidate.concept_coverage ?? 0) >= 2
+        : ordinaryBrandable && quality(candidate) >= BRANDABLE_SET_QUALITY_FLOOR
+      const replacement = takeMatch(unmatchedRemoved, (item) => (
+        row.repaired.indexOf(item) > 0
+        && item.sourceMode === 'brandable'
+        && !isGuided(item)
+        && quality(candidate) + Number.EPSILON >= quality(item) + PAIR_SET_GAIN
+        && (candidate.concept_coverage ?? 0) >= (item.concept_coverage ?? 0)
+      ))
+      valid = valid
+        && candidateValid
+        && Boolean(replacement)
+        && familySafe(candidate, true)
+      if (replacement) labels.push(`${replacement.name} -> ${candidate.name}`)
+    }
+    valid = valid && unmatchedRemoved.length === 0
+    return { valid, labels }
   })
   const retryContractViolations = retryChanges.filter((change) => !change.valid).length
-  const exactRetryChanges = retryChanges.map((change) => change.label).sort().join('|')
+  const retrySwapLabels = retryChanges.flatMap((change) => change.labels)
+  const exactRetryChanges = retrySwapLabels.slice().sort().join('|')
     === EXPECTED_RETRY_CHANGES.slice().sort().join('|')
   const weakenedLeadRows = rows.filter((row) => (
     quality(row.selected[0]) + Number.EPSILON < quality(row.repaired[0])
@@ -288,16 +316,16 @@ try {
   console.log(`multiple-accent pages: ${multipleAccentPages}/${rows.length} (max ${maxAccents})`)
   console.log(`strong lead reorder: ${reorderedPages}/${rows.length} · quality ${originalLeadQuality.toFixed(2)} -> ${selectedLeadQuality.toFixed(2)} · coverage ${selectedLeadCoverage.toFixed(2)} · suffix first ${originalSuffixLeads} -> ${selectedSuffixLeads} · guided first ${selectedGuidedLeads}`)
   console.log(`justified near-tie trades: ${justifiedNearTies.length} · max quality loss ${(maxLeadQualityLoss * 100).toFixed(2)}`)
-  console.log(`targeted retry/set changes: ${retryChanges.map((change) => change.label).join(', ') || 'none'}`)
+  console.log(`targeted retry/set changes: ${retrySwapLabels.join(', ') || 'none'}`)
   console.log(`own brief: ${ownBrief.selected.map((item) => `${item.sourceMode}:${item.name}`).join(', ')}`)
 
   const gates = [
     [wrongSize === 0, 'every repaired cold page contains ten names'],
     [wrongFallback === 0, 'repair uses either no fallback or the bounded 30-name pool'],
     [multipleAccentPages === 0, 'cold repair preserves Auto\'s one-accent visible-page contract'],
-    [retryRows.length === 5 && exactRetryChanges, 'the targeted retry closes exactly four fixed gaps and upgrades one weak set card'],
+    [retryRows.length === 5 && retrySwapLabels.length === 6 && exactRetryChanges, 'the targeted retry closes exactly four fixed gaps and upgrades two weak set cards'],
     [orderingChangedSet === retryRows.length, 'only targeted retry pages change the repaired name set'],
-    [retryContractViolations === 0, 'each change is a bounded lead retry or a diversity-safe two-point semantic set upgrade'],
+    [retryContractViolations === 0, 'each change is a bounded lead retry or a diversity-safe two-point semantic/Brandable set upgrade'],
     [unjustifiedWeakenedLeads === 0, 'any first-card quality trade stays inside the semantic/guided near-tie rule'],
     [justifiedNearTies.length === 4, 'the fixed matrix contains exactly four justified near-tie promotions'],
     [maxLeadQualityLoss <= NEAR_TIE_TOLERANCE + Number.EPSILON, 'first-card structural quality loss never exceeds half a point'],

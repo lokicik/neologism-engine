@@ -300,6 +300,55 @@ check(
   }])[0].name === 'Vitalia',
   'a concept pair outside the half-point lead tolerance stays out of the page',
 )
+const workoutLeadGap = [
+  { ...scoredResult('Vitalia', 88.3), sourceMode: 'brandable' as const, concept_coverage: 1 },
+  {
+    ...scoredResult('Pulseseed', 85.5),
+    sourceMode: 'brandable' as const,
+    concept_coverage: 1,
+    construction: 'guided_metaphor' as const,
+    constructionRank: 1 as const,
+  },
+  { ...scoredResult('Thriveloom', 79.2), sourceMode: 'brandable' as const, concept_coverage: 1 },
+  { ...scoredResult('Fitify', 89.1), sourceMode: 'brandable' as const, concept_coverage: 1 },
+  { ...scoredResult('Vitalix', 88), sourceMode: 'brandable' as const, concept_coverage: 1 },
+  { ...scoredResult('Pulsetrail', 82.4), sourceMode: 'brandable' as const, concept_coverage: 1 },
+  { ...scoredResult('Fitio', 88.4), sourceMode: 'brandable' as const, concept_coverage: 1 },
+  { ...scoredResult('Thrivetrail', 77.5), sourceMode: 'brandable' as const, concept_coverage: 1 },
+  { ...scoredResult('Pulselink', 84), sourceMode: 'brandable' as const, concept_coverage: 1 },
+  { ...scoredResult('Vitalvault', 79.4), sourceMode: 'brandable' as const, concept_coverage: 1 },
+]
+const upgradedWorkoutSet = fillColdLeadRetry(workoutLeadGap, [{
+  ...scoredResult('FitPath', 88),
+  sourceMode: 'brandable',
+  concept_coverage: 2,
+  construction: 'guided_pair',
+}], [{
+  ...scoredResult('Pulselab', 86),
+  sourceMode: 'brandable',
+  concept_coverage: 1,
+}])
+check(
+  upgradedWorkoutSet[0].name === 'FitPath'
+    && upgradedWorkoutSet.some((item) => item.name === 'Pulselab')
+    && upgradedWorkoutSet.some((item) => item.name === 'Pulseseed')
+    && !upgradedWorkoutSet.some((item) => item.name === 'Fitio')
+    && !upgradedWorkoutSet.some((item) => item.name === 'Pulsetrail'),
+  'an existing repair candidate may safely upgrade one inner card after the lead retry',
+)
+check(
+  fillColdLeadRetry(workoutLeadGap, [{
+    ...scoredResult('FitPath', 88),
+    sourceMode: 'brandable',
+    concept_coverage: 2,
+    construction: 'guided_pair',
+  }], [{
+    ...scoredResult('Pulselab', 84.9),
+    sourceMode: 'brandable',
+    concept_coverage: 1,
+  }]).some((item) => item.name === 'Pulsetrail'),
+  'a sub-85 repair candidate cannot upgrade the cold set',
+)
 const semanticSetGap = [
   { ...scoredResult('Poolify', 91.3), sourceMode: 'brandable' as const, concept_coverage: 1 },
   { ...scoredResult('Sharebond', 78), sourceMode: 'brandable' as const, concept_coverage: 2 },

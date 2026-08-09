@@ -108,7 +108,7 @@ try {
         const retry = needsColdLeadRetry(ordered)
           ? await generateColdLeadRetry(config)
           : []
-        pages.push(fillColdLeadRetry(ordered, retry))
+        pages.push(fillColdLeadRetry(ordered, retry, [...direct, ...fallback]))
       }
       output.push({ prompt, pages })
     }
