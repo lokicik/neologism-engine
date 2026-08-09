@@ -43,8 +43,8 @@ export function Sidebar({ view, savedCount, onNavigate, onAbout, onSettings }: P
       </div>
 
       <div className="sidebar-foot">
-        <button className="sidebar-item sidebar-settings" onClick={onSettings} title="AI model settings (used by AI Studio)">
-          ⚙ AI settings
+        <button className="sidebar-item sidebar-settings" onClick={onSettings} title="AI model and local taste settings">
+          ⚙ Settings
         </button>
         <button className="sidebar-about" onClick={onAbout}>
           About

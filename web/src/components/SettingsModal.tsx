@@ -8,9 +8,14 @@ import {
   type JudgeProvider,
   type ModelInfo,
 } from '../lib/judge'
+import type { NameResult } from '../lib/engine'
+import { exportTasteDataset } from '../lib/taste-data'
+import { IconDownload } from './icons'
 
 interface Props {
   config: JudgeConfig
+  favorites: NameResult[]
+  rejected: NameResult[]
   onSave: (cfg: JudgeConfig) => void
   onClose: () => void
 }
@@ -31,7 +36,7 @@ const priceFields = (m?: ModelInfo) => ({
 // (both OpenAI-compatible): OpenRouter with the user's own key, or a local
 // server. The model list is fetched live and shown in a themed combobox (Phase
 // 53 — the native <datalist> couldn't be styled and scrolled badly).
-export function SettingsModal({ config, onSave, onClose }: Props) {
+export function SettingsModal({ config, favorites, rejected, onSave, onClose }: Props) {
   const [draft, setDraft] = useState<JudgeConfig>(config)
   const [models, setModels] = useState<ModelInfo[]>([])
   const [modelsLoading, setModelsLoading] = useState(false)
@@ -96,6 +101,8 @@ export function SettingsModal({ config, onSave, onClose }: Props) {
   // When the field holds a fully-selected id (or is empty) show the whole list
   // so the user can browse/switch; only filter while they're typing a partial.
   const filtered = (query === '' || selected ? pickList : pickList.filter((m) => m.id.toLowerCase().includes(query))).slice(0, 60)
+  const comparisonCount = favorites.length * rejected.length
+  const feedbackCount = favorites.length + rejected.length
 
   const selectModel = (m: ModelInfo) => {
     setDraft((d) => ({ ...d, model: m.id, ...priceFields(m) }))
@@ -155,9 +162,9 @@ export function SettingsModal({ config, onSave, onClose }: Props) {
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="settings-modal" onClick={(e) => e.stopPropagation()} role="dialog" aria-label="AI judge settings">
+      <div className="settings-modal" onClick={(e) => e.stopPropagation()} role="dialog" aria-label="Settings">
         <div className="settings-head">
-          <h2>AI settings</h2>
+          <h2>Settings</h2>
           <button className="icon-btn" onClick={onClose} title="Close">✕</button>
         </div>
         <p className="settings-intro">
@@ -175,7 +182,7 @@ export function SettingsModal({ config, onSave, onClose }: Props) {
           <span>Enable AI re-rank</span>
         </label>
 
-        <fieldset className="settings-group" disabled={!draft.enabled}>
+        {draft.enabled && <fieldset className="settings-group">
           <legend>Provider</legend>
           <div className="settings-radios">
             {(['openrouter', 'localhost'] as JudgeProvider[]).map((p) => (
@@ -245,12 +252,32 @@ export function SettingsModal({ config, onSave, onClose }: Props) {
               Reset to default
             </button>
           </label>
-        </fieldset>
+        </fieldset>}
 
-        <p className="settings-note">
-          Note: in-browser models are intentionally left out — sub-3B models that fit a
-          browser judge brand names poorly. Use a hosted or local model for real taste.
-        </p>
+        {draft.enabled && (
+          <p className="settings-note">
+            Note: in-browser models are intentionally left out — sub-3B models that fit a
+            browser judge brand names poorly. Use a hosted or local model for real taste.
+          </p>
+        )}
+
+        <section className="settings-data" aria-labelledby="taste-data-title">
+          <div className="settings-data-copy">
+            <h3 id="taste-data-title">Local taste data</h3>
+            <p className="settings-data-meta">
+              {favorites.length} liked · {rejected.length} passed · {comparisonCount} preference pairs
+            </p>
+            <p>Exports explicit feedback only — never your API key or recent-name history.</p>
+          </div>
+          <button
+            type="button"
+            className="toolbar-btn taste-export-btn"
+            disabled={feedbackCount === 0}
+            onClick={() => exportTasteDataset(favorites, rejected)}
+          >
+            <IconDownload /> Export JSON
+          </button>
+        </section>
 
         <div className="settings-actions">
           <button className="toolbar-btn" onClick={onClose}>Cancel</button>

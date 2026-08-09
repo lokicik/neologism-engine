@@ -833,6 +833,35 @@ output.
 
 ---
 
+## Phase 66 — Export real pairwise taste evidence
+
+**Bottleneck.** The next cold-start scorer needs genuine human preference evidence, but the
+only durable labels were browser-local favorite/pass arrays. The earlier offline scorer had
+failed on proxy LLM labels and underpowered structural features; repeating that experiment
+without real labels would not move quality forward.
+
+**What changed.** Settings now exports a versioned `neologism-taste-v1` JSON dataset. Each
+explicit like/pass keeps its full engine scores and Phase 65 source mode; compact index pairs
+encode every observed `liked > passed` comparison without duplicating result objects. The
+file includes an export timestamp and counts, but deliberately excludes the AI key, judge
+configuration, prompt, and recent-name history. One-sided feedback remains valid data and
+exports with zero pair comparisons.
+
+**UX.** The former **AI settings** entry is now the general **Settings** surface. AI provider
+details use progressive disclosure and render only after `Enable AI re-rank`, so the default
+modal is short and the Local taste data card is visible without scrolling. The card uses the
+existing dark surface hierarchy, tabular dynamic counts, a 40px export target, exact-property
+press behavior, and a stable `neologism-taste.json` filename.
+
+**Verification.** Eight deterministic schema checks cover versioning, timestamp, counts,
+pair indices, source modes, credential exclusion, and one-sided data. TypeScript/Vite
+production build clean. Eighteen Chromium checks exercise real WASM feedback, Settings
+collapse/reveal behavior, summary counts, the browser download event, parsed JSON schema and
+pairs, source preservation, persistence, and accessibility. Visual review at 1440px confirms
+the default modal fits without scrolling and the export card matches the established theme.
+
+---
+
 ## Bottom line
 
 Big-tech is the strongest style, tuned through Phase 25 and extended since:

@@ -400,7 +400,13 @@ export default function App() {
       </main>
 
       {showSettings && (
-        <SettingsModal config={judgeConfig} onSave={saveSettings} onClose={() => setShowSettings(false)} />
+        <SettingsModal
+          config={judgeConfig}
+          favorites={favorites}
+          rejected={rejected}
+          onSave={saveSettings}
+          onClose={() => setShowSettings(false)}
+        />
       )}
     </div>
   )

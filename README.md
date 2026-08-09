@@ -93,6 +93,7 @@ npm run build        # output in web/dist/
 - **Controls** — count, min/max length, randomness (temperature), seed words, product description, starts-with / contains constraints
 - **Compound mode** — big-tech adjective+noun names (SwiftForge, NobleFrost) alongside blends
 - **Local taste learning** — star or pass on 3+ names; future batches are automatically re-ranked toward liked structures and naming modes or away from repeatedly rejected ones. Feedback stays in `localStorage`.
+- **Taste data export** — Settings turns explicit likes and passes into a versioned, pairwise-ready JSON dataset without exporting AI credentials or browsing history.
 - **Brief-aware Auto** — project descriptions lead with semantic Brandable names; an empty brief leans further on the curated real-word pool instead of returning a page of opaque coinages.
 - **Score bars** — pronounceability, novelty, and memorability per generated name
 - **Favorites** — star names; persisted across reloads via `localStorage`

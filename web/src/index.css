@@ -789,7 +789,7 @@ body {
 }
 .card-aipick { margin-right: .25rem; }
 
-/* Phase 50: AI judge settings modal. */
+/* Phase 50/66: AI judge and local-data settings modal. */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -834,7 +834,6 @@ body {
   gap: .8rem;
   margin: 0;
 }
-.settings-group[disabled] { opacity: .5; }
 .settings-group legend { font-size: .78rem; color: var(--muted); padding: 0 .35rem; }
 .settings-radios { display: flex; gap: .5rem; flex-wrap: wrap; }
 .settings-radio {
@@ -864,6 +863,24 @@ body {
 .settings-hint code, .settings-field code { font-size: .72rem; background: var(--surface2); padding: .05rem .3rem; border-radius: 4px; }
 .settings-reset { align-self: flex-start; background: none; border: none; color: var(--accent); font-size: .78rem; cursor: pointer; padding: 0; }
 .settings-note { margin: 0; font-size: .76rem; color: var(--muted); opacity: .8; line-height: 1.45; }
+.settings-data {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: .85rem 1rem;
+  padding: .85rem 1rem;
+  background: var(--surface2);
+  border-radius: 10px;
+  box-shadow: 0 0 0 1px var(--border);
+}
+.settings-data-copy { min-width: 0; flex: 1 1 290px; }
+.settings-data h3 { margin: 0 0 .25rem; font-size: .88rem; color: var(--text); }
+.settings-data p { margin: 0; font-size: .74rem; line-height: 1.45; color: var(--muted); text-wrap: pretty; }
+.settings-data-meta { font-variant-numeric: tabular-nums; }
+.taste-export-btn { flex-shrink: 0; min-height: 40px; }
+.taste-export-btn:disabled { opacity: .45; cursor: not-allowed; }
+.taste-export-btn:disabled:active { transform: none; }
 .settings-actions { display: flex; justify-content: flex-end; gap: .6rem; }
 
 /* Phase 53: themed model combobox (replaces the unstyleable native datalist). */

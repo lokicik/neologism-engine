@@ -44,6 +44,13 @@ async function storedCount(page, key) {
   }, key)
 }
 
+async function readDownload(download) {
+  const stream = await download.createReadStream()
+  const chunks = []
+  for await (const chunk of stream) chunks.push(chunk)
+  return Buffer.concat(chunks).toString('utf8')
+}
+
 try {
   const context = await browser.newContext()
   await context.addInitScript(() => localStorage.setItem('neologism:visited', '1'))
@@ -86,6 +93,28 @@ try {
   await page.waitForSelector('.taste-note', { timeout: 20000 })
   const restored = (await page.locator('.taste-note').textContent()) ?? ''
   check(/3 liked.*2 passed/.test(restored), 'taste feedback survives a reload')
+
+  await page.click('.sidebar-settings')
+  check(await page.locator('.settings-group').count() === 0, 'disabled AI details stay collapsed')
+  await page.locator('.settings-toggle input').click()
+  check(await page.locator('.settings-group').count() === 1, 'enabling AI reveals provider details')
+  await page.locator('.settings-toggle input').click()
+  const dataMeta = (await page.locator('.settings-data-meta').textContent()) ?? ''
+  check(/3 liked.*2 passed.*6 preference pairs/.test(dataMeta), 'Settings summarizes pairwise taste data')
+  await page.screenshot({ path: join(SHOTS, 'taste-export-settings.png'), fullPage: true })
+  const downloadPromise = page.waitForEvent('download')
+  await page.click('.taste-export-btn')
+  const download = await downloadPromise
+  check(download.suggestedFilename() === 'neologism-taste.json', 'taste export uses a stable filename')
+  const exported = JSON.parse(await readDownload(download))
+  check(
+    exported.schema === 'neologism-taste-v1' && exported.comparisons.length === 6,
+    'downloaded taste data carries the versioned pairwise dataset',
+  )
+  check(
+    exported.examples.every((example) => example.result.sourceMode),
+    'downloaded feedback retains source modes without AI settings',
+  )
 
   await context.close()
 
