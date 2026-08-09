@@ -654,6 +654,11 @@ fn generate_bigtech(
     // on the same ranked names instead of offering meaningful alternatives.
     let target = if cfg.compound && !compound_adjectives.is_empty() {
         cfg.count * 2
+    } else if concept_expanded && !cfg.exclude.is_empty() {
+        // Continuation pages have already consumed the strongest forms. Search
+        // a deeper semantic pool there so the quality floor rarely needs its
+        // last-resort fallback; first-page cost and behavior stay unchanged.
+        cfg.count * 8
     } else {
         cfg.count * 5
     };
@@ -973,7 +978,7 @@ fn generate_bigtech(
         0
     };
     let exploration_w = if concept_expanded {
-        cfg.variety.clamp(0.0, 1.0) * 1.2
+        cfg.variety.clamp(0.0, 1.0) * if naming_brief { 1.2 } else { 1.5 }
     } else {
         0.0
     };
@@ -1022,6 +1027,20 @@ fn generate_bigtech(
     // (~10× the work). Same values, same comparator → identical order.
     let mut decorated: Vec<(f64, NameResult)> = pool.into_iter().map(|r| (rank(&r), r)).collect();
     decorated.sort_by(|a, b| b.0.partial_cmp(&a.0).unwrap_or(std::cmp::Ordering::Equal));
+    if concept_expanded && (!naming_brief || !cfg.exclude.is_empty()) {
+        // Semantic roots intentionally bypass the generic word-likelihood gate,
+        // but that must not let structurally weak names outrank sound choices.
+        // Keep below-floor candidates only as a last-resort capacity fallback
+        // when fewer than a full page of qualified names remains. Naming's
+        // proven first-page order stays intact; its continuation still uses
+        // this floor once prior names have been excluded.
+        let (mut qualified, weak): (Vec<_>, Vec<_>) = std::mem::take(&mut decorated)
+            .into_iter()
+            .partition(|(_, result)| metrics::composite_score(result) >= 75);
+        let missing = cfg.count.saturating_sub(qualified.len());
+        qualified.extend(weak.into_iter().take(missing));
+        decorated = qualified;
+    }
     let rank_min = decorated.last().map(|(score, _)| *score).unwrap_or(0.0);
     let rank_max = decorated.first().map(|(score, _)| *score).unwrap_or(0.0);
     let rank_span = (rank_max - rank_min).max(f64::EPSILON);
@@ -1070,10 +1089,17 @@ fn generate_bigtech(
     let mut out = lead;
     let remaining = cfg.count - out.len();
     if concept_expanded {
+        // The structural floor lets semantic pages trade a little more rank
+        // weight for shape diversity without admitting low-quality outliers.
+        let semantic_mmr_lambda = if naming_brief {
+            tuning.mmr_lambda
+        } else {
+            (tuning.mmr_lambda - 0.08).max(0.0)
+        };
         out.extend(metrics::mmr_select_capped_by(
             &pool,
             remaining,
-            tuning.mmr_lambda,
+            semantic_mmr_lambda,
             share_cap,
             |result| concept_relevance.get(&result.name).copied().unwrap_or(0.0),
         ));
@@ -1611,7 +1637,7 @@ mod tests {
     #[test]
     fn description_session_yields_100_fresh_contextual_names() {
         let description =
-            "a developer tool that generates names for packages CLIs libraries and projects";
+            "an offline naming engine for developer projects that checks npm and crates.io";
         let groups = keywords::brand_root_groups(&keywords::extract_keywords(description, 6), 16);
         let mut excluded = Vec::new();
         let mut unique = HashSet::new();
@@ -1643,6 +1669,11 @@ mod tests {
                 );
             }
             for result in batch {
+                assert!(
+                    metrics::composite_score(&result) >= 75,
+                    "{} fell below the semantic quality floor",
+                    result.name
+                );
                 let lower = result.name.to_lowercase();
                 assert!(
                     concept_coverage(&lower, &groups) >= 1,

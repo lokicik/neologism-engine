@@ -2114,6 +2114,42 @@ regression assertion only; generated names are byte-for-byte unchanged.
 
 ---
 
+## Phase 100 — Keep semantic Brandable above its structural floor
+
+**Bottleneck.** The app's own deterministic 100-name Brandable session started strongly but let
+the weak candidate tail surface after repeated exclusions: five names fell below the web app's
+existing 75-point quality boundary, with `Mintora` at **69**, `Minton` at **72**, and
+`Aliaspeak` at **64**. The broad morphology audit did not measure continuation quality, so it
+reported full capacity without exposing that decline. Environment-variable naming showed the
+same source problem more sharply through low-scoring `Value*` forms.
+
+**Retained correction.** Prompt-derived Brandable candidates are still all generated and ranked,
+but candidates at or above **75** now form the selectable pool whenever they can fill a page.
+Below-floor candidates remain ordered as a last-resort capacity fallback rather than being
+deleted. Continuation pages search an eight-page pool because earlier exclusions have consumed
+the strongest forms. Inside that qualified pool, non-naming semantic pages spend eight additional
+MMR points on shape diversity and seed jitter rises from **1.2x to 1.5x**, recovering variety
+without reopening the weak tail. Naming first pages retain their Phase 97 selection profile and
+adopt the floor on continuation, preserving the npm/registry contract. The environment family
+replaces generic `value/setting` with the concise technical roots `var/param`.
+
+**Measured result.** The product brief now sustains **100/100** fresh names with **0** below 75;
+the environment brief does the same and its five-seed Brandable composite rises to **85.74**.
+Across the morphology matrix, fixed quality rises **80.92 → 83.16** and diversity
+**0.730 → 0.737**, with a minimum of **75** and **0/1,100** failures. All rolling sessions retain
+**2,200/2,200** names at **81.83** average, minimum **75**, and **0/2,200** failures. The broad
+48-domain audit rises **80.61 → 83.09** composite while retaining **0.726** diversity,
+**47.2%** five-seed uniqueness, **23/2,400** explained collisions, and zero unexplained ones.
+General-domain calibration and holdout each keep **1,076/1,100** semantic names, and the held-out
+developer matrix keeps **1,587/1,600 (99.2%)** semantic names.
+
+**Verification boundary.** The strengthened morphology audit now fails on any sub-75 fixed or
+rolling name and on any lost 100-name capacity. The product's exact npm/crates.io brief is also
+pinned by the unit session regression. No LLM, network call, final-name blacklist, or scorer
+weight retraining was added.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

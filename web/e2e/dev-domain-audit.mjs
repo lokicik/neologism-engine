@@ -56,7 +56,7 @@ const CASES = [
   },
   {
     prompt: 'an environment variable manager',
-    markers: ['env', 'config', 'dot', 'setting', 'secret', 'value'],
+    markers: ['env', 'config', 'dot', 'secret', 'var', 'param'],
   },
   {
     prompt: 'a filesystem search CLI',

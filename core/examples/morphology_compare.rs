@@ -193,6 +193,8 @@ fn main() {
     let mut metaphor_forms = 0usize;
     let mut collapsed_consonant_metaphor_seams = 0usize;
     let mut composite = 0u64;
+    let mut sub_floor = 0usize;
+    let mut min_quality = u32::MAX;
     let mut batch_diversity = 0.0;
     let mut collapsed_examples = BTreeSet::new();
     let mut full_vowel_suffix_examples = BTreeSet::new();
@@ -200,11 +202,16 @@ fn main() {
     let mut preserved_overlap_examples: BTreeMap<String, usize> = BTreeMap::new();
     let mut rolling_total = 0usize;
     let mut rolling_short = 0usize;
+    let mut rolling_short_examples = BTreeSet::new();
     let mut rolling_full_vowel_suffixes = 0usize;
     let mut rolling_concept_suffixes = 0usize;
     let mut rolling_multi_concept_joins = 0usize;
     let mut rolling_metaphor_forms = 0usize;
     let mut rolling_collapsed_consonant_metaphor_seams = 0usize;
+    let mut rolling_composite = 0u64;
+    let mut rolling_sub_floor = 0usize;
+    let mut rolling_min_quality = u32::MAX;
+    let mut rolling_weak_examples = BTreeSet::new();
     let mut suffix_heavy_pages = 0usize;
     let mut suffix_only_pages = 0usize;
     let mut collapsed_consonant_metaphor_examples = BTreeSet::new();
@@ -269,8 +276,11 @@ fn main() {
             suffix_only_pages += usize::from(page_suffixes == results.len());
             for result in results {
                 let coverage = concept_coverage(&result.name, &groups);
+                let quality = composite_score(&result);
                 total += 1;
-                composite += composite_score(&result) as u64;
+                composite += quality as u64;
+                sub_floor += usize::from(quality < 75);
+                min_quality = min_quality.min(quality);
                 if has_collapsed_suffix(&result.name, &roots) {
                     collapsed += 1;
                     collapsed_examples.insert(result.name.clone());
@@ -310,9 +320,24 @@ fn main() {
             cfg.exclude = excluded.clone();
             let results = generate(&cfg);
             rolling_short += usize::from(results.len() < cfg.count);
+            if results.len() < cfg.count {
+                rolling_short_examples.insert(format!(
+                    "{prompt} / batch {}: {}/{}",
+                    batch + 1,
+                    results.len(),
+                    cfg.count
+                ));
+            }
             rolling_total += results.len();
             for result in &results {
                 let coverage = concept_coverage(&result.name, &groups);
+                let quality = composite_score(result);
+                rolling_composite += quality as u64;
+                rolling_sub_floor += usize::from(quality < 75);
+                rolling_min_quality = rolling_min_quality.min(quality);
+                if quality < 75 {
+                    rolling_weak_examples.insert(format!("{} ({quality})", result.name));
+                }
                 if coverage < 2 {
                     if let Some(tail) = concept_metaphor_tail(&result.name, &roots) {
                         *rolling_metaphor_tail_counts.entry(tail).or_default() += 1;
@@ -355,6 +380,8 @@ fn main() {
         collapsed as f64 / total as f64 * 100.0
     );
     println!("composite: {:.2}", composite as f64 / total as f64);
+    println!("structural floor: min {min_quality}, sub-75 {sub_floor}/{total}");
+    assert_eq!(sub_floor, 0, "fixed semantic pages exposed sub-75 names");
     println!(
         "diversity: {:.3}",
         batch_diversity / (PROMPTS.len() * SEEDS.len()) as f64
@@ -377,6 +404,18 @@ fn main() {
     );
     println!(
         "rolling shape mix: suffix {rolling_concept_suffixes}/{rolling_total}, multi-concept {rolling_multi_concept_joins}/{rolling_total}, metaphor {rolling_metaphor_forms}/{rolling_total}",
+    );
+    println!(
+        "rolling structural quality: avg {:.2}, min {rolling_min_quality}, sub-75 {rolling_sub_floor}/{rolling_total} ({})",
+        rolling_composite as f64 / rolling_total as f64,
+        rolling_weak_examples
+            .into_iter()
+            .collect::<Vec<_>>()
+            .join(", ")
+    );
+    assert_eq!(
+        rolling_sub_floor, 0,
+        "rolling semantic pages exposed sub-75 names"
     );
     println!(
         "metaphor tails: {} exact forms across {metaphor_pages}/{} pages; repeated-tail pages {repeated_metaphor_tail_pages}/{metaphor_pages}, max same tail {max_metaphor_tail_share}/10",
@@ -472,7 +511,16 @@ fn main() {
             .join(", ")
     );
     println!(
-        "rolling sessions: {rolling_total}/{} names, {rolling_short} short batches",
-        PROMPTS.len() * 100
+        "rolling sessions: {rolling_total}/{} names, {rolling_short} short batches ({})",
+        PROMPTS.len() * 100,
+        rolling_short_examples
+            .into_iter()
+            .collect::<Vec<_>>()
+            .join(" | ")
+    );
+    assert_eq!(
+        rolling_total,
+        PROMPTS.len() * 100,
+        "rolling semantic sessions lost capacity"
     );
 }

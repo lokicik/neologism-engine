@@ -188,7 +188,7 @@ fn concept_roots(word: &str) -> &'static [&'static str] {
             "format", "lint", "style", "rule", "tidy", "syntax", "indent", "align",
         ],
         "environment" | "env" | "variable" | "config" | "configuration" | "setting"
-        | "settings" | "secret" => &["env", "config", "dot", "secret", "value", "setting"],
+        | "settings" | "secret" => &["env", "config", "dot", "secret", "var", "param"],
         "filesystem" | "file" | "path" | "directory" | "folder" | "search" | "find" | "index" => {
             &["file", "path", "find", "scan", "index", "seek"]
         }
@@ -1711,8 +1711,10 @@ mod tests {
 
         let environment = brand_roots(&extract_keywords("an environment variable manager", 6), 16);
         assert!(environment.contains(&"dot".to_string()));
-        assert!(environment.contains(&"setting".to_string()));
-        assert!(!environment.contains(&"var".to_string()));
+        assert!(environment.contains(&"var".to_string()));
+        assert!(environment.contains(&"param".to_string()));
+        assert!(!environment.contains(&"value".to_string()));
+        assert!(!environment.contains(&"setting".to_string()));
 
         let legal = brand_roots(&extract_keywords("legal research for court cases", 6), 16);
         assert!(legal.contains(&"jury".to_string()));

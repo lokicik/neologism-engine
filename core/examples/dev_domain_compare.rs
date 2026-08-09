@@ -59,7 +59,7 @@ const CASES: &[Case] = &[
     },
     Case {
         prompt: "an environment variable manager",
-        semantic_markers: &["env", "config", "dot", "setting", "secret", "value"],
+        semantic_markers: &["env", "config", "dot", "secret", "var", "param"],
     },
     Case {
         prompt: "a filesystem search CLI",
