@@ -1,4 +1,5 @@
 import init, { generate_names, batch_metrics, explain_name, extract_keywords } from '../wasm/neologism_wasm.js'
+import { mergeAutoBatches } from './auto'
 
 export type Style = 'big_tech' | 'sci_fi' | 'fantasy'
 
@@ -48,14 +49,18 @@ export async function generateNames(cfg: Config): Promise<NameResult[]> {
 
 // Auto mode (web-only meta-mode): blend the four engine modes into one batch.
 // The engine never sees variant:'auto' — we fan out four real sub-calls
-// (brandable-weighted), all sharing the exclude window, then dedupe by name and
-// interleave one-from-each-mode. Shared by Create (Auto) and the AI Studio pool.
+// (strongly Brandable-weighted), all sharing the exclude window, then dedupe by
+// name and distribute the three accent modes through the batch. Shared by
+// Create (Auto) and the AI Studio pool.
 export async function generateBatch(cfg: Config): Promise<NameResult[]> {
   if (cfg.variant !== 'auto') return generateNames(cfg)
   const total = cfg.count ?? 10
-  const realword = Math.max(1, Math.round(total * 0.2))
-  const respell = Math.max(1, Math.round(total * 0.2))
-  const compound = Math.max(1, Math.round(total * 0.1))
+  // With a normal 10-name batch this is 7 Brandable + one accent from each
+  // explicit mode. Larger AI Studio pools keep the same 70/10/10/10 ratio.
+  const accent = total >= 4 ? Math.max(1, Math.floor(total * 0.1)) : 0
+  const realword = accent
+  const respell = accent
+  const compound = accent
   const brandable = Math.max(1, total - realword - respell - compound)
   const subs: Config[] = [
     { ...cfg, variant: undefined, compound: false, count: brandable },
@@ -64,19 +69,10 @@ export async function generateBatch(cfg: Config): Promise<NameResult[]> {
     { ...cfg, variant: undefined, compound: true, count: compound },
   ]
   const batches = await Promise.all(subs.map((c) => generateNames(c)))
-  const seen = new Set<string>()
-  const merged: NameResult[] = []
-  const max = Math.max(0, ...batches.map((b) => b.length))
-  for (let i = 0; i < max; i++) {
-    for (const b of batches) {
-      const r = b[i]
-      if (r && !seen.has(r.name.toLowerCase())) {
-        seen.add(r.name.toLowerCase())
-        merged.push(r)
-      }
-    }
-  }
-  return merged
+  // Round-robin only the accent modes, then place them at even intervals among
+  // Brandable results. The old one-from-each round robin made three of the first
+  // four cards accent modes even though Brandable was the quality lead.
+  return mergeAutoBatches(batches, total)
 }
 
 export interface BatchStats {
