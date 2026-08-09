@@ -1481,6 +1481,56 @@ reaches 100 without repeats or false exhaustion.
 
 ---
 
+## Phase 84 — Separate product context from naming concepts
+
+**Bottleneck.** The post-suffix audit exposed a deeper source of awkward names. RAKE correctly
+kept descriptive words from a brief, but Brandable treated every unknown word as a separate
+semantic root group. That produced `Stashlocal`, `Dreamguided`, `Trackerloom`, `Instantbeam`,
+`Flowshared`, and `Modernreel`. Long descriptors could be worse than unattractive: the lead root
+for `simple workout planner` became `simple`, so only **30/50** first-page names returned and just
+**5/30** carried a fitness marker; `collaborative document editor` and `automatic invoice
+reminders` returned **0/50** each.
+
+**Permanent audit and boundary.** A new eleven-brief fixed-seed corpus covers local, guided,
+simple, personal/tracker, collaborative, instant, shared, automatic/reminder, modern,
+lightweight, and remote wording. It records first-page capacity, domain markers, weak context
+forms, misordered tails, and ten-batch rolling capacity. The baseline returned only
+**430/550** first-page names and **806/1,100** rolling names, with **30** short rolling batches.
+Of the returned first pages, **405/430** were domain-linked but **36/430** used a context-only
+word as a name root; rolling sessions contained **83/806** such forms.
+
+The retained rule is deliberately contextual rather than a global stopword expansion. When the
+brief already contains a recognized semantic domain, eleven measured delivery/role words such as
+`local`, `guided`, `simple`, `collaborative`, `automatic`, `tracker`, and `reminder` do not open
+standalone Brandable groups. Unknown briefs still preserve their words (`local bakery` remains
+available), and Compound keeps its adjective semantics (`LocalCache` remains possible). This
+separates what the product *is* from how it is delivered without pretending every adjective is
+meaningless.
+
+**Measured result.** The dedicated corpus now returns **550/550** first-page and
+**1,100/1,100** rolling names with no short batch. All **550/550** first-page names carry an
+expected domain marker; weak context forms and misordered tails fall to **0**, including across
+all **1,100** rolling names. Formerly empty briefs now produce readable sets such as `Draftwave`,
+`Scribeflux`, `Ledgerflux`, and `Tallylink`; the workout page replaces `Simpleora` with forms such
+as `Careflow`, `Thrivespring`, `Fitsignal`, and `Pulseatlas`.
+
+The established morphology matrix improves at the same time: suffix forms move
+**513/1,100 → 487/1,100**, metaphor forms **189 → 216**, suffix-heavy pages **15/110 → 10/110**,
+and suffix-only pages **4/110 → 0/110**. Diversity stays **0.726** while the legacy structural
+composite moves **80.15 → 80.03**. General-domain calibration remains **1,053/1,100** semantic
+with one wrong-domain result; synonym holdout remains **1,050/1,100** with none. Developer-domain
+coverage stays **1,591/1,600 (99.4%)**.
+
+**Verification.** The workspace suite is **126/126**, and the new descriptor audit fails closed
+on capacity, semantics, weak forms, tails, and rolling output. WASM and the production bundle
+build cleanly. Chromium expands Auto coverage from 30 to **55** fixed pages: every page contains
+ten names, weak Brandable context forms remain zero, and all **35/35** accents are prompt-linked.
+The developer browser gate remains **800/800 Brandable** and **791/800 Compound**, while
+suffix-only Brandable pages improve **8/80 → 4/80**. Five Compound sessions and the app's own
+Brandable session still reach 100 unique names without false exhaustion.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

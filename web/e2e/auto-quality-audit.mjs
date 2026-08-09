@@ -17,10 +17,22 @@ const PROMPTS = [
   'an app for splitting expenses with friends',
   'a marketplace for vintage keyboards',
   'a fast analytics dashboard for API performance',
+  'a local cache inspector',
+  'a guided breathing and rest companion',
+  'a simple workout planner',
+  'a collaborative document editor',
+  'automatic invoice reminders',
 ]
 const SEEDS = [7, 42, 101, 2024, 9999]
 const VERBOSE = process.argv.includes('--verbose')
 const LOSSY_SEAMS = new Set(['aurank', 'poolink', 'pooledger', 'settledger', 'tagent'])
+const CONTEXT_ONLY_WORDS = new Map([
+  ['a local cache inspector', ['local']],
+  ['a guided breathing and rest companion', ['guided', 'companion']],
+  ['a simple workout planner', ['simple']],
+  ['a collaborative document editor', ['collaborative']],
+  ['automatic invoice reminders', ['automatic', 'reminder']],
+])
 
 const server = spawn(process.execPath, [viteCli, '--port', String(PORT), '--strictPort'], {
   cwd: WEB_DIR,
@@ -62,6 +74,7 @@ function isPromptLinked(item, keywords) {
 }
 
 let failures = 0
+let weakContextForms = 0
 try {
   const page = await browser.newPage()
   await page.goto(APP_URL)
@@ -97,7 +110,20 @@ try {
     const samples = row.results.filter((item) => item.sourceMode !== 'brandable')
     const badAccents = samples.filter((item) => !isPromptLinked(item, row.keywords))
     const lossySeams = row.results.filter((item) => LOSSY_SEAMS.has(item.name.toLowerCase()))
-    if (row.results.length !== 10 || samples.length > 1 || badAccents.length > 0 || lossySeams.length > 0) failures++
+    const weakWords = CONTEXT_ONLY_WORDS.get(row.prompt) ?? []
+    const weakForms = row.results.filter((item) => {
+      if (item.sourceMode !== 'brandable') return false
+      const name = item.name.toLowerCase().replace(/[^a-z]/g, '')
+      return weakWords.some((word) => name.startsWith(word) || name.endsWith(word))
+    })
+    weakContextForms += weakForms.length
+    if (
+      row.results.length !== 10
+      || samples.length > 1
+      || badAccents.length > 0
+      || lossySeams.length > 0
+      || weakForms.length > 0
+    ) failures++
     if (VERBOSE) {
       console.log(`\n${row.seed}  ${row.prompt}`)
       console.log(`keywords: ${row.keywords.join(', ')}`)
@@ -117,6 +143,7 @@ try {
     }
   }
 
+  console.log(`weak Brandable context forms: ${weakContextForms}`)
   console.log('\nAuto accent relevance')
   for (const [mode, stats] of Object.entries(byMode)) {
     console.log(`${mode}: ${stats.linked}/${stats.total} prompt-linked`)
@@ -132,5 +159,5 @@ if (failures > 0) {
   console.error(`${failures} Auto page(s) violated the quality gate`)
   process.exitCode = 1
 } else {
-  console.log('PASS  all 30 Auto pages contain ten names, no lossy seams, and at most one prompt-linked accent')
+  console.log(`PASS  all ${PROMPTS.length * SEEDS.length} Auto pages contain ten names, no weak context forms or lossy seams, and at most one prompt-linked accent`)
 }

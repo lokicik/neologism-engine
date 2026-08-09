@@ -529,6 +529,26 @@ fn is_contextually_suppressed(word: &str, keywords: &[String]) -> bool {
             ))
 }
 
+/// Describes how a known product is delivered rather than what it is. These
+/// words remain available for unknown briefs, but should not become standalone
+/// Brandable root groups beside an already recognized domain.
+fn is_brand_context_only(word: &str) -> bool {
+    matches!(
+        word,
+        "automatic"
+            | "collaborative"
+            | "companion"
+            | "guided"
+            | "instant"
+            | "local"
+            | "modern"
+            | "reminder"
+            | "shared"
+            | "simple"
+            | "tracker"
+    )
+}
+
 /// Return the focused adjective pool for a Compound first page. Unknown
 /// domains use the restrained general palette instead of the whimsical corpus.
 pub fn compound_adjectives(keywords: &[String]) -> Vec<&'static str> {
@@ -931,6 +951,9 @@ pub fn brand_root_groups(keywords: &[String], limit: usize) -> Vec<Vec<String>> 
             "dependency" | "dependencies" | "update" | "updater" | "upgrade" | "bump"
         )
     });
+    let has_semantic_anchor = keywords.iter().any(|keyword| {
+        !concept_roots(keyword).is_empty() && !is_contextually_suppressed(keyword, keywords)
+    });
     let mut positioned_groups = Vec::new();
     let mut seen = Vec::new();
     for (source_order, keyword) in keywords.iter().enumerate() {
@@ -938,6 +961,9 @@ pub fn brand_root_groups(keywords: &[String], limit: usize) -> Vec<Vec<String>> 
             break;
         }
         if is_contextually_suppressed(keyword, keywords) {
+            continue;
+        }
+        if has_semantic_anchor && is_brand_context_only(keyword) {
             continue;
         }
         if (has_queue_domain && keyword == "message")
@@ -1171,6 +1197,32 @@ mod tests {
         let roots = brand_roots(&["vintage".into(), "keyboard".into()], 12);
         assert!(roots.contains(&"retro".to_string()));
         assert!(roots.contains(&"key".to_string()));
+    }
+
+    #[test]
+    fn drops_context_only_words_beside_a_known_domain() {
+        for (prompt, dropped, expected) in [
+            ("a local cache inspector", "local", "stash"),
+            ("a guided breathing and rest companion", "guided", "still"),
+            ("a simple workout planner", "simple", "pulse"),
+            ("a collaborative document editor", "collaborative", "ink"),
+            ("automatic invoice reminders", "automatic", "ledger"),
+        ] {
+            let keywords = extract_keywords(prompt, 6);
+            let roots = brand_roots(&keywords, 16);
+            assert!(!roots.contains(&dropped.to_string()), "{prompt}: {roots:?}");
+            assert!(roots.contains(&expected.to_string()), "{prompt}: {roots:?}");
+        }
+    }
+
+    #[test]
+    fn keeps_context_words_when_no_domain_is_known() {
+        let roots = brand_roots(&["local".into(), "bakery".into()], 12);
+        assert!(roots.contains(&"local".to_string()));
+        assert!(roots.contains(&"bakery".to_string()));
+
+        let cache = extract_keywords("a local cache inspector", 6);
+        assert!(compound_adjectives(&cache).contains(&"local"));
     }
 
     #[test]
