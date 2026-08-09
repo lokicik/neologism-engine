@@ -9,19 +9,19 @@ pub mod phonotactics;
 pub mod score;
 pub mod style;
 
-use std::collections::{HashMap, HashSet};
-use std::sync::OnceLock;
 use rand::SeedableRng;
 use rand_chacha::ChaCha8Rng;
 use serde::{Deserialize, Serialize};
+use std::collections::{HashMap, HashSet};
+use std::sync::OnceLock;
 
-use style::{Config, Style};
+use blend::{blend, compound, concept_transform, overlap_blend, semantic_join, tech_transform};
+use exclude::ExcludeSet;
 use markov::Model;
 use phonemes::{affinity_score, Variant};
 use phonotactics::{is_valid, is_valid_clustered, respects_sonority, syllable_count};
 use score::{score_memorability, score_novelty, score_pronounceability};
-use blend::{blend, compound, overlap_blend, tech_transform};
-use exclude::ExcludeSet;
+use style::{Config, Style};
 
 /// Tunable big-tech generation knobs (Phase 21). `Default` = production values;
 /// the tuning harness ([core/examples/tune.rs]) sweeps these in-process. Only
@@ -69,6 +69,9 @@ pub struct BigTechTuning {
     /// session-scale fuzzy/stem exclusion starves generation, while exact
     /// exclusion blocks single points and is starvation-safe at any scale.
     pub fuzzy_window: usize,
+    /// Expand prompt keywords through a curated offline concept lexicon before
+    /// blending. Kept as a switch so quality harnesses can compare old/new paths.
+    pub concept_expand: bool,
 }
 
 impl Default for BigTechTuning {
@@ -116,6 +119,7 @@ impl BigTechTuning {
             max_share: 0.20,
             // Phase 35: fuzzy/stem scope — constant across the variety axis.
             fuzzy_window: 2000,
+            concept_expand: true,
         }
     }
 }
@@ -137,9 +141,9 @@ const COMMON_WORDS: &str = include_str!("../data/common_words.txt");
 /// `anal`, `pee`, `rape`, `hell` — they hit innocent names like class/canal/speed/
 /// shell). Catches connotation flubs (`Bitdefect`) and keeps output safe.
 const BAD_SUBSTRINGS: &[&str] = &[
-    "fuck", "shit", "cunt", "dick", "cock", "bitch", "bastard", "whore", "slut",
-    "porn", "nazi", "nigg", "retard", "damn", "crap", "turd", "fart", "puke",
-    "vomit", "poop", "defect", "fraud", "scam", "lousy",
+    "fuck", "shit", "cunt", "dick", "cock", "bitch", "bastard", "whore", "slut", "porn", "nazi",
+    "nigg", "retard", "damn", "crap", "turd", "fart", "puke", "vomit", "poop", "defect", "fraud",
+    "scam", "lousy", "kill",
     // Phase 48: a blend seam produced mood+journaling → "mong" (UK slur).
     "mong",
 ];
@@ -162,7 +166,13 @@ fn scifi_corpus() -> String {
 
 /// All fantasy sub-corpora concatenated (used when no variant is selected).
 fn fantasy_corpus() -> String {
-    [FANTASY_ELVISH, FANTASY_DWARVISH, FANTASY_ORCISH, FANTASY_COMMON].join("\n")
+    [
+        FANTASY_ELVISH,
+        FANTASY_DWARVISH,
+        FANTASY_ORCISH,
+        FANTASY_COMMON,
+    ]
+    .join("\n")
 }
 
 /// Map a variant name to its dedicated sub-corpus.
@@ -198,12 +208,18 @@ fn parse_lines(s: &str) -> Vec<&str> {
 }
 
 fn build_dictionary() -> HashSet<String> {
-    parse_lines(WORDS).iter().map(|s| s.to_lowercase()).collect()
+    parse_lines(WORDS)
+        .iter()
+        .map(|s| s.to_lowercase())
+        .collect()
 }
 
 /// Common-English-word set for the big-tech real-word filter (see COMMON_WORDS).
 fn build_common_words() -> HashSet<String> {
-    parse_lines(COMMON_WORDS).iter().map(|s| s.to_string()).collect()
+    parse_lines(COMMON_WORDS)
+        .iter()
+        .map(|s| s.to_string())
+        .collect()
 }
 
 /// Seed-independent big-tech setup, built once per process (Phase 34). Before
@@ -403,6 +419,24 @@ fn blend_roots(rng: &mut ChaCha8Rng, roots: &[&str]) -> Option<String> {
     overlap_blend(a, b).or_else(|| blend(a, b))
 }
 
+/// Combine two prompt-derived roots while preserving compact semantic
+/// morphemes. Randomizing order keeps the same seeded variety as blend_roots.
+fn join_roots(rng: &mut ChaCha8Rng, roots: &[&str]) -> Option<String> {
+    if roots.len() < 2 {
+        return None;
+    }
+    let a = roots[rand::Rng::gen_range(rng, 0..roots.len())];
+    let b = roots[rand::Rng::gen_range(rng, 0..roots.len())];
+    if a == b {
+        return None;
+    }
+    if rand::Rng::gen::<bool>(rng) {
+        semantic_join(a, b)
+    } else {
+        semantic_join(b, a)
+    }
+}
+
 /// Offline "brand-appeal" score (Phase 28) — a cheap proxy for the *semantic*
 /// quality the structural scores miss. Rewards names that open with a real word
 /// and end in a clean brandable suffix; penalizes harsh consonant-cluster
@@ -420,16 +454,21 @@ fn brand_appeal(lower: &str, common: &HashSet<String>, t: &BigTechTuning) -> f64
         }
     }
     const CLEAN_SUFFIXES: [&str; 7] = ["ify", "io", "ai", "ia", "ly", "ix", "ora"];
-    const HARSH_ENDINGS: [&str; 12] =
-        ["rch", "tch", "sh", "ck", "sk", "ft", "rt", "rk", "nt", "st", "ld", "rd"];
+    const HARSH_ENDINGS: [&str; 12] = [
+        "rch", "tch", "sh", "ck", "sk", "ft", "rt", "rk", "nt", "st", "ld", "rd",
+    ];
     let clean = CLEAN_SUFFIXES.iter().any(|s| lower.ends_with(s));
     let harsh = HARSH_ENDINGS.iter().any(|s| lower.ends_with(s));
-    prefix_len as f64 * t.prefix_w
-        + if clean { t.suffix_w } else { 0.0 }
+    prefix_len as f64 * t.prefix_w + if clean { t.suffix_w } else { 0.0 }
         - if harsh { t.harsh_w } else { 0.0 }
 }
 
-fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, tuning: &BigTechTuning) -> Vec<NameResult> {
+fn generate_bigtech(
+    cfg: &Config,
+    dict: &HashSet<String>,
+    rng: &mut ChaCha8Rng,
+    tuning: &BigTechTuning,
+) -> Vec<NameResult> {
     // Phase 34: corpora, trained model, word sets and gate stats are cached —
     // all seed-independent, so repeated calls (one per Generate click) skip setup.
     let st = BigtechStatic::get();
@@ -439,13 +478,31 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, 
     // the most recent fuzzy_window entries (see the BigTechTuning field doc).
     let exclude = ExcludeSet::new(&cfg.exclude, tuning.fuzzy_window);
 
+    // Phase 36 naming modes (big-tech reuses the previously unused `variant`
+    // field): "respell" = Lyft/Tumblr-style one-transform respellings of real
+    // words; "realword" = curated real words verbatim (Apple/Notion-style).
+    // Anything else (or None) = the default brandable pipeline.
+    let variant_lower = cfg.variant.as_deref().map(str::to_lowercase);
+    let respell_mode = variant_lower.as_deref() == Some("respell");
+    let realword_mode = variant_lower.as_deref() == Some("realword");
+
     // Priority for blend roots: description keywords > user-supplied roots > corpus.
-    let desc_keywords: Vec<String> = cfg
+    let raw_desc_keywords: Vec<String> = cfg
         .description
         .as_deref()
         .filter(|d| !d.trim().is_empty())
         .map(|d| keywords::extract_keywords(d, 6))
         .unwrap_or_default();
+    // Concept roots are a Brandable strategy. Compound and Respell promise the
+    // user's literal words, so silently replacing those roots breaks the mode.
+    let expanded_desc_keywords =
+        if tuning.concept_expand && !cfg.compound && !respell_mode && !realword_mode {
+            keywords::brand_roots(&raw_desc_keywords, 16)
+        } else {
+            raw_desc_keywords.clone()
+        };
+    let concept_expanded = expanded_desc_keywords != raw_desc_keywords;
+    let desc_keywords = expanded_desc_keywords;
 
     let all_roots: Vec<&str> = if !desc_keywords.is_empty() {
         desc_keywords.iter().map(|s| s.as_str()).collect()
@@ -466,14 +523,6 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, 
     // generator mix below (coined Markov + clean blends + short evocative roots).
     let has_roots = !desc_keywords.is_empty() || !cfg.roots.is_empty();
 
-    // Phase 36 naming modes (big-tech reuses the previously unused `variant`
-    // field): "respell" = Lyft/Tumblr-style one-transform respellings of real
-    // words; "realword" = curated real words verbatim (Apple/Notion-style).
-    // Anything else (or None) = the unchanged default pipeline.
-    let variant_lower = cfg.variant.as_deref().map(str::to_lowercase);
-    let respell_mode = variant_lower.as_deref() == Some("respell");
-    let realword_mode = variant_lower.as_deref() == Some("realword");
-
     // Phonotactic-probability quality gate (Springer "I'd buy that!"): a default
     // candidate must be at least as brand-like as the low tail of real brands.
     // Skipped for user-roots (keyword fidelity), compound (two real words), and
@@ -483,7 +532,10 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, 
     // respellings (journal → journl); the curated pool outnumbers them
     // ~100:1, so they're pulled to the front of the batch at the exit below.
     let kw_respells: HashSet<String> = if respell_mode && has_roots {
-        all_roots.iter().flat_map(|r| blend::respell_options(r)).collect()
+        all_roots
+            .iter()
+            .flat_map(|r| blend::respell_options(r))
+            .collect()
     } else {
         HashSet::new()
     };
@@ -496,7 +548,9 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, 
     };
 
     for _ in 0..max_attempts {
-        if pool.len() >= target { break; }
+        if pool.len() >= target {
+            break;
+        }
 
         let name = if respell_mode {
             // One-transform respelling of a curated real word (lyft, tumblr).
@@ -509,7 +563,9 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, 
             } else {
                 st.realword_pool[rand::Rng::gen_range(rng, 0..st.realword_pool.len())]
             };
-            let Some(r) = blend::respell(rng, w) else { continue };
+            let Some(r) = blend::respell(rng, w) else {
+                continue;
+            };
             r
         } else if realword_mode {
             // Curated real word, emitted verbatim (Apple/Notion-style).
@@ -538,20 +594,51 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, 
             // blend two user roots / one root + tech transform (Shopify
             // pattern — works with one keyword) / blend a user root with a
             // corpus root for variety (keyword half leads).
-            let blend_two_w = if all_roots.len() >= 2 { 0.45 } else { 0.0 };
-            let suffix_w = if all_roots.len() >= 2 { 0.30 } else { 0.45 };
+            let blend_two_w = if all_roots.len() >= 2 {
+                if concept_expanded {
+                    0.60
+                } else {
+                    0.45
+                }
+            } else {
+                0.0
+            };
+            let suffix_w = if concept_expanded {
+                1.0 - blend_two_w
+            } else if all_roots.len() >= 2 {
+                0.30
+            } else {
+                0.45
+            };
             let pick = rand::Rng::gen::<f64>(rng);
             if pick < blend_two_w {
-                let Some(b) = blend_roots(rng, &all_roots) else { continue };
-                tech_transform(rng, &b, cfg.temperature)
+                let combined = if concept_expanded {
+                    join_roots(rng, &all_roots)
+                } else {
+                    blend_roots(rng, &all_roots)
+                };
+                let Some(b) = combined else { continue };
+                if concept_expanded {
+                    b
+                } else {
+                    tech_transform(rng, &b, cfg.temperature)
+                }
             } else if pick < blend_two_w + suffix_w {
                 let root = all_roots[rand::Rng::gen_range(rng, 0..all_roots.len())];
-                tech_transform(rng, root, 1.0)
+                if concept_expanded {
+                    concept_transform(rng, root)
+                } else {
+                    tech_transform(rng, root, 1.0)
+                }
             } else {
                 let a = all_roots[rand::Rng::gen_range(rng, 0..all_roots.len())];
                 let b = st.roots[rand::Rng::gen_range(rng, 0..st.roots.len())];
-                if a == b { continue }
-                let Some(m) = overlap_blend(a, b).or_else(|| blend(a, b)) else { continue };
+                if a == b {
+                    continue;
+                }
+                let Some(m) = overlap_blend(a, b).or_else(|| blend(a, b)) else {
+                    continue;
+                };
                 tech_transform(rng, &m, cfg.temperature)
             }
         } else {
@@ -559,10 +646,17 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, 
             // single-root evocative names (root + tech suffix, à la Shopify).
             let pick = rand::Rng::gen::<f64>(rng);
             if pick < tuning.markov_w {
-                let Some(s) = st.model.sample(rng, cfg.temperature, cfg.min_len, cfg.max_len) else { continue };
+                let Some(s) = st
+                    .model
+                    .sample(rng, cfg.temperature, cfg.min_len, cfg.max_len)
+                else {
+                    continue;
+                };
                 tech_transform(rng, &s, cfg.temperature)
             } else if pick < tuning.markov_w + tuning.blend_w {
-                let Some(b) = blend_roots(rng, &st.roots) else { continue };
+                let Some(b) = blend_roots(rng, &st.roots) else {
+                    continue;
+                };
                 tech_transform(rng, &b, cfg.temperature)
             } else {
                 let root = st.roots[rand::Rng::gen_range(rng, 0..st.roots.len())];
@@ -571,36 +665,59 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, 
         };
 
         let name = capitalize(&name);
-        if name.len() < cfg.min_len || name.len() > cfg.max_len { continue; }
+        if name.len() < cfg.min_len || name.len() > cfg.max_len {
+            continue;
+        }
         let lower = name.to_lowercase();
         // Respellings deliberately break English phonotactics (tumblr ends in
         // a 4-consonant run) — allow the denser clusters and skip sonority,
         // like the harsh Sci-Fi variants do.
         if respell_mode {
-            if !is_valid_clustered(&lower, Style::BigTech, 4) { continue; }
-        } else if !is_valid(&lower, Style::BigTech) { continue; }
+            if !is_valid_clustered(&lower, Style::BigTech, 4) {
+                continue;
+            }
+        } else if !is_valid(&lower, Style::BigTech) {
+            continue;
+        }
         // Big-tech names should read naturally → enforce sonority sequencing.
         // Compounds join two real words, so skip the single-word sonority check.
-        if !cfg.compound && !respell_mode && !respects_sonority(&lower) { continue; }
+        if !cfg.compound && !respell_mode && !respects_sonority(&lower) {
+            continue;
+        }
         // Brand-shape: 1–3 syllables (research sweet spot); reject long mashups.
-        if !cfg.compound && syllable_count(&lower) > tuning.syllable_cap { continue; }
+        if !cfg.compound && syllable_count(&lower) > tuning.syllable_cap {
+            continue;
+        }
         // Phonotactic-probability gate: reject candidates less brand-like than
         // the low tail of real brands (no-op when apply_gate is false).
-        if st.model.log_likelihood(&name) < ll_floor { continue; }
+        if st.model.log_likelihood(&name) < ll_floor {
+            continue;
+        }
         // Don't emit names that read as a truncated/typo'd real brand. Also
         // enforced for the Phase 36 modes: a respelling can land on a brand
         // (flicker→flickr) and a real word can read as a brand typo (strip).
         if (apply_gate || respell_mode || realword_mode)
-            && mimics_real_brand_indexed(&lower, &st.corpus_by_len) { continue; }
+            && mimics_real_brand_indexed(&lower, &st.corpus_by_len)
+        {
+            continue;
+        }
         // Never emit a real brand / root / dictionary word verbatim — except in
         // real-word mode, where curated real words (incl. roots) are the point;
         // there only the brand-mimic check above guards against brands.
-        if !realword_mode && (st.corpus_set.contains(&lower) || dict.contains(&lower)) { continue; }
+        if !realword_mode && (st.corpus_set.contains(&lower) || dict.contains(&lower)) {
+            continue;
+        }
         // Reject plain real words (Guard, Telegraph) — big-tech only.
-        if !realword_mode && st.common_words.contains(&lower) { continue; }
+        if !realword_mode && st.common_words.contains(&lower) {
+            continue;
+        }
         // Reject bad/offensive connotations (Bitdefect) — big-tech only.
-        if BAD_SUBSTRINGS.iter().any(|b| lower.contains(b)) { continue; }
-        if !passes_constraints(&lower, cfg) { continue; }
+        if BAD_SUBSTRINGS.iter().any(|b| lower.contains(b)) {
+            continue;
+        }
+        if !passes_constraints(&lower, cfg) {
+            continue;
+        }
         // Phase 33: fuzzy + stem exclusion (most expensive filter — runs on
         // survivors only). Phase 44: only in the open-ended default mix —
         // with user roots/description the reachable space is a handful of
@@ -612,8 +729,12 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, 
             &lower,
             tuning.fuzzy_exclude && !constrained,
             tuning.stem_exclude && !constrained,
-        ) { continue; }
-        if seen.contains(&name) { continue; }
+        ) {
+            continue;
+        }
+        if seen.contains(&name) {
+            continue;
+        }
 
         seen.insert(name.clone());
         let sp = score_pronounceability(&lower);
@@ -650,8 +771,7 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, 
     // Phase 34: rank each name once, then sort on the cached value — sort_by
     // with rank() inline recomputed log_likelihood + brand_appeal per comparison
     // (~10× the work). Same values, same comparator → identical order.
-    let mut decorated: Vec<(f64, NameResult)> =
-        pool.into_iter().map(|r| (rank(&r), r)).collect();
+    let mut decorated: Vec<(f64, NameResult)> = pool.into_iter().map(|r| (rank(&r), r)).collect();
     decorated.sort_by(|a, b| b.0.partial_cmp(&a.0).unwrap_or(std::cmp::Ordering::Equal));
     let mut pool: Vec<NameResult> = decorated.into_iter().map(|(_, r)| r).collect();
     // Phase 48: a prompted respell batch leads with the keyword-derived
@@ -696,7 +816,12 @@ fn generate_bigtech(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, 
     out
 }
 
-fn generate_markov(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, corpus: &str) -> Vec<NameResult> {
+fn generate_markov(
+    cfg: &Config,
+    dict: &HashSet<String>,
+    rng: &mut ChaCha8Rng,
+    corpus: &str,
+) -> Vec<NameResult> {
     let names = parse_lines(corpus);
     let model = Model::train(&names, 3);
     // Never emit a training entry verbatim — this is a neologism engine.
@@ -725,16 +850,32 @@ fn generate_markov(cfg: &Config, dict: &HashSet<String>, rng: &mut ChaCha8Rng, c
     let mut seen: HashSet<String> = HashSet::new();
 
     for _ in 0..max_attempts {
-        if pool.len() >= target { break; }
-        let Some(name) = model.sample(rng, cfg.temperature, cfg.min_len, cfg.max_len) else { continue };
+        if pool.len() >= target {
+            break;
+        }
+        let Some(name) = model.sample(rng, cfg.temperature, cfg.min_len, cfg.max_len) else {
+            continue;
+        };
         let name = capitalize(&name);
-        if !is_valid_clustered(&name.to_lowercase(), cfg.style, max_run) { continue; }
-        if soft && !respects_sonority(&name.to_lowercase()) { continue; }
+        if !is_valid_clustered(&name.to_lowercase(), cfg.style, max_run) {
+            continue;
+        }
+        if soft && !respects_sonority(&name.to_lowercase()) {
+            continue;
+        }
         let lower = name.to_lowercase();
-        if corpus_set.contains(&lower) || dict.contains(&lower) { continue; }
-        if !passes_constraints(&lower, cfg) { continue; }
-        if exclude.contains(&lower) { continue; }
-        if seen.contains(&name) { continue; }
+        if corpus_set.contains(&lower) || dict.contains(&lower) {
+            continue;
+        }
+        if !passes_constraints(&lower, cfg) {
+            continue;
+        }
+        if exclude.contains(&lower) {
+            continue;
+        }
+        if seen.contains(&name) {
+            continue;
+        }
         seen.insert(name.clone());
         let sp = score_pronounceability(&name);
         let sn = score_novelty(&name.to_lowercase(), dict);
@@ -863,7 +1004,10 @@ mod tests {
         assert!(good > harsh, "good={good} should beat harsh={harsh}");
         // Harsh ending is penalized below a neutral coined name.
         let neutral = brand_appeal("zentu", &common, &t);
-        assert!(harsh < neutral, "harsh={harsh} should be penalized below neutral={neutral}");
+        assert!(
+            harsh < neutral,
+            "harsh={harsh} should be penalized below neutral={neutral}"
+        );
     }
 
     #[test]
@@ -872,13 +1016,21 @@ mod tests {
         c.count = 8;
         c.starts_with = Some("a".to_string());
         for r in generate(&c) {
-            assert!(r.name.to_lowercase().starts_with('a'), "{} ignored starts_with", r.name);
+            assert!(
+                r.name.to_lowercase().starts_with('a'),
+                "{} ignored starts_with",
+                r.name
+            );
         }
         let mut c2 = cfg(Style::SciFi);
         c2.count = 6;
         c2.contains = Some("ar".to_string());
         for r in generate(&c2) {
-            assert!(r.name.to_lowercase().contains("ar"), "{} ignored contains", r.name);
+            assert!(
+                r.name.to_lowercase().contains("ar"),
+                "{} ignored contains",
+                r.name
+            );
         }
     }
 
@@ -921,14 +1073,31 @@ mod tests {
             let mut c = cfg(style);
             c.count = 12;
             c.variant = variant.map(|s| s.to_string());
-            let names: HashSet<String> = generate(&c).iter().map(|r| r.name.to_lowercase()).collect();
+            let names: HashSet<String> =
+                generate(&c).iter().map(|r| r.name.to_lowercase()).collect();
             let corpus: HashSet<String> = match style {
-                Style::BigTech => parse_lines(BIGTECH_CORPUS).iter().chain(parse_lines(ROOTS).iter()).map(|s| s.to_lowercase()).collect(),
-                Style::SciFi => parse_lines(&scifi_corpus()).iter().map(|s| s.to_lowercase()).collect(),
-                Style::Fantasy => parse_lines(&fantasy_corpus()).iter().map(|s| s.to_lowercase()).collect(),
+                Style::BigTech => parse_lines(BIGTECH_CORPUS)
+                    .iter()
+                    .chain(parse_lines(ROOTS).iter())
+                    .map(|s| s.to_lowercase())
+                    .collect(),
+                Style::SciFi => parse_lines(&scifi_corpus())
+                    .iter()
+                    .map(|s| s.to_lowercase())
+                    .collect(),
+                Style::Fantasy => parse_lines(&fantasy_corpus())
+                    .iter()
+                    .map(|s| s.to_lowercase())
+                    .collect(),
             };
             let overlap: Vec<&String> = names.intersection(&corpus).collect();
-            assert!(overlap.is_empty(), "{:?}/{:?} reproduced corpus entries: {:?}", style, variant, overlap);
+            assert!(
+                overlap.is_empty(),
+                "{:?}/{:?} reproduced corpus entries: {:?}",
+                style,
+                variant,
+                overlap
+            );
         }
     }
 
@@ -960,8 +1129,11 @@ mod tests {
             let lower = r.name.to_lowercase();
             stems.iter().any(|s| lower.contains(s))
         });
-        assert!(hit, "no description-derived names: {:?}",
-            results.iter().map(|r| &r.name).collect::<Vec<_>>());
+        assert!(
+            hit,
+            "no description-derived names: {:?}",
+            results.iter().map(|r| &r.name).collect::<Vec<_>>()
+        );
     }
 
     #[test]
@@ -980,9 +1152,17 @@ mod tests {
         let mix = generate(&mix_cfg);
 
         let avg = |v: &[NameResult]| -> f64 {
-            v.iter().map(|r| affinity_score(&r.name, Variant::Elvish)).sum::<f64>() / v.len() as f64
+            v.iter()
+                .map(|r| affinity_score(&r.name, Variant::Elvish))
+                .sum::<f64>()
+                / v.len() as f64
         };
-        assert!(avg(&elvish) >= avg(&mix), "elvish {} vs mix {}", avg(&elvish), avg(&mix));
+        assert!(
+            avg(&elvish) >= avg(&mix),
+            "elvish {} vs mix {}",
+            avg(&elvish),
+            avg(&mix)
+        );
     }
 
     #[test]
@@ -992,7 +1172,11 @@ mod tests {
         c.count = 12;
         c.max_len = 12;
         for r in generate(&c) {
-            assert!(syllable_count(&r.name.to_lowercase()) <= 3, "{} has >3 syllables", r.name);
+            assert!(
+                syllable_count(&r.name.to_lowercase()) <= 3,
+                "{} has >3 syllables",
+                r.name
+            );
         }
     }
 
@@ -1007,8 +1191,8 @@ mod tests {
         assert!(!mimics_real_brand("zephyrium", &brands));
         // A distinctive brand padded by a short prefix/suffix → flagged.
         assert!(mimics_real_brand("supabasey", &["supabase"])); // suffix pad
-        assert!(mimics_real_brand("xstripe", &["stripe"]));     // prefix pad
-        // A coinage that merely shares a stem with a brand → kept.
+        assert!(mimics_real_brand("xstripe", &["stripe"])); // prefix pad
+                                                            // A coinage that merely shares a stem with a brand → kept.
         assert!(!mimics_real_brand("twility", &["twilio"]));
     }
 
@@ -1019,7 +1203,11 @@ mod tests {
         let mut c = cfg(Style::BigTech);
         c.count = 20;
         for r in generate(&c) {
-            assert!(!common.contains(&r.name.to_lowercase()), "{} is a common word", r.name);
+            assert!(
+                !common.contains(&r.name.to_lowercase()),
+                "{} is a common word",
+                r.name
+            );
         }
     }
 
@@ -1030,8 +1218,11 @@ mod tests {
         let mut c = cfg(Style::BigTech);
         c.count = 15;
         for r in generate(&c) {
-            assert!(!mimics_real_brand(&r.name.to_lowercase(), &brands),
-                "{} mimics a real brand", r.name);
+            assert!(
+                !mimics_real_brand(&r.name.to_lowercase(), &brands),
+                "{} mimics a real brand",
+                r.name
+            );
         }
     }
 
@@ -1043,13 +1234,16 @@ mod tests {
         let results = generate(&c);
         assert!(!results.is_empty());
         let st = BigtechStatic::get();
-        let brands: HashSet<String> =
-            parse_lines(BIGTECH_CORPUS).iter().map(|s| s.to_lowercase()).collect();
+        let brands: HashSet<String> = parse_lines(BIGTECH_CORPUS)
+            .iter()
+            .map(|s| s.to_lowercase())
+            .collect();
         for r in &results {
             let lower = r.name.to_lowercase();
             assert!(
                 st.realword_pool.binary_search(&lower.as_str()).is_ok(),
-                "{} not in the curated pool", r.name
+                "{} not in the curated pool",
+                r.name
             );
             assert!(!brands.contains(&lower), "{} is a real brand", r.name);
         }
@@ -1078,7 +1272,10 @@ mod tests {
     fn unknown_variant_matches_default_bigtech() {
         // An unrecognized variant must fall through to the default pipeline,
         // byte-identical — protects existing callers and the frozen baseline.
-        let a: Vec<String> = generate(&cfg(Style::BigTech)).into_iter().map(|r| r.name).collect();
+        let a: Vec<String> = generate(&cfg(Style::BigTech))
+            .into_iter()
+            .map(|r| r.name)
+            .collect();
         let mut c = cfg(Style::BigTech);
         c.variant = Some("nonsense".to_string());
         let b: Vec<String> = generate(&c).into_iter().map(|r| r.name).collect();
@@ -1102,7 +1299,10 @@ mod tests {
         c2.seed = Some(1337);
         c2.exclude = first.clone();
         let second: Vec<String> = generate(&c2).into_iter().map(|r| r.name).collect();
-        assert!(!second.is_empty(), "description mode starved after one excluded batch");
+        assert!(
+            !second.is_empty(),
+            "description mode starved after one excluded batch"
+        );
         for n in &second {
             assert!(!first.contains(n), "{n} repeated despite exact exclusion");
         }
@@ -1118,8 +1318,12 @@ mod tests {
         c.description = Some("fitness".to_string());
         c.count = 10;
         let results = generate(&c);
-        assert_eq!(results.len(), 10, "single-keyword description starved: {:?}",
-            results.iter().map(|r| &r.name).collect::<Vec<_>>());
+        assert_eq!(
+            results.len(),
+            10,
+            "single-keyword description starved: {:?}",
+            results.iter().map(|r| &r.name).collect::<Vec<_>>()
+        );
 
         // "AI tool for lawyers" used to reduce to one keyword too ("ai" was
         // dropped as <3 chars, "tool" is a stopword).
@@ -1150,29 +1354,46 @@ mod tests {
             *prefixes.entry(p).or_insert(0) += 1;
         }
         let names: Vec<&String> = results.iter().map(|r| &r.name).collect();
-        assert!(prefixes.len() >= 3, "only {} prefix families: {names:?}", prefixes.len());
+        assert!(
+            prefixes.len() >= 3,
+            "only {} prefix families: {names:?}",
+            prefixes.len()
+        );
         for (p, n) in &prefixes {
-            assert!(*n * 2 <= results.len(), "{n} of {} names share prefix {p:?}: {names:?}",
-                results.len());
+            assert!(
+                *n * 2 <= results.len(),
+                "{n} of {} names share prefix {p:?}: {names:?}",
+                results.len()
+            );
         }
     }
 
     #[test]
     fn description_names_echo_keywords() {
-        // Prompted names must visibly carry the prompt: at least half the
-        // batch opens with (or contains) a recognizable keyword fragment.
+        // Prompted names must visibly carry either a literal keyword or one of
+        // its curated concept roots; at least half the batch should show intent.
         let mut c = cfg(Style::BigTech);
         c.description = Some("a journaling app with mood insights".to_string());
         c.count = 10;
         let results = generate(&c);
         assert!(!results.is_empty());
-        let frags = ["jou", "journ", "moo", "mood", "ins", "insight"];
-        let hits = results.iter().filter(|r| {
-            let lower = r.name.to_lowercase();
-            frags.iter().any(|f| lower.contains(f))
-        }).count();
-        assert!(hits * 2 >= results.len(), "only {hits}/{} echo a keyword: {:?}",
-            results.len(), results.iter().map(|r| &r.name).collect::<Vec<_>>());
+        let frags = [
+            "jou", "journ", "moo", "mood", "ins", "insight", "ink", "quil", "draf", "scrib",
+            "note", "sign", "lens", "trac", "scop", "vect",
+        ];
+        let hits = results
+            .iter()
+            .filter(|r| {
+                let lower = r.name.to_lowercase();
+                frags.iter().any(|f| lower.contains(f))
+            })
+            .count();
+        assert!(
+            hits * 2 >= results.len(),
+            "only {hits}/{} echo a keyword: {:?}",
+            results.len(),
+            results.iter().map(|r| &r.name).collect::<Vec<_>>()
+        );
     }
 
     #[test]
@@ -1186,7 +1407,11 @@ mod tests {
             c.count = 10;
             c.seed = Some(seed);
             for r in generate(&c) {
-                assert!(!r.name.to_lowercase().contains("mong"), "emitted {}", r.name);
+                assert!(
+                    !r.name.to_lowercase().contains("mong"),
+                    "emitted {}",
+                    r.name
+                );
             }
         }
     }
@@ -1206,8 +1431,11 @@ mod tests {
             let lower = r.name.to_lowercase();
             stems.iter().any(|s| lower.contains(s))
         });
-        assert!(hit, "no keyword-derived compounds: {:?}",
-            results.iter().map(|r| &r.name).collect::<Vec<_>>());
+        assert!(
+            hit,
+            "no keyword-derived compounds: {:?}",
+            results.iter().map(|r| &r.name).collect::<Vec<_>>()
+        );
     }
 
     #[test]
@@ -1225,9 +1453,15 @@ mod tests {
         for kw in keywords::extract_keywords(c.description.as_deref().unwrap(), 6) {
             keyword_respells.extend(blend::respell_options(&kw));
         }
-        let hit = results.iter().any(|r| keyword_respells.contains(&r.name.to_lowercase()));
-        assert!(hit, "no keyword-derived respellings (options {:?}) in {:?}",
-            keyword_respells, results.iter().map(|r| &r.name).collect::<Vec<_>>());
+        let hit = results
+            .iter()
+            .any(|r| keyword_respells.contains(&r.name.to_lowercase()));
+        assert!(
+            hit,
+            "no keyword-derived respellings (options {:?}) in {:?}",
+            keyword_respells,
+            results.iter().map(|r| &r.name).collect::<Vec<_>>()
+        );
     }
 
     #[test]
@@ -1245,7 +1479,10 @@ mod tests {
         c2.seed = Some(1337);
         c2.exclude = first.clone();
         let second: Vec<String> = generate(&c2).into_iter().map(|r| r.name).collect();
-        assert!(!second.is_empty(), "realword mode starved after one excluded batch");
+        assert!(
+            !second.is_empty(),
+            "realword mode starved after one excluded batch"
+        );
         for n in &second {
             assert!(!first.contains(n), "{n} repeated despite exact exclusion");
         }
@@ -1258,9 +1495,24 @@ mod tests {
         let st = BigtechStatic::get();
         let corpus = parse_lines(BIGTECH_CORPUS);
         let probes = [
-            "supaba", "gongodb", "hulumi", "zephyrium", "xstripe", "supabasey",
-            "twility", "googl", "googler", "spotif", "notione", "zzzz",
-            "keyston", "vantaflow", "amazo", "samazon", "figm", "figmaa",
+            "supaba",
+            "gongodb",
+            "hulumi",
+            "zephyrium",
+            "xstripe",
+            "supabasey",
+            "twility",
+            "googl",
+            "googler",
+            "spotif",
+            "notione",
+            "zzzz",
+            "keyston",
+            "vantaflow",
+            "amazo",
+            "samazon",
+            "figm",
+            "figmaa",
         ];
         for p in probes {
             assert_eq!(
@@ -1275,9 +1527,16 @@ mod tests {
     fn levenshtein_le2_matches_full() {
         // Bounded check must agree with the full DP on representative pairs.
         let pairs = [
-            ("supaba", "supabase"), ("gongodb", "mongodb"), ("abc", "abc"),
-            ("abc", "abd"), ("abc", "xyz"), ("short", "shortest"),
-            ("keyston", "keystone"), ("a", "abc"), ("", "ab"), ("", "abc"),
+            ("supaba", "supabase"),
+            ("gongodb", "mongodb"),
+            ("abc", "abc"),
+            ("abc", "abd"),
+            ("abc", "xyz"),
+            ("short", "shortest"),
+            ("keyston", "keystone"),
+            ("a", "abc"),
+            ("", "ab"),
+            ("", "abc"),
         ];
         for (a, b) in pairs {
             assert_eq!(

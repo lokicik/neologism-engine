@@ -9,21 +9,217 @@
 
 /// Common English function words — phrase delimiters, never keywords.
 const STOPWORDS: &[&str] = &[
-    "a", "an", "the", "and", "or", "but", "if", "then", "else", "for", "to", "of", "in", "on",
-    "at", "by", "with", "from", "into", "onto", "up", "down", "out", "over", "under", "as", "is",
-    "are", "was", "were", "be", "been", "being", "am", "do", "does", "did", "have", "has", "had",
-    "it", "its", "this", "that", "these", "those", "they", "them", "their", "we", "us", "our",
-    "you", "your", "i", "me", "my", "he", "she", "his", "her", "him", "who", "whom", "which",
-    "what", "when", "where", "why", "how", "all", "any", "some", "no", "not", "can", "will",
-    "would", "should", "could", "may", "might", "must", "shall", "about", "between", "through",
-    "during", "without", "within", "along", "across", "after", "before", "than", "so", "too",
-    "very", "just", "more", "most", "much", "many", "such", "own", "same", "other", "each",
-    "app", "application", "platform", "tool", "service", "product", "system", "software",
-    "lets", "let", "help", "helps", "make", "makes", "using", "use", "uses", "via", "per",
+    "a",
+    "an",
+    "the",
+    "and",
+    "or",
+    "but",
+    "if",
+    "then",
+    "else",
+    "for",
+    "to",
+    "of",
+    "in",
+    "on",
+    "at",
+    "by",
+    "with",
+    "from",
+    "into",
+    "onto",
+    "up",
+    "down",
+    "out",
+    "over",
+    "under",
+    "as",
+    "is",
+    "are",
+    "was",
+    "were",
+    "be",
+    "been",
+    "being",
+    "am",
+    "do",
+    "does",
+    "did",
+    "have",
+    "has",
+    "had",
+    "it",
+    "its",
+    "this",
+    "that",
+    "these",
+    "those",
+    "they",
+    "them",
+    "their",
+    "we",
+    "us",
+    "our",
+    "you",
+    "your",
+    "i",
+    "me",
+    "my",
+    "he",
+    "she",
+    "his",
+    "her",
+    "him",
+    "who",
+    "whom",
+    "which",
+    "what",
+    "when",
+    "where",
+    "why",
+    "how",
+    "all",
+    "any",
+    "some",
+    "no",
+    "not",
+    "can",
+    "will",
+    "would",
+    "should",
+    "could",
+    "may",
+    "might",
+    "must",
+    "shall",
+    "about",
+    "between",
+    "through",
+    "during",
+    "without",
+    "within",
+    "along",
+    "across",
+    "after",
+    "before",
+    "than",
+    "so",
+    "too",
+    "very",
+    "just",
+    "more",
+    "most",
+    "much",
+    "many",
+    "such",
+    "own",
+    "same",
+    "other",
+    "each",
+    "app",
+    "application",
+    "platform",
+    "tool",
+    "service",
+    "product",
+    "system",
+    "software",
+    "lets",
+    "let",
+    "help",
+    "helps",
+    "make",
+    "makes",
+    "using",
+    "use",
+    "uses",
+    "via",
+    "per",
 ];
 
 fn is_stopword(w: &str) -> bool {
     STOPWORDS.contains(&w)
+}
+
+/// Short evocative roots for common product concepts. This is deliberately a
+/// small, transparent offline lexicon rather than semantic inference.
+fn concept_roots(word: &str) -> &'static [&'static str] {
+    match word {
+        "name" | "naming" | "brand" | "title" | "word" | "identity" => {
+            &["lex", "nym", "nom", "mark", "mint"]
+        }
+        "developer" | "code" | "coding" | "program" | "programming" | "package" | "library"
+        | "cli" | "api" => &["crate", "stack", "byte", "node", "kit"],
+        "generate" | "generator" | "create" | "creator" | "build" | "builder" => {
+            &["forge", "mint", "spark", "seed", "craft"]
+        }
+        "secure" | "security" | "private" | "privacy" | "password" | "auth" | "encrypt"
+        | "encrypted" => &["vault", "guard", "shield", "lock", "cipher"],
+        "finance" | "money" | "payment" | "expense" | "budget" | "bank" | "invoice" => {
+            &["ledger", "tally", "mint", "vault", "fund"]
+        }
+        "health" | "fitness" | "workout" | "exercise" | "medical" | "care" => {
+            &["pulse", "vital", "thrive", "fit", "care"]
+        }
+        "write" | "writing" | "journal" | "note" | "document" | "editor" => {
+            &["ink", "quill", "draft", "scribe", "note"]
+        }
+        "friend" | "community" | "social" | "team" | "chat" | "message" => {
+            &["kin", "circle", "bond", "link", "tribe"]
+        }
+        "data" | "analytic" | "analytics" | "insight" | "metric" => {
+            &["signal", "lens", "trace", "scope", "vector"]
+        }
+        "design" | "color" | "visual" | "creative" => &["hue", "form", "pixel", "canvas", "prism"],
+        "task" | "plan" | "schedule" | "calendar" | "focus" | "productivity" => {
+            &["focus", "flow", "tempo", "task", "plan"]
+        }
+        "market" | "marketplace" | "shop" | "sell" | "buy" | "commerce" => {
+            &["cart", "trade", "market", "shelf", "bazaar"]
+        }
+        "travel" | "trip" | "map" | "route" => &["roam", "atlas", "route", "compass", "trek"],
+        "photo" | "image" | "video" | "audio" | "music" => {
+            &["frame", "reel", "wave", "tune", "echo"]
+        }
+        "learn" | "education" | "study" | "course" => &["learn", "lore", "study", "skill", "class"],
+        "delivery" | "ship" | "shipping" | "logistic" | "logistics" | "transport" => {
+            &["route", "fleet", "cargo", "relay", "dock"]
+        }
+        "ai" | "model" | "agent" | "automation" => &["mind", "synth", "agent", "spark", "neural"],
+        "fast" | "speed" | "performance" | "rapid" => &["swift", "dash", "bolt", "flux", "surge"],
+        _ => &[],
+    }
+}
+
+/// Artifact words are informative in a brief but weak literal naming roots.
+/// Their concept expansions remain, avoiding Dev-/Gen-/Pack- stem walls.
+fn suppress_literal_root(word: &str) -> bool {
+    !concept_roots(word).is_empty() || matches!(word, "project" | "manager" | "dashboard")
+}
+
+/// Expand extracted keywords into brand-shaped roots. Unknown/domain-specific
+/// words remain untouched, preserving prompt fidelity ("keyboard" stays a root).
+pub fn brand_roots(keywords: &[String], limit: usize) -> Vec<String> {
+    let mut out = Vec::new();
+    for keyword in keywords {
+        if !suppress_literal_root(keyword) && !out.contains(keyword) {
+            out.push(keyword.clone());
+        }
+        for &root in concept_roots(keyword) {
+            let root = root.to_string();
+            if !out.contains(&root) {
+                out.push(root);
+            }
+            if out.len() == limit {
+                return out;
+            }
+        }
+        if out.len() == limit {
+            break;
+        }
+    }
+    out
 }
 
 /// Meaningful 2-letter tokens that survive the min-length cut ("AI tool for
@@ -50,11 +246,14 @@ fn stem(word: &str) -> String {
         if base.len() >= 2 {
             w = format!("{base}y"); // companies → company
         }
-    } else if w.ends_with("sses") || w.ends_with("xes") || w.ends_with("zes")
-        || w.ends_with("ches") || w.ends_with("shes")
+    } else if w.ends_with("sses")
+        || w.ends_with("xes")
+        || w.ends_with("zes")
+        || w.ends_with("ches")
+        || w.ends_with("shes")
     {
         w.truncate(w.len() - 2); // -es after a sibilant: boxes → box, glasses → glass
-        // ("expenses" falls through to the plain -s rule below → "expense")
+                                 // ("expenses" falls through to the plain -s rule below → "expense")
     } else if w.ends_with('s') && !w.ends_with("ss") && w.len() >= 4 {
         w.truncate(w.len() - 1); // keyboards → keyboard
     }
@@ -96,10 +295,7 @@ pub fn extract_keywords(text: &str, limit: usize) -> Vec<String> {
         }
     }
 
-    let mut scored: Vec<(&str, f64)> = freq
-        .keys()
-        .map(|&w| (w, degree[w] / freq[w]))
-        .collect();
+    let mut scored: Vec<(&str, f64)> = freq.keys().map(|&w| (w, degree[w] / freq[w])).collect();
     // Sort by score desc, then alphabetically for determinism.
     scored.sort_by(|a, b| {
         b.1.partial_cmp(&a.1)
@@ -162,7 +358,11 @@ mod tests {
     fn dedupes_stems() {
         // "keyboard" and "keyboards" must collapse to one root.
         let kws = extract_keywords("keyboard layouts for keyboards", 5);
-        assert_eq!(kws.iter().filter(|k| *k == "keyboard").count(), 1, "{kws:?}");
+        assert_eq!(
+            kws.iter().filter(|k| *k == "keyboard").count(),
+            1,
+            "{kws:?}"
+        );
     }
 
     #[test]
@@ -175,5 +375,25 @@ mod tests {
     fn respects_limit() {
         let kws = extract_keywords("fast secure private encrypted messaging chat network", 3);
         assert_eq!(kws.len(), 3);
+    }
+
+    #[test]
+    fn expands_generic_dev_brief_into_brand_roots() {
+        let kws = extract_keywords(
+            "a developer tool that generates names for packages CLIs libraries and projects",
+            8,
+        );
+        let roots = brand_roots(&kws, 16);
+        assert!(roots.iter().any(|r| r == "lex" || r == "nym"));
+        assert!(roots.iter().any(|r| r == "crate" || r == "stack"));
+        assert!(roots.iter().any(|r| r == "forge" || r == "mint"));
+        assert!(!roots.iter().any(|r| r == "developer" || r == "package"));
+    }
+
+    #[test]
+    fn keeps_unknown_domain_words() {
+        let roots = brand_roots(&["vintage".into(), "keyboard".into()], 12);
+        assert!(roots.contains(&"vintage".to_string()));
+        assert!(roots.contains(&"keyboard".to_string()));
     }
 }

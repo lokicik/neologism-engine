@@ -1,12 +1,17 @@
-use rand::Rng;
 use crate::phonotactics::{is_vowel, syllable_count};
+use rand::Rng;
 
 const TECH_SUFFIXES: &[&str] = &[
     // original 11
     "ly", "ify", "io", "ia", "ware", "hub", "base", "lab", "ai", "hq", "it",
     // Phase 29: 13 additions — all soft-ending (no harsh-cluster penalties from brand_appeal)
-    "app", "byte", "core", "edge", "flow", "forge", "hive", "link", "net", "ops", "sync", "wave", "works",
+    "app", "byte", "core", "edge", "flow", "forge", "hive", "link", "net", "ops", "sync", "wave",
+    "works",
 ];
+
+/// Softer endings for semantic prompt roots. These create coined names rather
+/// than generic product labels such as -hub/-app/-net.
+const CONCEPT_SUFFIXES: &[&str] = &["a", "o", "ia", "io", "ora", "en", "on", "ix", "ly", "ify"];
 
 /// Blend two root words: take a prefix of `a` and a suffix of `b`.
 /// Returns None if inputs are too short.
@@ -18,7 +23,9 @@ pub fn blend(a: &str, b: &str) -> Option<String> {
     let b_chars: Vec<char> = b.chars().collect();
 
     // split at the first vowel boundary (after at least 1 char) for each word
-    let a_split = first_vowel_boundary(&a_chars).unwrap_or(a_chars.len() / 2).max(1);
+    let a_split = first_vowel_boundary(&a_chars)
+        .unwrap_or(a_chars.len() / 2)
+        .max(1);
     let b_split = last_consonant_onset(&b_chars).unwrap_or(b_chars.len() / 2);
 
     let prefix: String = a_chars[..a_split].iter().collect();
@@ -47,6 +54,32 @@ pub fn overlap_blend(a: &str, b: &str) -> Option<String> {
     None
 }
 
+/// Join two short semantic roots without cutting away their meaning. Traditional
+/// prefix/suffix blending works for long words (pin + interest), but mangles
+/// compact morphemes such as lex/mint or nym/forge. Shared seams are still
+/// preferred; otherwise concatenate with one boundary duplicate/vowel removed.
+pub fn semantic_join(a: &str, b: &str) -> Option<String> {
+    if a.len() < 2 || b.len() < 2 || a.eq_ignore_ascii_case(b) {
+        return None;
+    }
+    if let Some(overlap) = overlap_blend(a, b) {
+        return Some(overlap);
+    }
+
+    let mut left = a.to_string();
+    let mut right = b.to_string();
+    let a_last = left.chars().last()?;
+    let b_first = right.chars().next()?;
+    if a_last == b_first || (is_vowel(a_last) && is_vowel(b_first)) {
+        right.remove(0);
+    }
+    if right.is_empty() {
+        return None;
+    }
+    left.push_str(&right);
+    (left.len() <= 12).then_some(left)
+}
+
 /// Join an adjective + noun into a CamelCase compound (SwiftForge, BrightLoom).
 pub fn compound(adj: &str, noun: &str) -> String {
     fn cap(s: &str) -> String {
@@ -62,7 +95,11 @@ pub fn compound(adj: &str, noun: &str) -> String {
 /// Drop the trailing vowel(s) to get a consonant-ending "tech" form (Flickr-style).
 pub fn drop_trailing_vowels(s: &str) -> String {
     let trimmed = s.trim_end_matches(|c| is_vowel(c));
-    if trimmed.is_empty() { s.to_string() } else { trimmed.to_string() }
+    if trimmed.is_empty() {
+        s.to_string()
+    } else {
+        trimmed.to_string()
+    }
 }
 
 /// Apply a random tech transform: suffix append or vowel-dropping.
@@ -86,6 +123,27 @@ pub fn tech_transform<R: Rng>(rng: &mut R, name: &str, temperature: f64) -> Stri
         } else {
             format!("{}{}", name, suffix)
         }
+    }
+}
+
+/// Append a tech suffix without vowel-dropping. Prompt-derived concept roots
+/// need to remain recognizable; Flickr-style truncation turns scope into scop
+/// and weakens exactly the semantic signal the concept lexicon added.
+pub fn concept_transform<R: Rng>(rng: &mut R, name: &str) -> String {
+    if name.len() >= 9 {
+        return name.to_string();
+    }
+    let suffix = CONCEPT_SUFFIXES[rng.gen_range(0..CONCEPT_SUFFIXES.len())];
+    if name.ends_with(suffix) {
+        name.to_string()
+    } else {
+        // Avoid a doubled vowel seam (scope + ora -> scopora).
+        let mut suffix = suffix.to_string();
+        if name.chars().last().is_some_and(is_vowel) && suffix.chars().next().is_some_and(is_vowel)
+        {
+            suffix.remove(0);
+        }
+        format!("{}{}", name, suffix)
     }
 }
 
@@ -155,9 +213,8 @@ pub fn tech_suffix_of(lower: &str) -> Option<&'static str> {
     // Sorted by descending length so multi-char suffixes (e.g. "works") beat
     // shorter ones (e.g. "ks") if we ever add short entries.
     const SORTED: &[&str] = &[
-        "works", "forge", "ware", "wave", "sync", "ops", "net", "link",
-        "hive", "hub", "hq", "flow", "edge", "core", "byte", "base",
-        "app", "ai", "lab", "ify", "io", "ia", "ly", "it",
+        "works", "forge", "ware", "wave", "sync", "ops", "net", "link", "hive", "hub", "hq",
+        "flow", "edge", "core", "byte", "base", "app", "ai", "lab", "ify", "io", "ia", "ly", "it",
     ];
     for &suf in SORTED {
         if lower.ends_with(suf) && lower.len().saturating_sub(suf.len()) >= 4 {
@@ -171,9 +228,15 @@ pub fn tech_suffix_of(lower: &str) -> Option<&'static str> {
 fn first_vowel_boundary(chars: &[char]) -> Option<usize> {
     let mut found_cons = false;
     for (i, &c) in chars.iter().enumerate() {
-        if i == 0 { continue; }
-        if !is_vowel(c) { found_cons = true; }
-        if found_cons && is_vowel(c) { return Some(i); }
+        if i == 0 {
+            continue;
+        }
+        if !is_vowel(c) {
+            found_cons = true;
+        }
+        if found_cons && is_vowel(c) {
+            return Some(i);
+        }
     }
     None
 }
@@ -183,7 +246,9 @@ fn last_consonant_onset(chars: &[char]) -> Option<usize> {
     if syllable_count(&chars.iter().collect::<String>()) < 2 {
         // single-syllable word: just take the last vowel start
         for (i, &c) in chars.iter().enumerate().rev() {
-            if is_vowel(c) { return Some(i); }
+            if is_vowel(c) {
+                return Some(i);
+            }
         }
         return None;
     }
@@ -233,9 +298,23 @@ mod tests {
 
     #[test]
     fn overlap_blend_merges_seam() {
-        assert_eq!(overlap_blend("pin", "interest"), Some("pinterest".to_string()));
-        assert_eq!(overlap_blend("data", "tabase"), Some("database".to_string()));
+        assert_eq!(
+            overlap_blend("pin", "interest"),
+            Some("pinterest".to_string())
+        );
+        assert_eq!(
+            overlap_blend("data", "tabase"),
+            Some("database".to_string())
+        );
         assert_eq!(overlap_blend("smoke", "fog"), None);
+    }
+
+    #[test]
+    fn semantic_join_preserves_short_roots() {
+        assert_eq!(semantic_join("lex", "mint"), Some("lexmint".to_string()));
+        assert_eq!(semantic_join("nym", "forge"), Some("nymforge".to_string()));
+        assert_eq!(semantic_join("nova", "atlas"), Some("novatlas".to_string()));
+        assert_eq!(semantic_join("mint", "mint"), None);
     }
 
     #[test]
@@ -292,13 +371,25 @@ mod tests {
 
     #[test]
     fn tech_transform_never_lengthens_long_names() {
-        use rand_chacha::ChaCha8Rng;
         use rand::SeedableRng;
+        use rand_chacha::ChaCha8Rng;
         let mut rng = ChaCha8Rng::seed_from_u64(1);
         let base = "datacortex"; // 10 chars — already long
         for _ in 0..100 {
             let out = tech_transform(&mut rng, base, 1.0);
             assert!(out.len() <= base.len(), "lengthened to {}", out);
+        }
+    }
+
+    #[test]
+    fn concept_transform_never_drops_the_root() {
+        use rand::SeedableRng;
+        use rand_chacha::ChaCha8Rng;
+        let mut rng = ChaCha8Rng::seed_from_u64(9);
+        for _ in 0..50 {
+            let name = concept_transform(&mut rng, "scope");
+            assert!(name.starts_with("scop"));
+            assert!(name.len() >= "scope".len());
         }
     }
 }
