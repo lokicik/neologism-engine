@@ -319,7 +319,7 @@ const workoutLeadGap = [
   { ...scoredResult('Vitalvault', 79.4), sourceMode: 'brandable' as const, concept_coverage: 1 },
 ]
 const upgradedWorkoutSet = fillColdLeadRetry(workoutLeadGap, [{
-  ...scoredResult('FitPath', 88),
+  ...scoredResult('RepLoop', 89.5),
   sourceMode: 'brandable',
   concept_coverage: 2,
   construction: 'guided_pair',
@@ -329,12 +329,12 @@ const upgradedWorkoutSet = fillColdLeadRetry(workoutLeadGap, [{
   concept_coverage: 1,
 }])
 check(
-  upgradedWorkoutSet[0].name === 'FitPath'
+  upgradedWorkoutSet[0].name === 'RepLoop'
     && upgradedWorkoutSet.some((item) => item.name === 'Pulselab')
     && upgradedWorkoutSet.some((item) => item.name === 'Pulseseed')
-    && !upgradedWorkoutSet.some((item) => item.name === 'Fitio')
+    && !upgradedWorkoutSet.some((item) => item.name === 'Vitalix')
     && !upgradedWorkoutSet.some((item) => item.name === 'Pulsetrail'),
-  'an existing repair candidate may safely upgrade one inner card after the lead retry',
+  'a stronger cross-family pair may lead before the repair pool upgrades one inner card',
 )
 check(
   fillColdLeadRetry(workoutLeadGap, [{
@@ -379,6 +379,17 @@ check(
     && upgradedSemanticSet.some((item) => item.name === 'Tallyglow')
     && !upgradedSemanticSet.some((item) => item.name === 'Sharebond'),
   'an 84+ semantic pair may upgrade a weaker non-leading Brandable without changing the lead',
+)
+const concreteExpenseLead = fillColdLeadRetry(semanticSetGap, [{
+  ...scoredResult('PayMate', 91.3),
+  sourceMode: 'brandable',
+  concept_coverage: 2,
+  construction: 'guided_pair',
+}])
+check(
+  concreteExpenseLead[0].name === 'PayMate'
+    && !concreteExpenseLead.some((item) => item.name === 'Poolify'),
+  'an equal-quality concrete expense role may replace a mechanical suffix lead',
 )
 check(
   !fillColdLeadRetry(semanticSetGap, [{

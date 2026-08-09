@@ -39,11 +39,12 @@ const BRANDABLE_SET_QUALITY_FLOOR = 0.85
 const PAIR_SET_GAIN = 0.02
 const EXPECTED_RETRY_CHANGES = [
   'Shieldora -> Kinloom',
-  'Sharebond -> TallyBond',
+  'Poolify -> PayMate',
   'Surgeora -> Kitwave',
   'Bufferia -> Bufferlab',
-  'Fitio -> FitPath',
+  'Vitalix -> RepLoop',
   'Pulsetrail -> Pulselab',
+  'Vitalia -> RepLoop',
 ]
 
 const server = spawn(process.execPath, [viteCli, '--port', String(PORT), '--strictPort'], {
@@ -323,11 +324,11 @@ try {
     [wrongSize === 0, 'every repaired cold page contains ten names'],
     [wrongFallback === 0, 'repair uses either no fallback or the bounded 30-name pool'],
     [multipleAccentPages === 0, 'cold repair preserves Auto\'s one-accent visible-page contract'],
-    [retryRows.length === 5 && retrySwapLabels.length === 6 && exactRetryChanges, 'the targeted retry closes exactly four fixed gaps and upgrades two weak set cards'],
+    [retryRows.length === 6 && retrySwapLabels.length === 7 && exactRetryChanges, 'the targeted retry closes exactly six fixed gaps and upgrades one weak set card'],
     [orderingChangedSet === retryRows.length, 'only targeted retry pages change the repaired name set'],
     [retryContractViolations === 0, 'each change is a bounded lead retry or a diversity-safe two-point semantic/Brandable set upgrade'],
     [unjustifiedWeakenedLeads === 0, 'any first-card quality trade stays inside the semantic/guided near-tie rule'],
-    [justifiedNearTies.length === 4, 'the fixed matrix contains exactly four justified near-tie promotions'],
+    [justifiedNearTies.length === 3, 'the fixed matrix contains exactly three justified near-tie promotions'],
     [maxLeadQualityLoss <= NEAR_TIE_TOLERANCE + Number.EPSILON, 'first-card structural quality loss never exceeds half a point'],
     [weakenedLeadCoverage === 0, 'strong lead ordering never lowers first-card concept coverage'],
     [selectedLeadQuality >= 85.4, 'ordered first-card structural quality stays at or above 85.4'],

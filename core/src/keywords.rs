@@ -1112,18 +1112,69 @@ pub fn brand_root_groups(keywords: &[String], limit: usize) -> Vec<Vec<String>> 
 /// Ordinary Brandable generation deliberately keeps artifact words such as
 /// `planner` out of its root pool; this lane can recover that meaning without
 /// spreading another root family through every first page.
+fn bounded_guided_groups(groups: &[&[&str]], limit: usize) -> Vec<Vec<String>> {
+    let mut remaining = limit;
+    groups
+        .iter()
+        .filter_map(|roots| {
+            let group: Vec<String> = roots
+                .iter()
+                .take(remaining)
+                .map(|root| (*root).to_string())
+                .collect();
+            remaining = remaining.saturating_sub(group.len());
+            (!group.is_empty()).then_some(group)
+        })
+        .collect()
+}
+
 pub fn guided_pair_root_groups(keywords: &[String], limit: usize) -> Vec<Vec<String>> {
+    // Shared-expense briefs benefit from role words that are more concrete than
+    // the broad finance/social palettes. Keep this vocabulary private to the
+    // final-gap pair lane: ordinary Brandable still explores the wider roots.
+    let shared_expenses = keywords.iter().any(|keyword| keyword == "expense")
+        && keywords.iter().any(|keyword| {
+            matches!(
+                keyword.as_str(),
+                "split" | "share" | "sharing" | "divide" | "settle"
+            )
+        })
+        && keywords
+            .iter()
+            .any(|keyword| matches!(keyword.as_str(), "friend" | "community" | "social" | "team"));
+    if shared_expenses {
+        const GROUPS: &[&[&str]] = &[
+            &["split", "share", "settle", "pool", "fair"],
+            &["tab", "tally", "due", "bill", "pay", "ledger"],
+            &["mate", "kin", "bond", "link", "circle"],
+        ];
+        return bounded_guided_groups(GROUPS, limit);
+    }
+
+    let planning = keywords
+        .iter()
+        .any(|keyword| matches!(keyword.as_str(), "plan" | "planner" | "planning"));
+    let workout = keywords
+        .iter()
+        .any(|keyword| matches!(keyword.as_str(), "fitness" | "workout" | "exercise"));
+    if planning && workout {
+        // `RepLoop` and `FitSet` express both the workout and the planning
+        // behavior without adding another Fit-suffix family to ordinary Auto.
+        const GROUPS: &[&[&str]] = &[
+            &["fit", "pulse", "rep", "lift"],
+            &["set", "log", "plan", "loop", "path", "map"],
+        ];
+        return bounded_guided_groups(GROUPS, limit);
+    }
+
     let mut groups = brand_root_groups(keywords, limit);
     let used = groups.iter().flatten().count();
     if used >= limit {
         return groups;
     }
 
-    let function_roots: &[&str] = if keywords
-        .iter()
-        .any(|keyword| matches!(keyword.as_str(), "plan" | "planner" | "planning"))
-    {
-        &["path", "pace", "wise", "map"]
+    let function_roots: &[&str] = if planning {
+        &["plan", "track", "path", "map"]
     } else {
         &[]
     };
@@ -1504,11 +1555,23 @@ mod tests {
         assert!(ordinary
             .iter()
             .any(|group| group.iter().any(|root| root == "pulse")));
-        assert!(!ordinary.iter().flatten().any(|root| root == "pace"));
+        assert!(!ordinary.iter().flatten().any(|root| root == "set"));
         assert!(guided
             .iter()
-            .any(|group| group.iter().any(|root| root == "pace")));
+            .any(|group| group.iter().any(|root| root == "set")));
         assert_eq!(guided.len(), ordinary.len() + 1, "{guided:?}");
+    }
+
+    #[test]
+    fn guided_shared_expense_pairs_use_concrete_roles_only_in_their_lane() {
+        let keywords = extract_keywords("an app for splitting expenses with friends", 6);
+        let ordinary = brand_root_groups(&keywords, 16);
+        let guided = guided_pair_root_groups(&keywords, 16);
+        assert!(!ordinary.iter().flatten().any(|root| root == "tab"));
+        assert!(!ordinary.iter().flatten().any(|root| root == "mate"));
+        assert!(guided.iter().flatten().any(|root| root == "tab"));
+        assert!(guided.iter().flatten().any(|root| root == "mate"));
+        assert!(guided.iter().flatten().count() <= 16, "{guided:?}");
     }
 
     #[test]

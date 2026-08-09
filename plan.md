@@ -2911,6 +2911,41 @@ logic are unchanged.
 
 ---
 
+## Phase 119 — Give the final semantic retry concrete product roles
+
+**Evidence boundary.** No exported real-user taste dataset exists in the workspace, so the broad
+aesthetic scorer and its weights remain unchanged. Instead, the candidate diagnostic now accepts
+arbitrary spellings and scores them through the exact browser/WASM metrics. This separated useful
+role constructions from metric-only ideas before they entered generation: `PayMate` scores 91.3,
+`RepLoop` 89.5, and `FitSet` 88.8, while generic or awkward alternatives stay out.
+
+**Isolated role palettes.** `concept_pair` now uses a bounded, context-specific palette for two
+briefs where the 90-page audit still exposed mechanical suffix leaders. Shared-expense briefs pair
+settlement actions with concrete money and social roles (`tab`, `due`, `pay`, `mate`); workout
+planner briefs pair workout actions with planning behavior (`rep`, `set`, `log`, `loop`). These
+roots are private to the final cold retry. Ordinary Brandable, explicit modes, continued sessions,
+personalized ranking, developer namespaces, and unrelated briefs keep their prior root pools.
+Generic non-workout planners retain the smaller `plan`/`track`/`path`/`map` fallback.
+
+**Measured result.** The expense retry replaces the equal-quality one-concept `Poolify 91.3` with
+the two-concept `PayMate 91.3` while lowering page similarity. Workout seed 7 now leads with
+`RepLoop 89.5/c2` and still reuses `Pulselab`; seed 2024 finally changes from `Fitify` to
+`RepLoop`, with the actual set swap improving `Vitalia 88.3 -> RepLoop 89.5`. Across the same 90
+cold pages, repaired average quality remains **83.21**, near-duplicate pairs improve **43 -> 42**,
+mean pair similarity improves **0.200 -> 0.199**, mean lead quality improves **85.41 -> 85.43**,
+mean lead coverage improves **1.23 -> 1.26**, and direct suffix leaders fall **10 -> 8**. Lead
+reorders rise **50 -> 52**, guided leaders **44 -> 46**, and justified quality trades fall
+**4 -> 3** because both new workout promotions improve rather than trade structural quality.
+
+**Verification.** The core suite is **142/142**. The preference suite pins both `PayMate` and the
+cross-family `RepLoop` plus repair-pool path. The 90-page cold audit validates seven exact swaps
+across six retry pages, all quality, coverage, family, and similarity guards, and zero sub-75
+visible names. The 85-page Auto audit, fifteen-page developer-namespace audit, prompt UI, real
+local feedback/reference/export flow, WASM build, TypeScript, and production Vite bundle all pass.
+No LLM, network call, broad scorer adjustment, or ordinary generation-pool expansion was added.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
@@ -2927,6 +2962,8 @@ half-point boundary and cannot deepen a visible prefix family. An 84+ pair that 
 lead may still replace one non-leading Brandable only with a two-point quality gain and no loss in
 coverage or diversity. On an already-proven retry page, one unused 85+ Brandable from the existing
 repair pool may make the same guarded inner-card upgrade without another generation call.
+The remaining shared-expense and workout-planner retries now use small concrete role palettes,
+so the last gap can produce names such as `PayMate` and `RepLoop` without changing ordinary Auto.
 Compound is now a genuinely brief-aware explicit alternative rather than a random adjective
 showcase. Focused first pages stay narrow; recognized concepts open a restrained continuation
 palette only when the user asks for more, preserving 100-name session capacity without generic
