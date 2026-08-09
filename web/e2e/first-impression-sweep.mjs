@@ -65,6 +65,29 @@ function promoteQualifiedNonSuffix(items, qualityMargin = 0) {
   return move(items, candidates[0]?.index ?? -1, 0)
 }
 
+function promoteAestheticAlternative(items, qualityTolerance, includeGuided) {
+  if (!isDirectSuffix(items[0])) return items.slice()
+  const firstQuality = quality(items[0])
+  const firstCoverage = items[0].concept_coverage ?? 0
+  const candidates = items
+    .map((item, index) => ({ item, index }))
+    .filter(({ item }) => (
+      !isDirectSuffix(item)
+      && quality(item) >= firstQuality - qualityTolerance
+      && (item.concept_coverage ?? 0) >= firstCoverage
+      && (
+        (item.concept_coverage ?? 0) > firstCoverage
+        || (includeGuided && item.construction === 'guided_metaphor')
+      )
+    ))
+    .sort((left, right) => (
+      (right.item.concept_coverage ?? 0) - (left.item.concept_coverage ?? 0)
+      || quality(right.item) - quality(left.item)
+      || left.index - right.index
+    ))
+  return move(items, candidates[0]?.index ?? -1, 0)
+}
+
 const strategies = {
   baseline: (items) => items.slice(),
   best_first: (items) => {
@@ -115,6 +138,21 @@ const strategies = {
     if (guided[0].name !== items[0].name || !isDirectSuffix(guided[0])) return guided
     return promoteQualifiedNonSuffix(items, 2)
   },
+  retained_then_semantic_half: (items) => promoteAestheticAlternative(
+    strategies.guided_then_non_suffix_plus_two(items), 0.5, false,
+  ),
+  retained_then_semantic_one: (items) => promoteAestheticAlternative(
+    strategies.guided_then_non_suffix_plus_two(items), 1, false,
+  ),
+  retained_then_semantic_or_guided_half: (items) => promoteAestheticAlternative(
+    strategies.guided_then_non_suffix_plus_two(items), 0.5, true,
+  ),
+  retained_then_semantic_or_guided_one: (items) => promoteAestheticAlternative(
+    strategies.guided_then_non_suffix_plus_two(items), 1, true,
+  ),
+  retained_then_semantic_or_guided_two: (items) => promoteAestheticAlternative(
+    strategies.guided_then_non_suffix_plus_two(items), 2, true,
+  ),
   guided_in_top_three: (items) => {
     if (items.slice(0, 3).some((item) => item.construction === 'guided_metaphor')) return items.slice()
     const index = items.findIndex((item) => item.construction === 'guided_metaphor')
@@ -169,6 +207,8 @@ try {
         output.push({
           prompt,
           seed,
+          direct,
+          fallback,
           items: repairWeakShortlist(direct, fallback, 10),
         })
       }
@@ -231,15 +271,56 @@ try {
     }
   }
 
+  console.log('\nremaining suffix leads after retained +2 strategy')
+  for (const row of rows) {
+    const selected = strategies.guided_then_non_suffix_plus_two(row.items)
+    if (!isDirectSuffix(selected[0])) continue
+    const describe = (item) => (
+      `${item.name}:${quality(item).toFixed(1)}/c${item.concept_coverage ?? 0}`
+      + `${item.construction === 'guided_metaphor' ? '/guided' : ''}`
+    )
+    const alternatives = row.items
+      .filter((item) => !isDirectSuffix(item))
+      .sort((left, right) => quality(right) - quality(left))
+      .slice(0, 4)
+      .map(describe)
+    console.log(
+      `${row.seed} · ${row.prompt}: ${describe(selected[0])}`
+      + ` | alternatives ${alternatives.join(', ') || 'none'}`
+      + ` | direct ${row.direct.length} fallback ${row.fallback.length}`,
+    )
+  }
+
+  console.log('\nnear-tie tolerance changes beyond retained +2 strategy')
+  for (const label of [
+    'retained_then_semantic_half',
+    'retained_then_semantic_one',
+    'retained_then_semantic_or_guided_half',
+    'retained_then_semantic_or_guided_one',
+    'retained_then_semantic_or_guided_two',
+  ]) {
+    console.log(label)
+    for (const row of rows) {
+      const retained = strategies.guided_then_non_suffix_plus_two(row.items)
+      const selected = strategies[label](row.items)
+      if (retained[0].name === selected[0].name) continue
+      console.log(
+        `  ${row.seed} · ${row.prompt}: ${retained[0].name}:${quality(retained[0]).toFixed(1)}`
+        + `/c${retained[0].concept_coverage ?? 0} -> ${selected[0].name}:${quality(selected[0]).toFixed(1)}`
+        + `/c${selected[0].concept_coverage ?? 0}`,
+      )
+    }
+  }
+
   const own = rows.find((row) => row.prompt.startsWith('an offline naming engine') && row.seed === 42)
   console.log('\nown page')
   for (const [label, strategy] of Object.entries(strategies)) {
     console.log(`${label}: ${strategy(own.items).map((item) => item.name).join(', ')}`)
   }
 
-  console.log('\nseed 42 · baseline -> guided then non-suffix')
+  console.log('\nseed 42 · baseline -> production near-tie strategy')
   for (const row of rows.filter((item) => item.seed === 42)) {
-    const selected = strategies.guided_then_non_suffix(row.items)
+    const selected = strategies.retained_then_semantic_or_guided_half(row.items)
     console.log(`${row.prompt}: ${row.items[0].name} -> ${selected[0].name}`)
   }
 } finally {

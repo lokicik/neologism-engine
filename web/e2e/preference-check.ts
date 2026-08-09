@@ -193,6 +193,33 @@ check(
 )
 check(
   prioritizeColdStrongLead([
+    { ...scoredResult('Lexia', 86.9), sourceMode: 'brandable', concept_coverage: 1 },
+    { ...scoredResult('Keyspark', 86.4), sourceMode: 'brandable', concept_coverage: 2 },
+  ])[0].name === 'Keyspark',
+  'a half-point non-suffix near-tie may lead when it adds a brief concept',
+)
+check(
+  prioritizeColdStrongLead([
+    { ...scoredResult('Boltify', 89.8), sourceMode: 'brandable', concept_coverage: 1 },
+    {
+      ...scoredResult('Dashlab', 89.3),
+      sourceMode: 'brandable',
+      concept_coverage: 1,
+      construction: 'guided_metaphor',
+      constructionRank: 1,
+    },
+  ])[0].name === 'Dashlab',
+  'a half-point quality-gated guided near-tie may replace a suffix lead',
+)
+check(
+  prioritizeColdStrongLead([
+    { ...scoredResult('Lexia', 86.9), sourceMode: 'brandable', concept_coverage: 1 },
+    { ...scoredResult('Keyspark', 86.3), sourceMode: 'brandable', concept_coverage: 2 },
+  ])[0].name === 'Lexia',
+  'a semantic alternative outside the half-point tolerance stays behind',
+)
+check(
+  prioritizeColdStrongLead([
     { ...scoredResult('Retroboard', 82), sourceMode: 'brandable', concept_coverage: 1 },
     { ...scoredResult('Keyshelf', 92), sourceMode: 'brandable', concept_coverage: 1 },
   ])[0].name === 'Retroboard',

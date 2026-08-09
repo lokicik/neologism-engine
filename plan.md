@@ -2653,6 +2653,49 @@ score, personalized order, continuation order, Rust/WASM, or AI behavior changed
 
 ---
 
+## Phase 113 — Let semantic near-ties beat mechanical leads
+
+**Bottleneck and classification.** Phase 112 left **17/90** cold pages opening with a direct
+suffix. Printing every remaining lead and its four strongest non-suffix alternatives separated
+true pool gaps from scoring near-ties. Only three pages had a visibly stronger construction within
+half a structural point: `Lexia 86.9/c1 → Keyspark 86.4/c2`,
+`Moodora 88.3/c1 → Moodink 88.0/c2`, and `Boltify 89.8/c1 → Dashlab 89.3/c1`.
+The other fourteen pages would require a larger quality trade or an alternative with weaker brief
+coverage, so they remain unchanged until the generator can supply a genuinely stronger form.
+
+**Calibrated boundary.** An extra-concept-only half-point rule changed the first two pages. Letting
+an already quality-gated guided form use the same tolerance added only `Dashlab`. A one-point rule
+also promoted `Vitalix → Fitlab`; although reasonable, it offered no coverage gain and opened a
+wider future boundary, so it was rejected. The two-point trial selected the same current four
+names but carried the same unnecessary future risk.
+
+**Retained correction.** Phase 111's no-loss guided rule and Phase 112's two-point non-suffix rule
+still get first refusal. Only if both decline a remaining direct suffix may a non-suffix near-tie
+lead. It must stay within **0.5** structural points, never reduce concept coverage, and either add
+at least one brief concept or carry explicit quality-gated guided construction metadata. Added
+coverage wins the tie before structural score. The operation still reorders the existing ten-name
+set only and remains fresh, cold Auto-only; personalized taste, AI Studio, and Load more do not use
+it.
+
+**Measured result.** Relative to Phase 112, reordered pages rise **43 → 46**, suffix-first pages
+fall **17 → 14**, mean first-card coverage improves **1.20 → 1.22**, guided leads rise **38 → 40**,
+and guided top-three presence rises **40 → 41**. Mean first-card structural quality changes only
+**85.35 → 85.33** and regret **3.97 → 3.99** because the three intentional trades lose 0.3, 0.5,
+and 0.5 points respectively. No page loses coverage, no trade exceeds half a point, the product's
+`Keyloom` lead is unchanged, and all fifteen developer-namespace pages keep their prior visible
+sets and pass their quality gates.
+
+**Verification.** The deterministic preference suite pins the extra-concept near-tie, guided
+near-tie, and over-tolerance rejection. The 90-page production audit requires exactly three
+justified trades, zero unjustified quality losses, a half-point maximum loss, at least 85.3 mean
+lead quality, at least 1.22 mean lead coverage, and at most fourteen suffix leads. The full
+first-impression strategy sweep and verbose namespace audit pass. Candidate generation, aggregate
+page quality/diversity, personalized order, continuation order, Rust/WASM, and AI behavior remain
+unchanged. The 85-page Auto construction audit, 1,000-name taste matrix, and real browser
+feedback/reference/export flow also pass unchanged.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
@@ -2662,7 +2705,8 @@ different-ending, quality-neutral second form may replace a direct suffix card. 
 broader modes remain explicit choices and still form the exploratory mix when no brief exists.
 Cold first pages now lead with that stronger guided form only when quality and brief coverage are
 both non-decreasing. A remaining direct suffix yields only to a same-coverage non-suffix form with
-a two-point quality advantage; the underlying ten-name set remains intact.
+a two-point quality advantage, or to a half-point near-tie that adds a concept or already passed
+the guided-form quality gate; the underlying ten-name set remains intact.
 Compound is now a genuinely brief-aware explicit alternative rather than a random adjective
 showcase. Focused first pages stay narrow; recognized concepts open a restrained continuation
 palette only when the user asks for more, preserving 100-name session capacity without generic

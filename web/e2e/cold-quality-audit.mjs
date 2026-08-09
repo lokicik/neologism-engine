@@ -1,5 +1,5 @@
 // Fixed-seed production audit for cold Auto's structural quality repair and
-// quality/coverage-neutral first-card ordering.
+// guarded first-card ordering.
 // Run from web/: node e2e/cold-quality-audit.mjs
 import { chromium } from 'playwright'
 import { spawn } from 'node:child_process'
@@ -32,6 +32,7 @@ const PROMPTS = [
 ]
 const SEEDS = [7, 42, 101, 2024, 9999]
 const DIRECT_SUFFIXES = ['ify', 'ora', 'ion', 'era', 'io', 'ia', 'ix', 'el', 'en', 'on']
+const NEAR_TIE_TOLERANCE = 0.005
 
 const server = spawn(process.execPath, [viteCli, '--port', String(PORT), '--strictPort'], {
   cwd: WEB_DIR,
@@ -160,13 +161,32 @@ try {
   const reorderedPages = rows.filter((row) => row.repaired[0].name !== row.selected[0].name).length
   const originalLeadQuality = rows.reduce((sum, row) => sum + quality(row.repaired[0]), 0) / rows.length * 100
   const selectedLeadQuality = rows.reduce((sum, row) => sum + quality(row.selected[0]), 0) / rows.length * 100
+  const selectedLeadCoverage = rows.reduce(
+    (sum, row) => sum + (row.selected[0].concept_coverage ?? 0), 0,
+  ) / rows.length
   const originalSuffixLeads = rows.filter((row) => isDirectSuffix(row.repaired[0])).length
   const selectedSuffixLeads = rows.filter((row) => isDirectSuffix(row.selected[0])).length
   const selectedGuidedLeads = rows.filter((row) => row.selected[0].construction === 'guided_metaphor').length
   const orderingChangedSet = rows.filter((row) => (
     row.repaired.map(normalized).sort().join('|') !== row.selected.map(normalized).sort().join('|')
   )).length
-  const weakenedLeads = rows.filter((row) => quality(row.selected[0]) < quality(row.repaired[0])).length
+  const weakenedLeadRows = rows.filter((row) => (
+    quality(row.selected[0]) + Number.EPSILON < quality(row.repaired[0])
+  ))
+  const justifiedNearTies = weakenedLeadRows.filter((row) => (
+    isDirectSuffix(row.repaired[0])
+    && !isDirectSuffix(row.selected[0])
+    && quality(row.selected[0]) + NEAR_TIE_TOLERANCE + Number.EPSILON >= quality(row.repaired[0])
+    && (row.selected[0].concept_coverage ?? 0) >= (row.repaired[0].concept_coverage ?? 0)
+    && (
+      (row.selected[0].concept_coverage ?? 0) > (row.repaired[0].concept_coverage ?? 0)
+      || row.selected[0].construction === 'guided_metaphor'
+    )
+  ))
+  const unjustifiedWeakenedLeads = weakenedLeadRows.length - justifiedNearTies.length
+  const maxLeadQualityLoss = weakenedLeadRows.reduce((max, row) => Math.max(
+    max, quality(row.repaired[0]) - quality(row.selected[0]),
+  ), 0)
   const weakenedLeadCoverage = rows.filter((row) => (
     (row.selected[0].concept_coverage ?? 0) < (row.repaired[0].concept_coverage ?? 0)
   )).length
@@ -179,7 +199,8 @@ try {
   console.log(`repaired near-duplicate pairs: ${repaired.nearPairs}`)
   console.log(`repaired mean pair similarity: ${repaired.meanPairSimilarity.toFixed(3)}`)
   console.log(`multiple-accent pages: ${multipleAccentPages}/${rows.length} (max ${maxAccents})`)
-  console.log(`strong lead reorder: ${reorderedPages}/${rows.length} · quality ${originalLeadQuality.toFixed(2)} -> ${selectedLeadQuality.toFixed(2)} · suffix first ${originalSuffixLeads} -> ${selectedSuffixLeads} · guided first ${selectedGuidedLeads}`)
+  console.log(`strong lead reorder: ${reorderedPages}/${rows.length} · quality ${originalLeadQuality.toFixed(2)} -> ${selectedLeadQuality.toFixed(2)} · coverage ${selectedLeadCoverage.toFixed(2)} · suffix first ${originalSuffixLeads} -> ${selectedSuffixLeads} · guided first ${selectedGuidedLeads}`)
+  console.log(`justified near-tie trades: ${justifiedNearTies.length} · max quality loss ${(maxLeadQualityLoss * 100).toFixed(2)}`)
   console.log(`own brief: ${ownBrief.selected.map((item) => `${item.sourceMode}:${item.name}`).join(', ')}`)
 
   const gates = [
@@ -187,8 +208,13 @@ try {
     [wrongFallback === 0, 'repair uses either no fallback or the bounded 30-name pool'],
     [multipleAccentPages === 0, 'cold repair preserves Auto\'s one-accent visible-page contract'],
     [orderingChangedSet === 0, 'strong lead ordering preserves the exact repaired name set'],
-    [weakenedLeads === 0, 'strong lead ordering never lowers first-card structural quality'],
+    [unjustifiedWeakenedLeads === 0, 'any first-card quality trade stays inside the semantic/guided near-tie rule'],
+    [justifiedNearTies.length === 3, 'the fixed matrix contains exactly three justified near-tie promotions'],
+    [maxLeadQualityLoss <= NEAR_TIE_TOLERANCE + Number.EPSILON, 'first-card structural quality loss never exceeds half a point'],
     [weakenedLeadCoverage === 0, 'strong lead ordering never lowers first-card concept coverage'],
+    [selectedLeadQuality >= 85.3, 'ordered first-card structural quality stays at or above 85.3'],
+    [selectedLeadCoverage >= 1.22, 'ordered first-card concept coverage stays at or above 1.22'],
+    [selectedSuffixLeads <= 14, 'direct suffix leads stay at or below fourteen of ninety pages'],
     [direct.below75 === 0 || repairedPages > 0, 'weak pages activate the offline repair pool'],
     [repaired.below75 === 0, 'no repaired cold Auto name falls below 75 structural quality'],
     [repaired.averageQuality >= 82.5, 'repaired cold Auto quality stays at or above 82.5'],

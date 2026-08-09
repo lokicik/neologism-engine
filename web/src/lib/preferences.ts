@@ -22,6 +22,7 @@ const STRONG_MODE_PREFERENCE = 0.75
 const COMPOUND_TASTE_POOL_SHARE = 0.3
 const MAX_COLD_PAIR_SIMILARITY = 0.21
 const COLD_NON_SUFFIX_LEAD_MARGIN = 0.02
+const COLD_NEAR_TIE_LEAD_TOLERANCE = 0.005
 export const MIN_TASTE_SIGNALS = 3
 export const TASTE_POOL_MULTIPLIER = 6
 export const MAX_TASTE_POOL = 60
@@ -302,13 +303,16 @@ function engineQuality(result: NameResult): number {
 // Cold first impressions should not lead with a mechanical suffix card when
 // the same page already contains a stronger, equally relevant form. Guided
 // forms get first refusal; broader non-suffix forms need a two-point margin.
+// After those no-loss rules, a half-point near-tie may lead only when it adds
+// a brief concept or is itself a quality-gated guided form.
 // Reorder only; personalized ranking and the ten-name set remain untouched.
 export function prioritizeColdStrongLead(results: NameResult[]): NameResult[] {
   if (results.length < 2) return results.slice()
   const firstQuality = engineQuality(results[0])
   const firstCoverage = results[0].concept_coverage ?? 0
-  const eligible = results
+  const ranked = results
     .map((result, index) => ({ result, index, quality: engineQuality(result) }))
+  const eligible = ranked
     .filter(({ result, quality }) => (
       quality >= firstQuality
       && (result.concept_coverage ?? 0) >= firstCoverage
@@ -324,7 +328,24 @@ export function prioritizeColdStrongLead(results: NameResult[]): NameResult[] {
       ))
       .sort((left, right) => right.quality - left.quality || left.index - right.index)[0]
     : undefined
-  const candidate = guided ?? nonSuffix
+  const nearTie = isDirectConceptSuffix(results[0])
+    ? ranked
+      .filter(({ result, quality }) => (
+        !isDirectConceptSuffix(result)
+        && quality + Number.EPSILON >= firstQuality - COLD_NEAR_TIE_LEAD_TOLERANCE
+        && (result.concept_coverage ?? 0) >= firstCoverage
+        && (
+          (result.concept_coverage ?? 0) > firstCoverage
+          || result.construction === 'guided_metaphor'
+        )
+      ))
+      .sort((left, right) => (
+        (right.result.concept_coverage ?? 0) - (left.result.concept_coverage ?? 0)
+        || right.quality - left.quality
+        || left.index - right.index
+      ))[0]
+    : undefined
+  const candidate = guided ?? nonSuffix ?? nearTie
   if (!candidate || candidate.index === 0) return results.slice()
   const selected = results.slice()
   const [lead] = selected.splice(candidate.index, 1)
