@@ -17,6 +17,12 @@ const CASES = [
   ['a simple workout planner', 7],
   ['a simple workout planner', 42],
   ['a simple workout planner', 2024],
+  ['candidate tracking software for recruiters', 13],
+  ['a code formatter and linter', 13],
+  ['a customer relationship pipeline for sales representatives', 13],
+  ['a customer relationship pipeline for sales representatives', 67],
+  ['a customer relationship pipeline for sales representatives', 313],
+  ['a catalog for household belongings', 67],
 ]
 
 const server = spawn(process.execPath, [viteCli, '--port', String(PORT), '--strictPort'], {

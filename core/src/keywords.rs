@@ -1186,6 +1186,20 @@ pub fn guided_pair_root_groups(keywords: &[String], limit: usize) -> Vec<Vec<Str
         return bounded_guided_groups(GROUPS, limit);
     }
 
+    let sales_relationship = keywords.iter().any(|keyword| {
+        matches!(
+            keyword.as_str(),
+            "crm" | "sale" | "lead" | "deal" | "customer" | "relationship" | "representative"
+        )
+    });
+    let sales_pipeline = keywords.iter().any(|keyword| keyword == "pipeline");
+    if sales_relationship && sales_pipeline {
+        // Compact revenue roles produce readable pairs such as `RevLoop`
+        // without pushing the abbreviation into ordinary Brandable pages.
+        const GROUPS: &[&[&str]] = &[&["rev"], &["loop", "lane", "path"]];
+        return bounded_guided_groups(GROUPS, limit);
+    }
+
     let mut groups = brand_root_groups(keywords, limit);
     let used = groups.iter().flatten().count();
     if used >= limit {
@@ -1602,6 +1616,21 @@ mod tests {
         assert!(!ordinary.iter().flatten().any(|root| root == "loop"));
         assert!(guided.iter().flatten().any(|root| root == "cog"));
         assert!(guided.iter().flatten().any(|root| root == "loop"));
+        assert!(guided.iter().flatten().count() <= 16, "{guided:?}");
+    }
+
+    #[test]
+    fn guided_sales_pipelines_use_revenue_roles_only_in_their_lane() {
+        let keywords = extract_keywords(
+            "a customer relationship pipeline for sales representatives",
+            6,
+        );
+        let ordinary = brand_root_groups(&keywords, 16);
+        let guided = guided_pair_root_groups(&keywords, 16);
+        assert!(!ordinary.iter().flatten().any(|root| root == "rev"));
+        assert!(guided.iter().flatten().any(|root| root == "rev"));
+        assert!(guided.iter().flatten().any(|root| root == "loop"));
+        assert_eq!(guided.len(), 2, "{guided:?}");
         assert!(guided.iter().flatten().count() <= 16, "{guided:?}");
     }
 

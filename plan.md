@@ -2988,6 +2988,63 @@ call, broad scorer adjustment, or ordinary role-palette expansion was added.
 
 ---
 
+## Phase 121 — Surface a semantic pair before the final retry
+
+**Observed gap.** The held-out AI-agent wording already had a non-suffix lead, so the final
+suffix-only retry never ran even though its pages averaged only 78–79 and the isolated pair lane
+contained `CogLoop 89.5/c2`. Auto now tries one 84+ semantic pair only when no prompt-linked
+Respell or 85+ metaphor exists. The pair can enter only by replacing an equal-or-weaker direct
+suffix card, so this path has no quota and cannot reduce structural quality.
+
+**Result.** `an AI automation agent` now surfaces `CogLoop` directly on all three independent
+seeds and never requests the final retry. The three-page average is **80.75**. On the fixed
+90-page matrix, repaired quality improves **83.21 -> 83.24**, lead quality **85.43 -> 85.76**,
+lead coverage **1.26 -> 1.28**, and guided leaders **46 -> 52** while suffix leaders stay at eight.
+The held-out aggregate, one-accent contract, local taste paths, developer domains, and long
+sessions remain inside their prior gates.
+
+---
+
+## Phase 122 — Reuse repair candidates without optimizing for ugly scores
+
+**Aesthetic guard.** A first general set-upgrade experiment raised held-out quality to 84.14, but
+manual inspection exposed metric gaming such as `Streamix -> Busharbor`, repeated `Keyseed`, and
+the redundant `Siteweb`. That variant was rejected. The retained selector follows the engine's
+existing order, requires the same three-letter semantic onset, preserves concept coverage and
+family/similarity limits, and refuses generic product or metaphor tails. It still requires an
+85+ candidate and at least a two-point gain, and reuses only a fallback pool that was already open.
+
+**Result.** The deliberately conservative path makes six reviewed held-out changes:
+`Rundream -> Runcalm`, `Webforge -> Webmint`, and `Lawtrace -> Lawcite` across two seeds each.
+Held-out average quality improves **83.95 -> 83.99** and near-duplicate pairs **80 -> 79**;
+fixed-matrix repaired quality improves **83.24 -> 83.25**. A deterministic preference test proves
+that a higher-scoring generic `Matchvault` stays out while a brief-specific safe alternative may
+enter. No extra generation call or network dependency was added.
+
+---
+
+## Phase 123 — Give CRM pipelines a compact revenue role
+
+**Isolated role palette.** CRM pipeline prompts previously collapsed into one root group and could
+not construct a two-concept name. The broad alternatives were mostly `Clientora`, `Contactio`, and
+other suffix forms. The isolated pair lane now maps only a recognized sales/relationship plus
+pipeline brief to `rev` and `loop`/`lane`/`path`. These roots do not enter ordinary Brandable or
+unrelated sales prompts. Exact engine scoring keeps `RevLoop 88.0`, `RevLane 86.8`, and
+`RevPath 86.5` above the existing 84-point pair floor.
+
+**Measured result.** Two weak CRM seeds now lead with `RevLoop 88.0/c2` directly and skip the final
+retry; the third retains its stronger existing `Salelab 89.5` metaphor. The three-page CRM average
+improves **80.39 -> 81.06**. Across the 105-page held-out base, average quality improves
+**83.99 -> 84.01**, lead quality **85.91 -> 85.94**, lead coverage **1.18 -> 1.20**, near-duplicate
+pairs **79 -> 78**, and mean similarity **0.202 -> 0.201**. The fixed 90-page matrix is unchanged.
+
+**Verification.** The core suite is **145/145**. The held-out audit pins the two direct `RevLoop`
+pages, their pair provenance, zero final retry, the retained `Salelab` seed, and a CRM average of at
+least 81. The fixed cold, Auto, namespace, developer-domain, preference, prompt UI, WASM,
+TypeScript, and production build gates pass. No LLM or broad scorer adjustment was added.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
@@ -3008,6 +3065,10 @@ The remaining shared-expense and workout-planner retries now use small concrete 
 so the last gap can produce names such as `PayMate` and `RepLoop` without changing ordinary Auto.
 AI workflow retries use the same isolated pattern for `CogLoop`, and recognized semantic domains
 can no longer starve merely because incidental words such as `assistant` appear first.
+Cold repair may reuse one already-generated candidate only when its brief-specific shape survives
+the stricter aesthetic guards; generic high-scoring metaphor tails do not displace visible names.
+CRM pipeline briefs use the isolated role pattern for `RevLoop` while strong `Salelab` pages remain
+untouched.
 Compound is now a genuinely brief-aware explicit alternative rather than a random adjective
 showcase. Focused first pages stay narrow; recognized concepts open a restrained continuation
 palette only when the user asks for more, preserving 100-name session capacity without generic

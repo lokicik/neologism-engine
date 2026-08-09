@@ -217,6 +217,13 @@ try {
     (sum, row) => sum + row.selected.reduce((pageSum, item) => pageSum + quality(item), 0),
     0,
   ) / (aiAgentRows.length * 10)
+  const crmRows = rows.filter((row) => (
+    row.prompt === 'a customer relationship pipeline for sales representatives'
+  ))
+  const crmAverage = crmRows.reduce(
+    (sum, row) => sum + row.selected.reduce((pageSum, item) => pageSum + quality(item), 0),
+    0,
+  ) / (crmRows.length * 10)
   const weak = allVisible.filter((item) => quality(item) < 75)
   const wrongSize = rows.filter((row) => row.selected.length !== 10)
   const wrongFallback = rows.filter((row) => row.fallbackCount < 0 || row.fallbackCount > 30)
@@ -238,6 +245,7 @@ try {
   console.log(`sub-75: ${weak.length} · near pairs ${nearPairs} · similarity ${(pairSimilarity / pairCount).toFixed(3)}`)
   console.log(`suffix leads: ${suffixLeads.length} · guided leads: ${guidedLeads.length}`)
   console.log(`AI agent average: ${aiAgentAverage.toFixed(2)} · direct semantic-pair pages ${aiAgentRows.filter((row) => row.direct.some((item) => item.name === 'CogLoop' && item.construction === 'guided_pair')).length}/${aiAgentRows.length}`)
+  console.log(`CRM average: ${crmAverage.toFixed(2)} · RevLoop leads ${crmRows.filter((row) => row.selected[0]?.name === 'RevLoop').length}/${crmRows.length}`)
   console.log(`guarded repair upgrades: ${guardedRepairUpgrades.length}`)
   console.log(`fallback counts: ${[...new Set(rows.map((row) => row.fallbackCount))].sort((a, b) => a - b).join(', ')}`)
   console.log('\nAI workflow focus')
@@ -282,10 +290,10 @@ try {
     [wrongFallback.length === 0, 'held-out repair uses only the bounded fallback'],
     [multipleAccents.length === 0, 'held-out pages preserve the one-accent contract'],
     [weak.length === 0, 'no held-out visible name falls below 75'],
-    [averageQuality >= 83.97, 'held-out average structural quality stays at or above 83.97'],
+    [averageQuality >= 84, 'held-out average structural quality stays at or above 84.0'],
     [leadQuality >= 85.8, 'held-out lead structural quality stays at or above 85.8'],
-    [leadCoverage >= 1.17, 'held-out lead concept coverage stays at or above 1.17'],
-    [nearPairs <= 79, 'held-out near-duplicate pairs stay at or below 79'],
+    [leadCoverage >= 1.19, 'held-out lead concept coverage stays at or above 1.19'],
+    [nearPairs <= 78, 'held-out near-duplicate pairs stay at or below 78'],
     [pairSimilarity / pairCount <= 0.203, 'held-out mean pair similarity stays at or below 0.203'],
     [suffixLeads.length <= 24, 'held-out direct suffix leads stay at or below 24'],
     [guardedRepairUpgrades.length >= 6, 'held-out repair surfaces brief-specific inner-card upgrades'],
@@ -317,6 +325,19 @@ try {
           && !row.retryRequested
         )),
       'AI agent pages surface their semantic pair before the final retry',
+    ],
+    [
+      crmRows.length === SEEDS.length
+        && crmAverage >= 81
+        && crmRows.every((row) => (
+          row.seed === 67
+            ? row.selected[0]?.name === 'Salelab'
+              && row.selected[0]?.construction === 'guided_metaphor'
+            : row.selected[0]?.name === 'RevLoop'
+              && row.selected[0]?.construction === 'guided_pair'
+              && !row.retryRequested
+        )),
+      'CRM pages surface RevLoop only where it improves the existing metaphor path',
     ],
   ]
   let failures = 0
