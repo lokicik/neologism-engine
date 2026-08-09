@@ -3,6 +3,7 @@
 // Run: cargo run -p neologism-core --example concept_compare --release
 use neologism_core::style::{Config, Style};
 use neologism_core::{generate_with_tuning, BigTechTuning};
+use neologism_core::keywords::{brand_root_groups, extract_keywords};
 
 const PROMPTS: &[&str] = &[
     "a developer tool that generates names for packages CLIs libraries and projects",
@@ -45,7 +46,9 @@ fn names(prompt: &str, seed: u64, concept_expand: bool) -> String {
 fn main() {
     for (i, prompt) in PROMPTS.iter().enumerate() {
         let seed = 0xA076_1D64_78BD_642Fu64.wrapping_mul(i as u64 + 1);
+        let keywords = extract_keywords(prompt, 6);
         println!("\n{prompt}");
+        println!("  roots: {:?}", brand_root_groups(&keywords, 16));
         println!("  old : {}", names(prompt, seed, false));
         println!("  new : {}", names(prompt, seed, true));
     }

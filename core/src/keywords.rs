@@ -165,8 +165,12 @@ fn concept_roots(word: &str) -> &'static [&'static str] {
         "write" | "writing" | "journal" | "note" | "document" | "editor" => {
             &["ink", "quill", "draft", "scribe", "note"]
         }
+        "mood" | "emotion" | "feeling" => &["mood", "vibe", "aura", "tone", "feel"],
         "friend" | "community" | "social" | "team" | "chat" | "message" => {
             &["kin", "circle", "bond", "link", "tribe"]
+        }
+        "split" | "share" | "sharing" | "divide" | "settle" => {
+            &["split", "share", "fair", "settle", "pool"]
         }
         "data" | "analytic" | "analytics" | "insight" | "metric" => {
             &["signal", "lens", "trace", "scope", "vector"]
@@ -177,6 +181,12 @@ fn concept_roots(word: &str) -> &'static [&'static str] {
         }
         "market" | "marketplace" | "shop" | "sell" | "buy" | "commerce" => {
             &["cart", "trade", "market", "shelf", "bazaar"]
+        }
+        "vintage" | "retro" | "classic" | "antique" => {
+            &["retro", "relic", "classic", "heritage", "timber"]
+        }
+        "keyboard" | "keyboards" | "typing" | "type" => {
+            &["key", "type", "switch", "cap", "board"]
         }
         "travel" | "trip" | "map" | "route" => &["roam", "atlas", "route", "compass", "trek"],
         "photo" | "image" | "video" | "audio" | "music" => {
@@ -198,28 +208,63 @@ fn suppress_literal_root(word: &str) -> bool {
     !concept_roots(word).is_empty() || matches!(word, "project" | "manager" | "dashboard")
 }
 
-/// Expand extracted keywords into brand-shaped roots. Unknown/domain-specific
-/// words remain untouched, preserving prompt fidelity ("keyboard" stays a root).
-pub fn brand_roots(keywords: &[String], limit: usize) -> Vec<String> {
-    let mut out = Vec::new();
-    for keyword in keywords {
-        if !suppress_literal_root(keyword) && !out.contains(keyword) {
-            out.push(keyword.clone());
+/// Preferred order inside a coined compound: modifiers first, core domain
+/// metaphors next, product function/context last. This encodes the difference
+/// between RetroKey and KeyRetro, or InkLens and LensInk, without an LLM.
+fn concept_position(word: &str) -> u8 {
+    match word {
+        "name" | "naming" | "brand" | "title" | "word" | "identity"
+        | "mood" | "emotion" | "feeling"
+        | "split" | "share" | "sharing" | "divide" | "settle"
+        | "vintage" | "retro" | "classic" | "antique"
+        | "fast" | "speed" | "performance" | "rapid" => 0,
+        "generate" | "generator" | "create" | "creator" | "build" | "builder"
+        | "friend" | "community" | "social" | "team" | "chat" | "message"
+        | "data" | "analytic" | "analytics" | "insight" | "metric"
+        | "market" | "marketplace" | "shop" | "sell" | "buy" | "commerce" => 2,
+        _ => 1,
+    }
+}
+
+/// Expand extracted keywords into distinct semantic groups. Keeping groups
+/// separate lets the generator combine *different ideas* (Ink + Lens) instead
+/// of accidentally pairing synonyms from one idea (Lens + Scope).
+pub fn brand_root_groups(keywords: &[String], limit: usize) -> Vec<Vec<String>> {
+    let mut positioned_groups = Vec::new();
+    let mut seen = Vec::new();
+    for (source_order, keyword) in keywords.iter().enumerate() {
+        if seen.len() == limit {
+            break;
+        }
+        let mut group = Vec::new();
+        if !suppress_literal_root(keyword) && !seen.contains(keyword) {
+            group.push(keyword.clone());
         }
         for &root in concept_roots(keyword) {
             let root = root.to_string();
-            if !out.contains(&root) {
-                out.push(root);
-            }
-            if out.len() == limit {
-                return out;
+            if !seen.contains(&root) && !group.contains(&root) {
+                group.push(root);
             }
         }
-        if out.len() == limit {
-            break;
+        group.truncate(limit - seen.len());
+        if !group.is_empty() {
+            seen.extend(group.iter().cloned());
+            positioned_groups.push((concept_position(keyword), source_order, group));
         }
     }
-    out
+    positioned_groups.sort_by_key(|(position, source_order, _)| (*position, *source_order));
+    positioned_groups
+        .into_iter()
+        .map(|(_, _, group)| group)
+        .collect()
+}
+
+/// Flatten semantic groups for callers that only need the candidate root pool.
+pub fn brand_roots(keywords: &[String], limit: usize) -> Vec<String> {
+    brand_root_groups(keywords, limit)
+        .into_iter()
+        .flatten()
+        .collect()
 }
 
 /// Meaningful 2-letter tokens that survive the min-length cut ("AI tool for
@@ -393,7 +438,26 @@ mod tests {
     #[test]
     fn keeps_unknown_domain_words() {
         let roots = brand_roots(&["vintage".into(), "keyboard".into()], 12);
-        assert!(roots.contains(&"vintage".to_string()));
-        assert!(roots.contains(&"keyboard".to_string()));
+        assert!(roots.contains(&"retro".to_string()));
+        assert!(roots.contains(&"key".to_string()));
+    }
+
+    #[test]
+    fn keeps_distinct_concepts_in_separate_groups() {
+        let groups = brand_root_groups(&["journal".into(), "insight".into()], 12);
+        assert_eq!(groups.len(), 2);
+        assert!(groups[0].contains(&"ink".to_string()));
+        assert!(groups[1].contains(&"lens".to_string()));
+    }
+
+    #[test]
+    fn orders_modifier_domain_then_function() {
+        let groups = brand_root_groups(
+            &["marketplace".into(), "keyboard".into(), "vintage".into()],
+            16,
+        );
+        assert!(groups[0].contains(&"retro".to_string()));
+        assert!(groups[1].contains(&"key".to_string()));
+        assert!(groups[2].contains(&"bazaar".to_string()));
     }
 }

@@ -11,7 +11,7 @@ const TECH_SUFFIXES: &[&str] = &[
 
 /// Softer endings for semantic prompt roots. These create coined names rather
 /// than generic product labels such as -hub/-app/-net.
-const CONCEPT_SUFFIXES: &[&str] = &["a", "o", "ia", "io", "ora", "en", "on", "ix", "ly", "ify"];
+const CONCEPT_SUFFIXES: &[&str] = &["ia", "io", "ora", "ix", "ify"];
 
 /// Blend two root words: take a prefix of `a` and a suffix of `b`.
 /// Returns None if inputs are too short.

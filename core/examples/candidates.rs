@@ -32,7 +32,10 @@ fn composite(pron: u32, mem: u32, nov: u32) -> f64 {
 fn run(label: &str, cfgs: Vec<Config>) {
     let mut seen: BTreeSet<String> = BTreeSet::new();
     let mut rows: Vec<(f64, String)> = vec![];
-    for cfg in cfgs {
+    for mut cfg in cfgs {
+        // Match the product's Load more behavior: every batch excludes names
+        // already shown in this run instead of repeatedly sampling the same top.
+        cfg.exclude.extend(seen.iter().cloned());
         for r in generate(&cfg) {
             if !seen.insert(r.name.to_lowercase()) {
                 continue;

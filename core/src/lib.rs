@@ -419,22 +419,55 @@ fn blend_roots(rng: &mut ChaCha8Rng, roots: &[&str]) -> Option<String> {
     overlap_blend(a, b).or_else(|| blend(a, b))
 }
 
-/// Combine two prompt-derived roots while preserving compact semantic
-/// morphemes. Randomizing order keeps the same seeded variety as blend_roots.
-fn join_roots(rng: &mut ChaCha8Rng, roots: &[&str]) -> Option<String> {
-    if roots.len() < 2 {
+/// Combine roots from two different prompt concepts. This avoids synonym piles
+/// such as Lens+Scope and favors names that carry two ideas, e.g. Ink+Lens.
+fn join_root_groups(rng: &mut ChaCha8Rng, groups: &[Vec<String>]) -> Option<String> {
+    if groups.len() < 2 {
         return None;
     }
-    let a = roots[rand::Rng::gen_range(rng, 0..roots.len())];
-    let b = roots[rand::Rng::gen_range(rng, 0..roots.len())];
+    let a_group = rand::Rng::gen_range(rng, 0..groups.len());
+    let mut b_group = rand::Rng::gen_range(rng, 0..groups.len() - 1);
+    if b_group >= a_group {
+        b_group += 1;
+    }
+    let (first_group, second_group) = if a_group < b_group {
+        (a_group, b_group)
+    } else {
+        (b_group, a_group)
+    };
+    let a = groups[first_group][rand::Rng::gen_range(rng, 0..groups[first_group].len())].as_str();
+    let b = groups[second_group][rand::Rng::gen_range(rng, 0..groups[second_group].len())].as_str();
     if a == b {
         return None;
     }
-    if rand::Rng::gen::<bool>(rng) {
-        semantic_join(a, b)
-    } else {
-        semantic_join(b, a)
+    semantic_join(a, b)
+}
+
+/// Number of prompt concepts visibly represented by a candidate. Root joins
+/// can lose one seam letter, so a stable three-letter fragment counts too.
+fn concept_coverage(lower: &str, groups: &[Vec<String>]) -> usize {
+    groups
+        .iter()
+        .filter(|group| {
+            group.iter().any(|root| {
+                lower.contains(root) || (root.len() >= 3 && lower.contains(&root[..3]))
+            })
+        })
+        .count()
+}
+
+/// Stable seed-dependent value in [-0.5, 0.5]. A small dose in semantic
+/// ranking keeps different seeds exploratory without admitting structural junk.
+fn rank_jitter(name: &str, salt: u64) -> f64 {
+    let mut hash = 0xcbf2_9ce4_8422_2325u64 ^ salt;
+    for byte in name.bytes() {
+        hash ^= byte as u64;
+        hash = hash.wrapping_mul(0x0000_0100_0000_01b3);
     }
+    hash ^= hash >> 33;
+    hash = hash.wrapping_mul(0xff51_afd7_ed55_8ccd);
+    let unit = (hash >> 11) as f64 / (1u64 << 53) as f64;
+    unit - 0.5
 }
 
 /// Offline "brand-appeal" score (Phase 28) — a cheap proxy for the *semantic*
@@ -495,12 +528,18 @@ fn generate_bigtech(
         .unwrap_or_default();
     // Concept roots are a Brandable strategy. Compound and Respell promise the
     // user's literal words, so silently replacing those roots breaks the mode.
-    let expanded_desc_keywords =
-        if tuning.concept_expand && !cfg.compound && !respell_mode && !realword_mode {
-            keywords::brand_roots(&raw_desc_keywords, 16)
-        } else {
-            raw_desc_keywords.clone()
-        };
+    let use_concept_roots =
+        tuning.concept_expand && !cfg.compound && !respell_mode && !realword_mode;
+    let concept_groups = if use_concept_roots {
+        keywords::brand_root_groups(&raw_desc_keywords, 16)
+    } else {
+        Vec::new()
+    };
+    let expanded_desc_keywords = if use_concept_roots {
+        concept_groups.iter().flatten().cloned().collect()
+    } else {
+        raw_desc_keywords.clone()
+    };
     let concept_expanded = expanded_desc_keywords != raw_desc_keywords;
     let desc_keywords = expanded_desc_keywords;
 
@@ -512,7 +551,8 @@ fn generate_bigtech(
         st.roots.clone()
     };
 
-    // Overgenerate a pool, then keep the most brand-like by Markov word-likeness.
+    // Keep the candidate pool shallow enough that different seeds explore
+    // different semantic pairings instead of converging on one global top ten.
     let target = cfg.count * 5;
     let mut pool: Vec<NameResult> = Vec::new();
     let mut seen: HashSet<String> = HashSet::new();
@@ -594,12 +634,10 @@ fn generate_bigtech(
             // blend two user roots / one root + tech transform (Shopify
             // pattern — works with one keyword) / blend a user root with a
             // corpus root for variety (keyword half leads).
-            let blend_two_w = if all_roots.len() >= 2 {
-                if concept_expanded {
-                    0.60
-                } else {
-                    0.45
-                }
+            let blend_two_w = if concept_expanded {
+                if concept_groups.len() >= 2 { 0.75 } else { 0.0 }
+            } else if all_roots.len() >= 2 {
+                0.45
             } else {
                 0.0
             };
@@ -613,7 +651,7 @@ fn generate_bigtech(
             let pick = rand::Rng::gen::<f64>(rng);
             if pick < blend_two_w {
                 let combined = if concept_expanded {
-                    join_roots(rng, &all_roots)
+                    join_root_groups(rng, &concept_groups)
                 } else {
                     blend_roots(rng, &all_roots)
                 };
@@ -624,7 +662,12 @@ fn generate_bigtech(
                     tech_transform(rng, &b, cfg.temperature)
                 }
             } else if pick < blend_two_w + suffix_w {
-                let root = all_roots[rand::Rng::gen_range(rng, 0..all_roots.len())];
+                let root = if concept_expanded {
+                    let lead_group = &concept_groups[0];
+                    lead_group[rand::Rng::gen_range(rng, 0..lead_group.len())].as_str()
+                } else {
+                    all_roots[rand::Rng::gen_range(rng, 0..all_roots.len())]
+                };
                 if concept_expanded {
                     concept_transform(rng, root)
                 } else {
@@ -762,17 +805,57 @@ fn generate_bigtech(
     let brevity_w = if has_roots { 0.0 } else { tuning.brevity_w };
     let fluency_w = tuning.fluency_w;
     let appeal_w = 1.0;
+    let concept_rank_salt = if concept_expanded {
+        rand::Rng::gen::<u64>(rng)
+    } else {
+        0
+    };
+    let exploration_w = if concept_expanded {
+        cfg.variety.clamp(0.0, 1.0) * 1.2
+    } else {
+        0.0
+    };
     let rank = |r: &NameResult| {
+        let coverage_bonus = if concept_expanded {
+            concept_coverage(&r.name.to_lowercase(), &concept_groups)
+                .saturating_sub(1) as f64
+                * 0.85
+        } else {
+            0.0
+        };
+        // In Brandable mode a one-edit common-word neighbor usually reads as a
+        // typo (Kiten/kitten), not an intentional respelling. Respell has its own
+        // explicit mode and bypasses this concept ranking path.
+        let typo_penalty = if concept_expanded && r.score_novelty == 60 {
+            0.45
+        } else {
+            0.0
+        };
         st.model.log_likelihood(&r.name)
             + (r.score_pronounce as f64 / 100.0) * fluency_w
             + (r.score_memorability as f64 / 100.0) * brevity_w
             + appeal_w * brand_appeal(&r.name.to_lowercase(), &st.common_words, tuning)
+            + coverage_bonus
+            + rank_jitter(&r.name, concept_rank_salt) * exploration_w
+            - typo_penalty
     };
     // Phase 34: rank each name once, then sort on the cached value — sort_by
     // with rank() inline recomputed log_likelihood + brand_appeal per comparison
     // (~10× the work). Same values, same comparator → identical order.
     let mut decorated: Vec<(f64, NameResult)> = pool.into_iter().map(|r| (rank(&r), r)).collect();
     decorated.sort_by(|a, b| b.0.partial_cmp(&a.0).unwrap_or(std::cmp::Ordering::Equal));
+    let rank_min = decorated.last().map(|(score, _)| *score).unwrap_or(0.0);
+    let rank_max = decorated.first().map(|(score, _)| *score).unwrap_or(0.0);
+    let rank_span = (rank_max - rank_min).max(f64::EPSILON);
+    let concept_relevance: HashMap<String, f64> = decorated
+        .iter()
+        .map(|(score, result)| {
+            (
+                result.name.clone(),
+                ((*score - rank_min) / rank_span).clamp(0.0, 1.0),
+            )
+        })
+        .collect();
     let mut pool: Vec<NameResult> = decorated.into_iter().map(|(_, r)| r).collect();
     // Phase 48: a prompted respell batch leads with the keyword-derived
     // respellings (best-ranked first, up to a third of the batch); the rest
@@ -807,12 +890,23 @@ fn generate_bigtech(
     // cost 1.9 memorability points for +0.5pp distinct. Both reverted.
     pool.truncate(cfg.count * 2);
     let mut out = lead;
-    out.extend(metrics::mmr_select_capped(
-        &pool,
-        cfg.count - out.len(),
-        tuning.mmr_lambda,
-        share_cap,
-    ));
+    let remaining = cfg.count - out.len();
+    if concept_expanded {
+        out.extend(metrics::mmr_select_capped_by(
+            &pool,
+            remaining,
+            tuning.mmr_lambda,
+            share_cap,
+            |result| concept_relevance.get(&result.name).copied().unwrap_or(0.0),
+        ));
+    } else {
+        out.extend(metrics::mmr_select_capped(
+            &pool,
+            remaining,
+            tuning.mmr_lambda,
+            share_cap,
+        ));
+    }
     out
 }
 

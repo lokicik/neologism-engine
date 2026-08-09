@@ -94,10 +94,26 @@ pub fn mmr_select(items: &[NameResult], count: usize, lambda: f64) -> Vec<NameRe
 /// `mmr_select` is untouched — Sci-Fi/Fantasy call it directly, so their
 /// output remains byte-for-byte identical.
 pub fn mmr_select_capped(items: &[NameResult], count: usize, lambda: f64, cap: usize) -> Vec<NameResult> {
+    mmr_select_capped_by(items, count, lambda, cap, |r| {
+        composite_score(r) as f64 / 100.0
+    })
+}
+
+/// Structural-cap MMR with a caller-supplied relevance score. Brandable prompt
+/// generation uses this so semantic coverage survives the final selection step.
+pub(crate) fn mmr_select_capped_by<F>(
+    items: &[NameResult],
+    count: usize,
+    lambda: f64,
+    cap: usize,
+    rel: F,
+) -> Vec<NameResult>
+where
+    F: Fn(&NameResult) -> f64,
+{
     if items.len() <= count {
         return items.to_vec();
     }
-    let rel = |r: &NameResult| composite_score(r) as f64 / 100.0;
     let sim = |a: &str, b: &str| -> f64 {
         let max = a.chars().count().max(b.chars().count()).max(1) as f64;
         1.0 - levenshtein(&a.to_lowercase(), &b.to_lowercase()) as f64 / max
@@ -341,6 +357,18 @@ mod tests {
         let capped_names: Vec<&str> = capped.iter().map(|r| r.name.as_str()).collect();
         let plain_names: Vec<&str> = plain.iter().map(|r| r.name.as_str()).collect();
         assert_eq!(capped_names, plain_names, "cap=usize::MAX should reproduce mmr_select");
+    }
+
+    #[test]
+    fn custom_relevance_survives_capped_selection() {
+        let pool = vec![
+            r("generic", 99, 99, 99),
+            r("semantic", 40, 40, 40),
+        ];
+        let picked = mmr_select_capped_by(&pool, 1, 0.85, usize::MAX, |item| {
+            if item.name == "semantic" { 1.0 } else { 0.0 }
+        });
+        assert_eq!(picked[0].name, "semantic");
     }
 
     #[test]
