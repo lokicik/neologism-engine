@@ -1352,6 +1352,42 @@ both 100-card Compound sessions intact.
 
 ---
 
+## Phase 81 — Give legal research a real semantic space
+
+**Bottleneck.** `legal research` exposed the weakness that still hides behind otherwise healthy
+global averages. Brandable treated both words almost literally and returned forms such as
+`Legol`, `Reslit`, `Legrify`, and `Resche`: diversity was **0.616**, none of 100 names represented
+both concepts, and every first-page name overused one of the two raw prefixes. Compound produced
+reasonable-looking labels such as `TopLegal`, but exhausted its narrow palette at **40/100**;
+diversity was **0.485** and only **44%** of the batch was structurally distinct.
+
+**Change.** Legal work and research now expand into separate, restrained offline vocabularies:
+`law`, `case`, `brief`, `clause`, `docket`, and `counsel` on one side; `source`, `proof`, `index`,
+`trace`, `lens`, and `scope` on the other. Compound receives matching adjective families instead
+of falling back to generic praise words. Unknown professions still use the restrained fallback,
+which is pinned independently by the `plumber` regression.
+
+**Measured result.** Brandable now fills **100/100** names, raises diversity
+**0.616 → 0.771**, moves two-concept forms **0% → 15%**, and cuts first-page raw-prefix overuse
+**10/10 → 1/10**. Its page now contains readable forms such as `Briefindex`, `Docketlens`,
+`Lawsource`, and `Clauselens`. Compound moves **40/100 → 100/100**, raises diversity
+**0.485 → 0.733**, and raises structurally distinct output **44% → 62%**, with forms such as
+`FirmLaw`, `DeepIndex`, `OpenProof`, and `FirmDocket`.
+
+The legacy Brandable structural composite falls **85.8 → 79.1**. That is an informative failure
+of the metric, not a quality regression: the old score rewarded short typo-like mutations and
+literal prefix reuse more strongly than semantic breadth. The retained change improves the
+observable failure modes without changing the previous seven audited briefs.
+
+**Verification.** The core suite is **120/120**. All previous concept-audit outputs remain
+byte-identical; Compound stays **1,000/1,000** prompt-linked and pair-coherent, all twenty long
+briefs now reach **100/100**, and lexical echoes remain **0/2,000**. Developer-domain coverage
+stays **1,590/1,600** and the Phase 80 morphology matrix is unchanged. WASM and the production
+bundle build cleanly; Chromium passes all 30 guided Auto pages, the developer-domain gate, and
+three separate 100-card Compound sessions including `legal research`.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

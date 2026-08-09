@@ -199,6 +199,12 @@ fn concept_roots(word: &str) -> &'static [&'static str] {
             &["doc", "guide", "page", "site", "manual"]
         }
         "site" | "website" | "portal" => &["site", "page", "web", "portal", "home"],
+        "legal" | "law" | "lawyer" | "attorney" | "court" | "litigation" => {
+            &["law", "case", "brief", "clause", "docket", "counsel"]
+        }
+        "research" | "investigate" | "investigation" | "discovery" => {
+            &["source", "proof", "index", "trace", "lens", "scope"]
+        }
         "generate" | "generator" | "create" | "creator" | "build" | "builder" => {
             &["forge", "mint", "spark", "seed", "craft"]
         }
@@ -308,6 +314,12 @@ fn concept_adjectives(word: &str) -> &'static [&'static str] {
             &["clear", "open", "simple", "ready", "living", "helpful"]
         }
         "site" | "website" | "portal" => &["open", "live", "clear", "fast", "public", "bright"],
+        "legal" | "law" | "lawyer" | "attorney" | "court" | "litigation" => {
+            &["sound", "clear", "exact", "trusted", "proven", "firm"]
+        }
+        "research" | "investigate" | "investigation" | "discovery" => {
+            &["deep", "exact", "clear", "open", "trusted", "focused"]
+        }
         "generate" | "generator" | "create" | "creator" | "build" | "builder" => {
             &["fresh", "bright", "bold", "swift", "open", "prime"]
         }
@@ -1026,7 +1038,7 @@ mod tests {
 
     #[test]
     fn compound_adjectives_have_a_restrained_fallback() {
-        let adjectives = compound_adjectives(&["lawyer".into()]);
+        let adjectives = compound_adjectives(&["plumber".into()]);
         assert_eq!(adjectives.len(), 30);
         assert_eq!(
             &adjectives[..8],
@@ -1180,5 +1192,22 @@ mod tests {
         let formatter_roots = compound_roots(&formatter, 16);
         assert!(formatter_roots.contains(&"lint".to_string()));
         assert!(!formatter_roots.contains(&"crate".to_string()));
+    }
+
+    #[test]
+    fn expands_legal_research_into_distinct_concepts() {
+        let keywords = extract_keywords("legal research", 6);
+        let groups = brand_root_groups(&keywords, 16);
+        assert_eq!(groups.len(), 2);
+        assert!(groups[0].contains(&"case".to_string()));
+        assert!(groups[0].contains(&"clause".to_string()));
+        assert!(groups[1].contains(&"source".to_string()));
+        assert!(groups[1].contains(&"proof".to_string()));
+
+        let roots = compound_roots(&keywords, 16);
+        assert!(roots.contains(&"docket".to_string()));
+        assert!(roots.contains(&"lens".to_string()));
+        assert!(!roots.contains(&"legal".to_string()));
+        assert!(!roots.contains(&"research".to_string()));
     }
 }

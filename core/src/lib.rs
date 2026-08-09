@@ -1838,13 +1838,14 @@ mod tests {
 
     #[test]
     fn prompted_compound_sustains_long_batches() {
-        // The first brief-aware palette was attractive but finite: these three
-        // prompts stopped at 34/47/41 names. Keep Load more viable without
-        // reopening the broad, mismatched adjective corpus.
+        // Brief-aware palettes must keep Load more viable without reopening
+        // the broad, mismatched adjective corpus. Legal research used to stop
+        // at 40 names before it gained a real semantic family.
         let prompts = [
             "a secure password manager for teams",
             "an app for splitting expenses with friends",
             "a fast analytics dashboard for API performance",
+            "legal research",
         ];
         for prompt in prompts {
             let mut c = cfg(Style::BigTech);

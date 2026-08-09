@@ -15,6 +15,7 @@ const PROMPTS: &[&str] = &[
     "a marketplace for vintage keyboards",
     "a fast analytics dashboard for API performance",
     "fitness",
+    "legal research",
 ];
 
 fn config(prompt: &str, seed: u64) -> Config {

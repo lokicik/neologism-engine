@@ -21,6 +21,14 @@ const SCENARIOS = [
     description: 'fitness',
     nouns: new Set(['pulse', 'vital', 'thrive', 'fit', 'care']),
   },
+  {
+    label: 'legal research',
+    description: 'legal research',
+    nouns: new Set([
+      'law', 'case', 'brief', 'clause', 'docket', 'counsel',
+      'source', 'proof', 'index', 'trace', 'lens', 'scope',
+    ]),
+  },
 ]
 
 const server = spawn(process.execPath, [viteCli, 'preview', '--port', String(PORT), '--strictPort'], {
