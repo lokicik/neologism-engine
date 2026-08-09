@@ -75,7 +75,7 @@ App runs at **http://localhost:5173/**.
 cargo test -p neologism-core
 ```
 
-136 unit tests covering Markov determinism, phonotactic filters, blend logic, score ranges, phoneme affinity, sonority sequencing, word-likeness, keyword extraction, semantic ranking, exclusion behavior, developer-domain coverage, first-page shape balance, and 100-name brief sessions.
+137 unit tests covering Markov determinism, phonotactic filters, blend logic, score ranges, phoneme affinity, sonority sequencing, word-likeness, keyword extraction, semantic ranking, exclusion behavior, developer-domain coverage, first-page shape balance, and 100-name brief sessions.
 
 > Quick quality check: `cargo run -p neologism-core --example sample` prints a batch of names for every style and variant.
 > Long-session check: `cargo run -p neologism-core --example concept_compare --release` audits ten rolling batches across eight representative briefs.
@@ -87,7 +87,7 @@ cargo test -p neologism-core
 > Brandable morphology check: `cargo run -p neologism-core --example morphology_compare --release` audits 1,100 fixed-seed names plus 2,200 rolling-session names for the 75-point structural floor, transformation-family balance, collapsed suffixes, consonant metaphor seams, complete vowel-suffix seams, lossy shared overlaps, diversity, and 100-name capacity. Multi-concept joins that only resemble a collapsed metaphor seam are reported separately instead of counted as artifacts.
 > Auto first-page check: from `web/`, `node e2e/auto-quality-audit.mjs` audits 85 deterministic guided pages, including product-subject Respell relevance (`--verbose` prints every name).
 > Cold Auto quality check: from `web/`, `node e2e/cold-quality-audit.mjs` audits 90 fixed pages, including the bounded weak/diversity repair, one-accent contract, structural floor, and within-page similarity.
-> Personalized shortlist check: from `web/`, `node e2e/taste-quality-audit.mjs` audits 100 fixed pages across five briefs, four reference-name sets, and five seeds, gating structural quality, taste affinity, and within-page family diversity.
+> Personalized shortlist check: from `web/`, `node e2e/taste-quality-audit.mjs` audits 100 fixed pages across five briefs, four reference-name sets, and five seeds, gating structural quality, taste affinity, specialized-brief retention, and within-page family diversity.
 
 ### Audit exported taste data
 
@@ -118,7 +118,7 @@ npm run build        # output in web/dist/
 - **Sub-styles** — Sci-Fi (Stellar / Machine / Alien) and Fantasy (Elvish / Dwarvish / Orcish / Common), plus "Mixed"
 - **Controls** — count, min/max length, randomness (temperature), seed words, product description, starts-with / contains constraints
 - **Brief-aware Compound mode** — readable two-word names use project-specific adjective palettes, semantic noun roots, and role-compatible pairings (`QuietInk`, `FairTally`, `SwiftSignal`) instead of arbitrary corpus combinations; recognized concepts keep their focused first page and expand to 100 fresh names on continued exploration
-- **Project-scoped local taste selection** — add 3–8 example names you already like for an immediate local profile, or teach each project by starring/passing on 3+ generated names. Future batches request up to a 6× offline candidate pool, reject structurally weak options when enough stronger names exist, and keep any one stem family — plus one exact ending on naming briefs — to 20% of the visible page when the pool allows it. References stay separate from feedback/export data, and everything remains in `localStorage`.
+- **Project-scoped local taste selection** — add 3–8 example names you already like for an immediate local profile, or teach each project by starring/passing on 3+ generated names. Future batches request up to a 6× offline candidate pool, reject structurally weak options when enough stronger names exist, preserve candidates that carry an additional brief concept, and keep any one stem family — plus one exact ending on naming briefs — to 20% of the visible page when the pool allows it. References stay separate from feedback/export data, and everything remains in `localStorage`.
 - **Taste data export** — Settings turns explicit likes and passes into a versioned JSON dataset, preserving each name's project brief while forming preference pairs only within the same project context. It never exports AI credentials or recent-name history.
 - **Brief-aware Auto** — a project description gets semantic Brandable names plus at most one Respell earned by a main product concept; incidental words such as `developer`, `companion`, `planner`, or `reminder` cannot take that accent slot. On a cold page, a bounded Brandable-only offline fallback replaces missing/sub-75 slots and makes only quality-neutral substitutions when the full page is too repetitive, without adding another accent. An empty brief keeps the broader four-mode sampler.
 - **Deep brief sessions** — initial semantic batches stay focused; later Brandable batches search a deeper curated metaphor pool so repeated scrolling reaches 100 fresh, prompt-linked names while keeping structurally weak forms out whenever a full stronger page remains.

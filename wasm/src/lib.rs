@@ -35,6 +35,18 @@ pub fn extract_keywords(text: &str) -> String {
     serde_json::to_string(&kws).unwrap_or_else(|_| "[]".to_string())
 }
 
+/// Count distinct prompt concepts represented by each supplied name. This is
+/// batched to keep the browser/WASM boundary cheap for personalized pools.
+#[wasm_bindgen]
+pub fn concept_coverages(text: &str, names_json: &str) -> String {
+    let names: Vec<String> = match serde_json::from_str(names_json) {
+        Ok(names) => names,
+        Err(e) => return format!("{{\"error\":\"{}\"}}", e),
+    };
+    let coverages = neologism_core::description_concept_coverages(text, &names);
+    serde_json::to_string(&coverages).unwrap_or_else(|_| "[]".to_string())
+}
+
 /// Takes a JSON-encoded Vec<NameResult>, returns aggregate stats + per-name
 /// composite scores as JSON.
 #[wasm_bindgen]

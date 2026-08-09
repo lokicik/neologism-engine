@@ -1,4 +1,4 @@
-import init, { generate_names, batch_metrics, explain_name, extract_keywords } from '../wasm/neologism_wasm.js'
+import init, { generate_names, batch_metrics, concept_coverages, explain_name, extract_keywords } from '../wasm/neologism_wasm.js'
 import { autoModeCounts, isPromptLinkedRespell, mergeAutoBatches } from './auto'
 import { tasteContextForConfig } from './taste-context'
 
@@ -37,6 +37,7 @@ export interface NameResult {
   score_pronounce: number
   score_novelty: number
   score_memorability: number
+  concept_coverage?: number
   connotations: string[]
 }
 
@@ -55,8 +56,17 @@ export async function generateNames(cfg: Config): Promise<NameResult[]> {
   const parsed = JSON.parse(json) as NameResult[] | { error: string }
   if ('error' in parsed) throw new Error((parsed as { error: string }).error)
   const results = parsed as NameResult[]
+  const coverageJson = cfg.style === 'big_tech' && cfg.description?.trim()
+    ? concept_coverages(cfg.description, JSON.stringify(results.map((result) => result.name)))
+    : '[]'
+  const coverages = JSON.parse(coverageJson) as number[] | { error: string }
+  if ('error' in coverages) throw new Error((coverages as { error: string }).error)
   const tasteContext = tasteContextForConfig(cfg)
-  const contextual = results.map((result) => ({ ...result, tasteContext }))
+  const contextual = results.map((result, index) => ({
+    ...result,
+    concept_coverage: (coverages as number[])[index] ?? 0,
+    tasteContext,
+  }))
   if (cfg.style !== 'big_tech') return contextual
 
   // The WASM result intentionally stays engine-generic; the web layer knows

@@ -11,12 +11,27 @@ const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
 const VERBOSE = process.argv.includes('--verbose')
-const PROMPTS = [
-  'an offline naming engine for developer projects that checks npm and crates.io',
-  'a Rust CLI that processes logs',
-  'a secure password manager for teams',
-  'a tool that syncs design tokens',
-  'a local database inspector',
+const CASES = [
+  {
+    prompt: 'an offline naming engine for developer projects that checks npm and crates.io',
+    markers: ['scope', 'key', 'tag', 'alias', 'slug'],
+  },
+  {
+    prompt: 'a Rust CLI that processes logs',
+    markers: ['trace', 'watch', 'scope', 'pulse', 'beacon'],
+  },
+  {
+    prompt: 'a secure password manager for teams',
+    markers: ['vault', 'guard', 'shield', 'lock', 'cipher'],
+  },
+  {
+    prompt: 'a tool that syncs design tokens',
+    markers: ['hue', 'form', 'pixel', 'canvas', 'prism'],
+  },
+  {
+    prompt: 'a local database inspector',
+    markers: ['schema', 'query', 'table', 'store', 'base', 'data', 'record', 'row', 'field', 'index'],
+  },
 ]
 const REFERENCE_SETS = [
   'Vercel, Linear, Notion',
@@ -46,7 +61,7 @@ let failures = 0
 try {
   const page = await browser.newPage()
   await page.goto(APP_URL)
-  const rows = await page.evaluate(async ({ prompts, referenceSets, seeds }) => {
+  const rows = await page.evaluate(async ({ cases, referenceSets, seeds }) => {
     const { generateBatch } = await import('/src/lib/engine.ts')
     const {
       buildReferencedProfile,
@@ -63,7 +78,7 @@ try {
     for (const references of referenceSets) {
       const profile = buildReferencedProfile([], [], references).profile
       if (!profile) throw new Error(`reference profile missing: ${references}`)
-      for (const prompt of prompts) {
+      for (const testCase of cases) {
         for (const seed of seeds) {
           const requested = 10
           const poolRequested = preferencePoolCount(requested, profile)
@@ -76,17 +91,18 @@ try {
             variety: 0.3,
             roots: [],
             variant: 'auto',
-            description: prompt,
+            description: testCase.prompt,
             exclude: [],
             seed,
           })
           const selected = shortlistByPreference(pool, profile, requested)
           output.push({
             references,
-            prompt,
+            prompt: testCase.prompt,
             seed,
             poolRequested,
             poolReturned: pool.length,
+            engineFirstPage: pool.slice(0, requested).map((item) => item.name),
             selected: selected.map((item) => ({
               name: item.name,
               mode: item.sourceMode,
@@ -98,7 +114,7 @@ try {
       }
     }
     return output
-  }, { prompts: PROMPTS, referenceSets: REFERENCE_SETS, seeds: SEEDS })
+  }, { cases: CASES, referenceSets: REFERENCE_SETS, seeds: SEEDS })
 
   const editDistance = (a, b) => {
     const row = Array.from({ length: b.length + 1 }, (_, index) => index)
@@ -183,6 +199,23 @@ try {
   for (const [prompt, sizes] of poolsByPrompt) {
     console.log(`  ${[...sizes].sort((a, b) => a - b).join('/')}  ${prompt}`)
   }
+  let semanticRetentionFailures = 0
+  for (const testCase of CASES) {
+    const caseRows = rows.filter((row) => row.prompt === testCase.prompt)
+    const engineMapped = caseRows.flatMap((row) => row.engineFirstPage).filter((name) => {
+      const normalized = name.toLowerCase().replace(/[^a-z]/g, '')
+      return testCase.markers.some((marker) => normalized.includes(marker))
+    }).length
+    const mapped = caseRows.flatMap((row) => row.selected).filter((item) => {
+      const normalized = item.name.toLowerCase().replace(/[^a-z]/g, '')
+      return testCase.markers.some((marker) => normalized.includes(marker))
+    }).length
+    const total = caseRows.length * 10
+    semanticRetentionFailures += Number(mapped * 10 < engineMapped * 7)
+    console.log(
+      `  semantic engine ${engineMapped}/${total} -> taste ${mapped}/${total} (${(mapped / total * 100).toFixed(1)}%)  ${testCase.prompt}`,
+    )
+  }
 
   const gates = [
     [wrongSize === 0, 'every page selects 10 names after requesting an expanded pool of up to 60'],
@@ -192,6 +225,10 @@ try {
     [averageTaste >= -0.82, 'reference affinity stays within the retained floor'],
     [nearPairs <= 260, 'near-duplicate pairs stay at or below 260'],
     [meanPairSimilarity <= 0.24, 'mean pair similarity stays at or below 0.24'],
+    [
+      semanticRetentionFailures === 0,
+      'taste keeps at least 70% of the engine first page\'s specialized meaning',
+    ],
   ]
   for (const [ok, label] of gates) {
     console.log(`${ok ? 'PASS' : 'FAIL'}  ${label}`)

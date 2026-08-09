@@ -487,6 +487,18 @@ fn concept_coverage(lower: &str, groups: &[Vec<String>]) -> usize {
         .count()
 }
 
+/// Count how many distinct description concepts each visible name carries.
+/// The web taste ranker uses this existing engine signal so personalization
+/// cannot silently trade away a multi-part brief for a preferred word shape.
+pub fn description_concept_coverages(description: &str, names: &[String]) -> Vec<usize> {
+    let keywords = keywords::extract_keywords(description, 6);
+    let groups = keywords::brand_root_groups(&keywords, 16);
+    names
+        .iter()
+        .map(|name| concept_coverage(&name.to_lowercase(), &groups))
+        .collect()
+}
+
 /// Join a prompt root to a curated metaphor without hiding either word at a
 /// vowel boundary. `semantic_join` deliberately turns nova+atlas into
 /// `novatlas`, which is useful for compact concept pairs but can turn
@@ -1824,6 +1836,18 @@ mod tests {
             "only {hits}/{} echo a keyword: {:?}",
             results.len(),
             results.iter().map(|r| &r.name).collect::<Vec<_>>()
+        );
+    }
+
+    #[test]
+    fn description_coverage_distinguishes_multi_concept_names() {
+        let names = vec!["Lextag".into(), "Lexion".into(), "Zorven".into()];
+        assert_eq!(
+            description_concept_coverages(
+                "an offline naming engine for developer projects that checks npm and crates.io",
+                &names,
+            ),
+            vec![2, 1, 0]
         );
     }
 

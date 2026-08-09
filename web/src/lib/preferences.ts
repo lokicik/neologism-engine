@@ -11,6 +11,7 @@ const VOWELS = new Set(['a', 'e', 'i', 'o', 'u', 'y'])
 const SHARP = new Set(['k', 't', 'x', 'z', 'q', 'v'])
 const KNOWN_SUFFIXES = ['ify', 'ora', 'ium', 'ion', 'io', 'ia', 'ix', 'ly', 'ai']
 const ENGINE_QUALITY_WEIGHT = 1.1
+const CONCEPT_COVERAGE_WEIGHT = 0.2
 const MIN_SHORTLIST_QUALITY = 0.75
 const VISIBLE_PREFIX_SHARE = 0.2
 const VISIBLE_SUFFIX_SHARE = 0.2
@@ -475,7 +476,12 @@ export function rankByPreference(results: NameResult[], profile: PreferenceProfi
       index,
       // Taste chooses among credible engine results; it should not pull a
       // structurally weak candidate into view solely because its shape fits.
-      score: similarity(result, profile) + engineQuality(result) * ENGINE_QUALITY_WEIGHT,
+      // Preserve one extra brief concept, but do not reward literal three-root
+      // mashups cumulatively.
+      score: similarity(result, profile)
+        + engineQuality(result) * ENGINE_QUALITY_WEIGHT
+        + Math.min(1, Math.max(0, (result.concept_coverage ?? 0) - 1))
+          * CONCEPT_COVERAGE_WEIGHT,
     }))
     .sort((a, b) => b.score - a.score || a.index - b.index)
     .map(({ result }) => result)

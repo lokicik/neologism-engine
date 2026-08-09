@@ -184,6 +184,18 @@ if (referencedTaste.profile) {
     qualityShortlist.length === 10 && !qualityShortlist.some((item) => item.name === 'Checktag'),
     'a full strong pool keeps sub-75 structural names out of the visible page',
   )
+
+  const conceptRanked = rankByPreference(
+    [
+      { ...scoredResult('Nymix', 88), concept_coverage: 1 },
+      { ...scoredResult('Nymix', 88), concept_coverage: 2 },
+    ],
+    referencedTaste.profile,
+  )
+  check(
+    conceptRanked[0].concept_coverage === 2,
+    'taste ranking preserves a candidate that carries an additional brief concept',
+  )
 }
 
 const deduplicatedTaste = buildReferencedProfile(

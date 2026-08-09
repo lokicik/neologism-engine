@@ -2150,6 +2150,43 @@ weight retraining was added.
 
 ---
 
+## Phase 101 — Keep local taste attached to the brief
+
+**Bottleneck.** Phase 100 removed the weak structural tail, but the browser's personalized
+60-to-10 selection could still optimize a preferred word shape by discarding the brief's more
+specific concepts. Across the retained 100-page matrix, the npm/crates.io product brief fell from
+**56/200** specialized names in the engine's first ten to **37/200** after taste selection. The
+Rust/log brief fell **28/200 → 15/200**, with pages collapsing into high-scoring but generic
+`Byteix`, `Nodeia`, and `Crateio` families.
+
+**Rejected alternatives.** A positional bonus for the engine's existing order reduced near pairs
+**260 → 246** but pushed npm/crates.io meaning down again to **30/200**; output position was not a
+reliable relevance signal and was removed. A **0.35** concept bonus reached **80/200** namespace
+and **25/200** log names, but lowered average structural quality to **85.07**, below the retained
+**85.2** gate. It was also removed.
+
+**Retained correction.** The existing Rust semantic groups now expose one batched WASM signal:
+how many distinct brief concepts each generated name visibly carries. Active local taste adds a
+bounded **0.20** preference when a candidate carries one additional concept. The bonus cannot
+accumulate for three-root literal mashups, cannot rescue a sub-75 name, and is absent for cold
+pages and non-Big-Tech styles. No semantic lexicon or generator ordering changed.
+
+**Measured result.** Personalized npm/crates.io meaning rises **37 → 58/200** and Rust/log meaning
+**15 → 20/200**; the other three audited domains hold at **200/200**, **160/200**, and **200/200**.
+Across all 1,000 selected names, specialized coverage rises **612 → 638** and near-duplicate pairs
+fall **260 → 247**. The trade remains bounded: structural quality **85.71 → 85.50**, reference
+affinity **-0.750 → -0.753**, mean pair similarity **0.223 → 0.226**, with zero sub-75 names and
+zero visible prefix overflow. The production audit now fails if personalization retains less than
+70% of the engine first page's specialized meaning on any prompt.
+
+**Verification.** The workspace suite is **137/137** and the deterministic preference harness
+pins the multi-concept tie-break. WASM and the production bundle build cleanly. Chromium passes
+the 1,000-name personalized matrix, real feedback/reference/export flow, all 90 cold Auto pages,
+all 85 guided Auto pages, the fifteen-page namespace gate, and the duplicate-free 100-name brief
+session. No LLM, network call, hidden name blacklist, or cold-start output change was added.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
@@ -2169,8 +2206,8 @@ availability without confusing `find` with filesystem search. Cold Auto preserve
 first-page names and opens a bounded offline fallback
 for weak slots or an overly repetitive page. Local taste feedback selects each
 visible page from up to sixty offline candidates per project, applies a structural quality floor,
-and restores visible stem and naming-ending diversity. AI Studio remains an optional, separate
-batch judge rather than a hidden dependency of Create.
+preserves additional brief concepts, and restores visible stem and naming-ending diversity.
+AI Studio remains an optional, separate batch judge rather than a hidden dependency of Create.
 
 The next broad aesthetic scorer change is evidence-gated: collect at least ten real likes and ten passes in
 matching project contexts, audit the current composite, and require held-out pairwise
