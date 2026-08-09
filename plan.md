@@ -3212,6 +3212,44 @@ or ordinary-pool expansion was added.
 
 ---
 
+## Phase 129 — Give feature flags a control role without another Gate
+
+**Observed gap.** The three canonical `a feature flag service` pages averaged **81.52** and often
+showed four `Gate...` forms in the same ten-card set. Raw score probing suggested `GateKit 92.5`,
+`GateMap 92.5`, and `GateOps 91.0`, but adding a fifth form from the same visible root would improve
+the metric while making the shortlist feel worse. That family was rejected despite its scores.
+
+**Scoped role family.** A different-root probe found `FlipOps 88.0`, `FlipKit 88.0`, `FlipMap 88.0`,
+`FlipLog 88.0`, and `FlipRun 86.5`. Only a brief containing `feature` plus an explicit
+flag/toggle/rollout/switch/gate marker receives the private `flip` plus
+`ops`/`kit`/`map`/`log`/`run` pair groups. Ordinary Brandable and unrelated feature briefs do not
+gain that vocabulary. In this exact feature-flag context, `developer` remains available to normal
+semantic Brandable roots but is no longer treated as the product subject for Respell, preventing
+the audience-shaped `Developr` accent.
+
+**A/B guard.** The first Auto integration replaced the normal metaphor path entirely. It raised the
+local average but increased held-out near pairs **78 -> 79** and exposed another repeated
+`Rollout...` form, so it was rejected. The retained path preserves the strongest existing metaphor
+and compares one `Flip...` role only against the second guided slot through the existing guarded
+replacement. The same pair remains available if a future feature-flag wording earns a safe Respell;
+it still cannot bypass the one-accent or quality/diversity contracts.
+
+**Measured result.** All three canonical pages now lead with `FlipOps`, require no final retry, and
+their average improves **81.52 -> 82.42**. All nine wording-stress pages contain the scoped pair;
+the developer wording contains no Respell. Across the 105-page held-out base, average quality
+improves **84.15 -> 84.18**, lead quality **86.73 -> 86.74**, lead concept coverage
+**1.28 -> 1.30**, near pairs **78 -> 77**, and exact-stem excess **9 -> 8**. Mean similarity stays
+at **0.201**, suffix leaders remain 23, seed spread improves **18.14 -> 18.17/30**, and pair overlap
+improves **5.16 -> 5.15/10**.
+
+**Verification.** The core suite is **149/149**. The full held-out gate now covers 105 independent
+pages plus 30 wording-stress pages. The fixed 90-page cold audit, 85-page Auto audit, fifteen
+namespace pages, 1,600 developer-domain names, rebuilt WASM, TypeScript, and production Vite bundle
+all pass. No LLM, network call, global score adjustment, ordinary-pool expansion, or aesthetic
+regression accepted only for a higher numeric score was added.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
@@ -3243,6 +3281,8 @@ Household inventory briefs can express the job directly through the isolated `St
 without teaching ordinary catalogs another global template.
 Recruiter tracking briefs likewise gain the isolated `JobLoop` hiring-workflow role; a strong pair
 can improve an inner suffix card without removing the page's one earned Respell accent.
+Feature-flag briefs use an isolated `FlipOps` control role instead of adding another high-scoring
+`Gate...` variant, while audience words such as `developer` cannot take the Respell slot.
 Cold Auto also limits exact four-letter stem repetition on a visible page, but only through a
 quality-neutral, coverage-preserving non-suffix substitution from the fallback it already opened.
 Compound is now a genuinely brief-aware explicit alternative rather than a random adjective

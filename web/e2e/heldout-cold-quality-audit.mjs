@@ -58,7 +58,17 @@ const RECRUITER_VARIANTS = [
   'an applicant tracking system for hiring teams',
   'a hiring pipeline for recruiters',
 ]
-const PROMPTS = [...BASE_PROMPTS, ...AI_VARIANTS, ...RECRUITER_VARIANTS]
+const FEATURE_FLAG_VARIANTS = [
+  'feature toggle management for developers',
+  'a feature rollout control service',
+  'a platform for feature flags',
+]
+const PROMPTS = [
+  ...BASE_PROMPTS,
+  ...AI_VARIANTS,
+  ...RECRUITER_VARIANTS,
+  ...FEATURE_FLAG_VARIANTS,
+]
 const SEEDS = [13, 67, 313]
 const DIRECT_SUFFIXES = ['ify', 'ora', 'ion', 'era', 'io', 'ia', 'ix', 'el', 'en', 'on']
 
@@ -259,6 +269,12 @@ try {
     0,
   ) / (recruiterTrackingRows.length * 10)
   const recruiterVariantRows = rows.filter((row) => RECRUITER_VARIANTS.includes(row.prompt))
+  const featureFlagRows = rows.filter((row) => row.prompt === 'a feature flag service')
+  const featureFlagAverage = featureFlagRows.reduce(
+    (sum, row) => sum + row.selected.reduce((pageSum, item) => pageSum + quality(item), 0),
+    0,
+  ) / (featureFlagRows.length * 10)
+  const featureFlagVariantRows = rows.filter((row) => FEATURE_FLAG_VARIANTS.includes(row.prompt))
   const seedDiversity = BASE_PROMPTS.map((prompt) => {
     const promptRows = auditRows.filter((row) => row.prompt === prompt)
     const nameSeeds = new Map()
@@ -382,6 +398,7 @@ try {
   console.log(`formatter average: ${formatterAverage.toFixed(2)} · TidyKit leads ${formatterRows.filter((row) => row.selected[0]?.name === 'TidyKit').length}/${formatterRows.length}`)
   console.log(`household catalog average: ${householdCatalogAverage.toFixed(2)} · StowLog leads ${householdCatalogRows.filter((row) => row.selected[0]?.name === 'StowLog').length}/${householdCatalogRows.length}`)
   console.log(`recruiter tracking average: ${recruiterTrackingAverage.toFixed(2)}`)
+  console.log(`feature flag average: ${featureFlagAverage.toFixed(2)}`)
   console.log(`guarded repair upgrades: ${guardedRepairUpgrades.length}`)
   console.log(`weak Respell accents: ${weakRespellAccents.length}`)
   console.log(`seed diversity: ${averageUniqueNames.toFixed(2)}/30 unique · ${averageSeedOverlap.toFixed(2)}/10 pair overlap · ${exactDuplicateSeedPages} duplicate pages`)
@@ -409,6 +426,10 @@ try {
       ? row.selected.map((item) => item.name).join(', ')
       : `empty · direct ${row.direct.map((item) => item.name).join('/')} · fallback ${row.fallbackCount}`
     console.log(`${row.seed} · ${row.prompt} · ${names}`)
+  }
+  console.log('\nfeature flag focus')
+  for (const row of [...featureFlagRows, ...featureFlagVariantRows]) {
+    console.log(`${row.seed} · ${row.prompt} · ${row.selected.map((item) => item.name).join(', ')}`)
   }
   console.log('\nguarded repair upgrades')
   for (const { row, replacement, candidate } of guardedRepairUpgrades) {
@@ -514,6 +535,37 @@ try {
           )
         )),
       'recruiter wording variants keep JobLoop and reject the weak applicant Respell',
+    ],
+    [
+      featureFlagRows.length === SEEDS.length
+        && featureFlagAverage >= 82.4
+        && featureFlagRows.every((row) => (
+          row.selected[0]?.name === 'FlipOps'
+          && row.selected[0]?.construction === 'guided_pair'
+          && row.direct.some((item) => (
+            item.name === 'FlipOps' && item.construction === 'guided_pair'
+          ))
+          && !row.retryRequested
+        )),
+      'feature flag pages lead with the scoped FlipOps control role',
+    ],
+    [
+      featureFlagVariantRows.length === FEATURE_FLAG_VARIANTS.length * SEEDS.length
+        && featureFlagVariantRows.every((row) => (
+          row.selected.length === 10
+          && quality(row.selected[0]) >= 88
+          && !isDirectSuffix(row.selected[0])
+          && row.selected.some((item) => (
+            item.name === 'FlipOps' && item.construction === 'guided_pair'
+          ))
+          && !row.retryRequested
+          && (
+            row.prompt.startsWith('feature toggle')
+              ? row.selected.every((item) => item.sourceMode !== 'respell')
+              : true
+          )
+        )),
+      'feature flag wording variants keep FlipOps and reject audience Respells',
     ],
     [
       formatterRows.length === SEEDS.length

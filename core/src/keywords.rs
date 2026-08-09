@@ -473,6 +473,11 @@ fn has_any_keyword(keywords: &[String], choices: &[&str]) -> bool {
         .any(|keyword| choices.contains(&keyword.as_str()))
 }
 
+fn is_feature_flag_brief(keywords: &[String]) -> bool {
+    keywords.iter().any(|keyword| keyword == "feature")
+        && has_any_keyword(keywords, &["flag", "toggle", "rollout", "switch", "gate"])
+}
+
 /// Drop a weak or polysemous word only when another keyword makes the intended
 /// domain explicit. The word remains available in every other context.
 fn is_contextually_suppressed(word: &str, keywords: &[String]) -> bool {
@@ -1008,12 +1013,14 @@ pub fn respell_source_keywords(keywords: &[String]) -> Vec<String> {
     }
 
     let naming_brief = is_naming_brief(keywords);
+    let feature_flags = is_feature_flag_brief(keywords);
     let focused: Vec<String> = keywords
         .iter()
         .filter(|keyword| {
             !is_contextually_suppressed(keyword, keywords)
                 && !is_brand_context_only(keyword)
                 && !matches!(keyword.as_str(), "friend" | "team" | "builder")
+                && !(feature_flags && keyword.as_str() == "developer")
                 && !concept_roots(keyword).is_empty()
                 && (!naming_brief
                     || matches!(
@@ -1218,6 +1225,13 @@ pub fn guided_pair_root_groups(keywords: &[String], limit: usize) -> Vec<Vec<Str
         // isolated pair lane. Ordinary Brandable keeps its broader syntax and
         // style palette instead of turning every formatter name into a kit.
         const GROUPS: &[&[&str]] = &[&["tidy", "lint", "rule"], &["kit", "fix"]];
+        return bounded_guided_groups(GROUPS, limit);
+    }
+
+    if is_feature_flag_brief(keywords) {
+        // `FlipOps` and `FlipLog` express feature control without adding a
+        // fifth Gate-prefixed card or widening ordinary Brandable vocabulary.
+        const GROUPS: &[&[&str]] = &[&["flip"], &["ops", "kit", "map", "log", "run"]];
         return bounded_guided_groups(GROUPS, limit);
     }
 
@@ -1764,6 +1778,33 @@ mod tests {
             .iter()
             .flatten()
             .any(|root| root == "job"));
+    }
+
+    #[test]
+    fn guided_feature_flags_use_flip_roles_only_in_their_lane() {
+        for prompt in [
+            "a feature flag service",
+            "feature toggle management for developers",
+        ] {
+            let keywords = extract_keywords(prompt, 6);
+            let ordinary = brand_root_groups(&keywords, 16);
+            let guided = guided_pair_root_groups(&keywords, 16);
+            assert!(!ordinary.iter().flatten().any(|root| root == "flip"));
+            assert!(guided.iter().flatten().any(|root| root == "flip"));
+            assert!(guided.iter().flatten().any(|root| root == "ops"));
+            assert!(guided.iter().flatten().any(|root| root == "log"));
+            assert_eq!(guided.len(), 2, "{prompt}: {guided:?}");
+            if prompt.contains("developers") {
+                let sources = respell_source_keywords(&keywords);
+                assert!(!sources.iter().any(|source| source == "developer"));
+            }
+        }
+
+        let unrelated = extract_keywords("a network feature map", 6);
+        assert!(!guided_pair_root_groups(&unrelated, 16)
+            .iter()
+            .flatten()
+            .any(|root| root == "flip"));
     }
 
     #[test]

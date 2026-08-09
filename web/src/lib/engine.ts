@@ -78,6 +78,12 @@ const isRecruiterTrackingBrief = (terms: string[]): boolean => {
     && ['track', 'pipeline'].some((term) => normalized.has(term))
 }
 
+const isFeatureFlagBrief = (terms: string[]): boolean => {
+  const normalized = new Set(terms.map(letters))
+  return normalized.has('feature')
+    && ['flag', 'toggle', 'rollout', 'switch', 'gate'].some((term) => normalized.has(term))
+}
+
 export const guidedMetaphorTail = (result: NameResult): string | undefined => {
   const normalized = letters(result.name)
   return GUIDED_METAPHOR_TAILS.find((tail) => normalized.endsWith(tail))
@@ -277,6 +283,7 @@ export async function generateBatch(cfg: Config): Promise<NameResult[]> {
       ...(cfg.roots ?? []),
     ]
     const recruiterTrackingBrief = isRecruiterTrackingBrief(terms)
+    const featureFlagBrief = isFeatureFlagBrief(terms)
     const [brandableBatch, respellBatch] = await Promise.all([
       generateNames({ ...cfg, variant: undefined, compound: false, count: total }),
       respell > 0
@@ -298,8 +305,8 @@ export async function generateBatch(cfg: Config): Promise<NameResult[]> {
     let pairAccent: NameResult[] = []
     if (total > 0 && recruiterTrackingBrief) {
       // The scoped hiring-workflow role is stronger than this domain's broad
-      // metaphor pool. It may coexist with a safe recruiter Respell or become
-      // the sole guided construction when the only spelling is weak.
+      // metaphor pool. It may coexist with a safe Respell or become the sole
+      // guided construction when no spelling survives.
       pairAccent = pickGuidedPair(await generateNames({
         ...cfg,
         variant: 'concept_pair',
@@ -337,9 +344,9 @@ export async function generateBatch(cfg: Config): Promise<NameResult[]> {
         }
       }
       // If no metaphor survives the 85-point gate, try one explicit semantic
-      // pair. It may enter only through the quality-neutral suffix replacement
-      // below, so ordinary pages cannot lose a stronger card to fill a quota.
-      if (metaphorAccent.length === 0) {
+      // pair. Feature flags may also compare their private Flip role against
+      // the second metaphor slot while preserving the first metaphor.
+      if (metaphorAccent.length === 0 || featureFlagBrief) {
         pairAccent = pickGuidedPair(await generateNames({
           ...cfg,
           variant: 'concept_pair',
@@ -347,6 +354,15 @@ export async function generateBatch(cfg: Config): Promise<NameResult[]> {
           count: GUIDED_PAIR_POOL,
         }))
       }
+    } else if (total > 0 && featureFlagBrief) {
+      // Keep the scoped control-role candidate available even if a future
+      // keyword rule lets a safe Respell survive this brief.
+      pairAccent = pickGuidedPair(await generateNames({
+        ...cfg,
+        variant: 'concept_pair',
+        compound: false,
+        count: GUIDED_PAIR_POOL,
+      }))
     }
     const primaryPage = preserveGuidedConstruction(mergeAutoBatches([
       brandableBatch,
@@ -358,6 +374,9 @@ export async function generateBatch(cfg: Config): Promise<NameResult[]> {
       return addStrongGuidedPairUpgrade(primaryPage, pairAccent[0])
     }
     if (metaphorAccent.length > 0) {
+      if (featureFlagBrief) {
+        return addStrongGuidedPairUpgrade(primaryPage, pairAccent[0])
+      }
       return addQualityNeutralGuidedAlternative(primaryPage, metaphorAccent[1])
     }
     return addQualityNeutralGuidedAlternative(
