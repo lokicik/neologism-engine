@@ -50,6 +50,7 @@ const MODES = [
 ]
 const SEEDS = [7, 42, 101, 2024, 9999]
 const EXPECTED_PER_CASE = SEEDS.length * 10
+const LOSSY_OVERLAPS = new Set(['settledger', 'tagent'])
 
 const server = spawn(process.execPath, [viteCli, '--port', String(PORT), '--strictPort'], {
   cwd: WEB_DIR,
@@ -108,6 +109,8 @@ try {
   }, { cases: CASES, modes: MODES, seeds: SEEDS })
 
   const aggregate = Object.fromEntries(MODES.map((mode) => [mode.label, { mapped: 0, total: 0 }]))
+  const lossyOverlaps = rows.flatMap((row) => row.names).filter((name) => LOSSY_OVERLAPS.has(name.toLowerCase()))
+  check(lossyOverlaps.length === 0, `no lossy semantic overlaps (${lossyOverlaps.join(', ') || 'none'})`)
   for (const testCase of CASES) {
     for (const mode of MODES) {
       const batches = rows.filter((row) => row.prompt === testCase.prompt && row.mode === mode.label)

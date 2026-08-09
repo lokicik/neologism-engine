@@ -56,20 +56,19 @@ pub fn overlap_blend(a: &str, b: &str) -> Option<String> {
 
 /// Join two short semantic roots without cutting away their meaning. Traditional
 /// prefix/suffix blending works for long words (pin + interest), but mangles
-/// compact morphemes such as lex/mint or nym/forge. Shared seams of two or more
-/// letters are still preferred. Otherwise preserve duplicate consonants so
-/// both concepts remain visible (pool+link → "poollink"). Two colliding vowels
-/// ask the caller for another pair; concatenating aura+ink as "auraink" is no
-/// clearer than deleting one into "aurank". The normal phonotactic filter can
-/// reject any resulting consonant pile-up.
+/// compact morphemes such as lex/mint or nym/forge. Shared seams ask the caller
+/// for another pair: merging settle+ledger into "settledger" or tag+agent into
+/// "tagent" makes both concepts less readable. Otherwise preserve duplicate
+/// consonants so both concepts remain visible (pool+link → "poollink"). Two
+/// colliding vowels are also skipped. The normal phonotactic filter can reject
+/// any resulting consonant pile-up.
 pub fn semantic_join(a: &str, b: &str) -> Option<String> {
     if a.len() < 2 || b.len() < 2 || a.eq_ignore_ascii_case(b) {
         return None;
     }
-    if let Some(overlap) = overlap_blend(a, b) {
-        return Some(overlap);
+    if overlap_blend(a, b).is_some() {
+        return None;
     }
-
     let a_last = a.chars().last()?;
     let b_first = b.chars().next()?;
     if is_vowel(a_last) && is_vowel(b_first) {
@@ -311,6 +310,8 @@ mod tests {
         assert_eq!(semantic_join("nym", "forge"), Some("nymforge".to_string()));
         assert_eq!(semantic_join("nova", "atlas"), None);
         assert_eq!(semantic_join("pool", "link"), Some("poollink".to_string()));
+        assert_eq!(semantic_join("settle", "ledger"), None);
+        assert_eq!(semantic_join("tag", "agent"), None);
         assert_eq!(semantic_join("aura", "ink"), None);
         assert_eq!(semantic_join("mint", "mint"), None);
     }

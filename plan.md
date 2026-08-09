@@ -1204,6 +1204,37 @@ passes the 80-page developer-domain gate, all 30 Auto pages, and both 100-card C
 
 ---
 
+## Phase 77 — Reject typo-like shared overlaps between semantic roots
+
+**Bottleneck.** The Phase 76 audit removed collapsed suffixes but exposed two remaining
+two-concept joins that still read like spelling mistakes. `settle + ledger` shared `le` and became
+`Settledger`; `tag + agent` shared `ag` and became `Tagent`. Across the fourteen-brief fixed-seed
+set they occupied **7/700 names**: two `Settledger` and five `Tagent` results. This path is separate
+from the generic portmanteau blender, where a deliberate overlap such as `pin + interest` remains
+useful.
+
+**A/B.** Preserving both roots instead of merging them removed the first-page defects, but only
+delayed the problem: `Tagagent` surfaced in the new 1,400-name rolling-session audit. The retained
+rule asks for another root pair whenever two semantic roots have a shared overlap of two or more
+letters. It does not blacklist outputs, remove generic overlap blending, or spend candidates on a
+known awkward full concatenation.
+
+**Measured result.** Shared-overlap artifacts move **7/700 → 0/700** on the fixed-seed set and
+remain zero across all **1,400/1,400** rolling-session names, with no short batch. Mean structural
+composite trades **81.63 → 81.54** while diversity moves **0.717 → 0.718**. The expense long
+session gives up one point of two-concept coverage (**45% → 44%**) but replaces `Settledger` with
+clear alternatives such as `Settlebond`; the Git brief replaces `Tagent` with `Tagmind`.
+Developer-domain coverage remains **790/800**, and Compound remains **600/600** prompt-linked and
+pair-coherent.
+
+**Verification.** Direct tests pin both rejected semantic pairs while preserving the generic
+`Pinterest` overlap path. The core suite is **114/114**. WASM and the production bundle build
+cleanly; Chromium reports no lossy semantic overlap, keeps the developer-domain gate at
+**398/400 Brandable** and **391/400 Compound**, passes all 30 Auto pages, and preserves both
+100-card Compound sessions.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

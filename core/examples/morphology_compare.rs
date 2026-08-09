@@ -1,10 +1,11 @@
 // Audit recurring Brandable morphology artifacts across established and held-out briefs.
 // Run: cargo run -p neologism-core --example morphology_compare --release
+use neologism_core::blend::overlap_blend;
 use neologism_core::generate;
-use neologism_core::keywords::{brand_roots, extract_keywords};
+use neologism_core::keywords::{brand_root_groups, brand_roots, extract_keywords};
 use neologism_core::metrics::{composite_score, diversity};
 use neologism_core::style::{Config, Style};
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 
 const PROMPTS: &[&str] = &[
     "a developer tool that generates names for packages CLIs libraries and projects",
@@ -56,16 +57,54 @@ fn has_collapsed_suffix(name: &str, roots: &[String]) -> bool {
     })
 }
 
+fn overlap_candidates(
+    groups: &[Vec<String>],
+) -> (BTreeMap<String, String>, BTreeMap<String, String>) {
+    let mut merged = BTreeMap::new();
+    let mut preserved = BTreeMap::new();
+    for first in 0..groups.len() {
+        for second in first + 1..groups.len() {
+            for a in &groups[first] {
+                for b in &groups[second] {
+                    if let Some(name) = overlap_blend(a, b) {
+                        let overlap = a.len() + b.len() - name.len();
+                        let pair = format!("{a}+{b} ({overlap})");
+                        merged.insert(name, pair.clone());
+                        preserved.insert(format!("{a}{b}"), pair);
+                    }
+                }
+            }
+        }
+    }
+    (merged, preserved)
+}
+
+fn record_overlap_form(
+    name: &str,
+    forms: &BTreeMap<String, String>,
+    examples: &mut BTreeMap<String, usize>,
+) {
+    if let Some(pair) = forms.get(&name.to_lowercase()) {
+        *examples.entry(format!("{name} <- {pair}")).or_default() += 1;
+    }
+}
+
 fn main() {
     let mut total = 0usize;
     let mut collapsed = 0usize;
     let mut composite = 0u64;
     let mut batch_diversity = 0.0;
     let mut collapsed_examples = BTreeSet::new();
+    let mut overlap_examples: BTreeMap<String, usize> = BTreeMap::new();
+    let mut preserved_overlap_examples: BTreeMap<String, usize> = BTreeMap::new();
+    let mut rolling_total = 0usize;
+    let mut rolling_short = 0usize;
 
     for prompt in PROMPTS {
         let keywords = extract_keywords(prompt, 6);
+        let groups = brand_root_groups(&keywords, 16);
         let roots = brand_roots(&keywords, 16);
+        let (overlaps, preserved_overlaps) = overlap_candidates(&groups);
         for seed in SEEDS {
             let results = generate(&config(prompt, *seed));
             batch_diversity += diversity(&results);
@@ -76,7 +115,32 @@ fn main() {
                     collapsed += 1;
                     collapsed_examples.insert(result.name.clone());
                 }
+                record_overlap_form(&result.name, &overlaps, &mut overlap_examples);
+                record_overlap_form(
+                    &result.name,
+                    &preserved_overlaps,
+                    &mut preserved_overlap_examples,
+                );
             }
+        }
+
+        let mut excluded = Vec::new();
+        for batch in 0..10 {
+            let seed = 0xA076_1D64_78BD_642Fu64.wrapping_mul(batch + 1);
+            let mut cfg = config(prompt, seed);
+            cfg.exclude = excluded.clone();
+            let results = generate(&cfg);
+            rolling_short += usize::from(results.len() < cfg.count);
+            rolling_total += results.len();
+            for result in &results {
+                record_overlap_form(&result.name, &overlaps, &mut overlap_examples);
+                record_overlap_form(
+                    &result.name,
+                    &preserved_overlaps,
+                    &mut preserved_overlap_examples,
+                );
+            }
+            excluded.extend(results.into_iter().map(|result| result.name));
         }
     }
 
@@ -99,5 +163,25 @@ fn main() {
             .into_iter()
             .collect::<Vec<_>>()
             .join(", ")
+    );
+    println!(
+        "overlap examples: {}",
+        overlap_examples
+            .into_iter()
+            .map(|(example, count)| format!("{example} x{count}"))
+            .collect::<Vec<_>>()
+            .join(", ")
+    );
+    println!(
+        "preserved overlap examples: {}",
+        preserved_overlap_examples
+            .into_iter()
+            .map(|(example, count)| format!("{example} x{count}"))
+            .collect::<Vec<_>>()
+            .join(", ")
+    );
+    println!(
+        "rolling sessions: {rolling_total}/{} names, {rolling_short} short batches",
+        PROMPTS.len() * 100
     );
 }

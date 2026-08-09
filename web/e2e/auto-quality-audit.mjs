@@ -20,7 +20,7 @@ const PROMPTS = [
 ]
 const SEEDS = [7, 42, 101, 2024, 9999]
 const VERBOSE = process.argv.includes('--verbose')
-const LOSSY_SEAMS = new Set(['aurank', 'poolink', 'pooledger'])
+const LOSSY_SEAMS = new Set(['aurank', 'poolink', 'pooledger', 'settledger', 'tagent'])
 
 const server = spawn(process.execPath, [viteCli, '--port', String(PORT), '--strictPort'], {
   cwd: WEB_DIR,

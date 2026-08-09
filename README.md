@@ -81,7 +81,7 @@ cargo test -p neologism-core
 > Long-session check: `cargo run -p neologism-core --example concept_compare --release` audits ten rolling batches across seven representative briefs.
 > Compound quality check: `cargo run -p neologism-core --example compound_compare --release` audits noun relevance, adjective–noun coherence, structural scores, seed diversity, and 100-name capacity across twelve multi- and single-concept briefs.
 > Developer-domain check: `cargo run -p neologism-core --example dev_domain_compare --release` audits semantic coverage across eight held-out developer briefs and both Brandable and Compound; from `web/`, `node e2e/dev-domain-audit.mjs` pins the same behavior in Chromium/WASM.
-> Brandable morphology check: `cargo run -p neologism-core --example morphology_compare --release` audits 700 names for lossy vowel-suffix seams while tracking structural composite and diversity.
+> Brandable morphology check: `cargo run -p neologism-core --example morphology_compare --release` audits 700 fixed-seed names plus 1,400 rolling-session names for lossy suffix and shared-overlap seams while tracking structural composite, diversity, and capacity.
 > Auto first-page check: from `web/`, `node e2e/auto-quality-audit.mjs` audits 30 deterministic guided pages (`--verbose` prints every name).
 
 ### Audit exported taste data
@@ -118,7 +118,7 @@ npm run build        # output in web/dist/
 - **Brief-aware Auto** — a project description gets semantic Brandable names plus at most one Respell that is actually derived from the prompt; unrelated modes no longer receive forced slots. An empty brief keeps the broader four-mode sampler.
 - **Deep brief sessions** — initial semantic batches stay focused; later Brandable batches open a curated metaphor lane so repeated scrolling reaches 100 fresh, prompt-linked names instead of exhausting suffix variants.
 - **Root-preserving coinages** — concept suffixes keep the full semantic root at vowel boundaries (`Bridgeora`, not the lossy `Bridgea`; `Cacheora`, not `Cachera`)
-- **Readable semantic joins** — concept pairs keep meaningful boundary consonants (`Poolledger`, not `Pooledger`), while awkward vowel collisions such as `Aura` + `Ink` are skipped instead of being crushed into `Aurank`.
+- **Readable semantic joins** — concept pairs keep meaningful boundary consonants (`Poolledger`, not `Pooledger`); awkward vowel collisions and shared-overlap typos such as `Aurank`, `Settledger`, and `Tagent` are skipped for a cleaner pair.
 - **Score bars** — pronounceability, novelty, and memorability per generated name
 - **Favorites** — star names; persisted across reloads via `localStorage`
 - **Domain indicator** — checks `.com` / `.io` availability via Cloudflare DNS-over-HTTPS (no API key; labeled as indicator, not authoritative)
