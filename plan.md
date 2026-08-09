@@ -914,26 +914,60 @@ source/context metadata; visual review confirms the compact Settings layout stil
 
 ---
 
+## Phase 69 — Keep brief-driven quality alive through 100 names
+
+**Bottleneck.** A fresh prompted Brandable batch looked stronger than before, but the exact
+exclusion path exposed a hidden finite-space problem. In a realistic ten-batch session, the
+six multi-concept benchmark briefs returned only 43–88 of the requested 100 unique names;
+the app's own developer-naming brief stopped at 75. Repeated suffixes and deterministic
+concept joins were being exhausted, so infinite scroll eventually claimed the prompt had no
+names left.
+
+**Rejected experiments.** Prefix-conditioned Markov completion produced fragments such as
+`Lexpedra`, `Nymetamanl`, and `Nodecrafis`, so it was removed. Feeding the existing third
+generation arm from the full roots corpus restored capacity but admitted mangled or arbitrary
+forms such as `Bytip`, `Klecore`, and `Minteddy`; that version was also removed.
+
+**What changed.** The strongest semantic join/suffix mix remains untouched for the first two
+multi-concept Brandable batches and the first single-concept batch. Once the rolling exclusion
+history proves that the user is continuing the same brief, a 15% exploration lane opens for
+multi-concept briefs. Single-concept prompts use that lane more heavily after their compact
+suffix batch because they start with only five semantic roots. The lane preserves one prompt
+root intact and joins it only with a small curated set of readable metaphors (`flow`, `spark`,
+`nest`, `smith`, `glow`, and related roots). Generic generation, explicit seed-word generation,
+the first prompted batch, and every non-Brandable mode retain their previous paths.
+
+`concept_compare` is now a rolling-session harness rather than a one-page sample only. It
+measures returned count, composite score, intra-batch diversity, uniqueness, two-concept
+coverage, prefix-family overflow, and short batches across seven briefs. All seven now return
+100/100 unique, context-linked names with zero short batches. For the six multi-concept briefs,
+session diversity moved from 0.346–0.629 to 0.744–0.798. Full-session composite averages are
+0.6–2.3 points lower because the denominator now includes later candidates that did not exist
+before; the initial high-quality batch is unchanged.
+
+**Verification.** Two new Rust regressions simulate ten rolling batches for the app's own
+brief and for a single-word `fitness` brief, requiring 100 unique results and visible concept
+coverage. A boundary regression also keeps both halves of curated metaphor joins readable
+(`ForgeAtlas`, not `Forgetlas`). The full core suite is 101/101. Native release benchmarking
+with a 20,000-name history measured a 42.5 ms cold prompted call and 10.5 ms subsequent
+average. WASM and the production web bundle build cleanly. A Chromium regression drives
+actual infinite scroll to 100 cards and verifies uniqueness, no false exhaustion, persisted
+recent-history coverage, and the visible keyword trace.
+
+---
+
 ## Bottom line
 
-Big-tech is the strongest style, tuned through Phase 25 and extended since:
+Big-tech Auto remains the product's strongest path. The first page now balances semantic
+Brandable candidates with Real-word, Respell, and Compound accents; long prompted sessions no
+longer collapse into repeated suffix families or stop before 100 names. Local taste feedback
+can already adjust structural and mode preferences, while AI Studio remains an optional,
+separate batch judge rather than a hidden dependency of Create.
 
-- **Quality (the judge).** The offline-distilled scorer (roadmap #1) was tried and stopped in Phase
-  27 — the gap is semantic, not statistical (§9). Phase 28 then shipped the real fix as a **two-stage
-  selector**: a cheap offline `brand_appeal` nudge plus an **opt-in local-LLM re-ranker** with silent
-  fallback (§10). This is roadmap #2 (online AI mode) realized in the form that fits a local-first
-  user — the smarter judge, with no cost to anyone who doesn't run a local model. Phase 31 then closed
-  the *generation* side of quality: a subsyllabic generator was LLM-verified **worse** and removed
-  (§13), so better quality lives in selection (the re-ranker), not the generator.
-- **Variety & repeats.** Phase 29 widened the generative space (suffixes 11→24, more blending) and
-  flattened the attractor tail (§11). Phase 30 established that the real distinct vocabulary is
-  **33k+** (not the ~5k once believed), that fresh-per-call seeding is already correct and is *not*
-  what controls repeats, and widened the exclude-recent horizon to 2,000 — the actual lever (§12).
-- **Remaining options.** **#6 deployment** (Netlify; the Phase 28/29/30 changes need a redeploy with
-  a fresh WASM build — the AI-rank toggle silently no-ops for public users without a local LLM, by
-  design) — now the single highest-value next step. The generation-core rewrite (roadmap #3) is
-  **closed as a quality lever** (§13); it would only return as a *capability* play ("name like X"
-  templates, language flavors), not for better English big-tech quality. #3 (phonotactic metric) is a
-  minor refinement.
+The next scorer change is evidence-gated: collect at least ten real likes and ten passes in
+matching project contexts, audit the current composite, and require held-out pairwise
+improvement before shipping new weights. Language flavors and “name like X” templates remain
+possible capability expansions, but they are not substitutes for proving better English
+dev-name selection on human preference data.
 
 See `README.md` for the research bibliography and `~/.claude/plans/` for the full build history.

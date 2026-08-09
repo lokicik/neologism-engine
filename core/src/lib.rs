@@ -136,6 +136,15 @@ const ADJECTIVES: &str = include_str!("../data/adjectives.txt");
 // (Apple/Notion-style). Filtered against roots/adjectives/brands at curation.
 const REALWORDS: &str = include_str!("../data/realwords.txt");
 const WORDS: &str = include_str!("../data/words.txt");
+// Curated second halves for the small exploration lane in description-driven
+// Brandable generation. Each remains readable after a semantic root
+// (LexFlow, AuraGlow, KeySmith) without becoming a random object pairing.
+const CONCEPT_METAPHORS: &[&str] = &[
+    "flow", "forge", "spark", "seed", "craft", "nest", "lab", "wave", "link", "pulse", "beam",
+    "grid", "vault", "relay", "trace", "scope", "prism", "lumen", "nova", "peak", "trail", "path",
+    "signal", "hive", "smith", "harbor", "grove", "spring", "frame", "glow", "flux", "loom",
+    "muse", "atlas",
+];
 // ~19k common English words — used ONLY to filter big-tech output so the model
 // can't emit a plain real word as a "brand" (Guard, Telegraph, Content). Kept
 // separate from WORDS so novelty scoring and Sci-Fi/Fantasy stay unchanged.
@@ -461,6 +470,25 @@ fn concept_coverage(lower: &str, groups: &[Vec<String>]) -> usize {
         .count()
 }
 
+/// Join a prompt root to a curated metaphor without hiding either word at a
+/// vowel boundary. `semantic_join` deliberately turns nova+atlas into
+/// `novatlas`, which is useful for compact concept pairs but can turn
+/// forge+atlas into the misleading `forgetlas` in the exploration lane.
+fn metaphor_join(a: &str, b: &str) -> Option<String> {
+    if a.len() < 2 || b.len() < 2 || a.eq_ignore_ascii_case(b) {
+        return None;
+    }
+
+    let mut joined = a.to_string();
+    let b_first = b.chars().next()?;
+    if joined.chars().last()? == b_first {
+        joined.extend(b.chars().skip(1));
+    } else {
+        joined.push_str(b);
+    }
+    (joined.len() <= 12).then_some(joined)
+}
+
 /// Stable seed-dependent value in [-0.5, 0.5]. A small dose in semantic
 /// ranking keeps different seeds exploratory without admitting structural junk.
 fn rank_jitter(name: &str, salt: u64) -> f64 {
@@ -547,6 +575,19 @@ fn generate_bigtech(
     };
     let concept_expanded = expanded_desc_keywords != raw_desc_keywords;
     let desc_keywords = expanded_desc_keywords;
+    // Preserve the strongest semantic mix for the first two multi-concept
+    // batches (one for a smaller single-concept brief), then open a metaphor
+    // lane so Load more does not exhaust suffix permutations.
+    let prompt_history_threshold = cfg.count.max(1) * if concept_groups.len() >= 2 { 2 } else { 1 };
+    let has_prompt_history = concept_expanded
+        && cfg
+            .exclude
+            .iter()
+            .rev()
+            .filter(|name| concept_coverage(&name.to_lowercase(), &concept_groups) > 0)
+            .take(prompt_history_threshold)
+            .count()
+            >= prompt_history_threshold;
 
     let all_roots: Vec<&str> = if !desc_keywords.is_empty() {
         desc_keywords.iter().map(|s| s.as_str()).collect()
@@ -638,10 +679,17 @@ fn generate_bigtech(
             // yielded opaque fragments (mood+journaling → "mong"). Arms:
             // blend two user roots / one root + tech transform (Shopify
             // pattern — works with one keyword) / blend a user root with a
-            // corpus root for variety (keyword half leads).
+            // curated metaphor root for variety (keyword half stays intact).
+            // After the compact phase, multi-concept prompts reserve 15% for
+            // this lane; single concepts use it more heavily because their
+            // suffix-only space is smaller.
             let blend_two_w = if concept_expanded {
                 if concept_groups.len() >= 2 {
-                    0.75
+                    if has_prompt_history {
+                        0.60
+                    } else {
+                        0.75
+                    }
                 } else {
                     0.0
                 }
@@ -651,7 +699,11 @@ fn generate_bigtech(
                 0.0
             };
             let suffix_w = if concept_expanded {
-                1.0 - blend_two_w
+                if concept_groups.len() >= 2 || has_prompt_history {
+                    0.25
+                } else {
+                    1.0
+                }
             } else if all_roots.len() >= 2 {
                 0.30
             } else {
@@ -684,14 +736,25 @@ fn generate_bigtech(
                 }
             } else {
                 let a = all_roots[rand::Rng::gen_range(rng, 0..all_roots.len())];
-                let b = st.roots[rand::Rng::gen_range(rng, 0..st.roots.len())];
+                let b = if concept_expanded {
+                    CONCEPT_METAPHORS[rand::Rng::gen_range(rng, 0..CONCEPT_METAPHORS.len())]
+                } else {
+                    st.roots[rand::Rng::gen_range(rng, 0..st.roots.len())]
+                };
                 if a == b {
                     continue;
                 }
-                let Some(m) = overlap_blend(a, b).or_else(|| blend(a, b)) else {
-                    continue;
-                };
-                tech_transform(rng, &m, cfg.temperature)
+                if concept_expanded {
+                    let Some(m) = metaphor_join(a, b) else {
+                        continue;
+                    };
+                    m
+                } else {
+                    let Some(m) = overlap_blend(a, b).or_else(|| blend(a, b)) else {
+                        continue;
+                    };
+                    tech_transform(rng, &m, cfg.temperature)
+                }
             }
         } else {
             // Weighted mix: mostly coined Markov, some clean blends, some short
@@ -1411,6 +1474,54 @@ mod tests {
     }
 
     #[test]
+    fn description_session_yields_100_fresh_contextual_names() {
+        let description =
+            "a developer tool that generates names for packages CLIs libraries and projects";
+        let groups = keywords::brand_root_groups(&keywords::extract_keywords(description, 6), 16);
+        let mut excluded = Vec::new();
+        let mut unique = HashSet::new();
+
+        for batch_index in 0..10 {
+            let mut c = cfg(Style::BigTech);
+            c.description = Some(description.to_string());
+            c.count = 10;
+            c.temperature = 0.85;
+            c.variety = 0.3;
+            c.seed = Some(0xA076_1D64_78BD_642Fu64.wrapping_mul(batch_index as u64 + 1));
+            c.exclude = excluded.clone();
+            let batch = generate(&c);
+            assert_eq!(
+                batch.len(),
+                10,
+                "description session starved at batch {batch_index}: {:?}",
+                batch.iter().map(|result| &result.name).collect::<Vec<_>>()
+            );
+            for result in batch {
+                let lower = result.name.to_lowercase();
+                assert!(
+                    concept_coverage(&lower, &groups) >= 1,
+                    "{} lost the project concept",
+                    result.name
+                );
+                assert!(unique.insert(lower), "{} repeated", result.name);
+                excluded.push(result.name);
+            }
+        }
+
+        assert_eq!(unique.len(), 100);
+    }
+
+    #[test]
+    fn metaphor_join_keeps_both_words_readable() {
+        assert_eq!(
+            metaphor_join("forge", "atlas"),
+            Some("forgeatlas".to_string())
+        );
+        assert_eq!(metaphor_join("nova", "atlas"), Some("novatlas".to_string()));
+        assert_eq!(metaphor_join("mint", "mint"), None);
+    }
+
+    #[test]
     fn single_keyword_description_generates() {
         // Phase 48 regression: "fitness" extracts exactly one keyword, and
         // blend_roots (the only candidate arm then) needs two — every attempt
@@ -1433,6 +1544,35 @@ mod tests {
         c2.description = Some("AI tool for lawyers".to_string());
         c2.count = 10;
         assert!(!generate(&c2).is_empty(), "AI-tool prompt starved");
+    }
+
+    #[test]
+    fn single_keyword_session_yields_100_fresh_names() {
+        let description = "fitness";
+        let groups = keywords::brand_root_groups(&keywords::extract_keywords(description, 6), 16);
+        let mut excluded = Vec::new();
+        for batch_index in 0..10 {
+            let mut c = cfg(Style::BigTech);
+            c.description = Some(description.to_string());
+            c.count = 10;
+            c.temperature = 0.85;
+            c.variety = 0.3;
+            c.seed = Some(0xA076_1D64_78BD_642Fu64.wrapping_mul(batch_index as u64 + 1));
+            c.exclude = excluded.clone();
+            let batch = generate(&c);
+            assert_eq!(
+                batch.len(),
+                10,
+                "single-concept batch {batch_index} starved"
+            );
+            for result in batch {
+                let lower = result.name.to_lowercase();
+                assert!(concept_coverage(&lower, &groups) >= 1);
+                assert!(!excluded.contains(&result.name));
+                excluded.push(result.name);
+            }
+        }
+        assert_eq!(excluded.len(), 100);
     }
 
     #[test]

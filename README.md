@@ -74,9 +74,10 @@ App runs at **http://localhost:5173/**.
 cargo test -p neologism-core
 ```
 
-98 unit tests covering Markov determinism, phonotactic filters, blend logic, score ranges, phoneme affinity, sonority sequencing, word-likeness, keyword extraction, semantic ranking, and exclusion behavior.
+101 unit tests covering Markov determinism, phonotactic filters, blend logic, score ranges, phoneme affinity, sonority sequencing, word-likeness, keyword extraction, semantic ranking, exclusion behavior, and 100-name brief sessions.
 
 > Quick quality check: `cargo run -p neologism-core --example sample` prints a batch of names for every style and variant.
+> Long-session check: `cargo run -p neologism-core --example concept_compare --release` audits ten rolling batches across seven representative briefs.
 
 ### Audit exported taste data
 
@@ -110,6 +111,7 @@ npm run build        # output in web/dist/
 - **Local taste learning** — star or pass on 3+ names; future batches are automatically re-ranked toward liked structures and naming modes or away from repeatedly rejected ones. Feedback stays in `localStorage`.
 - **Taste data export** — Settings turns explicit likes and passes into a versioned JSON dataset, preserving each name's project brief while forming preference pairs only within the same project context. It never exports AI credentials or recent-name history.
 - **Brief-aware Auto** — project descriptions lead with semantic Brandable names; an empty brief leans further on the curated real-word pool instead of returning a page of opaque coinages.
+- **Deep brief sessions** — initial semantic batches stay focused; later Brandable batches open a curated metaphor lane so repeated scrolling reaches 100 fresh, prompt-linked names instead of exhausting suffix variants.
 - **Score bars** — pronounceability, novelty, and memorability per generated name
 - **Favorites** — star names; persisted across reloads via `localStorage`
 - **Domain indicator** — checks `.com` / `.io` availability via Cloudflare DNS-over-HTTPS (no API key; labeled as indicator, not authoritative)
