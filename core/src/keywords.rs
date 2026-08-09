@@ -1108,6 +1108,39 @@ pub fn brand_root_groups(keywords: &[String], limit: usize) -> Vec<Vec<String>> 
         .collect()
 }
 
+/// Extra function concepts for Auto's isolated semantic-pair retry.
+/// Ordinary Brandable generation deliberately keeps artifact words such as
+/// `planner` out of its root pool; this lane can recover that meaning without
+/// spreading another root family through every first page.
+pub fn guided_pair_root_groups(keywords: &[String], limit: usize) -> Vec<Vec<String>> {
+    let mut groups = brand_root_groups(keywords, limit);
+    let used = groups.iter().flatten().count();
+    if used >= limit {
+        return groups;
+    }
+
+    let function_roots: &[&str] = if keywords
+        .iter()
+        .any(|keyword| matches!(keyword.as_str(), "plan" | "planner" | "planning"))
+    {
+        &["path", "pace", "wise", "map"]
+    } else {
+        &[]
+    };
+
+    let existing: Vec<&str> = groups.iter().flatten().map(String::as_str).collect();
+    let extra: Vec<String> = function_roots
+        .iter()
+        .filter(|root| !existing.contains(root))
+        .take(limit - used)
+        .map(|root| (*root).to_string())
+        .collect();
+    if !extra.is_empty() {
+        groups.push(extra);
+    }
+    groups
+}
+
 /// Flatten semantic groups for callers that only need the candidate root pool.
 pub fn brand_roots(keywords: &[String], limit: usize) -> Vec<String> {
     brand_root_groups(keywords, limit)
@@ -1460,6 +1493,22 @@ mod tests {
         assert_eq!(groups.len(), 2);
         assert!(groups[0].contains(&"ink".to_string()));
         assert!(groups[1].contains(&"lens".to_string()));
+    }
+
+    #[test]
+    fn guided_pairs_restore_suppressed_product_functions_only_in_their_lane() {
+        let prompt = "a simple workout planner";
+        let keywords = extract_keywords(prompt, 6);
+        let ordinary = brand_root_groups(&keywords, 16);
+        let guided = guided_pair_root_groups(&keywords, 16);
+        assert!(ordinary
+            .iter()
+            .any(|group| group.iter().any(|root| root == "pulse")));
+        assert!(!ordinary.iter().flatten().any(|root| root == "pace"));
+        assert!(guided
+            .iter()
+            .any(|group| group.iter().any(|root| root == "pace")));
+        assert_eq!(guided.len(), ordinary.len() + 1, "{guided:?}");
     }
 
     #[test]

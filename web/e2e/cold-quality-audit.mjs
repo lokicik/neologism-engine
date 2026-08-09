@@ -33,6 +33,11 @@ const PROMPTS = [
 const SEEDS = [7, 42, 101, 2024, 9999]
 const DIRECT_SUFFIXES = ['ify', 'ora', 'ion', 'era', 'io', 'ia', 'ix', 'el', 'en', 'on']
 const NEAR_TIE_TOLERANCE = 0.005
+const EXPECTED_RETRY_CHANGES = [
+  'Shieldora -> Kinloom',
+  'Surgeora -> Kitwave',
+  'Fitio -> FitPath',
+]
 
 const server = spawn(process.execPath, [viteCli, '--port', String(PORT), '--strictPort'], {
   cwd: WEB_DIR,
@@ -174,7 +179,10 @@ try {
   ) / rows.length
   const originalSuffixLeads = rows.filter((row) => isDirectSuffix(row.repaired[0])).length
   const selectedSuffixLeads = rows.filter((row) => isDirectSuffix(row.selected[0])).length
-  const selectedGuidedLeads = rows.filter((row) => row.selected[0].construction === 'guided_metaphor').length
+  const isGuided = (item) => (
+    item.construction === 'guided_metaphor' || item.construction === 'guided_pair'
+  )
+  const selectedGuidedLeads = rows.filter((row) => isGuided(row.selected[0])).length
   const orderingChangedSet = rows.filter((row) => (
     row.repaired.map(normalized).sort().join('|') !== row.selected.map(normalized).sort().join('|')
   )).length
@@ -184,19 +192,24 @@ try {
     const selectedNames = new Set(row.selected.map(normalized))
     const removed = row.repaired.filter((item) => !selectedNames.has(normalized(item)))
     const added = row.selected.filter((item) => !repairedNames.has(normalized(item)))
+    const semanticPair = added[0]?.construction === 'guided_pair'
     const valid = removed.length === 1
       && added.length === 1
       && isDirectSuffix(removed[0])
-      && added[0].construction === 'guided_metaphor'
-      && quality(added[0]) + Number.EPSILON >= quality(removed[0])
+      && isGuided(added[0])
+      && quality(added[0]) + (semanticPair ? NEAR_TIE_TOLERANCE : Number.EPSILON)
+        >= quality(removed[0])
+      && (!semanticPair || (added[0].concept_coverage ?? 0) >= 2)
       && !row.repaired.some((item) => item.sourceMode === 'respell')
-      && row.selected.filter((item) => item.construction === 'guided_metaphor').length <= 2
+      && row.selected.filter(isGuided).length <= 2
     return {
       valid,
       label: `${removed[0]?.name ?? '?'} -> ${added[0]?.name ?? '?'}`,
     }
   })
   const retryContractViolations = retryChanges.filter((change) => !change.valid).length
+  const exactRetryChanges = retryChanges.map((change) => change.label).sort().join('|')
+    === EXPECTED_RETRY_CHANGES.slice().sort().join('|')
   const weakenedLeadRows = rows.filter((row) => (
     quality(row.selected[0]) + Number.EPSILON < quality(row.repaired[0])
   ))
@@ -235,16 +248,16 @@ try {
     [wrongSize === 0, 'every repaired cold page contains ten names'],
     [wrongFallback === 0, 'repair uses either no fallback or the bounded 30-name pool'],
     [multipleAccentPages === 0, 'cold repair preserves Auto\'s one-accent visible-page contract'],
-    [retryRows.length === 2, 'the targeted retry closes exactly two fixed cold-page gaps'],
+    [retryRows.length === 3 && exactRetryChanges, 'the targeted retry closes exactly the three fixed cold-page gaps'],
     [orderingChangedSet === retryRows.length, 'only targeted retry pages change the repaired name set'],
-    [retryContractViolations === 0, 'each targeted retry replaces one no-stronger suffix within the guided-form contract'],
+    [retryContractViolations === 0, 'each retry stays quality-neutral or uses the bounded two-concept half-point trade'],
     [unjustifiedWeakenedLeads === 0, 'any first-card quality trade stays inside the semantic/guided near-tie rule'],
-    [justifiedNearTies.length === 3, 'the fixed matrix contains exactly three justified near-tie promotions'],
+    [justifiedNearTies.length === 4, 'the fixed matrix contains exactly four justified near-tie promotions'],
     [maxLeadQualityLoss <= NEAR_TIE_TOLERANCE + Number.EPSILON, 'first-card structural quality loss never exceeds half a point'],
     [weakenedLeadCoverage === 0, 'strong lead ordering never lowers first-card concept coverage'],
     [selectedLeadQuality >= 85.4, 'ordered first-card structural quality stays at or above 85.4'],
-    [selectedLeadCoverage >= 1.22, 'ordered first-card concept coverage stays at or above 1.22'],
-    [selectedSuffixLeads <= 12, 'direct suffix leads stay at or below twelve of ninety pages'],
+    [selectedLeadCoverage >= 1.23, 'ordered first-card concept coverage stays at or above 1.23'],
+    [selectedSuffixLeads <= 11, 'direct suffix leads stay at or below eleven of ninety pages'],
     [direct.below75 === 0 || repairedPages > 0, 'weak pages activate the offline repair pool'],
     [repaired.below75 === 0, 'no repaired cold Auto name falls below 75 structural quality'],
     [repaired.averageQuality >= 82.5, 'repaired cold Auto quality stays at or above 82.5'],

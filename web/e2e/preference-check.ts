@@ -245,6 +245,36 @@ check(
   ])[0].name === 'Vaultio',
   'a sub-85 retry candidate cannot enter the cold page',
 )
+const semanticPairGap = [
+  { ...scoredResult('Vitalia', 88.3), sourceMode: 'brandable' as const, concept_coverage: 1 },
+  { ...scoredResult('Fitify', 89.1), sourceMode: 'brandable' as const, concept_coverage: 1 },
+  { ...scoredResult('Vitalix', 88), sourceMode: 'brandable' as const, concept_coverage: 1 },
+  { ...scoredResult('Fitio', 88.4), sourceMode: 'brandable' as const, concept_coverage: 1 },
+  { ...scoredResult('Pulselink', 84), sourceMode: 'brandable' as const, concept_coverage: 1 },
+]
+const pairedColdLead = fillColdLeadRetry(semanticPairGap, [
+  {
+    ...scoredResult('FitPath', 88),
+    sourceMode: 'brandable',
+    concept_coverage: 2,
+    construction: 'guided_pair',
+  },
+])
+check(
+  pairedColdLead[0].name === 'FitPath'
+    && pairedColdLead.some((item) => item.name === 'Vitalix')
+    && !pairedColdLead.some((item) => item.name === 'Fitio'),
+  'a two-concept pair tries a same-prefix suffix replacement before deepening its family',
+)
+check(
+  fillColdLeadRetry(semanticPairGap, [{
+    ...scoredResult('FitPath', 87.7),
+    sourceMode: 'brandable',
+    concept_coverage: 2,
+    construction: 'guided_pair',
+  }])[0].name === 'Vitalia',
+  'a concept pair outside the half-point lead tolerance stays out of the page',
+)
 check(
   fillColdLeadRetry([
     { ...scoredResult('Dashify', 89.8), sourceMode: 'brandable', concept_coverage: 1 },

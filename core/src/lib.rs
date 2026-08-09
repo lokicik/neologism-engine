@@ -458,7 +458,13 @@ fn blend_roots(rng: &mut ChaCha8Rng, roots: &[&str]) -> Option<String> {
 
 /// Combine roots from two different prompt concepts. This avoids synonym piles
 /// such as Lens+Scope and favors names that carry two ideas, e.g. Ink+Lens.
-fn join_root_groups(rng: &mut ChaCha8Rng, groups: &[Vec<String>]) -> Option<String> {
+/// The isolated pair lane keeps the seam visible with CamelCase; ordinary
+/// Brandable generation remains a single coined word.
+fn join_root_groups(
+    rng: &mut ChaCha8Rng,
+    groups: &[Vec<String>],
+    visible_seam: bool,
+) -> Option<String> {
     if groups.len() < 2 {
         return None;
     }
@@ -477,7 +483,11 @@ fn join_root_groups(rng: &mut ChaCha8Rng, groups: &[Vec<String>]) -> Option<Stri
     if a == b {
         return None;
     }
-    semantic_join(a, b)
+    if visible_seam {
+        Some(compound(a, b))
+    } else {
+        semantic_join(a, b)
+    }
 }
 
 /// Number of prompt concepts visibly represented by a candidate. Root joins
@@ -595,12 +605,14 @@ fn generate_bigtech(
     // Phase 36 naming modes (big-tech reuses the previously unused `variant`
     // field): "respell" = Lyft/Tumblr-style one-transform respellings of real
     // words; "realword" = curated real words verbatim (Apple/Notion-style);
-    // "metaphor" = an internal Auto pool of readable semantic root joins.
+    // "metaphor" = an internal Auto pool of readable root + metaphor joins;
+    // "concept_pair" = Auto's isolated final-gap join of two brief concepts.
     // Anything else (or None) = the default brandable pipeline.
     let variant_lower = cfg.variant.as_deref().map(str::to_lowercase);
     let respell_mode = variant_lower.as_deref() == Some("respell");
     let realword_mode = variant_lower.as_deref() == Some("realword");
     let metaphor_mode = variant_lower.as_deref() == Some("metaphor");
+    let concept_pair_mode = variant_lower.as_deref() == Some("concept_pair");
 
     // Priority for blend roots: description keywords > user-supplied roots > corpus.
     let raw_desc_keywords: Vec<String> = cfg
@@ -616,10 +628,17 @@ fn generate_bigtech(
     let use_concept_roots =
         tuning.concept_expand && !cfg.compound && !respell_mode && !realword_mode;
     let concept_groups = if use_concept_roots {
-        keywords::brand_root_groups(&raw_desc_keywords, 16)
+        if concept_pair_mode {
+            keywords::guided_pair_root_groups(&raw_desc_keywords, 16)
+        } else {
+            keywords::brand_root_groups(&raw_desc_keywords, 16)
+        }
     } else {
         Vec::new()
     };
+    if concept_pair_mode && concept_groups.len() < 2 {
+        return Vec::new();
+    }
     let expanded_desc_keywords = if use_concept_roots {
         concept_groups.iter().flatten().cloned().collect()
     } else if respell_mode {
@@ -783,6 +802,11 @@ fn generate_bigtech(
                 continue;
             }
             compound(adj, noun)
+        } else if concept_pair_mode {
+            let Some(joined) = join_root_groups(rng, &concept_groups, true) else {
+                continue;
+            };
+            joined
         } else if metaphor_mode && has_roots {
             let root = all_roots[rand::Rng::gen_range(rng, 0..all_roots.len())];
             let metaphor = GUIDED_METAPHORS[rand::Rng::gen_range(rng, 0..GUIDED_METAPHORS.len())];
@@ -831,7 +855,7 @@ fn generate_bigtech(
             let pick = rand::Rng::gen::<f64>(rng);
             if pick < blend_two_w {
                 let combined = if concept_expanded {
-                    join_root_groups(rng, &concept_groups)
+                    join_root_groups(rng, &concept_groups, false)
                 } else {
                     blend_roots(rng, &all_roots)
                 };
@@ -1796,6 +1820,32 @@ mod tests {
                 result.name
             );
         }
+    }
+
+    #[test]
+    fn concept_pair_mode_requires_two_groups_and_keeps_the_seam_visible() {
+        let workout = "a simple workout planner";
+        let workout_keywords = keywords::extract_keywords(workout, 6);
+        let workout_groups = keywords::guided_pair_root_groups(&workout_keywords, 16);
+        let mut c = cfg(Style::BigTech);
+        c.variant = Some("concept_pair".to_string());
+        c.description = Some(workout.to_string());
+        c.count = 12;
+        c.seed = Some(7);
+
+        let results = generate(&c);
+        assert!(
+            results.iter().any(|result| result.name == "FitPath"),
+            "{results:?}"
+        );
+        for result in results {
+            let lower = result.name.to_lowercase();
+            assert!(result.name.chars().skip(1).any(char::is_uppercase));
+            assert!(concept_coverage(&lower, &workout_groups) >= 2);
+        }
+
+        c.description = Some("a local cache inspector".to_string());
+        assert!(generate(&c).is_empty());
     }
 
     #[test]

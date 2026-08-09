@@ -2749,6 +2749,52 @@ real feedback/reference/export flow, actual prompt UI, TypeScript, and productio
 
 ---
 
+## Phase 115 — Recover a suppressed product function without widening Auto
+
+**Bottleneck and rejected breadth.** Phase 114 left twelve suffix-led pages. The four genuine
+construction gaps were an expense page, a cache-inspector page, and two workout-planner pages;
+the rest correctly belonged to Respell or already used both guided slots. Adding inspection roots
+to the ordinary concept lexicon initially looked promising (`Heapify -> Bufferlens`), but the
+broad version added `Peeklink`, raised near pairs **43 -> 44**, and returned only 29 of 30 fallback
+candidates on one page. A narrower `lens/scope` version was worse: suffix leads rose **12 -> 14**
+and near pairs **43 -> 45**. Both variants were removed. Deeper Brandable and Compound pools were
+also rejected: they surfaced structurally high but aesthetically weak forms such as `KeyFit`,
+while expense/cache pair candidates either missed the 85 floor or could not beat their lead
+without weakening diversity.
+
+**Retained construction.** A separate `concept_pair` lane now exists only inside the true
+cold-gap retry. It restores the otherwise-suppressed planner function with the restrained local
+palette `path/pace/wise/map`, joins two distinct brief groups, and keeps both morphemes readable
+with a visible CamelCase seam. The lane returns nothing when fewer than two groups exist, which is
+pinned in Rust so a one-concept fallback cannot be mislabeled as two-concept. Candidates must be
+85+, carry two concepts, fit one of the two guided slots, and pass the same name, prefix-family,
+and mean-similarity guards as metaphor retries. A pair may replace a suffix within the existing
+half-point semantic tolerance; all possible suffix replacements are tried so it can preserve an
+already-full prefix family instead of deepening it. Metaphor retries remain strictly
+quality-neutral.
+
+**Measured result.** Exactly one additional fixed page changes: `Fitio 88.4/c1 -> FitPath
+88.0/c2`, then the normal half-point selector promotes `FitPath` over `Vitalia 88.3/c1`. Replacing
+the same `Fit-` family keeps its visible count at two and lowers that page's mean pair similarity
+by **0.014**. Relative to Phase 114, reordered pages rise **48 -> 49**, guided leads **42 -> 43**,
+mean lead coverage **1.22 -> 1.23**, and suffix-first pages **12 -> 11**. Mean lead quality still
+rounds to **85.41**, aggregate page quality still rounds to **83.20**, near pairs remain **43**,
+and aggregate mean similarity improves from **0.201 -> 0.200**. The product's `Keyloom` page and
+all fifteen developer-namespace pages remain unchanged.
+
+**Verification.** The core suite now contains **141** passing tests, including deterministic
+`FitPath`, visible pair seams, two-group coverage, and an empty one-group pair lane. The preference
+suite pins same-prefix replacement, the half-point boundary, capacity, Respell ownership, and
+overflow rejection. The 90-page audit requires the exact three retry swaps, four justified
+near-ties, at most eleven suffix leads, at least 1.23 lead coverage, unchanged near-pair count, and
+the prior quality floors. The 85-page Auto audit, 15-page namespace audit, retry-independent
+first-impression sweep, 1,000-name taste matrix, four 100-name personalized sessions, mode-aware
+taste audit, real feedback/reference/export flow, prompt UI, brief continuation, TypeScript, and
+production bundle all pass. Local taste, Load more, AI Studio, ordinary successful pages, and
+non-Big-Tech styles do not use this lane.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
@@ -2760,7 +2806,8 @@ Cold first pages now lead with that stronger guided form only when quality and b
 both non-decreasing. A remaining direct suffix yields only to a same-coverage non-suffix form with
 a two-point quality advantage, or to a half-point near-tie that adds a concept or already passed
 the guided-form quality gate. If that still leaves a mechanical lead, a final diversity-safe local
-retry may replace one weaker suffix on a proven gap page.
+retry may add either a proven metaphor or an 85+ two-concept pair; pair swaps stay inside the same
+half-point boundary and cannot deepen a visible prefix family.
 Compound is now a genuinely brief-aware explicit alternative rather than a random adjective
 showcase. Focused first pages stay narrow; recognized concepts open a restrained continuation
 palette only when the user asks for more, preserving 100-name session capacity without generic

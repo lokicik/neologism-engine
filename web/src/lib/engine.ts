@@ -32,7 +32,7 @@ export interface NameResult {
   name: string
   style: Style
   sourceMode?: NamingMode
-  construction?: 'guided_metaphor'
+  construction?: 'guided_metaphor' | 'guided_pair'
   constructionRank?: 1 | 2
   tasteContext?: TasteContext
   syllables: number
@@ -44,7 +44,8 @@ export interface NameResult {
 }
 
 const GUIDED_METAPHOR_POOL = 8
-const GUIDED_METAPHOR_QUALITY_FLOOR = 85
+const GUIDED_PAIR_POOL = 12
+const GUIDED_CONSTRUCTION_QUALITY_FLOOR = 85
 const GUIDED_METAPHOR_FALLBACK_SEED_OFFSET = 16
 const COLD_LEAD_METAPHOR_RETRY_SEED_OFFSETS = [13, 521]
 const UINT32_RANGE = 0x1_0000_0000
@@ -88,7 +89,7 @@ const pickGuidedMetaphor = (results: NameResult[]): NameResult[] => {
   const ranked = results
     .filter((result) => (
       (result.concept_coverage ?? 0) > 0
-      && structuralQuality(result) >= GUIDED_METAPHOR_QUALITY_FLOOR
+      && structuralQuality(result) >= GUIDED_CONSTRUCTION_QUALITY_FLOOR
     ))
     .sort((left, right) => structuralQuality(right) - structuralQuality(left))
   const selected: NameResult[] = []
@@ -106,6 +107,15 @@ const pickGuidedMetaphor = (results: NameResult[]): NameResult[] => {
   }
   return selected
 }
+
+const pickGuidedPair = (results: NameResult[]): NameResult[] => results
+  .filter((result) => (
+    (result.concept_coverage ?? 0) >= 2
+    && structuralQuality(result) >= GUIDED_CONSTRUCTION_QUALITY_FLOOR
+  ))
+  .sort((left, right) => structuralQuality(right) - structuralQuality(left))
+  .slice(0, 4)
+  .map((result) => ({ ...result, construction: 'guided_pair' }))
 
 const addQualityNeutralGuidedAlternative = (
   page: NameResult[],
@@ -163,7 +173,12 @@ export async function generateNames(cfg: Config): Promise<NameResult[]> {
   const tasteContext = tasteContextForConfig(cfg)
   const contextual = results.map((result, index) => ({
     ...result,
-    concept_coverage: (coverages as number[])[index] ?? 0,
+    // concept_pair emits only joins across two distinct engine groups. Its
+    // supplemental function group is intentionally private to that isolated
+    // lane, so the general-purpose coverage API cannot see the second half.
+    concept_coverage: cfg.variant === 'concept_pair'
+      ? Math.max(2, (coverages as number[])[index] ?? 0)
+      : (coverages as number[])[index] ?? 0,
     tasteContext,
   }))
   if (cfg.style !== 'big_tech') return contextual
@@ -182,18 +197,27 @@ export async function generateNames(cfg: Config): Promise<NameResult[]> {
 }
 
 // A cold-page retry is requested only after normal generation, repair, and
-// lead ordering still leave a direct suffix first. Keep this pool separate so
-// ordinary pages and continued sessions do not absorb another broad fallback.
+// lead ordering still leave a direct suffix first. Keep its metaphor and
+// semantic-pair pools separate so ordinary pages and continued sessions do not
+// absorb another broad fallback.
 export async function generateColdLeadRetry(cfg: Config): Promise<NameResult[]> {
-  const batches = await Promise.all(COLD_LEAD_METAPHOR_RETRY_SEED_OFFSETS.map(async (offset) => (
-    pickGuidedMetaphor(await generateNames({
+  const batches = await Promise.all([
+    ...COLD_LEAD_METAPHOR_RETRY_SEED_OFFSETS.map(async (offset) => (
+      pickGuidedMetaphor(await generateNames({
+        ...cfg,
+        variant: 'metaphor',
+        compound: false,
+        count: GUIDED_METAPHOR_POOL,
+        seed: guidedMetaphorFallbackSeed(cfg.seed, offset),
+      }))
+    )),
+    generateNames({
       ...cfg,
-      variant: 'metaphor',
+      variant: 'concept_pair',
       compound: false,
-      count: GUIDED_METAPHOR_POOL,
-      seed: guidedMetaphorFallbackSeed(cfg.seed, offset),
-    }))
-  )))
+      count: GUIDED_PAIR_POOL,
+    }).then(pickGuidedPair),
+  ])
   return batches.flat()
 }
 
