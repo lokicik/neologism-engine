@@ -157,13 +157,13 @@ export function SettingsModal({ config, onSave, onClose }: Props) {
     <div className="modal-overlay" onClick={onClose}>
       <div className="settings-modal" onClick={(e) => e.stopPropagation()} role="dialog" aria-label="AI judge settings">
         <div className="settings-head">
-          <h2>Sharpen with AI</h2>
+          <h2>AI settings</h2>
           <button className="icon-btn" onClick={onClose} title="Close">✕</button>
         </div>
         <p className="settings-intro">
-          The offline engine ranks by shape, not taste. An optional LLM re-ranks a batch
-          by real brand-quality judgment and adds a one-line reason per name. Default app
-          stays fully offline — this only runs when you turn it on and use it.
+          Configure the model the AI Studio uses to rank your names — OpenRouter (your key)
+          or a local server. The app stays fully offline by default; AI only runs in the AI
+          Studio, on demand.
         </p>
 
         <label className="settings-toggle">

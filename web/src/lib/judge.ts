@@ -58,6 +58,34 @@ No prose before or after the array.
 Names:
 {{names}}`
 
+// AI Studio metrics (Phase 56) — each is just a ranking criterion fed to the
+// same rerank() path via a tailored prompt. Add/edit freely; "Custom" is the
+// user's own free-text criterion.
+export const METRICS = [
+  { key: 'brandable', label: 'Brandable', criterion: 'sounds like a real, distinctive brand — memorable, easy to say, not junk' },
+  { key: 'memorable', label: 'Memorable', criterion: 'is memorable and sticky — easy to recall after hearing once' },
+  { key: 'premium', label: 'Premium', criterion: 'sounds premium, high-end and expensive' },
+  { key: 'playful', label: 'Playful', criterion: 'sounds playful, fun and approachable' },
+  { key: 'technical', label: 'Technical', criterion: 'fits a developer tool or technical product — credible to engineers' },
+  { key: 'trustworthy', label: 'Trustworthy', criterion: 'sounds trustworthy, serious and credible' },
+  { key: 'short', label: 'Short & punchy', criterion: 'is short and punchy' },
+] as const
+
+export type MetricKey = (typeof METRICS)[number]['key']
+
+// Build a judge prompt that scores names on a single criterion, reusing the
+// exact JSON-array output contract rerank() already parses.
+export function metricPrompt(criterion: string): string {
+  return `You are a branding expert judging invented startup/product names.
+Rate each name from 1 (poor) to 10 (excellent) on ONE criterion: how much each name ${criterion}.
+Respond with ONLY a JSON array, one object per name, in the SAME order as the input:
+[{"i": 1, "score": 8, "reason": "short reason, max 8 words"}]
+No prose before or after the array.
+
+Names:
+{{names}}`
+}
+
 export function defaultJudgeConfig(): JudgeConfig {
   return {
     enabled: false,

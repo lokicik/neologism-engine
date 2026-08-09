@@ -1,6 +1,6 @@
 import { IconSparkle, IconStar } from './icons'
 
-export type AppView = 'create' | 'saved'
+export type AppView = 'create' | 'studio' | 'saved'
 
 interface Props {
   view: AppView
@@ -28,6 +28,12 @@ export function Sidebar({ view, savedCount, onNavigate, onAbout, onSettings }: P
           <IconSparkle /> Create
         </button>
         <button
+          className={`sidebar-item${view === 'studio' ? ' active' : ''}`}
+          onClick={() => onNavigate('studio')}
+        >
+          <span className="studio-glyph" aria-hidden>✨</span> AI Studio
+        </button>
+        <button
           className={`sidebar-item${view === 'saved' ? ' active' : ''}`}
           onClick={() => onNavigate('saved')}
         >
@@ -37,8 +43,8 @@ export function Sidebar({ view, savedCount, onNavigate, onAbout, onSettings }: P
       </div>
 
       <div className="sidebar-foot">
-        <button className="sidebar-item sidebar-settings" onClick={onSettings} title="AI re-rank settings">
-          ⚙ Sharpen with AI
+        <button className="sidebar-item sidebar-settings" onClick={onSettings} title="AI model settings (used by AI Studio)">
+          ⚙ AI settings
         </button>
         <button className="sidebar-about" onClick={onAbout}>
           About

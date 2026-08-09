@@ -754,103 +754,6 @@ body {
 .sidebar-foot .sidebar-about { margin-top: 0; }
 .sidebar-settings { font-size: .82rem; color: var(--muted); }
 
-/* Phase 54: results sort control (Score ⇄ AI taste) in the sticky toolbar. */
-.stats-area-right { display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; }
-.sort-control { position: relative; display: flex; align-items: center; gap: .5rem; }
-.sort-label { font-size: .78rem; color: var(--muted); }
-/* Segmented control — concentric radius: outer 10 = inner 7 + 3 padding. */
-.sort-segs {
-  display: inline-flex;
-  gap: .2rem;
-  padding: .2rem;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-}
-.sort-seg {
-  padding: .32rem .7rem;
-  font-size: .82rem;
-  font-weight: 500;
-  color: var(--muted);
-  background: transparent;
-  border: none;
-  border-radius: 7px;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background-color .15s ease, color .15s ease, transform .08s ease;
-}
-.sort-seg:hover { color: var(--text); }
-.sort-seg.selected { background: rgba(124, 106, 249, .18); color: var(--text); }
-.sort-seg:active { transform: scale(.96); }
-.sort-seg:disabled { cursor: progress; opacity: .85; }
-.sort-rerank {
-  font-size: .76rem;
-  color: var(--accent);
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: .2rem .35rem;
-  border-radius: 6px;
-  transition: background-color .15s ease, transform .08s ease;
-}
-.sort-rerank:hover { background: rgba(124, 106, 249, .12); }
-.sort-rerank:active { transform: scale(.96); }
-/* ⓘ — small glyph, hit area extended to ~40px via the pseudo-element. */
-.sort-info {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.5rem;
-  height: 1.5rem;
-  font-size: .9rem;
-  color: var(--muted);
-  background: none;
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  transition: color .15s ease, background-color .15s ease;
-}
-.sort-info:hover { color: var(--text); background: var(--surface2); }
-.sort-info::after { content: ''; position: absolute; inset: -8px; }
-.sort-popover {
-  position: absolute;
-  top: calc(100% + .5rem);
-  right: 0;
-  z-index: 40;
-  width: 300px;
-  max-width: 80vw;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 11px;
-  padding: .85rem .95rem;
-  box-shadow: 0 1px 1px rgba(0, 0, 0, .2), 0 12px 32px rgba(0, 0, 0, .5);
-  display: flex;
-  flex-direction: column;
-  gap: .5rem;
-  font-size: .82rem;
-  color: var(--muted);
-  line-height: 1.5;
-  text-align: left;
-  text-wrap: pretty;
-}
-.sort-popover p { margin: 0; }
-.sort-popover strong { color: var(--text); font-weight: 600; }
-.sort-est { color: var(--text); font-variant-numeric: tabular-nums; white-space: nowrap; }
-.sort-popover-link { align-self: flex-start; background: none; border: none; color: var(--accent); font-size: .8rem; cursor: pointer; padding: 0; }
-.sort-notice { font-size: .78rem; color: var(--muted); }
-.sort-setup {
-  font-size: .8rem;
-  color: var(--muted);
-  background: none;
-  border: 1px dashed var(--border);
-  border-radius: 8px;
-  padding: .3rem .7rem;
-  cursor: pointer;
-  transition: color .15s ease, border-color .15s ease;
-}
-.sort-setup:hover { color: var(--text); border-color: rgba(255, 255, 255, .25); }
-
 /* Phase 53: hero subcopy (dev-naming positioning) + grouped availability. */
 .hero-sub {
   max-width: 48ch;
@@ -1026,23 +929,15 @@ body {
   min-height: 60dvh;
 }
 
-/* Phase 54: sticky results toolbar — stays reachable at any scroll depth. */
 .stats-area {
-  position: sticky;
-  top: 0;
-  z-index: 20;
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
   gap: 1rem;
   flex-wrap: wrap;
-  padding: .6rem .25rem .5rem;
-  border-bottom: 1px solid var(--border);
-  background: rgba(10, 10, 12, .82);
-  backdrop-filter: blur(8px);
-  box-shadow: 0 6px 16px -14px rgba(0, 0, 0, .8);
 }
-.stats-area .stats-strip { flex: 1; border-bottom: none; padding-bottom: 0; }
+.stats-area .stats-strip { flex: 1; border-bottom: none; }
+.stats-area { border-bottom: 1px solid var(--border); padding-bottom: .5rem; }
 
 /* Phase 48: what the engine heard — keyword stems extracted from the prompt. */
 .keyword-line {
@@ -1340,7 +1235,7 @@ body {
   .icon-btn:active,
   .command-go:active, .landing-cta:active, .nav-cta:active, .toolbar-btn:active,
   .mode-pill:active, .chip:active, .card-chip:active, .example-chip:active,
-  .tile-pill:active, .sidebar-item:active, .sort-seg:active, .sort-rerank:active { transform: none; }
+  .tile-pill:active, .sidebar-item:active { transform: none; }
 }
 
 /* Sidebar collapses to a horizontal top bar on narrow screens */
@@ -1385,6 +1280,62 @@ body {
 .copy-swap.copied .copy-check { opacity: 1; transform: scale(1); filter: blur(0); }
 @media (prefers-reduced-motion: reduce) {
   .copy-swap > * { transition: none; }
+}
+
+/* Phase 56: AI Studio — generate a pool, rank it by a chosen metric. */
+.ai-studio { display: flex; flex-direction: column; gap: 1.1rem; }
+.studio-sub {
+  margin: -.4rem 0 0;
+  font-size: .92rem;
+  color: var(--muted);
+  max-width: 62ch;
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+.studio-glyph { font-size: .85rem; }
+.studio-setup {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: .9rem;
+  padding: 1.4rem 1.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--muted);
+  font-size: .92rem;
+  line-height: 1.5;
+}
+.metric-chips { display: flex; align-items: center; gap: .4rem; flex-wrap: wrap; }
+.metric-label { font-size: .78rem; color: var(--muted); margin-right: .2rem; }
+.metric-chip {
+  padding: .34rem .8rem;
+  font-size: .82rem;
+  font-weight: 500;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: color .15s, background-color .15s, border-color .15s, transform .08s;
+}
+.metric-chip:hover { color: var(--text); border-color: rgba(255, 255, 255, .22); }
+.metric-chip.selected { color: var(--text); background: rgba(124, 106, 249, .18); border-color: rgba(124, 106, 249, .5); }
+.metric-chip:active { transform: scale(.96); }
+.metric-custom { display: flex; align-items: center; gap: .6rem; }
+.metric-custom .command-input {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: .6rem .8rem;
+}
+.metric-custom .command-input:focus { border-color: rgba(124, 106, 249, .55); }
+.studio-meta { margin: 0; font-size: .85rem; color: var(--muted); }
+.studio-meta strong { color: var(--text); }
+.studio-est { font-variant-numeric: tabular-nums; }
+@media (prefers-reduced-motion: reduce) {
+  .metric-chip:active { transform: none; }
 }
 
 @media (max-width: 560px) {
