@@ -32,6 +32,8 @@ export interface NameResult {
   name: string
   style: Style
   sourceMode?: NamingMode
+  construction?: 'guided_metaphor'
+  constructionRank?: 1 | 2
   tasteContext?: TasteContext
   syllables: number
   score_pronounce: number
@@ -45,6 +47,12 @@ const GUIDED_METAPHOR_POOL = 8
 const GUIDED_METAPHOR_QUALITY_FLOOR = 85
 const GUIDED_METAPHOR_FALLBACK_SEED_OFFSET = 16
 const UINT32_RANGE = 0x1_0000_0000
+const GUIDED_METAPHOR_TAILS = [
+  'flow', 'forge', 'spark', 'seed', 'craft', 'lab', 'wave', 'link', 'pulse', 'beam',
+  'prism', 'lumen', 'nova', 'peak', 'signal', 'smith', 'grove', 'glow', 'loom', 'muse',
+  'flux', 'atlas',
+]
+const DIRECT_SUFFIX_TAILS = ['ify', 'ora', 'ion', 'era', 'io', 'ia', 'ix', 'el', 'en', 'on']
 
 const structuralQuality = (result: NameResult): number => (
   result.score_pronounce * 0.4
@@ -52,19 +60,66 @@ const structuralQuality = (result: NameResult): number => (
   + result.score_novelty * 0.3
 )
 
+const letters = (value: string): string => value.toLowerCase().replace(/[^a-z]/g, '')
+
+const guidedMetaphorTail = (result: NameResult): string | undefined => {
+  const normalized = letters(result.name)
+  return GUIDED_METAPHOR_TAILS.find((tail) => normalized.endsWith(tail))
+}
+
+const isDirectSuffixForm = (result: NameResult): boolean => {
+  const normalized = letters(result.name)
+  return result.sourceMode === 'brandable'
+    && result.concept_coverage === 1
+    && DIRECT_SUFFIX_TAILS.some((tail) => normalized.endsWith(tail))
+}
+
 const guidedMetaphorFallbackSeed = (seed: number | undefined): number | undefined => (
   seed === undefined
     ? undefined
     : (Math.trunc(seed) % UINT32_RANGE + GUIDED_METAPHOR_FALLBACK_SEED_OFFSET + UINT32_RANGE) % UINT32_RANGE
 )
 
-const pickGuidedMetaphor = (results: NameResult[]): NameResult[] => results
-  .filter((result) => (
-    (result.concept_coverage ?? 0) > 0
-    && structuralQuality(result) >= GUIDED_METAPHOR_QUALITY_FLOOR
-  ))
-  .sort((left, right) => structuralQuality(right) - structuralQuality(left))
-  .slice(0, 1)
+const pickGuidedMetaphor = (results: NameResult[]): NameResult[] => {
+  const ranked = results
+    .filter((result) => (
+      (result.concept_coverage ?? 0) > 0
+      && structuralQuality(result) >= GUIDED_METAPHOR_QUALITY_FLOOR
+    ))
+    .sort((left, right) => structuralQuality(right) - structuralQuality(left))
+  const selected: NameResult[] = []
+  const tails = new Set<string>()
+  for (const result of ranked) {
+    const tail = guidedMetaphorTail(result)
+    if (!tail || tails.has(tail)) continue
+    selected.push({
+      ...result,
+      construction: 'guided_metaphor',
+      constructionRank: selected.length === 0 ? 1 : 2,
+    })
+    tails.add(tail)
+    if (selected.length === 2) break
+  }
+  return selected
+}
+
+const addQualityNeutralGuidedAlternative = (
+  page: NameResult[],
+  candidate: NameResult | undefined,
+): NameResult[] => {
+  if (!candidate || page.some((result) => letters(result.name) === letters(candidate.name))) return page
+  const quality = structuralQuality(candidate)
+  const replacement = page
+    .map((result, index) => ({ result, index, quality: structuralQuality(result) }))
+    .filter(({ result, quality: replacedQuality }) => (
+      isDirectSuffixForm(result) && replacedQuality <= quality + Number.EPSILON
+    ))
+    .sort((left, right) => left.quality - right.quality || right.index - left.index)[0]
+  if (!replacement) return page
+  const next = page.slice()
+  next[replacement.index] = candidate
+  return next
+}
 
 let initialized = false
 
@@ -149,7 +204,15 @@ export async function generateBatch(cfg: Config): Promise<NameResult[]> {
         }))
       }
     }
-    return mergeAutoBatches([brandableBatch, [], linkedRespells, metaphorAccent], total)
+    const primaryPage = mergeAutoBatches([
+      brandableBatch,
+      [],
+      linkedRespells,
+      metaphorAccent.slice(0, 1),
+    ], total)
+    return linkedRespells.length === 0
+      ? addQualityNeutralGuidedAlternative(primaryPage, metaphorAccent[1])
+      : primaryPage
   }
 
   const subs: Config[] = [

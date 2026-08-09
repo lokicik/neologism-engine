@@ -2472,11 +2472,64 @@ developer-domain gates therefore remain the current core baseline.
 
 ---
 
+## Phase 109 — Let a second strong form replace a template
+
+**Bottleneck.** Phase 108 guaranteed one non-template Brandable on every namespace page, but the
+remaining page could still read as one exception inside a suffix wall. Across the fifteen fixed
+pages, **91/150** names were still direct `Lex/Nom/Mark/Mint` suffix forms. The product's own
+seed-42 page had six of them alongside `Keyloom`; all ten names were structurally strong, so the
+normal weak/similarity repair correctly had no reason to open a different construction.
+
+**Rejected alternatives.** A direct-suffix cap was numerically attractive but aesthetically weak.
+With the normal 30-name fallback, a five-form cap could be reached on only **85/90** cold pages
+without lowering an individual replacement's quality; on the product page, the best alternative
+was `Marktag` at **84.8** versus an **86.1** suffix card. A 60-name fallback reached 90/90 and moved
+mean quality/similarity in the right direction, but its visible product change was merely
+`Nomify → Nomtag`, so the larger pool and hard quota were rejected. Blindly merging the top two
+metaphors was also unsafe: it produced same-tail pairs such as `Keyflow/Tagflow` and displaced the
+only `Scope` form on one namespace page.
+
+**Retained correction.** The original Phase 108 primary metaphor still enters unchanged. The
+eight-candidate pool may now identify one second candidate only when its curated ending differs
+from the primary and it also scores at least 85. With no Respell present, that candidate competes
+only against direct, single-concept suffix cards and enters only if its structural quality is at
+least as high as the card it replaces. Multi-concept forms are protected, page size stays ten,
+and later pages remain untouched because the seed fallback is still fresh-first-page only.
+Guided forms carry explicit construction/rank metadata so audits and future taste exports can
+distinguish them from ordinary Brandable names that happen to end in `flow`, `lab`, or `signal`.
+
+**Measured result.** In the fifteen namespace pages, guided metaphor forms rise **15 → 23** while
+direct suffix forms fall **91 → 86**. Namespace markers improve **54 → 55**, the three five-seed
+unions grow **73 → 77**, mean quality rises **85.96 → 86.18**, and mean similarity improves
+**0.167 → 0.160**. The product's own fixed page replaces `Mintel` with `Tagsignal` while retaining
+`Keyscope`, `Keyloom`, and both multi-concept alias forms.
+
+Across 90 cold pages, repair activation falls **37 → 34**, repaired quality rises
+**83.04 → 83.11**, near pairs improve **44 → 43**, and similarity **0.201 → 0.200** with no sub-75
+selection. The 1,000-name personalized matrix improves quality **85.40 → 85.45**, affinity
+**-0.793 → -0.791**, direct suffix forms **608 → 605**, near pairs **195 → 193**, similarity
+**0.202 → 0.201**, and fresh-session coverage **306 → 312**. Exact repeated retries remain seven.
+The mode-aware matrix reaches **100** unique names, up from 99. All four personalized sessions
+still reach 100 unique prompt-linked names with unchanged **85.28** mean and **84.36** tenth-page
+quality.
+
+**Verification.** The 85-page Auto audit now reads explicit construction metadata and requires at
+most two 85+ guided metaphors with distinct curated endings; it observes **56** forms, **36** unique,
+and only ten unique quality-neutral secondary forms (`Dreampeak`, `Kinflux`, `Pausebeam`,
+`Pulseflux`, `Pushlab`, `Tagflow`, `Tagsignal`, `Tallyflux`, `Tallyglow`, `Traceseed`). The namespace
+gate requires one or two on every fixed page. All cold, Auto, namespace, taste, mode-aware taste,
+four-session, feedback/export, and developer-domain browser gates pass. TypeScript and the
+production bundle build cleanly. The Rust engine/WASM are unchanged, so the **139/139** core suite
+and Phase 108's morphology/cross-domain baselines remain applicable.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
 Brandable by default and only admits a Respell accent that visibly comes from the brief; when no
-safe Respell exists, one quality-gated root-plus-metaphor Brandable may break the suffix wall. The
+safe Respell exists, one quality-gated root-plus-metaphor Brandable may break the suffix wall; one
+different-ending, quality-neutral second form may replace a direct suffix card. The
 broader modes remain explicit choices and still form the exploratory mix when no brief exists.
 Compound is now a genuinely brief-aware explicit alternative rather than a random adjective
 showcase. Focused first pages stay narrow; recognized concepts open a restrained continuation

@@ -31,7 +31,13 @@ const PROMPTS = [
 ]
 const SEEDS = [7, 42, 101, 2024, 9999]
 const VERBOSE = process.argv.includes('--verbose')
+const FORMS = process.argv.includes('--forms')
 const LOSSY_SEAMS = new Set(['aurank', 'poolink', 'pooledger', 'settledger', 'tagent'])
+const GUIDED_METAPHOR_TAILS = [
+  'flow', 'forge', 'spark', 'seed', 'craft', 'lab', 'wave', 'link', 'pulse', 'beam',
+  'prism', 'lumen', 'nova', 'peak', 'signal', 'smith', 'grove', 'glow', 'loom', 'muse',
+  'flux', 'atlas',
+]
 const CONTEXT_ONLY_WORDS = new Map([
   ['a developer tool that generates names for packages CLIs libraries and projects', ['developer', 'generate', 'package', 'library', 'cli']],
   ['an app for splitting expenses with friends', ['friend']],
@@ -85,6 +91,8 @@ function isPromptLinked(item, keywords) {
 
 let failures = 0
 let weakContextForms = 0
+const guidedMetaphorNames = []
+const secondaryMetaphorNames = []
 try {
   const page = await browser.newPage()
   await page.goto(APP_URL)
@@ -129,6 +137,23 @@ try {
       if (item.sourceMode !== 'brandable') return false
       return weakWords.some((word) => name.startsWith(word) || name.endsWith(word))
     })
+    const guidedMetaphors = row.results
+      .filter((item) => item.construction === 'guided_metaphor')
+      .map((item) => ({
+        item,
+        tail: GUIDED_METAPHOR_TAILS.find((tail) => item.name.toLowerCase().endsWith(tail)),
+      }))
+    const guidedTails = guidedMetaphors.map(({ tail }) => tail)
+    const guidedRanks = guidedMetaphors
+      .map(({ item }) => item.constructionRank)
+      .sort((left, right) => (left ?? 0) - (right ?? 0))
+    const invalidGuidedMetaphors = guidedMetaphors.filter(({ item }) => (
+      item.score_pronounce * 0.4 + item.score_memorability * 0.3 + item.score_novelty * 0.3 < 85
+    ))
+    guidedMetaphorNames.push(...guidedMetaphors.map(({ item }) => item.name))
+    secondaryMetaphorNames.push(...guidedMetaphors
+      .filter(({ item }) => item.constructionRank === 2)
+      .map(({ item }) => item.name))
     weakContextForms += weakForms.length
     if (
       row.results.length !== 10
@@ -136,6 +161,11 @@ try {
       || badAccents.length > 0
       || lossySeams.length > 0
       || weakForms.length > 0
+      || guidedMetaphors.length > 2
+      || guidedMetaphors.some(({ tail }) => !tail)
+      || new Set(guidedTails).size !== guidedTails.length
+      || guidedRanks.some((rank, index) => rank !== index + 1)
+      || invalidGuidedMetaphors.length > 0
     ) failures++
     if (VERBOSE) {
       console.log(`\n${row.seed}  ${row.prompt}`)
@@ -157,6 +187,11 @@ try {
   }
 
   console.log(`weak Brandable context forms: ${weakContextForms}`)
+  console.log(`quality-gated metaphor forms: ${guidedMetaphorNames.length} (${new Set(guidedMetaphorNames.map((name) => name.toLowerCase())).size} unique)`)
+  if (FORMS) {
+    console.log(`all: ${[...new Set(guidedMetaphorNames)].sort().join(', ')}`)
+    console.log(`secondary: ${[...new Set(secondaryMetaphorNames)].sort().join(', ')}`)
+  }
   console.log('\nAuto accent relevance')
   for (const [mode, stats] of Object.entries(byMode)) {
     console.log(`${mode}: ${stats.linked}/${stats.total} prompt-linked`)
@@ -172,5 +207,5 @@ if (failures > 0) {
   console.error(`${failures} Auto page(s) violated the quality gate`)
   process.exitCode = 1
 } else {
-  console.log(`PASS  all ${PROMPTS.length * SEEDS.length} Auto pages contain ten names, no weak context forms or lossy seams, and at most one prompt-linked accent`)
+  console.log(`PASS  all ${PROMPTS.length * SEEDS.length} Auto pages contain ten names, no weak context forms or lossy seams, at most one prompt-linked mode accent, and at most two distinct 85+ metaphor forms`)
 }
