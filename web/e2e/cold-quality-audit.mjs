@@ -336,9 +336,9 @@ try {
     [selectedSuffixLeads <= 10, 'direct suffix leads stay at or below ten of ninety pages'],
     [direct.below75 === 0 || repairedPages > 0, 'weak pages activate the offline repair pool'],
     [repaired.below75 === 0, 'no repaired cold Auto name falls below 75 structural quality'],
-    [repaired.averageQuality >= 82.5, 'repaired cold Auto quality stays at or above 82.5'],
-    [repaired.nearPairs <= 43, 'repaired cold Auto near-duplicate pairs do not exceed the prior baseline'],
-    [repaired.meanPairSimilarity <= 0.21, 'repaired cold Auto mean pair similarity stays at or below 0.21'],
+    [repaired.averageQuality >= 83.24, 'repaired cold Auto quality stays at or above 83.24'],
+    [repaired.nearPairs <= 41, 'repaired cold Auto near-duplicate pairs stay at or below 41'],
+    [repaired.meanPairSimilarity <= 0.2, 'repaired cold Auto mean pair similarity stays at or below 0.2'],
   ]
   for (const [ok, label] of gates) {
     console.log(`${ok ? 'PASS' : 'FAIL'}  ${label}`)

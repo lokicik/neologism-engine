@@ -147,6 +147,35 @@ check(
   'a fully strong cold page avoids a second fallback generation',
 )
 
+const upgradeableColdPage = [
+  { ...scoredResult('Scoutforge', 90), sourceMode: 'brandable' as const, concept_coverage: 2 },
+  { ...scoredResult('Crewrelay', 86), sourceMode: 'brandable' as const, concept_coverage: 1 },
+  { ...scoredResult('Talentix', 80), sourceMode: 'brandable' as const, concept_coverage: 1 },
+  { ...scoredResult('Crewscope', 84), sourceMode: 'brandable' as const, concept_coverage: 1 },
+  { ...scoredResult('Matchify', 84), sourceMode: 'brandable' as const, concept_coverage: 1 },
+  { ...scoredResult('Hirecraft', 84), sourceMode: 'brandable' as const, concept_coverage: 1 },
+  { ...scoredResult('Hirespring', 84), sourceMode: 'brandable' as const, concept_coverage: 1 },
+  { ...scoredResult('Talentbeam', 84), sourceMode: 'brandable' as const, concept_coverage: 1 },
+  { ...scoredResult('Scoutpulse', 84), sourceMode: 'brandable' as const, concept_coverage: 1 },
+  { ...scoredResult('Teamora', 70), sourceMode: 'brandable' as const, concept_coverage: 1 },
+]
+const upgradedColdPage = repairWeakShortlist(
+  upgradeableColdPage,
+  [
+    { ...scoredResult('Recruitpath', 82), sourceMode: 'brandable' as const, concept_coverage: 1 },
+    { ...scoredResult('Matchvault', 90), sourceMode: 'brandable' as const, concept_coverage: 1 },
+    { ...scoredResult('Matchcalm', 88), sourceMode: 'brandable' as const, concept_coverage: 1 },
+  ],
+  10,
+)
+check(
+  upgradedColdPage.some((item) => item.name === 'Recruitpath')
+    && upgradedColdPage.some((item) => item.name === 'Matchcalm')
+    && !upgradedColdPage.some((item) => item.name === 'Matchvault')
+    && !upgradedColdPage.some((item) => item.name === 'Teamora' || item.name === 'Matchify'),
+  'an open repair pool may make one brief-specific inner-card upgrade',
+)
+
 const coldGuidedPage = [
   { ...scoredResult('Lexify', 82), sourceMode: 'brandable' as const, concept_coverage: 1 },
   {

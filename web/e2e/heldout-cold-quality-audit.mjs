@@ -113,7 +113,17 @@ try {
         const retryRequested = needsColdLeadRetry(ordered)
         const retry = retryRequested ? await generateColdLeadRetry(config) : []
         const selected = fillColdLeadRetry(ordered, retry, [...direct, ...fallback])
-        output.push({ prompt, seed, direct, ordered, retry, retryRequested, selected, fallbackCount: fallback.length })
+        output.push({
+          prompt,
+          seed,
+          direct,
+          repaired,
+          ordered,
+          retry,
+          retryRequested,
+          selected,
+          fallbackCount: fallback.length,
+        })
       }
     }
     return output
@@ -172,6 +182,33 @@ try {
   ) / auditRows.length
   const suffixLeads = auditRows.filter((row) => row.selected[0] && isDirectSuffix(row.selected[0]))
   const guidedLeads = auditRows.filter((row) => Boolean(row.selected[0]?.construction))
+  const guardedRepairUpgrades = rows.flatMap((row) => {
+    const directNames = new Set(row.direct.map((item) => letters(item.name)))
+    const repairedNames = new Set(row.repaired.map((item) => letters(item.name)))
+    const removed = row.direct.filter((item) => !repairedNames.has(letters(item.name)))
+    const added = row.repaired.filter((item) => !directNames.has(letters(item.name)))
+    const upgrades = []
+    for (const candidate of added) {
+      if (
+        candidate.sourceMode !== 'brandable'
+        || candidate.construction
+        || isDirectSuffix(candidate)
+        || (candidate.concept_coverage ?? 0) === 0
+        || quality(candidate) < 85
+      ) continue
+      const replacementIndex = removed.findIndex((item) => (
+        item.sourceMode === 'brandable'
+        && !item.construction
+        && quality(item) >= 75
+        && quality(item) + 2 <= quality(candidate)
+        && (item.concept_coverage ?? 0) <= (candidate.concept_coverage ?? 0)
+      ))
+      if (replacementIndex < 0) continue
+      const [replacement] = removed.splice(replacementIndex, 1)
+      upgrades.push({ row, replacement, candidate })
+    }
+    return upgrades
+  })
   const aiWorkflowRows = rows.filter((row) => (
     /\bai\b/i.test(row.prompt) || /\bagent\b/i.test(row.prompt)
   ) && /\b(?:automation|workflow)s?\b/i.test(row.prompt))
@@ -201,6 +238,7 @@ try {
   console.log(`sub-75: ${weak.length} · near pairs ${nearPairs} · similarity ${(pairSimilarity / pairCount).toFixed(3)}`)
   console.log(`suffix leads: ${suffixLeads.length} · guided leads: ${guidedLeads.length}`)
   console.log(`AI agent average: ${aiAgentAverage.toFixed(2)} · direct semantic-pair pages ${aiAgentRows.filter((row) => row.direct.some((item) => item.name === 'CogLoop' && item.construction === 'guided_pair')).length}/${aiAgentRows.length}`)
+  console.log(`guarded repair upgrades: ${guardedRepairUpgrades.length}`)
   console.log(`fallback counts: ${[...new Set(rows.map((row) => row.fallbackCount))].sort((a, b) => a - b).join(', ')}`)
   console.log('\nAI workflow focus')
   for (const row of aiWorkflowRows) {
@@ -212,6 +250,13 @@ try {
       `${row.seed} · ${row.ordered[0]?.name ?? 'empty'} -> ${row.selected[0]?.name ?? 'empty'}`
       + ` · ${removed.map((item) => item.name).join('/') || 'same set'}`
       + ` -> ${added.map((item) => item.name).join('/') || 'same set'}`,
+    )
+  }
+  console.log('\nguarded repair upgrades')
+  for (const { row, replacement, candidate } of guardedRepairUpgrades) {
+    console.log(
+      `${row.seed} · ${row.prompt}: ${replacement.name}:${quality(replacement).toFixed(1)}`
+      + ` -> ${candidate.name}:${quality(candidate).toFixed(1)}`,
     )
   }
   console.log('\nremaining suffix leads')
@@ -237,12 +282,13 @@ try {
     [wrongFallback.length === 0, 'held-out repair uses only the bounded fallback'],
     [multipleAccents.length === 0, 'held-out pages preserve the one-accent contract'],
     [weak.length === 0, 'no held-out visible name falls below 75'],
-    [averageQuality >= 83.9, 'held-out average structural quality stays at or above 83.9'],
+    [averageQuality >= 83.97, 'held-out average structural quality stays at or above 83.97'],
     [leadQuality >= 85.8, 'held-out lead structural quality stays at or above 85.8'],
     [leadCoverage >= 1.17, 'held-out lead concept coverage stays at or above 1.17'],
-    [nearPairs <= 82, 'held-out near-duplicate pairs stay at or below 82'],
+    [nearPairs <= 79, 'held-out near-duplicate pairs stay at or below 79'],
     [pairSimilarity / pairCount <= 0.203, 'held-out mean pair similarity stays at or below 0.203'],
     [suffixLeads.length <= 24, 'held-out direct suffix leads stay at or below 24'],
+    [guardedRepairUpgrades.length >= 6, 'held-out repair surfaces brief-specific inner-card upgrades'],
     [
       aiWorkflowRows.length === SEEDS.length * 5
         && aiWorkflowRows.filter((row) => row.selected[0]?.name === 'CogLoop').length >= 10

@@ -27,6 +27,14 @@ const COLD_PAIR_REPLACEMENT_TOLERANCE = 0.005
 const COLD_PAIR_QUALITY_FLOOR = 0.84
 const COLD_SET_GAIN = 0.02
 const COLD_BRANDABLE_SET_QUALITY_FLOOR = 0.85
+const COLD_GENERIC_UPGRADE_TAILS = [
+  'app', 'web', 'site', 'tool', 'client', 'service',
+  // The broader metaphor palette not covered by guidedMetaphorTail(). These
+  // are useful generators, but not specific enough to justify displacing an
+  // already-visible name during the conservative cold repair.
+  'nest', 'grid', 'vault', 'relay', 'trace', 'scope', 'trail', 'path', 'hive',
+  'harbor', 'spring', 'frame',
+]
 export const MIN_TASTE_SIGNALS = 3
 export const TASTE_POOL_MULTIPLIER = 6
 export const MAX_TASTE_POOL = 60
@@ -368,9 +376,16 @@ export function needsColdLeadRetry(results: NameResult[]): boolean {
     && results.filter(isGuidedConstruction).length < 2
 }
 
-function upgradeColdRetryBrandableSet(
+// Reuse an already-open Brandable fallback pool for at most one inner-card
+// upgrade. The candidate must add two structural points, keep concept coverage,
+// and avoid worsening either visible families or page similarity. General cold
+// repair additionally follows engine order, preserves the semantic onset, and
+// rejects generic product/metaphor tails; targeted retry keeps the broader
+// best-gain selector that its separate quality gates already cover.
+function upgradeColdBrandableSet(
   results: NameResult[],
   candidates: NameResult[],
+  selection: 'best_gain' | 'brief_specific' = 'best_gain',
 ): NameResult[] {
   const usedNames = new Set(results.map((result) => letters(result.name)))
   const currentSimilarity = meanPairSimilarity(results)
@@ -385,6 +400,13 @@ function upgradeColdRetryBrandableSet(
       || isDirectConceptSuffix(candidate)
       || (candidate.concept_coverage ?? 0) === 0
       || candidateQuality < COLD_BRANDABLE_SET_QUALITY_FLOOR
+      || (
+        selection === 'brief_specific'
+        && (
+          COLD_GENERIC_UPGRADE_TAILS.some((tail) => name.endsWith(tail))
+          || guidedMetaphorTail(candidate)
+        )
+      )
       || usedNames.has(name)
     ) continue
 
@@ -396,6 +418,13 @@ function upgradeColdRetryBrandableSet(
         && !isGuidedConstruction(result)
         && (result.concept_coverage ?? 0) <= (candidate.concept_coverage ?? 0)
         && quality + COLD_SET_GAIN <= candidateQuality
+        && (
+          selection !== 'brief_specific'
+          || (
+            (quality < COLD_PAIR_QUALITY_FLOOR || isDirectConceptSuffix(result))
+            && letters(result.name).slice(0, 3) === name.slice(0, 3)
+          )
+        )
       ))
       .sort((left, right) => left.quality - right.quality || right.index - left.index)
 
@@ -420,6 +449,7 @@ function upgradeColdRetryBrandableSet(
       const trialSimilarity = meanPairSimilarity(trial)
       if (trialSimilarity > currentSimilarity + Number.EPSILON) continue
       const gain = candidateQuality - replacement.quality
+      if (selection === 'brief_specific') return trial
       if (
         !best
         || gain > best.gain + Number.EPSILON
@@ -442,8 +472,9 @@ function upgradeColdRetryBrandableSet(
 // pair that cannot lead may instead upgrade a non-leading Brandable by at least
 // two points without losing coverage or diversity. The already-generated
 // repair pool may contribute one 85+ non-template Brandable under the same set
-// guards, without another engine call. Existing Respell accents and two-form
-// pages keep their current direction.
+// guards, without another engine call. The shared cold-repair path applies that
+// same upgrade to pages which do not need this retry. Existing Respell accents
+// and two-form pages keep their current direction.
 export function fillColdLeadRetry(
   results: NameResult[],
   candidates: NameResult[],
@@ -499,7 +530,7 @@ export function fillColdLeadRetry(
         if (meanPairSimilarity(trial) > currentSimilarity + Number.EPSILON) continue
         const ordered = prioritizeColdStrongLead(trial)
         if (!isDirectConceptSuffix(ordered[0])) {
-          return upgradeColdRetryBrandableSet(ordered, setCandidates)
+          return upgradeColdBrandableSet(ordered, setCandidates)
         }
       }
     }
@@ -554,7 +585,7 @@ export function fillColdLeadRetry(
       }
     }
   }
-  return upgradeColdRetryBrandableSet(
+  return upgradeColdBrandableSet(
     bestPairUpgrade?.results ?? results.slice(),
     setCandidates,
   )
@@ -694,7 +725,9 @@ export function needsQualityRepair(results: NameResult[], requested: number): bo
 
 // Cold Auto keeps the engine's intended first-page order where possible. Weak
 // or missing slots are replaced first; a repetitive strong page permits only
-// same-or-better-quality substitutions from the bounded offline fallback.
+// same-or-better-quality substitutions from the bounded offline fallback. If
+// that pool still contains a clearly stronger non-template form, one inner
+// Brandable may then receive the guarded set upgrade above.
 export function repairWeakShortlist(
   primary: NameResult[],
   fallback: NameResult[],
@@ -706,7 +739,16 @@ export function repairWeakShortlist(
   const page = primary.slice(0, count)
   const selected = page.filter((result) => engineQuality(result) >= MIN_SHORTLIST_QUALITY)
   const namingPage = isNamingBrief([...page, ...fallback])
-  if (selected.length === count) return diversifyColdShortlist(selected, fallback, namingPage)
+  const finish = (results: NameResult[]): NameResult[] => {
+    const diversified = diversifyColdShortlist(results, fallback, namingPage)
+    // Pages that still need the targeted lead retry keep their existing
+    // one-upgrade path. Every other repaired page may reuse the same fallback
+    // once to improve an inner card under the stricter set guards above.
+    return needsColdLeadRetry(prioritizeColdStrongLead(diversified))
+      ? diversified
+      : upgradeColdBrandableSet(diversified, fallback, 'brief_specific')
+  }
+  if (selected.length === count) return finish(selected)
 
   const prefixCap = Math.max(1, Math.ceil(count * VISIBLE_PREFIX_SHARE))
   const suffixCap = Math.max(1, Math.ceil(count * VISIBLE_SUFFIX_SHARE))
@@ -737,7 +779,7 @@ export function repairWeakShortlist(
     seen.add(key)
     prefixCounts.set(prefix, (prefixCounts.get(prefix) ?? 0) + 1)
     suffixCounts.set(ending, (suffixCounts.get(ending) ?? 0) + 1)
-    if (selected.length === count) return diversifyColdShortlist(selected, fallback, namingPage)
+    if (selected.length === count) return finish(selected)
   }
 
   for (const candidate of deferred) {
@@ -745,7 +787,7 @@ export function repairWeakShortlist(
     if (seen.has(key)) continue
     selected.push(candidate)
     seen.add(key)
-    if (selected.length === count) return diversifyColdShortlist(selected, fallback, namingPage)
+    if (selected.length === count) return finish(selected)
   }
 
   // A genuinely constrained mode may lack enough strong alternatives. Keep
@@ -755,9 +797,9 @@ export function repairWeakShortlist(
     if (seen.has(key)) continue
     selected.push(candidate)
     seen.add(key)
-    if (selected.length === count) return diversifyColdShortlist(selected, fallback, namingPage)
+    if (selected.length === count) return finish(selected)
   }
-  return diversifyColdShortlist(selected, fallback, namingPage)
+  return finish(selected)
 }
 
 export function rankByPreference(
