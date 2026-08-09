@@ -15,6 +15,7 @@ const CONCEPT_COVERAGE_WEIGHT = 0.2
 const MIN_SHORTLIST_QUALITY = 0.75
 const VISIBLE_PREFIX_SHARE = 0.2
 const VISIBLE_SUFFIX_SHARE = 0.2
+const VISIBLE_GENERAL_SUFFIX_SHARE = 0.3
 const MAX_COLD_PAIR_SIMILARITY = 0.21
 export const MIN_TASTE_SIGNALS = 3
 export const TASTE_POOL_MULTIPLIER = 6
@@ -514,13 +515,14 @@ export function shortlistByPreference(
     ? qualified
     : [...qualified, ...ranked.filter((result) => engineQuality(result) < MIN_SHORTLIST_QUALITY)]
 
-  // The Rust generator caps one 3-letter stem family at 20% of a visible
-  // batch. A larger personalization pool relaxes that cap internally, so
-  // restore it after taste ranking instead of showing ten variants of one root.
+  // A larger personalization pool relaxes the Rust generator's visible family
+  // caps internally. Restore 20% per 3-letter stem and, for endings, keep the
+  // existing 20% naming boundary plus a gentler 30% boundary elsewhere. The
+  // latter prevents -ia/-io walls without overriding the learned shape.
   const prefixCap = Math.max(1, Math.ceil(count * VISIBLE_PREFIX_SHARE))
-  const suffixCap = isNamingBrief(candidates)
-    ? Math.max(1, Math.ceil(count * VISIBLE_SUFFIX_SHARE))
-    : Number.POSITIVE_INFINITY
+  const suffixCap = Math.max(1, Math.ceil(
+    count * (isNamingBrief(candidates) ? VISIBLE_SUFFIX_SHARE : VISIBLE_GENERAL_SUFFIX_SHARE),
+  ))
   const selected: NameResult[] = []
   const deferred: NameResult[] = []
   const prefixCounts = new Map<string, number>()

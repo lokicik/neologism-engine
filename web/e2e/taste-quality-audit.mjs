@@ -40,6 +40,7 @@ const REFERENCE_SETS = [
   'Supabase, Vite, Prisma',
 ]
 const SEEDS = [7, 42, 101, 2024, 9999]
+const KNOWN_SUFFIXES = ['ify', 'ora', 'ium', 'ion', 'io', 'ia', 'ix', 'ly', 'ai']
 
 const server = spawn(process.execPath, [viteCli, '--port', String(PORT), '--strictPort'], {
   cwd: WEB_DIR,
@@ -145,14 +146,27 @@ try {
   let pairSimilarity = 0
   let pairCount = 0
   let prefixOverTwo = 0
+  let endingOverTwo = 0
+  let endingOverThree = 0
+  let maxEndingCount = 0
   for (const row of rows) {
     const prefixes = new Map()
+    const endings = new Map()
     for (const item of row.selected) {
-      const prefix = item.name.toLowerCase().replace(/[^a-z]/g, '').slice(0, 3)
+      const normalized = item.name.toLowerCase().replace(/[^a-z]/g, '')
+      const prefix = normalized.slice(0, 3)
+      const ending = KNOWN_SUFFIXES.find((suffix) => normalized.endsWith(suffix))
+        ?? normalized.slice(-2)
       prefixes.set(prefix, (prefixes.get(prefix) ?? 0) + 1)
+      endings.set(ending, (endings.get(ending) ?? 0) + 1)
     }
     prefixOverTwo += [...prefixes.values()]
       .reduce((sum, count) => sum + Math.max(0, count - 2), 0)
+    endingOverTwo += [...endings.values()]
+      .reduce((sum, count) => sum + Math.max(0, count - 2), 0)
+    endingOverThree += [...endings.values()]
+      .reduce((sum, count) => sum + Math.max(0, count - 3), 0)
+    maxEndingCount = Math.max(maxEndingCount, ...endings.values())
     for (let i = 0; i < row.selected.length; i++) {
       for (let j = i + 1; j < row.selected.length; j++) {
         const overlap = lexicalSimilarity(row.selected[i].name, row.selected[j].name)
@@ -188,6 +202,8 @@ try {
   console.log(`average taste affinity: ${averageTaste.toFixed(3)}`)
   console.log(`sub-75 names: ${below75}`)
   console.log(`three-plus prefix overflow: ${prefixOverTwo}`)
+  console.log(`three-plus exact-ending overflow: ${endingOverTwo}`)
+  console.log(`four-plus exact-ending overflow: ${endingOverThree} (max ${maxEndingCount})`)
   console.log(`near-duplicate pairs: ${nearPairs}`)
   console.log(`mean pair similarity: ${meanPairSimilarity.toFixed(3)}`)
   console.log(`returned pool sizes: ${returnedCounts.join(', ')}`)
@@ -221,10 +237,12 @@ try {
     [wrongSize === 0, 'every page selects 10 names after requesting an expanded pool of up to 60'],
     [below75 === 0, 'no selected name falls below the structural quality floor'],
     [prefixOverTwo === 0, 'no visible page contains more than two names per prefix family'],
+    [endingOverThree === 0, 'no visible page contains more than three names per exact ending'],
+    [endingOverTwo <= 150, 'three-name ending families stay bounded across the matrix'],
     [averageQuality >= 85.2, 'average structural quality stays at or above 85.2'],
     [averageTaste >= -0.82, 'reference affinity stays within the retained floor'],
-    [nearPairs <= 260, 'near-duplicate pairs stay at or below 260'],
-    [meanPairSimilarity <= 0.24, 'mean pair similarity stays at or below 0.24'],
+    [nearPairs <= 230, 'near-duplicate pairs stay at or below 230'],
+    [meanPairSimilarity <= 0.22, 'mean pair similarity stays at or below 0.22'],
     [
       semanticRetentionFailures === 0,
       'taste keeps at least 70% of the engine first page\'s specialized meaning',

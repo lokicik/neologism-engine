@@ -260,6 +260,27 @@ if (namingEndingProfile) {
   )
 }
 
+const generalEndingProfile = buildProfile([result('Lexia'), result('Nymia'), result('Nomia')])
+if (generalEndingProfile) {
+  const generalContext = {
+    id: 'developer-project',
+    description: 'a Rust CLI that processes logs',
+    roots: [],
+  }
+  const generalShortlist = shortlistByPreference(
+    [
+      'Byteia', 'Crateia', 'Stackia', 'Kitia', 'Nodeia',
+      'Pulseio', 'Traceio', 'Watchio', 'Scopeix', 'Beaconix', 'Rustify', 'Logify',
+    ].map((name) => ({ ...scoredResult(name, 88), tasteContext: generalContext })),
+    generalEndingProfile,
+    10,
+  )
+  check(
+    generalShortlist.filter((item) => item.name.endsWith('ia')).length <= 3,
+    'a personalized non-naming page limits one exact ending family to three names',
+  )
+}
+
 const projectALikes = [
   result('Nomix', 2, 'brandable', 'project-a'),
   result('Lexix', 2, 'brandable', 'project-a'),

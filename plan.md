@@ -2187,6 +2187,40 @@ session. No LLM, network call, hidden name blacklist, or cold-start output chang
 
 ---
 
+## Phase 102 — Break personalized suffix walls outside naming briefs
+
+**Bottleneck.** Phase 101 kept personalized names attached to the brief, but the selector only
+limited exact endings for naming products. Other projects could still show mechanically uniform
+pages: one Rust/log profile selected five `-ia` and five `-io` forms such as `Byteia`, `Crateia`,
+`Stackia`, and `Kitia`. Across the 100-page matrix, names beyond the first two copies of one exact
+ending totaled **232/1,000**, despite zero prefix-family overflow.
+
+**Rejected alternative.** Applying the naming brief's strict two-per-ending cap everywhere
+removed all **232** excess forms and cut near pairs **247 → 177**, but structural quality fell to
+**85.17** and reference affinity to **-0.826**, missing both retained gates. The stricter global
+rule was removed rather than weakening those gates.
+
+**Retained correction.** Personalized naming briefs keep their existing **20%** exact-ending
+limit. Every other personalized brief now uses a gentler **30%** boundary: at ten visible names,
+no more than three may share `-ia`, `-io`, `-ix`, or another exact ending. Constrained pools still
+retain the existing deferred fallback, so a diversity preference cannot falsely shorten a page.
+Cold generation, engine ranking, and non-personalized modes are unchanged.
+
+**Measured result.** Exact-ending excess falls **232 → 135/1,000 (42%)**, near-duplicate pairs
+**247 → 213**, and mean pair similarity **0.226 → 0.206**. No audited page contains four copies of
+one ending. Structural quality holds **85.50 → 85.46**, reference affinity remains inside its gate
+at **-0.778**, specialized-brief retention is unchanged, and sub-75 names plus prefix overflow
+remain zero. The production audit now caps three-name ending excess at 150, near pairs at 230,
+mean similarity at 0.22, and fails on any four-copy ending family.
+
+**Verification.** The deterministic preference harness pins both boundaries: two copies for a
+naming page and three elsewhere. The 1,000-name Chromium matrix passes all strengthened ending,
+quality, taste, semantic, family, and capacity gates. TypeScript and the production bundle build
+cleanly, and the real browser feedback/reference flow still selects ten names from its expanded
+offline pool. No LLM, network call, new name rejection list, or Rust generation change was added.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
@@ -2206,7 +2240,7 @@ availability without confusing `find` with filesystem search. Cold Auto preserve
 first-page names and opens a bounded offline fallback
 for weak slots or an overly repetitive page. Local taste feedback selects each
 visible page from up to sixty offline candidates per project, applies a structural quality floor,
-preserves additional brief concepts, and restores visible stem and naming-ending diversity.
+preserves additional brief concepts, and restores visible stem and ending-family diversity.
 AI Studio remains an optional, separate batch judge rather than a hidden dependency of Create.
 
 The next broad aesthetic scorer change is evidence-gated: collect at least ten real likes and ten passes in
