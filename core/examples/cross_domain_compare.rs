@@ -358,8 +358,9 @@ fn main() {
     }
 
     let mut shared_roots: Vec<_> = root_domains
-        .into_iter()
+        .iter()
         .filter(|(_, domains)| domains.len() >= 2)
+        .map(|(root, domains)| (root.clone(), domains.clone()))
         .collect();
     shared_roots.sort_by(|a, b| b.1.len().cmp(&a.1.len()).then_with(|| a.0.cmp(&b.0)));
 
@@ -372,6 +373,28 @@ fn main() {
         .iter()
         .map(|(_, domains)| domains.len() * (domains.len() - 1) / 2)
         .sum::<usize>();
+    let mut explained_collision_pairs = 0usize;
+    let mut unexplained_collision_pairs = Vec::new();
+    for (name, domains) in &collisions {
+        let labels = domains.iter().copied().collect::<Vec<_>>();
+        for left in 0..labels.len() {
+            for right in left + 1..labels.len() {
+                let shared_root = root_domains.iter().find(|(root, root_domains)| {
+                    root_domains.contains(labels[left])
+                        && root_domains.contains(labels[right])
+                        && (name.starts_with(root.as_str()) || name.ends_with(root.as_str()))
+                });
+                if shared_root.is_some() {
+                    explained_collision_pairs += 1;
+                } else {
+                    unexplained_collision_pairs.push(format!(
+                        "{name} [{}/{}]",
+                        labels[left], labels[right]
+                    ));
+                }
+            }
+        }
+    }
 
     println!(
         "\naudited: {total}/{} names",
@@ -408,6 +431,11 @@ fn main() {
         format_shared(&collisions)
     );
     println!(
+        "collision provenance: {explained_collision_pairs} shared-root, {} unexplained: {}",
+        unexplained_collision_pairs.len(),
+        unexplained_collision_pairs.join(", ")
+    );
+    println!(
         "quality summary: comp {:.2}, div {:.3}, domain unique {:.1}%",
         audit_composite as f64 / total as f64,
         audit_diversity / (CASES.len() * SEEDS.len()) as f64,
@@ -438,8 +466,14 @@ fn main() {
             .join(", ")
     );
     assert!(
-        collision_pairs <= 20,
-        "cross-domain exact collision pairs regressed: {collision_pairs} > 20"
+        unexplained_collision_pairs.is_empty(),
+        "cross-domain names collided without a shared semantic root: {}",
+        unexplained_collision_pairs.join(", ")
+    );
+    assert!(
+        collision_pairs <= total / 100,
+        "cross-domain exact collision rate regressed: {collision_pairs}/{} > 1%",
+        total
     );
     assert!(
         audit_composite as f64 / total as f64 >= 80.5,

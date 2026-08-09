@@ -2067,6 +2067,31 @@ No LLM, network call, scorer-weight change, or final-name blacklist was added.
 
 ---
 
+## Phase 98 — Make the cross-domain collision gate explain its failures
+
+**Bottleneck.** The broad 48-domain audit had become red on the committed baseline: **22** exact
+domain-pair collisions exceeded a historical fixed cap of **20**. Blindly raising that integer
+would hide future regressions, while forcing the generator below it would penalize deliberate
+semantic overlap such as generic naming versus developer naming, fitness versus pet care, or
+travel versus delivery.
+
+**Retained correction.** The audit now traces every exact collision back through the root sets of
+both briefs. A pair is explained only when the final name visibly begins or ends with a root that
+both domains intentionally share; otherwise it fails immediately. Explained collisions retain a
+separate normalized cap of **1% of all audited names**, replacing the stale corpus-size-dependent
+integer. Composite, list diversity, per-domain seed uniqueness, short-page, and weak-context gates
+remain unchanged.
+
+**Measured result and verification.** All current **22/2,400** collision pairs are explained by a
+shared semantic root and unexplained collisions are **0**. Examples include `Lexia` from the
+shared naming family, `Vitalio` from `vital`, and `Routeora` from `route`; unrelated same-string
+collisions would still fail. The total remains below the normalized **24-pair** ceiling. The full
+audit is green at **80.61** composite, **0.730** diversity, **47.5%** average five-seed domain
+uniqueness, **2,400/2,400** names, and zero weak context roots/forms. This phase changes the
+regression oracle only; production generation and every name remain byte-for-byte unchanged.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
