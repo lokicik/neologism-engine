@@ -3364,6 +3364,47 @@ used.
 
 ---
 
+## Phase 132 — Replace generic AI roots with a stronger cognitive palette
+
+**Observed bottleneck.** After the color-page repair, the canonical AI-assistant brief was the
+worst remaining held-out seed spread: three ten-name pages retained only **12/30** distinct names,
+shared **8.67/10** names per seed pair, and seeds 13/313 produced the same set. Its **82.39** average
+also sat well below the held-out mean. `CogLoop` gave the page one clear two-concept lead, but the
+remaining cards converged on `Agentix`, `Sparkify`, `Synthia`, `Agentio`, `Neuralix`, `Synthify`,
+and `Sparkora`. The old `Mind...` root never survived the visible quality floor, while `Spark...`
+was readable but generic enough to make the page feel assembled from a stock AI template.
+
+**Candidate and A/B review.** Candidate scoring found stronger cognitive morphemes without changing
+the scorer: `Cognify 85.3`, `Cognio 87.6`, `Logicia 86.8`, `Logicio 88.3`, `Axiomia 87.1`, and
+`Axiomix 88.3`. Replacing only dead `Mind` with `Cogn` raised the canonical page to **83.34**,
+**14/30** names, and **6.67** overlap. Adding `Nous` raised quality to **84.74** but did not improve
+spread and repeated the less approachable `Nousora`, so it was rejected. Keeping `Spark` beside
+either `Logic` or `Axiom` reached **15/30** names and **6.33** overlap. The retained six-root palette
+uses `Cogn`, `Logic`, `Axiom`, `Synth`, `Agent`, and `Neural`: it removes the generic Spark family,
+keeps explicit AI meaning, and produces a more deliberate mix such as `Logicia`, `Cognora`,
+`Axiomia`, and `Axiomix`. This is a lexicon curation only; explicit unknown-domain input containing
+the word `spark` remains usable and is pinned by a unit test.
+
+**Measured result.** The canonical AI-assistant pages improve from **82.39 -> 86.23** average
+structural quality, **12 -> 15/30** distinct names, **8.67 -> 6.67** pair overlap, and **one -> zero**
+duplicate seed pages. AI-agent wording improves **81.01 -> 82.87**, while autonomous-agent builder
+wording improves **81.37 -> 84.92**. Across the unchanged 105-page held-out base, average quality
+rises **84.20 -> 84.31**, near pairs fall **72 -> 68**, average seed spread rises
+**18.23 -> 18.31/30**, pair overlap falls **5.11 -> 5.06/10**, and duplicate seed pages fall
+**2 -> 1**. Lead quality, coverage, suffix leads, and guided leads remain **86.76**, **1.33**,
+**21**, and **52** respectively; `CogLoop` still owns the clear two-concept first card.
+
+**Verification.** The core suite is **152/152**. The held-out gate now requires the canonical AI
+pages to average at least 86.1, retain at least 15/30 names, stay at or below 6.7 pair overlap, and
+avoid duplicate sets; all fifteen AI-workflow stress/base pages remain full and qualified. The
+1,000-selection taste matrix and 25-page mode-aware taste audit are unchanged. The 90-page cold and
+85-page Auto audits pass at their retained metrics. The 48-domain/2,400-name audit returns every
+name, no short page, **83.15** average quality, and zero unexplained collisions; AI automation alone
+rises to **84.80**. Rebuilt WASM and the production bundle pass. No LLM, network call, scorer,
+selection weight, retry, or random source changed.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

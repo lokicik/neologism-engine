@@ -288,7 +288,9 @@ fn concept_roots(word: &str) -> &'static [&'static str] {
         "delivery" | "ship" | "shipping" | "logistic" | "logistics" | "transport" => {
             &["route", "fleet", "cargo", "relay", "dock"]
         }
-        "ai" | "model" | "agent" | "automation" => &["mind", "synth", "agent", "spark", "neural"],
+        "ai" | "model" | "agent" | "automation" => {
+            &["cogn", "logic", "axiom", "synth", "agent", "neural"]
+        }
         "fast" | "speed" | "performance" | "rapid" => &["swift", "dash", "bolt", "flux", "surge"],
         _ => &[],
     }
@@ -1760,6 +1762,24 @@ mod tests {
         assert!(guided.iter().flatten().any(|root| root == "cog"));
         assert!(guided.iter().flatten().any(|root| root == "loop"));
         assert!(guided.iter().flatten().count() <= 16, "{guided:?}");
+    }
+
+    #[test]
+    fn ai_concepts_prefer_specific_cognitive_roots() {
+        let keywords = extract_keywords("an AI assistant for workflow automation", 6);
+        let roots = brand_roots(&keywords, 16);
+        for expected in ["cogn", "logic", "axiom"] {
+            assert!(roots.contains(&expected.to_string()), "{roots:?}");
+        }
+        for generic in ["mind", "spark"] {
+            assert!(!roots.contains(&generic.to_string()), "{roots:?}");
+        }
+
+        let explicit_spark = extract_keywords("a spark timer", 6);
+        assert!(
+            brand_roots(&explicit_spark, 16).contains(&"spark".to_string()),
+            "an explicit unknown-domain word must not become globally blocked",
+        );
     }
 
     #[test]

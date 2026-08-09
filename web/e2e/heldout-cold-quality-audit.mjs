@@ -242,6 +242,13 @@ try {
   const aiWorkflowRows = rows.filter((row) => (
     /\bai\b/i.test(row.prompt) || /\bagent\b/i.test(row.prompt)
   ) && /\b(?:automation|workflow)s?\b/i.test(row.prompt))
+  const aiAssistantRows = rows.filter((row) => (
+    row.prompt === 'an AI assistant for workflow automation'
+  ))
+  const aiAssistantAverage = aiAssistantRows.reduce(
+    (sum, row) => sum + row.selected.reduce((pageSum, item) => pageSum + quality(item), 0),
+    0,
+  ) / (aiAssistantRows.length * 10)
   const aiAgentRows = rows.filter((row) => row.prompt === 'an AI automation agent')
   const aiAgentAverage = aiAgentRows.reduce(
     (sum, row) => sum + row.selected.reduce((pageSum, item) => pageSum + quality(item), 0),
@@ -360,6 +367,9 @@ try {
   const colorPaletteDiversity = seedDiversity.find((row) => (
     row.prompt === 'a color palette and visual design tool'
   ))
+  const aiAssistantDiversity = seedDiversity.find((row) => (
+    row.prompt === 'an AI assistant for workflow automation'
+  ))
   const colorPaletteVariantDiversity = COLOR_PALETTE_VARIANTS.map((prompt) => {
     const promptRows = colorPaletteVariantRows.filter((row) => row.prompt === prompt)
     const names = new Set(promptRows.flatMap((row) => (
@@ -444,6 +454,7 @@ try {
   console.log(`sub-75: ${weak.length} · near pairs ${nearPairs} · similarity ${(pairSimilarity / pairCount).toFixed(3)}`)
   console.log(`suffix leads: ${suffixLeads.length} · guided leads: ${guidedLeads.length}`)
   console.log(`AI agent average: ${aiAgentAverage.toFixed(2)} · direct semantic-pair pages ${aiAgentRows.filter((row) => row.direct.some((item) => item.name === 'CogLoop' && item.construction === 'guided_pair')).length}/${aiAgentRows.length}`)
+  console.log(`AI assistant average: ${aiAssistantAverage.toFixed(2)} · ${aiAssistantDiversity?.uniqueNames ?? 0}/30 unique · ${aiAssistantDiversity?.averagePairOverlap.toFixed(2) ?? '0.00'} overlap`)
   console.log(`autonomous builder average: ${autonomousBuilderAverage.toFixed(2)} · CogLoop leads ${autonomousBuilderRows.filter((row) => row.selected[0]?.name === 'CogLoop').length}/${autonomousBuilderRows.length}`)
   console.log(`CRM average: ${crmAverage.toFixed(2)} · RevLoop leads ${crmRows.filter((row) => row.selected[0]?.name === 'RevLoop').length}/${crmRows.length}`)
   console.log(`formatter average: ${formatterAverage.toFixed(2)} · TidyKit leads ${formatterRows.filter((row) => row.selected[0]?.name === 'TidyKit').length}/${formatterRows.length}`)
@@ -466,7 +477,8 @@ try {
     console.log(
       `${row.seed} · ${row.ordered[0]?.name ?? 'empty'} -> ${row.selected[0]?.name ?? 'empty'}`
       + ` · ${removed.map((item) => item.name).join('/') || 'same set'}`
-      + ` -> ${added.map((item) => item.name).join('/') || 'same set'}`,
+      + ` -> ${added.map((item) => item.name).join('/') || 'same set'}`
+      + ` · ${row.selected.map((item) => item.name).join(', ')}`,
     )
   }
   console.log('\nformatter focus')
@@ -564,10 +576,23 @@ try {
     ],
     [averageUniqueNames >= 18, 'held-out first pages retain at least 18/30 names across three seeds'],
     [averageSeedOverlap <= 5.25, 'held-out seed pairs share at most 5.25/10 names on average'],
-    [exactDuplicateSeedPages <= 2, 'held-out content-identical seed pages retain the color-page repair'],
+    [exactDuplicateSeedPages <= 1, 'held-out content-identical seed pages retain the AI-page repair'],
     [dominantStemExcess <= 9, 'held-out exact-stem repetition stays at or below nine excess cards'],
     [suffixLeads.length <= 24, 'held-out direct suffix leads stay at or below 24'],
     [guardedRepairUpgrades.length >= 6, 'held-out repair surfaces brief-specific inner-card upgrades'],
+    [
+      aiAssistantRows.length === SEEDS.length
+        && aiAssistantAverage >= 86.1
+        && aiAssistantDiversity?.uniqueNames >= 15
+        && aiAssistantDiversity?.averagePairOverlap <= 6.7
+        && aiAssistantDiversity?.exactDuplicatePages === 0
+        && aiAssistantRows.every((row) => (
+          row.selected.length === 10
+          && row.selected[0]?.name === 'CogLoop'
+          && !row.retryRequested
+        )),
+      'AI-assistant pages use the stronger cognitive palette without seed-set collapse',
+    ],
     [
       colorPaletteRows.length === SEEDS.length
         && colorPaletteAverage >= 87.3
