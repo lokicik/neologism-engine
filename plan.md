@@ -2092,6 +2092,28 @@ regression oracle only; production generation and every name remain byte-for-byt
 
 ---
 
+## Phase 99 — Separate real morphology artifacts from semantic lookalikes
+
+**Bottleneck.** The rolling morphology report still named `Feelink` as one collapsed consonant
+metaphor seam in 2,200 names. That diagnosis was false: the journaling brief intentionally joined
+the distinct semantic roots `feel + ink`; the detector later reinterpreted the same spelling as a
+hypothetical collapsed `feel + link`. Production's actual metaphor join already preserves that
+consonant boundary as `Feellink`.
+
+**Retained correction.** The audit now calculates semantic-group coverage before classifying a
+seam. A spelling that visibly covers two prompt concepts is reported as a semantic lookalike, not
+as evidence that the root-plus-metaphor path swallowed a consonant. Real first-page and rolling
+metaphor seam counts are now hard zero gates, and a focused regression pins `feel + link` to the
+fully preserved `Feellink` form.
+
+**Measured result.** The same unchanged production corpus now reports **0/1,100** fixed and
+**0/2,200** rolling collapsed consonant metaphor seams, with `Feelink` transparently listed as the
+sole non-artifact lookalike. All **1,100/1,100** fixed and **2,200/2,200** rolling names remain
+available at **80.92** composite and **0.730** diversity. This phase changes the audit and one
+regression assertion only; generated names are byte-for-byte unchanged.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

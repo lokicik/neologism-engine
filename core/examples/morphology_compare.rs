@@ -208,6 +208,7 @@ fn main() {
     let mut suffix_heavy_pages = 0usize;
     let mut suffix_only_pages = 0usize;
     let mut collapsed_consonant_metaphor_examples = BTreeSet::new();
+    let mut semantic_seam_lookalikes = BTreeSet::new();
     let mut metaphor_tail_counts = BTreeMap::new();
     let mut metaphor_tail_prompts: BTreeMap<&'static str, BTreeSet<&'static str>> = BTreeMap::new();
     let mut metaphor_pages = 0usize;
@@ -267,6 +268,7 @@ fn main() {
             suffix_heavy_pages += usize::from(page_suffixes >= 8);
             suffix_only_pages += usize::from(page_suffixes == results.len());
             for result in results {
+                let coverage = concept_coverage(&result.name, &groups);
                 total += 1;
                 composite += composite_score(&result) as u64;
                 if has_collapsed_suffix(&result.name, &roots) {
@@ -279,14 +281,18 @@ fn main() {
                 }
                 if has_concept_suffix(&result.name, &roots) {
                     concept_suffixes += 1;
-                } else if concept_coverage(&result.name, &groups) >= 2 {
+                } else if coverage >= 2 {
                     multi_concept_joins += 1;
                 } else {
                     metaphor_forms += 1;
                 }
                 if has_collapsed_consonant_metaphor_seam(&result.name, &roots) {
-                    collapsed_consonant_metaphor_seams += 1;
-                    collapsed_consonant_metaphor_examples.insert(result.name.clone());
+                    if coverage >= 2 {
+                        semantic_seam_lookalikes.insert(result.name.clone());
+                    } else {
+                        collapsed_consonant_metaphor_seams += 1;
+                        collapsed_consonant_metaphor_examples.insert(result.name.clone());
+                    }
                 }
                 record_overlap_form(&result.name, &overlaps, &mut overlap_examples);
                 record_overlap_form(
@@ -306,7 +312,8 @@ fn main() {
             rolling_short += usize::from(results.len() < cfg.count);
             rolling_total += results.len();
             for result in &results {
-                if concept_coverage(&result.name, &groups) < 2 {
+                let coverage = concept_coverage(&result.name, &groups);
+                if coverage < 2 {
                     if let Some(tail) = concept_metaphor_tail(&result.name, &roots) {
                         *rolling_metaphor_tail_counts.entry(tail).or_default() += 1;
                     }
@@ -315,14 +322,18 @@ fn main() {
                     usize::from(has_full_vowel_suffix(&result.name, &roots));
                 if has_concept_suffix(&result.name, &roots) {
                     rolling_concept_suffixes += 1;
-                } else if concept_coverage(&result.name, &groups) >= 2 {
+                } else if coverage >= 2 {
                     rolling_multi_concept_joins += 1;
                 } else {
                     rolling_metaphor_forms += 1;
                 }
                 if has_collapsed_consonant_metaphor_seam(&result.name, &roots) {
-                    rolling_collapsed_consonant_metaphor_seams += 1;
-                    collapsed_consonant_metaphor_examples.insert(result.name.clone());
+                    if coverage >= 2 {
+                        semantic_seam_lookalikes.insert(result.name.clone());
+                    } else {
+                        rolling_collapsed_consonant_metaphor_seams += 1;
+                        collapsed_consonant_metaphor_examples.insert(result.name.clone());
+                    }
                 }
                 record_overlap_form(&result.name, &overlaps, &mut overlap_examples);
                 record_overlap_form(
@@ -421,6 +432,21 @@ fn main() {
             .into_iter()
             .collect::<Vec<_>>()
             .join(", ")
+    );
+    println!(
+        "semantic seam lookalikes (not artifacts): {}",
+        semantic_seam_lookalikes
+            .into_iter()
+            .collect::<Vec<_>>()
+            .join(", ")
+    );
+    assert_eq!(
+        collapsed_consonant_metaphor_seams, 0,
+        "first-page metaphor joins collapsed a consonant seam"
+    );
+    assert_eq!(
+        rolling_collapsed_consonant_metaphor_seams, 0,
+        "rolling metaphor joins collapsed a consonant seam"
     );
     println!(
         "full vowel suffix examples: {}",

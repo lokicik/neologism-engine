@@ -1669,6 +1669,10 @@ mod tests {
             Some("shelllink".to_string())
         );
         assert_eq!(
+            metaphor_join("feel", "link"),
+            Some("feellink".to_string())
+        );
+        assert_eq!(
             metaphor_join("bump", "pulse"),
             Some("bumppulse".to_string())
         );
