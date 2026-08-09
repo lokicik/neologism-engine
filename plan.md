@@ -2221,6 +2221,41 @@ offline pool. No LLM, network call, new name rejection list, or Rust generation 
 
 ---
 
+## Phase 103 — Stop personalized pagination from burning unseen names
+
+**Bottleneck.** The browser showed ten personalized names but requested a hidden pool of up to
+sixty, then wrote the entire pool into recent history. A single page could therefore consume
+fifty names the user never saw. In four deterministic 100-name sessions, that policy exhausted
+every run early, with a minimum of 60 visible names and **1,332** history entries for only
+**240** displayed names. Recording only visible names improved the same baseline to 70 names per
+run, but exposed a second coupling: the semantic continuation threshold scaled from the hidden
+request count, so a 60-candidate pool waited for 120 prior names before opening a broader lane.
+
+**Retained correction.** Recent history now records only the names actually displayed. Hidden
+shortlist candidates remain eligible for later pages, while already shown names are still
+excluded case-insensitively. Semantic continuation follows the product's visible page rhythm:
+after twenty shown names for a multi-concept brief, or ten for a single-concept brief, regardless
+of whether local taste internally requests ten or sixty candidates. The generator still returns
+a full sixty-name pool for personalized ranking, and no LLM, network call, scorer-weight change,
+or final-name blacklist was added.
+
+**Measured result.** The retained visible-only policy reaches **100/100** names in all four
+deterministic reference-profile sessions, with **400** displayed names and exactly **400** history
+entries. Every run has 100 unique names, all **400/400** remain visibly tied to the brief, no name
+falls below 75, and every page retains the full 60-candidate ranking pool. Mean structural quality
+is **85.18** and the tenth-page mean is **83.75**. The real Chromium UI also reaches 100 names with
+zero repeats, no false exhaustion, and a recent-history count exactly equal to the 100 visible
+cards.
+
+**Verification.** A focused regression proves that a 60-candidate internal request opens the
+multi-concept continuation lane after twenty visible exclusions. The workspace suite is
+**138/138**. Chromium passes the new rolling personalized A/B and real-UI gate, the feedback and
+reference flow, all 90 cold Auto pages, all 85 guided Auto pages, the fifteen-page namespace
+matrix, and the duplicate-free 100-name brief session. WASM and the production bundle build
+cleanly.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

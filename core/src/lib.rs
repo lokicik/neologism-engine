@@ -638,7 +638,11 @@ fn generate_bigtech(
     // Preserve the strongest semantic mix for the first two multi-concept
     // batches (one for a smaller single-concept brief), then open a metaphor
     // lane so Load more does not exhaust suffix permutations.
-    let prompt_history_threshold = cfg.count.max(1) * if concept_groups.len() >= 2 { 2 } else { 1 };
+    // The browser may request a much larger hidden pool for local taste while
+    // still showing ten names. Base continuation on visible-page history, not
+    // that internal pool size, or a 60-candidate shortlist can never reach the
+    // broader lane before its focused palette is exhausted.
+    let prompt_history_threshold = 10 * if concept_groups.len() >= 2 { 2 } else { 1 };
     let has_prompt_history = concept_expanded
         && cfg
             .exclude
@@ -1698,6 +1702,32 @@ mod tests {
         }
 
         assert_eq!(unique.len(), 100);
+    }
+
+    #[test]
+    fn large_selection_pool_opens_after_two_visible_pages() {
+        let description =
+            "an offline naming engine for developer projects that checks npm and crates.io";
+        let mut c = cfg(Style::BigTech);
+        c.description = Some(description.to_string());
+        c.count = 60;
+        c.temperature = 0.85;
+        c.variety = 0.3;
+        c.seed = Some(42);
+        let first = generate(&c);
+        assert_eq!(first.len(), 60);
+
+        c.exclude = first
+            .iter()
+            .take(20)
+            .map(|result| result.name.clone())
+            .collect();
+        let continuation = generate(&c);
+        assert_eq!(
+            continuation.len(),
+            60,
+            "a hidden shortlist pool mistook twenty visible names for an incomplete first page"
+        );
     }
 
     #[test]

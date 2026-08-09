@@ -179,9 +179,10 @@ export default function App() {
       // fallback only for weak/missing slots or an overly repetitive page.
       const shown = append ? [...resultsRef.current, ...batch] : batch
       setResults(shown)
-      // Hidden pool candidates count as explored. Otherwise the deterministic
-      // engine could keep offering the same passed-over names on every click.
-      markSeen(pool)
+      // Recent history represents names the user actually saw. Keeping hidden
+      // shortlist candidates eligible lets later pages reveal the next-best
+      // options instead of burning up to fifty unseen names per click.
+      markSeen(batch)
       setMetrics(shown.length > 0 ? await batchMetrics(shown) : null)
       setLoading(false)
     } catch (err) {

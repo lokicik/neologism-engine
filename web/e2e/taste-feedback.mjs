@@ -91,14 +91,17 @@ try {
   await page.click('.command-go')
   await page.waitForFunction((before) => {
     const raw = localStorage.getItem('neologism:recent')
-    return raw ? JSON.parse(raw).length > before + 10 : false
+    return raw ? JSON.parse(raw).length >= before + 10 : false
   }, recentBeforeTastePool)
   const recentAfterTastePool = await storedCount(page, 'neologism:recent')
-  check(await cards.count() === 10, 'personalized generation still shows the requested ten names')
+  const personalizedCards = await cards.count()
   check(
-    recentAfterTastePool - recentBeforeTastePool > 10
-      && recentAfterTastePool - recentBeforeTastePool <= 60,
-    'active local taste selects ten names from an expanded offline pool',
+    personalizedCards >= 10 && personalizedCards % 10 === 0,
+    'personalized generation still appends complete ten-name pages',
+  )
+  check(
+    recentAfterTastePool - recentBeforeTastePool === personalizedCards,
+    'active local taste records only displayed names while selecting from an expanded pool',
   )
   await page.screenshot({ path: join(SHOTS, 'taste-feedback.png'), fullPage: true })
 
@@ -178,17 +181,13 @@ try {
     'reference names are stored separately in the browser',
   )
   await referencePage.click('.command-go')
-  await referencePage.waitForFunction(() => {
-    const raw = localStorage.getItem('neologism:recent')
-    return raw ? JSON.parse(raw).length > 10 : false
-  })
+  await referencePage.waitForFunction(() => document.querySelectorAll('.name-card').length === 10)
   const referenceCards = referencePage.locator('.name-card')
   const referenceStatus = (await referencePage.locator('.taste-note').textContent()) ?? ''
   check(await referenceCards.count() === 10, 'reference taste still renders ten selected names')
   check(
-    await storedCount(referencePage, 'neologism:recent') > 10
-      && await storedCount(referencePage, 'neologism:recent') <= 60,
-    'three references select the first page from an expanded offline pool',
+    await storedCount(referencePage, 'neologism:recent') === await referenceCards.count(),
+    'expanded reference ranking records only the ten names the user actually saw',
   )
   check(
     /Local taste.*3 refs.*0 liked.*0 passed/.test(referenceStatus),
