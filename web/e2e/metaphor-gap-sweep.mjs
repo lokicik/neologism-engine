@@ -1,6 +1,7 @@
-// Search deterministic third-chance metaphor seeds only for cold Auto pages
-// that still lead with a direct suffix after production ordering. This is a
-// diagnostic: any winning offset must still pass all product quality gates.
+// Search deterministic retry metaphor seeds only for cold Auto pages that
+// still lead with a direct suffix after production ordering. Every legal
+// replacement slot is tried in production order. This is a diagnostic: any
+// winning offset must still pass all product quality gates.
 import { chromium } from 'playwright'
 import { spawn } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
@@ -106,20 +107,19 @@ try {
       && item.concept_coverage === 1
       && directSuffixes.some((ending) => letters(item.name).endsWith(ending))
     )
-    const addCandidate = (items, candidate, constructionRank) => {
-      const replacement = items
-        .map((item, index) => ({ item, index }))
-        .filter(({ item }) => isDirectSuffix(item) && quality(item) <= quality(candidate))
-        .sort((left, right) => quality(left.item) - quality(right.item) || right.index - left.index)[0]
-      if (!replacement) return null
-      const next = items.slice()
-      next[replacement.index] = {
-        ...candidate,
-        construction: 'guided_metaphor',
-        constructionRank,
-      }
-      return next
-    }
+    const candidateTrials = (items, candidate, constructionRank) => items
+      .map((item, index) => ({ item, index }))
+      .filter(({ item }) => isDirectSuffix(item) && quality(item) <= quality(candidate))
+      .sort((left, right) => quality(left.item) - quality(right.item) || right.index - left.index)
+      .map((replacement) => {
+        const next = items.slice()
+        next[replacement.index] = {
+          ...candidate,
+          construction: 'guided_metaphor',
+          constructionRank,
+        }
+        return { items: next, replaced: replacement.item.name }
+      })
 
     const output = []
     for (const prompt of prompts) {
@@ -179,31 +179,32 @@ try {
             .sort((left, right) => quality(right) - quality(left))
           let firstTrial
           let safeTrial
-          for (const candidate of candidates) {
-            const expanded = addCandidate(selected, candidate, guided.length + 1)
-            if (!expanded) continue
-            const ordered = prioritizeColdStrongLead(expanded)
-            if (isDirectSuffix(ordered[0])) continue
-            const prefix = letters(candidate.name).slice(0, 3)
-            const similarityDelta = meanSimilarity(expanded) - meanSimilarity(selected)
-            const prefixBefore = selected.filter((item) => letters(item.name).startsWith(prefix)).length
-            const prefixAfter = expanded.filter((item) => letters(item.name).startsWith(prefix)).length
-            const trial = {
-              offset,
-              name: candidate.name,
-              quality: quality(candidate),
-              coverage: candidate.concept_coverage ?? 0,
-              replaced: selected.find((item) => !expanded.some((next) => letters(next.name) === letters(item.name)))?.name,
-              lead: ordered[0].name,
-              similarityDelta,
-              prefixBefore,
-              prefixAfter,
-              safe: prefixAfter <= Math.max(2, prefixBefore) && similarityDelta <= Number.EPSILON,
-            }
-            firstTrial ??= trial
-            if (trial.safe) {
-              safeTrial = trial
-              break
+          candidateLoop: for (const candidate of candidates) {
+            for (const expanded of candidateTrials(selected, candidate, guided.length + 1)) {
+              const ordered = prioritizeColdStrongLead(expanded.items)
+              if (isDirectSuffix(ordered[0])) continue
+              const prefix = letters(candidate.name).slice(0, 3)
+              const similarityDelta = meanSimilarity(expanded.items) - meanSimilarity(selected)
+              const prefixBefore = selected.filter((item) => letters(item.name).startsWith(prefix)).length
+              const prefixAfter = expanded.items
+                .filter((item) => letters(item.name).startsWith(prefix)).length
+              const trial = {
+                offset,
+                name: candidate.name,
+                quality: quality(candidate),
+                coverage: candidate.concept_coverage ?? 0,
+                replaced: expanded.replaced,
+                lead: ordered[0].name,
+                similarityDelta,
+                prefixBefore,
+                prefixAfter,
+                safe: prefixAfter <= Math.max(2, prefixBefore) && similarityDelta <= Number.EPSILON,
+              }
+              firstTrial ??= trial
+              if (trial.safe) {
+                safeTrial = trial
+                break candidateLoop
+              }
             }
           }
           if (safeTrial ?? firstTrial) row.trials.push(safeTrial ?? firstTrial)

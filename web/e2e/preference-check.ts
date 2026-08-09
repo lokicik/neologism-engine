@@ -239,6 +239,31 @@ check(
     && !retriedColdLead.some((item) => item.name === 'Shieldora'),
   'the targeted retry replaces only a no-stronger suffix and closes the lead gap',
 )
+const cacheLeadGap = [
+  { ...scoredResult('Heapify', 85.3), sourceMode: 'brandable' as const, concept_coverage: 1 },
+  { ...scoredResult('Storeloom', 81), sourceMode: 'brandable' as const, concept_coverage: 1 },
+  { ...scoredResult('Cachelink', 79.5), sourceMode: 'brandable' as const, concept_coverage: 1 },
+  { ...scoredResult('Bufferia', 84.8), sourceMode: 'brandable' as const, concept_coverage: 1 },
+  { ...scoredResult('Stashify', 80.3), sourceMode: 'brandable' as const, concept_coverage: 1 },
+  { ...scoredResult('Bufferflow', 80.7), sourceMode: 'brandable' as const, concept_coverage: 1 },
+  { ...scoredResult('Storetrail', 79.4), sourceMode: 'brandable' as const, concept_coverage: 1 },
+  { ...scoredResult('Cacheseed', 81), sourceMode: 'brandable' as const, concept_coverage: 1 },
+  { ...scoredResult('Stashora', 81.8), sourceMode: 'brandable' as const, concept_coverage: 1 },
+  { ...scoredResult('Heapix', 87.3), sourceMode: 'brandable' as const, concept_coverage: 1 },
+]
+const retriedCacheLead = fillColdLeadRetry(cacheLeadGap, [{
+  ...scoredResult('Bufferlab', 85.5),
+  sourceMode: 'brandable',
+  concept_coverage: 1,
+  construction: 'guided_metaphor',
+}])
+check(
+  retriedCacheLead[0].name === 'Bufferlab'
+    && retriedCacheLead.some((item) => item.name === 'Stashify')
+    && retriedCacheLead.some((item) => item.name === 'Bufferflow')
+    && !retriedCacheLead.some((item) => item.name === 'Bufferia'),
+  'a retry tries a same-prefix suffix slot instead of deepening the candidate family',
+)
 check(
   fillColdLeadRetry(coldLeadGap, [
     { ...scoredResult('Kinflow', 84.9), sourceMode: 'brandable', concept_coverage: 1 },

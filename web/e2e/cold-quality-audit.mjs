@@ -40,6 +40,7 @@ const EXPECTED_RETRY_CHANGES = [
   'Shieldora -> Kinloom',
   'Sharebond -> TallyBond',
   'Surgeora -> Kitwave',
+  'Bufferia -> Bufferlab',
   'Fitio -> FitPath',
 ]
 
@@ -216,11 +217,6 @@ try {
     const sharedContract = isGuided(added[0])
       && !row.repaired.some((item) => item.sourceMode === 'respell')
       && row.selected.filter(isGuided).length <= 2
-    const leadRetry = sharedContract
-      && isDirectSuffix(removed[0])
-      && quality(added[0]) + (semanticPair ? NEAR_TIE_TOLERANCE : Number.EPSILON)
-        >= quality(removed[0])
-      && (!semanticPair || (added[0].concept_coverage ?? 0) >= 2)
     const prefix = normalized(added[0]).slice(0, 3)
     const ending = familySuffix(added[0])
     const prefixBefore = row.repaired.filter((item) => normalized(item).startsWith(prefix)).length
@@ -229,6 +225,16 @@ try {
     const endingAfter = row.selected.filter((item) => familySuffix(item) === ending).length
     const replacementIndex = row.repaired.findIndex((item) => normalized(item) === normalized(removed[0]))
     const addedIndex = row.selected.findIndex((item) => normalized(item) === normalized(added[0]))
+    const similarityPreserved = meanSimilarity(row.selected)
+      <= meanSimilarity(row.repaired) + Number.EPSILON
+    const leadRetry = sharedContract
+      && isDirectSuffix(removed[0])
+      && quality(added[0]) >= 0.85
+      && quality(added[0]) + (semanticPair ? NEAR_TIE_TOLERANCE : Number.EPSILON)
+        >= quality(removed[0])
+      && (!semanticPair || (added[0].concept_coverage ?? 0) >= 2)
+      && prefixAfter <= Math.max(2, prefixBefore)
+      && similarityPreserved
     const setUpgrade = sharedContract
       && semanticPair
       && normalized(row.repaired[0]) === normalized(row.selected[0])
@@ -241,7 +247,7 @@ try {
       && (added[0].concept_coverage ?? 0) >= (removed[0].concept_coverage ?? 0)
       && prefixAfter <= Math.max(2, prefixBefore)
       && endingAfter <= Math.max(2, endingBefore)
-      && meanSimilarity(row.selected) <= meanSimilarity(row.repaired) + Number.EPSILON
+      && similarityPreserved
     const valid = leadRetry || setUpgrade
     return {
       valid,
@@ -289,7 +295,7 @@ try {
     [wrongSize === 0, 'every repaired cold page contains ten names'],
     [wrongFallback === 0, 'repair uses either no fallback or the bounded 30-name pool'],
     [multipleAccentPages === 0, 'cold repair preserves Auto\'s one-accent visible-page contract'],
-    [retryRows.length === 4 && exactRetryChanges, 'the targeted retry closes exactly three fixed gaps and upgrades one weak set card'],
+    [retryRows.length === 5 && exactRetryChanges, 'the targeted retry closes exactly four fixed gaps and upgrades one weak set card'],
     [orderingChangedSet === retryRows.length, 'only targeted retry pages change the repaired name set'],
     [retryContractViolations === 0, 'each change is a bounded lead retry or a diversity-safe two-point semantic set upgrade'],
     [unjustifiedWeakenedLeads === 0, 'any first-card quality trade stays inside the semantic/guided near-tie rule'],
@@ -298,7 +304,7 @@ try {
     [weakenedLeadCoverage === 0, 'strong lead ordering never lowers first-card concept coverage'],
     [selectedLeadQuality >= 85.4, 'ordered first-card structural quality stays at or above 85.4'],
     [selectedLeadCoverage >= 1.23, 'ordered first-card concept coverage stays at or above 1.23'],
-    [selectedSuffixLeads <= 11, 'direct suffix leads stay at or below eleven of ninety pages'],
+    [selectedSuffixLeads <= 10, 'direct suffix leads stay at or below ten of ninety pages'],
     [direct.below75 === 0 || repairedPages > 0, 'weak pages activate the offline repair pool'],
     [repaired.below75 === 0, 'no repaired cold Auto name falls below 75 structural quality'],
     [repaired.averageQuality >= 82.5, 'repaired cold Auto quality stays at or above 82.5'],

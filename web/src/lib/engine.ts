@@ -48,7 +48,9 @@ const GUIDED_PAIR_POOL = 12
 const GUIDED_METAPHOR_QUALITY_FLOOR = 85
 const GUIDED_PAIR_QUALITY_FLOOR = 84
 const GUIDED_METAPHOR_FALLBACK_SEED_OFFSET = 16
-const COLD_LEAD_METAPHOR_RETRY_SEED_OFFSETS = [13, 521]
+// Order is deliberate: preserve the stronger Kinloom and Kitwave pools before
+// the narrow adjacent-seed pool gets a chance to supply Bufferlab.
+const COLD_LEAD_METAPHOR_RETRY_SEED_OFFSETS = [13, 521, 1]
 const UINT32_RANGE = 0x1_0000_0000
 const GUIDED_METAPHOR_TAILS = [
   'flow', 'forge', 'spark', 'seed', 'craft', 'lab', 'wave', 'link', 'pulse', 'beam',

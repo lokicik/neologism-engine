@@ -2835,6 +2835,42 @@ TypeScript, and production bundle all pass. The Rust core and WASM generation lo
 
 ---
 
+## Phase 117 — Revisit a rejected retry after fixing its replacement search
+
+**Corrected evidence.** Phase 114 rejected offset `+58` partly because `Bufferlab` appeared to grow
+the visible `Buf-` family from two names to three. That diagnostic tried only the lowest-quality
+eligible suffix slot, so it tested `Bufferlab` against an unrelated `Stash-` card and never reached
+the safer `Bufferia` slot. The production retry now tries every eligible suffix replacement in
+quality order. The 72-offset diagnostic was brought into line with that behavior and rerun: replacing
+`Bufferia` keeps the `Buf-` family at two and lowers that page's mean similarity by **0.003**.
+
+**Narrow pool choice.** Both `+58` and `+1` produce the same additional fixed-matrix result, but
+`+58` also exposes a weaker password-manager alternative already superseded by `Kinloom` from the
+first retry pool. Offset `+1` has only the cache-inspector win across the six pre-retry searchable
+pages, so it is the smaller observed candidate surface. It now runs last, after `+13` and `+521`,
+preserving first refusal for `Kinloom 92.5` and `Kitwave 89.8`. All three pools remain isolated to a
+fresh, unpersonalized, briefed Auto page that still has a direct-suffix lead, no Respell, and guided
+capacity after normal generation, repair, and ordering.
+
+**Measured result.** The only new set change is `Bufferia 84.8/c1 -> Bufferlab 85.5/c1`; the normal
+guided near-tie selector then promotes `Bufferlab` over `Heapify 85.3`. Relative to Phase 116,
+reordered pages rise **49 -> 50**, suffix-first pages fall **11 -> 10**, and guided leads rise
+**43 -> 44**. Mean lead quality still rounds to **85.41**, mean lead coverage remains **1.23**, and
+aggregate page quality remains **83.20**. Near-duplicate pairs remain **43**, mean similarity remains
+**0.200**, the product's `Keyloom` page is unchanged, and all fifteen developer-namespace pages keep
+their prior names and metrics.
+
+**Verification.** The preference suite now pins the exact cache page and requires the retry to skip
+weaker unrelated suffix slots in favor of the same-prefix `Bufferia` replacement. The 90-page audit
+requires exactly four lead-gap closures plus the Phase 116 non-leading set upgrade, validates the
+85-point retry floor, prefix-family and similarity guards, and tightens the suffix-lead ceiling to
+ten. The corrected 72-offset sweep, 85-page Auto audit, fifteen-page verbose namespace audit,
+construction-gap diagnostic, real prompt UI, local feedback/reference/export flow, TypeScript, and
+production bundle all pass. Personalized and continuation paths cannot open this fresh-page retry;
+the Rust core and WASM generation logic are unchanged.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
