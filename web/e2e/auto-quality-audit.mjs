@@ -24,6 +24,10 @@ const PROMPTS = [
   'automatic invoice reminders',
   'a ticket inbox for customer service agents',
   'animal health reminders for pet owners',
+  'an online marketplace for local sellers',
+  'a photo and video editing app',
+  'a trip planning and route app',
+  'git release automation',
 ]
 const SEEDS = [7, 42, 101, 2024, 9999]
 const VERBOSE = process.argv.includes('--verbose')

@@ -1578,6 +1578,51 @@ sessions pass without repeats or false exhaustion.
 
 ---
 
+## Phase 86 — Extend the context boundary across the full product lexicon
+
+**Bottleneck.** Phase 85 proved that exact cross-domain collisions can expose shared-root
+problems, but its eleven general domains covered only a fraction of the offline lexicon. A new
+48-domain, five-seed Brandable matrix now spans consumer, creative, business, and developer
+briefs. The first baseline requested **2,400** names but returned only **2,345**: every online
+marketplace page collapsed to **5/10** (`Seller…`/`Online…` only), and every photo/video editor
+page collapsed to **4/10** (`Edit…` only). Travel also opened the entire productivity palette,
+producing forms such as `Planora`, `Taskio`, and `Flowify`; `git release automation` opened the AI
+palette and produced `Commitsynth`, `Forgemind`, and `Shipmind`.
+
+The matrix also reports shared semantic roots and exact names across all 48 domains. Its initial
+51 collisions include true ambiguity (`cloud` for weather and deployment), adjacent meanings
+(`vital` for fitness and pet health), and expected nested contexts (developer naming and naming).
+Those are kept visible for future review but are not forced to zero: making every domain lexicon
+artificially disjoint would remove useful words without proving better names.
+
+**Bounded correction.** `online`, `seller`, and the stem `edit` are now treated as delivery/role
+context only when another recognized domain is present; unknown briefs still retain them.
+`plan` is suppressed only beside an explicit travel concept, and `automation` is suppressed only
+beside an explicit git/release concept. This removes the specific misleading group rather than
+globally banning productive words. Exact review also rejected an overbroad proposal to suppress
+delivery `track`: `Cargotrack`, `Relaytrack`, and `Routetrack` are coherent names and remain.
+
+**Measured result.** The broad matrix now returns **2,400/2,400** names with **0/240** short
+pages, zero audited context-only roots, and zero context-only name forms. Marketplace now opens
+with forms such as `Cartify`, `Tradeflux`, and `Bazaaria`; media with `Frameloom`, `Echopath`, and
+`Reellink`; travel with `Atlaspeak`, `Treksignal`, and `Roamify`; git release with `Branchify`,
+`Commitio`, and `Tagwave`. The established morphology matrix improves at the same time:
+composite **80.03 → 80.17**, diversity **0.726 → 0.728**, and the mix moves from
+**487 suffix / 397 multi-concept / 216 metaphor** to **477 / 380 / 243**, still with no
+suffix-only page and full **2,200/2,200** rolling output.
+
+**Verification.** The workspace suite remains **126/126**. The Phase 85 general matrix is
+unchanged at **1,069/1,100** calibration and **1,067/1,100** holdout semantic names with zero
+cross-domain collision in that guarded set. The modifier corpus remains **550/550** semantic,
+developer coverage **1,591/1,600 (99.4%)**, and Compound remains **1,000/1,000** prompt-linked
+and pair-coherent with zero lexical echoes across 2,000 rolling names. WASM and the production
+bundle build cleanly. Chromium expands Auto from 65 to **85** pages: all contain ten names, weak
+context forms stay zero, and all **45/45** accents are prompt-linked. Developer browser gates stay
+**800/800 Brandable** and **791/800 Compound**; the app Brandable session and all five Compound
+sessions still reach 100 unique names without false exhaustion.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

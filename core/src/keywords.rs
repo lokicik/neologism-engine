@@ -501,6 +501,11 @@ fn is_contextually_suppressed(word: &str, keywords: &[String]) -> bool {
     let habits = has_any_keyword(keywords, &["habit", "routine", "streak", "ritual"]);
     let sales = has_any_keyword(keywords, &["crm", "sale", "lead", "deal"]);
     let pets = has_any_keyword(keywords, &["pet", "animal", "vet", "veterinary"]);
+    let travel = has_any_keyword(keywords, &["travel", "trip", "map", "route"]);
+    let release = has_any_keyword(
+        keywords,
+        &["git", "repo", "repository", "version", "release"],
+    );
 
     (recruiting && matches!(word, "team" | "pipeline" | "track"))
         || (meals && matches!(word, "plan" | "weekly" | "organizer"))
@@ -525,6 +530,8 @@ fn is_contextually_suppressed(word: &str, keywords: &[String]) -> bool {
                 word,
                 "appointment" | "care" | "health" | "owner" | "reminder"
             ))
+        || (travel && word == "plan")
+        || (release && word == "automation")
 }
 
 /// Describes how a known product is delivered rather than what it is. These
@@ -536,11 +543,14 @@ fn is_brand_context_only(word: &str) -> bool {
         "automatic"
             | "collaborative"
             | "companion"
+            | "edit"
             | "guided"
             | "instant"
             | "local"
             | "modern"
+            | "online"
             | "reminder"
+            | "seller"
             | "shared"
             | "simple"
             | "tracker"
@@ -1205,6 +1215,10 @@ mod tests {
             ("a simple workout planner", "simple", "pulse"),
             ("a collaborative document editor", "collaborative", "ink"),
             ("automatic invoice reminders", "automatic", "ledger"),
+            ("an online marketplace for local sellers", "online", "cart"),
+            ("an online marketplace for local sellers", "seller", "cart"),
+            ("a photo and video editing app", "edit", "frame"),
+            ("a trip planning and route app", "plan", "roam"),
         ] {
             let keywords = extract_keywords(prompt, 6);
             let roots = brand_roots(&keywords, 16);
@@ -1474,6 +1488,12 @@ mod tests {
         let formatter_roots = compound_roots(&formatter, 16);
         assert!(formatter_roots.contains(&"lint".to_string()));
         assert!(!formatter_roots.contains(&"crate".to_string()));
+
+        let release = extract_keywords("git release automation", 6);
+        let release_roots = brand_roots(&release, 16);
+        assert!(release_roots.contains(&"commit".to_string()));
+        assert!(!release_roots.contains(&"mind".to_string()));
+        assert!(!release_roots.contains(&"synth".to_string()));
     }
 
     #[test]
