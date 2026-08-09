@@ -2025,6 +2025,48 @@ per-name rejection list was introduced.
 
 ---
 
+## Phase 97 — Teach the offline engine developer namespaces
+
+**Bottleneck.** The product's positioning promises developer-name availability across npm,
+PyPI, crates.io, GitHub, and domains, but the generator did not understand those words. Its own
+brief extracted `engine, name, offline, check, developer, npm`; `npm` had no semantic expansion,
+so the visible family collapsed around `Lex/Nom/Mint` and occasionally produced `Checkalias`.
+A held-out wording about finding available names across registries was worse: polysemous `find`
+activated the filesystem domain and returned `Pathlex`, `Scanify`, and `Fileora`.
+
+**Measured exploration.** A broad namespace palette (`scope, handle, claim, alias, tag`) raised
+semantic coverage but retained heavy joins such as `Aliasclaim` and `Markhandle`; it was rejected.
+A single shared identifier palette removed those joins but caused the explicit availability brief
+to collapse back to generic naming suffixes. The retained split gives registry words (`npm`,
+`pypi`, `crate`, `registry`, `namespace`) the concise `scope/key/tag/alias/slug` family and gives
+`available/availability` a separate `scope/open/clear/ready/free` family. In a recognized
+namespace-naming brief, `check/find/search` can no longer masquerade as the product domain;
+`engine/offline` remain available for unknown briefs but are delivery context beside a known one.
+
+**Measured result.** On the product's five fixed cold pages, visible namespace-root names rise
+**5/50 → 17/50**, distinct names rise **18 → 21**, and mean pair similarity falls
+**0.201 → 0.175**. Structural quality deliberately trades a small amount of suffix-score proxy
+for meaning and variety, moving **86.45 → 85.61** while staying above the focused 85 floor. The
+broader availability wording goes from **37** visible filesystem-context leaks to **0** and every
+seed now contains `Scopekey` or `Scopetag`. Across all three focused briefs, namespace coverage is
+**17/50**, **19/50**, and **15/50**; quality is **85.61**, **85.22**, and **85.13**; mean
+similarity is **0.175**, **0.161**, and **0.178**.
+
+The full 90-page cold matrix remains inside every retained gate: visible quality is **82.84**,
+sub-75 names remain **0**, near-duplicate pairs improve **58 → 52**, mean pair similarity improves
+**0.207 → 0.205**, and no page has more than one accent. The original developer-naming wording is
+byte-for-byte unchanged because it does not mention a registry or namespace.
+
+**Verification.** Two Rust regressions pin namespace expansion, contextual polysemy handling, and
+the unknown-brief fallback. The new fifteen-page production browser audit requires a namespace
+concept on every seed, at least 30% namespace-root names, zero delivery/filesystem leakage, no
+sub-75 names, at least 85 average quality, at most 0.19 mean similarity, and at least twenty
+distinct names per brief. Existing **85/85** guided Auto pages, all eight 90-page cold gates,
+and the developer-domain browser matrix (**800/800 Brandable**, **791/800 Compound**) remain green.
+No LLM, network call, scorer-weight change, or final-name blacklist was added.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
@@ -2039,7 +2081,9 @@ Long prompted sessions no longer collapse into repeated suffix families or stop 
 names, and semantic joins no longer erase a concept at one-letter/vowel boundaries. Naming briefs
 now use a smoother, deliberately scoped ending palette. Respell accents style a recognized
 product subject instead of incidental context, and disappear when the brief has no safe literal
-transformation. Cold Auto preserves strong first-page names and opens a bounded offline fallback
+transformation. Developer naming briefs now understand package registries, namespaces, and name
+availability without confusing `find` with filesystem search. Cold Auto preserves strong
+first-page names and opens a bounded offline fallback
 for weak slots or an overly repetitive page. Local taste feedback selects each
 visible page from up to sixty offline candidates per project, applies a structural quality floor,
 and restores visible stem and naming-ending diversity. AI Studio remains an optional, separate

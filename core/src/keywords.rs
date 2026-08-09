@@ -151,6 +151,10 @@ fn concept_roots(word: &str) -> &'static [&'static str] {
         }
         "developer" | "code" | "coding" | "program" | "programming" | "package" | "library"
         | "cli" | "api" => &["crate", "stack", "byte", "node", "kit"],
+        "npm" | "pypi" | "crate" | "registry" | "namespace" => {
+            &["scope", "key", "tag", "alias", "slug"]
+        }
+        "availability" | "available" => &["scope", "open", "clear", "ready", "free"],
         "database" | "db" | "sql" | "query" | "schema" | "table" | "storage" | "store" => &[
             "schema", "query", "table", "store", "base", "data", "record", "row", "field", "index",
         ],
@@ -299,6 +303,9 @@ fn concept_adjectives(word: &str) -> &'static [&'static str] {
         }
         "developer" | "code" | "coding" | "program" | "programming" | "package" | "library"
         | "cli" | "api" => &["open", "native", "prime", "solid", "swift", "clean"],
+        "npm" | "pypi" | "crate" | "registry" | "namespace" | "availability" | "available" => {
+            &["open", "free", "clear", "ready", "unique", "fresh"]
+        }
         "database" | "db" | "sql" | "query" | "schema" | "table" | "storage" | "store" => {
             &["local", "solid", "clear", "fast", "open", "native"]
         }
@@ -510,6 +517,22 @@ fn is_contextually_suppressed(word: &str, keywords: &[String]) -> bool {
         keywords,
         &["git", "repo", "repository", "version", "release"],
     );
+    let naming = has_any_keyword(
+        keywords,
+        &["name", "naming", "brand", "title", "word", "identity"],
+    );
+    let developer_namespace = has_any_keyword(
+        keywords,
+        &[
+            "npm",
+            "pypi",
+            "crate",
+            "registry",
+            "namespace",
+            "availability",
+            "available",
+        ],
+    );
 
     (recruiting && matches!(word, "team" | "pipeline" | "track"))
         || (meals && matches!(word, "plan" | "weekly" | "organizer"))
@@ -536,6 +559,7 @@ fn is_contextually_suppressed(word: &str, keywords: &[String]) -> bool {
             ))
         || (travel && word == "plan")
         || (release && word == "automation")
+        || (naming && developer_namespace && matches!(word, "check" | "find" | "search"))
 }
 
 /// Describes how a known product is delivered rather than what it is. These
@@ -548,10 +572,12 @@ fn is_brand_context_only(word: &str) -> bool {
             | "collaborative"
             | "companion"
             | "edit"
+            | "engine"
             | "guided"
             | "instant"
             | "local"
             | "modern"
+            | "offline"
             | "online"
             | "reminder"
             | "seller"
@@ -1288,6 +1314,48 @@ mod tests {
         let generic = brand_roots(&generic_kws, 16);
         assert!(generic.contains(&"crate".to_string()));
         assert!(generic.contains(&"kit".to_string()));
+    }
+
+    #[test]
+    fn expands_developer_namespace_briefs_without_filesystem_leakage() {
+        let own = extract_keywords(
+            "an offline naming engine for developer projects that checks npm and crates.io",
+            6,
+        );
+        let own_roots = brand_roots(&own, 16);
+        for expected in ["lex", "scope", "key", "tag", "alias", "slug"] {
+            assert!(own_roots.contains(&expected.to_string()), "{own_roots:?}");
+        }
+        for dropped in ["engine", "offline", "check"] {
+            assert!(!own_roots.contains(&dropped.to_string()), "{own_roots:?}");
+        }
+
+        let available = extract_keywords(
+            "a tool that finds available package names across developer registries and namespaces",
+            6,
+        );
+        let available_roots = brand_roots(&available, 16);
+        for expected in ["lex", "scope", "open", "key", "tag"] {
+            assert!(
+                available_roots.contains(&expected.to_string()),
+                "{available_roots:?}"
+            );
+        }
+        for leaked in ["file", "path", "find", "scan", "seek"] {
+            assert!(
+                !available_roots.contains(&leaked.to_string()),
+                "{available_roots:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn keeps_offline_engine_words_for_unknown_briefs() {
+        let keywords = vec!["offline".into(), "engine".into(), "bakery".into()];
+        let roots = brand_roots(&keywords, 12);
+        assert!(roots.contains(&"offline".to_string()), "{roots:?}");
+        assert!(roots.contains(&"engine".to_string()), "{roots:?}");
+        assert!(roots.contains(&"bakery".to_string()), "{roots:?}");
     }
 
     #[test]
