@@ -962,6 +962,10 @@ body {
 }
 .settings-field textarea { resize: vertical; line-height: 1.4; }
 .settings-field input:focus, .settings-field textarea:focus { outline: none; border-color: rgba(124, 106, 249, .55); }
+.settings-modal :is(button, a, input, textarea, select):focus-visible {
+  outline: 2px solid rgba(124, 106, 249, .9);
+  outline-offset: 2px;
+}
 .settings-hint { margin: 0; font-size: .76rem; color: var(--muted); line-height: 1.45; }
 .settings-hint code, .settings-field code { font-size: .72rem; background: var(--surface2); padding: .05rem .3rem; border-radius: 4px; }
 .settings-reset { align-self: flex-start; background: none; border: none; color: var(--accent); font-size: .78rem; cursor: pointer; padding: 0; }
@@ -1009,6 +1013,7 @@ body {
   text-align: left;
 }
 .settings-passed-toggle:hover:not(:disabled) { background: rgba(255, 255, 255, .035); }
+.settings-modal .settings-passed-toggle:focus-visible { outline-offset: -3px; }
 .settings-passed-toggle:disabled { color: var(--muted); cursor: default; }
 .settings-passed-meta { display: inline-flex; align-items: center; gap: .45rem; }
 .settings-passed-count {
@@ -1124,7 +1129,7 @@ body {
   color: var(--text);
   font-size: .82rem;
 }
-.model-option:hover { background: rgba(124, 106, 249, .16); }
+.model-option:hover, .model-option.active { background: rgba(124, 106, 249, .16); }
 .model-option.selected { background: rgba(124, 106, 249, .12); }
 .model-option.selected .model-id { color: var(--accent); }
 .model-id {

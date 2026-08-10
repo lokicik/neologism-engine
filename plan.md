@@ -4235,6 +4235,53 @@ dialog and its model picker fully keyboard-modal; it is not bundled into this da
 
 ---
 
+## Phase 148 — Make Settings genuinely keyboard-modal
+
+**Bottleneck.** Settings rendered with `role="dialog"`, but opening it did not move focus inside,
+Tab could reach the page behind it, closing did not restore the opener, and the dialog had neither
+`aria-modal` nor heading/description relationships. Its themed model list was also mouse-only:
+options selected on pointer down but exposed no combobox/listbox state or keyboard selection path.
+That made an already-central local-data and optional-AI surface unreliable without a mouse.
+
+**Frozen boundary.** This phase repairs only the existing Settings interaction and its visible
+focus treatment. It adds no preference action, storage field, export field, network request,
+provider, model default, generator/ranker behavior, or Rust/WASM surface. The existing editable
+model field and 60-row display cap remain; the work makes their current behavior operable and
+observable from the keyboard instead of replacing the control.
+
+**Modal and focus contract.** The dialog is now named by its visible heading, described by its
+introductory copy, and marked modal. Opening focuses the named close control. Forward and reverse
+Tab traversal wrap inside every currently rendered enabled control, while Escape, Cancel, overlay
+click, Save, and the close control all unmount through one opener-restoration path. Settings controls
+receive a visible two-pixel focus ring; the passed-history disclosure uses an inset offset so its
+ring is not clipped by the rounded overflow boundary. After the final pass is undone, collapsing
+the still-open zero state moves focus to Cancel before the disclosure becomes disabled, preserving
+modal ownership instead of briefly dropping focus to the document body.
+
+**Combobox contract.** The model input now exposes editable combobox state and owns a labeled
+listbox whose options carry selection state. Arrow Down/Up moves an active descendant while DOM
+focus remains on the input; Enter selects it, the first Escape closes only the list, and a second
+Escape closes Settings. Home and End retain native caret behavior. Active options scroll into the
+260-pixel popup viewport. An exact typed model beyond the first 60 source rows is substituted into
+the displayed cap and activated at its real displayed index, so Enter cannot silently replace it
+with row one. Pointer selection remains supported and closes the popup without stealing input focus.
+
+**Acceptance evidence.** The production keyboard fixture passes **48/48** against a mocked
+65-model OpenRouter response. It verifies dialog naming/description, initial focus, two complete
+forward and reverse Tab cycles, visible focus indicators, accessible control names, the final-pass
+focus handoff, 60-row cap, native Home/End behavior, off-screen option scrolling, exact source row
+65 selection, pointer selection, two-stage Escape, all close-path restoration, and exactly one
+intercepted model-list request. The retained passed-review browser contract remains **26/26** and
+the broader taste/Saved contract remains **61/61**. TypeScript checking and the production Vite
+build are green.
+
+**Decision.** This is an accessibility and interaction-correctness checkpoint, not an AI feature
+or taste experiment. Settings now behaves like the modal it visually claimed to be, and the custom
+model picker no longer trades themeability for keyboard exclusion. No generator, scorer, ranker,
+random stream, storage/taste schema, network policy, Saved identity, WASM API, or Rust code changed.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

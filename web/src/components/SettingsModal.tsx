@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react'
 import {
   DEFAULT_JUDGE_PROMPT,
   DEFAULT_LOCAL_ENDPOINT,
@@ -30,6 +30,14 @@ const perM = (pricePerToken: number) => `$${(pricePerToken * 1e6).toFixed(2)}/M`
 const priceTag = (m: ModelInfo) => (m.free ? 'FREE' : m.priceIn < 0 ? 'variable' : perM(m.priceIn))
 const ctxK = (m: ModelInfo) => (m.contextLength ? `${Math.round(m.contextLength / 1000)}k ctx` : '')
 const optionTag = (m: ModelInfo) => [priceTag(m), ctxK(m)].filter(Boolean).join(' · ')
+const FOCUSABLE = [
+  'a[href]',
+  'button:not([disabled])',
+  'input:not([disabled])',
+  'textarea:not([disabled])',
+  'select:not([disabled])',
+  '[tabindex]:not([tabindex="-1"])',
+].join(',')
 
 const STYLE_LABEL: Record<NameResult['style'], string> = {
   big_tech: 'Big Tech',
@@ -76,30 +84,41 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoRejec
   const [models, setModels] = useState<ModelInfo[]>([])
   const [modelsLoading, setModelsLoading] = useState(false)
   const [modelOpen, setModelOpen] = useState(false)
+  const [activeModelIndex, setActiveModelIndex] = useState(-1)
   const [passedOpen, setPassedOpen] = useState(false)
   const [passUndoError, setPassUndoError] = useState<string | null>(null)
   const [passUndoStatus, setPassUndoStatus] = useState<string | null>(null)
+  const modalRef = useRef<HTMLDivElement>(null)
+  const closeRef = useRef<HTMLButtonElement>(null)
+  const cancelRef = useRef<HTMLButtonElement>(null)
   const comboRef = useRef<HTMLDivElement>(null)
+  const modelInputRef = useRef<HTMLInputElement>(null)
+  const settingsTitleId = useId()
+  const settingsIntroId = useId()
+  const modelLabelId = useId()
+  const modelListId = useId()
   const passedListId = useId()
   const passedToggleRef = useRef<HTMLButtonElement>(null)
   const passedBodyRef = useRef<HTMLDivElement>(null)
 
-  // Escape closes the model dropdown first, then the modal.
+  // A real modal owns keyboard focus for its whole lifetime and returns it to
+  // the exact control that opened Settings on every close path.
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== 'Escape') return
-      if (modelOpen) setModelOpen(false)
-      else onClose()
+    const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null
+    closeRef.current?.focus({ preventScroll: true })
+    return () => {
+      if (opener?.isConnected) opener.focus({ preventScroll: true })
     }
-    document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
-  }, [onClose, modelOpen])
+  }, [])
 
   // Close the dropdown on outside click.
   useEffect(() => {
     if (!modelOpen) return
     const onDown = (e: MouseEvent) => {
-      if (comboRef.current && !comboRef.current.contains(e.target as Node)) setModelOpen(false)
+      if (comboRef.current && !comboRef.current.contains(e.target as Node)) {
+        setModelOpen(false)
+        setActiveModelIndex(-1)
+      }
     }
     document.addEventListener('mousedown', onDown)
     return () => document.removeEventListener('mousedown', onDown)
@@ -137,11 +156,23 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoRejec
     : draft.provider === 'openrouter'
       ? OPENROUTER_FREE_MODELS.map((id) => ({ id, priceIn: 0, priceOut: 0, free: true }))
       : []
+  const modelOptions = (needle: string, exactModel?: ModelInfo) => {
+    const matches = needle === '' || exactModel
+      ? pickList
+      : pickList.filter((model) => model.id.toLowerCase().includes(needle))
+    const visible = matches.slice(0, 60)
+    if (exactModel && !visible.some((model) => model.id === exactModel.id)) {
+      if (visible.length === 60) visible[visible.length - 1] = exactModel
+      else visible.push(exactModel)
+    }
+    return visible
+  }
   const query = (draft.model ?? '').toLowerCase()
   const selected = pickList.find((m) => m.id === draft.model)
   // When the field holds a fully-selected id (or is empty) show the whole list
   // so the user can browse/switch; only filter while they're typing a partial.
-  const filtered = (query === '' || selected ? pickList : pickList.filter((m) => m.id.toLowerCase().includes(query))).slice(0, 60)
+  // Keep an exact selection visible even when it falls beyond the 60-row cap.
+  const filtered = modelOptions(query, selected)
   const tasteSummary = useMemo(
     () => buildTasteDataset(favorites, rejected).summary,
     [favorites, rejected],
@@ -152,9 +183,75 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoRejec
   )
   const feedbackCount = favorites.length + rejected.length
 
+  useEffect(() => {
+    if (!modelOpen) return
+    setActiveModelIndex((current) => {
+      if (filtered.length === 0) return -1
+      if (current < 0) return 0
+      return Math.min(current, filtered.length - 1)
+    })
+  }, [modelOpen, filtered.length])
+
+  useEffect(() => {
+    if (!modelOpen || activeModelIndex < 0) return
+    document.getElementById(`${modelListId}-option-${activeModelIndex}`)?.scrollIntoView({
+      block: 'nearest',
+      inline: 'nearest',
+    })
+  }, [activeModelIndex, modelListId, modelOpen])
+
   const selectModel = (m: ModelInfo) => {
     setDraft((d) => ({ ...d, model: m.id, ...priceFields(m) }))
     setModelOpen(false)
+    setActiveModelIndex(-1)
+  }
+
+  const closeModelMenu = () => {
+    setModelOpen(false)
+    setActiveModelIndex(-1)
+  }
+
+  const openModelMenu = () => {
+    setModelOpen(true)
+    const selectedIndex = filtered.findIndex((model) => model.id === draft.model)
+    setActiveModelIndex(selectedIndex >= 0 ? selectedIndex : filtered.length > 0 ? 0 : -1)
+  }
+
+  const handleDialogKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (event.key === 'Escape') {
+      event.preventDefault()
+      if (modelOpen) {
+        closeModelMenu()
+        modelInputRef.current?.focus()
+      } else {
+        onClose()
+      }
+      return
+    }
+    if (event.key !== 'Tab') return
+
+    const modal = modalRef.current
+    if (!modal) return
+    const focusable = [...modal.querySelectorAll<HTMLElement>(FOCUSABLE)].filter((element) => (
+      element.tabIndex >= 0
+        && element.getAttribute('aria-hidden') !== 'true'
+        && getComputedStyle(element).visibility !== 'hidden'
+    ))
+    if (focusable.length === 0) {
+      event.preventDefault()
+      modal.focus()
+      return
+    }
+    const first = focusable[0]
+    const last = focusable[focusable.length - 1]
+    const active = document.activeElement
+    if (event.shiftKey && (active === first || active === modal || !modal.contains(active))) {
+      event.preventDefault()
+      last.focus()
+    } else if (!event.shiftKey && (active === last || active === modal || !modal.contains(active))) {
+      event.preventDefault()
+      first.focus()
+    }
   }
 
   const undoPass = (item: NameResult) => {
@@ -174,35 +271,89 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoRejec
   }
 
   const modelField = (placeholder: string, extraLabel = '') => (
-    <label className="settings-field">
-      <span>Model {extraLabel}</span>
-      <div className="model-combo" ref={comboRef}>
+    <div className="settings-field">
+      <span id={modelLabelId}>Model {extraLabel}</span>
+      <div
+        className="model-combo"
+        ref={comboRef}
+        onBlur={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget as Node | null)) closeModelMenu()
+        }}
+      >
         <input
+          ref={modelInputRef}
           type="text"
+          role="combobox"
+          aria-autocomplete="list"
+          aria-haspopup="listbox"
+          aria-labelledby={modelLabelId}
+          aria-expanded={modelOpen}
+          aria-controls={modelListId}
+          aria-activedescendant={modelOpen && activeModelIndex >= 0
+            ? `${modelListId}-option-${activeModelIndex}`
+            : undefined}
           placeholder={placeholder}
           value={draft.model ?? ''}
-          onFocus={() => setModelOpen(true)}
+          onFocus={openModelMenu}
+          onClick={() => {
+            if (!modelOpen) openModelMenu()
+          }}
           onChange={(e) => {
             const id = e.target.value
-            setDraft((d) => ({ ...d, model: id, ...priceFields(pickList.find((x) => x.id === id)) }))
+            const exactModel = pickList.find((model) => model.id === id)
+            const nextFiltered = modelOptions(id.toLowerCase(), exactModel)
+            setDraft((d) => ({ ...d, model: id, ...priceFields(exactModel) }))
             setModelOpen(true)
+            setActiveModelIndex(exactModel
+              ? nextFiltered.findIndex((model) => model.id === exactModel.id)
+              : nextFiltered.length > 0 ? 0 : -1)
+          }}
+          onKeyDown={(event) => {
+            if (event.key === 'Escape' && modelOpen) {
+              event.preventDefault()
+              event.stopPropagation()
+              closeModelMenu()
+              return
+            }
+            if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+              event.preventDefault()
+              setModelOpen(true)
+              setActiveModelIndex((current) => {
+                if (filtered.length === 0) return -1
+                if (event.key === 'ArrowDown') return current < 0 ? 0 : (current + 1) % filtered.length
+                return current < 0 ? filtered.length - 1 : (current - 1 + filtered.length) % filtered.length
+              })
+              return
+            }
+            if (event.key === 'Enter' && modelOpen && activeModelIndex >= 0) {
+              const activeModel = filtered[activeModelIndex]
+              if (activeModel) {
+                event.preventDefault()
+                selectModel(activeModel)
+              }
+            }
           }}
         />
         {modelOpen && (
-          <div className="model-menu">
-            {modelsLoading && <div className="model-empty">Loading models…</div>}
+          <div className="model-menu" id={modelListId} role="listbox" aria-label="Available models">
+            {modelsLoading && <div className="model-empty" role="status">Loading models…</div>}
             {!modelsLoading && filtered.length === 0 && (
-              <div className="model-empty">No matches — any model id works.</div>
+              <div className="model-empty" role="status">No matches — any model id works.</div>
             )}
-            {filtered.map((m) => (
+            {filtered.map((m, index) => (
               <button
                 type="button"
                 key={m.id}
-                className={`model-option${m.id === draft.model ? ' selected' : ''}`}
+                id={`${modelListId}-option-${index}`}
+                role="option"
+                aria-selected={m.id === draft.model}
+                tabIndex={-1}
+                className={`model-option${m.id === draft.model ? ' selected' : ''}${index === activeModelIndex ? ' active' : ''}`}
+                onMouseEnter={() => setActiveModelIndex(index)}
                 onMouseDown={(e) => {
                   e.preventDefault() // keep input focus; fire before blur
-                  selectModel(m)
                 }}
+                onClick={() => selectModel(m)}
               >
                 <span className="model-id">{m.id}</span>
                 <span className="model-tag">{optionTag(m)}</span>
@@ -221,17 +372,27 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoRejec
           {ctxK(selected) ? ` · ${ctxK(selected)}` : ''}
         </span>
       )}
-    </label>
+    </div>
   )
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="settings-modal" onClick={(e) => e.stopPropagation()} role="dialog" aria-label="Settings">
+      <div
+        ref={modalRef}
+        className="settings-modal"
+        onClick={(e) => e.stopPropagation()}
+        onKeyDown={handleDialogKeyDown}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={settingsTitleId}
+        aria-describedby={settingsIntroId}
+        tabIndex={-1}
+      >
         <div className="settings-head">
-          <h2>Settings</h2>
-          <button className="icon-btn" onClick={onClose} title="Close">✕</button>
+          <h2 id={settingsTitleId}>Settings</h2>
+          <button ref={closeRef} className="icon-btn" onClick={onClose} title="Close" aria-label="Close settings">✕</button>
         </div>
-        <p className="settings-intro">
+        <p className="settings-intro" id={settingsIntroId}>
           Configure the model the AI Studio uses to rank your names — OpenRouter (your key)
           or a local server. The app stays fully offline by default; AI only runs in the AI
           Studio, on demand.
@@ -359,7 +520,11 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoRejec
             aria-controls={passedListId}
             disabled={rejected.length === 0 && !passedOpen}
             onClick={() => {
-              setPassedOpen((open) => !open)
+              const nextOpen = !passedOpen
+              if (!nextOpen && rejected.length === 0) {
+                cancelRef.current?.focus({ preventScroll: true })
+              }
+              setPassedOpen(nextOpen)
               setPassUndoError(null)
               setPassUndoStatus(null)
             }}
@@ -409,7 +574,7 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoRejec
         </section>
 
         <div className="settings-actions">
-          <button className="toolbar-btn" onClick={onClose}>Cancel</button>
+          <button ref={cancelRef} className="toolbar-btn" onClick={onClose}>Cancel</button>
           <button className="command-go" onClick={save}>Save</button>
         </div>
       </div>
