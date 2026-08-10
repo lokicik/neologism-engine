@@ -83,6 +83,11 @@ const HABIT_ROUTINE_VARIANTS = [
   'streak and ritual coaching',
   'daily habit building and streak tracking',
 ]
+const EDUCATION_VARIANTS = [
+  'a learning app for online courses',
+  'study tools for students',
+  'a course platform for learners',
+]
 const PROMPTS = [
   ...BASE_PROMPTS,
   ...AI_VARIANTS,
@@ -92,6 +97,7 @@ const PROMPTS = [
   ...COLOR_PALETTE_VARIANTS,
   ...LEGAL_RESEARCH_VARIANTS,
   ...HABIT_ROUTINE_VARIANTS,
+  ...EDUCATION_VARIANTS,
 ]
 const SEEDS = [13, 67, 313]
 const DIRECT_SUFFIXES = ['ify', 'ora', 'ion', 'era', 'io', 'ia', 'ix', 'el', 'en', 'on']
@@ -353,6 +359,14 @@ try {
   const habitRoutineVariantRows = rows.filter((row) => (
     HABIT_ROUTINE_VARIANTS.includes(row.prompt)
   ))
+  const educationRows = rows.filter((row) => (
+    row.prompt === 'an online course and study app'
+  ))
+  const educationAverage = educationRows.reduce(
+    (sum, row) => sum + row.selected.reduce((pageSum, item) => pageSum + quality(item), 0),
+    0,
+  ) / (educationRows.length * 10)
+  const educationVariantRows = rows.filter((row) => EDUCATION_VARIANTS.includes(row.prompt))
   const seedDiversity = BASE_PROMPTS.map((prompt) => {
     const promptRows = auditRows.filter((row) => row.prompt === prompt)
     const nameSeeds = new Map()
@@ -421,6 +435,9 @@ try {
   const habitRoutineDiversity = seedDiversity.find((row) => (
     row.prompt === 'routine and streak coaching'
   ))
+  const educationDiversity = seedDiversity.find((row) => (
+    row.prompt === 'an online course and study app'
+  ))
   const wordingDiversity = (prompts, variantRows) => prompts.map((prompt) => {
     const promptRows = variantRows.filter((row) => row.prompt === prompt)
     const names = new Set(promptRows.flatMap((row) => (
@@ -455,6 +472,16 @@ try {
     HABIT_ROUTINE_VARIANTS,
     habitRoutineVariantRows,
   )
+  const educationVariantDiversity = wordingDiversity(
+    EDUCATION_VARIANTS,
+    educationVariantRows,
+  )
+  const educationWordingStable = educationVariantRows.every((row) => {
+    const canonical = educationRows.find((candidate) => candidate.seed === row.seed)
+    return canonical
+      && row.selected.map((item) => letters(item.name)).join('|')
+        === canonical.selected.map((item) => letters(item.name)).join('|')
+  })
   const habitRoutineWordingStable = habitRoutineVariantRows.every((row) => {
     const canonical = habitRoutineRows.find((candidate) => candidate.seed === row.seed)
     return canonical
@@ -534,6 +561,7 @@ try {
   console.log(`color palette average: ${colorPaletteAverage.toFixed(2)} · ${colorPaletteDiversity?.uniqueNames ?? 0}/30 unique · ${colorPaletteDiversity?.averagePairOverlap.toFixed(2) ?? '0.00'} overlap`)
   console.log(`legal research average: ${legalResearchAverage.toFixed(2)} · ${legalResearchDiversity?.uniqueNames ?? 0}/30 unique · ${legalResearchDiversity?.averagePairOverlap.toFixed(2) ?? '0.00'} overlap`)
   console.log(`habit routine average: ${habitRoutineAverage.toFixed(2)} · ${habitRoutineDiversity?.uniqueNames ?? 0}/30 unique · ${habitRoutineDiversity?.averagePairOverlap.toFixed(2) ?? '0.00'} overlap`)
+  console.log(`education average: ${educationAverage.toFixed(2)} · ${educationDiversity?.uniqueNames ?? 0}/30 unique · ${educationDiversity?.averagePairOverlap.toFixed(2) ?? '0.00'} overlap`)
   console.log(`guarded repair upgrades: ${guardedRepairUpgrades.length}`)
   console.log(`weak Respell accents: ${weakRespellAccents.length}`)
   console.log(`seed diversity: ${averageUniqueNames.toFixed(2)}/30 unique · ${averageSeedOverlap.toFixed(2)}/10 pair overlap · ${exactDuplicateSeedPages} duplicate pages`)
@@ -581,6 +609,10 @@ try {
   }
   console.log('\nhabit routine focus')
   for (const row of [...habitRoutineRows, ...habitRoutineVariantRows]) {
+    console.log(`${row.seed} · ${row.prompt} · ${row.selected.map((item) => item.name).join(', ')}`)
+  }
+  console.log('\neducation focus')
+  for (const row of [...educationRows, ...educationVariantRows]) {
     console.log(`${row.seed} · ${row.prompt} · ${row.selected.map((item) => item.name).join(', ')}`)
   }
   console.log('\nguarded repair upgrades')
@@ -770,6 +802,37 @@ try {
           && !row.retryRequested
         )),
       'habit-routine wording variants suppress build and tracking context without changing intent',
+    ],
+    [
+      educationRows.length === SEEDS.length
+        && educationAverage >= 83.6
+        && educationDiversity?.uniqueNames >= 28
+        && educationDiversity?.averagePairOverlap <= 0.7
+        && educationDiversity?.exactDuplicatePages === 0
+        && new Set(educationRows.map((row) => letters(row.selected[0]?.name ?? ''))).size === SEEDS.length
+        && educationRows.every((row) => (
+          row.selected.length === 10
+          && dominantStemOverflowFor(row.selected) === 0
+          && row.selected.every((item) => item.sourceMode !== 'respell')
+          && !row.retryRequested
+        )),
+      'education pages use five live roots without Sage/Lore or repeated-lead collapse',
+    ],
+    [
+      educationVariantRows.length === EDUCATION_VARIANTS.length * SEEDS.length
+        && educationWordingStable
+        && educationVariantDiversity.every((row) => (
+          row.rowCount === SEEDS.length
+          && row.uniqueNames >= 28
+          && row.averagePairOverlap <= 0.7
+        ))
+        && educationVariantRows.every((row) => (
+          row.selected.length === 10
+          && dominantStemOverflowFor(row.selected) === 0
+          && row.selected.every((item) => item.sourceMode !== 'respell')
+          && !row.retryRequested
+        )),
+      'education wording variants suppress tool and learner context without changing intent',
     ],
     [
       recruiterTrackingRows.length === SEEDS.length

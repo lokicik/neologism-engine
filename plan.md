@@ -3497,6 +3497,54 @@ green. No LLM, network call, scorer, selection algorithm, retry, or random sourc
 
 ---
 
+## Phase 135 — Prefer a broad classroom over a higher-scoring Edu wall
+
+**Observed bottleneck.** With the habit page diversified, `an online course and study app` owned
+the remaining three-page semantic stem wall: every seed showed four `Sage...` or `Lore...` cards.
+The canonical pages averaged **82.94**, retained **21/30** names, and shared **3.33/10** names per
+seed pair. The nominal six-root palette was effectively only `Lore`, `Sage`, and `Quiz` because
+literal `Learn`, `Study`, and `Skill` transforms scored mostly **60–73**. Natural wording also
+exposed interpretation leaks: `study tools for students` produced `Sagetool`, `Loretool`, and
+`Toolatlas`, while learner wording collapsed back into a suffix-heavy three-root set.
+
+**Retained palette and wording scope.** The education map is now deliberately five productive
+roots: `Tutor`, `Lore`, `Sage`, `Quiz`, and `Dojo`. `Tutor` states the role directly; `Dojo` adds a
+short practice-and-learning metaphor without becoming a global vocabulary word. Beside an
+explicit learn/education/study/course concept, `tool`, `student`, `learner`, and `online` are now
+context rather than naming material. Outside that lane the words keep their previous treatment.
+The three natural wording variants resolve to the same seed-specific pages as the canonical brief.
+
+**A/B boundaries.** Candidate scoring found several structurally strong roots, but score alone was
+not accepted as taste. `Tutor + Prep + Dojo` raised local quality to **84.99** while shrinking
+spread to **20/30** and creating a `Prep...` wall. Keeping a dead `Skill` slot beside `Tutor/Dojo`
+reached **84.49**, **22/30**, and **2.67** overlap, but the unused entry still narrowed exploration.
+Replacing it with `Edu` reached the highest local score, **85.51**, yet stayed at **22/30**, raised
+overlap to **3.00**, and opened two seeds with the generic `Edupeak`. That version was rejected.
+Removing the ineffective sixth slot produced the strongest visible set even though its structural
+average is lower: three different leads and nearly disjoint seed pages matter more here than a
+short, easily scored prefix.
+
+**Measured result.** Canonical education pages improve **82.94 -> 83.75** average structural
+quality, **21 -> 28/30** distinct names, and **3.33 -> 0.67/10** pair overlap. `Dojobeam`,
+`Quizlab`, and `Sagelab` lead the three seeds; no page has a four-name stem family. Representative
+companions include `Sagepath`, `Tutorseed`, `Lorevault`, `Tutorflux`, and `Dojoflow`. Across the
+unchanged 105-page held-out base, average quality rises **84.44 -> 84.46**, lead quality
+**87.09 -> 87.13**, seed spread **18.60 -> 18.80/30**, pair overlap **4.90 -> 4.83/10**, and mean
+similarity **0.199 -> 0.197**. Dominant-stem excess falls **5 -> 2**; near pairs, suffix leaders,
+coverage, and duplicate pages remain **69**, **21**, **1.33**, and **zero**, while guided leaders
+rise **55 -> 56**.
+
+**Verification.** The core suite is **155/155**. The held-out audit now covers 105 base pages plus
+75 wording-stress pages and requires 28/30 education names, at most 0.7 overlap, three different
+leads, zero stem overflow, and exact wording equivalence. The 90-page cold audit, 85-page Auto
+audit, 1,000-selection taste matrix, and 25-page mode-aware taste audit pass their retained gates.
+The 48-domain/2,400-name collision audit returns every name at **83.28** average quality and
+**0.728** diversity, with the same 24 explained collision pairs and zero unexplained collisions.
+Rebuilt WASM, TypeScript, and the production bundle are green. No LLM, network call, scorer,
+selection algorithm, retry, or random source changed.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
@@ -3536,6 +3584,8 @@ Legal-research briefs similarly surface the scoped `LexCite` case-law role while
 filesystem search and ordinary developer-naming vocabulary isolated.
 Habit and routine briefs replace ineffective roots with the scoped `Beat` and `Chain`
 families, while building/tracking wording can no longer pull generic creator roots into the page.
+Education briefs use five productive `Tutor`/`Lore`/`Sage`/`Quiz`/`Dojo` roots instead of letting
+low-yield literal words collapse every seed into the same classroom suffixes.
 Cold Auto also limits exact four-letter stem repetition on a visible page, but only through a
 quality-neutral, coverage-preserving non-suffix substitution from the fallback it already opened.
 Compound is now a genuinely brief-aware explicit alternative rather than a random adjective

@@ -286,7 +286,10 @@ fn concept_roots(word: &str) -> &'static [&'static str] {
             &["frame", "reel", "wave", "tune", "echo"]
         }
         "learn" | "education" | "study" | "course" => {
-            &["learn", "lore", "sage", "quiz", "study", "skill"]
+            // Literal learn/study/skill transforms stay below the visible
+            // quality floor. Keep five distinct, productive education roots
+            // instead of letting dead entries narrow every seed to Sage/Lore.
+            &["tutor", "lore", "sage", "quiz", "dojo"]
         }
         "delivery" | "ship" | "shipping" | "logistic" | "logistics" | "transport" => {
             &["route", "fleet", "cargo", "relay", "dock"]
@@ -554,6 +557,7 @@ fn is_contextually_suppressed(word: &str, keywords: &[String]) -> bool {
         ],
     );
     let habits = has_any_keyword(keywords, &["habit", "routine", "streak", "ritual"]);
+    let education = has_any_keyword(keywords, &["learn", "education", "study", "course"]);
     let sales = has_any_keyword(keywords, &["crm", "sale", "lead", "deal"]);
     let pets = has_any_keyword(keywords, &["pet", "animal", "vet", "veterinary"]);
     let travel = has_any_keyword(keywords, &["travel", "trip", "map", "route"]);
@@ -597,6 +601,7 @@ fn is_contextually_suppressed(word: &str, keywords: &[String]) -> bool {
                 word,
                 "build" | "builder" | "coach" | "daily" | "last" | "track" | "tracker"
             ))
+        || (education && matches!(word, "learner" | "online" | "student" | "tool"))
         || (sales
             && matches!(
                 word,
@@ -2417,5 +2422,40 @@ mod tests {
         let generic_builder = extract_keywords("a build tracker", 6);
         let generic_roots = brand_roots(&generic_builder, 16);
         assert!(generic_roots.contains(&"forge".to_string()));
+    }
+
+    #[test]
+    fn education_wording_variants_keep_live_roots_and_drop_audience_context() {
+        for prompt in [
+            "an online course and study app",
+            "a learning app for online courses",
+            "study tools for students",
+            "a course platform for learners",
+        ] {
+            let keywords = extract_keywords(prompt, 6);
+            let groups = brand_root_groups(&keywords, 16);
+            assert_eq!(groups.len(), 1, "{prompt}: {groups:?}");
+            assert_eq!(
+                groups[0],
+                ["tutor", "lore", "sage", "quiz", "dojo"]
+                    .map(str::to_string)
+                    .to_vec(),
+                "{prompt}",
+            );
+
+            let respell_sources = respell_source_keywords(&keywords);
+            assert!(
+                respell_sources.iter().all(|source| !matches!(
+                    source.as_str(),
+                    "learner" | "online" | "student" | "tool"
+                )),
+                "{prompt}: {respell_sources:?}",
+            );
+        }
+
+        let generic_student = extract_keywords("student", 6);
+        assert!(!is_contextually_suppressed("student", &generic_student));
+        let generic_tool = extract_keywords("tool", 6);
+        assert!(!is_contextually_suppressed("tool", &generic_tool));
     }
 }
