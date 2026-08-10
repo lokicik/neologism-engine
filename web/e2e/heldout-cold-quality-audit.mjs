@@ -88,6 +88,11 @@ const EDUCATION_VARIANTS = [
   'study tools for students',
   'a course platform for learners',
 ]
+const TERMINAL_LOG_VARIANTS = [
+  'CLI log viewer for developers',
+  'terminal logs and command output monitor',
+  'a console log inspection tool',
+]
 const PROMPTS = [
   ...BASE_PROMPTS,
   ...AI_VARIANTS,
@@ -98,6 +103,7 @@ const PROMPTS = [
   ...LEGAL_RESEARCH_VARIANTS,
   ...HABIT_ROUTINE_VARIANTS,
   ...EDUCATION_VARIANTS,
+  ...TERMINAL_LOG_VARIANTS,
 ]
 const SEEDS = [13, 67, 313]
 const DIRECT_SUFFIXES = ['ify', 'ora', 'ion', 'era', 'io', 'ia', 'ix', 'el', 'en', 'on']
@@ -367,6 +373,12 @@ try {
     0,
   ) / (educationRows.length * 10)
   const educationVariantRows = rows.filter((row) => EDUCATION_VARIANTS.includes(row.prompt))
+  const terminalLogRows = rows.filter((row) => row.prompt === 'a terminal log viewer')
+  const terminalLogAverage = terminalLogRows.reduce(
+    (sum, row) => sum + row.selected.reduce((pageSum, item) => pageSum + quality(item), 0),
+    0,
+  ) / (terminalLogRows.length * 10)
+  const terminalLogVariantRows = rows.filter((row) => TERMINAL_LOG_VARIANTS.includes(row.prompt))
   const seedDiversity = BASE_PROMPTS.map((prompt) => {
     const promptRows = auditRows.filter((row) => row.prompt === prompt)
     const nameSeeds = new Map()
@@ -438,6 +450,9 @@ try {
   const educationDiversity = seedDiversity.find((row) => (
     row.prompt === 'an online course and study app'
   ))
+  const terminalLogDiversity = seedDiversity.find((row) => (
+    row.prompt === 'a terminal log viewer'
+  ))
   const wordingDiversity = (prompts, variantRows) => prompts.map((prompt) => {
     const promptRows = variantRows.filter((row) => row.prompt === prompt)
     const names = new Set(promptRows.flatMap((row) => (
@@ -476,6 +491,10 @@ try {
     EDUCATION_VARIANTS,
     educationVariantRows,
   )
+  const terminalLogVariantDiversity = wordingDiversity(
+    TERMINAL_LOG_VARIANTS,
+    terminalLogVariantRows,
+  )
   const educationWordingStable = educationVariantRows.every((row) => {
     const canonical = educationRows.find((candidate) => candidate.seed === row.seed)
     return canonical
@@ -484,6 +503,12 @@ try {
   })
   const habitRoutineWordingStable = habitRoutineVariantRows.every((row) => {
     const canonical = habitRoutineRows.find((candidate) => candidate.seed === row.seed)
+    return canonical
+      && row.selected.map((item) => letters(item.name)).join('|')
+        === canonical.selected.map((item) => letters(item.name)).join('|')
+  })
+  const terminalLogWordingStable = terminalLogVariantRows.every((row) => {
+    const canonical = terminalLogRows.find((candidate) => candidate.seed === row.seed)
     return canonical
       && row.selected.map((item) => letters(item.name)).join('|')
         === canonical.selected.map((item) => letters(item.name)).join('|')
@@ -562,6 +587,7 @@ try {
   console.log(`legal research average: ${legalResearchAverage.toFixed(2)} · ${legalResearchDiversity?.uniqueNames ?? 0}/30 unique · ${legalResearchDiversity?.averagePairOverlap.toFixed(2) ?? '0.00'} overlap`)
   console.log(`habit routine average: ${habitRoutineAverage.toFixed(2)} · ${habitRoutineDiversity?.uniqueNames ?? 0}/30 unique · ${habitRoutineDiversity?.averagePairOverlap.toFixed(2) ?? '0.00'} overlap`)
   console.log(`education average: ${educationAverage.toFixed(2)} · ${educationDiversity?.uniqueNames ?? 0}/30 unique · ${educationDiversity?.averagePairOverlap.toFixed(2) ?? '0.00'} overlap`)
+  console.log(`terminal log average: ${terminalLogAverage.toFixed(2)} · ${terminalLogDiversity?.uniqueNames ?? 0}/30 unique · ${terminalLogDiversity?.averagePairOverlap.toFixed(2) ?? '0.00'} overlap`)
   console.log(`guarded repair upgrades: ${guardedRepairUpgrades.length}`)
   console.log(`weak Respell accents: ${weakRespellAccents.length}`)
   console.log(`seed diversity: ${averageUniqueNames.toFixed(2)}/30 unique · ${averageSeedOverlap.toFixed(2)}/10 pair overlap · ${exactDuplicateSeedPages} duplicate pages`)
@@ -613,6 +639,10 @@ try {
   }
   console.log('\neducation focus')
   for (const row of [...educationRows, ...educationVariantRows]) {
+    console.log(`${row.seed} · ${row.prompt} · ${row.selected.map((item) => item.name).join(', ')}`)
+  }
+  console.log('\nterminal log focus')
+  for (const row of [...terminalLogRows, ...terminalLogVariantRows]) {
     console.log(`${row.seed} · ${row.prompt} · ${row.selected.map((item) => item.name).join(', ')}`)
   }
   console.log('\nguarded repair upgrades')
@@ -833,6 +863,39 @@ try {
           && !row.retryRequested
         )),
       'education wording variants suppress tool and learner context without changing intent',
+    ],
+    [
+      terminalLogRows.length === SEEDS.length
+        && terminalLogAverage >= 85.7
+        && terminalLogDiversity?.uniqueNames >= 17
+        && terminalLogDiversity?.averagePairOverlap <= 5
+        && terminalLogDiversity?.exactDuplicatePages === 0
+        && terminalLogRows.every((row) => (
+          row.selected.length === 10
+          && dominantStemOverflowFor(row.selected) === 0
+          && row.selected.every((item) => item.sourceMode !== 'respell')
+          && !row.retryRequested
+        )),
+      'terminal-log pages use Log and Pane alternatives without a Term stem wall',
+    ],
+    [
+      terminalLogVariantRows.length === TERMINAL_LOG_VARIANTS.length * SEEDS.length
+        && terminalLogWordingStable
+        && terminalLogVariantDiversity.every((row) => (
+          row.rowCount === SEEDS.length
+          && row.uniqueNames >= 17
+          && row.averagePairOverlap <= 5
+        ))
+        && terminalLogVariantRows.every((row) => (
+          row.selected.length === 10
+          && dominantStemOverflowFor(row.selected) === 0
+          && row.selected.every((item) => item.sourceMode !== 'respell')
+          && row.selected.every((item) => ![
+            'byte', 'crate', 'develop', 'inspection', 'kit', 'node', 'output', 'stack',
+          ].some((stem) => letters(item.name).startsWith(stem)))
+          && !row.retryRequested
+        )),
+      'terminal-log wording variants reject developer and function-word leakage',
     ],
     [
       recruiterTrackingRows.length === SEEDS.length

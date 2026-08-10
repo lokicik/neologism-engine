@@ -3545,6 +3545,56 @@ selection algorithm, retry, or random source changed.
 
 ---
 
+## Phase 136 — Read terminal-log intent instead of the loudest acronym
+
+**Observed bottleneck.** `a terminal log viewer` was the last held-out page outside the message
+queue lane with an exact stem wall: seed 67 showed four `Term...` cards. The canonical pages
+averaged **84.67**, retained **17/30** names, and shared **6.00/10** names per seed pair. Natural
+wording exposed a more serious interpretation fault. `CLI log viewer for developers` discarded
+the terminal role and produced `Kitpulse`, `Stackora`, `Byteora`, `Developr`, and related generic
+developer names. `terminal logs and command output monitor` admitted `Shelloutput`, `Termoutput`,
+and `Monytor`. The acronym, audience, and delivery words were louder than the actual product.
+
+**Scoped interpretation and palette.** A terminal-log brief now requires both a terminal-side
+signal (`terminal`, `shell`, `console`, `command`, `prompt`, or `cli`) and a logging-side signal.
+Only in that combined context, all terminal phrasings resolve to the same six productive roots:
+`Term`, `Shell`, `Prompt`, `Log`, `Exec`, and `Pane`. The separate observability group remains
+`Trace`, `Watch`, `Scope`, `Pulse`, and `Beacon`. `developer`, `output`, `inspection`, `tool`, and
+`viewer` become context rather than naming roots, while CLI/command/monitor role words cannot take
+the Respell accent. A generic CLI brief outside this lane still keeps the ordinary developer
+palette. The three wording variants now produce exactly the same seed-specific pages as the
+canonical brief.
+
+**A/B boundaries.** Structural scoring made `Tail` look attractive, and a `Tail + Pane` palette
+raised the local average to **85.26** while removing the Term wall. The 48-domain audit caught the
+cost that the local page could not: pet care already owns `tail`, producing new `Tailify` and
+`Tailora` collisions and raising exact cross-domain pairs **24 -> 26/2,400**, above the 1% gate.
+That palette was rejected. Adding `ANSI` and `Mux` widened local spread to **20/30**, but neither
+root reached the visible page and the four-card Term wall returned. The final direct `Log` root is
+both clearer and isolated: it improves the page without creating a new shared-root collision.
+
+**Measured result.** Canonical terminal-log pages improve **84.67 -> 85.85** average structural
+quality, retain **17/30** distinct names, and reduce pair overlap **6.00 -> 5.00/10**. No page has
+a four-name stem family. Representative results include `Panebeam`, `Logbeacon`, `Logscope`,
+`Panelink`, `Shellio`, and `Promptora`. Across the unchanged 105-page held-out base, average
+quality rises **84.46 -> 84.50**, lead quality **87.13 -> 87.17**, and concept coverage
+**1.33 -> 1.35**. Near pairs fall **69 -> 64**, mean similarity **0.197 -> 0.195**, average seed
+overlap **4.83 -> 4.80/10**, and dominant-stem excess **2 -> 1**. Seed spread remains **18.80/30**,
+suffix leaders remain **21**, guided leaders remain **56**, and duplicate pages remain zero.
+
+**Verification.** The core suite is **156/156** and targeted formatting is clean. The held-out
+audit now covers 105 base pages plus 84 wording-stress pages and pins 85.7+ terminal quality,
+17/30 names, at most 5.0 overlap, zero terminal stem overflow, no role-word leakage, and exact
+wording equivalence. The 90-page cold audit, 85-page Auto audit, 1,000-selection taste matrix,
+25-page mode-aware taste audit, and browser developer-domain audit all pass. The latter retains
+**800/800** semantic Brandable names and **797/800** semantic Compound names. The 48-domain audit
+returns **2,400/2,400** names at **83.29** composite, **0.730** diversity, and **47.9%** domain
+uniqueness, with the original 24 explained collision pairs and zero unexplained collisions.
+Rebuilt WASM, TypeScript, and the production Vite bundle are green. No LLM, network call, global
+scorer, selection algorithm, retry, or random source changed.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
@@ -3586,6 +3636,9 @@ Habit and routine briefs replace ineffective roots with the scoped `Beat` and `C
 families, while building/tracking wording can no longer pull generic creator roots into the page.
 Education briefs use five productive `Tutor`/`Lore`/`Sage`/`Quiz`/`Dojo` roots instead of letting
 low-yield literal words collapse every seed into the same classroom suffixes.
+Terminal-log briefs normalize CLI/console/command wording into a scoped
+`Term`/`Shell`/`Prompt`/`Log`/`Exec`/`Pane` palette, so audience and delivery words cannot replace
+the product role or rebuild a `Term...` wall.
 Cold Auto also limits exact four-letter stem repetition on a visible page, but only through a
 quality-neutral, coverage-preserving non-suffix substitution from the fallback it already opened.
 Compound is now a genuinely brief-aware explicit alternative rather than a random adjective

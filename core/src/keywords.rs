@@ -513,6 +513,25 @@ fn is_legal_research_brief(keywords: &[String]) -> bool {
     )
 }
 
+const TERMINAL_LOG_ROOTS: &[&str] = &["term", "shell", "prompt", "log", "exec", "pane"];
+
+fn is_terminal_log_brief(keywords: &[String]) -> bool {
+    has_any_keyword(
+        keywords,
+        &["terminal", "shell", "console", "command", "prompt", "cli"],
+    ) && has_any_keyword(
+        keywords,
+        &[
+            "log",
+            "logging",
+            "monitor",
+            "monitoring",
+            "observability",
+            "telemetry",
+        ],
+    )
+}
+
 /// Drop a weak or polysemous word only when another keyword makes the intended
 /// domain explicit. The word remains available in every other context.
 fn is_contextually_suppressed(word: &str, keywords: &[String]) -> bool {
@@ -583,6 +602,7 @@ fn is_contextually_suppressed(word: &str, keywords: &[String]) -> bool {
     );
     let color_palette = is_color_palette_brief(keywords);
     let legal_research = is_legal_research_brief(keywords);
+    let terminal_log = is_terminal_log_brief(keywords);
 
     (recruiting && matches!(word, "team" | "pipeline" | "track"))
         || (meals && matches!(word, "plan" | "weekly" | "organizer"))
@@ -617,6 +637,11 @@ fn is_contextually_suppressed(word: &str, keywords: &[String]) -> bool {
         || (naming && developer_namespace && matches!(word, "check" | "find" | "search"))
         || (color_palette && matches!(word, "designer" | "generator" | "scheme"))
         || (legal_research && matches!(word, "case" | "opinion" | "search"))
+        || (terminal_log
+            && matches!(
+                word,
+                "developer" | "inspection" | "inspector" | "output" | "tool" | "viewer"
+            ))
 }
 
 /// Describes how a known product is delivered rather than what it is. These
@@ -1080,6 +1105,7 @@ pub fn respell_source_keywords(keywords: &[String]) -> Vec<String> {
     let naming_brief = is_naming_brief(keywords);
     let feature_flags = is_feature_flag_brief(keywords);
     let legal_research = is_legal_research_brief(keywords);
+    let terminal_log = is_terminal_log_brief(keywords);
     let focused: Vec<String> = keywords
         .iter()
         .filter(|keyword| {
@@ -1088,6 +1114,19 @@ pub fn respell_source_keywords(keywords: &[String]) -> Vec<String> {
                 && !matches!(keyword.as_str(), "friend" | "team" | "builder")
                 && !(feature_flags && keyword.as_str() == "developer")
                 && !(legal_research && matches!(keyword.as_str(), "citation" | "precedent"))
+                && !(terminal_log
+                    && matches!(
+                        keyword.as_str(),
+                        "cli"
+                            | "command"
+                            | "developer"
+                            | "inspection"
+                            | "inspector"
+                            | "monitor"
+                            | "output"
+                            | "tool"
+                            | "viewer"
+                    ))
                 && !concept_roots(keyword).is_empty()
                 && (!naming_brief
                     || matches!(
@@ -1108,6 +1147,7 @@ pub fn respell_source_keywords(keywords: &[String]) -> Vec<String> {
 pub fn brand_root_groups(keywords: &[String], limit: usize) -> Vec<Vec<String>> {
     const DEV_NAMING_ROOTS: &[&str] = &["key", "tag", "alias", "slug"];
     let has_naming_domain = is_naming_brief(keywords);
+    let terminal_log = is_terminal_log_brief(keywords);
     let has_rich_dev_palette = keywords.iter().any(|keyword| {
         matches!(
             keyword.as_str(),
@@ -1167,7 +1207,13 @@ pub fn brand_root_groups(keywords: &[String], limit: usize) -> Vec<Vec<String>> 
         if !suppress_literal_root(keyword) && !seen.contains(keyword) {
             group.push(keyword.clone());
         }
-        let expanded_roots = if has_naming_domain && is_dev_artifact(keyword) {
+        let expanded_roots = if terminal_log
+            && matches!(
+                keyword.as_str(),
+                "terminal" | "shell" | "console" | "command" | "prompt" | "cli"
+            ) {
+            TERMINAL_LOG_ROOTS
+        } else if has_naming_domain && is_dev_artifact(keyword) {
             DEV_NAMING_ROOTS
         } else {
             concept_roots(keyword)
@@ -2457,5 +2503,58 @@ mod tests {
         assert!(!is_contextually_suppressed("student", &generic_student));
         let generic_tool = extract_keywords("tool", 6);
         assert!(!is_contextually_suppressed("tool", &generic_tool));
+    }
+
+    #[test]
+    fn terminal_log_wording_variants_keep_terminal_roots_and_drop_role_context() {
+        for prompt in [
+            "a terminal log viewer",
+            "CLI log viewer for developers",
+            "terminal logs and command output monitor",
+            "a console log inspection tool",
+        ] {
+            let keywords = extract_keywords(prompt, 6);
+            assert!(is_terminal_log_brief(&keywords), "{prompt}: {keywords:?}");
+
+            let groups = brand_root_groups(&keywords, 16);
+            assert_eq!(groups.len(), 2, "{prompt}: {groups:?}");
+            assert_eq!(
+                groups[0],
+                TERMINAL_LOG_ROOTS
+                    .iter()
+                    .map(|root| root.to_string())
+                    .collect::<Vec<_>>(),
+                "{prompt}",
+            );
+            assert_eq!(
+                groups[1],
+                ["trace", "watch", "scope", "pulse", "beacon"]
+                    .map(str::to_string)
+                    .to_vec(),
+                "{prompt}",
+            );
+
+            let respell_sources = respell_source_keywords(&keywords);
+            assert!(
+                respell_sources.iter().all(|source| !matches!(
+                    source.as_str(),
+                    "cli"
+                        | "command"
+                        | "developer"
+                        | "inspection"
+                        | "inspector"
+                        | "monitor"
+                        | "output"
+                        | "tool"
+                        | "viewer"
+                )),
+                "{prompt}: {respell_sources:?}",
+            );
+        }
+
+        let generic_cli = extract_keywords("a CLI package manager", 6);
+        let generic_roots = brand_roots(&generic_cli, 16);
+        assert!(generic_roots.contains(&"crate".to_string()));
+        assert!(!is_terminal_log_brief(&generic_cli));
     }
 }

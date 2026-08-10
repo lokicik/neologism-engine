@@ -24,7 +24,10 @@ const CASES = [
   },
   {
     prompt: 'a terminal log viewer',
-    markers: ['term', 'shell', 'prompt', 'trace', 'watch', 'scope', 'pulse', 'beacon'],
+    markers: [
+      'term', 'shell', 'prompt', 'log', 'exec', 'pane',
+      'trace', 'watch', 'scope', 'pulse', 'beacon',
+    ],
   },
   {
     prompt: 'git release automation',
