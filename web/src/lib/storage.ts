@@ -74,7 +74,9 @@ export function removeFavorite(favorites: NameResult[], item: NameResult): NameR
 export function loadRejected(): NameResult[] {
   try {
     const raw = localStorage.getItem(REJECTED_KEY)
-    return raw ? (JSON.parse(raw) as NameResult[]) : []
+    if (!raw) return []
+    const stored = JSON.parse(raw) as unknown
+    return Array.isArray(stored) ? stored as NameResult[] : []
   } catch {
     return []
   }

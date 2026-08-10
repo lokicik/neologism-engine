@@ -305,6 +305,19 @@ export default function App() {
     }
   }, [])
 
+  const handleUndoRejected = useCallback((item: NameResult): number | null => {
+    const current = rejectedRef.current
+    try {
+      const nextRejected = removeRejected(current, item)
+      if (nextRejected.length === current.length) return null
+      rejectedRef.current = nextRejected
+      setRejected(nextRejected)
+      return nextRejected.length
+    } catch {
+      return null
+    }
+  }, [])
+
   const handleRemoveSaved = useCallback((item: NameResult) => {
     const removal = removeSavedEverywhere(
       favoritesRef.current,
@@ -563,6 +576,7 @@ export default function App() {
           favorites={favorites}
           rejected={rejected}
           onSave={saveSettings}
+          onUndoRejected={handleUndoRejected}
           onClose={() => setShowSettings(false)}
         />
       )}

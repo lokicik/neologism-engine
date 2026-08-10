@@ -4191,6 +4191,50 @@ DoH JSON documentation, and RDAP HTTP semantics in RFC 7480.
 
 ---
 
+## Phase 147 — Make persisted passes actually reversible
+
+**Bottleneck.** Phase 61 described **Not for me** as reversible, but the undo control existed only
+on a currently visible card. Passed rows persist locally, affect later ranking, and enter the v2
+taste export; after a reload or a new batch, there was no UI that could inspect or neutralize one
+mistaken or stale pass. The 20,000-name recent-history window also makes waiting for the exact card
+to reappear an unrealistic recovery path. This was a user-data correctness gap, not a request for
+another taste proxy or ranking rule.
+
+**Frozen boundary.** Settings now contains a default-collapsed **Review passed names** surface next
+to the existing Local taste data summary and export. It renders only explicit negative rows—never
+Saved or share-only names—and keeps one row per existing taste identity: project-context ID plus
+trimmed, lowercased spelling, with a separate null-context legacy bucket. Scoped labels expose all
+human-visible identity inputs already stored on the row: naming style, brief, and roots; an absent
+context is labeled **Historical unscoped feedback** rather than inferred from the current Create
+brief. Source mode remains descriptive. No timestamps or chronology are claimed because the schema
+does not store them.
+
+**Undo and failure semantics.** **Undo pass** is a remove-only action. It persists deletion of that
+exact identity before mutating React state, then immediately updates the count, matched-evidence
+progress, v2 export, active taste profile, and any matching visible card. It never converts the name
+into a like or Saved entry. The same spelling passed in another project or in the legacy bucket is
+untouched. If browser storage rejects the write, the row, profile, and export remain unchanged and
+the surface shows a visible alert. A successful action announces the remaining count and moves
+keyboard focus to the next Undo action, or back to the disclosure after the final row. Parsed
+non-array rejected storage now fails closed to an empty in-memory list without rewriting the
+durable value; valid arrays and the existing 200-row cap are unchanged.
+
+**Acceptance evidence.** The directly runnable identity fixture passes **21/21**, including scoped,
+cross-project, legacy, and unknown-row removal semantics. The production-browser contract passes
+**26/26**. It seeds one spelling in project A, project B, and the legacy bucket; proves distinct
+labels and exact deletion; checks summary, matched evidence, v2 export, live-card neutralization,
+reload persistence, success announcement and focus, the final-row empty state, malformed non-array
+loading, and a forced storage-write failure that leaves both UI and durable data intact. The
+production build is green, and the retained taste/Saved browser contract remains **61/61**.
+
+**Decision.** Phase 147 changes no `NameResult`, `TasteContext`, taste/storage/export schema,
+generator, scorer, ranker, profile threshold, random stream, network path, Saved identity, WASM, or
+Rust code. Settings already owns local taste counts and export, so the review stays there instead of
+adding another top-level collection. The next separate accessibility checkpoint should make that
+dialog and its model picker fully keyboard-modal; it is not bundled into this data-correction phase.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

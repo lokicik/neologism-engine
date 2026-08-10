@@ -985,6 +985,110 @@ body {
 .taste-export-btn { flex-shrink: 0; min-height: 40px; }
 .taste-export-btn:disabled { opacity: .45; cursor: not-allowed; }
 .taste-export-btn:disabled:active { transform: none; }
+.settings-passed {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .015);
+}
+.settings-passed-toggle {
+  width: 100%;
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .8rem;
+  padding: .65rem .8rem;
+  color: var(--text);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  font-size: .82rem;
+  font-weight: 600;
+  text-align: left;
+}
+.settings-passed-toggle:hover:not(:disabled) { background: rgba(255, 255, 255, .035); }
+.settings-passed-toggle:disabled { color: var(--muted); cursor: default; }
+.settings-passed-meta { display: inline-flex; align-items: center; gap: .45rem; }
+.settings-passed-count {
+  min-width: 1.55rem;
+  padding: .08rem .4rem;
+  border-radius: 999px;
+  color: var(--muted);
+  background: var(--surface2);
+  font-size: .72rem;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+.settings-passed-chevron {
+  color: var(--muted);
+  font-size: .65rem;
+  transition: transform .16s ease;
+}
+.settings-passed-chevron.open { transform: rotate(180deg); }
+.settings-passed-body {
+  padding: 0 .8rem .75rem;
+  border-top: 1px solid var(--border);
+}
+.settings-passed-help,
+.settings-passed-empty,
+.settings-passed-error,
+.settings-passed-status {
+  margin: .65rem 0 0;
+  color: var(--muted);
+  font-size: .74rem;
+  line-height: 1.45;
+}
+.settings-passed-error { color: var(--danger); }
+.settings-passed-status { color: var(--accent2); }
+.settings-passed-list {
+  max-height: 240px;
+  overflow-y: auto;
+  margin-top: .55rem;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: .35rem;
+}
+.settings-passed-row {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  min-width: 0;
+  padding: .5rem .55rem;
+  border-radius: 8px;
+  background: var(--surface2);
+}
+.settings-passed-copy {
+  min-width: 0;
+  flex: 1;
+  display: grid;
+  gap: .1rem;
+}
+.settings-passed-copy strong { color: var(--text); font-size: .82rem; }
+.settings-passed-copy span {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: .72rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.settings-passed-copy small { color: var(--muted); font-size: .68rem; opacity: .75; }
+.settings-passed-undo {
+  flex-shrink: 0;
+  min-height: 40px;
+  padding: .4rem .55rem;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  color: var(--text);
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-size: .74rem;
+}
+.settings-passed-undo:hover { border-color: rgba(255, 255, 255, .2); background: rgba(255, 255, 255, .035); }
+.settings-passed-undo:active { transform: scale(.96); }
 .settings-actions { display: flex; justify-content: flex-end; gap: .6rem; }
 
 /* Phase 53: themed model combobox (replaces the unstyleable native datalist). */
@@ -1394,12 +1498,13 @@ body {
   .badge-checking { animation: none; }
   .availability-domain-row[data-status="checking"] .availability-result { animation: none; }
   .chip-chevron { transition: none; }
+  .settings-passed-chevron { transition: none; }
   .icon-btn { transition: color .15s, background .15s; }
   .icon-btn:active,
   .command-go:active, .landing-cta:active, .nav-cta:active, .toolbar-btn:active,
   .mode-pill:active, .chip:active, .card-chip:active, .example-chip:active,
   .tile-pill:active, .sidebar-item:active, .availability-run:active,
-  .availability-manual-link:active { transform: none; }
+  .availability-manual-link:active, .settings-passed-undo:active { transform: none; }
 }
 
 /* Sidebar collapses to a horizontal top bar on narrow screens */
@@ -1507,4 +1612,5 @@ body {
   .command-go { width: 100%; }
   .page-header { flex-direction: column; align-items: flex-start; }
   .availability-reading { flex-direction: column; align-items: flex-start; gap: .05rem; }
+  .settings-passed-row { align-items: flex-start; }
 }

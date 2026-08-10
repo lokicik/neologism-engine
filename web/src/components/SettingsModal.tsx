@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import {
   DEFAULT_JUDGE_PROMPT,
   DEFAULT_LOCAL_ENDPOINT,
@@ -14,6 +14,7 @@ import {
   exportTasteDataset,
   tasteEvidenceProgress,
 } from '../lib/taste-data'
+import { tasteIdentity } from '../lib/taste-identity'
 import { IconDownload } from './icons'
 
 interface Props {
@@ -21,6 +22,7 @@ interface Props {
   favorites: NameResult[]
   rejected: NameResult[]
   onSave: (cfg: JudgeConfig) => void
+  onUndoRejected: (item: NameResult) => number | null
   onClose: () => void
 }
 
@@ -28,6 +30,35 @@ const perM = (pricePerToken: number) => `$${(pricePerToken * 1e6).toFixed(2)}/M`
 const priceTag = (m: ModelInfo) => (m.free ? 'FREE' : m.priceIn < 0 ? 'variable' : perM(m.priceIn))
 const ctxK = (m: ModelInfo) => (m.contextLength ? `${Math.round(m.contextLength / 1000)}k ctx` : '')
 const optionTag = (m: ModelInfo) => [priceTag(m), ctxK(m)].filter(Boolean).join(' · ')
+
+const STYLE_LABEL: Record<NameResult['style'], string> = {
+  big_tech: 'Big Tech',
+  sci_fi: 'Sci-Fi',
+  fantasy: 'Fantasy',
+}
+
+function passContextLabel(item: NameResult): string {
+  if (!item.tasteContext) return 'Historical unscoped feedback'
+  const parts = [STYLE_LABEL[item.style]]
+  if (item.tasteContext.description?.trim()) {
+    parts.push(`“${item.tasteContext.description.trim()}”`)
+  }
+  if (item.tasteContext.roots.length > 0) {
+    parts.push(`roots: ${item.tasteContext.roots.join(', ')}`)
+  }
+  if (parts.length === 1) parts.push('no project brief')
+  return parts.join(' · ')
+}
+
+function sourceModeLabel(item: NameResult): string {
+  const labels: Record<string, string> = {
+    brandable: 'Brandable',
+    realword: 'Real word',
+    respell: 'Respell',
+    compound: 'Compound',
+  }
+  return labels[item.sourceMode ?? ''] ?? 'Unknown source'
+}
 
 // Capture the picked model's per-token prices into the config (undefined when
 // unknown or variable, so the estimate shows "$?" rather than a bogus number).
@@ -40,12 +71,18 @@ const priceFields = (m?: ModelInfo) => ({
 // (both OpenAI-compatible): OpenRouter with the user's own key, or a local
 // server. The model list is fetched live and shown in a themed combobox (Phase
 // 53 — the native <datalist> couldn't be styled and scrolled badly).
-export function SettingsModal({ config, favorites, rejected, onSave, onClose }: Props) {
+export function SettingsModal({ config, favorites, rejected, onSave, onUndoRejected, onClose }: Props) {
   const [draft, setDraft] = useState<JudgeConfig>(config)
   const [models, setModels] = useState<ModelInfo[]>([])
   const [modelsLoading, setModelsLoading] = useState(false)
   const [modelOpen, setModelOpen] = useState(false)
+  const [passedOpen, setPassedOpen] = useState(false)
+  const [passUndoError, setPassUndoError] = useState<string | null>(null)
+  const [passUndoStatus, setPassUndoStatus] = useState<string | null>(null)
   const comboRef = useRef<HTMLDivElement>(null)
+  const passedListId = useId()
+  const passedToggleRef = useRef<HTMLButtonElement>(null)
+  const passedBodyRef = useRef<HTMLDivElement>(null)
 
   // Escape closes the model dropdown first, then the modal.
   useEffect(() => {
@@ -118,6 +155,22 @@ export function SettingsModal({ config, favorites, rejected, onSave, onClose }: 
   const selectModel = (m: ModelInfo) => {
     setDraft((d) => ({ ...d, model: m.id, ...priceFields(m) }))
     setModelOpen(false)
+  }
+
+  const undoPass = (item: NameResult) => {
+    const remaining = onUndoRejected(item)
+    if (remaining === null) {
+      setPassUndoStatus(null)
+      setPassUndoError(`Could not undo the pass on ${item.name}. Browser storage kept it unchanged.`)
+      return
+    }
+    setPassUndoError(null)
+    setPassUndoStatus(`Pass on ${item.name} undone. ${remaining} passed ${remaining === 1 ? 'name' : 'names'} remain.`)
+    requestAnimationFrame(() => {
+      const nextUndo = passedBodyRef.current?.querySelector<HTMLButtonElement>('.settings-passed-undo')
+      const focusTarget = nextUndo ?? passedToggleRef.current
+      focusTarget?.focus()
+    })
   }
 
   const modelField = (placeholder: string, extraLabel = '') => (
@@ -294,6 +347,65 @@ export function SettingsModal({ config, favorites, rejected, onSave, onClose }: 
           >
             <IconDownload /> Export JSON
           </button>
+        </section>
+
+        <section className="settings-passed" aria-labelledby={`${passedListId}-title`}>
+          <button
+            ref={passedToggleRef}
+            id={`${passedListId}-title`}
+            type="button"
+            className="settings-passed-toggle"
+            aria-expanded={passedOpen}
+            aria-controls={passedListId}
+            disabled={rejected.length === 0 && !passedOpen}
+            onClick={() => {
+              setPassedOpen((open) => !open)
+              setPassUndoError(null)
+              setPassUndoStatus(null)
+            }}
+          >
+            <span>Review passed names</span>
+            <span className="settings-passed-meta" aria-hidden="true">
+              <span className="settings-passed-count">{rejected.length}</span>
+              <span className={`settings-passed-chevron${passedOpen ? ' open' : ''}`}>▾</span>
+            </span>
+          </button>
+
+          {passedOpen && (
+            <div ref={passedBodyRef} id={passedListId} className="settings-passed-body">
+              <p className="settings-passed-help">
+                Undo makes only that pass entry neutral. It never likes or saves the name.
+              </p>
+              {passUndoError && <p className="settings-passed-error" role="alert">{passUndoError}</p>}
+              {passUndoStatus && <p className="settings-passed-status" role="status">{passUndoStatus}</p>}
+              {rejected.length === 0 ? (
+                <p className="settings-passed-empty">No passed names remain.</p>
+              ) : (
+                <ul className="settings-passed-list">
+                  {[...rejected].reverse().map((item) => {
+                    const context = passContextLabel(item)
+                    return (
+                      <li className="settings-passed-row" key={tasteIdentity(item)}>
+                        <div className="settings-passed-copy">
+                          <strong>{item.name}</strong>
+                          <span title={context}>{context}</span>
+                          <small>{sourceModeLabel(item)}</small>
+                        </div>
+                        <button
+                          type="button"
+                          className="settings-passed-undo"
+                          onClick={() => undoPass(item)}
+                          aria-label={`Undo pass on ${item.name} for ${context}`}
+                        >
+                          Undo pass
+                        </button>
+                      </li>
+                    )
+                  })}
+                </ul>
+              )}
+            </div>
+          )}
         </section>
 
         <div className="settings-actions">

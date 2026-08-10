@@ -74,6 +74,18 @@ check(
     && withoutTasteItem(rejected, projectB).length === 0,
   'same-context exclusion never erases an opposite label from another project',
 )
+const reviewedPasses = [projectA, projectB, legacy]
+const afterProjectAUndo = withoutTasteItem(reviewedPasses, result(' NOMA ', 'project-a'))
+check(
+  afterProjectAUndo.length === 2
+    && afterProjectAUndo[0] === projectB
+    && afterProjectAUndo[1] === legacy,
+  'undoing one scoped pass preserves same-spelling passes in another project and legacy',
+)
+check(
+  withoutTasteItem(reviewedPasses, projectC).length === reviewedPasses.length,
+  'undoing an unknown pass is a no-op',
+)
 
 const importedNoma = shareStub('NOMA')
 const importedLexix = shareStub('Lexix')
