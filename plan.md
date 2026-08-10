@@ -3791,6 +3791,46 @@ call, score adjustment, global pool expansion, or special-cased replacement name
 
 ---
 
+## Phase 141 — Measure visible construction saturation before changing generation
+
+**Observed blind spot.** The retained held-out set has only **0.197** mean edit similarity and one
+exact-stem excess card, yet whole pages still read as variations on the same recipe. Message-queue
+seed 67 is ten root-plus-metaphor forms; routine seed 13 is the same, while delivery pages place one
+semantic pair beside nine suffix forms. String and stem diversity therefore do not measure whether
+the construction itself has become repetitive.
+
+**Observation-only proxy.** The held-out audit now classifies only the final visible cards, using
+mutually exclusive surface shapes: Respell/other accent, one-concept direct suffix, multi-concept
+linkage, one-concept curated metaphor tail, or unclassified Brandable. This is explicitly a
+`template-match proxy`, not generator provenance or an aesthetic truth. A coincidental suffix is
+possible, `concept_coverage` is semantic rather than structural metadata, and an unclassified form
+would not by itself prove holistic Wordoid-style generation. For that reason Phase 141 adds no new
+quality gate and changes no production selection behavior.
+
+**Measured baseline.** Across the 105 canonical pages and 1,050 visible cards, **527 (50.2%)** are
+direct suffix forms, **363 (34.6%)** are root-plus-metaphor shapes, **148 (14.1%)** are linked to
+multiple brief concepts, and only **12 (1.1%)** are Respells; zero Brandables fall outside the
+known proxy. In total,
+**1,038/1,050 (98.9%)** cards match an assembled construction. **93/105** pages match 10/10 and all
+**105/105** match at least 9/10. A single broad construction shape occupies six or more cards on
+**72/105** pages, while **19/105** pages contain at least eight direct suffixes. The narrower
+suffix-plus-metaphor subtotal is **8.48/10** per page; 83 pages reach eight and 44 reach ten. The
+separate wording-stress set is even more saturated: **1,104/1,110 (99.5%)**, with **105/111**
+10/10 pages and **90/111** single-shape walls.
+
+**Decision boundary.** A future experimental lane must reduce both whole-page template matching
+and single-shape walls; merely exchanging suffix forms for more metaphor tails is not an
+improvement. Every existing semantic, structural, diversity, lexical-safety, taste, namespace, and
+session gate must remain green. Integration still requires context-matched, blind pairwise human
+preference evidence; this diagnostic alone cannot establish that a candidate is beautiful.
+
+**Verification.** The production-path held-out audit reproduces the full Phase 140 baseline and all
+49 retained gates while printing canonical and wording-stress construction summaries plus the most
+saturated pages. No Rust, WASM, generator, ranker, shortlist, score, random source, network path, or
+UI behavior changed.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
@@ -3867,6 +3907,10 @@ turning guided Auto back into a fixed mode quota.
 High-confidence hidden root-plus-metaphor reparses now open only the existing bounded Brandable
 fallback, and a replacement must preserve quality, brief coverage, and every retained set-diversity
 measure without changing the generator's rank or random stream.
+The held-out audit now also records visible construction saturation without treating it as an
+aesthetic score: **98.9%** of canonical cards match a known assembled template and **72/105** pages
+have a six-card single-shape wall. The next generator experiment must lower both measures beside
+production Auto rather than shifting suffix cards into another visible template family.
 AI Studio remains an optional, separate batch judge rather than a hidden dependency of Create.
 
 The next broad aesthetic scorer change is evidence-gated: collect at least ten real likes and ten passes in

@@ -125,6 +125,16 @@ const PROMPTS = [
 ]
 const SEEDS = [13, 67, 313]
 const DIRECT_SUFFIXES = ['ify', 'ora', 'ion', 'era', 'io', 'ia', 'ix', 'el', 'en', 'on']
+const ROOT_METAPHOR_TAILS = [
+  'flow', 'forge', 'spark', 'seed', 'craft', 'nest', 'lab', 'wave', 'link', 'pulse',
+  'beam', 'grid', 'vault', 'relay', 'trace', 'scope', 'prism', 'lumen', 'nova', 'peak',
+  'trail', 'path', 'signal', 'hive', 'smith', 'harbor', 'grove', 'spring', 'frame',
+  'glow', 'flux', 'loom', 'muse', 'atlas',
+]
+const ASSEMBLED_CONSTRUCTION_SHAPES = new Set([
+  'direct_suffix', 'root_metaphor', 'multi_concept',
+])
+const TEMPLATE_CONSTRUCTION_SHAPES = new Set(['direct_suffix', 'root_metaphor'])
 const REVIEWED_RESPELLS = new Set(['browsr', 'lybrary', 'pryvate', 'vysual'])
 
 const server = spawn(process.execPath, [viteCli, '--port', String(PORT), '--strictPort'], {
@@ -226,6 +236,29 @@ try {
     && item.concept_coverage === 1
     && DIRECT_SUFFIXES.some((ending) => letters(item.name).endsWith(ending))
   )
+  // This is a visible-shape diagnostic, not generator provenance. It measures
+  // how assembled a page reads without claiming which random branch emitted a
+  // candidate. Keep it observation-only until human preference data validates
+  // which construction shares actually predict a name someone would choose.
+  const constructionShape = (item) => {
+    if (item.sourceMode === 'respell') return 'respell'
+    if (item.sourceMode === 'realword') return 'realword'
+    if (item.sourceMode === 'compound') return 'compound'
+    if (item.construction === 'guided_metaphor') return 'root_metaphor'
+    if (isDirectSuffix(item)) return 'direct_suffix'
+    if (item.sourceMode === 'brandable' && (item.concept_coverage ?? 0) >= 2) {
+      return 'multi_concept'
+    }
+    const normalized = letters(item.name)
+    if (
+      item.sourceMode === 'brandable'
+      && (item.concept_coverage ?? 0) > 0
+      && ROOT_METAPHOR_TAILS.some((ending) => (
+        normalized.length >= ending.length + 2 && normalized.endsWith(ending)
+      ))
+    ) return 'root_metaphor'
+    return 'other_brandable'
+  }
   const basePrompts = new Set(BASE_PROMPTS)
   const auditRows = rows.filter((row) => basePrompts.has(row.prompt))
   const all = auditRows.flatMap((row) => row.selected)
@@ -312,6 +345,71 @@ try {
   const selectedLexicalHazards = rows.flatMap((row) => row.selected
     .filter((item) => item.lexicalHazard)
     .map((item) => ({ row, item })))
+  const summarizeConstruction = (selectedRows) => {
+    const counts = new Map()
+    const constructionRows = selectedRows.map((row) => {
+      const shapes = row.selected.map(constructionShape)
+      const pageCounts = shapes.reduce((result, shape) => {
+        counts.set(shape, (counts.get(shape) ?? 0) + 1)
+        result.set(shape, (result.get(shape) ?? 0) + 1)
+        return result
+      }, new Map())
+      const assembledCount = shapes.filter((shape) => (
+        ASSEMBLED_CONSTRUCTION_SHAPES.has(shape)
+      )).length
+      const templateCount = shapes.filter((shape) => (
+        TEMPLATE_CONSTRUCTION_SHAPES.has(shape)
+      )).length
+      const [dominantShape = 'empty', dominantCount = 0] = [...pageCounts.entries()]
+        .sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0]))[0] ?? []
+      return {
+        row, shapes, pageCounts, assembledCount, templateCount, dominantShape, dominantCount,
+      }
+    }).sort((left, right) => (
+      right.assembledCount - left.assembledCount
+      || right.templateCount - left.templateCount
+      || right.dominantCount - left.dominantCount
+      || left.row.prompt.localeCompare(right.row.prompt)
+    ))
+    const totalCards = selectedRows.reduce((sum, row) => sum + row.selected.length, 0)
+    const assembledForms = constructionRows.reduce((sum, row) => sum + row.assembledCount, 0)
+    const templateForms = constructionRows.reduce((sum, row) => sum + row.templateCount, 0)
+    const dominantForms = constructionRows.reduce((sum, row) => sum + row.dominantCount, 0)
+    return {
+      counts,
+      constructionRows,
+      totalCards,
+      assembledForms,
+      assembledHeavyRows: constructionRows.filter((row) => row.assembledCount >= 8),
+      assembledOnlyRows: constructionRows.filter((row) => row.assembledCount === 10),
+      severeAssemblyRows: constructionRows.filter((row) => row.assembledCount >= 9),
+      templateForms,
+      templateHeavyRows: constructionRows.filter((row) => row.templateCount >= 8),
+      templateOnlyRows: constructionRows.filter((row) => row.templateCount === 10),
+      dominantForms,
+      dominantHeavyRows: constructionRows.filter((row) => row.dominantCount >= 8),
+      singleShapeWallRows: constructionRows.filter((row) => row.dominantCount >= 6),
+      suffixWallRows: constructionRows.filter((row) => (
+        (row.pageCounts.get('direct_suffix') ?? 0) >= 8
+      )),
+      maxAssembled: Math.max(0, ...constructionRows.map((row) => row.assembledCount)),
+      maxDominant: Math.max(0, ...constructionRows.map((row) => row.dominantCount)),
+    }
+  }
+  const canonicalConstruction = summarizeConstruction(auditRows)
+  const stressConstruction = summarizeConstruction(rows.filter((row) => !basePrompts.has(row.prompt)))
+  const constructionSummary = (label, summary) => {
+    const describe = (shape) => {
+      const count = summary.counts.get(shape) ?? 0
+      const share = summary.totalCards === 0 ? 0 : count / summary.totalCards * 100
+      return `${count} (${share.toFixed(1)}%)`
+    }
+    return `${label}: suffix ${describe('direct_suffix')}`
+      + ` · root+metaphor ${describe('root_metaphor')}`
+      + ` · multi-concept ${describe('multi_concept')}`
+      + ` · Respell ${describe('respell')}`
+      + ` · other ${describe('other_brandable')}`
+  }
   const respellInventory = new Map()
   for (const { row, item } of selectedRespellAccents) {
     const key = letters(item.name)
@@ -699,6 +797,36 @@ try {
   console.log(`weak Respell accents: ${weakRespellAccents.length}`)
   console.log(`selected Respell accents: ${selectedRespellAccents.length} pages · ${respellInventory.size} unique`)
   console.log(`selected lexical hazards: ${selectedLexicalHazards.length}`)
+  console.log(constructionSummary('canonical construction shapes', canonicalConstruction))
+  console.log(
+    `canonical template-match proxy: ${canonicalConstruction.assembledForms}/${canonicalConstruction.totalCards}`
+    + ` (${(canonicalConstruction.assembledForms / canonicalConstruction.totalCards * 100).toFixed(1)}%)`
+    + ` · ${(canonicalConstruction.assembledForms / auditRows.length).toFixed(2)}/10 average`
+    + ` · max ${canonicalConstruction.maxAssembled}/10`,
+  )
+  console.log(
+    `canonical saturation pages: ${canonicalConstruction.assembledOnlyRows.length}/${auditRows.length} at 10/10`
+    + ` · ${canonicalConstruction.severeAssemblyRows.length}/${auditRows.length} at 9+`
+    + ` · ${canonicalConstruction.singleShapeWallRows.length}/${auditRows.length} single-shape walls`
+    + ` · ${canonicalConstruction.suffixWallRows.length}/${auditRows.length} suffix walls`,
+  )
+  console.log(
+    `canonical root-template subtotal: ${(canonicalConstruction.templateForms / auditRows.length).toFixed(2)}/10 average`
+    + ` · ${canonicalConstruction.templateHeavyRows.length}/${auditRows.length} pages at 8+`
+    + ` · ${canonicalConstruction.templateOnlyRows.length}/${auditRows.length} pages at 10/10`,
+  )
+  console.log(
+    `canonical dominant construction: ${(canonicalConstruction.dominantForms / auditRows.length).toFixed(2)}/10 average`
+    + ` · max ${canonicalConstruction.maxDominant}/10`
+    + ` · ${canonicalConstruction.dominantHeavyRows.length}/${auditRows.length} pages at 8+`,
+  )
+  console.log(constructionSummary('wording-stress construction shapes', stressConstruction))
+  console.log(
+    `wording-stress template-match proxy: ${stressConstruction.assembledForms}/${stressConstruction.totalCards}`
+    + ` (${(stressConstruction.assembledForms / stressConstruction.totalCards * 100).toFixed(1)}%)`
+    + ` · ${stressConstruction.assembledOnlyRows.length}/${stressConstruction.constructionRows.length} pages at 10/10`
+    + ` · ${stressConstruction.singleShapeWallRows.length}/${stressConstruction.constructionRows.length} single-shape walls`,
+  )
   console.log(`seed diversity: ${averageUniqueNames.toFixed(2)}/30 unique · ${averageSeedOverlap.toFixed(2)}/10 pair overlap · ${exactDuplicateSeedPages} duplicate pages`)
   console.log(`dominant stem overflow: ${dominantStemRows.length}/${auditRows.length} pages · ${dominantStemExcess} excess cards`)
   console.log(`fallback counts: ${[...new Set(rows.map((row) => row.fallbackCount))].sort((a, b) => a - b).join(', ')}`)
@@ -805,6 +933,16 @@ try {
   console.log('\nlowest-average pages')
   for (const row of worst) {
     console.log(`${row.average.toFixed(2)} · ${row.seed} · ${row.prompt}: ${row.selected.map((item) => item.name).join(', ')}`)
+  }
+  console.log('\nmost construction-saturated pages')
+  for (const {
+    row, shapes, assembledCount, templateCount, dominantShape, dominantCount,
+  } of canonicalConstruction.constructionRows.slice(0, 12)) {
+    console.log(
+      `${assembledCount}/10 assembled · ${templateCount}/10 template`
+      + ` · dominant ${dominantShape}:${dominantCount} · ${row.seed} · ${row.prompt}`
+      + ` · ${row.selected.map((item, index) => `${item.name}:${shapes[index]}`).join(', ')}`,
+    )
   }
   console.log('\nlowest seed diversity')
   for (const row of seedDiversity.slice(0, 8)) {
