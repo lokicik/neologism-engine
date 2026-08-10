@@ -289,9 +289,8 @@ fn concept_roots(word: &str) -> &'static [&'static str] {
             // instead of letting dead entries narrow every seed to Sage/Lore.
             &["tutor", "lore", "sage", "quiz", "dojo"]
         }
-        "delivery" | "ship" | "shipping" | "logistic" | "logistics" | "transport" => {
-            &["route", "fleet", "cargo", "relay", "dock"]
-        }
+        "delivery" | "ship" | "shipping" | "logistic" | "logistics" | "transport" | "parcel"
+        | "shipment" => &["route", "fleet", "cargo", "relay", "dock"],
         "ai" | "model" | "agent" | "automation" => {
             &["cogn", "logic", "axiom", "synth", "agent", "neural"]
         }
@@ -455,9 +454,8 @@ fn concept_adjectives(word: &str) -> &'static [&'static str] {
         "learn" | "education" | "study" | "course" => {
             &["bright", "clear", "open", "smart", "deep", "daily"]
         }
-        "delivery" | "ship" | "shipping" | "logistic" | "logistics" | "transport" => {
-            &["swift", "direct", "ready", "steady", "rapid", "local"]
-        }
+        "delivery" | "ship" | "shipping" | "logistic" | "logistics" | "transport" | "parcel"
+        | "shipment" => &["swift", "direct", "ready", "steady", "rapid", "local"],
         "ai" | "model" | "agent" | "automation" => {
             &["smart", "native", "open", "clear", "deep", "bright"]
         }
@@ -509,6 +507,30 @@ fn is_legal_research_brief(keywords: &[String]) -> bool {
             "opinion",
         ],
     )
+}
+
+fn is_delivery_tracking_brief(keywords: &[String]) -> bool {
+    has_any_keyword(
+        keywords,
+        &[
+            "delivery",
+            "ship",
+            "shipping",
+            "logistic",
+            "logistics",
+            "transport",
+            "parcel",
+            "shipment",
+        ],
+    ) && has_any_keyword(
+        keywords,
+        &["track", "tracking", "operation", "operations", "dispatch"],
+    )
+}
+
+fn is_cloud_deployment_brief(keywords: &[String]) -> bool {
+    has_any_keyword(keywords, &["cloud", "hosting", "infrastructure", "infra"])
+        && has_any_keyword(keywords, &["deploy", "deployment"])
 }
 
 const TERMINAL_LOG_ROOTS: &[&str] = &["term", "shell", "prompt", "log", "exec", "pane"];
@@ -606,6 +628,20 @@ fn is_contextually_suppressed(word: &str, keywords: &[String]) -> bool {
     let color_palette = is_color_palette_brief(keywords);
     let legal_research = is_legal_research_brief(keywords);
     let terminal_log = is_terminal_log_brief(keywords);
+    let delivery_tracking = is_delivery_tracking_brief(keywords);
+    let delivery_wording_context = delivery_tracking
+        && has_any_keyword(
+            keywords,
+            &[
+                "parcel",
+                "shipment",
+                "operation",
+                "operations",
+                "dispatch",
+                "team",
+            ],
+        );
+    let cloud_deployment = is_cloud_deployment_brief(keywords);
 
     (recruiting && matches!(word, "team" | "pipeline" | "track"))
         || (meals && matches!(word, "plan" | "weekly" | "organizer"))
@@ -658,6 +694,12 @@ fn is_contextually_suppressed(word: &str, keywords: &[String]) -> bool {
                 word,
                 "developer" | "inspection" | "inspector" | "output" | "tool" | "viewer"
             ))
+        || (delivery_wording_context
+            && matches!(
+                word,
+                "dashboard" | "dispatch" | "operation" | "team" | "track"
+            ))
+        || (cloud_deployment && matches!(word, "application" | "dashboard" | "team"))
 }
 
 /// Describes how a known product is delivered rather than what it is. These
@@ -1285,6 +1327,21 @@ pub fn guided_pair_root_groups(keywords: &[String], limit: usize) -> Vec<Vec<Str
         // Legal research benefits from deliberate research roles such as
         // `LexCite` and `BriefLens`; keep them out of ordinary suffix output.
         const GROUPS: &[&[&str]] = &[&["lex", "brief", "docket"], &["lens", "cite", "proof"]];
+        return bounded_guided_groups(GROUPS, limit);
+    }
+
+    if is_delivery_tracking_brief(keywords) {
+        // A delivery tracker benefits from one concise shipping-operations
+        // role such as `ShipOps`; keep Ops/Map/Hub out of ordinary delivery
+        // suffix pages and unrelated uses of shipping language.
+        const GROUPS: &[&[&str]] = &[&["ship"], &["ops", "map", "hub"]];
+        return bounded_guided_groups(GROUPS, limit);
+    }
+
+    if is_cloud_deployment_brief(keywords) {
+        // `SkyDock` gives cloud deployment a short release/docking metaphor
+        // without replacing the ordinary cloud and weather palettes.
+        const GROUPS: &[&[&str]] = &[&["sky"], &["dock", "ship", "grid"]];
         return bounded_guided_groups(GROUPS, limit);
     }
 
@@ -1936,6 +1993,74 @@ mod tests {
             .iter()
             .flatten()
             .any(|root| root == "stow"));
+    }
+
+    #[test]
+    fn guided_delivery_tracking_uses_shipping_operations_roles_only_in_its_lane() {
+        let canonical = extract_keywords("a delivery tracking and logistics app", 6);
+        assert!(!brand_root_groups(&canonical, 16)
+            .iter()
+            .flatten()
+            .any(|root| root == "ops"));
+        assert_eq!(
+            guided_pair_root_groups(&canonical, 16),
+            vec![vec!["ship"], vec!["ops", "map", "hub"]]
+        );
+
+        for prompt in [
+            "shipping operations and parcel tracking",
+            "a parcel tracking dashboard for delivery teams",
+            "logistics dispatch and shipment tracking",
+        ] {
+            let keywords = extract_keywords(prompt, 6);
+            let ordinary = brand_root_groups(&keywords, 16);
+            let guided = guided_pair_root_groups(&keywords, 16);
+            assert!(!ordinary.iter().flatten().any(|root| root == "ops"));
+            assert_eq!(ordinary.len(), 1, "{prompt}: {keywords:?} -> {ordinary:?}");
+            assert!(!ordinary.iter().flatten().any(|root| root == "kin"));
+            assert_eq!(guided, vec![vec!["ship"], vec!["ops", "map", "hub"]]);
+        }
+
+        for prompt in [
+            "a shipping label printer",
+            "a logistics inventory planner",
+            "git release automation",
+        ] {
+            let keywords = extract_keywords(prompt, 6);
+            assert!(!guided_pair_root_groups(&keywords, 16)
+                .iter()
+                .flatten()
+                .any(|root| root == "ops"));
+        }
+    }
+
+    #[test]
+    fn guided_cloud_deployment_uses_sky_docking_roles_only_in_its_lane() {
+        for prompt in [
+            "a cloud deployment dashboard",
+            "cloud hosting deployment",
+            "deploy applications to cloud infrastructure",
+            "infrastructure deployment for cloud teams",
+        ] {
+            let keywords = extract_keywords(prompt, 6);
+            let ordinary = brand_root_groups(&keywords, 16);
+            let guided = guided_pair_root_groups(&keywords, 16);
+            assert!(!ordinary.iter().flatten().any(|root| root == "sky"));
+            assert!(!ordinary.iter().flatten().any(|root| root == "kin"));
+            assert_eq!(guided, vec![vec!["sky"], vec!["dock", "ship", "grid"]]);
+        }
+
+        let cloud_cost = extract_keywords("a cloud cost dashboard", 6);
+        assert!(!guided_pair_root_groups(&cloud_cost, 16)
+            .iter()
+            .flatten()
+            .any(|root| root == "sky"));
+
+        let weather = extract_keywords("local rain and temperature alerts", 6);
+        assert_ne!(
+            guided_pair_root_groups(&weather, 16),
+            vec![vec!["sky"], vec!["dock", "ship", "grid"]]
+        );
     }
 
     #[test]

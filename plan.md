@@ -3697,6 +3697,54 @@ scorer, retry, or random source changed.
 
 ---
 
+## Phase 139 — Replace delivery and cloud suffix leads with scoped product roles
+
+**Observed bottleneck.** Phase 138 left eleven direct-suffix leaders in the 105-page held-out
+base. Five belonged to only two clearly recognized jobs: all three delivery-tracking seeds and two
+of three cloud-deployment seeds. The available generic Compound candidates (`TopDock`, `KeyDock`)
+scored well but read like templates, while literal tracking pairs (`CargoTrack`, `RouteTrack`)
+were too weak to enter a polished first page. The isolated concept-pair pool exposed two better
+roles without expanding the global vocabulary: `ShipOps` at **89.5** and `SkyDock` at **88.0**.
+
+**Scoped interpretation.** A delivery/logistics subject plus tracking, operations, or dispatch now
+opens a private `Ship` × `Ops/Map/Hub` pair family. A cloud/hosting/infrastructure subject plus
+deployment opens `Sky` × `Dock/Ship/Grid`; the web selector deliberately prefers `SkyDock` when
+the equal-scoring alternatives survive. Ordinary shipping labels, logistics inventory, cloud-cost
+tools, weather products, and Git release automation retain their previous palettes. `parcel` and
+`shipment` now map to the existing delivery roots, while operation/tracking and team context is
+suppressed only in the longer delivery wordings that otherwise produced short, sub-75 literal
+joins. Cloud deployment similarly ignores incidental `application` and `team` context.
+
+**A/B boundary.** A first normalization applied the delivery context rule to every recognized
+delivery-tracking brief. It produced readable inner cards but changed the broad-domain sample
+enough to add `Docklink` and another shared-root collision with cloud: the 48-domain gate moved
+from **24 -> 26** exact collision pairs and failed. That version was rejected. The final rule
+normalizes only prompts carrying `parcel`, `shipment`, `operation`, `dispatch`, or `team`; the
+canonical delivery palette keeps its prior exploration behavior. The collision matrix returns to
+**24** explained shared-root pairs and zero unexplained collisions.
+
+**Measured result.** Held-out suffix leaders fall **11 -> 6** and guided leaders rise **78 -> 84**.
+Average structural quality improves **84.80 -> 84.85**, lead quality **88.08 -> 88.22**, and lead
+concept coverage **1.34 -> 1.40**. Near pairs fall **66 -> 62** and mean similarity improves
+**0.198 -> 0.197**; seed spread remains **19.60/30**, with pair overlap moving only
+**4.39 -> 4.41/10** and no duplicate pages. `ShipOps` leads all **3/3** canonical delivery pages
+and all **9/9** wording-stress pages. `SkyDock` does the same for cloud deployment. Every one of
+the 18 new wording pages contains ten names, has no sub-75 card, no Respell, no context leakage,
+and needs no final retry.
+
+**Verification.** The held-out audit now covers **105 + 111** pages and permanently gates both
+roles, their six natural-language variants, seed diversity, leakage, retry use, and the visible
+quality floor. The Rust suite is **159/159**. Auto's 85-page matrix, the 90-page cold audit, three
+namespace briefs, 100 personalized pages/1,000 selections, 25 mode-aware pages, four 100-name
+personalized sessions, and the browser developer-domain audit all pass. Developer output remains
+**800/800** semantic Brandable and **797/800** semantic Compound. The 48-domain audit remains
+**2,400/2,400** at **83.30** composite, **0.729** diversity, and **47.8%** domain uniqueness,
+with 24 explained collisions and zero unexplained collisions. TypeScript, rebuilt clean WASM, and
+the production Vite bundle are green. No LLM, network call, global scorer, retry rule, random
+source, or explicit naming mode changed.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
@@ -3745,6 +3793,10 @@ the product role or rebuild a `Term...` wall.
 Message-queue briefs similarly normalize async/developer/monitoring wording into one queue lane
 with a restrained `Pub` root, eliminating its Pipe stem wall without lowering
 the quality-neutral repair boundary.
+Delivery-tracking briefs now lead with the isolated `ShipOps` logistics role, while parcel,
+shipment, operations, dispatch, and team wording normalize to the same safe delivery vocabulary.
+Cloud-deployment briefs similarly lead with the isolated `SkyDock` release metaphor without
+teaching weather pages or generic cloud tools a new global template.
 Cold Auto also limits exact four-letter stem repetition on a visible page, but only through a
 quality-neutral, coverage-preserving non-suffix substitution from the fallback it already opened.
 Compound is now a genuinely brief-aware explicit alternative rather than a random adjective

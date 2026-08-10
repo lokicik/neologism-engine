@@ -98,6 +98,16 @@ const MESSAGE_QUEUE_VARIANTS = [
   'event streaming and queue monitoring',
   'an async message bus',
 ]
+const DELIVERY_TRACKING_VARIANTS = [
+  'shipping operations and parcel tracking',
+  'a parcel tracking dashboard for delivery teams',
+  'logistics dispatch and shipment tracking',
+]
+const CLOUD_DEPLOYMENT_VARIANTS = [
+  'cloud hosting deployment',
+  'deploy applications to cloud infrastructure',
+  'infrastructure deployment for cloud teams',
+]
 const PROMPTS = [
   ...BASE_PROMPTS,
   ...AI_VARIANTS,
@@ -110,6 +120,8 @@ const PROMPTS = [
   ...EDUCATION_VARIANTS,
   ...TERMINAL_LOG_VARIANTS,
   ...MESSAGE_QUEUE_VARIANTS,
+  ...DELIVERY_TRACKING_VARIANTS,
+  ...CLOUD_DEPLOYMENT_VARIANTS,
 ]
 const SEEDS = [13, 67, 313]
 const DIRECT_SUFFIXES = ['ify', 'ora', 'ion', 'era', 'io', 'ia', 'ix', 'el', 'en', 'on']
@@ -419,6 +431,24 @@ try {
     0,
   ) / (messageQueueRows.length * 10)
   const messageQueueVariantRows = rows.filter((row) => MESSAGE_QUEUE_VARIANTS.includes(row.prompt))
+  const deliveryTrackingRows = rows.filter((row) => (
+    row.prompt === 'a delivery tracking and logistics app'
+  ))
+  const deliveryTrackingAverage = deliveryTrackingRows.reduce(
+    (sum, row) => sum + row.selected.reduce((pageSum, item) => pageSum + quality(item), 0),
+    0,
+  ) / (deliveryTrackingRows.length * 10)
+  const deliveryTrackingVariantRows = rows.filter((row) => (
+    DELIVERY_TRACKING_VARIANTS.includes(row.prompt)
+  ))
+  const cloudDeploymentRows = rows.filter((row) => row.prompt === 'a cloud deployment dashboard')
+  const cloudDeploymentAverage = cloudDeploymentRows.reduce(
+    (sum, row) => sum + row.selected.reduce((pageSum, item) => pageSum + quality(item), 0),
+    0,
+  ) / (cloudDeploymentRows.length * 10)
+  const cloudDeploymentVariantRows = rows.filter((row) => (
+    CLOUD_DEPLOYMENT_VARIANTS.includes(row.prompt)
+  ))
   const seedDiversity = BASE_PROMPTS.map((prompt) => {
     const promptRows = auditRows.filter((row) => row.prompt === prompt)
     const nameSeeds = new Map()
@@ -496,6 +526,12 @@ try {
   const messageQueueDiversity = seedDiversity.find((row) => (
     row.prompt === 'a message queue client'
   ))
+  const deliveryTrackingDiversity = seedDiversity.find((row) => (
+    row.prompt === 'a delivery tracking and logistics app'
+  ))
+  const cloudDeploymentDiversity = seedDiversity.find((row) => (
+    row.prompt === 'a cloud deployment dashboard'
+  ))
   const wordingDiversity = (prompts, variantRows) => prompts.map((prompt) => {
     const promptRows = variantRows.filter((row) => row.prompt === prompt)
     const names = new Set(promptRows.flatMap((row) => (
@@ -541,6 +577,14 @@ try {
   const messageQueueVariantDiversity = wordingDiversity(
     MESSAGE_QUEUE_VARIANTS,
     messageQueueVariantRows,
+  )
+  const deliveryTrackingVariantDiversity = wordingDiversity(
+    DELIVERY_TRACKING_VARIANTS,
+    deliveryTrackingVariantRows,
+  )
+  const cloudDeploymentVariantDiversity = wordingDiversity(
+    CLOUD_DEPLOYMENT_VARIANTS,
+    cloudDeploymentVariantRows,
   )
   const educationWordingStable = educationVariantRows.every((row) => {
     const canonical = educationRows.find((candidate) => candidate.seed === row.seed)
@@ -642,6 +686,12 @@ try {
   console.log(`education average: ${educationAverage.toFixed(2)} · ${educationDiversity?.uniqueNames ?? 0}/30 unique · ${educationDiversity?.averagePairOverlap.toFixed(2) ?? '0.00'} overlap`)
   console.log(`terminal log average: ${terminalLogAverage.toFixed(2)} · ${terminalLogDiversity?.uniqueNames ?? 0}/30 unique · ${terminalLogDiversity?.averagePairOverlap.toFixed(2) ?? '0.00'} overlap`)
   console.log(`message queue average: ${messageQueueAverage.toFixed(2)} · ${messageQueueDiversity?.uniqueNames ?? 0}/30 unique · ${messageQueueDiversity?.averagePairOverlap.toFixed(2) ?? '0.00'} overlap`)
+  console.log(`delivery tracking average: ${deliveryTrackingAverage.toFixed(2)} · ${deliveryTrackingDiversity?.uniqueNames ?? 0}/30 unique · ${deliveryTrackingDiversity?.averagePairOverlap.toFixed(2) ?? '0.00'} overlap`)
+  console.log(`cloud deployment average: ${cloudDeploymentAverage.toFixed(2)} · ${cloudDeploymentDiversity?.uniqueNames ?? 0}/30 unique · ${cloudDeploymentDiversity?.averagePairOverlap.toFixed(2) ?? '0.00'} overlap`)
+  console.log(`ShipOps leads: ${deliveryTrackingRows.filter((row) => row.selected[0]?.name === 'ShipOps').length}/${deliveryTrackingRows.length} canonical · ${deliveryTrackingVariantRows.filter((row) => row.selected[0]?.name === 'ShipOps').length}/${deliveryTrackingVariantRows.length} wording`)
+  console.log(`SkyDock leads: ${cloudDeploymentRows.filter((row) => row.selected[0]?.name === 'SkyDock').length}/${cloudDeploymentRows.length} canonical · ${cloudDeploymentVariantRows.filter((row) => row.selected[0]?.name === 'SkyDock').length}/${cloudDeploymentVariantRows.length} wording`)
+  console.log(`cloud wording diversity: ${cloudDeploymentVariantDiversity.map((row) => `${row.uniqueNames}/${row.averagePairOverlap.toFixed(2)}`).join(' · ')}`)
+  console.log(`cloud wording retries: ${cloudDeploymentVariantRows.filter((row) => row.retryRequested).length} · Respells ${cloudDeploymentVariantRows.flatMap((row) => row.selected).filter((item) => item.sourceMode === 'respell').length}`)
   console.log(`guarded repair upgrades: ${guardedRepairUpgrades.length}`)
   console.log(`weak Respell accents: ${weakRespellAccents.length}`)
   console.log(`selected Respell accents: ${selectedRespellAccents.length} pages · ${respellInventory.size} unique`)
@@ -702,6 +752,14 @@ try {
   }
   console.log('\nmessage queue focus')
   for (const row of [...messageQueueRows, ...messageQueueVariantRows]) {
+    console.log(`${row.seed} · ${row.prompt} · ${row.selected.map((item) => item.name).join(', ')}`)
+  }
+  console.log('\ndelivery tracking focus')
+  for (const row of [...deliveryTrackingRows, ...deliveryTrackingVariantRows]) {
+    console.log(`${row.seed} · ${row.prompt} · ${row.selected.map((item) => item.name).join(', ')}`)
+  }
+  console.log('\ncloud deployment focus')
+  for (const row of [...cloudDeploymentRows, ...cloudDeploymentVariantRows]) {
     console.log(`${row.seed} · ${row.prompt} · ${row.selected.map((item) => item.name).join(', ')}`)
   }
   console.log('\nguarded repair upgrades')
@@ -1001,6 +1059,82 @@ try {
           && !row.retryRequested
         )),
       'message-queue wording variants reject async, monitoring, and developer leakage',
+    ],
+    [
+      deliveryTrackingRows.length === SEEDS.length
+        && deliveryTrackingAverage >= 85.8
+        && deliveryTrackingDiversity?.uniqueNames >= 16
+        && deliveryTrackingDiversity?.averagePairOverlap <= 6.4
+        && deliveryTrackingDiversity?.exactDuplicatePages === 0
+        && deliveryTrackingRows.every((row) => (
+          row.selected.length === 10
+          && row.selected[0]?.name === 'ShipOps'
+          && row.selected[0]?.construction === 'guided_pair'
+          && row.direct.some((item) => (
+            item.name === 'ShipOps' && item.construction === 'guided_pair'
+          ))
+          && dominantStemOverflowFor(row.selected) === 0
+          && row.selected.every((item) => item.sourceMode !== 'respell')
+          && !row.retryRequested
+        )),
+      'delivery-tracking pages lead with ShipOps without suffix or stem-family collapse',
+    ],
+    [
+      deliveryTrackingVariantRows.length === DELIVERY_TRACKING_VARIANTS.length * SEEDS.length
+        && deliveryTrackingVariantDiversity.every((row) => (
+          row.rowCount === SEEDS.length
+          && row.uniqueNames >= 22
+          && row.averagePairOverlap <= 3.4
+        ))
+        && deliveryTrackingVariantRows.every((row) => (
+          row.selected.length === 10
+          && row.selected[0]?.name === 'ShipOps'
+          && row.selected[0]?.construction === 'guided_pair'
+          && row.selected.every((item) => ![
+            'bond', 'circle', 'kin', 'team', 'tribe',
+          ].some((stem) => letters(item.name).startsWith(stem)))
+          && row.selected.every((item) => item.sourceMode !== 'respell')
+          && !row.retryRequested
+        )),
+      'delivery-tracking wording variants suppress audience and function-word leakage',
+    ],
+    [
+      cloudDeploymentRows.length === SEEDS.length
+        && cloudDeploymentAverage >= 83
+        && cloudDeploymentDiversity?.uniqueNames >= 22
+        && cloudDeploymentDiversity?.averagePairOverlap <= 3.4
+        && cloudDeploymentDiversity?.exactDuplicatePages === 0
+        && cloudDeploymentRows.every((row) => (
+          row.selected.length === 10
+          && row.selected[0]?.name === 'SkyDock'
+          && row.selected[0]?.construction === 'guided_pair'
+          && row.direct.some((item) => (
+            item.name === 'SkyDock' && item.construction === 'guided_pair'
+          ))
+          && dominantStemOverflowFor(row.selected) === 0
+          && row.selected.every((item) => item.sourceMode !== 'respell')
+          && !row.retryRequested
+        )),
+      'cloud-deployment pages lead with the scoped SkyDock release metaphor',
+    ],
+    [
+      cloudDeploymentVariantRows.length === CLOUD_DEPLOYMENT_VARIANTS.length * SEEDS.length
+        && cloudDeploymentVariantDiversity.every((row) => (
+          row.rowCount === SEEDS.length
+          && row.uniqueNames >= 15
+          && row.averagePairOverlap <= 7
+        ))
+        && cloudDeploymentVariantRows.every((row) => (
+          row.selected.length === 10
+          && row.selected[0]?.name === 'SkyDock'
+          && row.selected[0]?.construction === 'guided_pair'
+          && row.selected.every((item) => ![
+            'app', 'application', 'bond', 'circle', 'kin', 'team', 'tribe',
+          ].some((stem) => letters(item.name).startsWith(stem)))
+          && row.selected.every((item) => item.sourceMode !== 'respell')
+          && !row.retryRequested
+        )),
+      'cloud-deployment wording variants reject application and team context leakage',
     ],
     [
       recruiterTrackingRows.length === SEEDS.length

@@ -112,6 +112,22 @@ const isLegalResearchBrief = (terms: string[]): boolean => {
     ].some((term) => normalized.has(term))
 }
 
+const isDeliveryTrackingBrief = (terms: string[]): boolean => {
+  const normalized = new Set(terms.map(letters))
+  return [
+    'delivery', 'ship', 'shipping', 'logistic', 'logistics', 'transport', 'parcel', 'shipment',
+  ].some((term) => normalized.has(term))
+    && [
+      'track', 'tracking', 'operation', 'operations', 'dispatch',
+    ].some((term) => normalized.has(term))
+}
+
+const isCloudDeploymentBrief = (terms: string[]): boolean => {
+  const normalized = new Set(terms.map(letters))
+  return ['cloud', 'hosting', 'infrastructure', 'infra'].some((term) => normalized.has(term))
+    && ['deploy', 'deployment'].some((term) => normalized.has(term))
+}
+
 export const guidedMetaphorTail = (result: NameResult): string | undefined => {
   const normalized = letters(result.name)
   return GUIDED_METAPHOR_TAILS.find((tail) => normalized.endsWith(tail))
@@ -334,6 +350,12 @@ export async function generateBatch(cfg: Config): Promise<NameResult[]> {
     const namingToolBrief = isNamingToolBrief(terms)
     const colorPaletteBrief = isColorPaletteBrief(terms)
     const legalResearchBrief = isLegalResearchBrief(terms)
+    const deliveryTrackingBrief = isDeliveryTrackingBrief(terms)
+    const cloudDeploymentBrief = isCloudDeploymentBrief(terms)
+    const strongPairBrief = featureFlagBrief
+      || namingToolBrief
+      || deliveryTrackingBrief
+      || cloudDeploymentBrief
     const guidedPairPool = legalResearchBrief ? LEGAL_GUIDED_PAIR_POOL : GUIDED_PAIR_POOL
     const [brandableBatch, respellBatch] = await Promise.all([
       generateNames({ ...cfg, variant: undefined, compound: false, count: total }),
@@ -400,8 +422,7 @@ export async function generateBatch(cfg: Config): Promise<NameResult[]> {
       // metaphor slot while preserving the first metaphor.
       if (
         metaphorAccent.length === 0
-        || featureFlagBrief
-        || namingToolBrief
+        || strongPairBrief
         || legalResearchBrief
       ) {
         pairAccent = pickGuidedPair(await generateNames({
@@ -411,7 +432,7 @@ export async function generateBatch(cfg: Config): Promise<NameResult[]> {
           count: guidedPairPool,
         }))
       }
-    } else if (total > 0 && (featureFlagBrief || namingToolBrief || legalResearchBrief)) {
+    } else if (total > 0 && (strongPairBrief || legalResearchBrief)) {
       // Keep a scoped product-role candidate available even if a future
       // keyword rule lets a safe Respell survive one of these briefs.
       pairAccent = pickGuidedPair(await generateNames({
@@ -448,7 +469,11 @@ export async function generateBatch(cfg: Config): Promise<NameResult[]> {
               letters(result.name).endsWith(tail)
             )).length < 2
           }) ?? pairAccent[0]
-      : pairAccent[0]
+        : deliveryTrackingBrief
+          ? pairAccent.find((candidate) => letters(candidate.name) === 'shipops') ?? pairAccent[0]
+          : cloudDeploymentBrief
+            ? pairAccent.find((candidate) => letters(candidate.name) === 'skydock') ?? pairAccent[0]
+            : pairAccent[0]
     const rolePreservedPage = preserveGuidedConstruction(primaryPage, existingScopedPair)
     if (linkedRespells.length > 0) {
       if (legalResearchBrief) {
@@ -460,7 +485,7 @@ export async function generateBatch(cfg: Config): Promise<NameResult[]> {
       if (legalResearchBrief) {
         return addQualityNeutralGuidedAlternative(rolePreservedPage, guidedPairCandidate)
       }
-      if (featureFlagBrief || namingToolBrief) {
+      if (strongPairBrief) {
         return addStrongGuidedPairUpgrade(rolePreservedPage, guidedPairCandidate, namingToolBrief)
       }
       return addQualityNeutralGuidedAlternative(rolePreservedPage, metaphorAccent[1])
