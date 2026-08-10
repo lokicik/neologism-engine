@@ -179,6 +179,375 @@ try {
   await passOnlyPage.screenshot({ path: join(SHOTS, 'taste-pass-only.png'), fullPage: true })
   await passOnlyContext.close()
 
+  const shareContext = await browser.newContext({
+    permissions: ['clipboard-read', 'clipboard-write'],
+  })
+  const sharePage = await shareContext.newPage({ viewport: { width: 1440, height: 900 } })
+  const sharedPayload = Buffer.from(JSON.stringify([
+    { n: 'SharedAlpha', s: 'big_tech' },
+    { n: ' sharedalpha ', s: 'big_tech' },
+    { n: 'SharedBeta', s: 'big_tech' },
+    { n: 'SharedGamma', s: 'big_tech' },
+  ])).toString('base64')
+  await sharePage.goto(`${APP_URL}#names=${sharedPayload}`)
+  await sharePage.waitForFunction(() => document.querySelectorAll('.saved-page .name-card').length === 3)
+  check(await storedCount(sharePage, 'neologism:imported-saved') === 3, 'share-link names persist in Saved')
+  check(
+    await storedCount(sharePage, 'neologism:favorites') === 0
+      && await storedCount(sharePage, 'neologism:rejected') === 0,
+    'opening a share link creates no explicit taste labels',
+  )
+  await sharePage.click('.sidebar-settings')
+  const shareDataMeta = (await sharePage.locator('.settings-data-meta').textContent()) ?? ''
+  check(
+    /0 liked.*0 passed.*0 derived pairs/.test(shareDataMeta)
+      && await sharePage.locator('.taste-export-btn').isDisabled(),
+    'share-only Saved names cannot enter a taste export',
+  )
+  await sharePage.getByTitle('Close').click()
+  await sharePage.reload()
+  await sharePage.getByRole('button', { name: /Saved/ }).click()
+  check(
+    await sharePage.locator('.saved-page .name-card').count() === 3,
+    'imported Saved names survive reload after the share hash is cleared',
+  )
+  const txtPromise = sharePage.waitForEvent('download')
+  await sharePage.getByRole('button', { name: 'TXT' }).click()
+  const txtNames = (await readDownload(await txtPromise)).trim().split(/\r?\n/)
+  check(
+    txtNames.length === 3 && new Set(txtNames.map((name) => name.toLowerCase())).size === 3,
+    'Saved TXT export contains one row per normalized spelling',
+  )
+  const jsonPromise = sharePage.waitForEvent('download')
+  await sharePage.getByRole('button', { name: 'JSON' }).click()
+  const sharedJson = JSON.parse(await readDownload(await jsonPromise))
+  check(
+    sharedJson.length === 3
+      && sharedJson.every((item) => Object.keys(item).sort().join(',') === 'name,style'),
+    'Saved JSON export is deduped and carries no taste or project context',
+  )
+  await sharePage.getByRole('button', { name: 'Share link' }).click()
+  const forwardedUrl = await sharePage.evaluate(() => navigator.clipboard.readText())
+  const forwardedRows = JSON.parse(Buffer.from(forwardedUrl.split('#names=')[1], 'base64').toString('utf8'))
+  check(
+    forwardedRows.length === 3
+      && forwardedRows.every((item) => Object.keys(item).sort().join(',') === 'n,s'),
+    'forwarded share links stay deduped and omit labels and context',
+  )
+  await sharePage.getByRole('button', { name: /Create/ }).click()
+  await sharePage.click('.command-go')
+  await sharePage.waitForSelector('.name-card', { timeout: 20000 })
+  const shareOnlyStatus = (await sharePage.locator('.taste-note').textContent()) ?? ''
+  check(
+    /Teach local taste.*3 likes.*3 passes left/.test(shareOnlyStatus),
+    `share-only Saved names cannot activate personalization (got "${shareOnlyStatus.trim()}")`,
+  )
+  await sharePage.locator('.name-card').first().locator('.star-btn').click()
+  check(
+    await storedCount(sharePage, 'neologism:favorites') === 1
+      && await storedCount(sharePage, 'neologism:imported-saved') === 3,
+    'an explicit generated-name star records taste without mutating imported Saved names',
+  )
+  await shareContext.close()
+
+  const quotaContext = await browser.newContext()
+  await quotaContext.addInitScript(() => {
+    localStorage.setItem('neologism:visited', '1')
+    const original = Storage.prototype.setItem
+    Storage.prototype.setItem = function setItem(key, value) {
+      if (key === 'neologism:imported-saved') throw new DOMException('quota', 'QuotaExceededError')
+      return original.call(this, key, value)
+    }
+  })
+  const quotaPage = await quotaContext.newPage({ viewport: { width: 1200, height: 800 } })
+  await quotaPage.goto(`${APP_URL}#names=${sharedPayload}`)
+  await quotaPage.waitForFunction(() => document.querySelectorAll('.saved-page .name-card').length === 3)
+  check(
+    await storedCount(quotaPage, 'neologism:imported-saved') === 0
+      && (await quotaPage.evaluate(() => location.hash)).startsWith('#names='),
+    'a failed import write preserves the recovery share URL instead of clearing it',
+  )
+  await quotaContext.close()
+
+  const invalidShareContext = await browser.newContext()
+  await invalidShareContext.addInitScript(() => localStorage.setItem('neologism:visited', '1'))
+  const invalidHashes = [
+    '#names=not-base64',
+    `#names=${Buffer.from(JSON.stringify([{}])).toString('base64')}`,
+    `#names=${Buffer.from(JSON.stringify(Array.from(
+      { length: 201 },
+      (_, index) => ({ n: `Name${index}`, s: 'big_tech' }),
+    ))).toString('base64')}`,
+  ]
+  let invalidSharePage
+  for (const [index, hash] of invalidHashes.entries()) {
+    if (invalidSharePage) await invalidSharePage.close()
+    invalidSharePage = await invalidShareContext.newPage({ viewport: { width: 1200, height: 800 } })
+    await invalidSharePage.goto(`${APP_URL}${hash}`)
+    await invalidSharePage.waitForFunction(() => location.hash === '')
+    check(
+      await invalidSharePage.locator('.saved-page').count() === 0,
+      `invalid share case ${index + 1} clears into the normal app instead of trapping empty Saved`,
+    )
+  }
+  if (!invalidSharePage) throw new Error('invalid-share fixtures did not run')
+  await invalidSharePage.reload()
+  check(
+    await invalidSharePage.locator('.saved-page').count() === 0
+      && await invalidSharePage.locator('.command-bar').count() === 1,
+    'an invalid share remains recoverable after reload',
+  )
+  await invalidShareContext.close()
+
+  const failedMigrationStubs = ['OldSharedA', 'OldSharedB', 'OldSharedC'].map((name) => ({
+    name,
+    style: 'big_tech',
+    score_pronounce: 0,
+    score_novelty: 0,
+    score_memorability: 0,
+    connotations: [],
+    syllables: 0,
+  }))
+  const failedMigrationContext = await browser.newContext()
+  await failedMigrationContext.addInitScript((stubs) => {
+    localStorage.setItem('neologism:visited', '1')
+    if (!localStorage.getItem('phase145:failed-migration-seeded')) {
+      localStorage.setItem('neologism:favorites', JSON.stringify(stubs))
+      localStorage.setItem('neologism:imported-saved', '{}')
+      localStorage.setItem('phase145:failed-migration-seeded', '1')
+    }
+    const original = Storage.prototype.setItem
+    Storage.prototype.setItem = function setItem(key, value) {
+      if (key === 'neologism:imported-saved') throw new DOMException('quota', 'QuotaExceededError')
+      return original.call(this, key, value)
+    }
+  }, failedMigrationStubs)
+  const failedMigrationPage = await failedMigrationContext.newPage({ viewport: { width: 1200, height: 800 } })
+  await failedMigrationPage.goto(APP_URL)
+  await failedMigrationPage.getByRole('button', { name: /Saved/ }).click()
+  const failedMigrationSavedCount = await failedMigrationPage.locator('.saved-page .name-card').count()
+  const failedMigrationFavoriteCount = await storedCount(failedMigrationPage, 'neologism:favorites')
+  check(
+    failedMigrationSavedCount === 3 && failedMigrationFavoriteCount === 3,
+    `failed historical migration keeps all share names recoverable in Saved (cards ${failedMigrationSavedCount}, stored ${failedMigrationFavoriteCount})`,
+  )
+  await failedMigrationPage.click('.sidebar-settings')
+  const failedMigrationMeta = (await failedMigrationPage.locator('.settings-data-meta').textContent()) ?? ''
+  check(
+    /0 liked.*0 passed.*0 derived pairs/.test(failedMigrationMeta)
+      && await failedMigrationPage.locator('.taste-export-btn').isDisabled(),
+    'failed historical migration cannot restore false taste evidence',
+  )
+  await failedMigrationPage.getByTitle('Close').click()
+  await failedMigrationPage.getByRole('button', { name: /Create/ }).click()
+  await failedMigrationPage.click('.command-go')
+  await failedMigrationPage.waitForSelector('.taste-note', { timeout: 20000 })
+  check(
+    /Teach local taste.*3 likes.*3 passes left/.test(
+      (await failedMigrationPage.locator('.taste-note').textContent()) ?? '',
+    ),
+    'failed historical migration cannot activate the local taste profile',
+  )
+  await failedMigrationPage.locator('.results-grid .name-card').first().locator('.star-btn').click()
+  await failedMigrationPage.reload()
+  await failedMigrationPage.getByRole('button', { name: /Saved/ }).click()
+  const recoveredOldCards = await failedMigrationPage.locator('.saved-page .name-card').filter({ hasText: /OldShared/ }).count()
+  await failedMigrationPage.click('.sidebar-settings')
+  const recoveredMigrationMeta = (await failedMigrationPage.locator('.settings-data-meta').textContent()) ?? ''
+  check(
+    recoveredOldCards === 3 && /1 liked.*0 passed/.test(recoveredMigrationMeta),
+    'a later explicit star preserves failed-migration share names without converting them to taste',
+  )
+  await failedMigrationContext.close()
+
+  const removalFailureLike = {
+    name: 'AtomicSaved',
+    style: 'big_tech',
+    tasteContext: { id: 'project-a', description: 'project-a', roots: [] },
+    score_pronounce: 85,
+    score_novelty: 90,
+    score_memorability: 80,
+    connotations: [],
+    syllables: 2,
+  }
+  const removalFailureStub = {
+    name: 'AtomicSaved',
+    style: 'big_tech',
+    score_pronounce: 0,
+    score_novelty: 0,
+    score_memorability: 0,
+    connotations: [],
+    syllables: 0,
+  }
+  const removalFailureContext = await browser.newContext()
+  await removalFailureContext.addInitScript(({ liked, imported }) => {
+    localStorage.setItem('neologism:visited', '1')
+    if (!localStorage.getItem('phase145:removal-failure-seeded')) {
+      localStorage.setItem('neologism:favorites', JSON.stringify([liked]))
+      localStorage.setItem('neologism:imported-saved', JSON.stringify([imported]))
+      localStorage.setItem('phase145:removal-failure-seeded', '1')
+    }
+    const original = Storage.prototype.setItem
+    Storage.prototype.setItem = function setItem(key, value) {
+      if (key === 'neologism:imported-saved') throw new DOMException('quota', 'QuotaExceededError')
+      return original.call(this, key, value)
+    }
+  }, { liked: removalFailureLike, imported: removalFailureStub })
+  const removalFailurePage = await removalFailureContext.newPage({ viewport: { width: 1200, height: 800 } })
+  const removalDialogs = []
+  removalFailurePage.on('dialog', async (dialog) => {
+    removalDialogs.push(dialog.message())
+    await dialog.accept()
+  })
+  await removalFailurePage.goto(APP_URL)
+  await removalFailurePage.getByRole('button', { name: /Saved/ }).click()
+  await removalFailurePage.locator('.saved-page .star-btn').click()
+  check(
+    removalDialogs.some((message) => /browser storage rejected/.test(message))
+      && await storedCount(removalFailurePage, 'neologism:favorites') === 1
+      && await storedCount(removalFailurePage, 'neologism:imported-saved') === 1,
+    'a failed multi-key removal reports failure and leaves both durable sources unchanged',
+  )
+  await removalFailurePage.reload()
+  await removalFailurePage.getByRole('button', { name: /Saved/ }).click()
+  check(
+    await removalFailurePage.locator('.saved-page .name-card').count() === 1,
+    'a failed multi-key removal cannot claim success and then resurrect on reload',
+  )
+  await removalFailureContext.close()
+
+  const partialMigrationContext = await browser.newContext()
+  await partialMigrationContext.addInitScript((stub) => {
+    localStorage.setItem('neologism:visited', '1')
+    if (!localStorage.getItem('phase145:partial-migration-seeded')) {
+      localStorage.setItem('neologism:favorites', JSON.stringify([stub]))
+      localStorage.setItem('phase145:partial-migration-seeded', '1')
+      const original = Storage.prototype.setItem
+      globalThis.__originalStorageSetItem = original
+      Storage.prototype.setItem = function setItem(key, value) {
+        if (key === 'neologism:favorites') throw new DOMException('quota', 'QuotaExceededError')
+        return original.call(this, key, value)
+      }
+    }
+  }, { ...removalFailureStub, name: 'PartialLegacy' })
+  const partialMigrationPage = await partialMigrationContext.newPage({ viewport: { width: 1200, height: 800 } })
+  await partialMigrationPage.goto(APP_URL)
+  await partialMigrationPage.evaluate(() => {
+    Storage.prototype.setItem = globalThis.__originalStorageSetItem
+  })
+  await partialMigrationPage.getByRole('button', { name: /Saved/ }).click()
+  await partialMigrationPage.locator('.saved-page .star-btn').click()
+  await partialMigrationPage.reload()
+  const partialFavoriteCount = await storedCount(partialMigrationPage, 'neologism:favorites')
+  const partialImportedCount = await storedCount(partialMigrationPage, 'neologism:imported-saved')
+  check(
+    partialFavoriteCount === 0
+      && partialImportedCount === 0
+      && await partialMigrationPage.locator('.saved-page .name-card').count() === 0,
+    `removal after a partial migration cleanup cannot resurrect the stale historical stub (favorites ${partialFavoriteCount}, imported ${partialImportedCount})`,
+  )
+  await partialMigrationContext.close()
+
+  const migrationContext = await browser.newContext()
+  await migrationContext.addInitScript(() => {
+    localStorage.setItem('neologism:visited', '1')
+    if (localStorage.getItem('phase145:migration-seeded')) return
+    const oldShareStub = {
+      name: 'OldSharedOnly',
+      style: 'big_tech',
+      score_pronounce: 0,
+      score_novelty: 0,
+      score_memorability: 0,
+      connotations: [],
+      syllables: 0,
+    }
+    const explicit = (name, context) => ({
+      name,
+      style: 'big_tech',
+      tasteContext: context
+        ? { id: context, description: context, roots: [] }
+        : undefined,
+      score_pronounce: 85,
+      score_novelty: 90,
+      score_memorability: 80,
+      connotations: [],
+      syllables: 2,
+    })
+    localStorage.setItem('neologism:favorites', JSON.stringify([
+      oldShareStub,
+      explicit('LegacyLiked'),
+      explicit('SharedEverywhere', 'project-a'),
+      explicit('SHAREDEVERYWHERE', 'project-b'),
+    ]))
+    localStorage.setItem('neologism:imported-saved', JSON.stringify([
+      {
+        ...oldShareStub,
+        name: 'SharedEverywhere',
+      },
+    ]))
+    localStorage.setItem('neologism:rejected', JSON.stringify([
+      explicit('SharedEverywhere', 'project-c'),
+    ]))
+    localStorage.setItem('phase145:migration-seeded', '1')
+  })
+  const migrationPage = await migrationContext.newPage({ viewport: { width: 1440, height: 1000 } })
+  await migrationPage.goto(APP_URL)
+  check(
+    await storedCount(migrationPage, 'neologism:favorites') === 3
+      && await storedCount(migrationPage, 'neologism:imported-saved') === 2,
+    'historical share stubs migrate while genuine legacy and scoped likes remain explicit',
+  )
+  await migrationPage.reload()
+  check(
+    await storedCount(migrationPage, 'neologism:favorites') === 3
+      && await storedCount(migrationPage, 'neologism:imported-saved') === 2,
+    'historical share migration is idempotent across repeated app initialization',
+  )
+  await migrationPage.click('.sidebar-settings')
+  const migrationExportPromise = migrationPage.waitForEvent('download')
+  await migrationPage.click('.taste-export-btn')
+  const migrationExport = JSON.parse(await readDownload(await migrationExportPromise))
+  check(
+    migrationExport.examples.length === 4
+      && migrationExport.examples.every((example) => example.result.name !== 'OldSharedOnly'),
+    'migrated share-only names stay out of taste exports while genuine legacy likes remain',
+  )
+  await migrationPage.getByTitle('Close').click()
+  await migrationPage.getByRole('button', { name: /Saved/ }).click()
+  check(
+    await migrationPage.locator('.saved-page .name-card').count() === 3
+      && await migrationPage.getByText('Saved from a shared link · not taste evidence').count() === 1
+      && await migrationPage.getByText(/liked in 2 projects.*also received by share/i).count() === 1,
+    'Saved explains imported-only and multi-project provenance without duplicate cards',
+  )
+  const oldSharedCard = migrationPage.locator('.name-card').filter({ hasText: 'OldSharedOnly' })
+  check(
+    await oldSharedCard.locator('.card-score').textContent() === 'Shared'
+      && !/0 syllables/.test((await oldSharedCard.textContent()) ?? ''),
+    'share-only cards do not present missing scores or syllables as zero-quality evidence',
+  )
+  const sharedEverywhere = migrationPage.locator('.name-card').filter({ hasText: 'SharedEverywhere' })
+  let removalPrompt = ''
+  migrationPage.once('dialog', async (dialog) => {
+    removalPrompt = dialog.message()
+    await dialog.dismiss()
+  })
+  await sharedEverywhere.locator('.star-btn').click()
+  check(
+    /2 explicit likes and its shared copy.*Passes are kept/.test(removalPrompt)
+      && await storedCount(migrationPage, 'neologism:favorites') === 3,
+    'multi-source Saved removal requires explicit confirmation and cancel preserves every source',
+  )
+  migrationPage.once('dialog', (dialog) => dialog.accept())
+  await sharedEverywhere.locator('.star-btn').click()
+  check(
+    await storedCount(migrationPage, 'neologism:favorites') === 1
+      && await storedCount(migrationPage, 'neologism:imported-saved') === 1
+      && await storedCount(migrationPage, 'neologism:rejected') === 1,
+    'confirmed Saved removal clears positive/share copies but preserves other-context passes',
+  )
+  await migrationContext.close()
+
   const referenceContext = await browser.newContext()
   await referenceContext.addInitScript(() => localStorage.setItem('neologism:visited', '1'))
   const referencePage = await referenceContext.newPage({ viewport: { width: 1440, height: 1000 } })

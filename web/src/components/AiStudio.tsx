@@ -10,6 +10,7 @@ import {
   type JudgeConfig,
   type MetricKey,
 } from '../lib/judge'
+import { tasteIdentity } from '../lib/taste-identity'
 import { NameCard } from './NameCard'
 
 interface Props {
@@ -43,7 +44,7 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
   const cache = useRef<Map<string, Ranked>>(new Map())
 
   const ready = isJudgeReady(judgeConfig)
-  const favSet = new Set(favorites.map((f) => f.name))
+  const favoriteKeys = new Set(favorites.map(tasteIdentity))
 
   const criterionFor = (m: Metric) =>
     m === 'custom' ? custom.trim() : METRICS.find((x) => x.key === m)!.criterion
@@ -221,7 +222,7 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
                 <NameCard
                   key={r.name}
                   result={r}
-                  isFavorite={favSet.has(r.name)}
+                  isFavorite={favoriteKeys.has(tasteIdentity(r))}
                   onToggleFavorite={onToggleFavorite}
                   reason={view.reasons.get(r.name)}
                   isAiPick={r.name === view.pick}

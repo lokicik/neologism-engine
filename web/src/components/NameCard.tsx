@@ -9,6 +9,12 @@ interface Props {
   result: NameResult
   isFavorite: boolean
   onToggleFavorite: (r: NameResult) => void
+  /// Saved-page wording distinguishes collection membership from taste.
+  favoriteAction?: 'favorite' | 'saved'
+  /// Optional collection provenance shown without changing the name result.
+  collectionNote?: string
+  /// Share payloads contain no scores or syllable analysis.
+  metricsAvailable?: boolean
   /// Explicit negative taste signal used by the local preference ranker.
   isRejected?: boolean
   onToggleRejected?: (r: NameResult) => void
@@ -48,7 +54,7 @@ function whyParts(e: Explanation): string[] {
   return parts
 }
 
-export function NameCard({ result, isFavorite, onToggleFavorite, isRejected = false, onToggleRejected, isBest = false, appearDelay = 0, reason, isAiPick = false }: Props) {
+export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction = 'favorite', collectionNote, metricsAvailable = true, isRejected = false, onToggleRejected, isBest = false, appearDelay = 0, reason, isAiPick = false }: Props) {
   const [copied, setCopied] = useState(false)
   const [domains, setDomains] = useState<Record<string, DomainStatus>>(idleMap)
   const [showAvail, setShowAvail] = useState(false)
@@ -109,9 +115,10 @@ export function NameCard({ result, isFavorite, onToggleFavorite, isRejected = fa
     return `${key} ?`
   }
 
-  const metaParts: string[] = [
-    `${result.syllables} syllable${result.syllables === 1 ? '' : 's'}`,
-  ]
+  const metaParts: string[] = []
+  if (metricsAvailable) {
+    metaParts.push(`${result.syllables} syllable${result.syllables === 1 ? '' : 's'}`)
+  }
   if (result.connotations.length > 0) {
     metaParts.push(result.connotations.slice(0, 3).join(', '))
   }
@@ -122,16 +129,29 @@ export function NameCard({ result, isFavorite, onToggleFavorite, isRejected = fa
       <div className="card-top">
         <Monogram name={result.name} size={36} />
         <span className="name-text">{result.name}</span>
-        <span className="card-score" title="Overall score — pronounceability, memorability and originality blended">
-          {isAiPick && <span className="card-aipick" title="The AI judge's top pick of this batch">✨</span>}
-          {isBest && <span className="card-crown" title="Top pick of this batch">👑</span>}
-          ★ {composite(result)}
+        <span
+          className="card-score"
+          title={metricsAvailable
+            ? 'Overall score — pronounceability, memorability and originality blended'
+            : 'Share links carry only the name and style'}
+        >
+          {metricsAvailable ? (
+            <>
+              {isAiPick && <span className="card-aipick" title="The AI judge's top pick of this batch">✨</span>}
+              {isBest && <span className="card-crown" title="Top pick of this batch">👑</span>}
+              ★ {composite(result)}
+            </>
+          ) : 'Shared'}
         </span>
       </div>
 
-      <p className="card-meta-line" title="Syllables · the vibe this name evokes (sound symbolism)">
-        {metaParts.join(' · ')}
-      </p>
+      {metaParts.length > 0 && (
+        <p className="card-meta-line" title="Syllables · the vibe this name evokes (sound symbolism)">
+          {metaParts.join(' · ')}
+        </p>
+      )}
+
+      {collectionNote && <p className="card-meta-line">{collectionNote}</p>}
 
       {reason && (
         <p className="card-ai-reason" title="Why the AI judge rated this name">
@@ -224,8 +244,12 @@ export function NameCard({ result, isFavorite, onToggleFavorite, isRejected = fa
           <button
             className={`icon-btn star-btn${isFavorite ? ' starred' : ''}`}
             onClick={() => onToggleFavorite(result)}
-            title={isFavorite ? 'Remove from favorites' : 'Save to favorites'}
-            aria-label={isFavorite ? `Remove ${result.name} from favorites` : `Save ${result.name} to favorites`}
+            title={favoriteAction === 'saved'
+              ? 'Remove from Saved'
+              : isFavorite ? 'Remove from favorites' : 'Save to favorites'}
+            aria-label={favoriteAction === 'saved'
+              ? `Remove ${result.name} from Saved`
+              : isFavorite ? `Remove ${result.name} from favorites` : `Save ${result.name} to favorites`}
             aria-pressed={isFavorite}
           >
             <IconStar filled={isFavorite} />

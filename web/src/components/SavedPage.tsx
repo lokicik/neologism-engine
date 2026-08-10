@@ -1,21 +1,48 @@
 import { useState } from 'react'
 import type { NameResult } from '../lib/engine'
 import { exportText, exportJson, encodeShareUrl } from '../lib/share'
+import type { SavedNameEntry } from '../lib/taste-identity'
 import { NameCard } from './NameCard'
 import { IconCopy, IconCheck, IconDownload, IconLink } from './icons'
 
 interface Props {
-  favorites: NameResult[]
-  onToggleFavorite: (r: NameResult) => void
+  entries: SavedNameEntry[]
+  onRemoveSaved: (r: NameResult) => void
   onGoCreate: () => void
 }
 
 // Phase 47: Saved is a first-class page — large header, real icon toolbar,
 // and the full NameCard experience for every saved name (Why, Availability,
 // copy; unstarring removes it from the collection).
-export function SavedPage({ favorites, onToggleFavorite, onGoCreate }: Props) {
+export function SavedPage({ entries, onRemoveSaved, onGoCreate }: Props) {
   const [copiedAll, setCopiedAll] = useState(false)
   const [copiedUrl, setCopiedUrl] = useState(false)
+  const favorites = entries.map((entry) => entry.result)
+
+  function provenance(entry: SavedNameEntry): string {
+    if (entry.explicitLikes === 0) return 'Saved from a shared link · not taste evidence'
+    const sources: string[] = []
+    if (entry.scopedProjects > 0) {
+      sources.push(`liked in ${entry.scopedProjects} project${entry.scopedProjects === 1 ? '' : 's'}`)
+    }
+    if (entry.legacyLiked) sources.push('legacy unscoped like')
+    const liked = sources.join(' · ')
+    return entry.imported ? `${liked} · also received by share` : liked
+  }
+
+  function remove(entry: SavedNameEntry) {
+    const sourceCount = entry.explicitLikes + Number(entry.imported)
+    if (sourceCount > 1) {
+      const liked = entry.explicitLikes === 0
+        ? ''
+        : `${entry.explicitLikes} explicit like${entry.explicitLikes === 1 ? '' : 's'}`
+      const shared = entry.imported ? `${liked ? ' and ' : ''}its shared copy` : ''
+      if (!window.confirm(
+        `Remove ${entry.result.name} from Saved everywhere? This removes ${liked}${shared}. Passes are kept.`,
+      )) return
+    }
+    onRemoveSaved(entry.result)
+  }
 
   function copyAll() {
     const text = favorites.map((f) => f.name).join('\n')
@@ -26,11 +53,15 @@ export function SavedPage({ favorites, onToggleFavorite, onGoCreate }: Props) {
   }
 
   function shareLink() {
-    const url = encodeShareUrl(favorites)
-    navigator.clipboard.writeText(url).then(() => {
-      setCopiedUrl(true)
-      setTimeout(() => setCopiedUrl(false), 1500)
-    })
+    try {
+      const url = encodeShareUrl(favorites)
+      navigator.clipboard.writeText(url).then(() => {
+        setCopiedUrl(true)
+        setTimeout(() => setCopiedUrl(false), 1500)
+      })
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : 'Could not create the share link.')
+    }
   }
 
   if (favorites.length === 0) {
@@ -74,12 +105,15 @@ export function SavedPage({ favorites, onToggleFavorite, onGoCreate }: Props) {
       </header>
 
       <section className="results-grid">
-        {favorites.map((f) => (
+        {entries.map((entry) => (
           <NameCard
-            key={f.name}
-            result={f}
+            key={entry.result.name.toLowerCase()}
+            result={entry.result}
             isFavorite
-            onToggleFavorite={onToggleFavorite}
+            onToggleFavorite={() => remove(entry)}
+            favoriteAction="saved"
+            collectionNote={provenance(entry)}
+            metricsAvailable={entry.explicitLikes > 0}
           />
         ))}
       </section>

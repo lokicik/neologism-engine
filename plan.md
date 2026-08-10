@@ -3910,11 +3910,15 @@ WASM, web selector, scorer, ranker, random source, or public API changed.
 presented global place/product/dictionary collisions through a reproducible review index, and add
 brief-conditioned semantics rather than a decorative accent. Beside frozen Auto it must reduce
 assembled-card share by at least ten points and lower single-shape walls by at least 25%, while all
-49 production gates remain green. Production use then requires at least 120 decisive,
-context-matched blind A/B comparisons over 30 unseen briefs, a 60% experimental win rate whose 95%
-Wilson lower bound exceeds 50%, both profiles individually above 50%, at least 20 experimental
-likes and 20 passes, no keeper-rate regression, and at least 80% agreement on reversed duplicates.
-Until then the corpus and probe remain research artifacts only.
+49 production gates remain green. Production use then requires a candidate-vs-frozen-Auto study
+whose inferential unit is the brief, not four correlated name rows from one prompt. Each proposed
+profile is a separate study: 30 distinct unseen briefs contribute one blind full-page primary
+choice each, while 12 concealed side-reversed repeats are quality control only and never enter
+efficacy. All 42 decisions must be recorded; the candidate needs at least 21/30 primary page wins
+(70%, with a 95% Wilson lower bound of 52.1%) and at least 10/12 consistent reversals. Fullness,
+collisions, and all 49 production gates must remain green. One evaluator establishes only that
+evaluator's preference, and no keeper-rate claim is allowed without a separately frozen keeper
+definition. Until then the corpus and probe remain research artifacts only.
 
 ---
 
@@ -4050,6 +4054,73 @@ study.
 
 ---
 
+## Phase 145 — Stop shared Saved names from masquerading as taste evidence
+
+**Contradiction.** Before this checkpoint, opening `#names=` wrote zero-score, contextless stubs
+directly into `neologism:favorites`. The recipient had made no preference decision, but three
+shared names could activate the legacy local profile and later export as three explicit likes.
+Feedback mutation and card state were also keyed only by spelling, even though Phase 144 correctly
+defined scoped evidence as `(tasteContext.id, normalized name)`. A spelling liked for project A
+could therefore erase or light up the same spelling in project B.
+
+**Frozen ownership model.** Explicit likes remain in `neologism:favorites`; future share imports
+use the separate local-only `neologism:imported-saved` collection. Taste identity is project
+context plus trimmed, case-normalized spelling, with historical unscoped feedback retained in its
+own null-context compatibility bucket. Same-context like/pass remains mutually exclusive, while
+opposite labels in different projects coexist. Settings, preference profiles, taste exports, and
+Create/AI-Studio card state consume explicit feedback only. Saved is instead a spelling-deduped
+projection of explicit likes plus imported names, preferring the fully scored explicit record when
+both sources contain the same spelling.
+
+**Migration and failure boundary.** The old share branch emitted one exact seven-field stub shape:
+valid name/style, zero syllables and scores, and an empty connotation array. Only parsed rows with
+that exact key set migrate; nonzero historical likes and rows with context or modern provenance
+remain explicit. Migration writes the imported copy first. If that write fails, the original
+durable key remains untouched while the recovered row is shown as imported-only Saved data, never
+as taste, and later explicit feedback writes preserve that durable recovery copy; if the second
+write fails, the two-key Saved projection dedupes the temporary copy and the next initialization
+retries idempotently. New import writes retain the recovery hash on quota/privacy failure rather
+than clearing the only transferable copy.
+
+**Saved and share UX.** Saved retains source metadata while showing one card per normalized
+spelling. Imported-only cards explicitly say that they came from a shared link and are not taste
+evidence; combined cards report their scoped, legacy, and share sources. Removing a card backed by
+more than one source requires an explicit “remove everywhere” confirmation and states that passes
+are kept. Persistence is imported-first with best-effort compensating rollback and a visible
+failure if either write cannot complete. TXT and JSON exports and forwarded links use the deduped
+projection and contain only name and style. Share decoding now validates the array boundary,
+nonempty bounded names, known styles, control characters, the 200-name limit, and the
+32,768-character hash limit;
+the encoder preflights the same collection-count and hash-length limits. Malformed rows are
+discarded; malformed, non-array, and oversized payloads fail closed. The sender rejects 201 names
+instead of creating a link the receiver would silently truncate.
+
+**Acceptance evidence.** The pure identity/migration/removal fixture passes **19/19**, including
+imported-first write failure, second-write retry, compensating deletion rollback, exact old-stub
+recognition, context isolation, and Saved source counts. The share contract passes **8/8** and the
+unchanged v2 taste-data contract passes **21/21**. The production browser taste workflow passes
+**61/61** across share-only profile/export exclusion, duplicate imports, reload, quota recovery,
+historical migration, malformed hashes and oversized collections, TXT/JSON/forwarded-link privacy,
+provenance copy, confirm cancel/accept, transactional failure, and rejection preservation. A
+deterministic Create identity contract passes **7/7**, proving project-scoped like/pass coexistence, mutual
+exclusion, neutrality in a third project, and reload persistence. The separate AI Studio browser
+contract passes **5/5**: imported-only and other-project copies do not light the star, the current-
+project action adds its own row without mutating either source, and the exact context restores the
+star. The existing preference contract remains green, the production web build succeeds, and the
+release Rust library remains **160/160**.
+
+**Decision.** This is a data-integrity repair, not an aesthetic or generator experiment. The held-
+out production audit remains **49/49** at the exact **84.85** quality, **0.197** similarity, and
+**19.60/30** seed-spread baseline with zero lexical hazards. No generator, scorer, ranker, random
+stream, network call, taste-export schema, WASM API, or public Rust type changed; the only new
+persistence surface is the provenance-specific imported-Saved key and its guarded migration. Real
+matched labels are still absent, so scorer weights remain blocked. The later blind study now uses
+30 distinct briefs as the inferential units: one primary full-page choice each, 12 side-reversed
+quality-control repeats excluded from efficacy, at least 21/30 candidate wins, and at least 10/12
+consistent reversals.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
@@ -4144,6 +4215,10 @@ failed probe remains disconnected from production and carries no semantic or aes
 AI Studio remains an optional, separate batch judge rather than a hidden dependency of Create.
 
 Local taste now distinguishes its three-signal personalization trigger from scorer evidence. The
+Saved collection also distinguishes explicit project likes from names received through a share:
+both remain available as one deduplicated shortlist, but only deliberate project feedback teaches
+the local profile or enters a taste export. One spelling can carry independent decisions across
+projects, and old automatic share stubs migrate without reclassifying genuine legacy likes. The
 next broad aesthetic scorer change is evidence-gated: collect at least ten unique scoped likes and
 ten unique scoped passes that each participate in a same-context pair, then audit one canonical v2
 export. That 10/10 checkpoint is descriptive, not independent or blind proof; shipping new weights

@@ -1,38 +1,70 @@
 import type { NameResult } from './engine'
 import { defaultJudgeConfig, type JudgeConfig } from './judge'
+import {
+  hasTasteItem,
+  isLegacyShareStub,
+  mergeSavedNames,
+  migrateLegacyShareRows,
+  removeSavedRows,
+  sameSavedName,
+  withoutSavedName,
+  withoutTasteItem,
+} from './taste-identity'
+
+export { mergeSavedNames } from './taste-identity'
 
 const KEY = 'neologism:favorites'
 const REJECTED_KEY = 'neologism:rejected'
+const IMPORTED_SAVED_KEY = 'neologism:imported-saved'
 const TASTE_REFERENCES_KEY = 'neologism:taste-references'
 const MAX_REJECTED = 200
 const MAX_TASTE_REFERENCE_INPUT = 240
-
-function sameName(a: NameResult, b: NameResult): boolean {
-  return a.name.toLowerCase() === b.name.toLowerCase()
-}
+let recoveredImportedSaved: NameResult[] = []
 
 export function loadFavorites(): NameResult[] {
+  recoveredImportedSaved = []
   try {
     const raw = localStorage.getItem(KEY)
-    return raw ? (JSON.parse(raw) as NameResult[]) : []
+    if (!raw) return []
+    const stored = JSON.parse(raw) as NameResult[]
+    if (!Array.isArray(stored)) return []
+
+    const migration = migrateLegacyShareRows(
+      stored,
+      loadImportedSaved(),
+      writeImportedSaved,
+      writeFavorites,
+    )
+    recoveredImportedSaved = migration.recoveredImported
+    return migration.favorites
   } catch {
     return []
   }
 }
 
-export function saveFavorites(favorites: NameResult[]): void {
+function writeFavorites(favorites: NameResult[]): void {
   localStorage.setItem(KEY, JSON.stringify(favorites))
 }
 
+export function saveFavorites(favorites: NameResult[]): void {
+  // If the imported key was temporarily unwritable during old-share
+  // migration, the old favorites key is still the only durable copy of those
+  // Saved names. Preserve the stubs through later taste mutations until a
+  // dedicated imported write succeeds or the user explicitly removes them.
+  writeFavorites([...favorites, ...recoveredImportedSaved])
+}
+
 export function toggleFavorite(favorites: NameResult[], item: NameResult): NameResult[] {
-  const exists = favorites.some((favorite) => sameName(favorite, item))
-  const next = exists ? favorites.filter((favorite) => !sameName(favorite, item)) : [...favorites, item]
+  const exists = hasTasteItem(favorites, item)
+  const next = exists
+    ? withoutTasteItem(favorites, item)
+    : [...favorites, item]
   saveFavorites(next)
   return next
 }
 
 export function removeFavorite(favorites: NameResult[], item: NameResult): NameResult[] {
-  const next = favorites.filter((favorite) => !sameName(favorite, item))
+  const next = withoutTasteItem(favorites, item)
   if (next.length !== favorites.length) saveFavorites(next)
   return next
 }
@@ -53,18 +85,102 @@ export function saveRejected(rejected: NameResult[]): void {
 }
 
 export function toggleRejected(rejected: NameResult[], item: NameResult): NameResult[] {
-  const exists = rejected.some((candidate) => sameName(candidate, item))
+  const exists = hasTasteItem(rejected, item)
   const next = exists
-    ? rejected.filter((candidate) => !sameName(candidate, item))
+    ? withoutTasteItem(rejected, item)
     : [...rejected, item].slice(-MAX_REJECTED)
   saveRejected(next)
   return next
 }
 
 export function removeRejected(rejected: NameResult[], item: NameResult): NameResult[] {
-  const next = rejected.filter((candidate) => !sameName(candidate, item))
+  const next = withoutTasteItem(rejected, item)
   if (next.length !== rejected.length) saveRejected(next)
   return next
+}
+
+// Names opened from somebody else's share link belong in Saved, but are not an
+// explicit positive taste action by the recipient. Keep them in a separate
+// collection so they never train the local profile or enter a taste export.
+export function loadImportedSaved(): NameResult[] {
+  try {
+    const raw = localStorage.getItem(IMPORTED_SAVED_KEY)
+    if (!raw) return recoveredImportedSaved
+    const stored = JSON.parse(raw) as unknown
+    if (!Array.isArray(stored)) return recoveredImportedSaved
+    return mergeSavedNames(stored.filter(isLegacyShareStub), recoveredImportedSaved)
+  } catch {
+    return recoveredImportedSaved
+  }
+}
+
+function writeImportedSaved(items: NameResult[]): void {
+  localStorage.setItem(IMPORTED_SAVED_KEY, JSON.stringify(items))
+}
+
+export function saveImportedSaved(items: NameResult[]): boolean {
+  try {
+    writeImportedSaved(items)
+    return true
+  } catch {
+    // ignore quota / privacy-mode storage errors
+    return false
+  }
+}
+
+export function addImportedSaved(
+  current: NameResult[],
+  items: NameResult[],
+): { items: NameResult[]; persisted: boolean } {
+  const next = mergeSavedNames(current, items)
+  const persisted = saveImportedSaved(next)
+  if (persisted) recoveredImportedSaved = []
+  return { items: next, persisted }
+}
+
+export function removeSavedEverywhere(
+  favorites: NameResult[],
+  importedSaved: NameResult[],
+  item: NameResult,
+): ReturnType<typeof removeSavedRows> {
+  // A previous migration may already have persisted the imported copy but
+  // failed to clean the exact old stub from the favorites key. Include that
+  // pending durable row in this transaction so an imported-only optimization
+  // cannot leave it behind to reappear on reload.
+  let pendingLegacyRows: NameResult[] = []
+  try {
+    const raw = localStorage.getItem(KEY)
+    const stored = raw ? JSON.parse(raw) as unknown : []
+    if (Array.isArray(stored)) {
+      pendingLegacyRows = stored.filter((candidate): candidate is NameResult => (
+        isLegacyShareStub(candidate) && sameSavedName(candidate, item)
+      ))
+    }
+  } catch {
+    // The normal removal path still handles the in-memory sources.
+  }
+
+  const removal = removeSavedRows(
+    [...favorites, ...pendingLegacyRows],
+    importedSaved,
+    item,
+    writeImportedSaved,
+    writeFavorites,
+  )
+  if (!removal.removed && pendingLegacyRows.length > 0) {
+    // The old key still owns a recoverable copy. Keep presenting it as
+    // imported-only, never as explicit taste, until cleanup can succeed.
+    return { favorites, importedSaved, removed: false }
+  }
+  if (!removal.importedSaved.some((candidate) => (
+    sameSavedName(candidate, item)
+  ))) {
+    recoveredImportedSaved = withoutSavedName(recoveredImportedSaved, item)
+  }
+  return {
+    ...removal,
+    favorites: removal.favorites.filter((candidate) => !isLegacyShareStub(candidate)),
+  }
 }
 
 // Optional examples such as "Vercel, Linear, Notion" seed the local shape

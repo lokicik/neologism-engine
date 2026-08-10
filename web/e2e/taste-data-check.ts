@@ -81,6 +81,17 @@ check(
   'disjoint 10/10 labels cannot masquerade as matched evidence',
 )
 
+const crossProjectSpelling = buildTasteDataset(
+  [result('Noma', 'brandable', 'project-a')],
+  [result('NOMA', 'brandable', 'project-b')],
+  '2026-08-09T00:00:00.000Z',
+)
+check(
+  crossProjectSpelling.examples.length === 2
+    && crossProjectSpelling.comparisons.length === 0,
+  'opposite labels for one spelling remain separate across project contexts',
+)
+
 const matchedLikes = Array.from(
   { length: 10 },
   (_, index) => result(`MatchedLike${index}`, 'brandable', 'project-c'),

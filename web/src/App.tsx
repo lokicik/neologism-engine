@@ -1,10 +1,29 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
-import { generateBatch, generateColdLeadRetry, generateNames, batchMetrics, extractKeywords, type BatchMetrics, type Config, type NameResult, type Style } from './lib/engine'
+import { generateBatch, generateColdLeadRetry, generateNames, batchMetrics, extractKeywords, type BatchMetrics, type Config, type NameResult } from './lib/engine'
 import { recommendations } from './lib/recommend'
 import { buildReferencedProfile, coldQualityPoolCount, compoundTastePoolCount, feedbackForContext, fillColdLeadRetry, MIN_TASTE_SIGNALS, needsColdLeadRetry, needsQualityRepair, preferencePoolCount, prioritizeColdStrongLead, repairWeakShortlist, shortlistByPreference } from './lib/preferences'
 import { tasteContextForConfig } from './lib/taste-context'
 import { tasteEvidenceProgress } from './lib/taste-data'
-import { loadFavorites, toggleFavorite, removeFavorite, saveFavorites, loadRejected, toggleRejected, removeRejected, loadTasteReferences, saveTasteReferences, loadRecent, saveRecent, hasVisited, markVisited, loadJudgeConfig, saveJudgeConfig } from './lib/storage'
+import {
+  addImportedSaved,
+  hasVisited,
+  loadFavorites,
+  loadImportedSaved,
+  loadJudgeConfig,
+  loadRecent,
+  loadRejected,
+  loadTasteReferences,
+  markVisited,
+  removeFavorite,
+  removeRejected,
+  removeSavedEverywhere,
+  saveJudgeConfig,
+  saveRecent,
+  saveTasteReferences,
+  toggleFavorite,
+  toggleRejected,
+} from './lib/storage'
+import { hasTasteItem, savedNameEntries, tasteIdentity } from './lib/taste-identity'
 import { type JudgeConfig } from './lib/judge'
 import { decodeShareUrl } from './lib/share'
 import { CommandBar } from './components/CommandBar'
@@ -51,13 +70,14 @@ export default function App() {
   // First visit shows the landing; share-URL visitors skip it and land on the
   // Saved page (they came for shared favorites). Entering is remembered.
   const [view, setView] = useState<View>(() => {
-    if (location.hash.startsWith('#names=')) return 'saved'
+    if (decodeShareUrl().length > 0) return 'saved'
     return hasVisited() ? 'create' : 'landing'
   })
   const [config, setConfig] = useState<Config>(DEFAULT_CONFIG)
   const [results, setResults] = useState<NameResult[]>([])
   const [metrics, setMetrics] = useState<BatchMetrics | null>(null)
   const [favorites, setFavorites] = useState<NameResult[]>(loadFavorites)
+  const [importedSaved, setImportedSaved] = useState<NameResult[]>(loadImportedSaved)
   const [rejected, setRejected] = useState<NameResult[]>(loadRejected)
   const [tasteReferences, setTasteReferences] = useState(loadTasteReferences)
   const [loading, setLoading] = useState(false)
@@ -100,35 +120,45 @@ export default function App() {
   useEffect(() => {
     favoritesRef.current = favorites
   }, [favorites])
+  const importedSavedRef = useRef<NameResult[]>(importedSaved)
+  useEffect(() => {
+    importedSavedRef.current = importedSaved
+  }, [importedSaved])
   const rejectedRef = useRef<NameResult[]>(rejected)
   useEffect(() => {
     rejectedRef.current = rejected
   }, [rejected])
 
-  // On mount: if a #names= share URL is present, union those names into favorites.
+  // On mount: a share URL adds names to Saved without pretending that the
+  // recipient explicitly liked them. Taste evidence remains action-derived.
   useEffect(() => {
     const shared = decodeShareUrl()
-    if (shared.length === 0) return
-    setFavorites((prev) => {
-      const existing = new Set(prev.map((f) => f.name))
-      const stubs: NameResult[] = shared
-        .filter((p) => !existing.has(p.name))
-        .map((p) => ({
-          name: p.name,
-          style: p.style as Style,
-          score_pronounce: 0,
-          score_novelty: 0,
-          score_memorability: 0,
-          connotations: [],
-          syllables: 0,
-        }))
-      if (stubs.length === 0) return prev
-      const merged = [...prev, ...stubs]
-      saveFavorites(merged)
-      return merged
-    })
-    // Clear the hash so the URL is clean after loading.
-    history.replaceState(null, '', location.pathname)
+    if (shared.length === 0) {
+      // Invalid or unsupported payloads are not recoverable by retrying. A
+      // valid payload whose storage write fails follows the branch below and
+      // deliberately keeps its hash as the recovery copy.
+      if (location.hash.startsWith('#names=')) {
+        history.replaceState(null, '', location.pathname)
+      }
+      return
+    }
+    // A valid share is an intentional entry into the app. Remember it so the
+    // recipient returns to the product, not the first-visit landing page,
+    // after the recovery hash has been cleared.
+    markVisited()
+    const stubs: NameResult[] = shared.map((item) => ({
+      name: item.name,
+      style: item.style,
+      score_pronounce: 0,
+      score_novelty: 0,
+      score_memorability: 0,
+      connotations: [],
+      syllables: 0,
+    }))
+    const imported = addImportedSaved(importedSaved, stubs)
+    setImportedSaved(imported.items)
+    // Preserve the recovery URL if browser storage rejected the write.
+    if (imported.persisted) history.replaceState(null, '', location.pathname)
   }, [])
 
   const markSeen = (names: NameResult[]) => {
@@ -248,9 +278,7 @@ export default function App() {
   }, [])
 
   const handleToggleFavorite = useCallback((item: NameResult) => {
-    const wasFavorite = favoritesRef.current.some(
-      (favorite) => favorite.name.toLowerCase() === item.name.toLowerCase(),
-    )
+    const wasFavorite = hasTasteItem(favoritesRef.current, item)
     const nextFavorites = toggleFavorite(favoritesRef.current, item)
     favoritesRef.current = nextFavorites
     setFavorites(nextFavorites)
@@ -265,9 +293,7 @@ export default function App() {
   }, [])
 
   const handleToggleRejected = useCallback((item: NameResult) => {
-    const wasRejected = rejectedRef.current.some(
-      (candidate) => candidate.name.toLowerCase() === item.name.toLowerCase(),
-    )
+    const wasRejected = hasTasteItem(rejectedRef.current, item)
     const nextRejected = toggleRejected(rejectedRef.current, item)
     rejectedRef.current = nextRejected
     setRejected(nextRejected)
@@ -276,6 +302,22 @@ export default function App() {
       const nextFavorites = removeFavorite(favoritesRef.current, item)
       favoritesRef.current = nextFavorites
       setFavorites(nextFavorites)
+    }
+  }, [])
+
+  const handleRemoveSaved = useCallback((item: NameResult) => {
+    const removal = removeSavedEverywhere(
+      favoritesRef.current,
+      importedSavedRef.current,
+      item,
+    )
+    favoritesRef.current = removal.favorites
+    importedSavedRef.current = removal.importedSaved
+    setFavorites(removal.favorites)
+    setImportedSaved(removal.importedSaved)
+    if (!removal.removed) {
+      window.alert('Could not remove this name completely because browser storage rejected part of the change. Saved was refreshed to match durable data.')
+      return
     }
   }, [])
 
@@ -345,8 +387,9 @@ export default function App() {
     void handleGenerate(false, next)
   }
 
-  const favoriteNames = new Set(favorites.map((item) => item.name.toLowerCase()))
-  const rejectedNames = new Set(rejected.map((item) => item.name.toLowerCase()))
+  const favoriteKeys = new Set(favorites.map(tasteIdentity))
+  const rejectedKeys = new Set(rejected.map(tasteIdentity))
+  const savedEntries = savedNameEntries(favorites, importedSaved)
 
   // Preference profile learns toward likes or away from repeated passes.
   // Phase 37: applied automatically once it exists — no toggle. Phase 49:
@@ -395,7 +438,7 @@ export default function App() {
     <div className="shell">
       <Sidebar
         view={view}
-        savedCount={favorites.length}
+        savedCount={savedEntries.length}
         onNavigate={setView}
         onAbout={() => setView('landing')}
         onSettings={() => setShowSettings(true)}
@@ -404,8 +447,8 @@ export default function App() {
       <main className="page">
         {view === 'saved' ? (
           <SavedPage
-            favorites={favorites}
-            onToggleFavorite={handleToggleFavorite}
+            entries={savedEntries}
+            onRemoveSaved={handleRemoveSaved}
             onGoCreate={() => setView('create')}
           />
         ) : view === 'studio' ? (
@@ -464,9 +507,9 @@ export default function App() {
                       <NameCard
                         key={r.name}
                         result={r}
-                        isFavorite={favoriteNames.has(r.name.toLowerCase())}
+                        isFavorite={favoriteKeys.has(tasteIdentity(r))}
                         onToggleFavorite={handleToggleFavorite}
-                        isRejected={rejectedNames.has(r.name.toLowerCase())}
+                        isRejected={rejectedKeys.has(tasteIdentity(r))}
                         onToggleRejected={handleToggleRejected}
                         isBest={r.name === bestName}
                         appearDelay={(i % (config.count ?? 10)) * 45}
