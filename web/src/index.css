@@ -603,40 +603,143 @@ body {
 .star-btn.starred { color: #f59e0b; }
 .pass-btn.passed { color: var(--danger); background: rgba(248, 113, 113, .08); }
 
-/* Availability badges (inside the card expansion) — quiet outline style */
-.domain-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: .3rem;
+/* Phase 146: domain observations are explicit, time-stamped evidence rather
+   than green/red "availability" verdicts. Opening the panel performs no I/O. */
+.availability-panel {
+  gap: .7rem;
 }
 
-.badge {
-  font-size: .64rem;
-  padding: .1rem .42rem;
-  border-radius: 999px;
-  font-weight: 600;
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--muted);
+.availability-intro,
+.availability-disclaimer,
+.availability-unsupported {
+  margin: 0;
+  text-wrap: pretty;
 }
-.badge-checking { animation: badge-pulse 1.2s ease-in-out infinite; }
-.badge-available { color: var(--accent2); border-color: rgba(78, 204, 163, .35); }
-.badge-taken { color: #e0716d; border-color: rgba(224, 113, 109, .3); }
+
+.availability-disclosure {
+  display: flex;
+  flex-direction: column;
+  gap: .65rem;
+  padding: .75rem;
+  border-radius: 10px;
+  background: rgba(124, 106, 249, .055);
+  box-shadow: 0 0 0 1px rgba(124, 106, 249, .18);
+}
+
+.availability-run {
+  align-self: flex-start;
+  min-height: 40px;
+  padding: .48rem .78rem;
+  border: none;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  font: inherit;
+  font-size: .74rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition-property: opacity, transform;
+  transition-duration: .15s, .08s;
+  transition-timing-function: ease-out;
+}
+.availability-run:hover { opacity: .88; }
+.availability-run:active { transform: scale(.96); }
+.availability-run:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+.availability-grid {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--border);
+}
+
+.availability-domain-row {
+  min-height: 40px;
+  display: grid;
+  grid-template-columns: 3.25rem minmax(0, 1fr);
+  align-items: center;
+  gap: .75rem;
+  padding: .35rem .1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.availability-domain {
+  color: var(--text);
+  font-weight: 650;
+  letter-spacing: .01em;
+}
+
+.availability-reading {
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: .7rem;
+}
+
+.availability-result { color: var(--muted); }
+.availability-domain-row[data-status="record_found"] .availability-result,
+.availability-domain-row[data-status="dns_record"] .availability-result {
+  color: #e8a09c;
+}
+.availability-domain-row[data-status="no_record"] .availability-result,
+.availability-domain-row[data-status="nxdomain"] .availability-result,
+.availability-domain-row[data-status="no_a_answer"] .availability-result {
+  color: var(--text);
+}
+.availability-domain-row[data-status="checking"] .availability-result {
+  animation: badge-pulse 1.2s ease-in-out infinite;
+}
+
+.availability-meta {
+  flex-shrink: 0;
+  color: var(--muted);
+  font-size: .62rem;
+  font-variant-numeric: tabular-nums;
+  opacity: .8;
+}
+
+.availability-manual {
+  display: flex;
+  flex-direction: column;
+  gap: .4rem;
+}
+
+.availability-manual-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35rem;
+}
+
+.availability-manual-link {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  padding: .38rem .62rem;
+  border-radius: 8px;
+  color: var(--muted);
+  text-decoration: none;
+  box-shadow: 0 0 0 1px var(--border);
+  transition-property: color, box-shadow, transform;
+  transition-duration: .15s, .15s, .08s;
+  transition-timing-function: ease-out;
+}
+.availability-manual-link:hover {
+  color: var(--text);
+  box-shadow: 0 0 0 1px rgba(124, 106, 249, .5);
+}
+.availability-manual-link:active { transform: scale(.96); }
+
+.availability-disclaimer,
+.availability-unsupported {
+  color: var(--muted);
+  font-size: .65rem;
+}
+.availability-unsupported { color: #e8a09c; }
 
 @keyframes badge-pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: .45; }
 }
-
-.domain-disclaimer {
-  font-size: .6rem;
-  color: var(--muted);
-  opacity: .6;
-}
-
-.tm-link { text-decoration: none; cursor: pointer; }
-.tm-link:hover { color: var(--text); border-color: var(--accent); }
 
 /* Monogram */
 .monogram {
@@ -1289,12 +1392,14 @@ body {
   .name-card { animation: none; }
   .skeleton-card { animation: none; background: var(--surface); }
   .badge-checking { animation: none; }
+  .availability-domain-row[data-status="checking"] .availability-result { animation: none; }
   .chip-chevron { transition: none; }
   .icon-btn { transition: color .15s, background .15s; }
   .icon-btn:active,
   .command-go:active, .landing-cta:active, .nav-cta:active, .toolbar-btn:active,
   .mode-pill:active, .chip:active, .card-chip:active, .example-chip:active,
-  .tile-pill:active, .sidebar-item:active { transform: none; }
+  .tile-pill:active, .sidebar-item:active, .availability-run:active,
+  .availability-manual-link:active { transform: none; }
 }
 
 /* Sidebar collapses to a horizontal top bar on narrow screens */
@@ -1401,4 +1506,5 @@ body {
   .command-bar { flex-wrap: wrap; padding: .6rem; }
   .command-go { width: 100%; }
   .page-header { flex-direction: column; align-items: flex-start; }
+  .availability-reading { flex-direction: column; align-items: flex-start; gap: .05rem; }
 }

@@ -1,8 +1,8 @@
 # Neologism Engine
 
-Generates invented names for three styles — **Big Tech brands**, **Sci-Fi**, and **Fantasy** — using a Rust engine compiled to WebAssembly and a React + Vite + TypeScript SPA. Everything runs fully client-side; no backend or API keys required.
+Generates invented names for three styles — **Big Tech brands**, **Sci-Fi**, and **Fantasy** — using a Rust engine compiled to WebAssembly and a React + Vite + TypeScript SPA. Name generation, Saved data, and taste processing run fully client-side; no backend or API keys are required for them.
 
-Built for naming **packages, CLIs, libraries, and brands** — it's the rare generator that checks **developer namespaces** (GitHub username, npm, PyPI, crates.io) alongside domain registries and trademark search, so you can clear a name everywhere it matters before you commit.
+Built for naming **packages, CLIs, libraries, and brands** — local generation is paired with on-request domain evidence and manual developer-namespace and trademark links, so you can investigate a displayed spelling before committing to it.
 
 ## Architecture
 
@@ -155,7 +155,7 @@ npm run build        # output in web/dist/
 - **Readable semantic joins** — concept pairs keep meaningful boundary consonants (`Poolledger`, not `Pooledger`); awkward vowel collisions and shared-overlap typos such as `Aurank`, `Settledger`, and `Tagent` are skipped for a cleaner pair.
 - **Score bars** — pronounceability, novelty, and memorability per generated name
 - **Provenance-safe Saved collection** — explicit stars and names received from share links appear together once per spelling, while cards explain whether the source was a project like, a historical unscoped like, a share, or a combination. Share-only names are not taste evidence. Removing a name backed by multiple sources requires confirmation; passes are preserved. TXT, JSON, and forwarded share links expose only the deduplicated spelling/style shortlist. The collection persists in `localStorage`.
-- **Domain indicator** — checks `.com` / `.io` availability via Cloudflare DNS-over-HTTPS (no API key; labeled as indicator, not authoritative)
+- **On-request domain evidence** — opening Name checks sends nothing. An explicit domain action sends only the displayed valid label, plus normal IP/request metadata, through six lookups across four third-party providers: Verisign, Identity Digital, Google Registry, and Cloudflare. It reports time-stamped registry-record evidence for `.com`, `.ai`, `.app`, and `.dev`, and DNS evidence for `.io` and `.co`; the absence of an exact record or DNS answer is not legal, trademark, or market clearance. GitHub, npm, PyPI, crates.io, USPTO, and EUIPO remain manual links and are **not evaluated**. Those providers receive the name only when their link is opened. These domain requests never include the project brief, Saved/taste data, or AI credentials; generation and taste processing remain local.
 - **Batch metrics & tips** — a stats panel shows the batch's average scores, diversity, and uniqueness, with 👑/✦/🔊 badges on standout names and contextual suggestions (e.g. "raise Randomness for more invented results"). A CLI eval harness (`cargo run -p neologism-core --example metrics`) prints per-style aggregates for regression tracking.
 
 ## How it works

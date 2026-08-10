@@ -275,8 +275,8 @@ export function Landing({ onEnter }: Props) {
           <span className="eyebrow">Free · open · runs entirely in your browser</span>
           <h1 className="landing-title">Name your next big thing.</h1>
           <p className="hero-sub">
-            Coined names for packages, CLIs, libraries, and brands — checked across npm,
-            PyPI, crates.io, GitHub and domains before you commit.
+            Coined names for packages, CLIs, libraries, and brands — generated locally, with
+            on-request domain evidence and manual namespace and trademark links.
           </p>
 
           <div className="decode-stage">
@@ -331,15 +331,19 @@ export function Landing({ onEnter }: Props) {
         </div>
 
         <div className="tile">
-          <h3>Availability, built in</h3>
+          <h3>Availability evidence, on request</h3>
           <div className="check-rows">
-            <span className="check-group-label">Dev namespaces</span>
-            <span className="check-row"><i>✓</i> GitHub · npm · PyPI · crates.io</span>
-            <span className="check-group-label">Domains &amp; trademark</span>
-            <span className="check-row"><i>✓</i> .com · .io · .ai — registry-level</span>
-            <span className="check-row"><i>™</i> USPTO / EUIPO one click away</span>
+            <span className="check-group-label">Domain action</span>
+            <span className="check-row"><i>✓</i> RDAP · .com · .ai · .app · .dev</span>
+            <span className="check-row"><i>~</i> DNS · .io · .co</span>
+            <span className="check-group-label">Manual links · not evaluated</span>
+            <span className="check-row"><i>↗</i> GitHub · npm · PyPI · crates.io</span>
+            <span className="check-row"><i>™</i> USPTO · EUIPO</span>
           </div>
-          <p className="tile-foot">the dev namespaces other generators skip</p>
+          <p className="tile-foot">
+            Opening Name checks sends nothing. A domain action sends the displayed label plus
+            normal IP/request metadata; manual providers receive the name only when opened.
+          </p>
         </div>
 
         <div className="tile">
@@ -391,7 +395,7 @@ export function Landing({ onEnter }: Props) {
         </div>
         <div className="step">
           <span className="step-num">03</span>
-          <span>Check the namespace — npm, PyPI, crates.io, GitHub, domains. Save the keepers.</span>
+          <span>Review domain evidence. Open manual namespace or trademark links. Save the keepers.</span>
         </div>
       </section>
 

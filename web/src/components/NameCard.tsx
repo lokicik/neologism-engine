@@ -1,6 +1,13 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { explainName, type Explanation, type NameResult } from '../lib/engine'
-import { checkDomains, checkHandles, isAuthoritative, trademarkLinks, HANDLES, TLDS, type DomainStatus } from '../lib/domain'
+import {
+  checkDomainEvidence,
+  idleDomainObservations,
+  manualLookupLinks,
+  normalizeDomainLabel,
+  type DomainObservation,
+  type DomainObservationStatus,
+} from '../lib/domain'
 import { composite } from '../lib/score'
 import { Monogram } from './Monogram'
 import { IconCopy, IconCheck, IconStar, IconThumbDown } from './icons'
@@ -35,13 +42,6 @@ const STYLE_LABEL: Record<string, string> = {
   fantasy: 'Fantasy',
 }
 
-function idleMap(): Record<string, DomainStatus> {
-  const m: Record<string, DomainStatus> = {}
-  for (const tld of TLDS) m[tld] = 'idle'
-  for (const h of HANDLES) m[h] = 'idle'
-  return m
-}
-
 // Render the structural facts as a short human sentence fragment list.
 function whyParts(e: Explanation): string[] {
   const parts: string[] = []
@@ -56,16 +56,23 @@ function whyParts(e: Explanation): string[] {
 
 export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction = 'favorite', collectionNote, metricsAvailable = true, isRejected = false, onToggleRejected, isBest = false, appearDelay = 0, reason, isAiPick = false }: Props) {
   const [copied, setCopied] = useState(false)
-  const [domains, setDomains] = useState<Record<string, DomainStatus>>(idleMap)
+  const [domains, setDomains] = useState<DomainObservation[]>(() => idleDomainObservations(result.name))
+  const [domainsRunning, setDomainsRunning] = useState(false)
   const [showAvail, setShowAvail] = useState(false)
   const [why, setWhy] = useState<Explanation | null>(null)
   const [showWhy, setShowWhy] = useState(false)
+  const domainAbort = useRef<AbortController | null>(null)
+  const domainRun = useRef(0)
 
   useEffect(() => {
-    setDomains(idleMap())
+    domainAbort.current?.abort()
+    domainRun.current++
+    setDomains(idleDomainObservations(result.name))
+    setDomainsRunning(false)
     setShowAvail(false)
     setWhy(null)
     setShowWhy(false)
+    return () => domainAbort.current?.abort()
   }, [result.name])
 
   function copy() {
@@ -86,34 +93,112 @@ export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction 
   function toggleAvailability() {
     const next = !showAvail
     setShowAvail(next)
-    // Fire the checks the first time the panel opens.
-    if (next && Object.values(domains).every((s) => s === 'idle')) {
-      const checking: Record<string, DomainStatus> = {}
-      for (const tld of TLDS) checking[tld] = 'checking'
-      for (const h of HANDLES) checking[h] = 'checking'
-      setDomains(checking)
-      void checkDomains(result.name, (tld, status) => {
-        setDomains((prev) => ({ ...prev, [tld]: status }))
-      })
-      void checkHandles(result.name, (handle, status) => {
-        setDomains((prev) => ({ ...prev, [handle]: status }))
-      })
+    if (!next && domainsRunning) {
+      domainAbort.current?.abort()
+      domainRun.current++
+      setDomainsRunning(false)
+      setDomains((current) => current.map((observation) => (
+        observation.status === 'checking'
+          ? {
+              ...observation,
+              status: 'idle',
+              checkedAt: null,
+              cached: false,
+              source: 'not_run',
+              cooldownUntil: null,
+            }
+          : observation
+      )))
     }
   }
 
-  function domainBadgeClass(status: DomainStatus): string {
-    if (status === 'available') return 'badge badge-available'
-    if (status === 'taken') return 'badge badge-taken'
-    if (status === 'checking') return 'badge badge-checking'
-    return 'badge badge-idle'
+  async function runDomainEvidence() {
+    if (domainsRunning || !normalizeDomainLabel(result.name)) return
+    domainAbort.current?.abort()
+    const controller = new AbortController()
+    domainAbort.current = controller
+    const run = ++domainRun.current
+    setDomainsRunning(true)
+
+    const update = (observation: DomainObservation) => {
+      if (domainRun.current !== run || controller.signal.aborted) return
+      setDomains((current) => current.map((candidate) => (
+        candidate.tld === observation.tld ? observation : candidate
+      )))
+    }
+
+    try {
+      const evidence = await checkDomainEvidence(result.name, {
+        signal: controller.signal,
+        onUpdate: update,
+      })
+      if (domainRun.current === run && !controller.signal.aborted) {
+        setDomains(evidence.observations)
+      }
+    } catch {
+      if (domainRun.current === run && !controller.signal.aborted) {
+        setDomains((current) => current.map((observation) => (
+          observation.status === 'checking'
+            ? {
+                ...observation,
+                status: 'inconclusive',
+                checkedAt: Date.now(),
+                cached: false,
+                source: 'network',
+                cooldownUntil: null,
+              }
+            : observation
+        )))
+      }
+    } finally {
+      if (domainRun.current === run) setDomainsRunning(false)
+    }
   }
 
-  function domainLabel(key: string, status: DomainStatus): string {
-    if (status === 'checking') return `${key} …`
-    if (status === 'available') return `${key} ✓`
-    if (status === 'taken') return `${key} ✗`
-    return `${key} ?`
+  function domainLabel(status: DomainObservationStatus): string {
+    const labels: Record<DomainObservationStatus, string> = {
+      idle: 'Not run',
+      checking: 'Checking…',
+      record_found: 'Registration record found',
+      no_record: 'No registration record found',
+      dns_record: 'DNS record observed',
+      nxdomain: 'NXDOMAIN observed',
+      no_a_answer: 'No A answer',
+      rate_limited: 'Provider rate limited',
+      inconclusive: 'Inconclusive',
+    }
+    return labels[status]
   }
+
+  function observationMeta(observation: DomainObservation): string {
+    const method = observation.method === 'rdap' ? 'RDAP registry' : 'DNS-only'
+    const source = observation.source === 'not_run'
+      ? ''
+      : observation.source === 'cache'
+        ? 'cached'
+        : observation.source === 'cooldown'
+          ? 'provider cooldown'
+          : observation.source
+    if (observation.checkedAt === null) {
+      return [observation.provider, method, source].filter(Boolean).join(' · ')
+    }
+    const time = new Date(observation.checkedAt).toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    })
+    const cooldown = observation.cooldownUntil === null
+      ? ''
+      : `retry after ${new Date(observation.cooldownUntil).toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+        })}`
+    return [observation.provider, method, source, time, cooldown].filter(Boolean).join(' · ')
+  }
+
+  const manualLinks = manualLookupLinks(result.name)
+  const domainSupported = normalizeDomainLabel(result.name) !== null
 
   const metaParts: string[] = []
   if (metricsAvailable) {
@@ -175,44 +260,80 @@ export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction 
       )}
 
       {showAvail && (
-        <div className="card-expansion">
-          <div className="avail-section">
-            <span className="avail-label" title="The checks that matter for a project name — and that other name generators skip">
-              Dev namespaces
-            </span>
-            <div className="domain-row">
-              {HANDLES.map((h) => (
-                <span
-                  key={h}
-                  className={domainBadgeClass(domains[h])}
-                  title={{ gh: 'GitHub username', npm: 'npm package', pypi: 'PyPI package', crates: 'crates.io crate' }[h]}
-                >
-                  {domainLabel(h, domains[h])}
-                </span>
-              ))}
-            </div>
+        <div className="card-expansion availability-panel">
+          <div className="availability-disclosure">
+            <p className="availability-intro">
+              Run six point-in-time domain observations for this exact spelling. The action sends
+              only each queried host to Verisign, Identity Digital, Google Registry, or Cloudflare;
+              your IP and normal request metadata accompany those requests. No brief, taste data,
+              Saved list, or AI key is sent.
+            </p>
+            <button
+              className="availability-run"
+              type="button"
+              onClick={() => void runDomainEvidence()}
+              disabled={domainsRunning || !domainSupported}
+            >
+              {domainsRunning ? 'Running 6 domain lookups…' : 'Run 6 domain lookups'}
+            </button>
+            {!domainSupported && (
+              <p className="availability-unsupported" role="status">
+                Unsupported domain label. Use 1–63 ASCII letters, numbers, or internal hyphens;
+                no lookup was sent.
+              </p>
+            )}
           </div>
-          <div className="avail-section">
-            <span className="avail-label">Domains &amp; trademark</span>
-            <div className="domain-row">
-              {TLDS.map((tld) => (
-                <span
-                  key={tld}
-                  className={domainBadgeClass(domains[tld])}
-                  title={isAuthoritative(tld) ? 'Registry (RDAP) — authoritative' : 'DNS lookup — indicator only'}
-                >
-                  {domainLabel(tld, domains[tld])}
-                  {!isAuthoritative(tld) ? '~' : ''}
+
+          <div className="availability-grid" aria-live="polite">
+            {domains.map((observation) => (
+              <div
+                key={observation.tld}
+                className="availability-domain-row"
+                data-tld={observation.tld}
+                data-status={observation.status}
+                data-cached={observation.cached ? 'true' : 'false'}
+              >
+                <span className="availability-domain">{observation.tld}</span>
+                <span className="availability-reading">
+                  <span className="availability-result">{domainLabel(observation.status)}</span>
+                  <span className="availability-meta">{observationMeta(observation)}</span>
                 </span>
-              ))}
-              {trademarkLinks(result.name).map((l) => (
-                <a key={l.label} className="badge badge-idle tm-link" href={l.url} target="_blank" rel="noreferrer" title="Open trademark search (manual check)">
-                  ™ {l.label}
-                </a>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
-          <span className="domain-disclaimer">~ DNS indicator only</span>
+
+          {(['developer', 'trademark'] as const).map((group) => (
+            <div className="availability-manual" key={group}>
+              <span className="avail-label">
+                {group === 'developer' ? 'Developer namespaces' : 'Trademark'} · not evaluated
+              </span>
+              <div className="availability-manual-links">
+                {manualLinks.filter((link) => link.group === group).map((link) => (
+                  <a
+                    key={link.service}
+                    className="availability-manual-link"
+                    data-service={link.service}
+                    href={link.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    title={`Open ${link.label} manually · not evaluated`}
+                  >
+                    {link.label} ↗
+                  </a>
+                ))}
+              </div>
+            </div>
+          ))}
+
+          <p className="availability-disclaimer">
+            Manual providers receive this displayed name only when you open their link; their own
+            privacy terms then apply. They are not included in the domain observations above.
+          </p>
+
+          <p className="availability-disclaimer">
+            Evidence only — not a promise of registrability, ownership, publishability, trademark
+            safety, or market clearance. DNS-only observations can miss registered names.
+          </p>
         </div>
       )}
 
@@ -221,7 +342,7 @@ export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction 
           Why <span className={`chip-chevron${showWhy ? ' open' : ''}`}>▾</span>
         </button>
         <button className={`card-chip${showAvail ? ' active' : ''}`} onClick={toggleAvailability}>
-          Availability <span className={`chip-chevron${showAvail ? ' open' : ''}`}>▾</span>
+          Name checks <span className={`chip-chevron${showAvail ? ' open' : ''}`}>▾</span>
         </button>
         <div className="card-icons">
           <button className="icon-btn" onClick={copy} title="Copy name">

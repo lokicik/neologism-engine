@@ -4121,6 +4121,76 @@ consistent reversals.
 
 ---
 
+## Phase 146 — Make domain evidence honest before batching it
+
+**Why the proposed batch stopped.** Availability was already a shipped utility: Phase 32 added
+TLD/GitHub checks, Phase 36a expanded them to registry and package sources, and Phase 53 made
+developer naming part of the product position. A Saved-shortlist batch was therefore the strongest
+code-facing idea while new aesthetic weights remain evidence-blocked. The provider audit rejected
+that implementation, however. Ten names would have multiplied the old card's ten simultaneous
+requests into one hundred. GitHub's unauthenticated REST budget is 60 requests/hour; PyPI asks
+high-volume clients to identify themselves; and crates.io requires API clients to send an
+application-identifying User-Agent and stay at or below one request/second. Browser fetch cannot
+set that protected header, the official sparse index is not CORS-readable from the app, and a raw
+GitHub mirror was not accepted as an undocumented workaround. The phase therefore fixes the
+existing evidence surface before adding any batch.
+
+**Frozen boundary.** Opening **Name checks** performs zero network I/O. A second explicit action
+runs exactly six domain observations for one supported spelling: RDAP registry evidence for
+`.com`, `.ai`, `.app`, and `.dev`, plus DNS-only observations for `.io` and `.co`. The displayed
+name is trimmed and lowercased only; spaces, punctuation, Unicode, labels longer than 63 characters,
+and edge hyphens are unsupported rather than silently stripped or transliterated. GitHub, npm,
+PyPI, crates.io, USPTO, and EUIPO are manual links marked **not evaluated**. They never enter a
+result count or aggregate verdict and receive the displayed name only if the user opens the link.
+No developer registry API is called automatically.
+
+**Evidence semantics.** RDAP `200` is “registration record found” and `404` is “no registration
+record found”; authentication failures, throttling, redirects, other HTTP failures, network errors,
+and timeouts are inconclusive. DNS `NOERROR` with an answer is “DNS record observed,” empty
+`NOERROR` is “no A answer,” and status 3 is “NXDOMAIN observed”; malformed/mismatched payloads,
+SERVFAIL, and REFUSED fail closed. None of those labels says **available**, registrable, publishable,
+clear, or legally safe. Rows distinguish provider, method, and network/cache/cooldown/not-run/
+cancelled source; completed provider observations show their relevant timestamp. The panel states
+that normal IP/request metadata accompanies the six lookups and that the result is point-in-time
+evidence only.
+
+**Network contract.** Only the four frozen origins—Verisign, Identity Digital, Google Registry,
+and Cloudflare—are accepted. Requests omit credentials and referrers, bypass HTTP cache, reject
+redirects, time out after ten seconds, and share a 30-second per-card ceiling. The session scheduler
+caps global concurrency at four, permits only one active request per origin, and spaces same-origin
+starts by at least one second. A 429 starts an origin cooldown and stops its queued sibling without
+an automatic retry. Conclusive observations use a 256-entry in-memory LRU for exactly five minutes;
+transport failures and throttling are never cached, concurrent identical work is coalesced, and a
+reload clears everything. Coalesced transport has subscriber ownership: closing one card cannot
+cancel another active card's shared request, while work with no remaining subscribers is aborted.
+Closing a panel resets unfinished rows to not-run instead of inventing a network result.
+
+**Acceptance evidence.** The directly runnable transport/state contract passes **33/33**. It pins
+input boundaries; RDAP, DoH, HTTP, redirect, malformed, network, timeout, cooldown, and cancellation
+semantics; exact 299,999/300,000 ms cache behavior; origin allowlisting; concurrency and spacing;
+deterministic ordering; in-flight coalescing; and the combined case where the owner subscriber
+aborts while another remains active. A separate production-browser fixture intercepts every HTTPS
+request and passes **19/19**: opening sends zero, a valid explicit run sends exactly six allowed
+hosts, all rows terminate, the same-session rerun sends zero and says cached, an unsupported Saved
+name sends zero, reload restores six fresh requests, manual links issue no API calls, and no
+unexpected external request escapes. CI uses only injected/intercepted transports; it does not
+treat a live provider response as a stable test oracle.
+
+TypeScript checking and the production web build remain green. The retained Phase 145 contracts
+still pass 19/19, 8/8, 21/21, 61/61, 7/7, and 5/5; the Rust release suite remains 160/160; and the
+49-gate held-out production audit remains green at quality 84.85, similarity 0.197, and seed spread
+19.60/30 with zero lexical hazards.
+
+**Decision.** Phase 146 is a correctness and privacy repair, not “clearance,” a ranking feature, or
+a beauty signal. It changes no generator, scorer, ranker, taste state/schema, Saved identity,
+random stream, WASM API, or Rust code. A shortlist batch can reopen only after every automated
+namespace source has a provider-approved browser contract; it must then remain explicit, bounded,
+ephemeral, and disconnected from result ranking. The relevant provider references are GitHub's
+REST rate-limit and best-practice pages, PyPI's API policy, the crates.io policy RFC, Cloudflare's
+DoH JSON documentation, and RDAP HTTP semantics in RFC 7480.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
