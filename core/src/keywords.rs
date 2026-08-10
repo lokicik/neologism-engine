@@ -205,10 +205,10 @@ fn concept_roots(word: &str) -> &'static [&'static str] {
             &["doc", "guide", "page", "site", "manual"]
         }
         "site" | "website" | "portal" => &["site", "page", "web", "portal", "home"],
-        "legal" | "law" | "lawyer" | "attorney" | "court" | "litigation" => {
-            &["law", "case", "brief", "clause", "jury", "docket"]
-        }
-        "research" | "investigate" | "investigation" => {
+        "legal" | "law" | "lawyer" | "attorney" | "court" | "litigation" | "precedent" => &[
+            "law", "case", "brief", "clause", "jury", "docket", "memo", "gavel",
+        ],
+        "research" | "investigate" | "investigation" | "citation" => {
             &["source", "proof", "trace", "lens", "cite"]
         }
         "hire" | "recruit" | "recruiter" | "candidate" | "applicant" | "talent" => {
@@ -359,10 +359,10 @@ fn concept_adjectives(word: &str) -> &'static [&'static str] {
             &["clear", "open", "simple", "ready", "living", "helpful"]
         }
         "site" | "website" | "portal" => &["open", "live", "clear", "fast", "public", "bright"],
-        "legal" | "law" | "lawyer" | "attorney" | "court" | "litigation" => {
+        "legal" | "law" | "lawyer" | "attorney" | "court" | "litigation" | "precedent" => {
             &["sound", "clear", "exact", "trusted", "proven", "firm"]
         }
-        "research" | "investigate" | "investigation" => {
+        "research" | "investigate" | "investigation" | "citation" => {
             &["deep", "exact", "clear", "open", "trusted", "focused"]
         }
         "hire" | "recruit" | "recruiter" | "candidate" | "applicant" | "talent" => {
@@ -489,6 +489,24 @@ fn is_color_palette_brief(keywords: &[String]) -> bool {
         )
 }
 
+fn is_legal_research_brief(keywords: &[String]) -> bool {
+    has_any_keyword(
+        keywords,
+        &["legal", "law", "lawyer", "attorney", "court", "litigation"],
+    ) && has_any_keyword(
+        keywords,
+        &[
+            "research",
+            "investigate",
+            "investigation",
+            "search",
+            "citation",
+            "precedent",
+            "opinion",
+        ],
+    )
+}
+
 /// Drop a weak or polysemous word only when another keyword makes the intended
 /// domain explicit. The word remains available in every other context.
 fn is_contextually_suppressed(word: &str, keywords: &[String]) -> bool {
@@ -557,6 +575,7 @@ fn is_contextually_suppressed(word: &str, keywords: &[String]) -> bool {
         ],
     );
     let color_palette = is_color_palette_brief(keywords);
+    let legal_research = is_legal_research_brief(keywords);
 
     (recruiting && matches!(word, "team" | "pipeline" | "track"))
         || (meals && matches!(word, "plan" | "weekly" | "organizer"))
@@ -585,6 +604,7 @@ fn is_contextually_suppressed(word: &str, keywords: &[String]) -> bool {
         || (release && word == "automation")
         || (naming && developer_namespace && matches!(word, "check" | "find" | "search"))
         || (color_palette && matches!(word, "designer" | "generator" | "scheme"))
+        || (legal_research && matches!(word, "case" | "opinion" | "search"))
 }
 
 /// Describes how a known product is delivered rather than what it is. These
@@ -981,7 +1001,8 @@ fn concept_position(word: &str) -> u8 {
     match word {
         "name" | "naming" | "brand" | "title" | "word" | "identity" | "mood" | "emotion"
         | "feeling" | "split" | "share" | "sharing" | "divide" | "settle" | "vintage" | "retro"
-        | "classic" | "antique" | "fast" | "speed" | "performance" | "rapid" => 0,
+        | "classic" | "antique" | "fast" | "speed" | "performance" | "rapid" | "legal" | "law"
+        | "lawyer" | "attorney" | "court" | "litigation" | "precedent" => 0,
         "migration" | "migrate" | "rate" | "limit" | "limiter" | "throttle" | "terminal"
         | "git" | "release" | "test" | "testing" | "qa" | "debug" | "cloud" | "deploy"
         | "deployment" | "queue" | "broker" | "messaging" | "event" | "stream" | "topic"
@@ -1046,6 +1067,7 @@ pub fn respell_source_keywords(keywords: &[String]) -> Vec<String> {
 
     let naming_brief = is_naming_brief(keywords);
     let feature_flags = is_feature_flag_brief(keywords);
+    let legal_research = is_legal_research_brief(keywords);
     let focused: Vec<String> = keywords
         .iter()
         .filter(|keyword| {
@@ -1053,6 +1075,7 @@ pub fn respell_source_keywords(keywords: &[String]) -> Vec<String> {
                 && !is_brand_context_only(keyword)
                 && !matches!(keyword.as_str(), "friend" | "team" | "builder")
                 && !(feature_flags && keyword.as_str() == "developer")
+                && !(legal_research && matches!(keyword.as_str(), "citation" | "precedent"))
                 && !concept_roots(keyword).is_empty()
                 && (!naming_brief
                     || matches!(
@@ -1184,6 +1207,13 @@ pub fn guided_pair_root_groups(keywords: &[String], limit: usize) -> Vec<Vec<Str
         return bounded_guided_groups(GROUPS, limit);
     }
 
+    if is_legal_research_brief(keywords) {
+        // Legal research benefits from deliberate research roles such as
+        // `LexCite` and `BriefLens`; keep them out of ordinary suffix output.
+        const GROUPS: &[&[&str]] = &[&["lex", "brief", "docket"], &["lens", "cite", "proof"]];
+        return bounded_guided_groups(GROUPS, limit);
+    }
+
     // Shared-expense briefs benefit from role words that are more concrete than
     // the broad finance/social palettes. Keep this vocabulary private to the
     // final-gap pair lane: ordinary Brandable still explores the wider roots.
@@ -1232,10 +1262,7 @@ pub fn guided_pair_root_groups(keywords: &[String], limit: usize) -> Vec<Vec<Str
         // The broad AI roots produce readable suffix forms but become too long
         // when joined to a workflow concept. These short roles keep both ideas
         // visible in names such as `CogLoop` without changing ordinary Auto.
-        const GROUPS: &[&[&str]] = &[
-            &["cog", "aid"],
-            &["loop", "run", "task", "flow"],
-        ];
+        const GROUPS: &[&[&str]] = &[&["cog", "aid"], &["loop", "run", "task", "flow"]];
         return bounded_guided_groups(GROUPS, limit);
     }
 
@@ -1686,7 +1713,10 @@ mod tests {
             let keywords = extract_keywords(prompt, 6);
             let sources = respell_source_keywords(&keywords);
             for word in kept {
-                assert!(sources.iter().any(|source| source == word), "{prompt}: {sources:?}");
+                assert!(
+                    sources.iter().any(|source| source == word),
+                    "{prompt}: {sources:?}"
+                );
             }
             for word in dropped {
                 assert!(
@@ -1855,10 +1885,7 @@ mod tests {
             .iter()
             .flatten()
             .any(|root| root == "talent"));
-        assert!(applicant_guided
-            .iter()
-            .flatten()
-            .any(|root| root == "job"));
+        assert!(applicant_guided.iter().flatten().any(|root| root == "job"));
 
         let unrelated = extract_keywords("a package dependency tracker", 6);
         assert!(!guided_pair_root_groups(&unrelated, 16)
@@ -2286,5 +2313,61 @@ mod tests {
         assert!(roots.contains(&"lens".to_string()));
         assert!(!roots.contains(&"legal".to_string()));
         assert!(!roots.contains(&"research".to_string()));
+    }
+
+    #[test]
+    fn legal_research_wording_variants_keep_domain_before_function() {
+        for prompt in [
+            "case law research for attorneys",
+            "court opinion and citation search",
+            "a legal precedent research tool",
+        ] {
+            let keywords = extract_keywords(prompt, 6);
+            assert!(is_legal_research_brief(&keywords), "{prompt}: {keywords:?}");
+
+            let groups = brand_root_groups(&keywords, 16);
+            assert_eq!(groups.len(), 2, "{prompt}: {groups:?}");
+            for root in ["law", "brief", "docket", "memo", "gavel"] {
+                assert!(
+                    groups[0].contains(&root.to_string()),
+                    "{prompt}: {groups:?}"
+                );
+            }
+            for root in ["source", "proof", "trace", "lens", "cite"] {
+                assert!(
+                    groups[1].contains(&root.to_string()),
+                    "{prompt}: {groups:?}"
+                );
+            }
+            assert!(
+                groups.iter().flatten().all(|root| !matches!(
+                    root.as_str(),
+                    "file" | "path" | "find" | "scan" | "index" | "seek"
+                )),
+                "{prompt}: {groups:?}",
+            );
+
+            assert_eq!(
+                guided_pair_root_groups(&keywords, 16),
+                [
+                    ["lex", "brief", "docket"].map(str::to_string).to_vec(),
+                    ["lens", "cite", "proof"].map(str::to_string).to_vec(),
+                ],
+                "{prompt}",
+            );
+            let respell_sources = respell_source_keywords(&keywords);
+            assert!(
+                respell_sources
+                    .iter()
+                    .all(|source| !matches!(source.as_str(), "citation" | "precedent")),
+                "{prompt}: {respell_sources:?}",
+            );
+        }
+
+        let filesystem = extract_keywords("a filesystem search CLI", 6);
+        let filesystem_roots = brand_roots(&filesystem, 16);
+        assert!(filesystem_roots.contains(&"file".to_string()));
+        assert!(filesystem_roots.contains(&"index".to_string()));
+        assert!(!is_legal_research_brief(&filesystem));
     }
 }

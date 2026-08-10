@@ -3405,6 +3405,51 @@ selection weight, retry, or random source changed.
 
 ---
 
+## Phase 133 — Give legal research a distinct case-law role
+
+**Observed bottleneck.** After the AI palette repair, `legal research for court cases` was the
+last held-out brief with a content-identical seed page. Its three first pages averaged **81.39**,
+retained only **13/30** distinct names, and shared **8.00/10** names per seed pair. The visible
+set leaned on repeated `Case...`, `Lens...`, and suffix forms, while natural variants such as
+`court opinion and citation search` could let the generic word `search` pull in filesystem roots.
+
+**Scoped vocabulary and role.** Explicit legal-plus-research briefs now keep the legal domain
+before the research function, treat `case`, `opinion`, and `search` as context in that lane, and
+add viable `Memo` and `Gavel` families to the ordinary legal palette. A private two-concept pool
+combines `Lex`/`Brief`/`Docket` with `Lens`/`Cite`/`Proof`; Auto examines the slightly deeper pool
+only for this lane and preserves the tail-aware `LexCite` lead. `Citation` and `precedent` still
+activate the correct semantic groups but cannot become weak literal Respells. Generic filesystem
+search remains unchanged.
+
+**A/B boundaries.** Adding ordinary `Lex` improved local spread but produced **29/2,400**
+cross-domain collision pairs, above the 1% gate, so `Lex` remains private to the guided pair.
+Adding both `Lex` and `Memo` had the same leakage. `Memo` alone was clean but stopped at **17/30**
+names and **6.00** overlap; the retained `Memo` plus `Gavel` palette reaches the stronger spread
+without a global collision. Suppressing every ordinary `Lens` raised the structural average but
+collapsed spread to **14/30** and created another suffix wall. A custom tail-replacement repair
+was also rejected: the existing bounded selection can hold Lens-family output to four of ten
+without adding a new cold-repair algorithm.
+
+**Measured result.** The canonical legal-research pages improve to **83.97** average structural
+quality, **19/30** distinct names, **4.67/10** pair overlap, and **zero** duplicate seed pages. All
+three seeds lead with `LexCite`; representative companions include `Brieflens`, `Memoora`,
+`Gavelio`, `Lawtrace`, and `Docketlens`. Three natural wording variants retain the same minimum
+spread and maximum overlap while rejecting filesystem roots, weak legal Respells, and retries.
+Across the unchanged 105-page held-out base, average quality rises **84.31 -> 84.38**, lead quality
+**86.76 -> 86.93**, seed spread **18.31 -> 18.49/30**, and pair overlap **5.06 -> 4.96/10**.
+Near pairs and suffix leaders remain **68** and **21**; guided leaders rise **52 -> 55**, and the
+last exact duplicate seed page disappears.
+
+**Verification.** The core suite is **153/153**. The held-out audit now covers 105 base pages plus
+57 wording-stress pages and pins the canonical and variant legal-research behavior. The 90-page
+cold audit, 85-page Auto audit, 1,000-selection taste matrix, and 25-page mode-aware taste audit
+all pass their retained gates. The 48-domain/2,400-name collision audit returns every name at
+**83.23** average quality and **0.727** diversity, with 24 explained shared-root collision pairs
+and zero unexplained collisions. Rebuilt WASM, TypeScript, and the production Vite bundle are
+green. No LLM, network call, global scorer change, retry, or random source was added.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
@@ -3440,6 +3485,8 @@ Feature-flag briefs use an isolated `FlipOps` control role instead of adding ano
 `Gate...` variant, while audience words such as `developer` cannot take the Respell slot.
 Naming-engine briefs now surface a scoped `LexLoom` or `LexMint` word-making role while preserving
 a stronger existing metaphor and refusing duplicate Loom tails.
+Legal-research briefs similarly surface the scoped `LexCite` case-law role while keeping generic
+filesystem search and ordinary developer-naming vocabulary isolated.
 Cold Auto also limits exact four-letter stem repetition on a visible page, but only through a
 quality-neutral, coverage-preserving non-suffix substitution from the fallback it already opened.
 Compound is now a genuinely brief-aware explicit alternative rather than a random adjective

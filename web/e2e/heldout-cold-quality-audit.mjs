@@ -73,6 +73,11 @@ const COLOR_PALETTE_VARIANTS = [
   'a palette tool for visual designers',
   'a color scheme generator',
 ]
+const LEGAL_RESEARCH_VARIANTS = [
+  'case law research for attorneys',
+  'court opinion and citation search',
+  'a legal precedent research tool',
+]
 const PROMPTS = [
   ...BASE_PROMPTS,
   ...AI_VARIANTS,
@@ -80,6 +85,7 @@ const PROMPTS = [
   ...FEATURE_FLAG_VARIANTS,
   ...NAMING_TOOL_VARIANTS,
   ...COLOR_PALETTE_VARIANTS,
+  ...LEGAL_RESEARCH_VARIANTS,
 ]
 const SEEDS = [13, 67, 313]
 const DIRECT_SUFFIXES = ['ify', 'ora', 'ion', 'era', 'io', 'ia', 'ix', 'el', 'en', 'on']
@@ -236,6 +242,19 @@ try {
     }
     return upgrades
   })
+  const requiredGuardedRepairUpgrades = [
+    [67, 'a mindfulness timer for sleep and breath', 'Runcalm'],
+    [313, 'a mindfulness timer for sleep and breath', 'Runcalm'],
+    [13, 'a documentation site generator', 'Webmint'],
+    [67, 'a documentation site generator', 'Webmint'],
+  ]
+  const guardedRepairCoverage = requiredGuardedRepairUpgrades.every((
+    [seed, prompt, candidate],
+  ) => guardedRepairUpgrades.some((upgrade) => (
+    upgrade.row.seed === seed
+    && upgrade.row.prompt === prompt
+    && upgrade.candidate.name === candidate
+  )))
   const weakRespellAccents = rows.flatMap((row) => row.direct
     .filter((item) => item.sourceMode === 'respell' && quality(item) < 75)
     .map((item) => ({ row, item })))
@@ -308,6 +327,16 @@ try {
     0,
   ) / (colorPaletteRows.length * 10)
   const colorPaletteVariantRows = rows.filter((row) => COLOR_PALETTE_VARIANTS.includes(row.prompt))
+  const legalResearchRows = rows.filter((row) => (
+    row.prompt === 'legal research for court cases'
+  ))
+  const legalResearchAverage = legalResearchRows.reduce(
+    (sum, row) => sum + row.selected.reduce((pageSum, item) => pageSum + quality(item), 0),
+    0,
+  ) / (legalResearchRows.length * 10)
+  const legalResearchVariantRows = rows.filter((row) => (
+    LEGAL_RESEARCH_VARIANTS.includes(row.prompt)
+  ))
   const seedDiversity = BASE_PROMPTS.map((prompt) => {
     const promptRows = auditRows.filter((row) => row.prompt === prompt)
     const nameSeeds = new Map()
@@ -370,8 +399,11 @@ try {
   const aiAssistantDiversity = seedDiversity.find((row) => (
     row.prompt === 'an AI assistant for workflow automation'
   ))
-  const colorPaletteVariantDiversity = COLOR_PALETTE_VARIANTS.map((prompt) => {
-    const promptRows = colorPaletteVariantRows.filter((row) => row.prompt === prompt)
+  const legalResearchDiversity = seedDiversity.find((row) => (
+    row.prompt === 'legal research for court cases'
+  ))
+  const wordingDiversity = (prompts, variantRows) => prompts.map((prompt) => {
+    const promptRows = variantRows.filter((row) => row.prompt === prompt)
     const names = new Set(promptRows.flatMap((row) => (
       row.selected.map((item) => letters(item.name))
     )))
@@ -392,6 +424,14 @@ try {
       averagePairOverlap: pairTotal === 0 ? 0 : pairOverlap / pairTotal,
     }
   })
+  const colorPaletteVariantDiversity = wordingDiversity(
+    COLOR_PALETTE_VARIANTS,
+    colorPaletteVariantRows,
+  )
+  const legalResearchVariantDiversity = wordingDiversity(
+    LEGAL_RESEARCH_VARIANTS,
+    legalResearchVariantRows,
+  )
   const dominantStemOverflowFor = (items) => {
     const counts = new Map()
     for (const item of items) {
@@ -463,6 +503,7 @@ try {
   console.log(`feature flag average: ${featureFlagAverage.toFixed(2)}`)
   console.log(`naming tool average: ${namingToolAverage.toFixed(2)}`)
   console.log(`color palette average: ${colorPaletteAverage.toFixed(2)} · ${colorPaletteDiversity?.uniqueNames ?? 0}/30 unique · ${colorPaletteDiversity?.averagePairOverlap.toFixed(2) ?? '0.00'} overlap`)
+  console.log(`legal research average: ${legalResearchAverage.toFixed(2)} · ${legalResearchDiversity?.uniqueNames ?? 0}/30 unique · ${legalResearchDiversity?.averagePairOverlap.toFixed(2) ?? '0.00'} overlap`)
   console.log(`guarded repair upgrades: ${guardedRepairUpgrades.length}`)
   console.log(`weak Respell accents: ${weakRespellAccents.length}`)
   console.log(`seed diversity: ${averageUniqueNames.toFixed(2)}/30 unique · ${averageSeedOverlap.toFixed(2)}/10 pair overlap · ${exactDuplicateSeedPages} duplicate pages`)
@@ -502,6 +543,10 @@ try {
   }
   console.log('\ncolor palette focus')
   for (const row of [...colorPaletteRows, ...colorPaletteVariantRows]) {
+    console.log(`${row.seed} · ${row.prompt} · ${row.selected.map((item) => item.name).join(', ')}`)
+  }
+  console.log('\nlegal research focus')
+  for (const row of [...legalResearchRows, ...legalResearchVariantRows]) {
     console.log(`${row.seed} · ${row.prompt} · ${row.selected.map((item) => item.name).join(', ')}`)
   }
   console.log('\nguarded repair upgrades')
@@ -576,10 +621,13 @@ try {
     ],
     [averageUniqueNames >= 18, 'held-out first pages retain at least 18/30 names across three seeds'],
     [averageSeedOverlap <= 5.25, 'held-out seed pairs share at most 5.25/10 names on average'],
-    [exactDuplicateSeedPages <= 1, 'held-out content-identical seed pages retain the AI-page repair'],
+    [exactDuplicateSeedPages === 0, 'held-out seed pages contain no content-identical sets'],
     [dominantStemExcess <= 9, 'held-out exact-stem repetition stays at or below nine excess cards'],
     [suffixLeads.length <= 24, 'held-out direct suffix leads stay at or below 24'],
-    [guardedRepairUpgrades.length >= 6, 'held-out repair surfaces brief-specific inner-card upgrades'],
+    [
+      guardedRepairCoverage,
+      'held-out repair preserves the four pinned brief-specific inner-card upgrades',
+    ],
     [
       aiAssistantRows.length === SEEDS.length
         && aiAssistantAverage >= 86.1
@@ -622,6 +670,42 @@ try {
           && !row.retryRequested
         )),
       'color-palette wording variants stay full, seed-diverse, and free of audience/function Respells',
+    ],
+    [
+      legalResearchRows.length === SEEDS.length
+        && legalResearchAverage >= 83.3
+        && legalResearchDiversity?.uniqueNames >= 19
+        && legalResearchDiversity?.averagePairOverlap <= 5
+        && legalResearchDiversity?.exactDuplicatePages === 0
+        && legalResearchRows.every((row) => (
+          row.selected.length === 10
+          && row.selected[0]?.name === 'LexCite'
+          && row.selected[0]?.construction === 'guided_pair'
+          && row.selected.filter((item) => letters(item.name).endsWith('lens')).length <= 4
+          && row.selected.every((item) => item.sourceMode !== 'respell')
+          && !row.retryRequested
+        )),
+      'legal-research pages lead with LexCite without seed-set or Lens-family collapse',
+    ],
+    [
+      legalResearchVariantRows.length === LEGAL_RESEARCH_VARIANTS.length * SEEDS.length
+        && legalResearchVariantDiversity.every((row) => (
+          row.rowCount === SEEDS.length
+          && row.uniqueNames >= 19
+          && row.averagePairOverlap <= 5
+        ))
+        && legalResearchVariantRows.every((row) => (
+          row.selected.length === 10
+          && row.selected[0]?.name === 'LexCite'
+          && row.selected[0]?.construction === 'guided_pair'
+          && row.selected.filter((item) => letters(item.name).endsWith('lens')).length <= 4
+          && row.selected.every((item) => item.sourceMode !== 'respell')
+          && row.selected.every((item) => ![
+            'file', 'path', 'find', 'scan', 'index', 'seek',
+          ].some((stem) => letters(item.name).startsWith(stem)))
+          && !row.retryRequested
+        )),
+      'legal-research wording variants reject filesystem roots and weak legal Respells',
     ],
     [
       recruiterTrackingRows.length === SEEDS.length

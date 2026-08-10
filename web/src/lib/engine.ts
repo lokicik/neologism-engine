@@ -45,6 +45,7 @@ export interface NameResult {
 
 const GUIDED_METAPHOR_POOL = 8
 const GUIDED_PAIR_POOL = 12
+const LEGAL_GUIDED_PAIR_POOL = 24
 const AUTO_ACCENT_QUALITY_FLOOR = 75
 const GUIDED_METAPHOR_QUALITY_FLOOR = 85
 const GUIDED_PAIR_QUALITY_FLOOR = 84
@@ -99,6 +100,16 @@ const isColorPaletteBrief = (terms: string[]): boolean => {
   const normalized = new Set(terms.map(letters))
   return ['color', 'palette'].some((term) => normalized.has(term))
     && ['design', 'visual', 'creative', 'generator', 'scheme'].some((term) => normalized.has(term))
+}
+
+const isLegalResearchBrief = (terms: string[]): boolean => {
+  const normalized = new Set(terms.map(letters))
+  return ['legal', 'law', 'lawyer', 'attorney', 'court', 'litigation']
+    .some((term) => normalized.has(term))
+    && [
+      'research', 'investigate', 'investigation', 'search',
+      'citation', 'precedent', 'opinion',
+    ].some((term) => normalized.has(term))
 }
 
 export const guidedMetaphorTail = (result: NameResult): string | undefined => {
@@ -322,6 +333,8 @@ export async function generateBatch(cfg: Config): Promise<NameResult[]> {
     const featureFlagBrief = isFeatureFlagBrief(terms)
     const namingToolBrief = isNamingToolBrief(terms)
     const colorPaletteBrief = isColorPaletteBrief(terms)
+    const legalResearchBrief = isLegalResearchBrief(terms)
+    const guidedPairPool = legalResearchBrief ? LEGAL_GUIDED_PAIR_POOL : GUIDED_PAIR_POOL
     const [brandableBatch, respellBatch] = await Promise.all([
       generateNames({ ...cfg, variant: undefined, compound: false, count: total }),
       respell > 0
@@ -350,7 +363,7 @@ export async function generateBatch(cfg: Config): Promise<NameResult[]> {
         ...cfg,
         variant: 'concept_pair',
         compound: false,
-        count: GUIDED_PAIR_POOL,
+        count: guidedPairPool,
       }))
     } else if (total > 0 && (linkedRespells.length === 0 || colorPaletteBrief)) {
       const metaphorConfig = {
@@ -385,22 +398,27 @@ export async function generateBatch(cfg: Config): Promise<NameResult[]> {
       // If no metaphor survives the 85-point gate, try one explicit semantic
       // pair. Scoped product roles may also compare against the second
       // metaphor slot while preserving the first metaphor.
-      if (metaphorAccent.length === 0 || featureFlagBrief || namingToolBrief) {
+      if (
+        metaphorAccent.length === 0
+        || featureFlagBrief
+        || namingToolBrief
+        || legalResearchBrief
+      ) {
         pairAccent = pickGuidedPair(await generateNames({
           ...cfg,
           variant: 'concept_pair',
           compound: false,
-          count: GUIDED_PAIR_POOL,
+          count: guidedPairPool,
         }))
       }
-    } else if (total > 0 && (featureFlagBrief || namingToolBrief)) {
+    } else if (total > 0 && (featureFlagBrief || namingToolBrief || legalResearchBrief)) {
       // Keep a scoped product-role candidate available even if a future
       // keyword rule lets a safe Respell survive one of these briefs.
       pairAccent = pickGuidedPair(await generateNames({
         ...cfg,
         variant: 'concept_pair',
         compound: false,
-        count: GUIDED_PAIR_POOL,
+        count: guidedPairPool,
       }))
     }
     const primaryPage = preserveGuidedConstruction(mergeAutoBatches([
@@ -409,22 +427,39 @@ export async function generateBatch(cfg: Config): Promise<NameResult[]> {
       linkedRespells,
       metaphorAccent.slice(0, 1),
     ], total), metaphorAccent[0])
-    const existingNamingPair = namingToolBrief
-      ? pairAccent.find((candidate) => primaryPage.some((result) => (
-          letters(result.name) === letters(candidate.name)
-        )))
+    const existingScopedPair = (namingToolBrief || legalResearchBrief)
+      ? pairAccent.find((candidate) => (
+          structuralQuality(candidate) >= RESPELL_COMPANION_PAIR_QUALITY_FLOOR
+          && primaryPage.some((result) => (
+            letters(result.name) === letters(candidate.name)
+          ))
+        ))
       : undefined
     const guidedPairCandidate = namingToolBrief
-      ? existingNamingPair ?? pairAccent.find((candidate) => {
+      ? existingScopedPair ?? pairAccent.find((candidate) => {
           const tail = ['loom', 'mint'].find((ending) => letters(candidate.name).endsWith(ending))
           return !tail || primaryPage.every((result) => !letters(result.name).endsWith(tail))
         })
+      : legalResearchBrief
+        ? existingScopedPair ?? pairAccent.find((candidate) => {
+            const tail = ['lens', 'cite', 'proof']
+              .find((ending) => letters(candidate.name).endsWith(ending))
+            return !tail || primaryPage.filter((result) => (
+              letters(result.name).endsWith(tail)
+            )).length < 2
+          }) ?? pairAccent[0]
       : pairAccent[0]
-    const rolePreservedPage = preserveGuidedConstruction(primaryPage, existingNamingPair)
+    const rolePreservedPage = preserveGuidedConstruction(primaryPage, existingScopedPair)
     if (linkedRespells.length > 0) {
+      if (legalResearchBrief) {
+        return addQualityNeutralGuidedAlternative(rolePreservedPage, guidedPairCandidate)
+      }
       return addStrongGuidedPairUpgrade(rolePreservedPage, guidedPairCandidate, namingToolBrief)
     }
     if (metaphorAccent.length > 0) {
+      if (legalResearchBrief) {
+        return addQualityNeutralGuidedAlternative(rolePreservedPage, guidedPairCandidate)
+      }
       if (featureFlagBrief || namingToolBrief) {
         return addStrongGuidedPairUpgrade(rolePreservedPage, guidedPairCandidate, namingToolBrief)
       }
