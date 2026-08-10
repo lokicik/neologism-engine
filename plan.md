@@ -4001,6 +4001,55 @@ or UI behavior is changed by this phase.
 
 ---
 
+## Phase 144 — Count matched taste evidence, not raw labels
+
+**Bottleneck.** The product already had the complete local-feedback chain: project-scoped
+like/pass storage, v2 export, offline composite audit, context isolation, personalized shortlist
+selection, and a separate reference-name bootstrap. Its visible stopping rule was nevertheless
+wrong for scorer research. Settings showed global liked/passed totals, and the Rust audit warned on
+those same raw totals. Ten likes from project A plus ten passes from project B could therefore look
+like the requested 10/10 sample while producing zero valid comparisons. A 1-by-10 Cartesian fan-out
+could likewise look like ten pair rows even though only one liked example participated.
+
+**Frozen evidence semantics.** Readiness now counts unique `(tasteContext.id, normalized name)`
+endpoints that participate in at least one validated v2 `liked > passed` edge. Both endpoints must
+carry the same non-legacy project context. Duplicate example rows and duplicate edges do not
+inflate the sets; raw labels, Cartesian pair count, and legacy-unscoped pairs remain descriptive
+only. The checkpoint is **10 matched likes and 10 matched passes**, with the number of contributing
+project contexts reported beside it. Reaching 10/10 means only that one export is large enough for
+a minimum descriptive audit. The existing recorder captures separate unary actions, not randomized
+direct choices, so blinding and reversed-choice consistency remain explicitly **NOT EVALUATED**.
+
+**What changed.** `web/src/lib/taste-data.ts` owns the shared matched-endpoint calculation without
+changing the v2 schema or the exported comparisons. The active project status continues past the
+three-signal personalization threshold toward 10/10, while Settings separates raw labels and
+derived-pair count from matched likes, matched passes, and scoped context count. The Rust
+`taste_audit` validates schema, indices, direction, and v2 context before building the same unique
+endpoint sets. A single canonical export can report minimum-sample readiness; multiple files still
+aggregate raw scores for descriptive inspection but never aggregate readiness. Their output warns
+that v2 has no rater/profile/snapshot identity, so cumulative snapshots may double-count and only
+one terminal export per independent profile should be supplied. README copy keeps the export's
+privacy boundary explicit: briefs are present, API credentials and recent-name history are absent.
+
+**Acceptance fixtures.** A disjoint 10-like/10-pass sample is fixed at 0/0 matched endpoints; one
+same-context 10-by-10 sample produces 100 derived rows but only 10/10 endpoints; one like fanned to
+ten passes stays 1/10; case-normalized duplicate rows and repeated edges stay 1/1; legacy-only data
+stays 0/0; and readiness changes from false at 9/10 to true at 10/10. The Rust audit additionally
+pins that descriptive multi-file aggregation leaves readiness endpoint sets empty.
+
+**Verification and decision.** The focused TypeScript contract passes **20/20**, the Rust audit
+passes **7/7**, the release core library remains **160/160**, and the production web build succeeds.
+The production-browser taste workflow passes all **34** checks, including active, pass-only,
+reference-only, reload, export, privacy, and matched-context progress behavior. The production
+held-out audit remains **49/49** at the exact **84.85** average quality, **0.197** similarity, and
+**19.60/30** seed-spread baseline with zero lexical hazards. This phase changes no generator,
+scorer, ranker, random stream, persistence schema, network behavior, or WASM API. No real taste
+export is present in the repository, so it cannot authorize new weights; broad scorer work remains
+blocked pending actual matched labels and a separate preregistered, context-disjoint blind/reversal
+study.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
@@ -4094,10 +4143,13 @@ collapse back into the transparent local shape reranker already shipped for refe
 failed probe remains disconnected from production and carries no semantic or aesthetic claim.
 AI Studio remains an optional, separate batch judge rather than a hidden dependency of Create.
 
-The next broad aesthetic scorer change is evidence-gated: collect at least ten real likes and ten passes in
-matching project contexts, audit the current composite, and require held-out pairwise
-improvement before shipping new weights. Reference names continue to provide the transparent local
-approximation of “name like X”; neither the rejected exact spelling template nor broader language
-templates substitute for proving better English dev-name selection on human preference data.
+Local taste now distinguishes its three-signal personalization trigger from scorer evidence. The
+next broad aesthetic scorer change is evidence-gated: collect at least ten unique scoped likes and
+ten unique scoped passes that each participate in a same-context pair, then audit one canonical v2
+export. That 10/10 checkpoint is descriptive, not independent or blind proof; shipping new weights
+still requires a separately preregistered, context-disjoint blind/reversal study. Reference names
+continue to provide the transparent local approximation of “name like X”; neither the rejected
+exact spelling template nor broader language templates substitute for proving better English
+dev-name selection on real human preference data.
 
 See `README.md` for the research bibliography and `~/.claude/plans/` for the full build history.

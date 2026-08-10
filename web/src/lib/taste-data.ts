@@ -1,6 +1,7 @@
 import type { NameResult } from './engine'
 
 export const TASTE_DATA_SCHEMA = 'neologism-taste-v2'
+export const TASTE_EVIDENCE_TARGET = 10
 
 export interface TasteExample {
   label: 'liked' | 'passed'
@@ -20,6 +21,15 @@ export interface TasteDataset {
   // Indices into examples: [preferred, rejected]. Keeping references compact
   // avoids repeating full result objects for every cross-product pair.
   comparisons: Array<[number, number]>
+}
+
+export interface TasteEvidenceProgress {
+  matchedLiked: number
+  matchedPassed: number
+  matchedContexts: number
+  likesNeeded: number
+  passesNeeded: number
+  ready: boolean
 }
 
 export function buildTasteDataset(
@@ -62,6 +72,42 @@ export function buildTasteDataset(
     },
     examples,
     comparisons,
+  }
+}
+
+// The scorer checkpoint needs evidence on both sides of a real project
+// context. Raw totals are misleading: ten likes for project A and ten passes
+// for project B produce no comparable preference at all. Count only unique
+// examples that participate in at least one same-context comparison. This is
+// still unary like/pass evidence, not a blinded head-to-head study.
+export function tasteEvidenceProgress(
+  favorites: NameResult[],
+  rejected: NameResult[],
+): TasteEvidenceProgress {
+  const dataset = buildTasteDataset(favorites, rejected, '')
+  const matchedLiked = new Set<string>()
+  const matchedPassed = new Set<string>()
+  const matchedContexts = new Set<string>()
+  for (const [likedIndex, passedIndex] of dataset.comparisons) {
+    const liked = dataset.examples[likedIndex]?.result
+    const passed = dataset.examples[passedIndex]?.result
+    const likedContext = liked?.tasteContext?.id
+    const passedContext = passed?.tasteContext?.id
+    // Legacy pairs remain in exports for backward-compatible audits, but an
+    // absent context cannot prove that both labels answered the same brief.
+    if (!likedContext || likedContext !== passedContext) continue
+    matchedLiked.add(JSON.stringify([likedContext, liked.name.trim().toLowerCase()]))
+    matchedPassed.add(JSON.stringify([passedContext, passed.name.trim().toLowerCase()]))
+    matchedContexts.add(likedContext)
+  }
+  return {
+    matchedLiked: matchedLiked.size,
+    matchedPassed: matchedPassed.size,
+    matchedContexts: matchedContexts.size,
+    likesNeeded: Math.max(0, TASTE_EVIDENCE_TARGET - matchedLiked.size),
+    passesNeeded: Math.max(0, TASTE_EVIDENCE_TARGET - matchedPassed.size),
+    ready: matchedLiked.size >= TASTE_EVIDENCE_TARGET
+      && matchedPassed.size >= TASTE_EVIDENCE_TARGET,
   }
 }
 

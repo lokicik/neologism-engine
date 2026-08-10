@@ -1,4 +1,8 @@
-import { buildTasteDataset, TASTE_DATA_SCHEMA } from '../src/lib/taste-data.ts'
+import {
+  buildTasteDataset,
+  tasteEvidenceProgress,
+  TASTE_DATA_SCHEMA,
+} from '../src/lib/taste-data.ts'
 import type { NameResult, NamingMode } from '../src/lib/engine.ts'
 import { tasteContextForConfig } from '../src/lib/taste-context.ts'
 
@@ -38,9 +42,96 @@ check(
   'pair indices deterministically point from liked to passed examples',
 )
 check(!JSON.stringify(dataset).includes('apiKey'), 'taste export contains no AI credentials')
+const contextualProgress = tasteEvidenceProgress(
+  [result('Noma', 'realword', 'project-a'), result('Lexix', 'brandable', 'project-b')],
+  [result('Bobbyn', 'respell', 'project-a'), result('EagerMythos', 'compound', 'project-b')],
+)
+check(
+  contextualProgress.matchedLiked === 2
+    && contextualProgress.matchedPassed === 2
+    && contextualProgress.matchedContexts === 2
+    && !contextualProgress.ready,
+  'evidence progress counts unique examples participating in same-project pairs',
+)
 
 const oneSided = buildTasteDataset([result('Noma')], [], '2026-08-09T00:00:00.000Z')
 check(oneSided.examples.length === 1 && oneSided.comparisons.length === 0, 'one-sided feedback still exports safely')
+
+const disjointLikes = Array.from(
+  { length: 10 },
+  (_, index) => result(`Like${index}`, 'brandable', 'project-a'),
+)
+const disjointPasses = Array.from(
+  { length: 10 },
+  (_, index) => result(`Pass${index}`, 'brandable', 'project-b'),
+)
+const disjointDataset = buildTasteDataset(
+  disjointLikes,
+  disjointPasses,
+  '2026-08-09T00:00:00.000Z',
+)
+const disjointProgress = tasteEvidenceProgress(disjointLikes, disjointPasses)
+check(
+  disjointDataset.summary.liked === 10
+    && disjointDataset.summary.passed === 10
+    && disjointDataset.comparisons.length === 0
+    && disjointProgress.matchedLiked === 0
+    && disjointProgress.matchedPassed === 0
+    && !disjointProgress.ready,
+  'disjoint 10/10 labels cannot masquerade as matched evidence',
+)
+
+const matchedLikes = Array.from(
+  { length: 10 },
+  (_, index) => result(`MatchedLike${index}`, 'brandable', 'project-c'),
+)
+const matchedPasses = Array.from(
+  { length: 10 },
+  (_, index) => result(`MatchedPass${index}`, 'brandable', 'project-c'),
+)
+const readyProgress = tasteEvidenceProgress(matchedLikes, matchedPasses)
+check(
+  readyProgress.matchedLiked === 10
+    && readyProgress.matchedPassed === 10
+    && readyProgress.matchedContexts === 1
+    && readyProgress.ready,
+  'ten matched labels per side reach only the minimum descriptive audit sample',
+)
+check(
+  buildTasteDataset(matchedLikes, matchedPasses, '2026-08-09T00:00:00.000Z').comparisons.length === 100,
+  'ten unary labels per side create 100 derived pairs without becoming 100 observations',
+)
+
+const fanOutProgress = tasteEvidenceProgress(
+  [result('OnlyLike', 'brandable', 'project-c')],
+  matchedPasses,
+)
+check(
+  fanOutProgress.matchedLiked === 1
+    && fanOutProgress.matchedPassed === 10
+    && !fanOutProgress.ready,
+  'one liked endpoint fanned across ten passes remains 1/10 matched evidence',
+)
+
+const duplicateProgress = tasteEvidenceProgress(
+  [result('Noma', 'brandable', 'project-d'), result('NOMA', 'brandable', 'project-d')],
+  [result('Miss', 'brandable', 'project-d'), result('MISS', 'brandable', 'project-d')],
+)
+check(
+  duplicateProgress.matchedLiked === 1
+    && duplicateProgress.matchedPassed === 1
+    && duplicateProgress.matchedContexts === 1,
+  'duplicate rows and comparison edges cannot inflate normalized evidence endpoints',
+)
+
+const belowThreshold = tasteEvidenceProgress(matchedLikes.slice(0, 9), matchedPasses)
+check(
+  belowThreshold.matchedLiked === 9
+    && belowThreshold.matchedPassed === 10
+    && !belowThreshold.ready
+    && readyProgress.ready,
+  'readiness changes only at the frozen 10/10 endpoint threshold',
+)
 
 const legacy = buildTasteDataset(
   [result('OldLike')],
@@ -50,6 +141,17 @@ const legacy = buildTasteDataset(
 check(
   JSON.stringify(legacy.comparisons) === JSON.stringify([[0, 1]]) && legacy.summary.contexts === 2,
   'legacy feedback stays comparable only inside its own unscoped bucket',
+)
+const legacyProgress = tasteEvidenceProgress(
+  Array.from({ length: 10 }, (_, index) => result(`OldLike${index}`)),
+  Array.from({ length: 10 }, (_, index) => result(`OldPass${index}`)),
+)
+check(
+  legacyProgress.matchedLiked === 0
+    && legacyProgress.matchedPassed === 0
+    && legacyProgress.matchedContexts === 0
+    && !legacyProgress.ready,
+  'legacy-unscoped pairs remain auditable but never satisfy matched-context readiness',
 )
 
 const normalizedContext = tasteContextForConfig({

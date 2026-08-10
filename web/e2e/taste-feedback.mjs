@@ -86,6 +86,10 @@ try {
 
   const status = (await page.locator('.taste-note').textContent()) ?? ''
   check(/Local taste.*3 liked.*2 passed/.test(status), `taste status explains the active model (got "${status.trim()}")`)
+  check(
+    /evidence 3\/10 likes \+ 2\/10 passes/.test(status),
+    `active taste keeps guiding the matched evidence sample (got "${status.trim()}")`,
+  )
 
   const recentBeforeTastePool = await storedCount(page, 'neologism:recent')
   await page.click('.command-go')
@@ -129,7 +133,12 @@ try {
   check(await page.locator('.settings-group').count() === 1, 'enabling AI reveals provider details')
   await page.locator('.settings-toggle input').click()
   const dataMeta = (await page.locator('.settings-data-meta').textContent()) ?? ''
-  check(/3 liked.*2 passed.*6 same-project pairs/.test(dataMeta), 'Settings summarizes contextual pairwise taste data')
+  check(/3 liked.*2 passed.*6 derived pairs/.test(dataMeta), 'Settings summarizes derived contextual taste pairs')
+  const evidenceMeta = (await page.locator('.settings-data-evidence').textContent()) ?? ''
+  check(
+    /3\/10 matched likes.*2\/10 matched passes.*1 project context/.test(evidenceMeta),
+    'Settings distinguishes matched evidence and its project scope from raw label totals',
+  )
   await page.screenshot({ path: join(SHOTS, 'taste-export-settings.png'), fullPage: true })
   const downloadPromise = page.waitForEvent('download')
   await page.click('.taste-export-btn')
@@ -162,6 +171,10 @@ try {
   check(
     /Local taste.*0 liked.*3 passed/.test(passOnlyStatus),
     `pass-only feedback activates local taste (got "${passOnlyStatus.trim()}")`,
+  )
+  check(
+    /evidence 0\/10 likes \+ 0\/10 passes/.test(passOnlyStatus),
+    'one-sided local taste does not masquerade as paired evidence',
   )
   await passOnlyPage.screenshot({ path: join(SHOTS, 'taste-pass-only.png'), fullPage: true })
   await passOnlyContext.close()

@@ -3,6 +3,7 @@ import { generateBatch, generateColdLeadRetry, generateNames, batchMetrics, extr
 import { recommendations } from './lib/recommend'
 import { buildReferencedProfile, coldQualityPoolCount, compoundTastePoolCount, feedbackForContext, fillColdLeadRetry, MIN_TASTE_SIGNALS, needsColdLeadRetry, needsQualityRepair, preferencePoolCount, prioritizeColdStrongLead, repairWeakShortlist, shortlistByPreference } from './lib/preferences'
 import { tasteContextForConfig } from './lib/taste-context'
+import { tasteEvidenceProgress } from './lib/taste-data'
 import { loadFavorites, toggleFavorite, removeFavorite, saveFavorites, loadRejected, toggleRejected, removeRejected, loadTasteReferences, saveTasteReferences, loadRecent, saveRecent, hasVisited, markVisited, loadJudgeConfig, saveJudgeConfig } from './lib/storage'
 import { type JudgeConfig } from './lib/judge'
 import { decodeShareUrl } from './lib/share'
@@ -361,6 +362,10 @@ export default function App() {
     tasteFeedback.rejected,
     tasteReferences,
   )
+  const projectEvidence = tasteEvidenceProgress(
+    tasteFeedback.favorites,
+    tasteFeedback.rejected,
+  )
   const displayResults = results
   const positiveSignals = tasteFeedback.favorites.length + activeReferences.length
   const likesNeeded = Math.max(0, MIN_TASTE_SIGNALS - positiveSignals)
@@ -442,10 +447,10 @@ export default function App() {
                   {results.length > 0 && (
                     <span
                       className={`nav-note taste-note${profile ? ' active' : ''}`}
-                      title="Add reference names in Advanced, star names you like, and use Not for me on misses. New batches are selected from a larger local pool; nothing leaves your browser."
+                      title="Add reference names in Advanced, star names you like, and use Not for me on misses. Local ranking activates at three signals; scorer evidence needs matched likes and passes from the same project. Nothing leaves your browser."
                     >
                       {profile
-                        ? `Local taste · ${activeReferences.length > 0 ? `${activeReferences.length} refs · ` : ''}${feedbackScope}${tasteFeedback.favorites.length} liked · ${tasteFeedback.rejected.length} passed`
+                        ? `Local taste · ${activeReferences.length > 0 ? `${activeReferences.length} refs · ` : ''}${feedbackScope}${tasteFeedback.favorites.length} liked · ${tasteFeedback.rejected.length} passed · evidence ${projectEvidence.matchedLiked}/10 likes + ${projectEvidence.matchedPassed}/10 passes`
                         : tastePrompt}
                     </span>
                   )}

@@ -9,7 +9,11 @@ import {
   type ModelInfo,
 } from '../lib/judge'
 import type { NameResult } from '../lib/engine'
-import { buildTasteDataset, exportTasteDataset } from '../lib/taste-data'
+import {
+  buildTasteDataset,
+  exportTasteDataset,
+  tasteEvidenceProgress,
+} from '../lib/taste-data'
 import { IconDownload } from './icons'
 
 interface Props {
@@ -103,6 +107,10 @@ export function SettingsModal({ config, favorites, rejected, onSave, onClose }: 
   const filtered = (query === '' || selected ? pickList : pickList.filter((m) => m.id.toLowerCase().includes(query))).slice(0, 60)
   const tasteSummary = useMemo(
     () => buildTasteDataset(favorites, rejected).summary,
+    [favorites, rejected],
+  )
+  const evidenceProgress = useMemo(
+    () => tasteEvidenceProgress(favorites, rejected),
     [favorites, rejected],
   )
   const feedbackCount = favorites.length + rejected.length
@@ -268,9 +276,15 @@ export function SettingsModal({ config, favorites, rejected, onSave, onClose }: 
           <div className="settings-data-copy">
             <h3 id="taste-data-title">Local taste data</h3>
             <p className="settings-data-meta">
-              {favorites.length} liked · {rejected.length} passed · {tasteSummary.comparisons} same-project pairs
+              {favorites.length} liked · {rejected.length} passed · {tasteSummary.comparisons} derived pairs
             </p>
-            <p>Includes each name's project brief — never your API key or recent-name history.</p>
+            <p
+              className="settings-data-evidence"
+              title="Counts only labels that share a project with at least one opposite label. This is a minimum descriptive sample, not a blind study."
+            >
+              Evidence · {evidenceProgress.matchedLiked}/10 matched likes · {evidenceProgress.matchedPassed}/10 matched passes · {evidenceProgress.matchedContexts} project {evidenceProgress.matchedContexts === 1 ? 'context' : 'contexts'}
+            </p>
+            <p>Keep rating both sides for the same project. Export includes each brief — never your API key or recent-name history.</p>
           </div>
           <button
             type="button"

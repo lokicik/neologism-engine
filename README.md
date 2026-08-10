@@ -101,17 +101,26 @@ cargo test -p neologism-core
 ### Audit exported taste data
 
 After exporting **Local taste data** from Settings, measure how often the current offline
-composite agrees with real `liked > passed` choices:
+composite agrees with preference pairs derived from explicit likes and passes. Scoped pairs stay
+inside one project; historical unscoped labels remain in a separate legacy bucket:
 
 ```sh
 cargo run -p neologism-core --release --example taste_audit -- path/to/neologism-taste.json
 ```
 
-The report includes pairwise agreement, project-context counts, labels by source mode, and
-the worst score-vs-human disagreements. It accepts historical v1 exports and validates that
-v2 comparisons stay within one project context. Pairs share examples, so treat the result as
-descriptive until the export has at least 10 liked and 10 passed names. It is an evidence gate
-for scorer experiments, not a production model.
+The report includes derived-pair agreement, project-context counts, labels by source mode,
+and the worst score-vs-label disagreements. It validates v2 comparison direction and context,
+then counts unique `(project context, normalized name)` endpoints that actually participate in
+at least one pair. The minimum descriptive-audit checkpoint is 10 matched likes and 10 matched
+passes; 100 Cartesian pairs from one 10-by-10 context still count as 10/10, not 100 independent
+observations. Historical unscoped pairs remain auditable but never satisfy that checkpoint.
+
+Likes and passes are separate unary actions, not randomized blind choices. Direct blinding and
+reversed-choice consistency are therefore **not evaluated**, and 10/10 means enough to inspect,
+not proof for new scorer weights. Judge readiness from one current v2 export. Multiple-file output
+is descriptive only because the schema has no rater/profile/snapshot identity and cumulative
+exports can double-count. The JSON preserves each name's brief but never the API key or recent-name
+history.
 
 ### Production build
 
@@ -128,7 +137,7 @@ npm run build        # output in web/dist/
 - **Controls** — count, min/max length, randomness (temperature), seed words, product description, starts-with / contains constraints
 - **Brief-aware Compound mode** — readable two-word names use project-specific adjective palettes, semantic noun roots, and role-compatible pairings (`QuietInk`, `FairTally`, `SwiftSignal`) instead of arbitrary corpus combinations; recognized concepts keep their focused first page and expand to 100 fresh names on continued exploration
 - **Project-scoped local taste selection** — add 3–8 example names you already like for an immediate local profile, or teach each project by starring/passing on 3+ generated names. Future batches request up to a 6× offline candidate pool, reject structurally weak options when enough stronger names exist, preserve candidates that carry an additional brief concept, keep any one stem family to 20% of the visible page, cap one exact ending at 20% on naming briefs or 30% elsewhere, and reserve at least two slots for non-suffix naming forms when the pool allows it. If at least 75% of positive examples are visibly two-part names, guided Auto adds only three Compound candidates for the same local judge; explicit Compound remains the all-Compound path. A fresh manual generation explores a nearby high-quality shortlist while continued scrolling keeps one coherent taste direction. Only names actually shown enter recent history, so unshown shortlist candidates remain available on later pages. References stay separate from feedback/export data, and everything remains in `localStorage`.
-- **Taste data export** — Settings turns explicit likes and passes into a versioned JSON dataset, preserving each name's project brief while forming preference pairs only within the same project context. It never exports AI credentials or recent-name history.
+- **Taste data export** — Settings turns explicit likes and passes into a versioned JSON dataset, preserving each name's project brief while keeping scoped preference pairs inside one project and historical unscoped labels in a separate legacy bucket. The UI separately tracks unique matched likes and passes toward the 10/10 descriptive-audit checkpoint, so one-sided, legacy, or cross-project totals cannot look ready. It never exports AI credentials or recent-name history.
 - **Brief-aware Auto** — a project description gets semantic Brandable names plus at most one mode accent. A Respell earned by a main product concept gets priority only after it clears the same 75-point visible-quality floor; a weak but related spelling can no longer starve a stronger construction. When no safe Respell exists, Auto may surface one 85+ root-and-metaphor Brandable selected from a bounded offline pool (`Keyflow`, `Tagwave`) instead of showing only suffix templates. A second form with a different metaphor ending may replace one direct-suffix card only when it is at least as strong; the page never shows more than two guided metaphors. If the first pool has fewer than two qualifying forms, a deterministic second pool may fill the missing slot on a fresh first page only; primary-pool winners keep first refusal and continued sessions keep their original direction. After normal repair and ordering, a still-mechanical cold lead may open small deterministic retry pools. A lead-closing candidate enters only if there is no Respell, guided capacity remains, it replaces a no-stronger suffix, does not deepen an overflowing prefix family, and does not increase mean similarity. An 84+ two-concept pair that cannot lead may instead replace a non-leading Brandable only when it gains at least two structural points, preserves concept coverage, and keeps both name-family caps and mean similarity from worsening. Small domain-specific pair lanes can express missing tool roles without widening ordinary Brandable; formatter/linter briefs, for example, can surface `TidyKit` or `LintFix`. The same proven-gap path may reuse one unused 85+ non-template Brandable from the already-generated repair pool under those set guards, without another engine call. Incidental words such as `developer`, `builder`, `companion`, `planner`, or `reminder` cannot take the Respell slot when a stronger product subject is present. Strong, explicit two-part local taste may contribute a bounded Compound accent without changing the cold default. On a cold page, a separate Brandable-only fallback replaces missing/sub-75 slots and makes only quality-neutral substitutions when the full page is too repetitive, without adding another mode accent. If four of ten cards still begin with the same exact four-letter stem, that bounded pool may replace a non-leading ordinary Brandable only with a non-suffix candidate that preserves quality and concept coverage while improving every measured repetition guard. An empty brief keeps the broader four-mode sampler.
 - **Readable Auto Respell** — Auto admits only compact, easily reversible brand spellings: a short `i -> y` form such as `Desygn` / `Vysual`, or a final `e` drop such as `Browsr`. Mid-word vowel damage such as `Grocry`, `Monytor`, and `Filesystm` yields to a stronger guided Brandable; explicit Respell mode keeps the broader exploratory vocabulary.
 - **Terminal-log intent normalization** — briefs that combine terminal, shell, console, command, or CLI language with logging/monitoring use one stable `Term` / `Shell` / `Prompt` / `Log` / `Exec` / `Pane` palette beside the existing observability roots. Audience and function words such as `developer`, `output`, `inspection`, and `viewer` cannot become names or steal the Respell accent; CLI keeps its ordinary developer meaning outside this combined context.
