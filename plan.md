@@ -3893,8 +3893,8 @@ visible construction walls, and has no cultural or human-preference evidence. Ra
 adding retries, or changing model order after seeing this result would need a newly preregistered
 experiment; doing it post hoc merely to clear the frozen gate, hand-picking seeds, weakening
 uniqueness, or celebrating circular self-model hits would game the proxy. Phase 31 already showed
-that a structural proxy win can lose blind human preference; this checkpoint preserves the same
-boundary.
+that a structural proxy win can receive worse blind local-LLM quality ratings; this checkpoint
+preserves the same boundary without calling those ratings human preference.
 
 **Verification.** Rebuilding from the pinned dumps reproduces 1,000 unique tokens per file, the
 documented derived hashes, and population floors of 4,556 and 15,763. The default probe exits one
@@ -3915,6 +3915,89 @@ context-matched blind A/B comparisons over 30 unseen briefs, a 60% experimental 
 Wilson lower bound exceeds 50%, both profiles individually above 50%, at least 20 experimental
 likes and 20 passes, no keeper-rate regression, and at least 80% agreement on reversed duplicates.
 Until then the corpus and probe remain research artifacts only.
+
+---
+
+## Phase 143 — Reject fixed-budget exact-template rejection sampling
+
+**Historical boundary and hypothesis.** A brief-root fragment followed by character-Markov
+completion is not a new lane: Phase 69 already rejected that path after `Lexpedra`, `Nymetamanl`,
+and `Nodecrafis`, while Phase 31 showed that a new subsyllabic generator could improve structural
+proxies and still receive worse blind local-LLM ratings. A narrower untested variant available
+without building another model was an explicit, separate “name like X” rejection sampler. This
+phase asks one mechanical question: can the existing global BigTech character model fill good,
+varied pages whose *spelling* has exactly the same consonant/vowel layout as a reference? It does
+not claim prompt semantics, phonemes, language modeling, aesthetic quality, or a reduction in
+Phase 141's ordinary Auto walls. A genuinely reference-conditioned onset–nucleus–coda model remains
+a distinct, untested capability.
+
+**Frozen standalone protocol.** A one-off `reference_template_probe.rs` trains the public order-three
+backoff model on the 5,067 BigTech entries left after removing all eight declared references. Five
+fixed seeds (`13`, `67`, `313`, `521`, `997`) each draw one shared, prompt-independent pool of
+2,000 unique candidates at temperature `0.70` within 100,000 attempts. Candidates must pass the
+existing BigTech phonotactic, sonority, one-to-three-syllable, scoring, and train-derived
+fifth-percentile likelihood checks. Exact and edit-one matches against the complete BigTech,
+`words.txt`, `common_words.txt`, `roots.txt`, and reference inventories are rejected through a
+deletion-signature index. No suffix, transform, blend, concept join, production `generate()` call,
+WASM path, or web ranker participates.
+
+The eight frozen spelling templates deliberately cover distinct shapes: Slack `CCVCC`, Vercel
+`CVCCVC`, Figma `CVCCV`, Spotify `CCVCVCV`, Sentry `CVCCCV`, Prisma `CCVCCV`, Asana `VCVCV`, and
+Oracle `VCVCCV`, with `y` treated as a vowel to match the engine's existing letter heuristic. A
+hard match has the same exact length and per-letter C/V sequence; this is explicitly orthographic,
+not Wuggy-style phonological or G2P evidence. Every template/seed needed at least 30 eligible
+matches before public `0.70` MMR selected ten. The causal control is an unconditioned ten-name MMR
+page from the identical shared pool. The preregistered mechanical gates also require 40/40 full
+pages, deterministic replay, zero selected blocklist hits, composite mean at least 84 and within
+0.5 of control, ILAD mean/minimum at least `0.72/0.60`, at least 45/50 unique names per template,
+zero duplicate page sets, seed overlap at most 1/10 on average and 3/10 maximum, and at least a
+30-point overall and 20-point per-template fidelity uplift. Short-page overlaps are normalized to
+ten by dividing the intersection by the smaller page before applying the overlap gates. Thresholds
+and templates were not relaxed after the first result.
+
+**What worked mechanically.** All five shared pools filled, requiring only 12,553–13,012 attempts,
+and same-process replay preserved the full pool, counters, scores, and order. The 304 selection
+occurrences were 100% exact C/V matches, versus 12% of the unconditioned controls matching any
+declared pattern, for an 88-point diagnostic uplift. Every selected name retained the
+composite-75 floor; exact/edit-one inventory leakage was zero. No complete page set repeated. Two
+fresh release processes emitted byte-identical standard output.
+
+**Frozen failures.** Exact templates were too sparse in a large shared pool. Minimum per-seed
+capacity was Slack **1**, Vercel **43**, Figma **7**, Spotify **23**, Sentry **13**, Prisma **9**,
+Asana **2**, and Oracle **3**; only Vercel cleared the required 30 in every seed. The matrix
+therefore returned **304/400** selections rather than forty full pages. Per-template uniqueness
+was respectively **10/16, 47/50, 30/41, 50/50, 42/50, 42/49, 18/24, and 21/24**
+unique/selected occurrences; 50 remained the target for each template. Conditioned mean composite
+fell from the shared-pool control's **92.84** to **88.38**, far beyond the allowed half point. Mean
+ILAD was a healthy **0.826**, but the one-name Slack page made the minimum **0.000**. Eleven selected
+occurrences, representing ten unique strings, visibly began with a full four-plus-letter root
+followed by an opaque tail; `Pathly` was the repeat. Another 23/304 occurrences had a recognized
+tech-suffix surface despite full-string Markov provenance. Normalized cross-seed overlap averaged
+**1.35/10** and peaked at **10/10**, exposing repeated short-page attractors. In total seven frozen
+gates failed: template capacity, full pages, visible root tails, quality retention, minimum page
+diversity, per-template uniqueness, and normalized page overlap.
+
+**Decision.** Product integration is rejected. Exact orthographic conditioning proves fidelity by
+construction but starves common reference shapes, lowers selection quality, and still surfaces
+awkward candidates such as `Predb`, `Flecq`, and `Credb`; it does not solve the judgment problem.
+Increasing attempts or the pool after seeing these failures could change capacity and quality, but
+would be a distinct, newly preregistered experiment rather than a rescue of this checkpoint.
+Relaxing exact C/V distance turns the proposal back into the transparent local shape reranker
+already shipped in Phase 92. A reference-conditioned onset–nucleus–coda sampler would be broader
+new research, not a result closed by this run; Phase 31's worse LLM-rated unconditional sampler is
+a warning for its acceptance protocol. This fixed-budget lane must not enter Auto, replace the
+current reference profile, or be described as a Phase 141 construction-wall improvement. External
+place/package/product collision checks and blind human preference were not run because the frozen
+mechanical checkpoint already failed.
+
+**Verification.** The standalone release example exited one on exactly the seven documented gates,
+and two fresh processes returned identical standard output. Once the negative result was recorded,
+the 788-line one-off harness was removed rather than adding an intentionally red, mutable-data
+artifact with no product consumer; this mirrors the Phase 31 checkpoint. The release Rust suite
+stays **160/160**. The production held-out audit retains all 49 gates and the exact Phase 141
+baseline: **84.85** average quality, **0.197** similarity, **19.60/30** seed spread, zero lexical
+hazards, and unchanged construction counts. No generator, ranker, scorer, random source, WASM API,
+or UI behavior is changed by this phase.
 
 ---
 
@@ -4003,13 +4086,18 @@ separate two spelling distributions at **96.7%** sealed balanced accuracy, but t
 win: it misses both the frozen cross-seed uniqueness and untouched-holdout leakage gates, while
 **159/475** unique visible strings collide with IT/JP GeoNames source records. It remains
 deliberately disconnected from production.
+A fixed-budget exact single-reference spelling-template probe is likewise rejected: although all
+five shared 2,000-name pools filled and the selected subset matched its declared C/V layout by
+construction, only one of eight reference shapes had enough candidates in every seed, the matrix
+returned **304/400**, and mean composite fell **92.84 → 88.38**. Relaxing that hard layout would
+collapse back into the transparent local shape reranker already shipped for reference names; this
+failed probe remains disconnected from production and carries no semantic or aesthetic claim.
 AI Studio remains an optional, separate batch judge rather than a hidden dependency of Create.
 
 The next broad aesthetic scorer change is evidence-gated: collect at least ten real likes and ten passes in
 matching project contexts, audit the current composite, and require held-out pairwise
-improvement before shipping new weights. Language flavors and “name like X” templates remain
-possible capability expansions. Reference names now provide a transparent local approximation
-of “name like X”; broader language templates are still not a substitute for proving better
-English dev-name selection on human preference data.
+improvement before shipping new weights. Reference names continue to provide the transparent local
+approximation of “name like X”; neither the rejected exact spelling template nor broader language
+templates substitute for proving better English dev-name selection on human preference data.
 
 See `README.md` for the research bibliography and `~/.claude/plans/` for the full build history.
