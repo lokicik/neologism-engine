@@ -3831,6 +3831,93 @@ UI behavior changed.
 
 ---
 
+## Phase 142 — Reject a corpus-backed spelling-profile lane before product integration
+
+**Hypothesis and isolation.** Phase 141 showed that almost every visible Brandable is assembled
+from a known surface recipe. A character-level spelling-profile lane could, in principle, add forms
+that are not direct suffixes, metaphor joins, or concept pairs. This phase tests only that narrow
+technical premise with the existing public `Model::train_backoff`, sampling, score, phonotactic,
+and MMR APIs. The two new examples and their adjacent data never enter `generate()`, Auto, WASM,
+the web app, or a public mode. This is not a production experiment and it does not claim to model
+an Italian or Japanese language.
+
+**Provenance-safe corpus snapshot.** The experiment derives two 1,000-name snapshots from the
+2026-08-10 GeoNames IT, Italian alternate-name, and JP country dumps under CC BY 4.0. It keeps
+single-token 4–10-letter ASCII populated places with population at least 1,000, excludes
+historical, abandoned, and destroyed feature codes, and rejects Italian alternates flagged
+historic or colloquial. An Italian record survives only when it has one unique preferred spelling
+or one unambiguous non-preferred spelling; regional alternatives are not resolved by an arbitrary
+lexical tie-break. The Japanese file uses GeoNames' plain ASCII field and is labeled a Japanese
+plain-ASCII place-name spelling profile, not verified transliteration, Hepburn romaji, or Japanese
+phonology. The reproducible builder, source hashes, transformation disclosure, derived hashes,
+license link, attribution, non-endorsement statement, and limitations live beside the snapshots.
+
+**Sealed technical protocol.** Every fifth population-ranked entry is the frozen 200-name holdout;
+the remaining 800 train an order-three backoff model. A fifth-percentile plausibility floor is
+derived from training self-likelihood only. The holdout is never used to filter, tune, or select a
+generated candidate; it is consulted only after pages are fixed for exact-leakage and profile
+classification reports. Each profile runs the same 30 declared seeds, fills an 80-candidate pool
+within 10,000 attempts, and selects ten names with production's `0.70` MMR balance. Exact names
+from both training partitions, `words.txt`, `common_words.txt`, `bigtech.txt`, and the existing
+blocked substrings are rejected. Replay compares ordered raw-pool names, rejection counters, and
+selected scores/order. The report separates class recalls, ties, signed margins, and balanced
+accuracy; generated self-model classification is printed only as a circular sanity diagnostic.
+The one exact spelling shared by both source profiles, `mori`, is reported and excluded from its
+Japanese holdout denominator rather than being assigned an intrinsically ambiguous class.
+
+**What passed.** Both profiles fill **30/30** pages and every 80-name pool. Same-process replay is
+identical, training-corpus/dictionary/brand leakage is zero, every visible name scores at least 85,
+and accepted-yield rates differ by only **1.21x** despite the English-biased compatibility filters.
+Italian averages **90.48** technical composite and **0.892** ILAD with a **0.853** minimum page;
+Japanese ASCII averages **90.50**, **0.889**, and **0.857**. Page-pair overlap averages
+**0.14/10** and **0.29/10**, with maxima of two and three. After excluding the shared spelling,
+the sealed classifier reaches **191/200 (95.5%)** Italian recall, **195/199 (98.0%)** Japanese
+recall, no ties, and **96.7%** balanced accuracy. Thus the existing character model can distinguish
+these selected spelling distributions without test-set calibration leakage.
+
+**What failed.** The fixed cross-seed uniqueness gate requires at least 270/300 names per profile.
+Italian reaches only **255/300** and Japanese ASCII only **220/300**. The untouched holdout also
+catches four visible Japanese selections reconstructing two unique source names: `Tama` appears
+three times and `Tomi` once. A read-only scan of canonical, ASCII, and inline-alternate strings plus
+name-bearing, non-metadata alternate-table rows in the downloaded IT and JP dumps finds **159 exact
+source collisions among 475 unique visible outputs**. Two are those holdout names and **157** are
+raw-source-only; the total contains 47 four-letter, 61 five-letter, 44 six-letter, and seven
+seven-letter strings. The selected-corpus edit-one diagnostic is also high: **119/300** Italian and
+**213/300** Japanese selections. These are reconstruction and near-copy risks, not train leakage.
+The audit is explicitly limited to IT/JP and must not be described as a global GeoNames check.
+
+**Decision.** Product integration is rejected. The lane separates source profiles, but it repeats
+too many short attractors, frequently reconstructs real place names, is filtered by English-centric
+sonority and scoring rules, has no brief semantics, has not shown any reduction in Phase 141's
+visible construction walls, and has no cultural or human-preference evidence. Raising temperature,
+adding retries, or changing model order after seeing this result would need a newly preregistered
+experiment; doing it post hoc merely to clear the frozen gate, hand-picking seeds, weakening
+uniqueness, or celebrating circular self-model hits would game the proxy. Phase 31 already showed
+that a structural proxy win can lose blind human preference; this checkpoint preserves the same
+boundary.
+
+**Verification.** Rebuilding from the pinned dumps reproduces 1,000 unique tokens per file, the
+documented derived hashes, and population floors of 4,556 and 15,763. The default probe exits one
+on exactly the frozen holdout-leakage and cross-seed-uniqueness gates; with the four-file IT/JP
+audit it also fails the explicit source-collision gate. Two fresh release processes produce
+byte-identical output. All **160/160** core tests and the additional
+all-target example/test harnesses pass. The production-path held-out audit retains all 49 gates and
+the full Phase 141 baseline: **84.85** average quality, **0.197** similarity, **19.60/30** seed
+spread, zero lexical hazards, and unchanged construction-saturation counts. No production Rust,
+WASM, web selector, scorer, ranker, random source, or public API changed.
+
+**Any future revival.** A successor must first retain the 30-seed mechanical gates, eliminate
+presented global place/product/dictionary collisions through a reproducible review index, and add
+brief-conditioned semantics rather than a decorative accent. Beside frozen Auto it must reduce
+assembled-card share by at least ten points and lower single-shape walls by at least 25%, while all
+49 production gates remain green. Production use then requires at least 120 decisive,
+context-matched blind A/B comparisons over 30 unseen briefs, a 60% experimental win rate whose 95%
+Wilson lower bound exceeds 50%, both profiles individually above 50%, at least 20 experimental
+likes and 20 passes, no keeper-rate regression, and at least 80% agreement on reversed duplicates.
+Until then the corpus and probe remain research artifacts only.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
@@ -3911,6 +3998,11 @@ The held-out audit now also records visible construction saturation without trea
 aesthetic score: **98.9%** of canonical cards match a known assembled template and **72/105** pages
 have a six-card single-shape wall. The next generator experiment must lower both measures beside
 production Auto rather than shifting suffix cards into another visible template family.
+A corpus-backed Italian/Japanese-ASCII character probe confirms that the current Markov stack can
+separate two spelling distributions at **96.7%** sealed balanced accuracy, but that is not a product
+win: it misses both the frozen cross-seed uniqueness and untouched-holdout leakage gates, while
+**159/475** unique visible strings collide with IT/JP GeoNames source records. It remains
+deliberately disconnected from production.
 AI Studio remains an optional, separate batch judge rather than a hidden dependency of Create.
 
 The next broad aesthetic scorer change is evidence-gated: collect at least ten real likes and ten passes in
