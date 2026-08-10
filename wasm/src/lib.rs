@@ -47,6 +47,19 @@ pub fn concept_coverages(text: &str, names_json: &str) -> String {
     serde_json::to_string(&coverages).unwrap_or_else(|_| "[]".to_string())
 }
 
+/// Flag high-confidence root+metaphor joins that can be reparsed as two
+/// different English words. Batched beside concept coverage for diagnostics
+/// and bounded shortlist repair.
+#[wasm_bindgen]
+pub fn lexical_hazards(text: &str, names_json: &str) -> String {
+    let names: Vec<String> = match serde_json::from_str(names_json) {
+        Ok(names) => names,
+        Err(e) => return format!("{{\"error\":\"{}\"}}", e),
+    };
+    let hazards = neologism_core::description_lexical_hazards(text, &names);
+    serde_json::to_string(&hazards).unwrap_or_else(|_| "[]".to_string())
+}
+
 /// Takes a JSON-encoded Vec<NameResult>, returns aggregate stats + per-name
 /// composite scores as JSON.
 #[wasm_bindgen]

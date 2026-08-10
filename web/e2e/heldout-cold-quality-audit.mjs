@@ -309,6 +309,9 @@ try {
   const unreviewedRespellAccents = selectedRespellAccents.filter(({ item }) => (
     !REVIEWED_RESPELLS.has(letters(item.name))
   ))
+  const selectedLexicalHazards = rows.flatMap((row) => row.selected
+    .filter((item) => item.lexicalHazard)
+    .map((item) => ({ row, item })))
   const respellInventory = new Map()
   for (const { row, item } of selectedRespellAccents) {
     const key = letters(item.name)
@@ -695,6 +698,7 @@ try {
   console.log(`guarded repair upgrades: ${guardedRepairUpgrades.length}`)
   console.log(`weak Respell accents: ${weakRespellAccents.length}`)
   console.log(`selected Respell accents: ${selectedRespellAccents.length} pages · ${respellInventory.size} unique`)
+  console.log(`selected lexical hazards: ${selectedLexicalHazards.length}`)
   console.log(`seed diversity: ${averageUniqueNames.toFixed(2)}/30 unique · ${averageSeedOverlap.toFixed(2)}/10 pair overlap · ${exactDuplicateSeedPages} duplicate pages`)
   console.log(`dominant stem overflow: ${dominantStemRows.length}/${auditRows.length} pages · ${dominantStemExcess} excess cards`)
   console.log(`fallback counts: ${[...new Set(rows.map((row) => row.fallbackCount))].sort((a, b) => a - b).join(', ')}`)
@@ -835,6 +839,7 @@ try {
     [multipleAccents.length === 0, 'held-out pages preserve the one-accent contract'],
     [weakRespellAccents.length === 0, 'sub-75 Respells cannot block a stronger Auto accent'],
     [unreviewedRespellAccents.length === 0, 'held-out pages surface only reviewed Respell forms'],
+    [selectedLexicalHazards.length === 0, 'held-out pages contain no high-confidence lexical reparses'],
     [weak.length === 0, 'no held-out visible name falls below 75'],
     [averageQuality >= 84, 'held-out average structural quality stays at or above 84.0'],
     [leadQuality >= 85.8, 'held-out lead structural quality stays at or above 85.8'],

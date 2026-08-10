@@ -1,4 +1,11 @@
-import init, { generate_names, batch_metrics, concept_coverages, explain_name, extract_keywords } from '../wasm/neologism_wasm.js'
+import init, {
+  generate_names,
+  batch_metrics,
+  concept_coverages,
+  lexical_hazards,
+  explain_name,
+  extract_keywords,
+} from '../wasm/neologism_wasm.js'
 import { autoModeCounts, isReadableAutoRespell, mergeAutoBatches } from './auto'
 import { tasteContextForConfig } from './taste-context'
 
@@ -40,6 +47,7 @@ export interface NameResult {
   score_novelty: number
   score_memorability: number
   concept_coverage?: number
+  lexicalHazard?: boolean
   connotations: string[]
 }
 
@@ -280,6 +288,11 @@ export async function generateNames(cfg: Config): Promise<NameResult[]> {
     : '[]'
   const coverages = JSON.parse(coverageJson) as number[] | { error: string }
   if ('error' in coverages) throw new Error((coverages as { error: string }).error)
+  const hazardsJson = cfg.style === 'big_tech' && cfg.description?.trim()
+    ? lexical_hazards(cfg.description, JSON.stringify(results.map((result) => result.name)))
+    : '[]'
+  const hazards = JSON.parse(hazardsJson) as boolean[] | { error: string }
+  if ('error' in hazards) throw new Error((hazards as { error: string }).error)
   const tasteContext = tasteContextForConfig(cfg)
   const contextual = results.map((result, index) => ({
     ...result,
@@ -289,6 +302,7 @@ export async function generateNames(cfg: Config): Promise<NameResult[]> {
     concept_coverage: cfg.variant === 'concept_pair'
       ? Math.max(2, (coverages as number[])[index] ?? 0)
       : (coverages as number[])[index] ?? 0,
+    lexicalHazard: (hazards as boolean[])[index] || undefined,
     tasteContext,
   }))
   if (cfg.style !== 'big_tech') return contextual

@@ -517,6 +517,20 @@ pub fn description_concept_coverages(description: &str, names: &[String]) -> Vec
         .collect()
 }
 
+/// Flag high-confidence lexical reparses at hidden root+metaphor seams.
+/// `bus` + `harbor` is structurally valid but reads as `bush` + `arbor`.
+/// Requiring both alternate words to exist keeps this diagnostic narrower
+/// than a general digraph heuristic.
+pub fn description_lexical_hazards(description: &str, names: &[String]) -> Vec<bool> {
+    let keywords = keywords::extract_keywords(description, 6);
+    let groups = keywords::brand_root_groups(&keywords, 16);
+    let common = &BigtechStatic::get().common_words;
+    names
+        .iter()
+        .map(|name| has_ambiguous_digraph_seam(&name.to_lowercase(), &groups, common))
+        .collect()
+}
+
 /// Join a prompt root to a curated metaphor without hiding either word at a
 /// vowel boundary. `semantic_join` deliberately turns nova+atlas into
 /// `novatlas`, which is useful for compact concept pairs but can turn
@@ -575,6 +589,41 @@ fn brand_appeal(lower: &str, common: &HashSet<String>, t: &BigTechTuning, suffix
     let harsh = HARSH_ENDINGS.iter().any(|s| lower.ends_with(s));
     prefix_len as f64 * t.prefix_w + if clean { suffix_w } else { 0.0 }
         - if harsh { t.harsh_w } else { 0.0 }
+}
+
+/// A hidden semantic join can accidentally extend its root into a different
+/// English word: `bus` + `harbor` becomes `busharbor`, which reads as
+/// "bush arbor". Restrict detection to a curated root+metaphor join where
+/// both alternate words are known; ordinary joins such as `log` + `scope`
+/// remain unflagged.
+fn has_ambiguous_digraph_seam(
+    lower: &str,
+    groups: &[Vec<String>],
+    common: &HashSet<String>,
+) -> bool {
+    groups.iter().flatten().any(|root| {
+        if root.len() < 2 || !lower.starts_with(root) || lower.len() <= root.len() + 1 {
+            return false;
+        }
+        if !CONCEPT_METAPHORS.contains(&&lower[root.len()..]) {
+            return false;
+        }
+        let Some(&left) = root.as_bytes().last() else {
+            return false;
+        };
+        let Some(&right) = lower.as_bytes().get(root.len()) else {
+            return false;
+        };
+        let digraph = matches!(
+            (left, right),
+            (b's', b'h') | (b'c', b'h') | (b't', b'h') | (b'p', b'h') | (b'w', b'h')
+        );
+        let reparsed_tail = &lower[root.len() + 1..];
+        digraph
+            && reparsed_tail.len() >= 4
+            && common.contains(&lower[..root.len() + 1])
+            && common.contains(reparsed_tail)
+    })
 }
 
 fn suffix_rank_weight(tuning: &BigTechTuning, concept_expanded: bool, concept_count: usize) -> f64 {
@@ -1362,6 +1411,43 @@ mod tests {
         assert!(
             harsh < neutral,
             "harsh={harsh} should be penalized below neutral={neutral}"
+        );
+    }
+
+    #[test]
+    fn ambiguous_digraph_seam_only_flags_a_reparsed_root() {
+        let common = HashSet::from([
+            "arbor".to_string(),
+            "bath".to_string(),
+            "bush".to_string(),
+            "logs".to_string(),
+        ]);
+        assert!(has_ambiguous_digraph_seam(
+            "busharbor",
+            &[vec!["bus".to_string()]],
+            &common,
+        ));
+        assert!(!has_ambiguous_digraph_seam(
+            "logscope",
+            &[vec!["log".to_string()]],
+            &common,
+        ));
+        assert!(!has_ambiguous_digraph_seam(
+            "bushelia",
+            &[vec!["bus".to_string()]],
+            &common,
+        ));
+        assert!(has_ambiguous_digraph_seam(
+            "batharbor",
+            &[vec!["bat".to_string()]],
+            &common,
+        ));
+        assert_eq!(
+            description_lexical_hazards(
+                "a message queue client",
+                &["Busharbor".to_string(), "Logscope".to_string()],
+            ),
+            vec![true, false],
         );
     }
 

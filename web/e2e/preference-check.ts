@@ -118,6 +118,38 @@ if (ixProfile) {
 check(preferencePoolCount(10, null) === 10, 'cold start keeps the requested candidate count')
 check(coldQualityPoolCount(10) === 30, 'a weak cold Auto page opens a three-page repair pool')
 
+const lexicalHazardPage = [
+  'Streamwave', 'Queueframe', 'Brokerbeam', 'Pipeloom', 'Busharbor',
+  'Publink', 'Pubsignal', 'Pipegrid', 'Publoom', 'Queuebeam',
+].map((name) => ({
+  ...scoredResult(name, name === 'Busharbor' ? 85.5 : 88),
+  sourceMode: 'brandable' as const,
+  concept_coverage: 1,
+  lexicalHazard: name === 'Busharbor' || undefined,
+}))
+check(
+  needsQualityRepair(lexicalHazardPage, 10),
+  'a high-confidence lexical reparse opens the bounded cold fallback',
+)
+const lexicalHazardRepaired = repairWeakShortlist(
+  lexicalHazardPage,
+  [
+    { ...scoredResult('Pipeora', 92), sourceMode: 'brandable' as const, concept_coverage: 1 },
+    { ...scoredResult('Topicpath', 85.5), sourceMode: 'brandable' as const, concept_coverage: 1 },
+  ],
+  10,
+)
+check(
+  lexicalHazardRepaired.length === 10
+    && !lexicalHazardRepaired.some((item) => item.lexicalHazard)
+    && !lexicalHazardRepaired.some((item) => item.name === 'Pipeora')
+    && lexicalHazardRepaired.some((item) => item.name === 'Topicpath')
+    && lexicalHazardPage.every((item, index) => (
+      item.lexicalHazard || lexicalHazardRepaired[index].name === item.name
+    )),
+  'lexical repair changes one card without forcing a direct-suffix replacement',
+)
+
 const weakColdPage = [
   scoredResult('Lexion', 88),
   scoredResult('Marken', 88),

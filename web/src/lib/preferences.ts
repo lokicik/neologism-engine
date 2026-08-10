@@ -395,6 +395,7 @@ function upgradeColdBrandableSet(
 
   for (const candidate of candidates) {
     const name = letters(candidate.name)
+    if (candidate.lexicalHazard) continue
     const candidateQuality = engineQuality(candidate)
     if (
       candidate.sourceMode !== 'brandable'
@@ -416,6 +417,7 @@ function upgradeColdBrandableSet(
       .map((result, index) => ({ result, index, quality: engineQuality(result) }))
       .filter(({ result, index, quality }) => (
         index > 0
+        && !result.lexicalHazard
         && result.sourceMode === 'brandable'
         && !isGuidedConstruction(result)
         && (result.concept_coverage ?? 0) <= (candidate.concept_coverage ?? 0)
@@ -498,7 +500,8 @@ export function fillColdLeadRetry(
     const pair = candidate.construction === 'guided_pair'
     const candidateQuality = engineQuality(candidate)
     if (
-      (!pair && (!tail || usedTails.has(tail)))
+      candidate.lexicalHazard
+      || (!pair && (!tail || usedTails.has(tail)))
       || usedNames.has(name)
       || (pair ? (candidate.concept_coverage ?? 0) < 2 : (candidate.concept_coverage ?? 0) === 0)
       || candidateQuality < (pair ? COLD_PAIR_QUALITY_FLOOR : 0.85)
@@ -689,6 +692,50 @@ function dominantStemOverflow(results: NameResult[]): number {
   return [...stems.values()].reduce((sum, value) => sum + Math.max(0, value - cap), 0)
 }
 
+// Preserve the Phase 139 page and replace only a selected high-confidence
+// lexical reparse. The bounded Brandable fallback is already seed-specific;
+// following its order avoids making every seed converge on a global attractor.
+// A replacement cannot trade away quality or brief coverage, introduce a
+// direct suffix, or worsen any retained visible-set diversity measure.
+function repairLexicalHazards(
+  page: NameResult[],
+  fallback: NameResult[],
+  namingPage: boolean,
+): NameResult[] {
+  const selected = page.slice()
+  for (let index = 0; index < selected.length; index++) {
+    const replaced = selected[index]
+    if (!replaced.lexicalHazard) continue
+    const usedNames = new Set(selected.map((result) => letters(result.name)))
+    const currentStemOverflow = dominantStemOverflow(selected)
+    const currentNearPairs = nearPairCount(selected)
+    const currentFamilyOverflow = visibleFamilyOverflow(selected, namingPage)
+    const currentSimilarity = meanPairSimilarity(selected)
+    for (const candidate of fallback) {
+      if (
+        candidate.lexicalHazard
+        || candidate.sourceMode !== 'brandable'
+        || isGuidedConstruction(candidate)
+        || isDirectConceptSuffix(candidate)
+        || usedNames.has(letters(candidate.name))
+        || engineQuality(candidate) + Number.EPSILON < engineQuality(replaced)
+        || (candidate.concept_coverage ?? 0) < (replaced.concept_coverage ?? 0)
+      ) continue
+      const trial = selected.slice()
+      trial[index] = candidate
+      if (
+        dominantStemOverflow(trial) > currentStemOverflow
+        || nearPairCount(trial) > currentNearPairs
+        || visibleFamilyOverflow(trial, namingPage) > currentFamilyOverflow
+        || meanPairSimilarity(trial) > currentSimilarity + Number.EPSILON
+      ) continue
+      selected[index] = candidate
+      break
+    }
+  }
+  return selected
+}
+
 // If a strong cold page is still visually repetitive, make the smallest
 // quality-neutral substitutions available from the bounded fallback pool.
 // Respell/Compound accents keep their slots; every replacement must be at
@@ -711,7 +758,9 @@ function diversifyColdShortlist(
     let best: { index: number; candidateIndex: number; similarity: number; quality: number } | null = null
     for (let index = 0; index < selected.length; index++) {
       const replaced = selected[index]
-      if (replaced.sourceMode && replaced.sourceMode !== 'brandable') continue
+      if (replaced.lexicalHazard || (replaced.sourceMode && replaced.sourceMode !== 'brandable')) {
+        continue
+      }
       for (let candidateIndex = 0; candidateIndex < candidates.length; candidateIndex++) {
         const candidate = candidates[candidateIndex]
         const quality = engineQuality(candidate)
@@ -776,7 +825,11 @@ function diversifyDominantStems(
     } | null = null
     for (let index = 1; index < selected.length; index++) {
       const replaced = selected[index]
-      if (replaced.sourceMode !== 'brandable' || isGuidedConstruction(replaced)) continue
+      if (
+        replaced.lexicalHazard
+        || replaced.sourceMode !== 'brandable'
+        || isGuidedConstruction(replaced)
+      ) continue
       for (let candidateIndex = 0; candidateIndex < candidates.length; candidateIndex++) {
         const candidate = candidates[candidateIndex]
         const quality = engineQuality(candidate)
@@ -842,13 +895,20 @@ export function coldQualityPoolCount(requested: number): number {
   return Math.max(count, Math.min(MAX_TASTE_POOL, count * COLD_QUALITY_POOL_MULTIPLIER))
 }
 
-export function needsQualityRepair(results: NameResult[], requested: number): boolean {
+function needsStructuralRepair(results: NameResult[], requested: number): boolean {
   const count = Math.max(0, Math.floor(requested))
   const page = results.slice(0, count)
   return page.length < count
     || page.some((result) => engineQuality(result) < MIN_SHORTLIST_QUALITY)
     || meanPairSimilarity(page) > MAX_COLD_PAIR_SIMILARITY
     || dominantStemOverflow(page) > 0
+}
+
+export function needsQualityRepair(results: NameResult[], requested: number): boolean {
+  const count = Math.max(0, Math.floor(requested))
+  const page = results.slice(0, count)
+  return page.some((result) => result.lexicalHazard)
+    || needsStructuralRepair(page, count)
 }
 
 // Cold Auto keeps the engine's intended first-page order where possible. Weak
@@ -864,13 +924,16 @@ export function repairWeakShortlist(
   const count = Math.max(0, Math.floor(requested))
   if (count === 0) return []
 
-  const page = primary.slice(0, count)
+  const initialPage = primary.slice(0, count)
+  const safeFallback = fallback.filter((result) => !result.lexicalHazard)
+  const namingPage = isNamingBrief([...initialPage, ...safeFallback])
+  const structuralRepairNeeded = needsStructuralRepair(initialPage, count)
+  const page = initialPage
   const selected = page.filter((result) => engineQuality(result) >= MIN_SHORTLIST_QUALITY)
-  const namingPage = isNamingBrief([...page, ...fallback])
   const finish = (results: NameResult[]): NameResult[] => {
     const diversified = diversifyDominantStems(
-      diversifyColdShortlist(results, fallback, namingPage),
-      fallback,
+      diversifyColdShortlist(results, safeFallback, namingPage),
+      safeFallback,
       namingPage,
     )
     // Pages that still need the targeted lead retry keep their existing
@@ -878,9 +941,14 @@ export function repairWeakShortlist(
     // once to improve an inner card under the stricter set guards above.
     return needsColdLeadRetry(prioritizeColdStrongLead(diversified))
       ? diversified
-      : upgradeColdBrandableSet(diversified, fallback, 'brief_specific')
+      : upgradeColdBrandableSet(diversified, safeFallback, 'brief_specific')
   }
-  if (selected.length === count) return finish(selected)
+  const finishWithLexicalRepair = (results: NameResult[]): NameResult[] => repairLexicalHazards(
+    structuralRepairNeeded ? finish(results) : results,
+    safeFallback,
+    namingPage,
+  )
+  if (selected.length === count) return finishWithLexicalRepair(selected)
 
   const prefixCap = Math.max(1, Math.ceil(count * VISIBLE_PREFIX_SHARE))
   const suffixCap = Math.max(1, Math.ceil(count * VISIBLE_SUFFIX_SHARE))
@@ -895,7 +963,7 @@ export function repairWeakShortlist(
   }
 
   const deferred: NameResult[] = []
-  for (const candidate of fallback) {
+  for (const candidate of safeFallback) {
     const key = letters(candidate.name)
     if (seen.has(key) || engineQuality(candidate) < MIN_SHORTLIST_QUALITY) continue
     const prefix = key.slice(0, 3)
@@ -911,7 +979,7 @@ export function repairWeakShortlist(
     seen.add(key)
     prefixCounts.set(prefix, (prefixCounts.get(prefix) ?? 0) + 1)
     suffixCounts.set(ending, (suffixCounts.get(ending) ?? 0) + 1)
-    if (selected.length === count) return finish(selected)
+    if (selected.length === count) return finishWithLexicalRepair(selected)
   }
 
   for (const candidate of deferred) {
@@ -919,19 +987,19 @@ export function repairWeakShortlist(
     if (seen.has(key)) continue
     selected.push(candidate)
     seen.add(key)
-    if (selected.length === count) return finish(selected)
+    if (selected.length === count) return finishWithLexicalRepair(selected)
   }
 
   // A genuinely constrained mode may lack enough strong alternatives. Keep
   // the requested count with the original order as the final fallback.
-  for (const candidate of [...page, ...fallback]) {
+  for (const candidate of [...page, ...safeFallback]) {
     const key = letters(candidate.name)
     if (seen.has(key)) continue
     selected.push(candidate)
     seen.add(key)
-    if (selected.length === count) return finish(selected)
+    if (selected.length === count) return finishWithLexicalRepair(selected)
   }
-  return finish(selected)
+  return finishWithLexicalRepair(selected)
 }
 
 export function rankByPreference(
@@ -999,10 +1067,15 @@ export function shortlistByPreference(
   if (!profile) return results.slice(0, count)
 
   const ranked = rankByPreference(results, profile, explorationSalt)
-  const qualified = ranked.filter((result) => engineQuality(result) >= MIN_SHORTLIST_QUALITY)
+  const safeRanked = ranked.filter((result) => !result.lexicalHazard)
+  const eligibleRanked = safeRanked.length >= count ? safeRanked : ranked
+  const qualified = eligibleRanked.filter((result) => engineQuality(result) >= MIN_SHORTLIST_QUALITY)
   const candidates = qualified.length >= count
     ? qualified
-    : [...qualified, ...ranked.filter((result) => engineQuality(result) < MIN_SHORTLIST_QUALITY)]
+    : [
+        ...qualified,
+        ...eligibleRanked.filter((result) => engineQuality(result) < MIN_SHORTLIST_QUALITY),
+      ]
 
   // A larger personalization pool relaxes the Rust generator's visible family
   // caps internally. Restore 20% per 3-letter stem and, for endings, keep the

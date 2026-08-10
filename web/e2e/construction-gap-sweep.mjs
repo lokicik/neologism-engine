@@ -1,6 +1,6 @@
-// Inspect candidate families for the cold Auto pages that still open with a
-// direct suffix. This is a diagnostic: a promising name must still win the
-// full 90-page and long-session quality matrices before entering production.
+// Inspect candidate families for cold Auto pages with a suffix lead or a weak
+// inner set. This is a diagnostic: a promising name must still win the full
+// held-out and long-session quality matrices before entering production.
 import { chromium } from 'playwright'
 import { spawn } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
@@ -17,7 +17,24 @@ const CASES = [
   ['a community chat app', 13],
   ['a color palette and visual design tool', 13],
   ['a fast performance monitor', 13],
+  ['candidate tracking software for recruiters', 13],
+  ['candidate tracking software for recruiters', 67],
+  ['candidate tracking software for recruiters', 313],
+  ['a customer relationship pipeline for sales representatives', 13],
+  ['a customer relationship pipeline for sales representatives', 67],
+  ['a customer relationship pipeline for sales representatives', 313],
+  ['a feature flag service', 13],
+  ['a catalog for household belongings', 67],
+  ['local rain and temperature alerts', 13],
+  ['a message queue client', 13],
+  ['a message queue client', 67],
+  ['a message queue client', 313],
 ]
+const query = process.argv.slice(2).join(' ').trim().toLowerCase()
+const selectedCases = query
+  ? CASES.filter(([prompt]) => prompt.toLowerCase().includes(query))
+  : CASES
+if (selectedCases.length === 0) throw new Error(`no diagnostic case matches: ${query}`)
 
 const server = spawn(process.execPath, [viteCli, '--port', String(PORT), '--strictPort'], {
   cwd: WEB_DIR,
@@ -75,10 +92,21 @@ try {
         generateNames({ ...config, variant: undefined, compound: true, count: 30 }),
         generateNames({ ...config, variant: 'metaphor', compound: false, count: 40 }),
       ])
-      output.push({ prompt, seed, direct, fallback, ordered, selected, deep, conceptPair, compound, metaphor })
+      output.push({
+        prompt,
+        seed,
+        direct,
+        fallback,
+        ordered,
+        selected,
+        deep,
+        conceptPair,
+        compound,
+        metaphor,
+      })
     }
     return output
-  }, { cases: CASES })
+  }, { cases: selectedCases })
 
   const letters = (value) => value.toLowerCase().replace(/[^a-z]/g, '')
   const quality = (item) => (
@@ -122,6 +150,7 @@ try {
   const describe = (item) => (
     `${item.name}:${quality(item).toFixed(1)}/c${item.concept_coverage ?? 0}`
     + `/${item.sourceMode ?? '?'}${item.construction ? '/guided' : ''}`
+    + `${item.lexicalHazard ? '/lexical-hazard' : ''}`
   )
 
   for (const row of rows) {

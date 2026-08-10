@@ -3745,6 +3745,52 @@ source, or explicit naming mode changed.
 
 ---
 
+## Phase 140 — Repair lexical seam hazards without perturbing generation
+
+**Observed defect.** A message-queue page exposed `Busharbor`, produced by `bus + harbor` but
+naturally reparsed as “bush arbor.” Rejecting `sh/ch/th/ph/wh` seams during sampling removed the
+name but changed the deterministic RNG stream and broke five held-out gates. A fixed `0.50` rank
+penalty kept the RNG stream but still changed the shortlist boundary: `Busharbor` disappeared,
+`Pipeora` entered from the shallow attractor pool, and message-queue spread regressed from
+**26 -> 25/30** while seed overlap rose **1.67 -> 2.00**. Applying the same filter immediately
+before MMR produced the identical failure. All three versions were rejected; no gate was weakened
+and `Pipelab` was not forced from a deeper diagnostic pool.
+
+**High-confidence signal.** The retained core API detects only a prompt-expanded root followed by
+a curated metaphor where the seam is one of the five English `h` digraphs and both alternate
+segments are dictionary words. Thus `bus + harbor -> bush + arbor` is flagged, while `Logscope`,
+ordinary suffix coinages, and unrelated two-part names are not. The signal crosses WASM as batched
+metadata; it does not change generation, ranking, MMR, scoring, candidate depth, or random state.
+The focused fixtures also pin a second positive `bat + harbor -> bath + arbor` and a non-metaphor
+negative.
+
+**Bounded repair.** A selected lexical hazard opens only the existing three-page Brandable fallback.
+Exactly that card may be replaced, following the fallback's seed-specific order, only by a safe
+non-suffix candidate with non-decreasing structural quality and concept coverage. Exact-stem
+overflow, prefix/ending-family overflow, near pairs, and mean page similarity must all stay flat or
+improve. Personalized shortlists likewise omit a hazard whenever the existing pool has enough safe
+names. On the affected seed, `Busharbor 85.5` becomes `Topicpath 85.5`; the other nine cards remain
+unchanged. The held-out audit now permanently gates visible high-confidence lexical hazards at zero.
+
+**Measured result.** The Phase 139 aggregate is restored exactly: average quality **84.85**, lead
+quality **88.22**, lead coverage **1.40**, **62** near pairs, **0.197** mean similarity, **6** suffix
+leaders, **84** guided leaders, **19.60/30** seed diversity, **4.41/10** overlap, and zero duplicate
+pages. Message-queue pages return to **26/30** names and **1.67** overlap at **84.43** average, with
+zero Respells, retries, stem overflow, or wording drift. All **105 + 111** selected pages contain
+zero flagged lexical reparses.
+
+**Verification.** The Rust suite is **160/160** and the preference smoke suite passes its new
+single-card repair fixtures. Rebuilt WASM, TypeScript, and the production Vite bundle are green.
+The 49-gate held-out audit, 85-page Auto audit, 90-page cold audit, namespace audit, 100-page taste
+matrix, 25-page mode-aware taste audit, four 100-name personalized sessions, and real 100-name UI
+session all pass. Browser developer output remains **800/800** semantic Brandable and **797/800**
+semantic Compound; the core developer comparison reaches **1,558/1,600** marker hits. The
+48-domain audit remains **2,400/2,400** at **83.30** composite, **0.729** diversity, and **47.8%**
+domain uniqueness, with 24 explained collisions and zero unexplained collisions. No LLM, network
+call, score adjustment, global pool expansion, or special-cased replacement name was added.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
@@ -3818,6 +3864,9 @@ preserves additional brief concepts, restores visible stem and ending-family div
 keeps every sufficiently rich page from becoming only root-plus-suffix templates.
 Strongly two-part positive examples can also contribute a small Compound accent pool without
 turning guided Auto back into a fixed mode quota.
+High-confidence hidden root-plus-metaphor reparses now open only the existing bounded Brandable
+fallback, and a replacement must preserve quality, brief coverage, and every retained set-diversity
+measure without changing the generator's rank or random stream.
 AI Studio remains an optional, separate batch judge rather than a hidden dependency of Create.
 
 The next broad aesthetic scorer change is evidence-gated: collect at least ten real likes and ten passes in
