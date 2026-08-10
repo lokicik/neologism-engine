@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import type { Config } from '../lib/engine'
 import { MIN_TASTE_SIGNALS, parseTasteReferences } from '../lib/preferences'
 
@@ -47,37 +47,75 @@ function currentMode(config: Config): Mode {
   return 'brandable'
 }
 
-// A chip that opens a popover menu; closes on outside click or Esc.
-function Chip({ label, children, active }: { label: string; children: ReactNode; active?: boolean }) {
+// A nonmodal disclosure that can contain either choices or real form fields.
+// Selection/Escape restore its trigger; natural focus and pointer exits do not.
+function Chip({
+  label,
+  controlLabel,
+  panelLabel,
+  children,
+  active,
+  closeOnSelect = false,
+}: {
+  label: string
+  controlLabel: string
+  panelLabel: string
+  children: ReactNode
+  active?: boolean
+  closeOnSelect?: boolean
+}) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
+  const panelId = useId()
+
+  const closeAndRestore = () => {
+    triggerRef.current?.focus({ preventScroll: true })
+    setOpen(false)
+  }
 
   useEffect(() => {
     if (!open) return
     const onDown = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
     }
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false)
-    }
     document.addEventListener('mousedown', onDown)
-    document.addEventListener('keydown', onKey)
-    return () => {
-      document.removeEventListener('mousedown', onDown)
-      document.removeEventListener('keydown', onKey)
-    }
+    return () => document.removeEventListener('mousedown', onDown)
   }, [open])
 
   return (
-    <div className="chip-wrap" ref={ref}>
+    <div
+      className="chip-wrap"
+      ref={ref}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setOpen(false)
+      }}
+      onKeyDown={(event) => {
+        if (event.key !== 'Escape' || !open) return
+        event.preventDefault()
+        event.stopPropagation()
+        closeAndRestore()
+      }}
+    >
       <button
+        ref={triggerRef}
+        type="button"
         className={`chip${open || active ? ' open' : ''}`}
+        aria-label={controlLabel}
+        aria-expanded={open}
+        aria-controls={panelId}
         onClick={() => setOpen(!open)}
       >
         {label} <span className="chip-caret">▾</span>
       </button>
       {open && (
-        <div className="chip-menu" onClick={() => setOpen(false)}>
+        <div
+          className="chip-menu"
+          id={panelId}
+          role="group"
+          aria-label={panelLabel}
+          onClick={closeOnSelect ? closeAndRestore : undefined}
+        >
           {children}
         </div>
       )}
@@ -101,6 +139,12 @@ export function CommandBar({
   const creativityLabel =
     CREATIVITY.find((c) => c.temperature === config.temperature && c.variety === config.variety)
       ?.label ?? 'Balanced'
+  const advancedActive = Boolean(
+    tasteReferences.trim()
+    || config.roots?.length
+    || config.starts_with
+    || config.contains,
+  )
 
   const setMode = (m: Mode) =>
     onChange({
@@ -149,11 +193,18 @@ export function CommandBar({
       </div>
 
       <div className="chips-row">
-        <Chip label={lengthLabel}>
+        <Chip
+          label={lengthLabel}
+          controlLabel={`Length: ${lengthLabel}`}
+          panelLabel="Length choices"
+          closeOnSelect
+        >
           {LENGTHS.map((l) => (
             <button
+              type="button"
               key={l.label}
               className={`menu-item${config.min_len === l.min && config.max_len === l.max ? ' selected' : ''}`}
+              aria-pressed={config.min_len === l.min && config.max_len === l.max}
               onClick={() => onChange({ ...config, min_len: l.min, max_len: l.max })}
             >
               <span className="menu-label">{l.label}</span>
@@ -162,11 +213,18 @@ export function CommandBar({
           ))}
         </Chip>
 
-        <Chip label={creativityLabel}>
+        <Chip
+          label={creativityLabel}
+          controlLabel={`Creativity: ${creativityLabel}`}
+          panelLabel="Creativity choices"
+          closeOnSelect
+        >
           {CREATIVITY.map((c) => (
             <button
+              type="button"
               key={c.label}
               className={`menu-item${config.temperature === c.temperature && config.variety === c.variety ? ' selected' : ''}`}
+              aria-pressed={config.temperature === c.temperature && config.variety === c.variety}
               onClick={() => onChange({ ...config, temperature: c.temperature, variety: c.variety })}
             >
               <span className="menu-label">{c.label}</span>
@@ -176,12 +234,9 @@ export function CommandBar({
 
         <Chip
           label="Advanced"
-          active={Boolean(
-            tasteReferences.trim()
-            || config.roots?.length
-            || config.starts_with
-            || config.contains,
-          )}
+          controlLabel={`Advanced filters${advancedActive ? ', applied' : ''}`}
+          panelLabel="Advanced filters"
+          active={advancedActive}
         >
           <div className="menu-form" onClick={(e) => e.stopPropagation()}>
             <label>

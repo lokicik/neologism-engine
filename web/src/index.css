@@ -1426,6 +1426,10 @@ body {
   font-family: inherit;
 }
 .menu-form input:focus { border-color: rgba(124, 106, 249, .55); }
+.chip-wrap :is(button, input):focus-visible {
+  outline: 2px solid rgba(124, 106, 249, .9);
+  outline-offset: 2px;
+}
 .menu-form input:disabled { opacity: .4; }
 .menu-label-line {
   display: flex;
@@ -1618,4 +1622,13 @@ body {
   .page-header { flex-direction: column; align-items: flex-start; }
   .availability-reading { flex-direction: column; align-items: flex-start; gap: .05rem; }
   .settings-passed-row { align-items: flex-start; }
+  .chips-row { position: relative; }
+  .chips-row .chip-wrap:last-child { position: static; }
+  .chips-row .chip-wrap:last-child .chip-menu {
+    left: .25rem;
+    right: 0;
+    min-width: 0;
+  }
+  .chips-row .chip-wrap:last-child .menu-form { min-width: 0; }
+  .chips-row .chip-wrap:last-child .menu-form input { scroll-margin-block: 8px; }
 }

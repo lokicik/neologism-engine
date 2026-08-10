@@ -4282,6 +4282,54 @@ random stream, storage/taste schema, network policy, Saved identity, WASM API, o
 
 ---
 
+## Phase 149 — Make Create filter popovers keep keyboard context
+
+**Bottleneck.** The shared Phase 41 `Chip` control still treated Length, Creativity, and Advanced
+as pointer-first popovers. Triggers exposed neither category-bearing names nor expanded/controlled
+state. Escape from a choice or Advanced input removed the focused node and left focus on the
+document body; keyboard choice activation did the same. Tabbing away left the old panel open, so a
+keyboard user could reach another chip while the first disclosure remained visible. Existing
+browser coverage opened these controls only with pointer clicks and never asserted focus.
+
+**Frozen boundary.** The three Create chips remain nonmodal disclosures, and Advanced remains a
+real form rather than an ARIA menu. This phase changes only their shared interaction semantics and
+scoped focus treatment. It adds no arrow-key/roving-menu contract, focus trap, config option,
+storage key, network request, generation/ranking rule, or taste behavior. Parent-owned values and
+the existing pointer selection paths remain unchanged.
+
+**Disclosure and focus contract.** Every trigger now reports its category and current value,
+`aria-expanded`, and a stable `aria-controls` target. Its visible panel is an explicitly named
+group; Length and Creativity choices expose exactly one selected `aria-pressed` state for canonical
+presets. Enter or Space opens the disclosure. Escape and preset selection synchronously return
+focus to the persistent trigger before closing. By contrast, Tab/Shift+Tab leaving the wrapper and
+an outside pointer action close without restoring focus, preserving the browser-chosen destination.
+That focusout policy also keeps ordinary keyboard and pointer switching to one open popup. Advanced
+continues to skip its disabled Seed words field in Auto, retains native input behavior, and keeps
+storage-neutral form values across close/reopen. A scoped two-pixel focus-visible ring covers chip
+triggers, choices, and Advanced inputs without changing the rest of Create.
+
+**Acceptance evidence.** The production Chromium fixture passes **46/46**. It verifies all three
+dynamic accessible names, collapsed/expanded state, unique control IDs, named groups, ordered
+choices, exact pressed state, Enter and Space opening, keyboard and pointer selection, visible
+focus, Escape restoration, natural forward and reverse exits, outside-pointer focus preservation,
+single-popup behavior, disabled-field skipping, `Starts with = z` preservation, and non-menu
+Advanced semantics, plus 390-pixel and 320-pixel horizontal containment for the panel and focused
+controls, and scroll-margin-backed vertical visibility for each keyboard-focused Advanced field at
+320 pixels. The interaction starts no generation, leaves browser storage byte-for-byte
+unchanged, records zero fetch/XHR calls, and lets no external request escape. TypeScript and the
+production Vite build are green; the retained taste/Saved browser contract remains **61/61**,
+including its existing pointer-driven Advanced reference workflow. The desktop panel stays fully
+visible; narrow layouts keep it horizontally contained and scroll each keyboard-focused field with
+its full ring visible.
+
+**Decision.** Phase 149 fixes the highest-reach remaining keyboard context loss in the core Create
+flow without widening it into a general menu system. It changes no Settings, NameCard/domain,
+Saved, AI Studio, generator, scorer, ranker, random stream, storage/taste schema, network policy,
+WASM API, or Rust code. Name checks still has a separate disclosure-order/accessibility gap and is
+the strongest candidate for a later narrow checkpoint; it is not bundled here.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
