@@ -1,5 +1,10 @@
 // Deterministic smoke test for Auto's brief-aware presentation schedule.
-import { autoModeCounts, isPromptLinkedRespell, mergeAutoBatches } from '../src/lib/auto.ts'
+import {
+  autoModeCounts,
+  isPromptLinkedRespell,
+  isReadableAutoRespell,
+  mergeAutoBatches,
+} from '../src/lib/auto.ts'
 import type { NameResult } from '../src/lib/engine.ts'
 
 function result(name: string): NameResult {
@@ -45,6 +50,30 @@ check(
     && !isPromptLinkedRespell('Developer', ['developer'])
     && !isPromptLinkedRespell('Bobbyn', ['journal', 'mood']),
   'the Auto accent gate accepts one-edit prompt stylings only',
+)
+
+check(
+  [
+    ['Browsr', 'browser'],
+    ['Desygn', 'design'],
+    ['Lybrary', 'library'],
+    ['Pryvate', 'private'],
+    ['Vyntage', 'vintage'],
+    ['Vysual', 'visual'],
+  ].every(([name, term]) => isReadableAutoRespell(name, [term]))
+    && [
+      ['Calndar', 'calendar'],
+      ['Developr', 'developer'],
+      ['Filesystm', 'filesystem'],
+      ['Grocry', 'grocery'],
+      ['Logystic', 'logistic'],
+      ['Monytor', 'monitor'],
+      ['Mygration', 'migration'],
+      ['Proprty', 'property'],
+      ['Recruitr', 'recruiter'],
+      ['Recruyt', 'recruit'],
+    ].every(([name, term]) => !isReadableAutoRespell(name, [term])),
+  'Auto keeps compact brand spellings and rejects hard-to-scan vowel damage',
 )
 
 const generic = autoModeCounts(10, false)

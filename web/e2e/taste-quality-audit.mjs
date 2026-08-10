@@ -42,6 +42,7 @@ const REFERENCE_SETS = [
 const SEEDS = [7, 42, 101, 2024, 9999]
 const KNOWN_SUFFIXES = ['ify', 'ora', 'ium', 'ion', 'io', 'ia', 'ix', 'ly', 'ai']
 const DIRECT_CONCEPT_SUFFIXES = ['ify', 'ora', 'ion', 'era', 'io', 'ia', 'ix', 'el', 'en', 'on']
+const REVIEWED_RESPELLS = new Set(['desygn'])
 
 const server = spawn(process.execPath, [viteCli, '--port', String(PORT), '--strictPort'], {
   cwd: WEB_DIR,
@@ -151,6 +152,16 @@ try {
 
   const names = rows.flatMap((row) => row.selected)
   const engineNames = rows.flatMap((row) => row.engineFirstPage)
+  const respellInventory = new Map()
+  for (const row of rows) {
+    for (const item of row.selected.filter((candidate) => candidate.mode === 'respell')) {
+      const key = item.name.toLowerCase().replace(/[^a-z]/g, '')
+      const entry = respellInventory.get(key) ?? { name: item.name, pages: 0, prompts: new Set() }
+      entry.pages++
+      entry.prompts.add(row.prompt)
+      respellInventory.set(key, entry)
+    }
+  }
   let nearPairs = 0
   let pairSimilarity = 0
   let pairCount = 0
@@ -162,6 +173,7 @@ try {
   let suffixHeavyPages = 0
   let suffixOnlyPages = 0
   let maxDirectSuffixes = 0
+  const capViolationRows = []
   const isDirectSuffix = (item) => {
     const normalized = item.name.toLowerCase().replace(/[^a-z]/g, '')
     return item.mode === 'brandable'
@@ -179,8 +191,9 @@ try {
       prefixes.set(prefix, (prefixes.get(prefix) ?? 0) + 1)
       endings.set(ending, (endings.get(ending) ?? 0) + 1)
     }
-    prefixOverTwo += [...prefixes.values()]
+    const pagePrefixOverflow = [...prefixes.values()]
       .reduce((sum, count) => sum + Math.max(0, count - 2), 0)
+    prefixOverTwo += pagePrefixOverflow
     endingOverTwo += [...endings.values()]
       .reduce((sum, count) => sum + Math.max(0, count - 2), 0)
     endingOverThree += [...endings.values()]
@@ -191,6 +204,9 @@ try {
     suffixHeavyPages += Number(pageDirectSuffixes >= 8)
     suffixOnlyPages += Number(pageDirectSuffixes === row.selected.length)
     maxDirectSuffixes = Math.max(maxDirectSuffixes, pageDirectSuffixes)
+    if (pagePrefixOverflow > 0 || pageDirectSuffixes > 8) {
+      capViolationRows.push({ row, pagePrefixOverflow, pageDirectSuffixes })
+    }
     for (let i = 0; i < row.selected.length; i++) {
       for (let j = i + 1; j < row.selected.length; j++) {
         const overlap = lexicalSimilarity(row.selected[i].name, row.selected[j].name)
@@ -217,6 +233,10 @@ try {
   const engineTaste = engineAverage('taste')
   const meanPairSimilarity = pairSimilarity / pairCount
   const below75 = names.filter((item) => item.quality < 0.75).length
+  const unreviewedRespells = names.filter((item) => (
+    item.mode === 'respell'
+    && !REVIEWED_RESPELLS.has(item.name.toLowerCase().replace(/[^a-z]/g, ''))
+  ))
   const wrongSize = rows.filter((row) => (
     row.poolRequested !== 60
     || row.poolReturned <= 10
@@ -257,6 +277,18 @@ try {
   console.log(`near-duplicate pairs: ${nearPairs}`)
   console.log(`mean pair similarity: ${meanPairSimilarity.toFixed(3)}`)
   console.log(`returned pool sizes: ${returnedCounts.join(', ')}`)
+  console.log(`selected Respell accents: ${[...respellInventory.values()].reduce((sum, entry) => sum + entry.pages, 0)} pages · ${respellInventory.size} unique`)
+  for (const entry of [...respellInventory.values()].sort((left, right) => (
+    left.name.localeCompare(right.name)
+  ))) {
+    console.log(`  ${entry.name} · ${entry.pages} pages · ${[...entry.prompts].join(' / ')}`)
+  }
+  for (const { row, pagePrefixOverflow, pageDirectSuffixes } of capViolationRows) {
+    console.log(
+      `  cap ${pagePrefixOverflow}/${pageDirectSuffixes} · ${row.seed} · ${row.references}`
+      + ` · ${row.prompt}: ${row.selected.map((item) => item.name).join(', ')}`,
+    )
+  }
   console.log(`retry unique names: ${baselineRetries.uniqueNames} -> ${seededRetries.uniqueNames} / ${retryGroups.size * SEEDS.length * 10}`)
   console.log(`exact repeated retry pages: ${baselineRetries.repeatedPages} -> ${seededRetries.repeatedPages}`)
   const poolsByPrompt = new Map()
@@ -298,6 +330,7 @@ try {
   const gates = [
     [wrongSize === 0, 'every page selects 10 names after requesting an expanded pool of up to 60'],
     [below75 === 0, 'no selected name falls below the structural quality floor'],
+    [unreviewedRespells.length === 0, 'personalized pages surface only reviewed Respell forms'],
     [prefixOverTwo === 0, 'no visible page contains more than two names per prefix family'],
     [endingOverThree === 0, 'no visible page contains more than three names per exact ending'],
     [endingOverTwo <= 150, 'three-name ending families stay bounded across the matrix'],

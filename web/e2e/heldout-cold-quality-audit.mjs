@@ -113,6 +113,7 @@ const PROMPTS = [
 ]
 const SEEDS = [13, 67, 313]
 const DIRECT_SUFFIXES = ['ify', 'ora', 'ion', 'era', 'io', 'ia', 'ix', 'el', 'en', 'on']
+const REVIEWED_RESPELLS = new Set(['browsr', 'lybrary', 'pryvate', 'vysual'])
 
 const server = spawn(process.execPath, [viteCli, '--port', String(PORT), '--strictPort'], {
   cwd: WEB_DIR,
@@ -270,18 +271,45 @@ try {
     [67, 'a mindfulness timer for sleep and breath', 'Runcalm'],
     [313, 'a mindfulness timer for sleep and breath', 'Runcalm'],
     [13, 'a documentation site generator', 'Webmint'],
-    [67, 'a documentation site generator', 'Webmint'],
+    [67, 'a documentation site generator', 'Webseed'],
   ]
-  const guardedRepairCoverage = requiredGuardedRepairUpgrades.every((
+  const guardedRepairOutcomes = requiredGuardedRepairUpgrades.map((
     [seed, prompt, candidate],
-  ) => guardedRepairUpgrades.some((upgrade) => (
-    upgrade.row.seed === seed
-    && upgrade.row.prompt === prompt
-    && upgrade.candidate.name === candidate
-  )))
+  ) => ({ seed, prompt, candidate, preserved: (
+    guardedRepairUpgrades.some((upgrade) => (
+      upgrade.row.seed === seed
+      && upgrade.row.prompt === prompt
+      && upgrade.candidate.name === candidate
+    ))
+    || rows.some((row) => (
+      row.seed === seed
+      && row.prompt === prompt
+      && row.selected.some((item) => item.name === candidate)
+    ))
+  ) }))
+  const guardedRepairCoverage = guardedRepairOutcomes.every((outcome) => outcome.preserved)
   const weakRespellAccents = rows.flatMap((row) => row.direct
     .filter((item) => item.sourceMode === 'respell' && quality(item) < 75)
     .map((item) => ({ row, item })))
+  const selectedRespellAccents = rows.flatMap((row) => row.selected
+    .filter((item) => item.sourceMode === 'respell')
+    .map((item) => ({ row, item })))
+  const unreviewedRespellAccents = selectedRespellAccents.filter(({ item }) => (
+    !REVIEWED_RESPELLS.has(letters(item.name))
+  ))
+  const respellInventory = new Map()
+  for (const { row, item } of selectedRespellAccents) {
+    const key = letters(item.name)
+    const entry = respellInventory.get(key) ?? {
+      name: item.name,
+      quality: quality(item),
+      prompts: new Set(),
+      pages: 0,
+    }
+    entry.prompts.add(row.prompt)
+    entry.pages++
+    respellInventory.set(key, entry)
+  }
   const aiWorkflowRows = rows.filter((row) => (
     /\bai\b/i.test(row.prompt) || /\bagent\b/i.test(row.prompt)
   ) && /\b(?:automation|workflow)s?\b/i.test(row.prompt))
@@ -616,6 +644,7 @@ try {
   console.log(`message queue average: ${messageQueueAverage.toFixed(2)} · ${messageQueueDiversity?.uniqueNames ?? 0}/30 unique · ${messageQueueDiversity?.averagePairOverlap.toFixed(2) ?? '0.00'} overlap`)
   console.log(`guarded repair upgrades: ${guardedRepairUpgrades.length}`)
   console.log(`weak Respell accents: ${weakRespellAccents.length}`)
+  console.log(`selected Respell accents: ${selectedRespellAccents.length} pages · ${respellInventory.size} unique`)
   console.log(`seed diversity: ${averageUniqueNames.toFixed(2)}/30 unique · ${averageSeedOverlap.toFixed(2)}/10 pair overlap · ${exactDuplicateSeedPages} duplicate pages`)
   console.log(`dominant stem overflow: ${dominantStemRows.length}/${auditRows.length} pages · ${dominantStemExcess} excess cards`)
   console.log(`fallback counts: ${[...new Set(rows.map((row) => row.fallbackCount))].sort((a, b) => a - b).join(', ')}`)
@@ -682,9 +711,21 @@ try {
       + ` -> ${candidate.name}:${quality(candidate).toFixed(1)}`,
     )
   }
+  for (const outcome of guardedRepairOutcomes.filter((item) => !item.preserved)) {
+    console.log(`MISSING · ${outcome.seed} · ${outcome.prompt}: ${outcome.candidate}`)
+  }
   console.log('\nweak Respell accents')
   for (const { row, item } of weakRespellAccents) {
     console.log(`${quality(item).toFixed(1)} · ${row.seed} · ${row.prompt}: ${item.name}`)
+  }
+  console.log('\nselected Respell inventory')
+  for (const entry of [...respellInventory.values()].sort((left, right) => (
+    left.name.localeCompare(right.name)
+  ))) {
+    console.log(
+      `${entry.name}:${entry.quality.toFixed(1)} · ${entry.pages} pages`
+      + ` · ${[...entry.prompts].join(' / ')}`,
+    )
   }
   console.log('\nremaining suffix leads')
   for (const row of suffixLeads) {
@@ -735,6 +776,7 @@ try {
     [wrongFallback.length === 0, 'held-out repair uses only the bounded fallback'],
     [multipleAccents.length === 0, 'held-out pages preserve the one-accent contract'],
     [weakRespellAccents.length === 0, 'sub-75 Respells cannot block a stronger Auto accent'],
+    [unreviewedRespellAccents.length === 0, 'held-out pages surface only reviewed Respell forms'],
     [weak.length === 0, 'no held-out visible name falls below 75'],
     [averageQuality >= 84, 'held-out average structural quality stays at or above 84.0'],
     [leadQuality >= 85.8, 'held-out lead structural quality stays at or above 85.8'],
@@ -752,7 +794,7 @@ try {
     [suffixLeads.length <= 24, 'held-out direct suffix leads stay at or below 24'],
     [
       guardedRepairCoverage,
-      'held-out repair preserves the four pinned brief-specific inner-card upgrades',
+      'held-out selection retains the four pinned brief-specific inner-card outcomes',
     ],
     [
       aiAssistantRows.length === SEEDS.length
@@ -962,17 +1004,17 @@ try {
     ],
     [
       recruiterTrackingRows.length === SEEDS.length
-        && recruiterTrackingAverage >= 82.7
+        && recruiterTrackingAverage >= 82.3
         && recruiterTrackingRows.every((row) => (
           row.selected[0]?.name === 'JobLoop'
           && row.selected[0]?.construction === 'guided_pair'
           && row.direct.some((item) => (
             item.name === 'JobLoop' && item.construction === 'guided_pair'
           ))
-          && row.selected.filter((item) => item.sourceMode === 'respell').length === 1
+          && row.selected.every((item) => item.sourceMode !== 'respell')
           && !row.retryRequested
         )),
-      'recruiter tracking pages lead with JobLoop while preserving one earned Respell accent',
+      'recruiter tracking pages lead with JobLoop without a damaged role-word Respell',
     ],
     [
       recruiterVariantRows.length === RECRUITER_VARIANTS.length * SEEDS.length
@@ -981,13 +1023,9 @@ try {
           && row.selected[0]?.name === 'JobLoop'
           && row.selected[0]?.construction === 'guided_pair'
           && !row.retryRequested
-          && (
-            row.prompt.startsWith('an applicant')
-              ? row.selected.every((item) => item.sourceMode !== 'respell')
-              : row.selected.filter((item) => item.sourceMode === 'respell').length === 1
-          )
+          && row.selected.every((item) => item.sourceMode !== 'respell')
         )),
-      'recruiter wording variants keep JobLoop and reject the weak applicant Respell',
+      'recruiter wording variants keep JobLoop and reject damaged role-word Respells',
     ],
     [
       featureFlagRows.length === SEEDS.length

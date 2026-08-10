@@ -33,6 +33,7 @@ const SEEDS = [7, 42, 101, 2024, 9999]
 const VERBOSE = process.argv.includes('--verbose')
 const FORMS = process.argv.includes('--forms')
 const LOSSY_SEAMS = new Set(['aurank', 'poolink', 'pooledger', 'settledger', 'tagent'])
+const REVIEWED_RESPELLS = new Set(['anymal', 'edytor', 'vyntage'])
 const GUIDED_METAPHOR_TAILS = [
   'flow', 'forge', 'spark', 'seed', 'craft', 'lab', 'wave', 'link', 'pulse', 'beam',
   'prism', 'lumen', 'nova', 'peak', 'signal', 'smith', 'grove', 'glow', 'loom', 'muse',
@@ -94,6 +95,7 @@ let weakContextForms = 0
 const guidedMetaphorNames = []
 const secondaryMetaphorNames = []
 const pageViolations = []
+const respellInventory = new Map()
 try {
   const page = await browser.newPage()
   await page.goto(APP_URL)
@@ -128,6 +130,10 @@ try {
   for (const row of rows) {
     const samples = row.results.filter((item) => item.sourceMode !== 'brandable')
     const badAccents = samples.filter((item) => !isPromptLinked(item, row.keywords))
+    const unreviewedRespells = samples.filter((item) => (
+      item.sourceMode === 'respell'
+      && !REVIEWED_RESPELLS.has(item.name.toLowerCase().replace(/[^a-z]/g, ''))
+    ))
     const lossySeams = row.results.filter((item) => LOSSY_SEAMS.has(item.name.toLowerCase()))
     const weakWords = CONTEXT_ONLY_WORDS.get(row.prompt) ?? []
     const weakForms = row.results.filter((item) => {
@@ -160,6 +166,7 @@ try {
       [row.results.length !== 10, `size ${row.results.length}`],
       [samples.length > 1, `${samples.length} mode accents`],
       [badAccents.length > 0, 'unlinked mode accent'],
+      [unreviewedRespells.length > 0, `unreviewed Respell ${unreviewedRespells.map((item) => item.name).join('/')}`],
       [lossySeams.length > 0, `lossy seam ${lossySeams.map((item) => item.name).join('/')}`],
       [weakForms.length > 0, `weak context ${weakForms.map((item) => item.name).join('/')}`],
       [guidedMetaphors.length > 2, `${guidedMetaphors.length} guided metaphors`],
@@ -188,11 +195,18 @@ try {
       byMode[mode] ??= { total: 0, linked: 0 }
       byMode[mode].total++
       byMode[mode].linked += Number(hit)
+      if (mode === 'respell') {
+        const key = item.name.toLowerCase().replace(/[^a-z]/g, '')
+        const entry = respellInventory.get(key) ?? { name: item.name, pages: 0 }
+        entry.pages++
+        respellInventory.set(key, entry)
+      }
     }
   }
 
   console.log(`weak Brandable context forms: ${weakContextForms}`)
   console.log(`quality-gated metaphor forms: ${guidedMetaphorNames.length} (${new Set(guidedMetaphorNames.map((name) => name.toLowerCase())).size} unique)`)
+  console.log(`reviewed Respell forms: ${[...respellInventory.values()].map((entry) => `${entry.name}:${entry.pages}`).join(', ') || 'none'}`)
   if (FORMS) {
     console.log(`all: ${[...new Set(guidedMetaphorNames)].sort().join(', ')}`)
     console.log(`secondary: ${[...new Set(secondaryMetaphorNames)].sort().join(', ')}`)

@@ -62,6 +62,41 @@ export function isPromptLinkedRespell(name: string, terms: string[]): boolean {
   })
 }
 
+// Auto should use Respell as a familiar brand accent, not as a license to
+// remove any convenient vowel. Explicit Respell mode keeps the broader engine
+// vocabulary; this presentation gate admits only compact, easily reversible
+// Lyft/Tumblr-style spellings.
+export function isReadableAutoRespell(name: string, terms: string[]): boolean {
+  const candidate = letters(name)
+  if (candidate.length > 7) return false
+
+  return terms.some((term) => {
+    const source = letters(term)
+    if (source.length < 4) return false
+
+    if (source.length === candidate.length) {
+      const differences: number[] = []
+      for (let index = 0; index < source.length; index++) {
+        if (source[index] !== candidate[index]) differences.push(index)
+      }
+      const [index] = differences
+      return differences.length === 1
+        && (candidate.length <= 6 || index <= 2)
+        && source[index] === 'i'
+        && candidate[index] === 'y'
+    }
+
+    if (source.length === candidate.length + 1) {
+      const index = source.length - 2
+      return index >= 2
+        && source[index] === 'e'
+        && source.slice(0, index) + source.slice(index + 1) === candidate
+    }
+
+    return false
+  })
+}
+
 // Distribute secondary naming modes through the stronger Brandable stream while
 // preserving each mode's own order and removing cross-mode duplicates.
 export function mergeAutoBatches(batches: NameResult[][], total: number): NameResult[] {

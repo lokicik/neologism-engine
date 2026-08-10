@@ -1,5 +1,5 @@
 import init, { generate_names, batch_metrics, concept_coverages, explain_name, extract_keywords } from '../wasm/neologism_wasm.js'
-import { autoModeCounts, isPromptLinkedRespell, mergeAutoBatches } from './auto'
+import { autoModeCounts, isReadableAutoRespell, mergeAutoBatches } from './auto'
 import { tasteContextForConfig } from './taste-context'
 
 export type Style = 'big_tech' | 'sci_fi' | 'fantasy'
@@ -343,7 +343,7 @@ export async function generateBatch(cfg: Config): Promise<NameResult[]> {
     ])
     const linkedRespells = respellBatch
       .filter((result) => (
-        isPromptLinkedRespell(result.name, terms)
+        isReadableAutoRespell(result.name, terms)
         && structuralQuality(result) >= (
           recruiterTrackingBrief ? RECRUITER_RESPELL_QUALITY_FLOOR : AUTO_ACCENT_QUALITY_FLOOR
         )

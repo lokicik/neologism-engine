@@ -3646,11 +3646,63 @@ LLM, network call, global scorer, selection algorithm, retry, or random source c
 
 ---
 
+## Phase 138 — Make Auto Respell earn its place by readability
+
+**Observed bottleneck.** The held-out audit previously checked weak Respell scores but did not
+inventory the spellings that actually survived to the visible page. Across 105 independent cold
+pages plus 93 wording-stress pages, Auto selected a Respell on **63 pages** from **18 unique**
+forms. The edit-distance rule treated reversible brand spellings and damaged words as equivalent:
+`Browsr`, `Lybrary`, `Pryvate`, and `Vysual` sat beside `Grocry`, `Calndar`, `Proprty`,
+`Monytor`, `Filesystm`, `Recruitr`, and related interior-vowel deletions. Their structural scores
+were often high, so the existing 75-point floor could not express the visual problem.
+
+**Scoped presentation rule.** Explicit Respell still exposes the engine's full exploratory
+vocabulary. Auto now adds a separate readability gate after prompt linkage: the result must be at
+most seven letters and must be exactly reversible as either an early `i -> y` substitution, a
+compact six-letter substitution such as `Desygn`, or a penultimate `e` deletion such as `Browsr`.
+Long forms and interior deletions yield their accent slot to the existing quality-gated metaphor
+or scoped pair path. This changes neither Respell generation nor scoring; it changes only what
+Auto is willing to present as a supposedly polished first-page accent.
+
+**A/B boundary.** The first guard allowed `i -> y` only in the first three positions. It cleaned
+the held-out pages, but it also removed `Desygn` from the constrained design-token taste pool.
+Eight of 100 personalized pages then needed a third prefix family card and four pages reached nine
+direct suffix forms. Allowing the same one-edit substitution anywhere in words of six letters or
+fewer restored that useful sixth family while still rejecting `Monytor`, `Logystic`, `Mygration`,
+and `Recruyt`. The final personalized matrix has zero prefix overflow, at most eight direct suffix
+forms, **85.32** selected quality, **0.193** mean similarity, and only the reviewed `Desygn` accent
+across its 20 design-token pages. A remaining four-card `Plan...` family was also inspected; its
+fallback could only offer another mechanical suffix form (`Taskora`) without weakening an existing
+non-template guard, so that score-only swap was rejected.
+
+**Measured result.** Visible held-out Respells fall **63 -> 18 pages** and **18 -> 4 unique
+forms**: `Browsr`, `Lybrary`, `Pryvate`, and `Vysual`. Average structural quality rises
+**84.52 -> 84.80**, lead quality **87.25 -> 88.08**, suffix leaders fall **21 -> 11**, and guided
+leaders rise **56 -> 78**. Seed spread improves **18.86 -> 19.60/30** while pair overlap falls
+**4.79 -> 4.39/10**. The trade is small and explicit: coverage moves **1.35 -> 1.34**, near pairs
+**64 -> 66**, mean similarity **0.195 -> 0.198**, and one task-planner page has one exact-stem
+excess; all remain inside retained gates. Recruiter pages now keep `JobLoop` and discard the
+damaged role-word accents instead of preserving a Respell quota.
+
+**Verification.** The Auto smoke test pins both accepted and rejected transformations. The
+85-page Auto audit surfaces only the reviewed `Vyntage`, `Edytor`, and `Anymal` accents; the
+198-page held-out audit and 100-page/1,000-selection taste audit now print and gate their visible
+Respell inventories. The 90-page cold audit, 25-page mode-aware taste audit, three-prompt namespace
+audit, four 100-name personalized sessions, and 1,600-name browser developer-domain audit pass
+their retained contracts. The Rust suite remains **157/157** and the 48-domain audit remains
+**2,400/2,400** at **83.30** composite, **0.729** diversity, and **47.8%** domain uniqueness, with
+24 shared-root collisions and zero unexplained collisions. TypeScript and the production Vite
+bundle are green. No LLM, network call, Rust generator, WASM artifact, explicit Respell mode,
+scorer, retry, or random source changed.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
-Brandable by default and only admits a 75+ Respell accent that visibly comes from the brief; when no
-safe Respell exists, one quality-gated root-plus-metaphor Brandable may break the suffix wall; one
+Brandable by default and only admits a 75+ Respell accent that visibly comes from the brief and
+passes the compact readability gate; when no safe Respell exists, one quality-gated
+root-plus-metaphor Brandable may break the suffix wall; one
 different-ending, quality-neutral second form may replace a direct suffix card. The
 broader modes remain explicit choices and still form the exploratory mix when no brief exists.
 Cold first pages now lead with that stronger guided form only when quality and brief coverage are
@@ -3675,8 +3727,8 @@ Generic `builder` wording likewise cannot steal the Respell accent from a recogn
 subject; unknown builder briefs still keep their literal source.
 Household inventory briefs can express the job directly through the isolated `StowLog` family
 without teaching ordinary catalogs another global template.
-Recruiter tracking briefs likewise gain the isolated `JobLoop` hiring-workflow role; a strong pair
-can improve an inner suffix card without removing the page's one earned Respell accent.
+Recruiter tracking briefs likewise gain the isolated `JobLoop` hiring-workflow role and no longer
+reserve a visible slot for damaged `Recruitr` / `Recruyt` forms.
 Feature-flag briefs use an isolated `FlipOps` control role instead of adding another high-scoring
 `Gate...` variant, while audience words such as `developer` cannot take the Respell slot.
 Naming-engine briefs now surface a scoped `LexLoom` or `LexMint` word-making role while preserving
@@ -3691,7 +3743,7 @@ Terminal-log briefs normalize CLI/console/command wording into a scoped
 `Term`/`Shell`/`Prompt`/`Log`/`Exec`/`Pane` palette, so audience and delivery words cannot replace
 the product role or rebuild a `Term...` wall.
 Message-queue briefs similarly normalize async/developer/monitoring wording into one queue lane
-with a restrained `Pub` root, eliminating the last held-out four-card stem wall without lowering
+with a restrained `Pub` root, eliminating its Pipe stem wall without lowering
 the quality-neutral repair boundary.
 Cold Auto also limits exact four-letter stem repetition on a visible page, but only through a
 quality-neutral, coverage-preserving non-suffix substitution from the fallback it already opened.
@@ -3703,8 +3755,9 @@ pairings that are individually relevant but read poorly together.
 Long prompted sessions no longer collapse into repeated suffix families or stop before 100
 names, and semantic joins no longer erase a concept at one-letter/vowel boundaries. Naming briefs
 now use a smoother, deliberately scoped ending palette. Respell accents style a recognized
-product subject instead of incidental context, and disappear when the brief has no safe literal
-transformation. Developer naming briefs now understand package registries, namespaces, and name
+product subject instead of incidental context, survive Auto only when the one-edit spelling stays
+compact and reversible, and disappear when the brief has no safe literal transformation.
+Developer naming briefs now understand package registries, namespaces, and name
 availability without confusing `find` with filesystem search. Cold Auto preserves strong
 first-page names and opens a bounded offline fallback
 for weak slots or an overly repetitive page. Local taste feedback selects each
