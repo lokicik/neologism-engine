@@ -78,6 +78,11 @@ const LEGAL_RESEARCH_VARIANTS = [
   'court opinion and citation search',
   'a legal precedent research tool',
 ]
+const HABIT_ROUTINE_VARIANTS = [
+  'a habit tracker for daily routines',
+  'streak and ritual coaching',
+  'daily habit building and streak tracking',
+]
 const PROMPTS = [
   ...BASE_PROMPTS,
   ...AI_VARIANTS,
@@ -86,6 +91,7 @@ const PROMPTS = [
   ...NAMING_TOOL_VARIANTS,
   ...COLOR_PALETTE_VARIANTS,
   ...LEGAL_RESEARCH_VARIANTS,
+  ...HABIT_ROUTINE_VARIANTS,
 ]
 const SEEDS = [13, 67, 313]
 const DIRECT_SUFFIXES = ['ify', 'ora', 'ion', 'era', 'io', 'ia', 'ix', 'el', 'en', 'on']
@@ -337,6 +343,16 @@ try {
   const legalResearchVariantRows = rows.filter((row) => (
     LEGAL_RESEARCH_VARIANTS.includes(row.prompt)
   ))
+  const habitRoutineRows = rows.filter((row) => (
+    row.prompt === 'routine and streak coaching'
+  ))
+  const habitRoutineAverage = habitRoutineRows.reduce(
+    (sum, row) => sum + row.selected.reduce((pageSum, item) => pageSum + quality(item), 0),
+    0,
+  ) / (habitRoutineRows.length * 10)
+  const habitRoutineVariantRows = rows.filter((row) => (
+    HABIT_ROUTINE_VARIANTS.includes(row.prompt)
+  ))
   const seedDiversity = BASE_PROMPTS.map((prompt) => {
     const promptRows = auditRows.filter((row) => row.prompt === prompt)
     const nameSeeds = new Map()
@@ -402,6 +418,9 @@ try {
   const legalResearchDiversity = seedDiversity.find((row) => (
     row.prompt === 'legal research for court cases'
   ))
+  const habitRoutineDiversity = seedDiversity.find((row) => (
+    row.prompt === 'routine and streak coaching'
+  ))
   const wordingDiversity = (prompts, variantRows) => prompts.map((prompt) => {
     const promptRows = variantRows.filter((row) => row.prompt === prompt)
     const names = new Set(promptRows.flatMap((row) => (
@@ -432,6 +451,16 @@ try {
     LEGAL_RESEARCH_VARIANTS,
     legalResearchVariantRows,
   )
+  const habitRoutineVariantDiversity = wordingDiversity(
+    HABIT_ROUTINE_VARIANTS,
+    habitRoutineVariantRows,
+  )
+  const habitRoutineWordingStable = habitRoutineVariantRows.every((row) => {
+    const canonical = habitRoutineRows.find((candidate) => candidate.seed === row.seed)
+    return canonical
+      && row.selected.map((item) => letters(item.name)).join('|')
+        === canonical.selected.map((item) => letters(item.name)).join('|')
+  })
   const dominantStemOverflowFor = (items) => {
     const counts = new Map()
     for (const item of items) {
@@ -504,6 +533,7 @@ try {
   console.log(`naming tool average: ${namingToolAverage.toFixed(2)}`)
   console.log(`color palette average: ${colorPaletteAverage.toFixed(2)} · ${colorPaletteDiversity?.uniqueNames ?? 0}/30 unique · ${colorPaletteDiversity?.averagePairOverlap.toFixed(2) ?? '0.00'} overlap`)
   console.log(`legal research average: ${legalResearchAverage.toFixed(2)} · ${legalResearchDiversity?.uniqueNames ?? 0}/30 unique · ${legalResearchDiversity?.averagePairOverlap.toFixed(2) ?? '0.00'} overlap`)
+  console.log(`habit routine average: ${habitRoutineAverage.toFixed(2)} · ${habitRoutineDiversity?.uniqueNames ?? 0}/30 unique · ${habitRoutineDiversity?.averagePairOverlap.toFixed(2) ?? '0.00'} overlap`)
   console.log(`guarded repair upgrades: ${guardedRepairUpgrades.length}`)
   console.log(`weak Respell accents: ${weakRespellAccents.length}`)
   console.log(`seed diversity: ${averageUniqueNames.toFixed(2)}/30 unique · ${averageSeedOverlap.toFixed(2)}/10 pair overlap · ${exactDuplicateSeedPages} duplicate pages`)
@@ -547,6 +577,10 @@ try {
   }
   console.log('\nlegal research focus')
   for (const row of [...legalResearchRows, ...legalResearchVariantRows]) {
+    console.log(`${row.seed} · ${row.prompt} · ${row.selected.map((item) => item.name).join(', ')}`)
+  }
+  console.log('\nhabit routine focus')
+  for (const row of [...habitRoutineRows, ...habitRoutineVariantRows]) {
     console.log(`${row.seed} · ${row.prompt} · ${row.selected.map((item) => item.name).join(', ')}`)
   }
   console.log('\nguarded repair upgrades')
@@ -706,6 +740,36 @@ try {
           && !row.retryRequested
         )),
       'legal-research wording variants reject filesystem roots and weak legal Respells',
+    ],
+    [
+      habitRoutineRows.length === SEEDS.length
+        && habitRoutineAverage >= 83.7
+        && habitRoutineDiversity?.uniqueNames >= 24
+        && habitRoutineDiversity?.averagePairOverlap <= 2.1
+        && habitRoutineDiversity?.exactDuplicatePages === 0
+        && habitRoutineRows.every((row) => (
+          row.selected.length === 10
+          && dominantStemOverflowFor(row.selected) === 0
+          && row.selected.every((item) => item.sourceMode !== 'respell')
+          && !row.retryRequested
+        )),
+      'habit-routine pages replace ineffective roots without a Daily or Beat stem wall',
+    ],
+    [
+      habitRoutineVariantRows.length === HABIT_ROUTINE_VARIANTS.length * SEEDS.length
+        && habitRoutineWordingStable
+        && habitRoutineVariantDiversity.every((row) => (
+          row.rowCount === SEEDS.length
+          && row.uniqueNames >= 24
+          && row.averagePairOverlap <= 2.1
+        ))
+        && habitRoutineVariantRows.every((row) => (
+          row.selected.length === 10
+          && dominantStemOverflowFor(row.selected) === 0
+          && row.selected.every((item) => item.sourceMode !== 'respell')
+          && !row.retryRequested
+        )),
+      'habit-routine wording variants suppress build and tracking context without changing intent',
     ],
     [
       recruiterTrackingRows.length === SEEDS.length

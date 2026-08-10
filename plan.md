@@ -3450,6 +3450,53 @@ green. No LLM, network call, global scorer change, retry, or random source was a
 
 ---
 
+## Phase 134 — Replace the habit page's Daily wall with live rhythm roots
+
+**Observed bottleneck.** After legal research was separated from generic search, `routine and
+streak coaching` was the clearest remaining visual repetition: every seed showed four `Daily...`
+cards, all three pages contributed one dominant-stem overflow, and the canonical set averaged only
+**81.81**. Across three seeds it retained **20/30** names and shared **4.00/10** names per pair.
+The six-root map was misleadingly broad: `routine` and `rhythm` contributed almost nothing to the
+canonical first page, so selection repeatedly converged on `Daily`, `Habit`, `Ritual`, and
+`Streak`.
+
+**Retained vocabulary and context fix.** The habit/routine palette replaces those two ineffective
+roots with `Beat` and `Chain`. Both are short, recognizable expressions of rhythm and streak
+continuity, and they produce a more varied set such as `Beatlab`, `Beatsignal`, `Chainhive`,
+`Dailyflow`, `Habitbeam`, and `Streakpath`. Natural wording exposed a separate interpretation bug:
+`daily habit building and streak tracking` admitted generic creation roots and produced forms such
+as `Dailycraft` and `Ritualmint`. Only beside an explicit habit/routine/streak/ritual concept,
+`build`, `builder`, `track`, `last`, and the existing coaching/tracker words are now context rather
+than naming material. Generic builder briefs keep their original `Forge` palette.
+
+**A/B boundaries.** `Groove + Chain` removed the stem wall but lowered two already-weak pages and
+global lead quality. `Tempo + Chain` improved local and global metrics, but `Tempo` is shared with
+productivity and raised cross-domain collisions **24 -> 28/2,400**, so it was rejected.
+`Beat + Groove` reached **84.84** local quality but collapsed to **19/30** names and left four `Beat...`
+cards on two pages. Keeping all three roots added width without improving the selected pair's
+quality or overlap. Doubling the guided-metaphor pool also lost quality (**83.84 -> 83.73**) and
+raised overlap, so the existing bounded generation path remains unchanged.
+
+**Measured result.** The canonical habit pages improve **81.81 -> 83.84** average structural
+quality, **20 -> 24/30** distinct names, and **4.00 -> 2.00/10** pair overlap. No page has more than
+three names from one four-letter stem. Three natural wording variants produce the same stable
+seed-specific pages and no longer leak build/tracking context. Across the unchanged 105-page
+held-out base, average quality rises **84.38 -> 84.44**, lead quality **86.93 -> 87.09**, seed
+spread **18.49 -> 18.60/30**, pair overlap **4.96 -> 4.90/10**, and mean similarity
+**0.200 -> 0.199**. Dominant-stem excess falls **8 -> 5**; near pairs move **68 -> 69**, while
+coverage, suffix leaders, guided leaders, and duplicate pages remain **1.33**, **21**, **55**, and
+**zero**.
+
+**Verification.** The core suite is **154/154**. The held-out audit now covers 105 base pages plus
+66 wording-stress pages and pins both canonical habit diversity and wording equivalence. The
+90-page cold audit, 85-page Auto audit, 1,000-selection taste matrix, and 25-page mode-aware taste
+audit pass their retained gates. The 48-domain/2,400-name collision audit returns every name at
+**83.26** average quality and **0.727** diversity, with the same 24 explained shared-root collision
+pairs and zero unexplained collisions. Rebuilt WASM, TypeScript, and the production bundle are
+green. No LLM, network call, scorer, selection algorithm, retry, or random source changed.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
@@ -3487,6 +3534,8 @@ Naming-engine briefs now surface a scoped `LexLoom` or `LexMint` word-making rol
 a stronger existing metaphor and refusing duplicate Loom tails.
 Legal-research briefs similarly surface the scoped `LexCite` case-law role while keeping generic
 filesystem search and ordinary developer-naming vocabulary isolated.
+Habit and routine briefs replace ineffective roots with the scoped `Beat` and `Chain`
+families, while building/tracking wording can no longer pull generic creator roots into the page.
 Cold Auto also limits exact four-letter stem repetition on a visible page, but only through a
 quality-neutral, coverage-preserving non-suffix substitution from the fallback it already opened.
 Compound is now a genuinely brief-aware explicit alternative rather than a random adjective

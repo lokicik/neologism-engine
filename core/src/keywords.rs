@@ -233,7 +233,10 @@ fn concept_roots(word: &str) -> &'static [&'static str] {
             &["sky", "cloud", "rain", "storm", "breeze", "sun"]
         }
         "habit" | "routine" | "streak" | "ritual" => {
-            &["habit", "routine", "streak", "ritual", "daily", "rhythm"]
+            // `routine` and `rhythm` contribute almost nothing to the canonical
+            // first page. Beat and chain keep the same habit/streak idea in
+            // short roots that reliably survive the visible quality floor.
+            &["habit", "streak", "ritual", "daily", "beat", "chain"]
         }
         "crm" | "sale" | "lead" | "deal" => &[
             "lead", "deal", "sale", "close", "client", "contact", "growth",
@@ -589,7 +592,11 @@ fn is_contextually_suppressed(word: &str, keywords: &[String]) -> bool {
         || (technical_queue && word == "event")
         || (events && matches!(word, "book" | "check"))
         || (weather && matches!(word, "alert" | "local"))
-        || (habits && matches!(word, "coach" | "daily" | "tracker"))
+        || (habits
+            && matches!(
+                word,
+                "build" | "builder" | "coach" | "daily" | "last" | "track" | "tracker"
+            ))
         || (sales
             && matches!(
                 word,
@@ -2369,5 +2376,46 @@ mod tests {
         assert!(filesystem_roots.contains(&"file".to_string()));
         assert!(filesystem_roots.contains(&"index".to_string()));
         assert!(!is_legal_research_brief(&filesystem));
+    }
+
+    #[test]
+    fn habit_routine_wording_variants_keep_live_roots_and_drop_delivery_context() {
+        for prompt in [
+            "routine and streak coaching",
+            "a habit tracker for daily routines",
+            "streak and ritual coaching",
+            "daily habit building and streak tracking",
+            "a routine builder for lasting habits",
+        ] {
+            let keywords = extract_keywords(prompt, 6);
+            let groups = brand_root_groups(&keywords, 16);
+            assert_eq!(groups.len(), 1, "{prompt}: {groups:?}");
+            for root in ["habit", "streak", "ritual", "daily", "beat", "chain"] {
+                assert!(
+                    groups[0].contains(&root.to_string()),
+                    "{prompt}: {groups:?}"
+                );
+            }
+            assert!(
+                groups[0].iter().all(|root| !matches!(
+                    root.as_str(),
+                    "routine" | "rhythm" | "track" | "forge" | "mint" | "spark" | "seed" | "craft"
+                )),
+                "{prompt}: {groups:?}",
+            );
+
+            let respell_sources = respell_source_keywords(&keywords);
+            assert!(
+                respell_sources.iter().all(|source| !matches!(
+                    source.as_str(),
+                    "build" | "builder" | "coach" | "daily" | "last" | "track" | "tracker"
+                )),
+                "{prompt}: {respell_sources:?}",
+            );
+        }
+
+        let generic_builder = extract_keywords("a build tracker", 6);
+        let generic_roots = brand_roots(&generic_builder, 16);
+        assert!(generic_roots.contains(&"forge".to_string()));
     }
 }
