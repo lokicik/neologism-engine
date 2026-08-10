@@ -93,6 +93,11 @@ const TERMINAL_LOG_VARIANTS = [
   'terminal logs and command output monitor',
   'a console log inspection tool',
 ]
+const MESSAGE_QUEUE_VARIANTS = [
+  'message broker client for developers',
+  'event streaming and queue monitoring',
+  'an async message bus',
+]
 const PROMPTS = [
   ...BASE_PROMPTS,
   ...AI_VARIANTS,
@@ -104,6 +109,7 @@ const PROMPTS = [
   ...HABIT_ROUTINE_VARIANTS,
   ...EDUCATION_VARIANTS,
   ...TERMINAL_LOG_VARIANTS,
+  ...MESSAGE_QUEUE_VARIANTS,
 ]
 const SEEDS = [13, 67, 313]
 const DIRECT_SUFFIXES = ['ify', 'ora', 'ion', 'era', 'io', 'ia', 'ix', 'el', 'en', 'on']
@@ -379,6 +385,12 @@ try {
     0,
   ) / (terminalLogRows.length * 10)
   const terminalLogVariantRows = rows.filter((row) => TERMINAL_LOG_VARIANTS.includes(row.prompt))
+  const messageQueueRows = rows.filter((row) => row.prompt === 'a message queue client')
+  const messageQueueAverage = messageQueueRows.reduce(
+    (sum, row) => sum + row.selected.reduce((pageSum, item) => pageSum + quality(item), 0),
+    0,
+  ) / (messageQueueRows.length * 10)
+  const messageQueueVariantRows = rows.filter((row) => MESSAGE_QUEUE_VARIANTS.includes(row.prompt))
   const seedDiversity = BASE_PROMPTS.map((prompt) => {
     const promptRows = auditRows.filter((row) => row.prompt === prompt)
     const nameSeeds = new Map()
@@ -453,6 +465,9 @@ try {
   const terminalLogDiversity = seedDiversity.find((row) => (
     row.prompt === 'a terminal log viewer'
   ))
+  const messageQueueDiversity = seedDiversity.find((row) => (
+    row.prompt === 'a message queue client'
+  ))
   const wordingDiversity = (prompts, variantRows) => prompts.map((prompt) => {
     const promptRows = variantRows.filter((row) => row.prompt === prompt)
     const names = new Set(promptRows.flatMap((row) => (
@@ -495,6 +510,10 @@ try {
     TERMINAL_LOG_VARIANTS,
     terminalLogVariantRows,
   )
+  const messageQueueVariantDiversity = wordingDiversity(
+    MESSAGE_QUEUE_VARIANTS,
+    messageQueueVariantRows,
+  )
   const educationWordingStable = educationVariantRows.every((row) => {
     const canonical = educationRows.find((candidate) => candidate.seed === row.seed)
     return canonical
@@ -509,6 +528,12 @@ try {
   })
   const terminalLogWordingStable = terminalLogVariantRows.every((row) => {
     const canonical = terminalLogRows.find((candidate) => candidate.seed === row.seed)
+    return canonical
+      && row.selected.map((item) => letters(item.name)).join('|')
+        === canonical.selected.map((item) => letters(item.name)).join('|')
+  })
+  const messageQueueWordingStable = messageQueueVariantRows.every((row) => {
+    const canonical = messageQueueRows.find((candidate) => candidate.seed === row.seed)
     return canonical
       && row.selected.map((item) => letters(item.name)).join('|')
         === canonical.selected.map((item) => letters(item.name)).join('|')
@@ -588,6 +613,7 @@ try {
   console.log(`habit routine average: ${habitRoutineAverage.toFixed(2)} · ${habitRoutineDiversity?.uniqueNames ?? 0}/30 unique · ${habitRoutineDiversity?.averagePairOverlap.toFixed(2) ?? '0.00'} overlap`)
   console.log(`education average: ${educationAverage.toFixed(2)} · ${educationDiversity?.uniqueNames ?? 0}/30 unique · ${educationDiversity?.averagePairOverlap.toFixed(2) ?? '0.00'} overlap`)
   console.log(`terminal log average: ${terminalLogAverage.toFixed(2)} · ${terminalLogDiversity?.uniqueNames ?? 0}/30 unique · ${terminalLogDiversity?.averagePairOverlap.toFixed(2) ?? '0.00'} overlap`)
+  console.log(`message queue average: ${messageQueueAverage.toFixed(2)} · ${messageQueueDiversity?.uniqueNames ?? 0}/30 unique · ${messageQueueDiversity?.averagePairOverlap.toFixed(2) ?? '0.00'} overlap`)
   console.log(`guarded repair upgrades: ${guardedRepairUpgrades.length}`)
   console.log(`weak Respell accents: ${weakRespellAccents.length}`)
   console.log(`seed diversity: ${averageUniqueNames.toFixed(2)}/30 unique · ${averageSeedOverlap.toFixed(2)}/10 pair overlap · ${exactDuplicateSeedPages} duplicate pages`)
@@ -643,6 +669,10 @@ try {
   }
   console.log('\nterminal log focus')
   for (const row of [...terminalLogRows, ...terminalLogVariantRows]) {
+    console.log(`${row.seed} · ${row.prompt} · ${row.selected.map((item) => item.name).join(', ')}`)
+  }
+  console.log('\nmessage queue focus')
+  for (const row of [...messageQueueRows, ...messageQueueVariantRows]) {
     console.log(`${row.seed} · ${row.prompt} · ${row.selected.map((item) => item.name).join(', ')}`)
   }
   console.log('\nguarded repair upgrades')
@@ -896,6 +926,39 @@ try {
           && !row.retryRequested
         )),
       'terminal-log wording variants reject developer and function-word leakage',
+    ],
+    [
+      messageQueueRows.length === SEEDS.length
+        && messageQueueAverage >= 84.4
+        && messageQueueDiversity?.uniqueNames >= 26
+        && messageQueueDiversity?.averagePairOverlap <= 1.7
+        && messageQueueDiversity?.exactDuplicatePages === 0
+        && messageQueueRows.every((row) => (
+          row.selected.length === 10
+          && dominantStemOverflowFor(row.selected) === 0
+          && row.selected.every((item) => item.sourceMode !== 'respell')
+          && !row.retryRequested
+        )),
+      'message-queue pages add a Pub lane without a Pipe stem wall',
+    ],
+    [
+      messageQueueVariantRows.length === MESSAGE_QUEUE_VARIANTS.length * SEEDS.length
+        && messageQueueWordingStable
+        && messageQueueVariantDiversity.every((row) => (
+          row.rowCount === SEEDS.length
+          && row.uniqueNames >= 26
+          && row.averagePairOverlap <= 1.7
+        ))
+        && messageQueueVariantRows.every((row) => (
+          row.selected.length === 10
+          && dominantStemOverflowFor(row.selected) === 0
+          && row.selected.every((item) => item.sourceMode !== 'respell')
+          && row.selected.every((item) => ![
+            'async', 'byte', 'crate', 'develop', 'kit', 'monitor', 'monytor', 'node', 'stack',
+          ].some((stem) => letters(item.name).startsWith(stem)))
+          && !row.retryRequested
+        )),
+      'message-queue wording variants reject async, monitoring, and developer leakage',
     ],
     [
       recruiterTrackingRows.length === SEEDS.length

@@ -181,9 +181,7 @@ fn concept_roots(word: &str) -> &'static [&'static str] {
         "cloud" | "deploy" | "deployment" | "server" | "hosting" | "infrastructure" | "infra" => {
             &["cloud", "dock", "ship", "stack", "grid"]
         }
-        "queue" | "broker" | "messaging" | "stream" | "topic" | "bus" => {
-            &["queue", "broker", "stream", "topic", "pipe", "bus"]
-        }
+        "queue" | "broker" | "messaging" | "stream" | "topic" | "bus" => MESSAGE_QUEUE_ROOTS,
         "format" | "formatter" | "lint" | "linter" | "style" => &[
             "format", "lint", "style", "rule", "tidy", "syntax", "indent", "align",
         ],
@@ -514,6 +512,14 @@ fn is_legal_research_brief(keywords: &[String]) -> bool {
 }
 
 const TERMINAL_LOG_ROOTS: &[&str] = &["term", "shell", "prompt", "log", "exec", "pane"];
+const MESSAGE_QUEUE_ROOTS: &[&str] = &["queue", "broker", "stream", "topic", "pipe", "bus", "pub"];
+
+fn is_message_queue_brief(keywords: &[String]) -> bool {
+    has_any_keyword(
+        keywords,
+        &["queue", "broker", "messaging", "stream", "topic", "bus"],
+    )
+}
 
 fn is_terminal_log_brief(keywords: &[String]) -> bool {
     has_any_keyword(
@@ -560,10 +566,7 @@ fn is_contextually_suppressed(word: &str, keywords: &[String]) -> bool {
         &["estate", "property", "listing", "realtor", "housing"],
     );
     let events = has_any_keyword(keywords, &["event", "conference", "attendee", "venue"]);
-    let technical_queue = has_any_keyword(
-        keywords,
-        &["queue", "broker", "messaging", "stream", "topic", "bus"],
-    );
+    let technical_queue = is_message_queue_brief(keywords);
     let weather = has_any_keyword(
         keywords,
         &[
@@ -613,7 +616,20 @@ fn is_contextually_suppressed(word: &str, keywords: &[String]) -> bool {
                 word,
                 "discovery" | "home" | "market" | "marketplace" | "buyer" | "real"
             ))
-        || (technical_queue && word == "event")
+        || (technical_queue
+            && matches!(
+                word,
+                "async"
+                    | "asynchronous"
+                    | "client"
+                    | "consumer"
+                    | "dashboard"
+                    | "developer"
+                    | "event"
+                    | "message"
+                    | "monitor"
+                    | "monitoring"
+            ))
         || (events && matches!(word, "book" | "check"))
         || (weather && matches!(word, "alert" | "local"))
         || (habits
@@ -2556,5 +2572,52 @@ mod tests {
         let generic_roots = brand_roots(&generic_cli, 16);
         assert!(generic_roots.contains(&"crate".to_string()));
         assert!(!is_terminal_log_brief(&generic_cli));
+    }
+
+    #[test]
+    fn message_queue_wording_variants_drop_delivery_and_audience_context() {
+        for prompt in [
+            "a message queue client",
+            "message broker client for developers",
+            "event streaming and queue monitoring",
+            "an async message bus",
+        ] {
+            let keywords = extract_keywords(prompt, 6);
+            assert!(is_message_queue_brief(&keywords), "{prompt}: {keywords:?}");
+
+            let groups = brand_root_groups(&keywords, 16);
+            assert_eq!(groups.len(), 1, "{prompt}: {groups:?}");
+            assert_eq!(
+                groups[0],
+                MESSAGE_QUEUE_ROOTS
+                    .iter()
+                    .map(|root| root.to_string())
+                    .collect::<Vec<_>>(),
+                "{prompt}",
+            );
+
+            let respell_sources = respell_source_keywords(&keywords);
+            assert!(
+                respell_sources.iter().all(|source| !matches!(
+                    source.as_str(),
+                    "async"
+                        | "asynchronous"
+                        | "client"
+                        | "consumer"
+                        | "dashboard"
+                        | "developer"
+                        | "event"
+                        | "message"
+                        | "monitor"
+                        | "monitoring"
+                )),
+                "{prompt}: {respell_sources:?}",
+            );
+        }
+
+        let generic_async = extract_keywords("an async runtime", 6);
+        assert!(!is_contextually_suppressed("async", &generic_async));
+        let generic_developer = extract_keywords("developer toolkit", 6);
+        assert!(!is_contextually_suppressed("developer", &generic_developer));
     }
 }

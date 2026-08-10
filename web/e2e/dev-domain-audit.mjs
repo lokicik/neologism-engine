@@ -51,7 +51,7 @@ const CASES = [
   },
   {
     prompt: 'a message queue client',
-    markers: ['queue', 'broker', 'stream', 'topic', 'pipe', 'bus'],
+    markers: ['queue', 'broker', 'stream', 'topic', 'pipe', 'bus', 'pub'],
   },
   {
     prompt: 'a code formatter and linter',

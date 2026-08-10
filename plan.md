@@ -3595,6 +3595,57 @@ scorer, selection algorithm, retry, or random source changed.
 
 ---
 
+## Phase 137 — Keep message queues out of Async and Pipe walls
+
+**Observed bottleneck.** After terminal logs were corrected, `a message queue client` owned the
+last dominant-stem overflow in the 105-page held-out base: seed 313 showed four `Pipe...` cards.
+The canonical pages averaged **83.64**, retained **24/30** names, and shared **2.00/10** names per
+seed pair. Natural wording exposed a larger failure. `message broker client for developers`
+produced `Topickit`, `Queuebyte`, and `Developr`; `event streaming and queue monitoring` admitted
+generic observability roots plus `Monytor`; and `an async message bus` returned only seven cards,
+three below the visible quality floor, with an `Async...` wall.
+
+**Scoped interpretation and palette.** Explicit queue/broker/messaging/stream/topic/bus language
+now marks the message-queue lane. Within it, `async`, `asynchronous`, `client`, `consumer`,
+`dashboard`, `developer`, `event`, `message`, `monitor`, and `monitoring` are delivery, audience,
+or function context rather than naming roots. These words keep their previous behavior outside a
+recognized queue brief. The productive queue palette retains `Queue`, `Broker`, `Stream`,
+`Topic`, `Pipe`, and `Bus`, and adds one short `Pub` root from publish/subscribe terminology.
+All three natural wording variants now produce the same full seed-specific pages as the canonical
+brief, with no Respell accent.
+
+**A/B boundaries.** The bounded fallback already contained many relevant alternatives, but every
+visible `Pipe...` card scored **87.5** while the strongest different-stem replacements stopped at
+**85.5**. The global quality-neutral repair correctly refused that trade, so its safety rule was
+not relaxed. Adding `FIFO` raised local quality to **84.31** but showed no FIFO names, reduced
+spread to **20/30**, raised overlap to **4.33**, and merely moved the Pipe wall to another seed.
+`Deque` surfaced once but still left the wall, with **21/30** names and **3.67** overlap. A combined
+`Pub + Sub` palette reached the highest local score, **85.11**, but fell to **23/30** names and
+introduced abbreviation-heavy forms such as `Subio` and `Subify`. The single `Pub` lane gives the
+best balance of visible taste, structural quality, and exploration.
+
+**Measured result.** Canonical message-queue pages improve **83.64 -> 84.43** average structural
+quality, **24 -> 26/30** distinct names, and **2.00 -> 1.67/10** pair overlap. No page has a
+four-name stem family. Representative results include `Publink`, `Publoom`, `Pubsignal`,
+`Pipeloom`, `Queueflow`, `Brokerbeam`, and `Topicflux`. Across the unchanged 105-page held-out
+base, average quality rises **84.50 -> 84.52**, lead quality **87.17 -> 87.25**, seed spread
+**18.80 -> 18.86/30**, and pair overlap **4.80 -> 4.79/10**. Dominant-stem excess falls **1 -> 0**;
+coverage, near pairs, mean similarity, suffix leaders, guided leaders, and duplicate pages remain
+**1.35**, **64**, **0.195**, **21**, **56**, and zero.
+
+**Verification.** The core suite is **157/157** and targeted formatting is clean. The held-out
+audit now covers 105 base pages plus 93 wording-stress pages and pins 84.4+ queue quality,
+26/30 names, at most 1.7 overlap, zero queue stem overflow, full ten-name variants, no context-word
+leakage, and exact wording equivalence. The 90-page cold audit, 85-page Auto audit,
+1,000-selection taste matrix, 25-page mode-aware taste audit, and browser developer-domain audit
+all pass. The latter retains **800/800** semantic Brandable names and **797/800** semantic Compound
+names. The 48-domain audit returns **2,400/2,400** names at **83.30** composite, **0.729**
+diversity, and **47.8%** domain uniqueness, with the same 24 explained collision pairs and zero
+unexplained collisions. Rebuilt WASM, TypeScript, and the production Vite bundle are green. No
+LLM, network call, global scorer, selection algorithm, retry, or random source changed.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
@@ -3639,6 +3690,9 @@ low-yield literal words collapse every seed into the same classroom suffixes.
 Terminal-log briefs normalize CLI/console/command wording into a scoped
 `Term`/`Shell`/`Prompt`/`Log`/`Exec`/`Pane` palette, so audience and delivery words cannot replace
 the product role or rebuild a `Term...` wall.
+Message-queue briefs similarly normalize async/developer/monitoring wording into one queue lane
+with a restrained `Pub` root, eliminating the last held-out four-card stem wall without lowering
+the quality-neutral repair boundary.
 Cold Auto also limits exact four-letter stem repetition on a visible page, but only through a
 quality-neutral, coverage-preserving non-suffix substitution from the fallback it already opened.
 Compound is now a genuinely brief-aware explicit alternative rather than a random adjective
