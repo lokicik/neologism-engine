@@ -56,6 +56,7 @@ function whyParts(e: Explanation): string[] {
 
 export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction = 'favorite', collectionNote, metricsAvailable = true, isRejected = false, onToggleRejected, isBest = false, appearDelay = 0, reason, isAiPick = false }: Props) {
   const [copied, setCopied] = useState(false)
+  const [copyError, setCopyError] = useState<string | null>(null)
   const [domains, setDomains] = useState<DomainObservation[]>(() => idleDomainObservations(result.name))
   const [domainsRunning, setDomainsRunning] = useState(false)
   const [showAvail, setShowAvail] = useState(false)
@@ -74,6 +75,8 @@ export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction 
     setDomains(idleDomainObservations(result.name))
     setDomainsRunning(false)
     setShowAvail(false)
+    setCopied(false)
+    setCopyError(null)
     setWhy(null)
     setShowWhy(false)
     return () => domainAbort.current?.abort()
@@ -83,11 +86,16 @@ export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction 
     if (showAvail) availabilityPanel.current?.focus()
   }, [showAvail])
 
-  function copy() {
-    navigator.clipboard.writeText(result.name).then(() => {
+  async function copy() {
+    setCopyError(null)
+    try {
+      await navigator.clipboard.writeText(result.name)
       setCopied(true)
       setTimeout(() => setCopied(false), 1500)
-    })
+    } catch {
+      setCopied(false)
+      setCopyError(`Could not copy ${result.name}. Browser clipboard access was denied.`)
+    }
   }
 
   function toggleWhy() {
@@ -318,7 +326,12 @@ export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction 
           Name checks <span className={`chip-chevron${showAvail ? ' open' : ''}`} aria-hidden="true">▾</span>
         </button>
         <div className="card-icons">
-          <button className="icon-btn" onClick={copy} title="Copy name">
+          <button
+            className="icon-btn"
+            onClick={() => void copy()}
+            title="Copy name"
+            aria-label={copied ? `${result.name} copied` : `Copy ${result.name}`}
+          >
             <span className={`copy-swap${copied ? ' copied' : ''}`}>
               <span className="copy-copy"><IconCopy /></span>
               <span className="copy-check"><IconCheck /></span>
@@ -350,6 +363,8 @@ export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction 
           </button>
         </div>
       </div>
+
+      {copyError && <p className="card-copy-error" role="alert">{copyError}</p>}
 
       {showAvail && (
         <div

@@ -4664,6 +4664,58 @@ and keyboard-dismissible on every card.
 
 ---
 
+## Phase 156 — Make clipboard rejection visible and retryable
+
+**Bottleneck.** Card **Copy**, Saved **Copy all**, and Saved **Share link** all called
+`navigator.clipboard.writeText(...).then(...)` without handling rejection. A browser permission,
+privacy-mode, or clipboard failure therefore produced no visible explanation and could surface as an
+unhandled Promise rejection. The success icon usually stayed off, but absence of a checkmark was not
+an actionable failure state. Share link's surrounding synchronous `try/catch` did not catch its
+asynchronous clipboard rejection.
+
+**Frozen boundary.** This phase changes only the three existing clipboard actions, their card/Saved
+error surfaces, one forced-failure production-browser contract, and documentation. It does not add a
+clipboard fallback, permission prompt, retry loop, toast framework, storage key, network request,
+share/export schema, Saved identity change, generation/ranking change, WASM, or Rust. The visible
+toolbar labels and share payload remain unchanged. Encoding-size failures are still reported from
+`encodeShareUrl`; clipboard-access rejection gets its own fixed message.
+
+**Success and failure contract.** Every action clears its prior local error at the start of a user
+retry and awaits exactly one clipboard write. Only a resolved write enables the existing transient
+check state. Rejection forces that success state off, exposes `role="alert"` beside the responsible
+card or Saved toolbar, and leaves focus on the persistent invoking button. A later success removes
+the alert. Card Copy also exposes a name-specific accessible label—`Copy <name>` or `<name> copied`—
+so the icon-only transition is observable without sight. None of these paths writes browser storage.
+
+| Before | After |
+| --- | --- |
+| Clipboard rejection was silent and potentially unhandled. | A visible local alert explains that browser clipboard access was denied. |
+| The missing success icon was the only failure clue. | Failure explicitly clears success state; success appears only after the awaited write resolves. |
+| Card Copy buttons were repeatedly announced only by the generic title. | Each button names its card and announces the short-lived copied state. |
+| Saved share-link encoding and clipboard failure shared an ineffective catch boundary. | Encoding errors and clipboard-access errors are handled in two explicit stages. |
+| Retrying had no frozen recovery contract. | One activation means one write attempt; successful retry clears the alert and preserves exact payload/order. |
+
+**Acceptance evidence.** The new `clipboard-failure.mjs` production fixture passes **18/18** with a
+deterministic clipboard that rejects calls 1, 3, and 5 and accepts calls 2, 4, and 6. Card Copy failure
+must show the exact name-specific alert, keep its icon/accessible name in the unsucceeded state, retain
+focus, and fit inside the card at 390 pixels. Retry must first write `Noma`, then expose the copied
+label/icon in one browser snapshot. Saved Copy all must similarly recover to the exact ordered
+`Noma\nOrbit` shortlist. Share-link rejection must preserve the previous clipboard value and remain
+distinct from encoding failure; retry must produce the unchanged two-row `n,s` payload. All six
+activations produce exactly six clipboard attempts, byte-identical storage, zero external HTTPS
+requests, and zero page errors. Visual review confirms the card-attached and page-level red surfaces
+are readable, contained, and do not obscure their retry controls at 390 pixels.
+
+The retained production Taste/Saved contract remains green at **61/61**, including successful
+forwarded share-link decoding. TypeScript, the production Vite build, fixture syntax, and
+`git diff --check` are green.
+
+**Decision.** Phase 156 turns a silent browser capability failure into local, honest recovery without
+inventing a new notification system or fallback clipboard. Users can distinguish “not copied” from
+“copied,” retry the same action, and keep their Saved/taste data untouched.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

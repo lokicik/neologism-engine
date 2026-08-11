@@ -17,6 +17,7 @@ interface Props {
 export function SavedPage({ entries, onRemoveSaved, onGoCreate }: Props) {
   const [copiedAll, setCopiedAll] = useState(false)
   const [copiedUrl, setCopiedUrl] = useState(false)
+  const [copyError, setCopyError] = useState<string | null>(null)
   const favorites = entries.map((entry) => entry.result)
 
   function provenance(entry: SavedNameEntry): string {
@@ -44,23 +45,36 @@ export function SavedPage({ entries, onRemoveSaved, onGoCreate }: Props) {
     onRemoveSaved(entry.result)
   }
 
-  function copyAll() {
+  async function copyAll() {
     const text = favorites.map((f) => f.name).join('\n')
-    navigator.clipboard.writeText(text).then(() => {
+    setCopyError(null)
+    try {
+      await navigator.clipboard.writeText(text)
       setCopiedAll(true)
       setTimeout(() => setCopiedAll(false), 1500)
-    })
+    } catch {
+      setCopiedAll(false)
+      setCopyError('Could not copy the Saved names. Browser clipboard access was denied.')
+    }
   }
 
-  function shareLink() {
+  async function shareLink() {
+    setCopyError(null)
+    let url: string
     try {
-      const url = encodeShareUrl(favorites)
-      navigator.clipboard.writeText(url).then(() => {
-        setCopiedUrl(true)
-        setTimeout(() => setCopiedUrl(false), 1500)
-      })
+      url = encodeShareUrl(favorites)
     } catch (error) {
-      window.alert(error instanceof Error ? error.message : 'Could not create the share link.')
+      setCopiedUrl(false)
+      setCopyError(error instanceof Error ? error.message : 'Could not create the share link.')
+      return
+    }
+    try {
+      await navigator.clipboard.writeText(url)
+      setCopiedUrl(true)
+      setTimeout(() => setCopiedUrl(false), 1500)
+    } catch {
+      setCopiedUrl(false)
+      setCopyError('Could not copy the share link. Browser clipboard access was denied.')
     }
   }
 
@@ -89,7 +103,7 @@ export function SavedPage({ entries, onRemoveSaved, onGoCreate }: Props) {
           Saved names <span className="count-pill">{favorites.length}</span>
         </h1>
         <div className="page-toolbar">
-          <button className="toolbar-btn" onClick={copyAll}>
+          <button className="toolbar-btn" onClick={() => void copyAll()}>
             {copiedAll ? <IconCheck /> : <IconCopy />} Copy all
           </button>
           <button className="toolbar-btn" onClick={() => exportText(favorites)}>
@@ -98,11 +112,13 @@ export function SavedPage({ entries, onRemoveSaved, onGoCreate }: Props) {
           <button className="toolbar-btn" onClick={() => exportJson(favorites)}>
             <IconDownload /> JSON
           </button>
-          <button className="toolbar-btn" onClick={shareLink}>
+          <button className="toolbar-btn" onClick={() => void shareLink()}>
             {copiedUrl ? <IconCheck /> : <IconLink />} Share link
           </button>
         </div>
       </header>
+
+      {copyError && <p className="saved-copy-error" role="alert">{copyError}</p>}
 
       <section className="results-grid">
         {entries.map((entry) => (

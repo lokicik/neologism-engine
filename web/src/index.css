@@ -814,6 +814,22 @@ body {
   text-wrap: pretty;
 }
 
+.card-copy-error,
+.saved-copy-error {
+  margin: 0;
+  padding: .55rem .7rem;
+  border: 1px solid rgba(248, 113, 113, .34);
+  border-radius: 8px;
+  color: #fecaca;
+  background: rgba(69, 10, 10, .72);
+  font-size: .74rem;
+  line-height: 1.4;
+  text-wrap: pretty;
+}
+
+.card-copy-error { margin-top: .55rem; }
+.saved-copy-error { max-width: 720px; }
+
 /* Phase 47: sidebar app shell (saved work is a page, not a drawer) */
 .shell {
   display: flex;
