@@ -4385,6 +4385,57 @@ registrability, ownership, trademark safety, or market clearance.
 
 ---
 
+## Phase 151 — Contain the mobile app shell
+
+**Bottleneck.** The responsive shell introduced in Phase 47 still forced all six navigation
+controls into one unwrapped row below 900 pixels. Later additions raised that row's intrinsic
+width to roughly 596 pixels, so a fresh 390-pixel page already had an oversized document and
+opening Saved panned it to `scrollX=59`; at 320 pixels the pan reached `227`. That shift clipped
+the logo, navigation, title, and toolbar even though the Saved toolbar itself wrapped correctly.
+A second 320-pixel defect came from `.results-grid` retaining a 300-pixel minimum inside a
+288-pixel content column. Existing responsive gates measured the already-panned card rather than
+the document before focus could hide the original overflow.
+
+**Frozen boundary.** This is a CSS-only shell and grid correction plus one deterministic
+production-browser fixture and documentation. It does not hide or clip overflow, add a horizontal
+scroller, reorder controls, shorten labels, change Sidebar or Saved markup, touch routing, storage,
+networking, generation, ranking, taste, WASM, or Rust, or claim cross-browser conformance. The
+unsemantic `.sidebar-nav` and `.sidebar-foot` wrappers may stop contributing flex boxes at the
+narrow breakpoint; the outer `nav` and the original DOM/Tab sequence remain intact.
+
+**Responsive contract.** At 640 pixels and below the shell may wrap while keeping the exact visual
+and keyboard order `logo → Create → AI Studio → Saved → Settings → About`. All six targets are at
+least 40 pixels high. At 640 and 560 pixels they still fit one row; at 390 and 320 pixels they form
+a balanced three-plus-three layout without CSS `order`. At 560 pixels and below the results grid
+uses `minmax(0, 1fr)`, allowing its card to shrink to the real content width. The document remains
+at the viewport width with `scrollX=0`; no ancestor masks the result with `overflow-x`.
+
+| Before | After |
+| --- | --- |
+| Fresh 390/320-pixel pages had an approximately 596-pixel document. | HTML, body, shell, sidebar, and page stay within the 390/320-pixel viewport. |
+| Saved navigation panned horizontally to 59/227 pixels. | Real Create → AI Studio → Saved reaches the fresh snapshot at `scrollX=0`; Settings restores its opener afterward. |
+| The 320-pixel results column forced a 300-pixel card into 288 pixels. | Grid and card use the available 288-pixel width. |
+| Focus could conceal the initial overflow before a test measured it. | The regression snapshot is taken immediately after Saved navigation, before later focus movement. |
+
+**Acceptance evidence.** The new `responsive-shell.mjs` production fixture passes **17/17** at
+1280×900, 390×844, and 320×700. It hard-gates document/body width containment, zero horizontal pan,
+absence of overflow masking, expected desktop/mobile shell placement, six visible non-overlapping
+shell controls, natural Tab order, 40-pixel mobile targets, all four Saved toolbar actions, grid
+and first-card containment, Settings opener restoration, byte-identical local/session storage, and
+zero fetch/XMLHttpRequest calls or external HTTPS requests. The 390- and 320-pixel visual review shows
+the balanced header rows and contained Saved content; this is production Chromium evidence, not a
+cross-browser claim.
+
+Retained production-browser contracts remain green at Create filters **46/46**, Name checks
+**49/49**, Settings **48/48**, and Taste/Saved **61/61**. TypeScript and the production Vite build
+are green; the focused fixture syntax check and `git diff --check` also pass.
+
+**Decision.** Phase 151 removes a real shell-wide content-loss path with a narrow layout rule rather
+than masking it. It does not change any naming or evidence behavior; it makes the existing controls
+and Saved content reachable at the measured narrow widths while preserving their natural order.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

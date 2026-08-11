@@ -1550,6 +1550,41 @@ body {
   .page { padding: 1.25rem 1rem 2rem; }
 }
 
+/* Keep the mobile app shell in natural DOM/Tab order while allowing its six
+   navigation actions to wrap instead of widening the document. */
+@media (max-width: 640px) {
+  .sidebar {
+    flex-wrap: wrap;
+    justify-content: space-between;
+    column-gap: .25rem;
+    row-gap: .5rem;
+  }
+  .sidebar-nav,
+  .sidebar-foot { display: contents; }
+  .sidebar-logo {
+    min-height: 40px;
+    padding-left: .2rem;
+    padding-right: .2rem;
+    font-size: 1rem;
+  }
+  .sidebar-item {
+    min-height: 40px;
+    padding-left: .3rem;
+    padding-right: .3rem;
+    gap: .3rem;
+  }
+  .sidebar-item .count-pill {
+    margin-left: 0;
+    padding-left: .2rem;
+    padding-right: .2rem;
+  }
+  .sidebar-about {
+    min-height: 40px;
+    padding-left: .3rem;
+    padding-right: .3rem;
+  }
+}
+
 /* Phase 55: interface-polish pass (make-interfaces-feel-better). */
 /* P9 — tabular numerals so dynamic figures don't shift layout as they change. */
 .card-score, .stat-value, .meta-score, .count-pill { font-variant-numeric: tabular-nums; }
@@ -1631,6 +1666,7 @@ body {
 }
 
 @media (max-width: 560px) {
+  .results-grid { grid-template-columns: minmax(0, 1fr); }
   .command-bar { flex-wrap: wrap; padding: .6rem; }
   .command-go { width: 100%; }
   .page-header { flex-direction: column; align-items: flex-start; }
