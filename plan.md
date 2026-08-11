@@ -4436,6 +4436,71 @@ and Saved content reachable at the measured narrow widths while preserving their
 
 ---
 
+## Phase 152 — Keep AI Studio honest when ranking fails
+
+**Bottleneck.** AI Studio generated its 24-name pool locally before asking the optional model to
+rank it, but a first HTTP failure left `pool` populated while `view` stayed empty. The notice was
+nested inside metadata that rendered only for an existing ranked view, so the user saw zero cards,
+zero warning, and the original “Generate a batch” empty state even though all 24 names had already
+been sent. Native-disabling Generate also dropped keyboard focus to the document body. After one
+successful metric, a later failed metric preserved the cards accidentally but relabeled them with
+the newly selected metric. Rapid metric changes could additionally let a slower earlier response
+overwrite the reasons/pick for the latest selection.
+
+**Frozen boundary.** This phase changes only the AI Studio component state machine, its scoped
+status/focus styling, one mocked production-browser contract, and documentation. It does not change
+`judge.ts`, provider URLs or headers, request/prompt schemas, model settings, generation, Create,
+scoring, taste, Saved, storage schemas, WASM, or Rust. There is no automatic retry, backoff, queue,
+transport cancellation, raw provider error body, persistent pool/error state, or new concurrency
+system. The existing judge still returns `null` on any incomplete or failed result; Studio now owns
+an honest caller-side fallback.
+
+**State and recovery contract.** The selected metric is no longer evidence of the displayed order.
+Every successful ranked view stores the actual metric snapshot that produced its order, reasons,
+and pick. A newly generated pool is installed immediately as **Unranked local pool** before the
+model call. Failure never mutates that base view: the first failure therefore leaves all 24 names
+in engine order with no AI reasons/pick, while a later failure leaves the last successful order,
+reasons, pick, and label intact. The accessible alert names the attempted metric and the preserved
+view. **Retry ranking** uses the same pool id, ordered names, and criterion snapshot with the current
+model configuration; **Open Settings** uses the existing modal and opener-restoration contract.
+
+One synchronous operation guard keeps Generate, metric chips, Custom Rank, and Retry focusable with
+observable busy/disabled state while rejecting repeat activation. Request and pool ids bind each
+response to the attempt that owns it. Retry remains in the DOM while pending; success moves focus
+to the persistent metric control before removing the recovery action.
+Custom criteria are frozen at request start, so later input edits cannot mislabel the response.
+
+| Before | After |
+| --- | --- |
+| First 503 hid the already-generated 24-name pool and warning. | All 24 names remain visible in exact engine order under `Unranked local pool`. |
+| Local fallback could be mistaken for an AI result. | It has zero AI reasons, zero pick, and never says `Ranked by Brandable`. |
+| Failed Premium selection relabeled the preserved Brandable order. | Metadata remains `Ranked by Brandable`; the alert separately names the failed Premium attempt. |
+| Generate/Retry disabling could move focus to `BODY`. | Busy controls remain focusable, guarded, and restore persistent focus before transient actions disappear. |
+| Rapid actions could start competing calls or drift the selected metric. | One pending operation accepts no duplicate or competing request. |
+
+**Acceptance evidence.** The new `ai-studio-failure.mjs` production fixture passes **33/33** with
+mocked OpenRouter responses. At 390 pixels it freezes the exact 24-name Brandable request, forces a
+503, verifies local order/no reasons/no pick/no false empty state, visible `role="alert"`, Generate
+focus, Settings open/close focus restoration, no automatic retry, and one same-pool/same-criterion
+Retry despite repeated activation. Successful recovery requires 24 reasons, one pick, the true
+Brandable label, and focus on the Brandable chip. A separate 320-pixel path establishes a successful
+Brandable view, holds a Premium request while rapid Premium/Playful actions are rejected, then
+verifies that failure leaves the complete prior view byte-identical. Premium Retry must reuse its
+snapshot and replace the view only after a complete success. Both widths gate alert/action/card
+containment, `scrollX=0`, byte-identical browser storage, no unexpected external HTTPS request or
+page error, and no model-list burst. Visual review confirms the warm warning surface, readable
+recovery actions, visible Generate focus, and contained single-column cards at both widths.
+
+Retained production-browser contracts remain green at Studio taste identity **5/5**, Settings
+**48/48**, responsive shell **17/17**, and Taste/Saved **61/61**. TypeScript, the production Vite
+build, fixture syntax, and `git diff --check` are green.
+
+**Decision.** Phase 152 makes the optional judge fail without destroying or misrepresenting local
+work. It improves truth and recovery only; it does not claim that the fallback was AI-ranked, that
+the provider recovered automatically, or that a successful model judgment is objectively better.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

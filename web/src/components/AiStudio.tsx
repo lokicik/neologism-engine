@@ -25,6 +25,15 @@ interface Ranked {
   ranked: NameResult[]
   reasons: Map<string, string>
   pick?: string
+  rankedBy?: string
+}
+
+interface RankAttempt {
+  poolId: number
+  metric: Metric
+  criterion: string
+  label: string
+  cacheKey: string
 }
 
 const POOL_SIZE = 24
@@ -40,8 +49,15 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
   const [view, setView] = useState<Ranked>({ ranked: [], reasons: new Map() })
   const [busy, setBusy] = useState<'idle' | 'generating' | 'ranking'>('idle')
   const [notice, setNotice] = useState<string | null>(null)
+  const [activeRank, setActiveRank] = useState<RankAttempt | null>(null)
+  const [failedRank, setFailedRank] = useState<RankAttempt | null>(null)
   // Per-metric cache so flipping back to a metric is instant (no re-call).
   const cache = useRef<Map<string, Ranked>>(new Map())
+  const operationActive = useRef(false)
+  const rankRequestId = useRef(0)
+  const poolId = useRef(0)
+  const metricButtons = useRef<Map<Metric, HTMLButtonElement>>(new Map())
+  const customRankButton = useRef<HTMLButtonElement>(null)
 
   const ready = isJudgeReady(judgeConfig)
   const favoriteKeys = new Set(favorites.map(tasteIdentity))
@@ -52,27 +68,77 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
   const metricLabel = (m: Metric) =>
     m === 'custom' ? custom.trim() || 'custom' : METRICS.find((x) => x.key === m)!.label
 
+  const rankAttemptFor = (m: Metric, forPool: number): RankAttempt | null => {
+    const criterion = criterionFor(m)
+    if (!criterion) return null
+    return {
+      poolId: forPool,
+      metric: m,
+      criterion,
+      label: metricLabel(m),
+      cacheKey: cacheKey(m),
+    }
+  }
+
+  const focusRankControl = (attempt: RankAttempt) => {
+    const target = attempt.metric === 'custom' && !customRankButton.current?.disabled
+      ? customRankButton.current
+      : metricButtons.current.get(attempt.metric)
+    target?.focus()
+  }
+
+  const estimateCriterion = activeRank?.criterion
+    ?? failedRank?.criterion
+    ?? criterionFor(metric)
   const est = pool.length
-    ? estimateTokens(pool, { ...judgeConfig, prompt: metricPrompt(criterionFor(metric) || ' ') })
+    ? estimateTokens(pool, { ...judgeConfig, prompt: metricPrompt(estimateCriterion || ' ') })
     : null
   const cost = est ? estimateCost(est, judgeConfig.priceIn, judgeConfig.priceOut) : null
   const costLabel = cost === null ? '$?' : cost === 0 ? '$0' : `≈ $${cost.toFixed(4)}`
 
-  async function rankPool(m: Metric, poolToRank: NameResult[]) {
-    const crit = criterionFor(m)
-    if (!crit || poolToRank.length === 0) return
-    const key = cacheKey(m)
-    const cached = cache.current.get(key)
+  async function rankPool(
+    attempt: RankAttempt,
+    poolToRank: NameResult[],
+    options: { ownsOperation?: boolean; fromRetry?: boolean; displayedRanking?: string } = {},
+  ) {
+    if (poolToRank.length === 0 || attempt.poolId !== poolId.current) return
+    if (!options.ownsOperation) {
+      if (operationActive.current) return
+      operationActive.current = true
+    }
+    const requestId = ++rankRequestId.current
+    const finish = () => {
+      if (requestId !== rankRequestId.current) return
+      operationActive.current = false
+      setActiveRank(null)
+      setBusy('idle')
+    }
+    const cached = cache.current.get(attempt.cacheKey)
     if (cached && cached.ranked.length === poolToRank.length) {
+      if (options.fromRetry) focusRankControl(attempt)
       setView(cached)
+      setNotice(null)
+      setFailedRank(null)
+      finish()
       return
     }
     setBusy('ranking')
-    setNotice(null)
-    const result = await rerank(poolToRank, { ...judgeConfig, prompt: metricPrompt(crit) })
+    setActiveRank(attempt)
+    if (!options.fromRetry) {
+      setNotice(null)
+      setFailedRank(null)
+    }
+    const result = await rerank(poolToRank, {
+      ...judgeConfig,
+      prompt: metricPrompt(attempt.criterion),
+    })
+    if (requestId !== rankRequestId.current || attempt.poolId !== poolId.current) return
     if (!result) {
-      setNotice('Ranking unavailable — check your model in Settings.')
-      setBusy('idle')
+      setNotice(options.displayedRanking
+        ? `${attempt.label} ranking is unavailable. Still showing the ${options.displayedRanking} ranking.`
+        : `${attempt.label} ranking is unavailable. Showing the unranked local pool.`)
+      setFailedRank(attempt)
+      finish()
       return
     }
     const order = new Map(result.map((r, i) => [r.name, i]))
@@ -83,21 +149,32 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
       ranked,
       reasons: new Map(result.map((r) => [r.name, r.reason])),
       pick: result[0]?.name,
+      rankedBy: attempt.label,
     }
-    cache.current.set(key, next)
+    cache.current.set(attempt.cacheKey, next)
+    if (options.fromRetry) focusRankControl(attempt)
     setView(next)
-    setBusy('idle')
+    setNotice(null)
+    setFailedRank(null)
+    finish()
   }
 
   async function generate() {
+    if (operationActive.current) return
     if (!ready) {
       onOpenSettings()
       return
     }
+    operationActive.current = true
+    ++rankRequestId.current
+    const metricSnapshot = metric
+    const criterionSnapshot = criterionFor(metricSnapshot)
+    const labelSnapshot = metricLabel(metricSnapshot)
+    const cacheKeySnapshot = cacheKey(metricSnapshot)
     setBusy('generating')
     setNotice(null)
-    cache.current.clear()
-    setView({ ranked: [], reasons: new Map() })
+    setFailedRank(null)
+    setActiveRank(null)
     try {
       const p = await generateBatch({
         style: 'big_tech',
@@ -110,17 +187,55 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
         variant: 'auto',
         description: prompt.trim() || undefined,
       })
+      const nextPoolId = ++poolId.current
+      cache.current.clear()
       setPool(p)
-      await rankPool(metric, p)
+      setView({ ranked: p, reasons: new Map() })
+      if (!criterionSnapshot) {
+        operationActive.current = false
+        setBusy('idle')
+        return
+      }
+      await rankPool({
+        poolId: nextPoolId,
+        metric: metricSnapshot,
+        criterion: criterionSnapshot,
+        label: labelSnapshot,
+        cacheKey: cacheKeySnapshot,
+      }, p, { ownsOperation: true })
     } catch {
-      setNotice('Generation failed.')
+      operationActive.current = false
+      setActiveRank(null)
+      setNotice(view.ranked.length
+        ? 'Generation failed. The displayed names are unchanged.'
+        : 'Generation failed. Try again.')
       setBusy('idle')
     }
   }
 
   function selectMetric(m: Metric) {
+    if (operationActive.current) return
     setMetric(m)
-    if (pool.length && m !== 'custom') void rankPool(m, pool)
+    const attempt = rankAttemptFor(m, poolId.current)
+    if (pool.length && m !== 'custom' && attempt) {
+      void rankPool(attempt, pool, { displayedRanking: view.rankedBy })
+    }
+  }
+
+  function rankCustom() {
+    if (operationActive.current) return
+    const attempt = rankAttemptFor('custom', poolId.current)
+    if (pool.length && attempt) {
+      void rankPool(attempt, pool, { displayedRanking: view.rankedBy })
+    }
+  }
+
+  function retryRanking() {
+    if (!failedRank || operationActive.current) return
+    void rankPool(failedRank, pool, {
+      fromRetry: true,
+      displayedRanking: view.rankedBy,
+    })
   }
 
   return (
@@ -152,7 +267,13 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
                 if (e.key === 'Enter' && busy === 'idle') void generate()
               }}
             />
-            <button className="command-go" onClick={() => void generate()} disabled={busy !== 'idle'}>
+            <button
+              type="button"
+              className="command-go"
+              onClick={() => void generate()}
+              aria-disabled={busy !== 'idle'}
+              aria-busy={busy !== 'idle'}
+            >
               {busy === 'generating' ? 'Generating…' : 'Generate'}
             </button>
           </div>
@@ -162,18 +283,30 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
             {METRICS.map((m) => (
               <button
                 key={m.key}
+                ref={(node) => {
+                  if (node) metricButtons.current.set(m.key, node)
+                  else metricButtons.current.delete(m.key)
+                }}
                 type="button"
                 className={`metric-chip${metric === m.key ? ' selected' : ''}`}
                 title={`how much each name ${m.criterion}`}
                 onClick={() => selectMetric(m.key)}
+                aria-pressed={metric === m.key}
+                aria-disabled={busy !== 'idle'}
               >
                 {m.label}
               </button>
             ))}
             <button
+              ref={(node) => {
+                if (node) metricButtons.current.set('custom', node)
+                else metricButtons.current.delete('custom')
+              }}
               type="button"
               className={`metric-chip${metric === 'custom' ? ' selected' : ''}`}
               onClick={() => selectMetric('custom')}
+              aria-pressed={metric === 'custom'}
+              aria-disabled={busy !== 'idle'}
             >
               + Custom
             </button>
@@ -189,31 +322,66 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
                 onChange={(e) => setCustom(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && pool.length && custom.trim() && busy === 'idle') {
-                    void rankPool('custom', pool)
+                    rankCustom()
                   }
                 }}
               />
               <button
+                ref={customRankButton}
                 className="command-go"
-                onClick={() => void rankPool('custom', pool)}
-                disabled={!pool.length || !custom.trim() || busy !== 'idle'}
+                onClick={rankCustom}
+                disabled={!pool.length || !custom.trim()}
+                aria-disabled={busy !== 'idle'}
+                aria-busy={busy === 'ranking' && activeRank?.metric === 'custom'}
               >
                 Rank
               </button>
             </div>
           )}
 
-          {(view.ranked.length > 0 || busy === 'ranking') && (
+          {view.ranked.length > 0 && (
             <p className="studio-meta">
-              Ranked by <strong>{metricLabel(metric)}</strong>
-              {busy === 'ranking' && ' · ranking…'}
+              {view.rankedBy
+                ? <>Ranked by <strong>{view.rankedBy}</strong></>
+                : <strong>Unranked local pool</strong>}
+              {busy === 'ranking' && activeRank && (
+                <> {' · '}ranking by <strong>{activeRank.label}</strong>…</>
+              )}
               {est && (
                 <span className="studio-est">
                   {' · '}≈ {est.total.toLocaleString()} tok · {costLabel}
                 </span>
               )}
-              {notice && <span className="sort-notice">{' · '}{notice}</span>}
             </p>
+          )}
+
+          {notice && (
+            <div className="studio-alert" role="alert" aria-busy={busy === 'ranking'}>
+              <p>{notice}</p>
+              {failedRank && (
+                <div className="studio-recovery">
+                  <button
+                    type="button"
+                    className="command-go"
+                    onClick={retryRanking}
+                    aria-disabled={busy !== 'idle'}
+                    aria-busy={busy === 'ranking'}
+                  >
+                    {busy === 'ranking' ? 'Retrying…' : 'Retry ranking'}
+                  </button>
+                  <button
+                    type="button"
+                    className="toolbar-btn"
+                    onClick={() => {
+                      if (!operationActive.current) onOpenSettings()
+                    }}
+                    aria-disabled={busy !== 'idle'}
+                  >
+                    Open Settings
+                  </button>
+                </div>
+              )}
+            </div>
           )}
 
           {view.ranked.length > 0 ? (
