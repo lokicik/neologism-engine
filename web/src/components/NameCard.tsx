@@ -63,6 +63,7 @@ export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction 
   const [showWhy, setShowWhy] = useState(false)
   const domainAbort = useRef<AbortController | null>(null)
   const domainRun = useRef(0)
+  const whyPanelId = useId()
   const availabilityPanelId = useId()
   const availabilityPanel = useRef<HTMLDivElement>(null)
   const availabilityTrigger = useRef<HTMLButtonElement>(null)
@@ -95,6 +96,13 @@ export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction 
     if (next && !why) {
       explainName(result.name).then(setWhy).catch(() => {})
     }
+  }
+
+  function handleWhyKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
+    if (event.key !== 'Escape' || !showWhy) return
+    event.preventDefault()
+    event.stopPropagation()
+    setShowWhy(false)
   }
 
   function closeAvailability(restoreFocus = false) {
@@ -264,7 +272,14 @@ export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction 
       )}
 
       {showWhy && (
-        <div className="card-expansion">
+        <div
+          id={whyPanelId}
+          className="card-expansion"
+          role="region"
+          aria-label={`Explanation for ${result.name}`}
+          aria-live="polite"
+          aria-busy={!why}
+        >
           {why ? (
             <>
               {whyParts(why).join(' · ') || 'a pure coinage — no real-word parts'}
@@ -279,7 +294,15 @@ export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction 
       )}
 
       <div className="card-actions-row">
-        <button type="button" className={`card-chip${showWhy ? ' active' : ''}`} onClick={toggleWhy}>
+        <button
+          type="button"
+          className={`card-chip${showWhy ? ' active' : ''}`}
+          aria-label={`Why ${result.name} was generated`}
+          aria-expanded={showWhy}
+          aria-controls={whyPanelId}
+          onClick={toggleWhy}
+          onKeyDown={handleWhyKeyDown}
+        >
           Why <span className={`chip-chevron${showWhy ? ' open' : ''}`} aria-hidden="true">▾</span>
         </button>
         <button

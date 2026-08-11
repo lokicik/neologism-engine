@@ -4616,6 +4616,54 @@ weight changes.
 
 ---
 
+## Phase 155 — Give every Why explanation an accessible owner and state
+
+**Bottleneck.** Every result card already had a native **Why** button, but all cards exposed the same
+accessible name and no expanded/controlled relationship. A keyboard user could open the text with
+Enter, yet assistive technology could not tell which name the button described or whether its region
+was open. Escape did nothing, and the asynchronously populated explanation had no named live/loading
+boundary. The disclosure was visually present but semantically anonymous.
+
+**Frozen boundary.** This phase changes only `NameCard` disclosure semantics/keyboard handling, one
+mock-free production-browser contract, and documentation. It does not change `explainName`, WASM,
+the explanation copy or scores, card layout, Name checks, generation, ranking, taste, Saved, storage,
+network policy, or Rust. The region has no interactive descendants, so opening intentionally keeps
+focus on its persistent trigger and ordinary Tab continues to Name checks. It is a named nonmodal
+region, not an ARIA menu, dialog, or focus trap.
+
+**Interaction contract.** Each card owns a stable `useId` target. The visible **Why** label remains
+unchanged, while its accessible name includes the displayed name and exposes `aria-expanded` plus
+`aria-controls`. The matching region includes the name, polite live behavior, and `aria-busy` while
+the local explanation is unresolved. Enter, Space, and pointer activation share the existing toggle.
+Escape on an open trigger closes only that card, stops propagation, and leaves focus on the same
+button. Other cards may remain open independently; no global accordion behavior is invented.
+
+| Before | After |
+| --- | --- |
+| Ten repeated controls were announced only as `Why`. | Each is announced as `Why <name> was generated`. |
+| Open state and ownership were not machine-readable. | Every trigger exposes expanded state and one unique controlled region. |
+| Explanation loading appeared as an anonymous ellipsis. | The named region exposes polite live and busy state until substantive local text resolves. |
+| Escape on the focused open control did nothing. | Escape closes only that card and focus remains on its exact trigger. |
+| The expanded text had no declared interaction model. | It is explicitly a nonmodal region with no extra Tab stop, menu semantics, or focus trap. |
+
+**Acceptance evidence.** The new `why-disclosure.mjs` production fixture passes **16/16**. It creates
+two deterministic cards and gates distinct card-specific button names, false collapsed state, unique
+control ids, Enter/Space/pointer activation, independent simultaneous regions, persistent trigger
+focus, region name/live/busy semantics, substantive completed explanation text, and Escape closing
+only the focused card. Tab moves directly from Why to the same card's Name checks; no hidden focus
+stop is introduced. At 390 pixels the expanded region stays inside its card. The fixture snapshots
+post-generation fetch/XHR/storage state and proves Why interactions add no request or write, with
+zero unexpected external HTTPS requests and zero page errors.
+
+Retained production-browser contracts remain green at Name checks **49/49** and Taste/Saved
+**61/61**. TypeScript, the production Vite build, fixture syntax, and `git diff --check` are green.
+
+**Decision.** Phase 155 makes an existing explanation honestly operable without redesigning it or
+claiming broader accessibility conformance. The same local analysis is now owned, named, stateful,
+and keyboard-dismissible on every card.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
