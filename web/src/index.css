@@ -570,6 +570,15 @@ body {
 .card-chip:hover { color: var(--text); border-color: rgba(255, 255, 255, .22); }
 .card-chip:active { transform: scale(.96); }
 .card-chip.active { color: var(--accent); border-color: rgba(124, 106, 249, .5); }
+.name-card :is(.card-chip, .availability-run, .availability-manual-link):focus-visible,
+.availability-panel:focus-visible {
+  outline: 2px solid rgba(124, 106, 249, .9);
+  outline-offset: 2px;
+}
+.availability-panel,
+.name-card .card-chip,
+.availability-run,
+.availability-manual-link { scroll-margin-block: 8px; }
 
 .chip-chevron {
   font-size: .58rem;
@@ -645,6 +654,11 @@ body {
 .availability-run:hover { opacity: .88; }
 .availability-run:active { transform: scale(.96); }
 .availability-run:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+.availability-run[aria-disabled="true"]:not(:disabled) {
+  opacity: .7;
+  cursor: progress;
+  transform: none;
+}
 
 .availability-grid {
   display: flex;

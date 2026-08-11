@@ -4330,6 +4330,61 @@ the strongest candidate for a later narrow checkpoint; it is not bundled here.
 
 ---
 
+## Phase 150 — Keep keyboard context inside Name checks
+
+**Bottleneck.** Phase 146 made domain evidence explicit and privacy-bounded, but its card disclosure
+remained pointer-first. The controlled panel rendered before its persistent **Name checks** trigger,
+so Enter or Space opened it while leaving focus on the trigger and forward Tab skipped Run plus all
+six manual links. The trigger exposed no card-specific name, expanded state, or controlled region;
+Escape did nothing. Starting a lookup also made the focused native button disabled, which Chromium
+responded to by dropping focus to the document body. The Phase 146 browser fixture covered network
+semantics through pointer actions but none of those focus failures.
+
+**Frozen boundary.** Name checks remains an inline, nonmodal disclosure—not a menu, dialog, focus
+trap, batch-clearance surface, or ranking input. This phase changes only NameCard DOM order,
+per-card disclosure semantics, focus/cancellation behavior, scoped focus styling, and the existing
+production-browser fixture. It does not change `domain.ts`, providers, requests, cache, scheduler,
+timeouts, rate limits, evidence wording, manual-link destinations, generation, taste, Saved
+identity, storage schema, WASM, or Rust.
+
+**Disclosure and focus contract.** The action row now precedes its controlled panel in DOM order.
+Every trigger is a real button named for its displayed card and reports `aria-expanded` plus a
+stable unique `aria-controls`; the matching panel is a named `role="region"`. Pointer, Enter, and
+Space opening all move focus into that region, where the next forward Tab reaches Run for a valid
+label or skips the natively disabled Run action to GitHub for an unsupported spelling. Normal Tab
+can leave without a trap. Escape from the region or any descendant closes it, uses the existing
+abort/reset path, and restores the exact card trigger. Completed rows remain intact across a
+close/reopen, while unfinished rows return to not-run and late responses cannot update the card.
+
+**Busy-button contract.** Unsupported labels still use native `disabled` and send nothing. During a
+valid run, however, Run stays natively focusable while exposing `aria-disabled` and `aria-busy`;
+the existing early-return guard rejects repeated activation. The results grid mirrors busy state.
+Terminal completion clears both states without moving focus, and Escape during delayed work can
+therefore cancel without ever falling to the document body. Scoped two-pixel focus rings and
+scroll margins cover the region, Run, trigger, and six manual links.
+
+**Acceptance evidence.** The expanded production fixture passes **49/49** with every HTTPS request
+intercepted. It pins unique per-card relationships, Enter/Space/pointer entry, zero-I/O opening,
+visible focus, forward and reverse traversal, Escape restoration, exactly six requests despite a
+repeated Enter, terminal focus retention, completed reopen, delayed-request cancellation and stale
+response rejection, independent Create/Saved cards, unsupported-label skipping, cache/reload
+behavior, the frozen provider/header/evidence contract, and no developer API or unexpected external
+traffic. At 390 and 320 pixels it gates horizontal card/panel/row containment and full focus-ring
+visibility for Run and all manual links. The direct interaction check keeps storage byte-identical;
+the full reload lifecycle separately leaves every storage key except the app's operational
+`recent` name history unchanged.
+
+The unchanged domain transport contract remains **33/33**. Retained production-browser contracts
+remain green at Taste/Saved **61/61**, Settings **48/48**, and Create filters **46/46**. TypeScript,
+the production Vite build, and `git diff --check` are green.
+
+**Decision.** Phase 150 closes the remaining keyboard context loss in the existing evidence
+surface without expanding what that evidence means. A lookup is still a point-in-time observation,
+manual services are still not evaluated, and none of these mechanics establishes availability,
+registrability, ownership, trademark safety, or market clearance.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

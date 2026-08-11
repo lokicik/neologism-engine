@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useId, useRef, type KeyboardEvent } from 'react'
 import { explainName, type Explanation, type NameResult } from '../lib/engine'
 import {
   checkDomainEvidence,
@@ -63,6 +63,9 @@ export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction 
   const [showWhy, setShowWhy] = useState(false)
   const domainAbort = useRef<AbortController | null>(null)
   const domainRun = useRef(0)
+  const availabilityPanelId = useId()
+  const availabilityPanel = useRef<HTMLDivElement>(null)
+  const availabilityTrigger = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
     domainAbort.current?.abort()
@@ -74,6 +77,10 @@ export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction 
     setShowWhy(false)
     return () => domainAbort.current?.abort()
   }, [result.name])
+
+  useEffect(() => {
+    if (showAvail) availabilityPanel.current?.focus()
+  }, [showAvail])
 
   function copy() {
     navigator.clipboard.writeText(result.name).then(() => {
@@ -90,10 +97,10 @@ export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction 
     }
   }
 
-  function toggleAvailability() {
-    const next = !showAvail
-    setShowAvail(next)
-    if (!next && domainsRunning) {
+  function closeAvailability(restoreFocus = false) {
+    if (restoreFocus) availabilityTrigger.current?.focus()
+    setShowAvail(false)
+    if (domainsRunning) {
       domainAbort.current?.abort()
       domainRun.current++
       setDomainsRunning(false)
@@ -110,6 +117,18 @@ export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction 
           : observation
       )))
     }
+  }
+
+  function toggleAvailability() {
+    if (showAvail) closeAvailability()
+    else setShowAvail(true)
+  }
+
+  function handleAvailabilityKeyDown(event: KeyboardEvent<HTMLElement>) {
+    if (event.key !== 'Escape' || !showAvail) return
+    event.preventDefault()
+    event.stopPropagation()
+    closeAvailability(true)
   }
 
   async function runDomainEvidence() {
@@ -259,90 +278,21 @@ export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction 
         </div>
       )}
 
-      {showAvail && (
-        <div className="card-expansion availability-panel">
-          <div className="availability-disclosure">
-            <p className="availability-intro">
-              Run six point-in-time domain observations for this exact spelling. The action sends
-              only each queried host to Verisign, Identity Digital, Google Registry, or Cloudflare;
-              your IP and normal request metadata accompany those requests. No brief, taste data,
-              Saved list, or AI key is sent.
-            </p>
-            <button
-              className="availability-run"
-              type="button"
-              onClick={() => void runDomainEvidence()}
-              disabled={domainsRunning || !domainSupported}
-            >
-              {domainsRunning ? 'Running 6 domain lookups…' : 'Run 6 domain lookups'}
-            </button>
-            {!domainSupported && (
-              <p className="availability-unsupported" role="status">
-                Unsupported domain label. Use 1–63 ASCII letters, numbers, or internal hyphens;
-                no lookup was sent.
-              </p>
-            )}
-          </div>
-
-          <div className="availability-grid" aria-live="polite">
-            {domains.map((observation) => (
-              <div
-                key={observation.tld}
-                className="availability-domain-row"
-                data-tld={observation.tld}
-                data-status={observation.status}
-                data-cached={observation.cached ? 'true' : 'false'}
-              >
-                <span className="availability-domain">{observation.tld}</span>
-                <span className="availability-reading">
-                  <span className="availability-result">{domainLabel(observation.status)}</span>
-                  <span className="availability-meta">{observationMeta(observation)}</span>
-                </span>
-              </div>
-            ))}
-          </div>
-
-          {(['developer', 'trademark'] as const).map((group) => (
-            <div className="availability-manual" key={group}>
-              <span className="avail-label">
-                {group === 'developer' ? 'Developer namespaces' : 'Trademark'} · not evaluated
-              </span>
-              <div className="availability-manual-links">
-                {manualLinks.filter((link) => link.group === group).map((link) => (
-                  <a
-                    key={link.service}
-                    className="availability-manual-link"
-                    data-service={link.service}
-                    href={link.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    title={`Open ${link.label} manually · not evaluated`}
-                  >
-                    {link.label} ↗
-                  </a>
-                ))}
-              </div>
-            </div>
-          ))}
-
-          <p className="availability-disclaimer">
-            Manual providers receive this displayed name only when you open their link; their own
-            privacy terms then apply. They are not included in the domain observations above.
-          </p>
-
-          <p className="availability-disclaimer">
-            Evidence only — not a promise of registrability, ownership, publishability, trademark
-            safety, or market clearance. DNS-only observations can miss registered names.
-          </p>
-        </div>
-      )}
-
       <div className="card-actions-row">
-        <button className={`card-chip${showWhy ? ' active' : ''}`} onClick={toggleWhy}>
-          Why <span className={`chip-chevron${showWhy ? ' open' : ''}`}>▾</span>
+        <button type="button" className={`card-chip${showWhy ? ' active' : ''}`} onClick={toggleWhy}>
+          Why <span className={`chip-chevron${showWhy ? ' open' : ''}`} aria-hidden="true">▾</span>
         </button>
-        <button className={`card-chip${showAvail ? ' active' : ''}`} onClick={toggleAvailability}>
-          Name checks <span className={`chip-chevron${showAvail ? ' open' : ''}`}>▾</span>
+        <button
+          ref={availabilityTrigger}
+          type="button"
+          className={`card-chip${showAvail ? ' active' : ''}`}
+          aria-label={`Name checks for ${result.name}`}
+          aria-expanded={showAvail}
+          aria-controls={availabilityPanelId}
+          onClick={toggleAvailability}
+          onKeyDown={handleAvailabilityKeyDown}
+        >
+          Name checks <span className={`chip-chevron${showAvail ? ' open' : ''}`} aria-hidden="true">▾</span>
         </button>
         <div className="card-icons">
           <button className="icon-btn" onClick={copy} title="Copy name">
@@ -377,6 +327,96 @@ export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction 
           </button>
         </div>
       </div>
+
+      {showAvail && (
+        <div
+          ref={availabilityPanel}
+          id={availabilityPanelId}
+          className="card-expansion availability-panel"
+          role="region"
+          aria-label={`Name checks for ${result.name}`}
+          tabIndex={-1}
+          onKeyDown={handleAvailabilityKeyDown}
+        >
+          <div className="availability-disclosure">
+            <p className="availability-intro">
+              Run six point-in-time domain observations for this exact spelling. The action sends
+              only each queried host to Verisign, Identity Digital, Google Registry, or Cloudflare;
+              your IP and normal request metadata accompany those requests. No brief, taste data,
+              Saved list, or AI key is sent.
+            </p>
+            <button
+              className="availability-run"
+              type="button"
+              aria-label={`${domainsRunning ? 'Running' : 'Run'} 6 domain lookups for ${result.name}`}
+              aria-busy={domainsRunning}
+              aria-disabled={domainsRunning || !domainSupported}
+              onClick={() => void runDomainEvidence()}
+              disabled={!domainSupported}
+            >
+              {domainsRunning ? 'Running 6 domain lookups…' : 'Run 6 domain lookups'}
+            </button>
+            {!domainSupported && (
+              <p className="availability-unsupported" role="status">
+                Unsupported domain label. Use 1–63 ASCII letters, numbers, or internal hyphens;
+                no lookup was sent.
+              </p>
+            )}
+          </div>
+
+          <div className="availability-grid" aria-live="polite" aria-busy={domainsRunning}>
+            {domains.map((observation) => (
+              <div
+                key={observation.tld}
+                className="availability-domain-row"
+                data-tld={observation.tld}
+                data-status={observation.status}
+                data-cached={observation.cached ? 'true' : 'false'}
+              >
+                <span className="availability-domain">{observation.tld}</span>
+                <span className="availability-reading">
+                  <span className="availability-result">{domainLabel(observation.status)}</span>
+                  <span className="availability-meta">{observationMeta(observation)}</span>
+                </span>
+              </div>
+            ))}
+          </div>
+
+          {(['developer', 'trademark'] as const).map((group) => (
+            <div className="availability-manual" key={group}>
+              <span className="avail-label">
+                {group === 'developer' ? 'Developer namespaces' : 'Trademark'} · not evaluated
+              </span>
+              <div className="availability-manual-links">
+                {manualLinks.filter((link) => link.group === group).map((link) => (
+                  <a
+                    key={link.service}
+                    className="availability-manual-link"
+                    data-service={link.service}
+                    aria-label={`Open ${link.label} manually for ${result.name}; not evaluated`}
+                    href={link.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    title={`Open ${link.label} manually · not evaluated`}
+                  >
+                    {link.label} ↗
+                  </a>
+                ))}
+              </div>
+            </div>
+          ))}
+
+          <p className="availability-disclaimer">
+            Manual providers receive this displayed name only when you open their link; their own
+            privacy terms then apply. They are not included in the domain observations above.
+          </p>
+
+          <p className="availability-disclaimer">
+            Evidence only — not a promise of registrability, ownership, publishability, trademark
+            safety, or market clearance. DNS-only observations can miss registered names.
+          </p>
+        </div>
+      )}
     </div>
   )
 }
