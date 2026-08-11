@@ -797,6 +797,23 @@ body {
   font-size: .875rem;
 }
 
+.feedback-alert {
+  position: sticky;
+  top: .75rem;
+  z-index: 80;
+  align-self: center;
+  width: min(100%, 720px);
+  padding: .75rem 1rem;
+  border: 1px solid rgba(248, 113, 113, .42);
+  border-radius: 10px;
+  color: #fecaca;
+  background: rgba(69, 10, 10, .96);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, .32);
+  font-size: .84rem;
+  line-height: 1.45;
+  text-wrap: pretty;
+}
+
 /* Phase 47: sidebar app shell (saved work is a page, not a drawer) */
 .shell {
   display: flex;

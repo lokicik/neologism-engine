@@ -14,16 +14,14 @@ import {
   loadRejected,
   loadTasteReferences,
   markVisited,
-  removeFavorite,
   removeRejected,
   removeSavedEverywhere,
   saveJudgeConfig,
   saveRecent,
   saveTasteReferences,
-  toggleFavorite,
-  toggleRejected,
+  toggleTasteFeedback,
 } from './lib/storage'
-import { hasTasteItem, savedNameEntries, tasteIdentity } from './lib/taste-identity'
+import { savedNameEntries, tasteIdentity } from './lib/taste-identity'
 import { type JudgeConfig } from './lib/judge'
 import { decodeShareUrl } from './lib/share'
 import { CommandBar } from './components/CommandBar'
@@ -88,6 +86,7 @@ export default function App() {
   // generation (Phase 48) — shown so users see what drove their batch.
   const [promptKeywords, setPromptKeywords] = useState<string[]>([])
   const [error, setError] = useState<string | null>(null)
+  const [feedbackError, setFeedbackError] = useState<string | null>(null)
   // AI model config (used by the AI Studio); configured once via Settings.
   const [judgeConfig, setJudgeConfig] = useState<JudgeConfig>(loadJudgeConfig)
   const [showSettings, setShowSettings] = useState(false)
@@ -278,31 +277,39 @@ export default function App() {
   }, [])
 
   const handleToggleFavorite = useCallback((item: NameResult) => {
-    const wasFavorite = hasTasteItem(favoritesRef.current, item)
-    const nextFavorites = toggleFavorite(favoritesRef.current, item)
-    favoritesRef.current = nextFavorites
-    setFavorites(nextFavorites)
-
-    // A name cannot be both a positive and negative signal. Saving a passed
-    // name is also the undo path for an accidental rejection.
-    if (!wasFavorite) {
-      const nextRejected = removeRejected(rejectedRef.current, item)
-      rejectedRef.current = nextRejected
-      setRejected(nextRejected)
-    }
+    const result = toggleTasteFeedback(
+      favoritesRef.current,
+      rejectedRef.current,
+      item,
+      'favorite',
+    )
+    favoritesRef.current = result.favorites
+    rejectedRef.current = result.rejected
+    setFavorites(result.favorites)
+    setRejected(result.rejected)
+    setFeedbackError(result.persisted
+      ? null
+      : result.rollbackFailed
+        ? `Could not update feedback for ${item.name}, and browser storage could not restore the previous choice. The name is now neutral.`
+        : `Could not update feedback for ${item.name}. Browser storage kept the previous choice.`)
   }, [])
 
   const handleToggleRejected = useCallback((item: NameResult) => {
-    const wasRejected = hasTasteItem(rejectedRef.current, item)
-    const nextRejected = toggleRejected(rejectedRef.current, item)
-    rejectedRef.current = nextRejected
-    setRejected(nextRejected)
-
-    if (!wasRejected) {
-      const nextFavorites = removeFavorite(favoritesRef.current, item)
-      favoritesRef.current = nextFavorites
-      setFavorites(nextFavorites)
-    }
+    const result = toggleTasteFeedback(
+      favoritesRef.current,
+      rejectedRef.current,
+      item,
+      'rejected',
+    )
+    favoritesRef.current = result.favorites
+    rejectedRef.current = result.rejected
+    setFavorites(result.favorites)
+    setRejected(result.rejected)
+    setFeedbackError(result.persisted
+      ? null
+      : result.rollbackFailed
+        ? `Could not update feedback for ${item.name}, and browser storage could not restore the previous choice. The name is now neutral.`
+        : `Could not update feedback for ${item.name}. Browser storage kept the previous choice.`)
   }, [])
 
   const handleUndoRejected = useCallback((item: NameResult): number | null => {
@@ -458,6 +465,11 @@ export default function App() {
       />
 
       <main className="page">
+        {feedbackError && (
+          <div className="feedback-alert" role="alert" aria-atomic="true">
+            {feedbackError}
+          </div>
+        )}
         {view === 'saved' ? (
           <SavedPage
             entries={savedEntries}

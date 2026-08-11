@@ -7,6 +7,7 @@ import {
   removeSavedRows,
   savedNameEntries,
   tasteIdentity,
+  toggleTasteRows,
   withoutSavedName,
   withoutTasteItem,
 } from '../src/lib/taste-identity.ts'
@@ -74,6 +75,170 @@ check(
     && withoutTasteItem(rejected, projectB).length === 0,
   'same-context exclusion never erases an opposite label from another project',
 )
+
+const passWrites: string[] = []
+const passedFromLike = toggleTasteRows(
+  [projectA],
+  [],
+  projectA,
+  'rejected',
+  (items) => passWrites.push(`favorites:${items.map((item) => item.name).join(',')}`),
+  (items) => passWrites.push(`rejected:${items.map((item) => item.name).join(',')}`),
+)
+check(
+  passedFromLike.persisted
+    && !passedFromLike.rollbackFailed
+    && passedFromLike.favorites.length === 0
+    && passedFromLike.rejected[0] === projectA
+    && passWrites.join('|') === 'favorites:|rejected:Noma',
+  'liked-to-passed switching removes the old label before writing the new one',
+)
+
+const likeWrites: string[] = []
+const likedFromPass = toggleTasteRows(
+  [],
+  [projectA],
+  projectA,
+  'favorite',
+  (items) => likeWrites.push(`favorites:${items.map((item) => item.name).join(',')}`),
+  (items) => likeWrites.push(`rejected:${items.map((item) => item.name).join(',')}`),
+)
+check(
+  likedFromPass.persisted
+    && likedFromPass.favorites[0] === projectA
+    && likedFromPass.rejected.length === 0
+    && likeWrites.join('|') === 'rejected:|favorites:Noma',
+  'passed-to-liked switching uses the symmetric old-label-first order',
+)
+
+let targetWriteAfterSourceFailure = false
+const sourceWriteFailure = toggleTasteRows(
+  [projectA],
+  [],
+  projectA,
+  'rejected',
+  () => { throw new Error('favorites unavailable') },
+  () => { targetWriteAfterSourceFailure = true },
+)
+check(
+  !sourceWriteFailure.persisted
+    && !sourceWriteFailure.rollbackFailed
+    && sourceWriteFailure.favorites[0] === projectA
+    && sourceWriteFailure.rejected.length === 0
+    && !targetWriteAfterSourceFailure,
+  'a failed old-label removal never attempts the new-label write',
+)
+
+const restoredWrites: string[] = []
+const restoredAfterTargetFailure = toggleTasteRows(
+  [projectA],
+  [],
+  projectA,
+  'rejected',
+  (items) => restoredWrites.push(`favorites:${items.map((item) => item.name).join(',')}`),
+  () => {
+    restoredWrites.push('rejected:FAIL')
+    throw new Error('rejected unavailable')
+  },
+)
+check(
+  !restoredAfterTargetFailure.persisted
+    && !restoredAfterTargetFailure.rollbackFailed
+    && restoredAfterTargetFailure.favorites[0] === projectA
+    && restoredAfterTargetFailure.rejected.length === 0
+    && restoredWrites.join('|') === 'favorites:|rejected:FAIL|favorites:Noma',
+  'a failed new-label write restores the previous liked state',
+)
+
+let favoriteWrites = 0
+const neutralAfterFavoriteRollbackFailure = toggleTasteRows(
+  [projectA],
+  [],
+  projectA,
+  'rejected',
+  () => {
+    favoriteWrites++
+    if (favoriteWrites === 2) throw new Error('rollback unavailable')
+  },
+  () => { throw new Error('rejected unavailable') },
+)
+check(
+  !neutralAfterFavoriteRollbackFailure.persisted
+    && neutralAfterFavoriteRollbackFailure.rollbackFailed
+    && neutralAfterFavoriteRollbackFailure.favorites.length === 0
+    && neutralAfterFavoriteRollbackFailure.rejected.length === 0,
+  'failed liked-to-passed rollback reports the honest neutral durable state',
+)
+
+let rejectedWrites = 0
+const neutralAfterRejectedRollbackFailure = toggleTasteRows(
+  [],
+  [projectA],
+  projectA,
+  'favorite',
+  () => { throw new Error('favorites unavailable') },
+  () => {
+    rejectedWrites++
+    if (rejectedWrites === 2) throw new Error('rollback unavailable')
+  },
+)
+check(
+  !neutralAfterRejectedRollbackFailure.persisted
+    && neutralAfterRejectedRollbackFailure.rollbackFailed
+    && neutralAfterRejectedRollbackFailure.favorites.length === 0
+    && neutralAfterRejectedRollbackFailure.rejected.length === 0,
+  'failed passed-to-liked rollback reports the symmetric neutral durable state',
+)
+
+const oneKeyFailure = toggleTasteRows(
+  [],
+  [],
+  projectA,
+  'favorite',
+  () => { throw new Error('favorites unavailable') },
+  () => { throw new Error('must not run') },
+)
+check(
+  !oneKeyFailure.persisted
+    && !oneKeyFailure.rollbackFailed
+    && oneKeyFailure.favorites.length === 0
+    && oneKeyFailure.rejected.length === 0,
+  'a single-key write failure keeps the previous neutral state',
+)
+
+let cappedRejected: NameResult[] = []
+const capResult = toggleTasteRows(
+  [],
+  [projectA, projectB],
+  projectC,
+  'rejected',
+  () => { throw new Error('must not run') },
+  (items) => { cappedRejected = items },
+  2,
+)
+check(
+  capResult.persisted
+    && cappedRejected.length === 2
+    && cappedRejected[0] === projectB
+    && cappedRejected[1] === projectC,
+  'a successful pass still enforces the bounded rejected-history cap',
+)
+
+const repairedConflict = toggleTasteRows(
+  [projectA],
+  [projectA],
+  projectA,
+  'favorite',
+  () => {},
+  () => { throw new Error('must not run') },
+)
+check(
+  repairedConflict.persisted
+    && repairedConflict.favorites.length === 0
+    && repairedConflict.rejected[0] === projectA,
+  'toggling either side of a historical conflict removes only that selected label',
+)
+
 const reviewedPasses = [projectA, projectB, legacy]
 const afterProjectAUndo = withoutTasteItem(reviewedPasses, result(' NOMA ', 'project-a'))
 check(

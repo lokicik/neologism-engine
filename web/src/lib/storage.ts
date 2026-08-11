@@ -7,8 +7,11 @@ import {
   migrateLegacyShareRows,
   removeSavedRows,
   sameSavedName,
+  toggleTasteRows,
   withoutSavedName,
   withoutTasteItem,
+  type TasteLabel,
+  type TasteToggleResult,
 } from './taste-identity'
 
 export { mergeSavedNames } from './taste-identity'
@@ -99,6 +102,23 @@ export function removeRejected(rejected: NameResult[], item: NameResult): NameRe
   const next = withoutTasteItem(rejected, item)
   if (next.length !== rejected.length) saveRejected(next)
   return next
+}
+
+export function toggleTasteFeedback(
+  favorites: NameResult[],
+  rejected: NameResult[],
+  item: NameResult,
+  label: TasteLabel,
+): TasteToggleResult {
+  return toggleTasteRows(
+    favorites,
+    rejected,
+    item,
+    label,
+    saveFavorites,
+    saveRejected,
+    MAX_REJECTED,
+  )
 }
 
 // Names opened from somebody else's share link belong in Saved, but are not an

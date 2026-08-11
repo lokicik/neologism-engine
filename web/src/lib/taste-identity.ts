@@ -90,6 +90,124 @@ export function withoutTasteItem(items: NameResult[], item: NameResult): NameRes
   return items.filter((candidate) => !sameTasteItem(candidate, item))
 }
 
+export type TasteLabel = 'favorite' | 'rejected'
+
+export interface TasteToggleResult {
+  favorites: NameResult[]
+  rejected: NameResult[]
+  persisted: boolean
+  rollbackFailed: boolean
+}
+
+// A like/pass switch spans two localStorage keys. Remove the old label first,
+// then add the new label; if that second write fails, restore the old label.
+// A failed rollback is reported as a neutral durable state rather than
+// pretending the original signal still exists or leaving both labels active.
+export function toggleTasteRows(
+  favorites: NameResult[],
+  rejected: NameResult[],
+  item: NameResult,
+  label: TasteLabel,
+  writeFavorites: (items: NameResult[]) => void,
+  writeRejected: (items: NameResult[]) => void,
+  maxRejected = 200,
+): TasteToggleResult {
+  const wasFavorite = hasTasteItem(favorites, item)
+  const wasRejected = hasTasteItem(rejected, item)
+  let nextFavorites = favorites
+  let nextRejected = rejected
+
+  if (label === 'favorite') {
+    nextFavorites = wasFavorite
+      ? withoutTasteItem(favorites, item)
+      : [...favorites, item]
+    if (!wasFavorite && wasRejected) nextRejected = withoutTasteItem(rejected, item)
+  } else {
+    nextRejected = wasRejected
+      ? withoutTasteItem(rejected, item)
+      : [...rejected, item].slice(-Math.max(1, maxRejected))
+    if (!wasRejected && wasFavorite) nextFavorites = withoutTasteItem(favorites, item)
+  }
+
+  const favoritesChanged = nextFavorites !== favorites
+  const rejectedChanged = nextRejected !== rejected
+
+  if (favoritesChanged && !rejectedChanged) {
+    try {
+      writeFavorites(nextFavorites)
+      return { favorites: nextFavorites, rejected, persisted: true, rollbackFailed: false }
+    } catch {
+      return { favorites, rejected, persisted: false, rollbackFailed: false }
+    }
+  }
+  if (rejectedChanged && !favoritesChanged) {
+    try {
+      writeRejected(nextRejected)
+      return { favorites, rejected: nextRejected, persisted: true, rollbackFailed: false }
+    } catch {
+      return { favorites, rejected, persisted: false, rollbackFailed: false }
+    }
+  }
+
+  if (label === 'favorite') {
+    // passed -> liked: remove the pass, then add the like
+    try {
+      writeRejected(nextRejected)
+    } catch {
+      return { favorites, rejected, persisted: false, rollbackFailed: false }
+    }
+    try {
+      writeFavorites(nextFavorites)
+      return {
+        favorites: nextFavorites,
+        rejected: nextRejected,
+        persisted: true,
+        rollbackFailed: false,
+      }
+    } catch {
+      try {
+        writeRejected(rejected)
+        return { favorites, rejected, persisted: false, rollbackFailed: false }
+      } catch {
+        return {
+          favorites,
+          rejected: nextRejected,
+          persisted: false,
+          rollbackFailed: true,
+        }
+      }
+    }
+  }
+
+  // liked -> passed: remove the like, then add the pass
+  try {
+    writeFavorites(nextFavorites)
+  } catch {
+    return { favorites, rejected, persisted: false, rollbackFailed: false }
+  }
+  try {
+    writeRejected(nextRejected)
+    return {
+      favorites: nextFavorites,
+      rejected: nextRejected,
+      persisted: true,
+      rollbackFailed: false,
+    }
+  } catch {
+    try {
+      writeFavorites(favorites)
+      return { favorites, rejected, persisted: false, rollbackFailed: false }
+    } catch {
+      return {
+        favorites: nextFavorites,
+        rejected,
+        persisted: false,
+        rollbackFailed: true,
+      }
+    }
+  }
+}
+
 export function sameSavedName(a: NameResult, b: NameResult): boolean {
   return normalizedName(a) === normalizedName(b)
 }

@@ -4501,6 +4501,63 @@ the provider recovered automatically, or that a successful model judgment is obj
 
 ---
 
+## Phase 153 — Recover like/pass switches without claiming atomic storage
+
+**Bottleneck.** A like-to-pass or pass-to-like switch wrote two separate `localStorage` keys in
+sequence. If removal from the old collection succeeded but the new-label write failed, durable
+storage could disagree with React state; the same scoped identity could reload as both liked and
+passed. The failure escaped as an unhandled page error, no user-facing status explained what was
+durable, and a natively focused card action could not be trusted as confirmation of success.
+
+**Frozen boundary.** This phase changes only the shared taste-identity/storage operation, the two
+App-owned feedback handlers, one global local error surface, focused pure/production-browser
+contracts, and documentation. It does not add a storage key, journal, timestamp, schema migration,
+automatic repair scan, network request, generator/scorer/ranker change, taste-weight change, Saved
+identity change, WASM surface, or Rust change. `localStorage` is not described as transactional or
+atomic across keys. Historical contradictory records are not silently migrated; activating either
+already-selected side removes that exact side through the existing neutral action.
+
+**Durable-state contract.** The shared operation derives identity from the existing project context
+plus normalized spelling. A switch removes and persists the old label first, then writes the new
+label. If the old-label removal fails, the target write is never attempted and UI remains on the
+previous choice. If the target write fails, the app makes one best-effort write restoring the old
+label. Successful rollback projects the previous durable choice back into both Create and AI
+Studio. If rollback also fails, the first removal is the only durable mutation, so both stored and
+visible state become neutral and the alert says that the old choice could not be restored. A
+single-key add/remove failure likewise leaves its previous state intact. Every result updates the
+favorite and rejected refs together, preserves the existing 200-pass cap, and clears the transient
+alert on the next successful feedback action; the alert itself is never persisted.
+
+| Before | After |
+| --- | --- |
+| A second-key failure could leave one identity durably liked and passed. | The old label is removed first; failure restores it or resolves honestly to neutral, never to a transaction-created double label. |
+| UI state advanced before both writes were known. | Both feedback collections are projected from the operation's reported durable result. |
+| Storage failure surfaced as an unhandled page error with no recovery boundary. | A shared accessible alert explains whether the previous choice was kept or the name became neutral. |
+| Create and AI Studio could diverge in failure behavior. | Both call the same App-owned operation and retain focus on the invoking card action. |
+| The rejected-history limit lived only in the old toggle helper. | The shared operation retains the exact bounded 200-row behavior. |
+
+**Acceptance evidence.** The dependency-free storage/identity contract passes **30/30**, including
+both switch directions, old-label failure short-circuiting, target-write failure with successful
+rollback, rollback failure in both directions, single-key failure, the 200-pass cap, and repair of
+one side of a historical conflict. The new production `feedback-transaction.mjs` fixture passes
+**20/20**. It forces liked-to-passed and passed-to-liked failures, verifies exact durable/UI state
+and invoking-control focus, reloads the restored state, then forces target plus rollback failure and
+gates an honest durable/visible neutral result. Its 390-pixel path confirms the sticky alert is
+readable and horizontally contained; visual review confirms it does not cover the active card
+controls. The same failure surface and focus contract pass in mocked AI Studio. All forced failures
+produce zero page errors and zero unexpected external HTTPS requests.
+
+Retained production-browser contracts remain green at Create taste identity **7/7**, Studio taste
+identity **5/5**, Taste/Saved **61/61**, passed review **26/26**, and Settings keyboard **48/48**.
+TypeScript, the production Vite build, fixture syntax, and `git diff --check` are green.
+
+**Decision.** Phase 153 closes a reproducible partial-write contradiction without pretending that
+browser storage offers a cross-key transaction. The product now reports the strongest durable truth
+it can prove after each attempted switch; broader backup/restore, automatic conflict migration, and
+multi-key journaling remain separate product decisions.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
