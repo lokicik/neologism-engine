@@ -4558,6 +4558,64 @@ multi-key journaling remain separate product decisions.
 
 ---
 
+## Phase 154 — Make exact likes reviewable without deleting Saved everywhere
+
+**Bottleneck.** Settings exposed explicit likes only as an aggregate count, while Saved deliberately
+collapsed one spelling across project A, project B, historical unscoped feedback, and a shared copy.
+Its removal action therefore had to mean “remove everywhere.” Once a generated card disappeared,
+there was no user path to make only project A's like neutral while preserving project B, the legacy
+row, and the shared Saved spelling. The exact identity already existed in storage and exports; the
+missing piece was a reversible product surface.
+
+**Frozen boundary.** This phase adds one collapsed explicit-like review to Settings, an App-owned
+persist-before-state undo handler, shared scoped styling with the existing passed review, one
+production-browser contract, and documentation. It does not change the Saved spelling union or its
+global removal confirmation, imported-share storage, `NameResult`, `TasteContext`, taste/export
+schema, ranking weights, generation, network behavior, WASM, or Rust. The surface contains only
+explicit favorites; imported-only Saved names never enter it. Undo removes the exact existing
+`(tasteContext.id | null, normalized spelling)` like and makes it neutral—it never creates a pass.
+No chronology is shown because feedback rows have no timestamp.
+
+**Interaction and durable-state contract.** `removeFavorite` persists before Settings mutates the
+favorite ref/state. A rejected browser-storage write therefore leaves the row, counts, evidence,
+export, and Saved provenance unchanged while exposing an alert inside that review section. Success
+updates the Local taste summary, matched evidence, v2 export, and Saved's aggregated source note from
+the same App state. Focus moves to the next available **Undo like**, or back to the still-open
+disclosure after the final row. Collapsing that now-empty disclosure uses the existing Settings
+handoff to Cancel, so modal focus never falls to the page. The review and passed sections cannot
+flex-shrink and clip hidden rows on a narrow modal; the modal owns scrolling while each list retains
+its bounded internal scroll.
+
+| Before | After |
+| --- | --- |
+| Three same-spelling likes appeared as one Saved card with only remove-everywhere control. | Settings renders project A, project B, and historical unscoped likes as three explicit rows. |
+| Neutralizing project A also risked deleting project B and a shared copy from Saved. | Exact undo removes only project A; every other like, pass, and imported Saved row stays durable. |
+| Removing the final explicit like could erase the recipient's shared shortlist entry. | The shared card remains and is relabeled `not taste evidence`; taste export becomes disabled when no labels remain. |
+| A failed favorites write had no dedicated review-row recovery contract. | The row/count remain unchanged, a visible alert explains the failure, and focus stays on its Undo action. |
+| Narrow flex layout could clip expanded review rows behind an overflow-hidden section. | Review sections keep their content height and the modal scrolls, with rows/actions contained at 390 pixels. |
+
+**Acceptance evidence.** The new `liked-history.mjs` production fixture passes **26/26**. It seeds
+one spelling as project A, project B, and historical-unscoped likes plus a separate shared Saved copy;
+the opposite labels make scoped/legacy evidence changes observable. The fixture gates collapsed
+counts, distinct context/source labels, exclusion of the shared row, zero writes while reviewing,
+exact project-A removal, next-action focus, unchanged passes/import, Local taste summary and evidence,
+v2 export, one deduplicated Saved card with corrected provenance, and reload persistence. A separate
+final-like case proves that the share-only card survives, does not enable taste export, and is labeled
+not taste evidence. Forced favorites-key failure retains durable/UI state and invoking focus with no
+page error. At 390 pixels, the expanded section must have no clipped content and every row/action must
+stay inside the modal; visual review confirms all three rows remain reachable and readable.
+
+Retained production-browser contracts remain green at passed review **26/26**, Settings keyboard
+**48/48**, feedback transaction **20/20**, and Taste/Saved **61/61**. TypeScript, the production Vite
+build, fixture syntax, and `git diff --check` are green.
+
+**Decision.** Phase 154 completes the reversible unary-feedback pair without changing what Saved
+means. Settings now owns exact evidence repair; Saved remains the spelling-deduplicated shortlist.
+This is still user-authored unary feedback, not a direct blind comparison or evidence for scorer
+weight changes.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

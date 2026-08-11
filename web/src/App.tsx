@@ -14,6 +14,7 @@ import {
   loadRejected,
   loadTasteReferences,
   markVisited,
+  removeFavorite,
   removeRejected,
   removeSavedEverywhere,
   saveJudgeConfig,
@@ -325,6 +326,19 @@ export default function App() {
     }
   }, [])
 
+  const handleUndoFavorite = useCallback((item: NameResult): number | null => {
+    const current = favoritesRef.current
+    try {
+      const nextFavorites = removeFavorite(current, item)
+      if (nextFavorites.length === current.length) return null
+      favoritesRef.current = nextFavorites
+      setFavorites(nextFavorites)
+      return nextFavorites.length
+    } catch {
+      return null
+    }
+  }, [])
+
   const handleRemoveSaved = useCallback((item: NameResult) => {
     const removal = removeSavedEverywhere(
       favoritesRef.current,
@@ -588,6 +602,7 @@ export default function App() {
           favorites={favorites}
           rejected={rejected}
           onSave={saveSettings}
+          onUndoFavorite={handleUndoFavorite}
           onUndoRejected={handleUndoRejected}
           onClose={() => setShowSettings(false)}
         />

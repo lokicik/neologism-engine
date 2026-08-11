@@ -22,6 +22,7 @@ interface Props {
   favorites: NameResult[]
   rejected: NameResult[]
   onSave: (cfg: JudgeConfig) => void
+  onUndoFavorite: (item: NameResult) => number | null
   onUndoRejected: (item: NameResult) => number | null
   onClose: () => void
 }
@@ -45,7 +46,7 @@ const STYLE_LABEL: Record<NameResult['style'], string> = {
   fantasy: 'Fantasy',
 }
 
-function passContextLabel(item: NameResult): string {
+function feedbackContextLabel(item: NameResult): string {
   if (!item.tasteContext) return 'Historical unscoped feedback'
   const parts = [STYLE_LABEL[item.style]]
   if (item.tasteContext.description?.trim()) {
@@ -79,15 +80,18 @@ const priceFields = (m?: ModelInfo) => ({
 // (both OpenAI-compatible): OpenRouter with the user's own key, or a local
 // server. The model list is fetched live and shown in a themed combobox (Phase
 // 53 — the native <datalist> couldn't be styled and scrolled badly).
-export function SettingsModal({ config, favorites, rejected, onSave, onUndoRejected, onClose }: Props) {
+export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavorite, onUndoRejected, onClose }: Props) {
   const [draft, setDraft] = useState<JudgeConfig>(config)
   const [models, setModels] = useState<ModelInfo[]>([])
   const [modelsLoading, setModelsLoading] = useState(false)
   const [modelOpen, setModelOpen] = useState(false)
   const [activeModelIndex, setActiveModelIndex] = useState(-1)
   const [passedOpen, setPassedOpen] = useState(false)
+  const [likedOpen, setLikedOpen] = useState(false)
   const [passUndoError, setPassUndoError] = useState<string | null>(null)
   const [passUndoStatus, setPassUndoStatus] = useState<string | null>(null)
+  const [likeUndoError, setLikeUndoError] = useState<string | null>(null)
+  const [likeUndoStatus, setLikeUndoStatus] = useState<string | null>(null)
   const modalRef = useRef<HTMLDivElement>(null)
   const closeRef = useRef<HTMLButtonElement>(null)
   const cancelRef = useRef<HTMLButtonElement>(null)
@@ -97,7 +101,10 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoRejec
   const settingsIntroId = useId()
   const modelLabelId = useId()
   const modelListId = useId()
+  const likedListId = useId()
   const passedListId = useId()
+  const likedToggleRef = useRef<HTMLButtonElement>(null)
+  const likedBodyRef = useRef<HTMLDivElement>(null)
   const passedToggleRef = useRef<HTMLButtonElement>(null)
   const passedBodyRef = useRef<HTMLDivElement>(null)
 
@@ -266,6 +273,22 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoRejec
     requestAnimationFrame(() => {
       const nextUndo = passedBodyRef.current?.querySelector<HTMLButtonElement>('.settings-passed-undo')
       const focusTarget = nextUndo ?? passedToggleRef.current
+      focusTarget?.focus()
+    })
+  }
+
+  const undoLike = (item: NameResult) => {
+    const remaining = onUndoFavorite(item)
+    if (remaining === null) {
+      setLikeUndoStatus(null)
+      setLikeUndoError(`Could not undo the like on ${item.name}. Browser storage kept it unchanged.`)
+      return
+    }
+    setLikeUndoError(null)
+    setLikeUndoStatus(`Like on ${item.name} undone. ${remaining} liked ${remaining === 1 ? 'name' : 'names'} remain.`)
+    requestAnimationFrame(() => {
+      const nextUndo = likedBodyRef.current?.querySelector<HTMLButtonElement>('.settings-liked-undo')
+      const focusTarget = nextUndo ?? likedToggleRef.current
       focusTarget?.focus()
     })
   }
@@ -510,6 +533,69 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoRejec
           </button>
         </section>
 
+        <section className="settings-liked" aria-labelledby={`${likedListId}-title`}>
+          <button
+            ref={likedToggleRef}
+            id={`${likedListId}-title`}
+            type="button"
+            className="settings-liked-toggle"
+            aria-expanded={likedOpen}
+            aria-controls={likedListId}
+            disabled={favorites.length === 0 && !likedOpen}
+            onClick={() => {
+              const nextOpen = !likedOpen
+              if (!nextOpen && favorites.length === 0) {
+                cancelRef.current?.focus({ preventScroll: true })
+              }
+              setLikedOpen(nextOpen)
+              setLikeUndoError(null)
+              setLikeUndoStatus(null)
+            }}
+          >
+            <span>Review liked names</span>
+            <span className="settings-liked-meta" aria-hidden="true">
+              <span className="settings-liked-count">{favorites.length}</span>
+              <span className={`settings-liked-chevron${likedOpen ? ' open' : ''}`}>▾</span>
+            </span>
+          </button>
+
+          {likedOpen && (
+            <div ref={likedBodyRef} id={likedListId} className="settings-liked-body">
+              <p className="settings-liked-help">
+                Undo makes only that like entry neutral. It never passes the name or removes a shared Saved copy.
+              </p>
+              {likeUndoError && <p className="settings-liked-error" role="alert">{likeUndoError}</p>}
+              {likeUndoStatus && <p className="settings-liked-status" role="status">{likeUndoStatus}</p>}
+              {favorites.length === 0 ? (
+                <p className="settings-liked-empty">No liked names remain.</p>
+              ) : (
+                <ul className="settings-liked-list">
+                  {[...favorites].reverse().map((item) => {
+                    const context = feedbackContextLabel(item)
+                    return (
+                      <li className="settings-liked-row" key={tasteIdentity(item)}>
+                        <div className="settings-liked-copy">
+                          <strong>{item.name}</strong>
+                          <span title={context}>{context}</span>
+                          <small>{sourceModeLabel(item)}</small>
+                        </div>
+                        <button
+                          type="button"
+                          className="settings-liked-undo"
+                          onClick={() => undoLike(item)}
+                          aria-label={`Undo like on ${item.name} for ${context}`}
+                        >
+                          Undo like
+                        </button>
+                      </li>
+                    )
+                  })}
+                </ul>
+              )}
+            </div>
+          )}
+        </section>
+
         <section className="settings-passed" aria-labelledby={`${passedListId}-title`}>
           <button
             ref={passedToggleRef}
@@ -548,7 +634,7 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoRejec
               ) : (
                 <ul className="settings-passed-list">
                   {[...rejected].reverse().map((item) => {
-                    const context = passContextLabel(item)
+                    const context = feedbackContextLabel(item)
                     return (
                       <li className="settings-passed-row" key={tasteIdentity(item)}>
                         <div className="settings-passed-copy">
