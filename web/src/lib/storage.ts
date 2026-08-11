@@ -279,10 +279,11 @@ export function loadJudgeConfig(): JudgeConfig {
   }
 }
 
-export function saveJudgeConfig(cfg: JudgeConfig): void {
+export function saveJudgeConfig(cfg: JudgeConfig): boolean {
   try {
     localStorage.setItem(JUDGE_KEY, JSON.stringify(cfg))
+    return true
   } catch {
-    // ignore quota / serialization errors
+    return false
   }
 }

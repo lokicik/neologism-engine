@@ -1111,6 +1111,16 @@ body {
 .settings-liked-error { color: var(--danger); }
 .settings-passed-status,
 .settings-liked-status { color: var(--accent2); }
+.settings-save-error {
+  margin: 0;
+  padding: .65rem .75rem;
+  border: 1px solid rgba(244, 91, 105, .35);
+  border-radius: 8px;
+  color: var(--danger);
+  background: rgba(244, 91, 105, .08);
+  font-size: .78rem;
+  line-height: 1.45;
+}
 .settings-passed-list,
 .settings-liked-list {
   max-height: 240px;

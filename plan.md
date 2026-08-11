@@ -4716,6 +4716,55 @@ inventing a new notification system or fallback clipboard. Users can distinguish
 
 ---
 
+## Phase 157 — Keep AI settings truthful when browser storage rejects a save
+
+**Bottleneck.** Settings updated the running `judgeConfig` before attempting its local-storage write,
+while `saveJudgeConfig` swallowed quota/privacy errors and returned no result. A rejected write
+therefore closed the dialog and made the current session look saved even though reload restored the
+older provider/model/key/prompt. There was no visible failure or honest retry path.
+
+**Frozen boundary.** This phase changes only the existing judge-config persistence return value,
+the App-to-Settings save handshake, one local modal alert, one forced-failure production fixture,
+and documentation. It does not change the judge request, provider/model discovery, key location,
+config shape or storage key, AI Studio ranking, taste/Saved data, generator/ranker, WASM, Rust, or
+network policy. The retained AI Studio fixture also narrows its `Generate` locator to an exact
+accessible-name match; this repairs a test ambiguity introduced when Phase 155 named card Why
+controls, without changing product behavior.
+
+**Persistence and focus contract.** `saveJudgeConfig` now reports success. App persists first and
+updates its in-memory config only after that write succeeds. On rejection, Settings remains open,
+keeps the edited draft, exposes `role="alert"`, and leaves Save focused. The new alert cannot push the
+focused retry action outside the 390-pixel modal viewport: the existing scroll owner brings Save to
+the nearest visible edge after the alert mounts. Cancel then reveals the unchanged in-memory config
+on reopen. A later successful Save closes normally, restores the Settings opener, and survives reload.
+
+| Before | After |
+| --- | --- |
+| The running AI config changed before durable storage was known to succeed. | Durable write succeeds first; only then does App replace `judgeConfig`. |
+| Storage rejection was swallowed and Settings closed as if saved. | The dialog stays open with an exact visible error and the edited draft intact. |
+| Cancel after a failed write could leave the session pretending to use unsaved values. | Cancel discards the draft; reopening shows the previous durable/in-memory config. |
+| Adding an alert could push the focused retry button below the modal viewport. | Error and focused Save are both visible and contained at 390 pixels. |
+| The retained Studio test's loose `Generate` locator also matched `Why <name> was generated`. | Both Studio Generate locators require the exact accessible name. |
+
+**Acceptance evidence.** The new `settings-storage-failure.mjs` production fixture passes **13/13**.
+It seeds an enabled OpenRouter config, rejects exactly the first `neologism:judge` write, edits only
+the key, and proves the modal/error/draft remain visible, Save retains focus, and the previous durable
+config remains authoritative. At 390 pixels, both the alert and focused retry action must fit inside
+the scrollable modal; visual review confirms the compact red surface remains readable above
+Cancel/Save without overlap. Cancel restores the Settings opener, and reopening shows no false
+in-memory update. A second Save succeeds exactly once, restores the opener, survives reload, leaves
+every non-judge key byte-identical, and produces no page error.
+
+Retained production-browser contracts remain green at Settings keyboard **48/48** and AI Studio
+failure/recovery **33/33**. TypeScript, the production Vite build, fixture syntax, and
+`git diff --check` are green.
+
+**Decision.** Phase 157 makes the optional AI configuration obey the same durable-state honesty as
+feedback and clipboard recovery. A browser-storage failure can no longer create a session-only
+configuration that looks saved; the user sees what stayed durable and can cancel or retry directly.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

@@ -21,7 +21,7 @@ interface Props {
   config: JudgeConfig
   favorites: NameResult[]
   rejected: NameResult[]
-  onSave: (cfg: JudgeConfig) => void
+  onSave: (cfg: JudgeConfig) => boolean
   onUndoFavorite: (item: NameResult) => number | null
   onUndoRejected: (item: NameResult) => number | null
   onClose: () => void
@@ -92,9 +92,11 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
   const [passUndoStatus, setPassUndoStatus] = useState<string | null>(null)
   const [likeUndoError, setLikeUndoError] = useState<string | null>(null)
   const [likeUndoStatus, setLikeUndoStatus] = useState<string | null>(null)
+  const [saveError, setSaveError] = useState<string | null>(null)
   const modalRef = useRef<HTMLDivElement>(null)
   const closeRef = useRef<HTMLButtonElement>(null)
   const cancelRef = useRef<HTMLButtonElement>(null)
+  const saveRef = useRef<HTMLButtonElement>(null)
   const comboRef = useRef<HTMLDivElement>(null)
   const modelInputRef = useRef<HTMLInputElement>(null)
   const settingsTitleId = useId()
@@ -154,7 +156,12 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
     setDraft((d) => ({ ...d, [key]: value }))
 
   const save = () => {
-    onSave(draft)
+    if (!onSave(draft)) {
+      setSaveError('Could not save AI settings. Browser storage kept the previous settings unchanged.')
+      requestAnimationFrame(() => saveRef.current?.scrollIntoView({ block: 'nearest' }))
+      return
+    }
+    setSaveError(null)
     onClose()
   }
 
@@ -659,9 +666,11 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
           )}
         </section>
 
+        {saveError && <p className="settings-save-error" role="alert">{saveError}</p>}
+
         <div className="settings-actions">
           <button ref={cancelRef} className="toolbar-btn" onClick={onClose}>Cancel</button>
-          <button className="command-go" onClick={save}>Save</button>
+          <button ref={saveRef} className="command-go" onClick={save}>Save</button>
         </div>
       </div>
     </div>

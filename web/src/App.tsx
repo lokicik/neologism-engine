@@ -356,8 +356,9 @@ export default function App() {
   }, [])
 
   const saveSettings = useCallback((cfg: JudgeConfig) => {
+    if (!saveJudgeConfig(cfg)) return false
     setJudgeConfig(cfg)
-    saveJudgeConfig(cfg)
+    return true
   }, [])
 
   // Phase 49: infinite scroll — when the sentinel under the grid comes within
