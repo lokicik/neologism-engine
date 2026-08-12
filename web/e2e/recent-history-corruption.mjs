@@ -11,7 +11,7 @@ const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 18
+const EXPECTED_CHECKS = 24
 
 const server = spawn(process.execPath, [viteCli, 'preview', '--port', String(PORT), '--strictPort'], {
   cwd: WEB_DIR,
@@ -139,6 +139,55 @@ try {
     'the capped history ends with the ten names shown on the current page',
   )
   await longRun.context.close()
+
+  const failedWriteContext = await browser.newContext({ viewport: { width: 390, height: 844 } })
+  await failedWriteContext.addInitScript(() => {
+    localStorage.setItem('neologism:visited', '1')
+    localStorage.setItem('neologism:recent', JSON.stringify(['DurableLegacy']))
+    window.__phase208RejectRecent = true
+    const original = Storage.prototype.setItem
+    Storage.prototype.setItem = function setItem(key, value) {
+      if (key === 'neologism:recent' && window.__phase208RejectRecent) {
+        throw new DOMException('quota', 'QuotaExceededError')
+      }
+      return original.call(this, key, value)
+    }
+  })
+  await failedWriteContext.route('https://**/*', async (route) => {
+    external.push(route.request().url())
+    await route.abort()
+  })
+  const failedWritePage = await failedWriteContext.newPage()
+  const failedWriteErrors = []
+  failedWritePage.on('pageerror', (error) => failedWriteErrors.push(error.message))
+  await failedWritePage.goto(APP_URL)
+  await generateAndSettle(failedWritePage)
+  const firstFailedNames = await failedWritePage.locator('.results-grid .name-text').allTextContents()
+  check(firstFailedNames.length === 10, 'a rejected recent-history write does not hide the generated page')
+  check(
+    await failedWritePage.evaluate(() => localStorage.getItem('neologism:recent')) === JSON.stringify(['DurableLegacy']),
+    'a rejected write cannot be mistaken for durable recent-history persistence',
+  )
+  check(
+    await failedWritePage.locator('.error-banner').getAttribute('role') === 'alert'
+      && ((await failedWritePage.locator('.error-banner').textContent()) ?? '').includes('seen-name history'),
+    'the persistence failure is visible and names its reload consequence',
+  )
+
+  await failedWritePage.evaluate(() => { window.__phase208RejectRecent = false })
+  await generateAndSettle(failedWritePage)
+  const recoveredNames = await failedWritePage.locator('.results-grid .name-text').allTextContents()
+  const recoveredRecent = await failedWritePage.evaluate(() => JSON.parse(localStorage.getItem('neologism:recent')))
+  check(
+    recoveredRecent.length === 21
+      && recoveredRecent[0] === 'DurableLegacy'
+      && JSON.stringify(recoveredRecent.slice(1, 11)) === JSON.stringify(firstFailedNames)
+      && JSON.stringify(recoveredRecent.slice(-10)) === JSON.stringify(recoveredNames),
+    'the next accepted write durably recovers both the failed and current visible batches',
+  )
+  check(!(await failedWritePage.locator('.error-banner').isVisible()), 'successful persistence clears the stale warning')
+  check(failedWriteErrors.length === 0, `recent-write recovery produces no page error (${failedWriteErrors.join(' | ')})`)
+  await failedWriteContext.close()
 
   check(external.length === 0, `recent-history recovery produces zero external HTTPS requests (${external.join(' | ')})`)
 } finally {

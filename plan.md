@@ -6673,6 +6673,43 @@ without turning the command bar into a locked or destructive form.
 
 ---
 
+## Phase 208 — Report and recover recent-history write failures
+
+**Bottleneck.** `saveRecent` swallowed browser-storage failures. Create still kept the new names in
+memory and showed a successful page, but the durable history remained stale. After reload those
+names could return despite the product describing seen-name history as persistent, and the user
+received no indication that the cross-session repeat guard had been lost.
+
+**Frozen boundary.** Recent-history writes now return success or failure. A rejected write does not
+discard or hide the generated page and does not roll back the session's in-memory exclusions. It
+shows one atomic local warning that explains the reload consequence. The next accepted history
+write includes the in-memory missed names beside the current batch and clears the warning.
+History key, 20,000-name cap, exclusion behavior, corruption handling, generator, ranking, taste,
+other storage, network, focus, layout, and Rust remain unchanged.
+
+| Before | After |
+| --- | --- |
+| A quota/privacy rejection looked identical to a durable history write. | Create visibly states that names may return after reload. |
+| Only the current in-memory session knew about the shown names. | The session keeps them excluded while persistence is unavailable. |
+| A later successful generation had no explicit recovery contract. | Its accepted write persists the missed batch and current batch together, then clears the stale warning. |
+
+**Acceptance evidence.** The expanded production-browser fixture first passed its original 18
+checks plus the visible-page and unchanged-durable-key checks, then timed out waiting for any
+failure guidance against the committed build. After propagating the write result it passes
+**24/24**. The forced failure leaves the old durable entry intact, shows ten names with an exact
+reload-risk alert, and the next accepted write contains the old entry, all ten missed names, and
+the ten current names in order. The alert then disappears. No page error or external HTTPS request
+is observed.
+
+TypeScript and the production Vite build are green. The retained Create generation
+focus/failure/duplicate-work fixture remains **19/19**, and generation-context continuity remains
+**8/8**.
+
+**Decision.** Phase 208 keeps local generation available under storage pressure without pretending
+that cross-reload repeat protection succeeded, and automatically repairs durability when possible.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

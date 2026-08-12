@@ -282,11 +282,12 @@ export function loadRecent(): string[] {
   }
 }
 
-export function saveRecent(names: string[]): void {
+export function saveRecent(names: string[]): boolean {
   try {
     localStorage.setItem(RECENT_KEY, JSON.stringify(names.slice(-RECENT_WINDOW)))
+    return true
   } catch {
-    // ignore quota / serialization errors
+    return false
   }
 }
 

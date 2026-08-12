@@ -103,6 +103,7 @@ export default function App() {
   const [promptKeywords, setPromptKeywords] = useState<string[]>([])
   const [error, setError] = useState<string | null>(null)
   const [generationStatus, setGenerationStatus] = useState('')
+  const [recentHistoryError, setRecentHistoryError] = useState<string | null>(null)
   const [feedbackError, setFeedbackError] = useState<string | null>(null)
   const [tasteReferenceError, setTasteReferenceError] = useState<string | null>(null)
   // AI model config (used by the AI Studio); configured once via Settings.
@@ -235,7 +236,9 @@ export default function App() {
 
   const markSeen = (names: NameResult[]) => {
     recentRef.current = [...recentRef.current, ...names.map((n) => n.name)].slice(-RECENT_WINDOW)
-    saveRecent(recentRef.current)
+    setRecentHistoryError(saveRecent(recentRef.current)
+      ? null
+      : 'Could not save seen-name history. This page will avoid repeats for now, but these names may return after reload.')
   }
 
   // `append` = the "More names" button: the new batch joins the existing grid
@@ -489,7 +492,9 @@ export default function App() {
   const clearSeenAndRetry = async (keyboard: boolean) => {
     if (loadingRef.current) return
     recentRef.current = []
-    saveRecent([])
+    setRecentHistoryError(saveRecent([])
+      ? null
+      : 'Could not clear saved seen-name history. This session will continue without it, but older names may stay excluded after reload.')
     await handleGenerate(false)
     if (keyboard) {
       requestAnimationFrame(() => {
@@ -632,6 +637,11 @@ export default function App() {
                 {generationStatus}
               </div>
               {error && <div className="error-banner" role="alert" aria-atomic="true">{error}</div>}
+              {recentHistoryError && (
+                <div className="error-banner recent-history-error" role="alert" aria-atomic="true">
+                  {recentHistoryError}
+                </div>
+              )}
 
               {promptKeywords.length > 0 && (results.length > 0 || exhausted) && (
                 <p className="keyword-line" title="The keyword stems extracted from your description — every batch is built around them">
