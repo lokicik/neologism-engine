@@ -41,6 +41,10 @@ export const OPENROUTER_BASE = 'https://openrouter.ai/api/v1'
 export const DEFAULT_LOCAL_ENDPOINT = 'http://localhost:11434/v1'
 export const DEFAULT_OPENROUTER_MODEL = 'meta-llama/llama-3.3-70b-instruct:free'
 
+export function normalizeLocalEndpoint(endpoint?: string): string {
+  return (endpoint ?? DEFAULT_LOCAL_ENDPOINT).trim().replace(/\/+$/, '')
+}
+
 // Free ids drift over time — these are editable in the UI; this is just the list
 // the model dropdown seeds with.
 export const OPENROUTER_FREE_MODELS = [
@@ -113,7 +117,7 @@ function baseAndHeaders(cfg: JudgeConfig): { base: string; headers: Record<strin
     headers['X-Title'] = 'neologism'
     return { base: OPENROUTER_BASE, headers }
   }
-  return { base: (cfg.endpoint ?? DEFAULT_LOCAL_ENDPOINT).replace(/\/$/, ''), headers }
+  return { base: normalizeLocalEndpoint(cfg.endpoint), headers }
 }
 
 // Localhost servers often expose a single loaded model; auto-detect it so the
@@ -159,7 +163,7 @@ export async function fetchModels(cfg: JudgeConfig): Promise<ModelInfo[]> {
   const url =
     cfg.provider === 'openrouter'
       ? `${OPENROUTER_BASE}/models`
-      : `${(cfg.endpoint ?? DEFAULT_LOCAL_ENDPOINT).replace(/\/$/, '')}/models`
+      : `${normalizeLocalEndpoint(cfg.endpoint)}/models`
   if (cfg.provider === 'openrouter' && modelCache.has(url)) return modelCache.get(url)!
   try {
     const res = await fetch(url)

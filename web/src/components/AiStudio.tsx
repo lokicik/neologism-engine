@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { generateBatch, type NameResult } from '../lib/engine'
 import {
-  DEFAULT_LOCAL_ENDPOINT,
   METRICS,
   metricPrompt,
+  normalizeLocalEndpoint,
   rerank,
   isJudgeReady,
   estimateTokens,
@@ -79,7 +79,7 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
     return JSON.stringify([
       judgeConfig.provider,
       judgeConfig.provider === 'localhost'
-        ? (judgeConfig.endpoint ?? DEFAULT_LOCAL_ENDPOINT).replace(/\/$/, '')
+        ? normalizeLocalEndpoint(judgeConfig.endpoint)
         : 'openrouter',
       configuredModel,
       m,

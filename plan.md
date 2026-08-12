@@ -6865,6 +6865,47 @@ into background polling or discarding the useful OpenRouter catalog cache.
 
 ---
 
+## Phase 213 — Canonicalize localhost judge request bases (2026-08-13)
+
+### Bottleneck
+
+The local endpoint field is intentionally editable, but three consumers normalized it differently
+and none trimmed surrounding whitespace. An entry such as
+`  http://127.0.0.1:9030/v1///  ` could produce malformed discovery/chat paths and a different
+Studio cache identity even though it named the same server. Readiness only trimmed for its Boolean
+check; it did not repair the actual request base.
+
+### Frozen boundary
+
+- Add one shared request-base normalizer: use the existing default when absent, trim surrounding
+  whitespace, and remove all trailing slashes.
+- Reuse that exact value for local model discovery, ranking requests, and Studio's per-pool cache
+  identity. OpenRouter URLs, stored Settings text, provider headers, prompts, and retry behavior stay
+  unchanged.
+- Do not infer protocols, rewrite internal paths, test server reachability, or silently mutate the
+  saved field. This is request canonicalization, not endpoint validation.
+
+### Acceptance evidence
+
+The pure contract was red first: its eight retained cache/discovery gates passed and only the new
+canonical-base gate failed. After routing all three consumers through one helper it passes **9/9**;
+the padded multi-slash endpoint yields exactly
+`http://127.0.0.1:9030/v1/models` and
+`http://127.0.0.1:9030/v1/chat/completions`.
+
+The production Studio fixture still passes **48/48**, now with its localhost hot-swap configuration
+stored with surrounding spaces and three trailing slashes while the mock accepts only the canonical
+URL. It preserves both A-to-B model discovery calls, both rankings on the identical 24-name pool,
+the complete failure/retry/race/focus contract, and zero unexpected external HTTPS traffic or page
+errors. TypeScript and the production Vite build are green.
+
+### Decision
+
+Phase 213 makes the local judge endpoint one request identity across Settings discovery, Studio
+reuse, and the actual provider call without broadening configuration or network behavior.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

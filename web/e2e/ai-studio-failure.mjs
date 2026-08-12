@@ -434,22 +434,24 @@ try {
   }
 
   // A localhost auto-detected model can change at the same endpoint. Studio
-  // must resolve it again instead of short-circuiting through its metric cache.
+  // must normalize the saved endpoint, then resolve the model again instead
+  // of short-circuiting through its metric cache.
   {
     const endpoint = 'http://127.0.0.1:7777/v1'
+    const configuredEndpoint = `  ${endpoint}///  `
     let activeModel = 'local-auto-a'
     let modelLookups = 0
     const calls = []
     const context = await browser.newContext({ viewport: { width: 390, height: 844 } })
-    await context.addInitScript(({ endpoint: configuredEndpoint }) => {
+    await context.addInitScript(({ endpoint: savedEndpoint }) => {
       localStorage.setItem('neologism:visited', '1')
       localStorage.setItem('neologism:judge', JSON.stringify({
         enabled: true,
         provider: 'localhost',
-        endpoint: configuredEndpoint,
+        endpoint: savedEndpoint,
         model: '',
       }))
-    }, { endpoint })
+    }, { endpoint: configuredEndpoint })
     await context.route(`${endpoint}/**`, async (route) => {
       if (route.request().url().endsWith('/models')) {
         modelLookups++
@@ -480,7 +482,7 @@ try {
       modelLookups === 1
         && calls.length === 1
         && initial.reasons.every((reason) => reason.includes('local-auto-a')),
-      'Studio initially renders the localhost model resolved by auto-detection',
+      'Studio normalizes the saved localhost endpoint and renders its auto-detected model',
     )
 
     activeModel = 'local-auto-b'

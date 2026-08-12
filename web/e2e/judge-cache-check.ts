@@ -1,4 +1,4 @@
-// Phase 204/205/211/212 pure contract: judge result identity and local model
+// Phase 204/205/211/212/213 pure contract: judge result identity and local model
 // discovery stay aligned with the current request configuration.
 // Run with: node --experimental-strip-types e2e/judge-cache-check.ts
 import type { NameResult } from '../src/lib/engine.ts'
@@ -29,8 +29,10 @@ let autoModel = 'auto-model-a'
 let discoveryModel = 'discovery-model-a'
 let discoveryLookups = 0
 let openRouterLookups = 0
+const canonicalEndpointUrls: string[] = []
 globalThis.fetch = async (input, init) => {
   const url = String(input)
+  if (url.includes(':9030/')) canonicalEndpointUrls.push(url)
   if (url.endsWith('/models')) {
     if (url.includes(':9020/')) {
       discoveryLookups++
@@ -186,9 +188,26 @@ check(
   'unchanged OpenRouter model discovery retains the existing session cache',
 )
 
-if (checks !== 8 || failures > 0) {
-  console.error(`judge cache check: ${failures} failure(s), ${checks}/8 checks executed`)
+const paddedEndpointConfig: JudgeConfig = {
+  enabled: true,
+  provider: 'localhost',
+  endpoint: '  http://127.0.0.1:9030/v1///  ',
+  model: 'fixture-model',
+  prompt: promptA,
+}
+await fetchModels(paddedEndpointConfig)
+await rerank(names('CanonicalEndpoint'), paddedEndpointConfig)
+check(
+  JSON.stringify(canonicalEndpointUrls) === JSON.stringify([
+    'http://127.0.0.1:9030/v1/models',
+    'http://127.0.0.1:9030/v1/chat/completions',
+  ]),
+  'localhost discovery and ranking share one trimmed trailing-slash-free request base',
+)
+
+if (checks !== 9 || failures > 0) {
+  console.error(`judge cache check: ${failures} failure(s), ${checks}/9 checks executed`)
   process.exitCode = 1
 } else {
-  console.log('judge cache check: 8/8 checks passed')
+  console.log('judge cache check: 9/9 checks passed')
 }
