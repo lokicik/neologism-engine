@@ -24,16 +24,55 @@ const MAX_REJECTED = 200
 const MAX_TASTE_REFERENCE_INPUT = 240
 let recoveredImportedSaved: NameResult[] = []
 
+function isStoredNameResult(value: unknown): value is NameResult {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) return false
+  const row = value as Record<string, unknown>
+  const context = row.tasteContext
+  const validContext = context === undefined
+    || context === null
+    || (
+      typeof context === 'object'
+      && !Array.isArray(context)
+      && typeof (context as Record<string, unknown>).id === 'string'
+      && (context as Record<string, unknown>).id !== ''
+      && Array.isArray((context as Record<string, unknown>).roots)
+      && ((context as Record<string, unknown>).roots as unknown[])
+        .every((root) => typeof root === 'string')
+      && (
+        (context as Record<string, unknown>).description === undefined
+        || typeof (context as Record<string, unknown>).description === 'string'
+      )
+    )
+  return typeof row.name === 'string'
+    && row.name.trim().length > 0
+    && row.name.trim().length <= 80
+    && !/[\u0000-\u001f\u007f]/.test(row.name)
+    && (row.style === 'big_tech' || row.style === 'sci_fi' || row.style === 'fantasy')
+    && typeof row.syllables === 'number'
+    && Number.isFinite(row.syllables)
+    && row.syllables >= 0
+    && typeof row.score_pronounce === 'number'
+    && Number.isFinite(row.score_pronounce)
+    && typeof row.score_novelty === 'number'
+    && Number.isFinite(row.score_novelty)
+    && typeof row.score_memorability === 'number'
+    && Number.isFinite(row.score_memorability)
+    && Array.isArray(row.connotations)
+    && row.connotations.every((connotation) => typeof connotation === 'string')
+    && validContext
+}
+
 export function loadFavorites(): NameResult[] {
   recoveredImportedSaved = []
   try {
     const raw = localStorage.getItem(KEY)
     if (!raw) return []
-    const stored = JSON.parse(raw) as NameResult[]
+    const stored = JSON.parse(raw) as unknown
     if (!Array.isArray(stored)) return []
+    const valid = stored.filter(isStoredNameResult)
 
     const migration = migrateLegacyShareRows(
-      stored,
+      valid,
       loadImportedSaved(),
       writeImportedSaved,
       writeFavorites,
@@ -79,7 +118,7 @@ export function loadRejected(): NameResult[] {
     const raw = localStorage.getItem(REJECTED_KEY)
     if (!raw) return []
     const stored = JSON.parse(raw) as unknown
-    return Array.isArray(stored) ? stored as NameResult[] : []
+    return Array.isArray(stored) ? stored.filter(isStoredNameResult) : []
   } catch {
     return []
   }

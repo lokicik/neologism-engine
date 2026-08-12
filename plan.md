@@ -5064,6 +5064,59 @@ on whether the local engine actually started and leaves recovery under explicit 
 
 ---
 
+## Phase 164 — Validate every stored explicit-feedback row
+
+**Bottleneck.** The favorites and rejected loaders rejected non-array JSON but trusted every entry
+inside an array as `NameResult`. A single `{}` favorite reached Saved aggregation and called
+`name.trim()`, crashing the complete application shell during its first render. The pre-fix
+production profile reproduced the exact page error while its valid historical and scoped likes and
+passes became unreachable.
+
+**Frozen boundary.** This phase changes only the runtime load boundary for explicit favorite/pass
+rows, one production-browser fixture, and documentation. It does not change either storage key,
+saved JSON shape, label identity, migration writes, feedback caps, toggle/undo transactions, taste
+math, export schema, imported Saved validation, UI, generator/ranker, WASM, Rust, or network behavior.
+It adds no corruption banner, automatic deletion, repair-on-read, backup, or schema migration.
+
+**Row validation and preservation contract.** A stored row must be a non-array object with a
+non-empty bounded/control-safe name, one known style, a finite non-negative syllable count, finite
+pronunciation/novelty/memorability scores, and an all-string connotation array. An absent or null
+context remains historical unscoped feedback. A present context must be an object with a non-empty
+string id, all-string roots, and an absent or string description. Invalid rows are filtered only from
+the in-memory arrays. Outside the existing legacy share-stub migration, filtering leaves the raw
+favorites and rejected records byte-identical until an explicit user mutation writes that
+collection. Valid rows continue through that migration, Saved union, profile, evidence, review, and
+export paths.
+
+| Before | After |
+| --- | --- |
+| Any object inside a parseable array was cast to `NameResult`. | Every row crosses one shared required-field and context validator. |
+| One `{}` favorite crashed startup at `name.trim()`. | The shell opens and Saved renders only the valid rows. |
+| A malformed pass could poison profile, Settings, or export. | Invalid entries never reach preference or presentation consumers. |
+| Defensive loading risked erasing mixed user data. | Filtering is non-destructive; legacy share migration remains the only read-side write. |
+| Filtering could accidentally erase old unscoped evidence. | Valid historical-null and fully scoped identities remain distinct and active. |
+| Share migration and taste review had no retained mixed-row proof. | Existing migration, Saved, like/pass review, evidence, and export gates remain green. |
+
+**Acceptance evidence.** The new `taste-row-corruption.mjs` production fixture passes **13/13**
+after the pre-fix shell crash. A 390-pixel profile mixes four malformed shapes among two valid likes
+and two valid passes: one historical and one scoped on each side. It proves zero page errors,
+byte-identical raw arrays, exactly two valid Saved cards, no malformed card, truthful 2/2 Settings
+totals, 1/10 scoped matched evidence, distinct historical/scoped review labels, and a v2 export with
+four valid examples plus its scoped and legacy pairs. The same filtered feedback still produces a
+full ten-card personalized Create page while unrelated storage and external HTTPS traffic remain
+unchanged/zero.
+
+Retained production contracts remain green at Taste/Share/Migration **61/61**, Like review **26/26**,
+and Pass review **26/26**. Those gates preserve genuine legacy likes, scoped identity, old automatic
+share-stub migration, reload, export, focus, failed-write truth, and exact undo behavior. TypeScript,
+the production Vite build, fixture syntax, and `git diff --check` are green.
+
+**Decision.** Phase 164 prevents one malformed feedback row from disabling the entire offline app
+without pretending to own or erase the user's raw data. Valid historical and project-scoped evidence
+remains authoritative; only structurally unsafe rows are denied entry to typed product logic.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
