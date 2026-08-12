@@ -67,6 +67,7 @@ export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction 
   const domainAbort = useRef<AbortController | null>(null)
   const domainRun = useRef(0)
   const whyRun = useRef(0)
+  const copyRun = useRef(0)
   const copyVisualTimer = useRef<number | undefined>(undefined)
   const copyStatusTimer = useRef<number | undefined>(undefined)
   const whyPanelId = useId()
@@ -78,6 +79,7 @@ export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction 
     domainAbort.current?.abort()
     domainRun.current++
     whyRun.current++
+    copyRun.current++
     setDomains(idleDomainObservations(result.name))
     setDomainsRunning(false)
     setShowAvail(false)
@@ -91,6 +93,7 @@ export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction 
     setShowWhy(false)
     return () => {
       domainAbort.current?.abort()
+      copyRun.current++
       if (copyVisualTimer.current !== undefined) clearTimeout(copyVisualTimer.current)
       if (copyStatusTimer.current !== undefined) clearTimeout(copyStatusTimer.current)
     }
@@ -101,6 +104,7 @@ export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction 
   }, [showAvail])
 
   async function copy() {
+    const run = ++copyRun.current
     if (copyVisualTimer.current !== undefined) clearTimeout(copyVisualTimer.current)
     if (copyStatusTimer.current !== undefined) clearTimeout(copyStatusTimer.current)
     setCopied(false)
@@ -108,11 +112,13 @@ export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction 
     setCopyError(null)
     try {
       await navigator.clipboard.writeText(result.name)
+      if (copyRun.current !== run) return
       setCopied(true)
       setCopyStatus(`${result.name} copied to clipboard.`)
       copyVisualTimer.current = window.setTimeout(() => setCopied(false), 1500)
       copyStatusTimer.current = window.setTimeout(() => setCopyStatus(''), 3000)
     } catch {
+      if (copyRun.current !== run) return
       setCopied(false)
       setCopyStatus('')
       setCopyError(`Could not copy ${result.name}. Browser clipboard access was denied.`)

@@ -6467,6 +6467,42 @@ the app imports or changing the public share-link shape.
 
 ---
 
+## Phase 202 — Keep clipboard feedback owned by the newest action
+
+**Bottleneck.** Clipboard actions awaited independent browser promises but had no completion
+identity. Two rapid card Copy activations could settle in reverse order, letting an older rejection
+erase a newer accepted copy or an older success hide a newer rejection. Saved's Copy all and Share
+link also shared one status/error surface, so a delayed Copy all rejection could overwrite the newer
+successful Share link result.
+
+**Frozen boundary.** Each activation still performs its existing clipboard write; no request is
+cancelled, retried, serialized, or disabled. A monotonically increasing local run id determines only
+which completion may update feedback. Card Copy owns one counter per mounted card. Copy all, Share
+link, TXT, and JSON share one Saved-action counter because they share one visible/live result
+surface. Starting a download invalidates older pending clipboard feedback; unmount invalidates all
+pending completions. Payloads, clipboard contents, timers, focus, layout, storage, network, share
+encoding, taste, generator, and Rust remain unchanged.
+
+| Before | After |
+| --- | --- |
+| Old card failure could erase a newer copied state. | The newer accepted Copy remains the sole visible/live result. |
+| Old card success could hide a newer permission error. | The newer rejection remains visible and no false copied state appears. |
+| Delayed Copy all failure could overwrite a newer Share success. | The shared Saved surface remains owned by Share link. |
+
+**Acceptance evidence.** The expanded production `clipboard-failure.mjs` fixture first failed all
+three out-of-order gates against the old code. It now passes **36/36**, resolving/rejecting six held
+clipboard promises in reversed orders and retaining the newest action's exact status/error. All
+retained alternating failure/retry, eight normal writes, focus, 390-pixel containment, timer restart
+and cleanup, TXT/JSON object-URL cleanup, payload, storage, page-error, and external-HTTPS gates
+remain green. The retained production taste/Saved workflow also passes in full.
+
+TypeScript and the production Vite build are green; `git diff --check` is green.
+
+**Decision.** Phase 202 removes stale async UI writes without changing what reaches the clipboard
+or making a fast local action feel artificially locked.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

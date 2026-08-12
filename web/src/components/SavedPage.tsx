@@ -26,6 +26,7 @@ export function SavedPage({ entries, onRemoveSaved, onGoCreate }: Props) {
   const copyStatusTimer = useRef<number | undefined>(undefined)
   const copiedAllTimer = useRef<number | undefined>(undefined)
   const copiedUrlTimer = useRef<number | undefined>(undefined)
+  const savedActionRun = useRef(0)
   const favorites = entries.map((entry) => entry.result)
 
   useLayoutEffect(() => {
@@ -40,6 +41,7 @@ export function SavedPage({ entries, onRemoveSaved, onGoCreate }: Props) {
   }, [entries])
 
   useEffect(() => () => {
+    savedActionRun.current++
     if (copyStatusTimer.current !== undefined) clearTimeout(copyStatusTimer.current)
     if (copiedAllTimer.current !== undefined) clearTimeout(copiedAllTimer.current)
     if (copiedUrlTimer.current !== undefined) clearTimeout(copiedUrlTimer.current)
@@ -52,6 +54,7 @@ export function SavedPage({ entries, onRemoveSaved, onGoCreate }: Props) {
   }
 
   function downloadSaved(format: 'TXT' | 'JSON') {
+    savedActionRun.current++
     if (copyStatusTimer.current !== undefined) clearTimeout(copyStatusTimer.current)
     setCopyStatus('')
     setCopyError(null)
@@ -109,17 +112,20 @@ export function SavedPage({ entries, onRemoveSaved, onGoCreate }: Props) {
   )
 
   async function copyAll() {
+    const run = ++savedActionRun.current
     const text = favorites.map((f) => f.name).join('\n')
     if (copyStatusTimer.current !== undefined) clearTimeout(copyStatusTimer.current)
     setCopyStatus('')
     setCopyError(null)
     try {
       await navigator.clipboard.writeText(text)
+      if (savedActionRun.current !== run) return
       if (copiedAllTimer.current !== undefined) clearTimeout(copiedAllTimer.current)
       setCopiedAll(true)
       announceSavedAction('Saved names copied to clipboard.')
       copiedAllTimer.current = window.setTimeout(() => setCopiedAll(false), 1500)
     } catch {
+      if (savedActionRun.current !== run) return
       if (copiedAllTimer.current !== undefined) clearTimeout(copiedAllTimer.current)
       setCopiedAll(false)
       setCopyStatus('')
@@ -128,6 +134,7 @@ export function SavedPage({ entries, onRemoveSaved, onGoCreate }: Props) {
   }
 
   async function shareLink() {
+    const run = ++savedActionRun.current
     if (copyStatusTimer.current !== undefined) clearTimeout(copyStatusTimer.current)
     setCopyStatus('')
     setCopyError(null)
@@ -135,6 +142,7 @@ export function SavedPage({ entries, onRemoveSaved, onGoCreate }: Props) {
     try {
       url = encodeShareUrl(favorites)
     } catch (error) {
+      if (savedActionRun.current !== run) return
       if (copiedUrlTimer.current !== undefined) clearTimeout(copiedUrlTimer.current)
       setCopiedUrl(false)
       setCopyError(error instanceof Error ? error.message : 'Could not create the share link.')
@@ -142,11 +150,13 @@ export function SavedPage({ entries, onRemoveSaved, onGoCreate }: Props) {
     }
     try {
       await navigator.clipboard.writeText(url)
+      if (savedActionRun.current !== run) return
       if (copiedUrlTimer.current !== undefined) clearTimeout(copiedUrlTimer.current)
       setCopiedUrl(true)
       announceSavedAction('Share link copied to clipboard.')
       copiedUrlTimer.current = window.setTimeout(() => setCopiedUrl(false), 1500)
     } catch {
+      if (savedActionRun.current !== run) return
       if (copiedUrlTimer.current !== undefined) clearTimeout(copiedUrlTimer.current)
       setCopiedUrl(false)
       setCopyStatus('')

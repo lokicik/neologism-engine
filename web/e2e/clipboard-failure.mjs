@@ -13,7 +13,7 @@ const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const SHOTS = join(E2E_DIR, 'shots')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 32
+const EXPECTED_CHECKS = 36
 
 mkdirSync(SHOTS, { recursive: true })
 
@@ -340,6 +340,99 @@ try {
   const finalClipboard = await page.evaluate(() => window.__phase156Clipboard)
   check(finalClipboard.calls === 8, `exactly one clipboard attempt occurs per activation (${finalClipboard.calls})`)
   await context.close()
+
+  // Out-of-order clipboard settlements: only the newest invoked action owns UI feedback.
+  const raceContext = await browser.newContext({ viewport: { width: 390, height: 844 } })
+  await raceContext.addInitScript(({ liked }) => {
+    localStorage.setItem('neologism:visited', '1')
+    localStorage.setItem('neologism:favorites', JSON.stringify(liked))
+    const state = { pending: [], value: '' }
+    window.__phase202Clipboard = state
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: {
+        writeText(value) {
+          return new Promise((resolve, reject) => {
+            state.pending.push({ value: String(value), resolve, reject })
+          })
+        },
+        async readText() {
+          return state.value
+        },
+      },
+    })
+  }, { liked: [result('RaceName', 'phase202-race')] })
+  const raceExternal = []
+  await raceContext.route('https://**/*', async (route) => {
+    raceExternal.push(route.request().url())
+    await route.abort()
+  })
+  const raceErrors = []
+  const racePage = await raceContext.newPage()
+  racePage.on('pageerror', (error) => raceErrors.push(error.message))
+  await racePage.goto(APP_URL)
+  await racePage.getByRole('button', { name: /^Saved/ }).click()
+  const raceCard = racePage.locator('.saved-page .name-card')
+  const raceCopy = raceCard.locator('button[title="Copy name"]')
+  const settle = (index, outcome) => racePage.evaluate(({ operationIndex, operationOutcome }) => {
+    const state = window.__phase202Clipboard
+    const operation = state.pending[operationIndex]
+    if (operationOutcome === 'resolve') {
+      state.value = operation.value
+      operation.resolve()
+    } else {
+      operation.reject(new Error('stale clipboard settlement'))
+    }
+  }, { operationIndex: index, operationOutcome: outcome })
+
+  await raceCopy.click()
+  await raceCopy.click()
+  await racePage.waitForFunction(() => window.__phase202Clipboard.pending.length === 2)
+  await settle(1, 'resolve')
+  await racePage.waitForFunction(() => document.querySelector('.card-copy-status')?.textContent?.includes('RaceName copied'))
+  await settle(0, 'reject')
+  await racePage.waitForTimeout(0)
+  check(
+    await raceCard.locator('.card-copy-error').count() === 0
+      && (await raceCard.locator('.card-copy-status').textContent())?.trim() === 'RaceName copied to clipboard.'
+      && (await raceCard.locator('.copy-swap').getAttribute('class'))?.includes('copied'),
+    'an older card-copy rejection cannot erase a newer accepted copy',
+  )
+
+  await raceCopy.click()
+  await raceCopy.click()
+  await racePage.waitForFunction(() => window.__phase202Clipboard.pending.length === 4)
+  await settle(3, 'reject')
+  await raceCard.locator('.card-copy-error').waitFor({ state: 'visible' })
+  await settle(2, 'resolve')
+  await racePage.waitForTimeout(0)
+  check(
+    (await raceCard.locator('.card-copy-error').textContent())?.includes('Could not copy RaceName')
+      && (await raceCard.locator('.card-copy-status').textContent())?.trim() === ''
+      && !(await raceCard.locator('.copy-swap').getAttribute('class'))?.includes('copied'),
+    'an older card-copy success cannot hide a newer rejected copy',
+  )
+
+  const raceCopyAll = racePage.getByRole('button', { name: 'Copy all' })
+  const raceShare = racePage.getByRole('button', { name: 'Share link' })
+  await raceCopyAll.click()
+  await raceShare.click()
+  await racePage.waitForFunction(() => window.__phase202Clipboard.pending.length === 6)
+  await settle(5, 'resolve')
+  await racePage.waitForFunction(() => document.querySelector('.saved-copy-status')?.textContent?.includes('Share link copied'))
+  await settle(4, 'reject')
+  await racePage.waitForTimeout(0)
+  check(
+    await racePage.locator('.saved-copy-error').count() === 0
+      && (await racePage.locator('.saved-copy-status').textContent())?.trim() === 'Share link copied to clipboard.'
+      && (await racePage.evaluate(() => window.__phase202Clipboard.value)).startsWith(APP_URL),
+    'an older Copy all rejection cannot overwrite the newer Share link result',
+  )
+  check(
+    raceErrors.length === 0 && raceExternal.length === 0,
+    `out-of-order clipboard settlements produce no page errors or external HTTPS requests (${JSON.stringify({ raceErrors, raceExternal })})`,
+  )
+  await raceContext.close()
 } catch (error) {
   console.error('SCRIPT ERROR:', error instanceof Error ? error.message : error)
   failures++
