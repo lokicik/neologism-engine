@@ -5835,6 +5835,44 @@ not expose, using the flex row's native wrap behavior rather than clipping or ho
 
 ---
 
+## Phase 183 — Announce successful clipboard actions
+
+**Bottleneck.** Clipboard rejection already produced a visible alert and retained the invoking
+focus, but successful card Copy was represented only by a temporary icon/accessibility-name change.
+Saved **Copy all** and **Share link** changed only their icon while retaining the same visible and
+accessible label. A screen-reader user therefore had no reliable completed-operation announcement,
+and a fast follow-up failure could leave an earlier success impression active.
+
+**Frozen boundary.** This phase adds one permanently mounted, visually hidden atomic polite status
+channel per card and one shared channel on Saved. It announces exact success only after the existing
+clipboard promise resolves, clears stale status before every attempt/failure, and separates the
+three-second announcement window from the existing 1.5-second icon animation. It extends the
+existing production fixture. It does not alter visible copy/layout, clipboard payloads, focus,
+export/share encoding, storage, network, generation, taste, WASM, or Rust.
+
+| Before | After |
+| --- | --- |
+| Card success relied on a focused-button label and temporary check icon. | `Noma copied to clipboard.` enters an atomic polite status channel. |
+| Copy all and Share link retained the same textual label on success. | Each announces its exact completed operation. |
+| A later failed action could coexist with an older success signal. | Starting or failing an attempt clears the prior status. |
+| The visual icon lifetime also controlled the announcement lifetime. | The icon remains 1.5 seconds; the nonvisual status remains 3 seconds. |
+
+**Acceptance evidence.** The expanded `clipboard-failure.mjs` production fixture first timed out
+waiting for the missing card status against the pre-fix build after its original six checks passed.
+After implementation it passes **23/23**. It proves exact atomic polite announcements for card Copy,
+Saved Copy all, and Share link; stale Copy-all status clearing on a failed Share-link attempt; exact
+ordered/payload writes; visible and contained errors; invoking-focus retention; unchanged storage;
+one attempt per activation; zero external HTTPS requests; and zero page errors.
+
+TypeScript and the production Vite build are green. The complete retained taste/share browser suite
+and Create-card responsive **15/15** remain green; fixture syntax and `git diff --check` are green.
+
+**Decision.** Phase 183 gives the three clipboard paths one truthful success/error model: success is
+announced only after a completed write, while failure remains visible and cannot inherit stale
+success.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

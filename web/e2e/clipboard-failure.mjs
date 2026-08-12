@@ -13,7 +13,7 @@ const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const SHOTS = join(E2E_DIR, 'shots')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 18
+const EXPECTED_CHECKS = 23
 
 mkdirSync(SHOTS, { recursive: true })
 
@@ -139,6 +139,17 @@ try {
     `successful card retry writes the name before exposing copied state (${JSON.stringify({ cardClipboard, copiedUi })})`,
   )
   check(await cardCopy.evaluate((element) => document.activeElement === element), 'successful card retry keeps focus on the same button')
+  const cardCopyStatus = nomaCard.locator('.card-copy-status')
+  check(
+    await cardCopyStatus.getAttribute('role') === 'status'
+      && await cardCopyStatus.getAttribute('aria-live') === 'polite'
+      && await cardCopyStatus.getAttribute('aria-atomic') === 'true',
+    'card copy success exposes one atomic polite status channel',
+  )
+  check(
+    (await cardCopyStatus.textContent())?.trim() === 'Noma copied to clipboard.',
+    'card copy success announces the exact completed operation',
+  )
 
   const copyAll = page.getByRole('button', { name: 'Copy all' })
   await copyAll.click()
@@ -169,6 +180,14 @@ try {
       && await copyAll.evaluate((element) => document.activeElement === element),
     'Copy all retry clears the error and writes the exact ordered shortlist',
   )
+  const savedCopyStatus = page.locator('.saved-copy-status')
+  check(
+    await savedCopyStatus.getAttribute('role') === 'status'
+      && await savedCopyStatus.getAttribute('aria-live') === 'polite'
+      && await savedCopyStatus.getAttribute('aria-atomic') === 'true'
+      && (await savedCopyStatus.textContent())?.trim() === 'Saved names copied to clipboard.',
+    'Copy all success announces one exact atomic polite status',
+  )
 
   const share = page.getByRole('button', { name: 'Share link' })
   await share.click()
@@ -183,6 +202,10 @@ try {
       && afterShareFailure.value === 'Noma\nOrbit'
       && await share.evaluate((element) => document.activeElement === element),
     'failed Share link preserves the prior clipboard and invoking focus',
+  )
+  check(
+    (await savedCopyStatus.textContent())?.trim() === '',
+    'failed Share link clears the prior Copy all success announcement',
   )
 
   await share.click()
@@ -199,6 +222,10 @@ try {
     await share.evaluate((element) => document.activeElement === element)
       && (await share.textContent())?.includes('Share link'),
     'successful Share link retry retains focus and its visible action label',
+  )
+  check(
+    (await savedCopyStatus.textContent())?.trim() === 'Share link copied to clipboard.',
+    'Share link success replaces the Saved status with its exact completed operation',
   )
 
   const storageAfter = await page.evaluate(() => JSON.stringify(localStorage))

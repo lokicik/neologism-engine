@@ -56,6 +56,7 @@ function whyParts(e: Explanation): string[] {
 
 export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction = 'favorite', collectionNote, metricsAvailable = true, isRejected = false, onToggleRejected, isBest = false, appearDelay = 0, reason, isAiPick = false }: Props) {
   const [copied, setCopied] = useState(false)
+  const [copyStatus, setCopyStatus] = useState('')
   const [copyError, setCopyError] = useState<string | null>(null)
   const [domains, setDomains] = useState<DomainObservation[]>(() => idleDomainObservations(result.name))
   const [domainsRunning, setDomainsRunning] = useState(false)
@@ -66,6 +67,8 @@ export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction 
   const domainAbort = useRef<AbortController | null>(null)
   const domainRun = useRef(0)
   const whyRun = useRef(0)
+  const copyVisualTimer = useRef<number | undefined>(undefined)
+  const copyStatusTimer = useRef<number | undefined>(undefined)
   const whyPanelId = useId()
   const availabilityPanelId = useId()
   const availabilityPanel = useRef<HTMLDivElement>(null)
@@ -78,12 +81,19 @@ export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction 
     setDomains(idleDomainObservations(result.name))
     setDomainsRunning(false)
     setShowAvail(false)
+    if (copyVisualTimer.current !== undefined) clearTimeout(copyVisualTimer.current)
+    if (copyStatusTimer.current !== undefined) clearTimeout(copyStatusTimer.current)
     setCopied(false)
+    setCopyStatus('')
     setCopyError(null)
     setWhy(null)
     setWhyError(false)
     setShowWhy(false)
-    return () => domainAbort.current?.abort()
+    return () => {
+      domainAbort.current?.abort()
+      if (copyVisualTimer.current !== undefined) clearTimeout(copyVisualTimer.current)
+      if (copyStatusTimer.current !== undefined) clearTimeout(copyStatusTimer.current)
+    }
   }, [result.name])
 
   useEffect(() => {
@@ -91,13 +101,20 @@ export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction 
   }, [showAvail])
 
   async function copy() {
+    if (copyVisualTimer.current !== undefined) clearTimeout(copyVisualTimer.current)
+    if (copyStatusTimer.current !== undefined) clearTimeout(copyStatusTimer.current)
+    setCopied(false)
+    setCopyStatus('')
     setCopyError(null)
     try {
       await navigator.clipboard.writeText(result.name)
       setCopied(true)
-      setTimeout(() => setCopied(false), 1500)
+      setCopyStatus(`${result.name} copied to clipboard.`)
+      copyVisualTimer.current = window.setTimeout(() => setCopied(false), 1500)
+      copyStatusTimer.current = window.setTimeout(() => setCopyStatus(''), 3000)
     } catch {
       setCopied(false)
+      setCopyStatus('')
       setCopyError(`Could not copy ${result.name}. Browser clipboard access was denied.`)
     }
   }
@@ -379,6 +396,14 @@ export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction 
       </div>
 
       {copyError && <p className="card-copy-error" role="alert">{copyError}</p>}
+      <p
+        className="visually-hidden card-copy-status"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {copyStatus}
+      </p>
 
       {showAvail && (
         <div
