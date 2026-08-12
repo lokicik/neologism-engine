@@ -20,7 +20,13 @@ export function encodeShareUrl(favs: NameResult[]): string {
     throw new Error(`A share link can include at most ${MAX_SHARE_NAMES} names.`)
   }
   const pairs = favs.map((f) => ({ n: f.name, s: f.style }))
-  const encoded = btoa(JSON.stringify(pairs))
+  // `btoa` accepts bytes only. Escaping non-ASCII UTF-16 code units keeps the
+  // existing hash format backward-compatible while allowing a valid imported
+  // spelling to be forwarded without corruption or an InvalidCharacterError.
+  const asciiJson = JSON.stringify(pairs).replace(/[\u007f-\uffff]/g, (character) => (
+    `\\u${character.charCodeAt(0).toString(16).padStart(4, '0')}`
+  ))
+  const encoded = btoa(asciiJson)
   const hash = `#names=${encoded}`
   if (hash.length > MAX_SHARE_HASH_LENGTH) {
     throw new Error('This shortlist is too large to fit safely in a share link.')

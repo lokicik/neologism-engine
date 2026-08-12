@@ -62,6 +62,14 @@ check(
   'forwarded share payloads contain only spelling and style, never feedback or project context',
 )
 
+const unicodeResult = { ...result, name: 'İsim✨' }
+const unicodeUrl = encodeShareUrl([unicodeResult])
+fakeLocation.hash = `#names=${unicodeUrl.split('#names=')[1]}`
+check(
+  JSON.stringify(decodeShareUrl()) === JSON.stringify([{ name: 'İsim✨', style: 'big_tech' }]),
+  'a valid imported Unicode spelling can be forwarded without loss',
+)
+
 const twoHundred = Array.from({ length: 200 }, (_, index) => ({
   ...result,
   name: `Name${index}`,

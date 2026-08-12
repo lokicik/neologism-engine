@@ -6432,6 +6432,41 @@ without discarding useful local results or pretending that re-enabling AI perfor
 
 ---
 
+## Phase 201 — Preserve imported Unicode spellings in forwarded share links
+
+**Bottleneck.** The share decoder deliberately accepts a bounded, nonempty spelling rather than
+restricting imported Saved names to the engine's ASCII output. The forward-share encoder passed its
+JSON directly to `btoa`, which accepts bytes only. A valid imported name such as `İsim✨` therefore
+survived Saved, reload, TXT, and JSON, but Share link threw `InvalidCharacterError` instead of
+producing a forwardable URL.
+
+**Frozen boundary.** The existing `#names=` protocol, 200-row and 32,768-character limits, payload
+fields, decoder validation, deduplication, privacy boundary, clipboard action, and ASCII output stay
+unchanged. Before Base64 encoding, non-ASCII UTF-16 code units in the JSON text are represented as
+standard `\uXXXX` escapes. JSON parsing reconstructs the original spelling, including surrogate
+pairs, without a schema/version fork or lossy transliteration. Generator output, taste, Saved
+identity, storage, network, and Rust remain unchanged.
+
+| Before | After |
+| --- | --- |
+| Forwarding `İsim✨` threw at `btoa`. | The existing URL format carries ASCII-safe JSON and decodes back to exact `İsim✨`. |
+| ASCII share links used the established payload. | Their payload fields, decoder, and bounds remain identical. |
+| Import/export coverage used ASCII-only names. | The production Saved flow now pins Unicode through import, reload, TXT, JSON, clipboard, and forward decode. |
+
+**Acceptance evidence.** The strengthened pure share contract first failed with
+`DOMException [InvalidCharacterError]: Invalid character` against the old encoder. It now passes
+**9/9**, including malformed/oversized fail-closed cases, payload privacy, 200/201 boundaries, hash
+preflight, and exact Unicode round-trip. The retained production taste/Saved browser workflow passes
+in full with `İsim✨` in the three-name share fixture and verifies exact spelling in TXT, JSON, and
+the forwarded clipboard URL.
+
+TypeScript and the production Vite build are green; `git diff --check` is green.
+
+**Decision.** Phase 201 closes a real accepted-input/forward-output mismatch without widening what
+the app imports or changing the public share-link shape.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

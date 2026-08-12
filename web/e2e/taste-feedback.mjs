@@ -183,12 +183,15 @@ try {
     permissions: ['clipboard-read', 'clipboard-write'],
   })
   const sharePage = await shareContext.newPage({ viewport: { width: 1440, height: 900 } })
-  const sharedPayload = Buffer.from(JSON.stringify([
+  const sharedRows = [
     { n: 'SharedAlpha', s: 'big_tech' },
     { n: ' sharedalpha ', s: 'big_tech' },
     { n: 'SharedBeta', s: 'big_tech' },
-    { n: 'SharedGamma', s: 'big_tech' },
-  ])).toString('base64')
+    { n: 'İsim✨', s: 'big_tech' },
+  ]
+  const sharedPayload = Buffer.from(JSON.stringify(sharedRows).replace(/[\u007f-\uffff]/g, (character) => (
+    `\\u${character.charCodeAt(0).toString(16).padStart(4, '0')}`
+  ))).toString('base64')
   await sharePage.goto(`${APP_URL}#names=${sharedPayload}`)
   await sharePage.waitForFunction(() => document.querySelectorAll('.saved-page .name-card').length === 3)
   check(await storedCount(sharePage, 'neologism:imported-saved') === 3, 'share-link names persist in Saved')
@@ -215,7 +218,9 @@ try {
   await sharePage.getByRole('button', { name: 'TXT' }).click()
   const txtNames = (await readDownload(await txtPromise)).trim().split(/\r?\n/)
   check(
-    txtNames.length === 3 && new Set(txtNames.map((name) => name.toLowerCase())).size === 3,
+    txtNames.length === 3
+      && new Set(txtNames.map((name) => name.toLowerCase())).size === 3
+      && txtNames.includes('İsim✨'),
     'Saved TXT export contains one row per normalized spelling',
   )
   const jsonPromise = sharePage.waitForEvent('download')
@@ -223,7 +228,8 @@ try {
   const sharedJson = JSON.parse(await readDownload(await jsonPromise))
   check(
     sharedJson.length === 3
-      && sharedJson.every((item) => Object.keys(item).sort().join(',') === 'name,style'),
+      && sharedJson.every((item) => Object.keys(item).sort().join(',') === 'name,style')
+      && sharedJson.some((item) => item.name === 'İsim✨'),
     'Saved JSON export is deduped and carries no taste or project context',
   )
   await sharePage.getByRole('button', { name: 'Share link' }).click()
@@ -231,7 +237,8 @@ try {
   const forwardedRows = JSON.parse(Buffer.from(forwardedUrl.split('#names=')[1], 'base64').toString('utf8'))
   check(
     forwardedRows.length === 3
-      && forwardedRows.every((item) => Object.keys(item).sort().join(',') === 'n,s'),
+      && forwardedRows.every((item) => Object.keys(item).sort().join(',') === 'n,s')
+      && forwardedRows.some((item) => item.n === 'İsim✨'),
     'forwarded share links stay deduped and omit labels and context',
   )
   await sharePage.getByRole('button', { name: /Create/ }).click()
