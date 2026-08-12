@@ -348,6 +348,12 @@ body {
   padding: 1rem 0;
 }
 
+.landing-steps:focus-visible {
+  outline: 2px solid rgba(124, 106, 249, .9);
+  outline-offset: .35rem;
+  border-radius: .4rem;
+}
+
 .step {
   display: flex;
   align-items: baseline;

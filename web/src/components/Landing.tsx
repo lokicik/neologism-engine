@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, type MouseEvent } from 'react'
 import { generateNames, explainName, type Explanation, type NameResult } from '../lib/engine'
 
 interface Props {
@@ -115,6 +115,7 @@ function demoConfig(mode: DemoMode, exclude: string[]) {
 
 export function Landing({ onEnter }: Props) {
   const rootRef = useRef<HTMLDivElement>(null)
+  const stepsRef = useRef<HTMLElement>(null)
   useReveal(rootRef)
 
   // --- Hero: decoded name from a prefetched queue --------------------------
@@ -240,11 +241,13 @@ export function Landing({ onEnter }: Props) {
     }
   }, [])
 
-  const scrollToSteps = () => {
-    rootRef.current?.querySelector('.landing-steps')?.scrollIntoView({
+  const scrollToSteps = (event: MouseEvent<HTMLButtonElement>) => {
+    const steps = stepsRef.current
+    steps?.scrollIntoView({
       behavior: reducedMotion() ? 'auto' : 'smooth',
       block: 'center',
     })
+    if (event.detail === 0) steps?.focus({ preventScroll: true })
   }
 
   return (
@@ -386,7 +389,14 @@ export function Landing({ onEnter }: Props) {
         </div>
       </section>
 
-      <section className="landing-steps" data-reveal>
+      <section
+        ref={stepsRef}
+        className="landing-steps"
+        role="region"
+        aria-label="How it works"
+        tabIndex={-1}
+        data-reveal
+      >
         <div className="step">
           <span className="step-num">01</span>
           <span>Describe what you’re building — or don’t.</span>

@@ -5726,6 +5726,42 @@ source.
 
 ---
 
+## Phase 180 — Keep the Landing in-page jump focused
+
+**Bottleneck.** Landing's **How it works** action scrolled the steps into view, but keyboard
+activation left focus on the now-distant hero button. The destination had no accessible region name,
+and the next Tab resumed from the hero instead of the newly displayed content. Pointer scrolling was
+already correct and should remain focus-neutral.
+
+**Frozen boundary.** This phase gives the existing steps section a programmatic name and temporary
+focus target, moves focus there only when the native button is keyboard-activated, adds one scoped
+focus indicator, and introduces one production-browser fixture. It does not change visible copy,
+section order, scroll animation, Landing generation, entry navigation, storage, network, WASM, Rust,
+or pointer focus behavior.
+
+| Before | After |
+| --- | --- |
+| Keyboard activation scrolled while focus stayed on the hero action. | The same scroll also focuses the named steps region. |
+| The next Tab resumed near the top of the page. | The next Tab continues to the closing Landing action after the steps. |
+| The destination was an unnamed structural section. | It is exposed as the **How it works** region. |
+| Pointer activation risked inheriting a keyboard-only repair. | Pointer activation still scrolls and leaves native focus on its button. |
+
+**Acceptance evidence.** The new `landing-how-it-works-focus.mjs` production fixture first failed
+exactly the destination-name, focus-transfer, visible-focus, and onward-Tab checks against the
+pre-fix build; scroll, pointer neutrality, storage, request, and page-error controls already passed.
+After the repair it passes **15/15**. It proves Enter at 390 pixels and Space at 320 pixels move
+focus to a fully visible named region, the next Tab reaches the closing action, pointer activation
+does not force destination focus, the narrow viewport remains horizontally contained, local storage
+is untouched, and no external HTTPS request or page error occurs.
+
+TypeScript and the production Vite build are green. Retained Landing navigation **14/14** and live
+mode-state **12/12** production-browser contracts remain green; `git diff --check` is green.
+
+**Decision.** Phase 180 makes the visual in-page jump an equivalent keyboard navigation jump while
+preserving the existing pointer interaction and page design.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
