@@ -1,4 +1,4 @@
-// Phase 204 pure contract: judge cache identity includes prompt content and endpoint.
+// Phase 204/205 pure contract: judge cache identity includes every request-shaping input.
 // Run with: node --experimental-strip-types e2e/judge-cache-check.ts
 import type { NameResult } from '../src/lib/engine.ts'
 import { rerank, type JudgeConfig } from '../src/lib/judge.ts'
@@ -64,7 +64,7 @@ check(
   calls.length === 1
     && firstA?.[0]?.name === 'PromptAlpha'
     && JSON.stringify(secondA) === JSON.stringify(firstA),
-  'an identical provider, model, prompt, and name set reuses one cached ranking',
+  'an identical provider, model, prompt, and ordered name list reuses one cached ranking',
 )
 
 const resultB = await rerank(promptNames, { ...openRouterBase, prompt: promptB })
@@ -93,9 +93,21 @@ check(
   'different localhost endpoints cannot reuse each other\'s cached ranking',
 )
 
-if (checks !== 4 || failures > 0) {
-  console.error(`judge cache check: ${failures} failure(s), ${checks}/4 checks executed`)
+const orderNames = names('Order')
+const ordered = await rerank(orderNames, { ...openRouterBase, prompt: promptA })
+const reversed = await rerank([...orderNames].reverse(), { ...openRouterBase, prompt: promptA })
+check(
+  calls.length === 6
+    && calls[4]?.prompt.includes('1. OrderAlpha\n2. OrderBeta')
+    && calls[5]?.prompt.includes('1. OrderBeta\n2. OrderAlpha')
+    && ordered?.[0]?.name === 'OrderAlpha'
+    && reversed?.[0]?.name === 'OrderBeta',
+  'the ordered candidate list remains part of the cache identity and provider prompt',
+)
+
+if (checks !== 5 || failures > 0) {
+  console.error(`judge cache check: ${failures} failure(s), ${checks}/5 checks executed`)
   process.exitCode = 1
 } else {
-  console.log('judge cache check: 4/4 checks passed')
+  console.log('judge cache check: 5/5 checks passed')
 }

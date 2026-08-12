@@ -246,7 +246,7 @@ export async function rerank(names: NameResult[], cfg: JudgeConfig): Promise<Ran
     base,
     cfg.model?.trim() ?? '',
     template,
-    [...labels].sort(),
+    labels,
   ])
   if (cache.has(key)) return cache.get(key)!
 

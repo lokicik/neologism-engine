@@ -6573,6 +6573,38 @@ changing which criterion or server actually judged the displayed names.
 
 ---
 
+## Phase 205 — Keep candidate order in AI judge cache identity
+
+**Bottleneck.** Phase 204 still sorted candidate labels while building the cache key. The provider
+prompt numbers names in their presented order, so reversing the same set creates a different real
+request. The sorted key could nevertheless reuse the earlier ranking, suppress the provider call,
+and return an order produced for a different numbered list.
+
+**Frozen boundary.** The key now stores the exact ordered label list instead of a sorted copy.
+Provider, normalized request base, configured model, and full prompt content remain in the same
+structured tuple. Exact repeat reuse stays enabled. Prompt construction, transport, model
+resolution, parsing, ranking, AI Studio state, storage, taste, Create, generator, and Rust remain
+unchanged.
+
+| Before | After |
+| --- | --- |
+| `Alpha, Beta` and `Beta, Alpha` shared a cache key. | Their numbered prompts and cache identities remain distinct. |
+| A reversed list could receive the earlier list's cached ranking with no request. | Reversing the list performs one fresh ranking and returns that order's response. |
+| An exact provider/model/prompt/ordered-list repeat used the cache. | It still performs one provider call and reuses that exact result. |
+
+**Acceptance evidence.** The expanded pure cache contract first failed exactly the new ordered-list
+gate against Phase 204: reversing two names reused the prior entry instead of making the sixth
+mocked call. It now passes **5/5**. The fifth and sixth provider prompts contain opposite numbered
+orders, and the deterministic replies lead with `OrderAlpha` and `OrderBeta` respectively.
+
+TypeScript and the production Vite build are green. The retained AI Studio
+failure/cache/race fixture remains **39/39**.
+
+**Decision.** Phase 205 keeps the useful exact-request session cache without letting a set-like
+identity erase the candidate order that the provider actually judged.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
