@@ -226,11 +226,18 @@ export function saveTasteReferences(value: string): boolean {
 
 // Recently-shown names, persisted so repeats don't return across reloads.
 const RECENT_KEY = 'neologism:recent'
+// A name cannot recur within this many explored names. Since Phase 35 the core
+// applies exact exclusion to the full list while windowing only fuzzy/stem work.
+export const RECENT_WINDOW = 20000
 
 export function loadRecent(): string[] {
   try {
     const raw = localStorage.getItem(RECENT_KEY)
-    return raw ? (JSON.parse(raw) as string[]) : []
+    if (!raw) return []
+    const parsed = JSON.parse(raw) as unknown
+    return Array.isArray(parsed) && parsed.every((name) => typeof name === 'string')
+      ? parsed.slice(-RECENT_WINDOW)
+      : []
   } catch {
     return []
   }
@@ -238,7 +245,7 @@ export function loadRecent(): string[] {
 
 export function saveRecent(names: string[]): void {
   try {
-    localStorage.setItem(RECENT_KEY, JSON.stringify(names))
+    localStorage.setItem(RECENT_KEY, JSON.stringify(names.slice(-RECENT_WINDOW)))
   } catch {
     // ignore quota / serialization errors
   }

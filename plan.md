@@ -4863,6 +4863,54 @@ the user's retry is actually stored.
 
 ---
 
+## Phase 160 — Fail closed on corrupt recent-name history
+
+**Bottleneck.** `loadRecent` trusted every parseable JSON value as `string[]`. A stored object or a
+mixed array therefore crossed into the generator's `exclude` input and could stop Create from
+producing a page. The browser fixture was deliberately run against the old production build first:
+both corrupt shapes remained intact on read, but each failed to produce ten cards or repair itself;
+the valid-array control continued to work.
+
+**Frozen boundary.** This phase changes only recent-history runtime validation, central ownership of
+the existing 20,000-name cap, one production-browser fixture, and documentation. It does not change
+the `neologism:recent` key, generator or ranker behavior, fuzzy/stem exclusion windows, recent-history
+reset UX, taste/Saved data, schemas, WASM, Rust, or network behavior. Recent history remains
+operational state rather than user evidence, so corruption does not add a new warning surface.
+
+**Validation and recovery contract.** The loader parses to `unknown` and accepts only an array whose
+every element is a string. Valid input is reduced to its newest 20,000 entries. Invalid or
+unparseable input becomes an empty in-memory exclusion list without rewriting the raw record during
+the read. A later successful Generate still follows the ordinary `markSeen` path, so it stores the
+ten names actually shown as a valid replacement. Saving applies the same exported cap, and App uses
+that single shared constant rather than maintaining a second policy value.
+
+| Before | After |
+| --- | --- |
+| Parseable storage was cast to `string[]` without checking its shape. | Only an all-string array enters the generator exclusion boundary. |
+| Objects and mixed arrays could prevent a full Create page. | Both fail closed to an empty in-memory history and Create returns ten cards. |
+| A defensive read risked silently erasing the corrupt record. | The read is non-destructive; normal successful generation performs the repair. |
+| Load and App each relied on an implicit capacity assumption. | Load, save, and App share one explicit 20,000-name window. |
+| Oversized valid arrays had no direct production-browser gate. | The newest tail is retained exactly and ends with the ten currently shown names. |
+
+**Acceptance evidence.** The new `recent-history-corruption.mjs` production fixture passes **18/18**
+after the pre-fix red reproduction. Isolated 390-pixel profiles cover a parseable object, a mixed
+array, a valid two-name history, and 20,005 valid names. They prove non-destructive reads, full
+ten-card pages, valid repair, preserved valid prefixes, exact 20,000-name tail capacity, current-page
+names at the end of that tail, unrelated local-storage stability, and zero page errors or external
+HTTPS requests.
+
+Retained production contracts remain green: the personalized-session audit sustains all four
+100-name sessions, keeps each visible page unique and its browser history equal to the names actually
+shown, and the brief-session fixture reaches 100 unique names without false exhaustion. TypeScript,
+the production Vite build, fixture syntax, and `git diff --check` are green.
+
+**Decision.** Phase 160 closes a local-data trust gap at the narrowest boundary. Corrupt operational
+history can no longer disable the core offline Create flow, valid history keeps its existing long-
+session semantics, and recovery remains an ordinary successful generation rather than a destructive
+or noisy read-side migration.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

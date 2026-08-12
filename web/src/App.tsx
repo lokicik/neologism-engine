@@ -17,6 +17,7 @@ import {
   removeFavorite,
   removeRejected,
   removeSavedEverywhere,
+  RECENT_WINDOW,
   saveJudgeConfig,
   saveRecent,
   saveTasteReferences,
@@ -46,16 +47,6 @@ const DEFAULT_CONFIG: Config = {
   // Auto is the default: blend all four modes into one batch (see generateBatch).
   variant: 'auto',
 }
-
-// Don't repeat names the user has seen recently. A name can't recur within this
-// many explored names (~333 full personalized pools at the 60-name cap) —
-// effectively "never repeats" for any real session. Persisted across reloads;
-// ~200 KB through the JSON boundary per call, negligible. Safe to scale: since
-// Phase 35 the engine applies exact-match
-// exclusion to the whole list but windows the fuzzy/stem layers internally
-// (fuzzy_window=2000), so a large list can't starve generation — the distinct
-// big-tech vocabulary measured at 57k+ (100k-generation sweep).
-const RECENT_WINDOW = 20000
 
 function randomSelectionSalt(): number {
   const value = new Uint32Array(1)
