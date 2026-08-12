@@ -1412,6 +1412,10 @@ body {
 }
 .toolbar-btn:hover { border-color: rgba(255, 255, 255, .25); }
 .toolbar-btn:active { transform: scale(.96); }
+.page-toolbar .toolbar-btn:focus-visible {
+  outline: 2px solid rgba(124, 106, 249, .9);
+  outline-offset: 2px;
+}
 
 /* Command bar (Phase 41: prompt-first dashboard) */
 .command-area {

@@ -11,7 +11,7 @@ const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 17
+const EXPECTED_CHECKS = 20
 const VIEWPORTS = [
   { width: 1280, height: 900, layout: 'desktop' },
   { width: 390, height: 844, layout: 'mobile' },
@@ -209,6 +209,42 @@ async function naturalSidebarOrder(page) {
   return order
 }
 
+async function savedToolbarFocusRings(page) {
+  const buttons = page.locator('.page-toolbar .toolbar-btn')
+  if (await buttons.count() !== 4) return []
+  await buttons.first().focus()
+  await page.keyboard.press('Shift+Tab')
+  await page.keyboard.press('Tab')
+  const rings = []
+  for (let index = 0; index < 4; index++) {
+    rings.push(await page.evaluate(() => {
+      const element = document.activeElement
+      if (!(element instanceof HTMLElement)) return { ok: false }
+      const rect = element.getBoundingClientRect()
+      const style = getComputedStyle(element)
+      const outline = Number.parseFloat(style.outlineWidth) || 0
+      const offset = Number.parseFloat(style.outlineOffset) || 0
+      const margin = outline + offset
+      return {
+        ok: element.matches(':focus-visible')
+          && outline >= 2
+          && style.outlineStyle !== 'none'
+          && rect.left - margin >= 0
+          && rect.top - margin >= 0
+          && rect.right + margin <= innerWidth
+          && rect.bottom + margin <= innerHeight,
+        label: element.innerText.replace(/\s+/g, ' ').trim(),
+        focusVisible: element.matches(':focus-visible'),
+        outline,
+        outlineStyle: style.outlineStyle,
+        offset,
+      }
+    }))
+    if (index < 3) await page.keyboard.press('Tab')
+  }
+  return rings
+}
+
 async function runScenario(viewport) {
   const context = await browser.newContext({
     viewport: { width: viewport.width, height: viewport.height },
@@ -265,6 +301,7 @@ async function runScenario(viewport) {
     && await page.getByRole('heading', { name: /Saved names/ }).isVisible()
     && await page.locator('.saved-page .name-card').count() === 3
     && await page.locator('.page-toolbar button').count() === 4
+  const toolbarFocusRings = await savedToolbarFocusRings(page)
 
   await settingsButton.click()
   const dialog = page.getByRole('dialog', { name: 'Settings' })
@@ -327,6 +364,13 @@ async function runScenario(viewport) {
       && mobileToolbarTargetsOk
       && toolbarVisible,
     `${viewport.width}px keeps the Saved title, four toolbar actions, grid, and first card fully visible and mobile-safe`,
+  )
+  if (!toolbarFocusRings.every((ring) => ring.ok)) {
+    console.log(`INFO  ${viewport.width}px Saved toolbar focus rings`, toolbarFocusRings)
+  }
+  check(
+    toolbarFocusRings.length === 4 && toolbarFocusRings.every((ring) => ring.ok),
+    `${viewport.width}px gives all four Saved toolbar actions a contained 2px focus ring`,
   )
 
   storageResults.push({

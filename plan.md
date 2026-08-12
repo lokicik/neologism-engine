@@ -5983,6 +5983,37 @@ language, including the narrow viewport where the stronger ring needs explicit s
 
 ---
 
+## Phase 187 — Give every Saved toolbar action a visible focus ring
+
+**Bottleneck.** Copy all, TXT, JSON, and Share link were already visible, contained, correctly
+ordered, and mobile-safe, but every one still relied on Chromium's 1px `auto` keyboard outline.
+The retained responsive-shell fixture measured their boxes but could not detect this weaker focus
+state.
+
+**Frozen boundary.** This phase adds one Saved page-toolbar `:focus-visible` rule and extends the
+existing responsive-shell fixture with real keyboard modality plus computed ring geometry at its
+three frozen widths. It does not resize or reorder controls, alter pointer styles, change clipboard,
+download, share, storage, navigation, network, generation, WASM, or Rust behavior.
+
+| Before | After |
+| --- | --- |
+| All four toolbar buttons rendered Chromium's 1px auto outline. | All four render the product's 2px solid focus ring. |
+| The responsive fixture proved toolbar size and containment only. | It also proves focus modality, ring width/style, and full viewport containment. |
+| Clipboard focus retention was tested without visual-ring evidence. | Clipboard behavior stays unchanged while the retained focus is visibly clear. |
+
+**Acceptance evidence.** The expanded production fixture first failed at 1280, 390, and 320 pixels:
+all four actions measured `outline-width: 1px`, `outline-style: auto`, and zero offset. After the
+scoped CSS rule, `responsive-shell.mjs` passes **20/20**, proving every toolbar action has a fully
+visible 2px ring while all prior shell, storage, and network checks remain green. The retained
+clipboard failure/retry contract passes **23/23**.
+
+TypeScript and the production Vite build are green; fixture syntax and `git diff --check` are green.
+
+**Decision.** Phase 187 completes the same visible keyboard language across Saved's four primary
+collection actions without widening the change into their data or export behavior.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
