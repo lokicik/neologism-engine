@@ -11,7 +11,7 @@ const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 44
+const EXPECTED_CHECKS = 48
 
 const server = spawn(process.execPath, [viteCli, 'preview', '--port', String(PORT), '--strictPort'], {
   cwd: WEB_DIR,
@@ -429,6 +429,76 @@ try {
     check(
       reranked.names.join('|') === namesBefore,
       'model replacement reranks the byte-identical local pool instead of regenerating names',
+    )
+    await context.close()
+  }
+
+  // A localhost auto-detected model can change at the same endpoint. Studio
+  // must resolve it again instead of short-circuiting through its metric cache.
+  {
+    const endpoint = 'http://127.0.0.1:7777/v1'
+    let activeModel = 'local-auto-a'
+    let modelLookups = 0
+    const calls = []
+    const context = await browser.newContext({ viewport: { width: 390, height: 844 } })
+    await context.addInitScript(({ endpoint: configuredEndpoint }) => {
+      localStorage.setItem('neologism:visited', '1')
+      localStorage.setItem('neologism:judge', JSON.stringify({
+        enabled: true,
+        provider: 'localhost',
+        endpoint: configuredEndpoint,
+        model: '',
+      }))
+    }, { endpoint })
+    await context.route(`${endpoint}/**`, async (route) => {
+      if (route.request().url().endsWith('/models')) {
+        modelLookups++
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ data: [{ id: activeModel }] }),
+        })
+        return
+      }
+      const snapshot = requestSnapshot(route.request())
+      calls.push(snapshot)
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: rankedReply(snapshot.names, activeModel),
+      })
+    })
+    const page = await context.newPage()
+    page.on('pageerror', (error) => pageErrors.push(error.message))
+    await page.goto(APP_URL)
+    await page.getByRole('button', { name: /^AI Studio$/ }).click()
+    const generate = page.getByRole('button', { name: 'Generate', exact: true })
+    await generate.click()
+    await page.waitForFunction(() => document.querySelectorAll('.ai-studio .card-ai-reason').length === 24)
+    const initial = await resultSnapshot(page)
+    check(
+      modelLookups === 1
+        && calls.length === 1
+        && initial.reasons.every((reason) => reason.includes('local-auto-a')),
+      'Studio initially renders the localhost model resolved by auto-detection',
+    )
+
+    activeModel = 'local-auto-b'
+    await page.getByRole('button', { name: 'Brandable', exact: true }).click()
+    await page.waitForTimeout(200)
+    const reranked = await resultSnapshot(page)
+    check(
+      modelLookups === 2 && calls.length === 2,
+      'same-metric Studio selection rechecks a blank localhost model before cache reuse',
+    )
+    check(
+      reranked.reasons.length === 24
+        && reranked.reasons.every((reason) => reason.includes('local-auto-b')),
+      'Studio replaces the visible reasons after the localhost loaded model changes',
+    )
+    check(
+      reranked.names.join('|') === initial.names.join('|'),
+      'localhost model hot-swap reranks the same local pool without regeneration',
     )
     await context.close()
   }

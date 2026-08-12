@@ -34,7 +34,7 @@ interface RankAttempt {
   metric: Metric
   criterion: string
   label: string
-  cacheKey: string
+  cacheKey: string | null
 }
 
 const POOL_SIZE = 24
@@ -70,15 +70,22 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
 
   const criterionFor = (m: Metric) =>
     m === 'custom' ? custom.trim() : METRICS.find((x) => x.key === m)!.criterion
-  const cacheKey = (m: Metric, criterion: string) => JSON.stringify([
-    judgeConfig.provider,
-    judgeConfig.provider === 'localhost'
-      ? (judgeConfig.endpoint ?? DEFAULT_LOCAL_ENDPOINT).replace(/\/$/, '')
-      : 'openrouter',
-    judgeConfig.model?.trim() ?? '',
-    m,
-    criterion,
-  ])
+  const cacheKey = (m: Metric, criterion: string) => {
+    const configuredModel = judgeConfig.model?.trim() ?? ''
+    // A blank localhost model is resolved live by rerank(). Let that shared
+    // cache own reuse so a different model loaded at the same endpoint cannot
+    // be hidden by this faster per-pool cache.
+    if (judgeConfig.provider === 'localhost' && !configuredModel) return null
+    return JSON.stringify([
+      judgeConfig.provider,
+      judgeConfig.provider === 'localhost'
+        ? (judgeConfig.endpoint ?? DEFAULT_LOCAL_ENDPOINT).replace(/\/$/, '')
+        : 'openrouter',
+      configuredModel,
+      m,
+      criterion,
+    ])
+  }
   const metricLabel = (m: Metric) =>
     m === 'custom' ? custom.trim() || 'custom' : METRICS.find((x) => x.key === m)!.label
 
@@ -128,7 +135,7 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
       setActiveRank(null)
       setBusy('idle')
     }
-    const cached = cache.current.get(attempt.cacheKey)
+    const cached = attempt.cacheKey === null ? undefined : cache.current.get(attempt.cacheKey)
     if (cached && cached.ranked.length === poolToRank.length) {
       if (options.fromRetry) focusRankControl(attempt)
       setView(cached)
@@ -167,7 +174,7 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
       pick: result[0]?.name,
       rankedBy: attempt.label,
     }
-    cache.current.set(attempt.cacheKey, next)
+    if (attempt.cacheKey !== null) cache.current.set(attempt.cacheKey, next)
     if (options.fromRetry) focusRankControl(attempt)
     setView(next)
     setRankingStatus(`${next.ranked.length} names ranked by ${attempt.label}.`)

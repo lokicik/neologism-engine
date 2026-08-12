@@ -6782,6 +6782,45 @@ change relabel stale AI output as if the newly configured model had judged it.
 
 ---
 
+## Phase 211 — Resolve localhost auto-model before cache reuse
+
+**Bottleneck.** Both Phase 204's shared key and Phase 210's Studio key used the configured model
+string. For localhost auto-detect that string is intentionally blank. If the server loaded model A,
+then later loaded model B at the same endpoint, both caches could return A's old ranking before
+calling `/models`; the UI would show A's reasons while the current server configuration was B.
+
+**Frozen boundary.** The shared judge path now resolves the effective model before constructing or
+reading its cache key. Explicit OpenRouter/localhost models still resolve synchronously and add no
+discovery request. A blank localhost model performs its existing `/models` lookup on each ranking
+attempt; the resolved id joins provider, endpoint, prompt, and ordered names in the shared key. AI
+Studio bypasses only its faster per-pool cache for that blank-model case, allowing the resolved-model
+shared cache to decide reuse. An unchanged loaded id avoids a new chat completion; a changed id gets
+one fresh ranking. Transport endpoints, model-selection policy, prompts, parsing, pool generation,
+storage, focus, taste, Create, and Rust remain unchanged.
+
+| Before | After |
+| --- | --- |
+| Auto-detected models A and B at one endpoint shared a blank-model cache key. | Their resolved ids produce distinct shared keys. |
+| Studio could return before rechecking `/models`. | Its blank-model path delegates reuse to the resolved-model cache. |
+| Correctness required manually typing the model id. | Auto-detect remains convenient and follows a server-side model hot-swap. |
+
+**Acceptance evidence.** The pure judge contract first passed its five retained gates and failed
+only the new sixth auto-model gate: the second call never resolved model B or requested its ranking.
+It now passes **6/6**, with three model lookups across A, B, and an unchanged B repeat, one chat
+request under `auto-model-a`, and one under `auto-model-b`. The two models produce opposite
+deterministic leads while the repeated resolved B id reuses its exact result without a third chat.
+
+The production Studio fixture then exposed the upper cache independently: 46 of 48 gates passed,
+but same-metric selection made neither a second model lookup nor a B ranking. After bypassing that
+coarse cache only for blank localhost models, the fixture passes **48/48**. All 24 reasons change
+from A's marker to B's on the byte-identical pool. TypeScript and the production Vite build are
+green.
+
+**Decision.** Phase 211 keeps local auto-detection honest when a server hot-swaps models, accepting
+one lightweight model-discovery request as the necessary price for truthful cache reuse.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

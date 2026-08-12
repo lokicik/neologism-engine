@@ -241,18 +241,18 @@ export async function rerank(names: NameResult[], cfg: JudgeConfig): Promise<Ran
   const labels = names.map((n) => n.name)
   const template = cfg.prompt || DEFAULT_JUDGE_PROMPT
   const { base, headers } = baseAndHeaders(cfg)
-  const key = JSON.stringify([
-    cfg.provider,
-    base,
-    cfg.model?.trim() ?? '',
-    template,
-    labels,
-  ])
-  if (cache.has(key)) return cache.get(key)!
 
   try {
     const model = await resolveModel(cfg, base, headers)
     if (!model) return null
+    const key = JSON.stringify([
+      cfg.provider,
+      base,
+      model,
+      template,
+      labels,
+    ])
+    if (cache.has(key)) return cache.get(key)!
 
     const res = await fetch(`${base}/chat/completions`, {
       method: 'POST',

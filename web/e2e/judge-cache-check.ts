@@ -1,4 +1,4 @@
-// Phase 204/205 pure contract: judge cache identity includes every request-shaping input.
+// Phase 204/205/211 pure contract: judge cache identity includes every request-shaping input.
 // Run with: node --experimental-strip-types e2e/judge-cache-check.ts
 import type { NameResult } from '../src/lib/engine.ts'
 import { rerank, type JudgeConfig } from '../src/lib/judge.ts'
@@ -22,17 +22,29 @@ const names = (prefix: string): NameResult[] => ['Alpha', 'Beta'].map((suffix) =
   connotations: [],
 }))
 
-const calls: Array<{ url: string; prompt: string }> = []
+const calls: Array<{ url: string; prompt: string; model: string }> = []
+let modelLookups = 0
+let autoModel = 'auto-model-a'
 globalThis.fetch = async (input, init) => {
   const url = String(input)
+  if (url.endsWith('/models')) {
+    modelLookups++
+    return new Response(JSON.stringify({ data: [{ id: autoModel }] }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  }
   const body = JSON.parse(String(init?.body ?? '{}')) as {
+    model?: string
     messages?: Array<{ content?: string }>
   }
   const prompt = body.messages?.[0]?.content ?? ''
-  calls.push({ url, prompt })
+  calls.push({ url, prompt, model: body.model ?? '' })
 
-  const secondWins = prompt.includes('Criterion B') || url.includes(':9002/')
-  const reasonPrefix = prompt.includes('Criterion B')
+  const secondWins = prompt.includes('Criterion B') || url.includes(':9002/') || body.model === 'auto-model-b'
+  const reasonPrefix = body.model?.startsWith('auto-model-')
+    ? body.model
+    : prompt.includes('Criterion B')
     ? 'criterion-b'
     : url.includes(':9002/') ? 'endpoint-9002' : url.includes(':9001/') ? 'endpoint-9001' : 'criterion-a'
   const judgments = [
@@ -105,9 +117,31 @@ check(
   'the ordered candidate list remains part of the cache identity and provider prompt',
 )
 
-if (checks !== 5 || failures > 0) {
-  console.error(`judge cache check: ${failures} failure(s), ${checks}/5 checks executed`)
+const autoNames = names('AutoModel')
+const autoConfig: JudgeConfig = {
+  enabled: true,
+  provider: 'localhost',
+  endpoint: 'http://127.0.0.1:9010/v1',
+  prompt: promptA,
+}
+const autoA = await rerank(autoNames, autoConfig)
+autoModel = 'auto-model-b'
+const autoB = await rerank(autoNames, autoConfig)
+const autoBAgain = await rerank(autoNames, autoConfig)
+check(
+  modelLookups === 3
+    && calls.length === 8
+    && calls[6]?.model === 'auto-model-a'
+    && calls[7]?.model === 'auto-model-b'
+    && autoA?.[0]?.reason === 'auto-model-a-first'
+    && autoB?.[0]?.reason === 'auto-model-b-second'
+    && JSON.stringify(autoBAgain) === JSON.stringify(autoB),
+  'localhost auto-detection resolves the active model before exact-result cache reuse',
+)
+
+if (checks !== 6 || failures > 0) {
+  console.error(`judge cache check: ${failures} failure(s), ${checks}/6 checks executed`)
   process.exitCode = 1
 } else {
-  console.log('judge cache check: 5/5 checks passed')
+  console.log('judge cache check: 6/6 checks passed')
 }
