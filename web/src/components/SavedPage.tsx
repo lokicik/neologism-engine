@@ -40,10 +40,24 @@ export function SavedPage({ entries, onRemoveSaved, onGoCreate }: Props) {
     if (copyStatusTimer.current !== undefined) clearTimeout(copyStatusTimer.current)
   }, [])
 
-  function announceCopy(message: string) {
+  function announceSavedAction(message: string) {
     if (copyStatusTimer.current !== undefined) clearTimeout(copyStatusTimer.current)
     setCopyStatus(message)
     copyStatusTimer.current = window.setTimeout(() => setCopyStatus(''), 3000)
+  }
+
+  function downloadSaved(format: 'TXT' | 'JSON') {
+    if (copyStatusTimer.current !== undefined) clearTimeout(copyStatusTimer.current)
+    setCopyStatus('')
+    setCopyError(null)
+    try {
+      if (format === 'TXT') exportText(favorites)
+      else exportJson(favorites)
+      announceSavedAction(`${format} download started.`)
+    } catch {
+      setCopyStatus('')
+      setCopyError(`Could not start the ${format} download.`)
+    }
   }
 
   function provenance(entry: SavedNameEntry): string {
@@ -80,7 +94,7 @@ export function SavedPage({ entries, onRemoveSaved, onGoCreate }: Props) {
     try {
       await navigator.clipboard.writeText(text)
       setCopiedAll(true)
-      announceCopy('Saved names copied to clipboard.')
+      announceSavedAction('Saved names copied to clipboard.')
       setTimeout(() => setCopiedAll(false), 1500)
     } catch {
       setCopiedAll(false)
@@ -104,7 +118,7 @@ export function SavedPage({ entries, onRemoveSaved, onGoCreate }: Props) {
     try {
       await navigator.clipboard.writeText(url)
       setCopiedUrl(true)
-      announceCopy('Share link copied to clipboard.')
+      announceSavedAction('Share link copied to clipboard.')
       setTimeout(() => setCopiedUrl(false), 1500)
     } catch {
       setCopiedUrl(false)
@@ -141,10 +155,10 @@ export function SavedPage({ entries, onRemoveSaved, onGoCreate }: Props) {
           <button className="toolbar-btn" onClick={() => void copyAll()}>
             {copiedAll ? <IconCheck /> : <IconCopy />} Copy all
           </button>
-          <button className="toolbar-btn" onClick={() => exportText(favorites)}>
+          <button className="toolbar-btn" onClick={() => downloadSaved('TXT')}>
             <IconDownload /> TXT
           </button>
-          <button className="toolbar-btn" onClick={() => exportJson(favorites)}>
+          <button className="toolbar-btn" onClick={() => downloadSaved('JSON')}>
             <IconDownload /> JSON
           </button>
           <button className="toolbar-btn" onClick={() => void shareLink()}>

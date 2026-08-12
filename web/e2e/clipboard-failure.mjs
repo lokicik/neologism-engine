@@ -13,7 +13,7 @@ const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const SHOTS = join(E2E_DIR, 'shots')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 23
+const EXPECTED_CHECKS = 27
 
 mkdirSync(SHOTS, { recursive: true })
 
@@ -187,6 +187,32 @@ try {
       && await savedCopyStatus.getAttribute('aria-atomic') === 'true'
       && (await savedCopyStatus.textContent())?.trim() === 'Saved names copied to clipboard.',
     'Copy all success announces one exact atomic polite status',
+  )
+
+  const txt = page.getByRole('button', { name: 'TXT' })
+  const txtDownload = page.waitForEvent('download')
+  await txt.click()
+  check(
+    (await txtDownload).suggestedFilename() === 'names.txt'
+      && await txt.evaluate((element) => document.activeElement === element),
+    'TXT starts the existing download and retains its invoking focus',
+  )
+  check(
+    (await savedCopyStatus.textContent())?.trim() === 'TXT download started.',
+    'TXT replaces stale clipboard status with its exact completed action',
+  )
+
+  const json = page.getByRole('button', { name: 'JSON' })
+  const jsonDownload = page.waitForEvent('download')
+  await json.click()
+  check(
+    (await jsonDownload).suggestedFilename() === 'names.json'
+      && await json.evaluate((element) => document.activeElement === element),
+    'JSON starts the existing download and retains its invoking focus',
+  )
+  check(
+    (await savedCopyStatus.textContent())?.trim() === 'JSON download started.',
+    'JSON replaces the TXT status with its exact completed action',
   )
 
   const share = page.getByRole('button', { name: 'Share link' })

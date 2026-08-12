@@ -6045,6 +6045,39 @@ the keyboard as the actions inside each destination, without touching routing be
 
 ---
 
+## Phase 189 — Announce Saved downloads when they start
+
+**Bottleneck.** Saved Copy all and Share link already reported their accepted clipboard writes through
+one atomic polite status channel. TXT and JSON started real downloads and retained focus, but remained
+silent: the prior clipboard message could stay in the live region, leaving keyboard and screen-reader
+users without truthful feedback about which action had just completed.
+
+**Frozen boundary.** This phase routes the two existing synchronous export calls through a small Saved
+page handler. It clears stale action state first, starts the unchanged export, and only then announces
+`TXT download started.` or `JSON download started.` through the existing live region. A synchronous
+start failure uses the existing visible Saved error surface. It does not change filenames, file
+contents, export schemas, shortlist order, toolbar focus/order, storage, network, generation, WASM,
+or Rust.
+
+| Before | After |
+| --- | --- |
+| TXT and JSON downloaded silently. | Each announces its exact started download after the browser accepts it. |
+| A prior Copy all status could remain after a download. | TXT replaces it; JSON replaces the TXT status. |
+| Download focus and payload were tested elsewhere only. | One focused contract now binds event, filename, focus, and status together. |
+
+**Acceptance evidence.** The expanded production fixture first passed both real download and focus
+checks but failed both new announcement checks. After the Saved handler change,
+`clipboard-failure.mjs` passes **27/27**, including the existing clipboard rejection/retry, stale
+status, exact payload, storage, containment, and network gates. The retained full taste/share browser
+contract also remains green, preserving TXT/JSON contents and the name/style-only share boundary.
+
+TypeScript and the production Vite build are green; fixture syntax and `git diff --check` are green.
+
+**Decision.** Phase 189 makes all four Saved toolbar outcomes observable without pretending a browser
+download is complete; the message deliberately says only that it started.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
