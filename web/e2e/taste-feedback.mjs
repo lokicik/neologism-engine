@@ -206,7 +206,7 @@ try {
   )
   await sharePage.getByTitle('Close').click()
   await sharePage.reload()
-  await sharePage.getByRole('button', { name: /Saved/ }).click()
+  await sharePage.locator('.sidebar').getByRole('button', { name: /^Saved(?:\s+\d+)?$/ }).click()
   check(
     await sharePage.locator('.saved-page .name-card').count() === 3,
     'imported Saved names survive reload after the share hash is cleared',
@@ -324,7 +324,7 @@ try {
   }, failedMigrationStubs)
   const failedMigrationPage = await failedMigrationContext.newPage({ viewport: { width: 1200, height: 800 } })
   await failedMigrationPage.goto(APP_URL)
-  await failedMigrationPage.getByRole('button', { name: /Saved/ }).click()
+  await failedMigrationPage.locator('.sidebar').getByRole('button', { name: /^Saved(?:\s+\d+)?$/ }).click()
   const failedMigrationSavedCount = await failedMigrationPage.locator('.saved-page .name-card').count()
   const failedMigrationFavoriteCount = await storedCount(failedMigrationPage, 'neologism:favorites')
   check(
@@ -350,7 +350,7 @@ try {
   )
   await failedMigrationPage.locator('.results-grid .name-card').first().locator('.star-btn').click()
   await failedMigrationPage.reload()
-  await failedMigrationPage.getByRole('button', { name: /Saved/ }).click()
+  await failedMigrationPage.locator('.sidebar').getByRole('button', { name: /^Saved(?:\s+\d+)?$/ }).click()
   const recoveredOldCards = await failedMigrationPage.locator('.saved-page .name-card').filter({ hasText: /OldShared/ }).count()
   await failedMigrationPage.click('.sidebar-settings')
   const recoveredMigrationMeta = (await failedMigrationPage.locator('.settings-data-meta').textContent()) ?? ''
@@ -400,7 +400,7 @@ try {
     await dialog.accept()
   })
   await removalFailurePage.goto(APP_URL)
-  await removalFailurePage.getByRole('button', { name: /Saved/ }).click()
+  await removalFailurePage.locator('.sidebar').getByRole('button', { name: /^Saved(?:\s+\d+)?$/ }).click()
   await removalFailurePage.locator('.saved-page .star-btn').click()
   check(
     removalDialogs.some((message) => /browser storage rejected/.test(message))
@@ -409,7 +409,7 @@ try {
     'a failed multi-key removal reports failure and leaves both durable sources unchanged',
   )
   await removalFailurePage.reload()
-  await removalFailurePage.getByRole('button', { name: /Saved/ }).click()
+  await removalFailurePage.locator('.sidebar').getByRole('button', { name: /^Saved(?:\s+\d+)?$/ }).click()
   check(
     await removalFailurePage.locator('.saved-page .name-card').count() === 1,
     'a failed multi-key removal cannot claim success and then resurrect on reload',
@@ -435,7 +435,7 @@ try {
   await partialMigrationPage.evaluate(() => {
     Storage.prototype.setItem = globalThis.__originalStorageSetItem
   })
-  await partialMigrationPage.getByRole('button', { name: /Saved/ }).click()
+  await partialMigrationPage.locator('.sidebar').getByRole('button', { name: /^Saved(?:\s+\d+)?$/ }).click()
   await partialMigrationPage.locator('.saved-page .star-btn').click()
   await partialMigrationPage.reload()
   const partialFavoriteCount = await storedCount(partialMigrationPage, 'neologism:favorites')
@@ -513,7 +513,7 @@ try {
     'migrated share-only names stay out of taste exports while genuine legacy likes remain',
   )
   await migrationPage.getByTitle('Close').click()
-  await migrationPage.getByRole('button', { name: /Saved/ }).click()
+  await migrationPage.locator('.sidebar').getByRole('button', { name: /^Saved(?:\s+\d+)?$/ }).click()
   check(
     await migrationPage.locator('.saved-page .name-card').count() === 3
       && await migrationPage.getByText('Saved from a shared link · not taste evidence').count() === 1

@@ -5645,6 +5645,48 @@ already-labeled Advanced and Settings forms.
 
 ---
 
+## Phase 178 — Make SPA pages participate in browser history
+
+**Bottleneck.** Create, AI Studio, Saved, and Landing changed React state, visible content, sidebar
+state, headings, and titles, but never created browser-history entries. Back therefore could not
+return from Saved to Studio or Studio to Create, and reload always fell back to the visited-state
+default instead of the current page. The existing shared-import failure path also requires its
+`#names=` hash to remain untouched as a recovery copy.
+
+**Frozen boundary.** This phase stores only the top-level `view` in the current tab's native
+`history.state`, pushes one entry per actual page change, restores it on `popstate` and reload, adds
+one production-browser fixture, scopes stale broad Saved selectors in the retained share fixture,
+and updates documentation. URLs remain otherwise unchanged; recovery hashes are preserved. It adds
+no local/session-storage key and does not change visible navigation, focus policy, Settings state,
+share payloads, generation, ranking, WASM, Rust, or network behavior.
+
+| Before | After |
+| --- | --- |
+| Create → Studio → Saved replaced only in-memory React state. | Each actual page change pushes matching native history state. |
+| Back/Forward could not traverse application pages. | Back/Forward restore state, visible page, current-page semantics, and browser title together. |
+| Reload used only share/visited defaults. | A valid current history page survives reload in that tab. |
+| A routing change risked overwriting a failed share-import hash. | Navigation and Back preserve the exact retained `#names=` recovery copy. |
+| Settings could accidentally become a page-history entry. | Opening/closing the modal leaves the underlying page entry unchanged. |
+
+**Acceptance evidence.** The new `view-history.mjs` production fixture passes **17/17** after the
+pre-fix build failed every history/state/Back/Forward/reload check while storage, network, and
+page-error controls passed. At 390 pixels it proves initial-entry normalization; two distinct pushes
+for Studio and Saved; Back to Studio then Create; Forward to Studio; Settings neutrality; About to
+Landing and Back; reload retention; recovery-hash preservation through navigation and Back;
+byte-identical local/session storage; zero external HTTPS requests; and zero page errors.
+
+Retained production-browser contracts remain green at Landing navigation **14/14**, view title
+**11/11**, and the complete taste/share fixture. The share fixture's sidebar actions are now scoped
+to the sidebar landmark because a correct Saved reload also renders several card actions whose names
+contain “Saved”; no behavioral assertion was removed. TypeScript, the production Vite build,
+fixture syntax, and `git diff --check` are green.
+
+**Decision.** Phase 178 completes the existing SPA navigation model rather than introducing visible
+routes or persistent tracking. Native Back/Forward and reload now agree with the page state already
+shown everywhere else, while the product's recovery URL remains authoritative.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

@@ -63,12 +63,28 @@ const VIEW_TITLES: Record<View, string> = {
   saved: 'Saved — Neologism Engine',
 }
 
+function viewFromHistoryState(state: unknown): View | null {
+  if (state === null || typeof state !== 'object' || Array.isArray(state)) return null
+  const view = (state as Record<string, unknown>).neologismView
+  return view === 'landing' || view === 'create' || view === 'studio' || view === 'saved'
+    ? view
+    : null
+}
+
+function historyStateFor(view: View): Record<string, unknown> {
+  const current = history.state
+  const base = current !== null && typeof current === 'object' && !Array.isArray(current)
+    ? current as Record<string, unknown>
+    : {}
+  return { ...base, neologismView: view }
+}
+
 export default function App() {
   // First visit shows the landing; share-URL visitors skip it and land on the
   // Saved page (they came for shared favorites). Entering is remembered.
   const [view, setView] = useState<View>(() => {
     if (decodeShareUrl().length > 0) return 'saved'
-    return hasVisited() ? 'create' : 'landing'
+    return viewFromHistoryState(history.state) ?? (hasVisited() ? 'create' : 'landing')
   })
   const [config, setConfig] = useState<Config>(DEFAULT_CONFIG)
   const [results, setResults] = useState<NameResult[]>([])
@@ -97,6 +113,28 @@ export default function App() {
   // gets a new salt; infinite-scroll pages keep it so the session feels
   // coherent instead of changing preference direction on every append.
   const preferenceSaltRef = useRef<number | null>(null)
+  const viewRef = useRef(view)
+
+  const navigateView = useCallback((next: View) => {
+    if (viewRef.current === next) return
+    history.pushState(historyStateFor(next), '', location.href)
+    viewRef.current = next
+    setView(next)
+  }, [])
+
+  useEffect(() => {
+    history.replaceState(historyStateFor(viewRef.current), '', location.href)
+    const restoreView = (event: PopStateEvent) => {
+      const next = viewFromHistoryState(event.state)
+      if (!next || next === viewRef.current) return
+      pendingViewFocusRef.current = null
+      viewRef.current = next
+      setShowSettings(false)
+      setView(next)
+    }
+    addEventListener('popstate', restoreView)
+    return () => removeEventListener('popstate', restoreView)
+  }, [])
 
   useEffect(() => {
     document.title = VIEW_TITLES[view]
@@ -151,7 +189,7 @@ export default function App() {
       // valid payload whose storage write fails follows the branch below and
       // deliberately keeps its hash as the recovery copy.
       if (location.hash.startsWith('#names=')) {
-        history.replaceState(null, '', location.pathname)
+        history.replaceState(historyStateFor(viewRef.current), '', location.pathname)
       }
       return
     }
@@ -171,7 +209,7 @@ export default function App() {
     const imported = addImportedSaved(importedSaved, stubs)
     setImportedSaved(imported.items)
     // Preserve the recovery URL if browser storage rejected the write.
-    if (imported.persisted) history.replaceState(null, '', location.pathname)
+    if (imported.persisted) history.replaceState(historyStateFor(viewRef.current), '', location.pathname)
   }, [])
 
   const markSeen = (names: NameResult[]) => {
@@ -493,7 +531,7 @@ export default function App() {
         onEnter={(keyboard) => {
           if (keyboard) pendingViewFocusRef.current = 'create'
           markVisited()
-          setView('create')
+          navigateView('create')
         }}
       />
     )
@@ -511,10 +549,10 @@ export default function App() {
       <Sidebar
         view={view}
         savedCount={savedEntries.length}
-        onNavigate={setView}
+        onNavigate={navigateView}
         onAbout={(keyboard) => {
           if (keyboard) pendingViewFocusRef.current = 'landing'
-          setView('landing')
+          navigateView('landing')
         }}
         onSettings={() => setShowSettings(true)}
       />
@@ -531,7 +569,7 @@ export default function App() {
             onRemoveSaved={handleRemoveSaved}
             onGoCreate={(keyboard) => {
               if (keyboard) pendingViewFocusRef.current = 'create'
-              setView('create')
+              navigateView('create')
             }}
           />
         ) : view === 'studio' ? (
