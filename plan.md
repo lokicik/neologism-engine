@@ -5382,6 +5382,44 @@ visual and announced truth cannot drift through separate interaction logic.
 
 ---
 
+## Phase 171 — Keep browser titles aligned with SPA views
+
+**Bottleneck.** The visible application and newly announced sidebar state moved correctly among
+Create, AI Studio, Saved, and Landing, but `document.title` remained the static Landing title from
+`index.html`. Production Chromium therefore showed “Startup & Project Name Generator” even while
+Saved or AI Studio was the current page. Settings is a modal over the current page and must not
+replace that underlying page identity.
+
+**Frozen boundary.** This phase adds one constant `view`-to-title map and one effect in `App`, adds
+one production-browser fixture, and updates documentation. It does not change history/URLs,
+navigation callbacks, focus, sidebar state, visible headings, modal behavior, storage, generation,
+ranking, WASM, Rust, or network behavior.
+
+| Before | After |
+| --- | --- |
+| Every SPA view retained the Landing browser title. | Landing, Create, AI Studio, and Saved expose distinct truthful titles. |
+| The tab title could contradict the visible and announced current page. | The authoritative `view` drives sidebar state, visible content, and browser title consistently. |
+| Opening Settings inherited a stale generic title by accident. | Settings intentionally preserves the title of its underlying page. |
+| Returning through About changed content but not a previously stale title. | About restores the original Landing title together with Landing content. |
+
+**Acceptance evidence.** The new `view-title.mjs` production fixture passes **11/11** after the
+pre-fix build failed all six non-Landing/title-transition checks while Landing, network, and
+page-error controls already passed. At 390 pixels it proves the initial Landing title; keyboard
+entry to Create; Enter navigation to AI Studio; Space navigation to Saved; Settings open/close
+neutrality; pointer return to Create; About return to Landing; zero external HTTPS requests; and
+zero page errors.
+
+Retained production-browser contracts remain green at sidebar current-page **12/12** and Landing
+navigation focus **14/14**, preserving the single current-page state, visible focus, modal
+neutrality, keyboard/pointer handoffs, and narrow-viewport stability. TypeScript, the production
+Vite build, fixture syntax, and `git diff --check` are green.
+
+**Decision.** Phase 171 closes a direct truth mismatch in the browser chrome with no new routing
+model. Titles are a deterministic projection of the same top-level `view` that already owns the
+rendered page.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

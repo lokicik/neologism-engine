@@ -56,6 +56,13 @@ function randomSelectionSalt(): number {
 
 type View = 'landing' | AppView
 
+const VIEW_TITLES: Record<View, string> = {
+  landing: 'Neologism Engine — Startup & Project Name Generator',
+  create: 'Create — Neologism Engine',
+  studio: 'AI Studio — Neologism Engine',
+  saved: 'Saved — Neologism Engine',
+}
+
 export default function App() {
   // First visit shows the landing; share-URL visitors skip it and land on the
   // Saved page (they came for shared favorites). Entering is remembered.
@@ -90,6 +97,10 @@ export default function App() {
   // gets a new salt; infinite-scroll pages keep it so the session feels
   // coherent instead of changing preference direction on every append.
   const preferenceSaltRef = useRef<number | null>(null)
+
+  useEffect(() => {
+    document.title = VIEW_TITLES[view]
+  }, [view])
 
   useEffect(() => {
     if (pendingViewFocusRef.current !== view) return
