@@ -11,7 +11,7 @@ const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 7
+const EXPECTED_CHECKS = 8
 const FIRST_BRIEF = 'a comet calendar for astronomers'
 const NEXT_BRIEF = 'a bakery inventory manager'
 
@@ -68,12 +68,17 @@ try {
     firstFavorite?.tasteContext?.description === FIRST_BRIEF,
     'the initial visible card keeps the first brief provenance',
   )
+  const visibleTasteNote = (await page.locator('.taste-note').textContent())?.trim()
 
   await brief.fill(NEXT_BRIEF)
   await page.waitForTimeout(100)
   check(
     JSON.stringify(await page.locator('.results-grid .name-text').allTextContents()) === JSON.stringify(firstNames),
     'editing the next brief does not reinterpret or replace the visible page',
+  )
+  check(
+    (await page.locator('.taste-note').textContent())?.trim() === visibleTasteNote,
+    'editing the next brief does not relabel the visible page taste context',
   )
 
   await page.locator('.scroll-sentinel').scrollIntoViewIfNeeded()

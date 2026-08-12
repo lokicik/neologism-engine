@@ -6640,6 +6640,39 @@ while preserving editable next-request controls and the existing local generatio
 
 ---
 
+## Phase 207 — Keep visible result metadata with its project owner
+
+**Bottleneck.** Phase 206 fixed generation and card provenance, but Create still computed the
+visible local-taste note and result tips from the live command controls. Merely typing project B
+over project A's unchanged cards therefore relabeled the page as B's taste scope before B had ever
+generated a result. The cards and feedback were correct while their user-facing explanation was
+not.
+
+**Frozen boundary.** Create now renders result-derived taste scope, recommendations, and card
+entrance grouping from the successful generation configuration that owns the visible page. The
+command controls remain freely editable and continue to define the next explicit request. A
+successful fresh generation updates the visible owner; an edit alone does not. Generation,
+ranking, feedback identity, storage, network behavior, focus, layout, and Rust remain unchanged.
+
+| Before | After |
+| --- | --- |
+| Typing project B changed the local-taste note above project A's unchanged cards. | The note remains attached to project A until B successfully produces a fresh page. |
+| Tips could describe visible metrics using draft controls that did not produce those results. | Result-derived tips use the same frozen configuration as the visible metrics and cards. |
+| Card entrance grouping read the mutable next-request count. | It reads the count that owns the visible result page. |
+
+**Acceptance evidence.** Extending the Phase 206 production fixture first produced exactly one new
+failure against the committed build: project B edits changed project A's visible taste note. The
+cards, append provenance, context ids, and network/error gates stayed green. After separating the
+render owner from the draft configuration, the fixture passes **8/8** and the retained Create
+generation focus/failure/duplicate-work fixture remains **19/19**.
+
+TypeScript and the production Vite build are green.
+
+**Decision.** Phase 207 makes Create's visible explanation agree with the result data it describes,
+without turning the command bar into a locked or destructive form.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

@@ -87,6 +87,7 @@ export default function App() {
     return viewFromHistoryState(history.state) ?? (hasVisited() ? 'create' : 'landing')
   })
   const [config, setConfig] = useState<Config>(DEFAULT_CONFIG)
+  const [generationConfig, setGenerationConfig] = useState<Config>(DEFAULT_CONFIG)
   const [results, setResults] = useState<NameResult[]>([])
   const [metrics, setMetrics] = useState<BatchMetrics | null>(null)
   const [favorites, setFavorites] = useState<NameResult[]>(loadFavorites)
@@ -328,7 +329,10 @@ export default function App() {
       }
       setPromptKeywords(cfg.description?.trim() ? await extractKeywords(cfg.description) : [])
       setExhausted(pool.length === 0)
-      if (!append) generationConfigRef.current = cfg
+      if (!append) {
+        generationConfigRef.current = cfg
+        setGenerationConfig(cfg)
+      }
       // Taste profiles select from a larger pool and may add a small Compound
       // accent pool when positive examples strongly prefer two-part names.
       // Cold Auto opens its fallback only for weak/missing or repetitive slots.
@@ -526,7 +530,7 @@ export default function App() {
   const tasteFeedback = feedbackForContext(
     favorites,
     rejected,
-    tasteContextForConfig(config).id,
+    tasteContextForConfig(generationConfig).id,
   )
   const { profile, references: activeReferences } = buildReferencedProfile(
     tasteFeedback.favorites,
@@ -549,7 +553,7 @@ export default function App() {
   // Top pick of the batch (compared by name, so re-ranking doesn't break it).
   const bestName = metrics && results.length >= 2 ? results[metrics.stats.best_index]?.name : undefined
 
-  const tips = metrics ? recommendations(metrics.stats, config, results) : []
+  const tips = metrics ? recommendations(metrics.stats, generationConfig, results) : []
 
   if (view === 'landing') {
     return (
@@ -669,7 +673,7 @@ export default function App() {
                         isRejected={rejectedKeys.has(tasteIdentity(r))}
                         onToggleRejected={handleToggleRejected}
                         isBest={r.name === bestName}
-                        appearDelay={(i % (config.count ?? 10)) * 45}
+                        appearDelay={(i % (generationConfig.count ?? 10)) * 45}
                       />
                     ))}
                   </div>
