@@ -5420,6 +5420,43 @@ rendered page.
 
 ---
 
+## Phase 172 — Give Create a truthful primary heading
+
+**Bottleneck.** Landing, AI Studio, and Saved each exposed exactly one descriptive `h1`, but Create
+started directly with the command bar and exposed no primary heading. The browser title and sidebar
+could identify Create after Phases 170–171, yet heading navigation skipped the product's main page.
+Adding a visible heading would change the intentionally compact command-bar layout.
+
+**Frozen boundary.** This phase adds one `Create names` heading to the existing Create fragment, a
+scoped visually-hidden style, one production-browser fixture, and documentation. It does not alter
+the command bar's position or dimensions, visible typography, focus order, titles, navigation,
+Settings, storage, generation, ranking, WASM, Rust, or network behavior.
+
+| Before | After |
+| --- | --- |
+| Landing, Studio, and Saved had an `h1`; Create had none. | Every top-level view exposes exactly one truthful `h1`. |
+| Heading navigation could not identify the primary Create page. | `Create names` identifies it in the accessibility tree. |
+| A visible repair risked shifting the compact command surface. | The heading uses a scoped 1×1 absolute clipping pattern and occupies no command-bar layout space. |
+| Settings inherited whichever page heading happened to exist beneath it. | The modal consistently leaves one underlying page `h1`, including Saved. |
+
+**Acceptance evidence.** The new `page-heading.mjs` production fixture passes **10/10** after the
+pre-fix build failed all three Create-heading checks while Landing, Studio, Saved, Settings,
+network, and page-error controls passed. At 390 pixels it proves exactly one truthful heading on
+each top-level view; an accessibility-visible Create heading whose computed box is at most 1×1 and
+absolutely positioned; Settings neutrality; pointer return to Create; zero external HTTPS
+requests; and zero page errors.
+
+Retained production-browser contracts remain green at view title **11/11** and responsive shell
+**17/17**, preserving browser-page truth, command/shell geometry, narrow containment, storage, and
+network boundaries. TypeScript, the production Vite build, fixture syntax, and `git diff --check`
+are green.
+
+**Decision.** Phase 172 completes the page-heading hierarchy without turning a semantic repair into
+a visual redesign. Create now matches the other top-level pages while preserving the established
+command-first composition.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

@@ -536,6 +536,7 @@ export default function App() {
           />
         ) : (
           <>
+            <h1 className="create-page-title">Create names</h1>
             <CommandBar
               config={config}
               onChange={setConfig}
