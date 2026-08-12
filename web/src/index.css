@@ -1388,6 +1388,16 @@ body {
 .command-go:hover { opacity: .88; }
 .command-go:active { transform: scale(.96); }
 .command-go:disabled { opacity: .45; cursor: not-allowed; }
+.command-area .command-go[aria-disabled="true"] {
+  opacity: .7;
+  cursor: progress;
+  transform: none;
+}
+.command-area .command-go[aria-disabled="true"]:hover { opacity: .7; }
+.command-area .command-go:focus-visible {
+  outline: 2px solid rgba(124, 106, 249, .9);
+  outline-offset: 2px;
+}
 
 /* Phase 50: naming style as always-visible segmented pills (was a hidden
    dropdown chip). Brandable is the default/primary; each pill shows a live

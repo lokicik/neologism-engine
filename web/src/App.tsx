@@ -163,15 +163,17 @@ export default function App() {
   // lets the empty-state example chips set a description and generate in one
   // step without racing the config state update.
   const handleGenerate = useCallback(async (append = false, cfgOverride?: Config) => {
-    const cfg = cfgOverride ?? config
-    // One random seed per click keeps every local sub-pool reproducible as a
-    // unit while still giving an unseeded user a fresh result on every click.
-    const generationSeed = cfg.seed ?? randomSelectionSalt()
-    const generationCfg = { ...cfg, seed: generationSeed }
-    lastGenerateRef.current = Date.now()
+    if (loadingRef.current) return
+    loadingRef.current = true
     setLoading(true)
     setError(null)
     try {
+      const cfg = cfgOverride ?? config
+      // One random seed per click keeps every local sub-pool reproducible as a
+      // unit while still giving an unseeded user a fresh result on every click.
+      const generationSeed = cfg.seed ?? randomSelectionSalt()
+      const generationCfg = { ...cfg, seed: generationSeed }
+      lastGenerateRef.current = Date.now()
       const feedback = feedbackForContext(
         favoritesRef.current,
         rejectedRef.current,
@@ -256,9 +258,10 @@ export default function App() {
       // options instead of burning up to fifty unseen names per click.
       markSeen(batch)
       setMetrics(shown.length > 0 ? await batchMetrics(shown) : null)
-      setLoading(false)
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err))
+    } finally {
+      loadingRef.current = false
       setLoading(false)
     }
   }, [config, tasteReferences])

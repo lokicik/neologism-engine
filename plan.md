@@ -4959,6 +4959,61 @@ as permanent work, and recovery stays explicit, focused, local, and side-effect 
 
 ---
 
+## Phase 162 — Keep Create generation focused and single-operation
+
+**Bottleneck.** Create's persistent **Generate** button used native `disabled` as soon as work
+started. Chromium immediately moved keyboard focus to `BODY`, so neither a failed local load nor a
+successful page returned focus to the action that initiated it. The control exposed no `aria-busy`
+state. `handleGenerate` also lacked its own synchronous operation guard, leaving correctness to a
+rendered button state and the separate infinite-scroll observer check.
+
+**Frozen boundary.** This phase changes only the Create Generate action, App's ownership of that one
+logical operation, scoped busy/focus styling, one forced-failure production fixture, and
+documentation. It does not change name generation, seed values, pool composition, ranking, error
+copy, recent-history semantics, automatic continuation cadence, AI Studio, filters, taste/Saved,
+storage schemas, WASM, Rust, or network policy. The observed initial parallel local WASM load burst
+is explicitly baselined rather than folded into this UI/focus checkpoint.
+
+**Busy, duplicate, and recovery contract.** Generate remains a native button but no longer sets its
+native `disabled` property. While loading it exposes `aria-disabled=true` and `aria-busy=true`, keeps
+a visible two-pixel focus ring and readable progress styling, and rejects click or Enter in
+CommandBar. App owns a synchronous `loadingRef` guard as the final boundary, covering the entire
+operation from seed preparation through the existing `try/catch/finally`; `finally` clears both the
+guard and visible loading state on every exit. Failure retains the existing error banner and focused
+Generate action. A new activation is an ordinary retry; success clears the prior error, returns ten
+cards, keeps focus, and records exactly those shown names.
+
+| Before | After |
+| --- | --- |
+| Native disabling moved Generate focus to `BODY` during work. | The persistent action stays focusable through pending, failed, and successful states. |
+| Loading was visible only through changed button text. | The action exposes explicit busy and disabled semantics while retaining native focusability. |
+| Repeated activation relied on the next React render. | CommandBar rejects rendered-busy input and App synchronously guards the logical operation. |
+| Early preparation sat outside a shared cleanup boundary. | Seed preparation and all generation work release the guard through one `finally`. |
+| Busy styling dimmed the focused action without a scoped contract. | A 70%-opacity progress state and solid two-pixel ring remain readable at 390 pixels. |
+| Failure required the user to find the action again. | The existing error appears while Generate remains focused and immediately retryable. |
+
+**Acceptance evidence.** The new `create-generation-focus.mjs` production fixture passes **16/16**
+after reproducing the native-disabled focus loss against the pre-fix build. At 390 pixels it holds
+and rejects the first local WASM request, proves focusable busy/disabled state, a solid two-pixel
+ring, no additional work from repeated Enter or click, focused idle recovery, the existing error
+banner, and byte-identical storage after failure. One normal retry returns ten cards, clears the
+error and busy state, retains focus, writes exactly those ten visible names to recent history, leaves
+an unrelated key intact, and emits zero page errors or external HTTPS requests. The fixture treats
+the initial internal WASM request burst as its baseline and proves repeat activation adds nothing;
+the one retry adds at most one initialization request. Visual review confirms the focused progress
+button is legible, contained, and clearly outlined on the 390-pixel Create surface.
+
+Retained production contracts remain green at Create-filter keyboard **46/46** and the brief-session
+browser flow, which still reaches 100 unique names without false exhaustion and keeps visible keyword
+trace plus rolling history aligned. TypeScript, the production Vite build, fixture syntax, and
+`git diff --check` are green.
+
+**Decision.** Phase 162 removes a high-frequency keyboard focus loss and gives the core offline
+action one honest operation boundary. It does not claim that internal WASM initialization is now
+coalesced; that separately observed efficiency issue remains a candidate for its own measured phase.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

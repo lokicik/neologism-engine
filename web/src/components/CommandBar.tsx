@@ -159,6 +159,10 @@ export function CommandBar({
   const set = <K extends keyof Config>(key: K, value: Config[K]) =>
     onChange({ ...config, [key]: value })
 
+  const generate = () => {
+    if (!loading) onGenerate()
+  }
+
   return (
     <div className="command-area">
       <div className="command-bar">
@@ -170,10 +174,16 @@ export function CommandBar({
           value={config.description ?? ''}
           onChange={(e) => set('description', e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === 'Enter' && !loading) onGenerate()
+            if (e.key === 'Enter') generate()
           }}
         />
-        <button className="command-go" onClick={onGenerate} disabled={loading}>
+        <button
+          type="button"
+          className="command-go"
+          aria-disabled={loading}
+          aria-busy={loading}
+          onClick={generate}
+        >
           {loading ? 'Generating…' : 'Generate'}
         </button>
       </div>
