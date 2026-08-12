@@ -1099,6 +1099,8 @@ body {
 .settings-data p { margin: 0; font-size: .74rem; line-height: 1.45; color: var(--muted); text-wrap: pretty; }
 .settings-data-meta { font-variant-numeric: tabular-nums; }
 .settings-data-evidence { color: var(--accent) !important; font-variant-numeric: tabular-nums; }
+.settings-data p.taste-export-status { color: var(--accent2); }
+.settings-data p.taste-export-error { color: var(--danger); }
 .taste-export-btn { flex-shrink: 0; min-height: 40px; }
 .taste-export-btn:disabled { opacity: .45; cursor: not-allowed; }
 .taste-export-btn:disabled:active { transform: none; }

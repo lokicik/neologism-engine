@@ -92,11 +92,14 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
   const [passUndoStatus, setPassUndoStatus] = useState<string | null>(null)
   const [likeUndoError, setLikeUndoError] = useState<string | null>(null)
   const [likeUndoStatus, setLikeUndoStatus] = useState<string | null>(null)
+  const [tasteExportError, setTasteExportError] = useState<string | null>(null)
+  const [tasteExportStatus, setTasteExportStatus] = useState<string | null>(null)
   const [saveError, setSaveError] = useState<string | null>(null)
   const modalRef = useRef<HTMLDivElement>(null)
   const closeRef = useRef<HTMLButtonElement>(null)
   const cancelRef = useRef<HTMLButtonElement>(null)
   const saveRef = useRef<HTMLButtonElement>(null)
+  const tasteExportRef = useRef<HTMLButtonElement>(null)
   const comboRef = useRef<HTMLDivElement>(null)
   const modelInputRef = useRef<HTMLInputElement>(null)
   const settingsTitleId = useId()
@@ -163,6 +166,18 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
     }
     setSaveError(null)
     onClose()
+  }
+
+  const exportTaste = () => {
+    setTasteExportError(null)
+    setTasteExportStatus(null)
+    try {
+      exportTasteDataset(favorites, rejected)
+      setTasteExportStatus('Taste data download started.')
+    } catch {
+      setTasteExportError('Could not start the taste data download.')
+      requestAnimationFrame(() => tasteExportRef.current?.scrollIntoView({ block: 'nearest' }))
+    }
   }
 
   const pickList: ModelInfo[] = models.length
@@ -529,12 +544,15 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
               Evidence · {evidenceProgress.matchedLiked}/10 matched likes · {evidenceProgress.matchedPassed}/10 matched passes · {evidenceProgress.matchedContexts} project {evidenceProgress.matchedContexts === 1 ? 'context' : 'contexts'}
             </p>
             <p>Keep rating both sides for the same project. Export includes each brief — never your API key or recent-name history.</p>
+            {tasteExportStatus && <p className="taste-export-status" role="status">{tasteExportStatus}</p>}
+            {tasteExportError && <p className="taste-export-error" role="alert">{tasteExportError}</p>}
           </div>
           <button
+            ref={tasteExportRef}
             type="button"
             className="toolbar-btn taste-export-btn"
             disabled={feedbackCount === 0}
-            onClick={() => exportTasteDataset(favorites, rejected)}
+            onClick={exportTaste}
           >
             <IconDownload /> Export JSON
           </button>

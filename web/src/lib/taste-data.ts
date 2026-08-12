@@ -118,6 +118,9 @@ export function exportTasteDataset(favorites: NameResult[], rejected: NameResult
   const anchor = document.createElement('a')
   anchor.href = url
   anchor.download = 'neologism-taste.json'
-  anchor.click()
-  URL.revokeObjectURL(url)
+  try {
+    anchor.click()
+  } finally {
+    URL.revokeObjectURL(url)
+  }
 }

@@ -6202,6 +6202,38 @@ changing its compact command-bar layout or behavior.
 
 ---
 
+## Phase 194 — Make taste-data downloads fail visibly and retry cleanly
+
+**Bottleneck.** Saved TXT/JSON downloads already caught browser setup failures, but Settings called
+the taste-data exporter directly. If object-URL creation or the synthetic download click threw, the
+modal showed neither an error nor a retry boundary and the exception escaped as a page error. A
+click failure also skipped object-URL cleanup.
+
+**Frozen boundary.** This phase keeps `neologism-taste-v2`, dataset contents, filename, evidence
+counts, Settings layout, browser storage, network behavior, and every generator/ranker path
+unchanged. It adds only a Settings-local export handler with live success/error copy and a
+`try/finally` around the existing synthetic download click.
+
+| Before | After |
+| --- | --- |
+| A browser download exception escaped the Settings action. | The modal shows `Could not start the taste data download.` as a live error. |
+| No download could still look like an inert click. | Failure starts no download, leaves no false success, and keeps focus on Export JSON. |
+| A throwing anchor click leaked its temporary object URL. | Failed and successful click paths both revoke the URL. |
+| Recovery was unverified. | A second activation downloads the same current v2 dataset and replaces the error with an exact live success. |
+
+**Acceptance evidence.** The production liked-review fixture now forces the first anchor click to
+throw after object-URL creation, then retries normally. It passes **29/29**, including zero false
+downloads, exact alert/status text, invoking-focus retention, unchanged v2 contents, and one URL
+revocation per attempt. Retained Settings keyboard passes **48/48**, and the retained taste/Saved
+browser flow remains green.
+
+TypeScript and the production Vite build are green; `git diff --check` is green.
+
+**Decision.** Phase 194 makes the existing local evidence export honest under a browser failure
+without changing what is exported or introducing persistence, network, or schema work.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

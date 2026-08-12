@@ -16,7 +16,7 @@ const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
 const FAVORITES_KEY = 'neologism:favorites'
 const REJECTED_KEY = 'neologism:rejected'
 const IMPORTED_KEY = 'neologism:imported-saved'
-const EXPECTED_CHECKS = 26
+const EXPECTED_CHECKS = 29
 
 mkdirSync(SHOTS, { recursive: true })
 
@@ -241,8 +241,42 @@ try {
     'undo updates derived pairs and scoped evidence without counting legacy',
   )
 
+  await page.evaluate(() => {
+    const originalRevoke = URL.revokeObjectURL.bind(URL)
+    const originalAnchorClick = HTMLAnchorElement.prototype.click
+    window.__tasteExportProbe = { failedOnce: false, revokes: 0 }
+    HTMLAnchorElement.prototype.click = function click() {
+      if (!window.__tasteExportProbe.failedOnce) {
+        window.__tasteExportProbe.failedOnce = true
+        throw new Error('taste export fixture rejection')
+      }
+      return originalAnchorClick.call(this)
+    }
+    URL.revokeObjectURL = (url) => {
+      window.__tasteExportProbe.revokes++
+      originalRevoke(url)
+    }
+  })
+  let exportDownloads = 0
+  page.on('download', () => { exportDownloads++ })
+  const exportButton = page.locator('.taste-export-btn')
+  await exportButton.click()
+  await page.locator('.taste-export-error').waitFor({ state: 'visible' })
+  check(
+    (await page.locator('.taste-export-error').textContent())?.trim() === 'Could not start the taste data download.'
+      && await page.locator('.taste-export-error').getAttribute('role') === 'alert'
+      && await exportButton.evaluate((element) => document.activeElement === element),
+    'failed taste export exposes an exact live error and preserves invoking focus',
+  )
+  check(
+    exportDownloads === 0
+      && await page.locator('.taste-export-status').count() === 0
+      && await page.evaluate(() => window.__tasteExportProbe.revokes === 1),
+    'failed taste export starts no download, leaves no false success, and revokes its object URL',
+  )
+
   const downloadPromise = page.waitForEvent('download')
-  await page.locator('.taste-export-btn').click()
+  await exportButton.click()
   const download = await downloadPromise
   const exported = JSON.parse(await readDownload(download))
   check(
@@ -258,6 +292,14 @@ try {
     exported.examples.filter((example) => example.label === 'liked').map((example) => tasteKey(example.result)).sort().join('|')
       === [tasteKey(likeB), tasteKey(likeLegacy)].sort().join('|'),
     'export excludes only project A and retains project B plus legacy',
+  )
+  check(
+    exportDownloads === 1
+      && (await page.locator('.taste-export-status').textContent())?.trim() === 'Taste data download started.'
+      && await page.locator('.taste-export-error').count() === 0
+      && await exportButton.evaluate((element) => document.activeElement === element)
+      && await page.evaluate(() => window.__tasteExportProbe.revokes === 2),
+    'retry downloads the same dataset, replaces the error, retains focus, and revokes its object URL',
   )
 
   await page.getByTitle('Close').click()
