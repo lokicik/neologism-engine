@@ -6330,6 +6330,40 @@ or adding another visible notification surface.
 
 ---
 
+## Phase 198 — Announce only verified AI Studio rankings
+
+**Bottleneck.** AI Studio already kept its local 24-name pool visible on ranking failure, preserved
+the last verified metric/order, exposed a live recovery alert, guarded concurrent requests, and
+restored focus. Successful ranking still changed only the visual cards and metadata, so assistive
+technology received a strong failure signal but no equivalent completion signal.
+
+**Frozen boundary.** This phase adds one persistent visually hidden atomic polite channel. Starting
+generation or ranking clears it; every failure leaves it empty so the existing alert remains the
+sole live failure owner. A fresh, retried, or cached verified result says only
+`24 names ranked by <metric>.` The model request, prompt, pool, cache, race guard, displayed metadata,
+reasons, pick, focus, storage, network provider, Create, taste, generator, and Rust remain unchanged.
+
+| Before | After |
+| --- | --- |
+| Verified ranking completion changed only visual cards/meta. | Studio announces `24 names ranked by Brandable.` |
+| A retry success removed its alert without a positive completion signal. | Brandable and Premium retries announce their exact verified metric. |
+| Returning to cached ranking was visually instant but silent. | Cached Brandable adds no request and announces the restored verified ranking. |
+| Failure already had a live alert. | The success channel stays empty on both first and later failure, avoiding false or competing success. |
+
+**Acceptance evidence.** The production AI Studio failure/race fixture now passes **37/37**. It
+gates empty success state on first/later failure, exact Brandable and Premium retry totals, initial
+success, zero-request cached restoration, 24 names/reasons and one pick, frozen pool/criterion,
+truthful displayed metadata, duplicate-operation rejection, invoking focus, Settings restoration,
+390/320-pixel containment, byte-identical storage, and zero unexpected external requests or page
+errors.
+
+TypeScript and the production Vite build are green; `git diff --check` is green.
+
+**Decision.** Phase 198 gives successful optional AI work an explicit completion signal without
+weakening the already-frozen failure truth boundary or implying that an unranked fallback succeeded.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

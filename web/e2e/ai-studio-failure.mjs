@@ -11,7 +11,7 @@ const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 33
+const EXPECTED_CHECKS = 37
 
 const server = spawn(process.execPath, [viteCli, 'preview', '--port', String(PORT), '--strictPort'], {
   cwd: WEB_DIR,
@@ -155,6 +155,7 @@ try {
     })
     const storageBefore = await storageSnapshot(page)
     const generate = page.getByRole('button', { name: 'Generate', exact: true })
+    const rankingStatus = page.locator('.studio-ranking-status')
     await generate.focus()
     await page.keyboard.press('Enter')
     const alert = page.getByRole('alert')
@@ -169,7 +170,11 @@ try {
     )
     check(/real, distinctive brand/i.test(calls[0]?.criterion ?? ''), 'first request freezes the Brandable criterion')
     check(
-      (await alert.textContent())?.includes('Brandable ranking is unavailable. Showing the unranked local pool.'),
+      (await alert.textContent())?.includes('Brandable ranking is unavailable. Showing the unranked local pool.')
+        && await rankingStatus.getAttribute('role') === 'status'
+        && await rankingStatus.getAttribute('aria-live') === 'polite'
+        && await rankingStatus.getAttribute('aria-atomic') === 'true'
+        && (await rankingStatus.textContent())?.trim() === '',
       'first failure exposes its exact accessible Brandable fallback message',
     )
     check(first.names.join('|') === calls[0].names.join('|'), 'all 24 cards remain in exact local engine order')
@@ -212,6 +217,10 @@ try {
       recovered.reasons.length === 24 && recovered.picks.length === 1 && recovered.meta.includes('Ranked by Brandable'),
       'successful Retry produces 24 reasons, one pick, and the true Brandable label',
     )
+    check(
+      (await rankingStatus.textContent())?.trim() === '24 names ranked by Brandable.',
+      'successful Retry announces the exact verified ranking total and label',
+    )
     check(await brandableChip.evaluate((button) => document.activeElement === button), 'successful Retry restores focus before removing its button')
     const fit = await horizontalFit(page)
     check(fit.fits && fit.scrollX === 0 && fit.scrollWidth <= fit.viewport + 1, `390px fallback and recovered cards stay horizontally contained (${JSON.stringify(fit)})`)
@@ -246,6 +255,7 @@ try {
     })
     const storageBefore = await storageSnapshot(page)
     const generate = page.getByRole('button', { name: 'Generate', exact: true })
+    const rankingStatus = page.locator('.studio-ranking-status')
     await generate.focus()
     await page.keyboard.press('Enter')
     await page.waitForFunction(() => document.querySelectorAll('.ai-studio .card-ai-reason').length === 24)
@@ -253,6 +263,10 @@ try {
     check(
       calls.length === 1 && brandable.reasons.length === 24 && brandable.picks.length === 1 && brandable.meta.includes('Ranked by Brandable'),
       'initial successful ranking establishes a complete truthful Brandable view',
+    )
+    check(
+      (await rankingStatus.textContent())?.trim() === '24 names ranked by Brandable.',
+      'initial success announces only the completed Brandable ranking',
     )
 
     const premium = page.getByRole('button', { name: 'Premium', exact: true })
@@ -275,7 +289,8 @@ try {
     await page.locator('.ai-studio').screenshot({ path: join(E2E_DIR, 'shots', 'ai-studio-later-failure-320.png') })
     check(calls.length === 2, 'Premium failure never auto-retries')
     check(
-      (await alert.textContent())?.includes('Premium ranking is unavailable. Still showing the Brandable ranking.'),
+      (await alert.textContent())?.includes('Premium ranking is unavailable. Still showing the Brandable ranking.')
+        && (await rankingStatus.textContent())?.trim() === '',
       'later failure names both the failed Premium attempt and preserved Brandable view',
     )
     check(
@@ -310,7 +325,22 @@ try {
         && premiumRecovered.picks.length === 1,
       'successful Premium Retry replaces the view with its own reasons, pick, and label',
     )
+    check(
+      (await rankingStatus.textContent())?.trim() === '24 names ranked by Premium.',
+      'Premium Retry announces only its completed verified ranking',
+    )
     check(await premium.evaluate((button) => document.activeElement === button), 'Premium Retry restores focus to its persistent metric chip')
+    const brandableChip = page.getByRole('button', { name: 'Brandable', exact: true })
+    await brandableChip.click()
+    await page.waitForFunction(() => document.querySelector('.studio-ranking-status')?.textContent?.includes('Brandable'))
+    const cachedBrandable = await resultSnapshot(page)
+    check(
+      calls.length === 3
+        && cachedBrandable.reasons.every((reason) => reason.includes('brandable'))
+        && (await rankingStatus.textContent())?.trim() === '24 names ranked by Brandable.'
+        && await brandableChip.evaluate((button) => document.activeElement === button),
+      'cached Brandable return adds no request and announces the restored verified ranking',
+    )
     const fit = await horizontalFit(page)
     check(fit.fits && fit.scrollX === 0 && fit.scrollWidth <= fit.viewport + 1, `320px alert, recovery actions, and cards stay horizontally contained (${JSON.stringify(fit)})`)
     check(await storageSnapshot(page) === storageBefore, 'later-failure and Retry lifecycle leaves browser storage byte-identical')

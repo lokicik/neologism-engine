@@ -49,6 +49,7 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
   const [view, setView] = useState<Ranked>({ ranked: [], reasons: new Map() })
   const [busy, setBusy] = useState<'idle' | 'generating' | 'ranking'>('idle')
   const [notice, setNotice] = useState<string | null>(null)
+  const [rankingStatus, setRankingStatus] = useState('')
   const [activeRank, setActiveRank] = useState<RankAttempt | null>(null)
   const [failedRank, setFailedRank] = useState<RankAttempt | null>(null)
   // Per-metric cache so flipping back to a metric is instant (no re-call).
@@ -107,6 +108,7 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
       operationActive.current = true
     }
     const requestId = ++rankRequestId.current
+    setRankingStatus('')
     const finish = () => {
       if (requestId !== rankRequestId.current) return
       operationActive.current = false
@@ -117,6 +119,7 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
     if (cached && cached.ranked.length === poolToRank.length) {
       if (options.fromRetry) focusRankControl(attempt)
       setView(cached)
+      setRankingStatus(`${cached.ranked.length} names ranked by ${attempt.label}.`)
       setNotice(null)
       setFailedRank(null)
       finish()
@@ -154,6 +157,7 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
     cache.current.set(attempt.cacheKey, next)
     if (options.fromRetry) focusRankControl(attempt)
     setView(next)
+    setRankingStatus(`${next.ranked.length} names ranked by ${attempt.label}.`)
     setNotice(null)
     setFailedRank(null)
     finish()
@@ -173,6 +177,7 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
     const cacheKeySnapshot = cacheKey(metricSnapshot)
     setBusy('generating')
     setNotice(null)
+    setRankingStatus('')
     setFailedRank(null)
     setActiveRank(null)
     try {
@@ -192,6 +197,7 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
       setPool(p)
       setView({ ranked: p, reasons: new Map() })
       if (!criterionSnapshot) {
+        setRankingStatus(`${p.length} unranked local names shown.`)
         operationActive.current = false
         setBusy('idle')
         return
@@ -247,6 +253,14 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
         Generate a batch, then rank it by what matters — the engine creates the names, your
         configured model ranks them and says why.
       </p>
+      <div
+        className="visually-hidden studio-ranking-status"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {rankingStatus}
+      </div>
 
       {!ready ? (
         <div className="studio-setup">
