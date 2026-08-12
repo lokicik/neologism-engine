@@ -11,7 +11,7 @@ const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 16
+const EXPECTED_CHECKS = 19
 
 const server = spawn(process.execPath, [viteCli, 'preview', '--port', String(PORT), '--strictPort'], {
   cwd: WEB_DIR,
@@ -70,6 +70,7 @@ try {
   page.on('pageerror', (error) => pageErrors.push(error.message))
   await page.goto(APP_URL)
   const generate = page.locator('.command-area .command-bar .command-go')
+  const resultStatus = page.locator('.create-results-status')
   const storageBefore = await page.evaluate(() => JSON.stringify(localStorage))
 
   await generate.focus()
@@ -85,6 +86,13 @@ try {
   check(
     await generate.evaluate((element) => document.activeElement === element),
     'Generate retains focus while the first local request is pending',
+  )
+  check(
+    await resultStatus.getAttribute('role') === 'status'
+      && await resultStatus.getAttribute('aria-live') === 'polite'
+      && await resultStatus.getAttribute('aria-atomic') === 'true'
+      && (await resultStatus.textContent())?.trim() === '',
+    'Create owns one empty atomic polite result channel while generation is pending',
   )
   check(
     await generate.evaluate((element) => {
@@ -124,7 +132,8 @@ try {
   check(
     ((await page.locator('.error-banner').textContent()) ?? '').trim().length > 0
       && await page.locator('.error-banner').getAttribute('role') === 'alert'
-      && await page.locator('.error-banner').getAttribute('aria-atomic') === 'true',
+      && await page.locator('.error-banner').getAttribute('aria-atomic') === 'true'
+      && (await resultStatus.textContent())?.trim() === '',
     'the existing Create error remains visible and is announced atomically after failure',
   )
   check(
@@ -139,6 +148,10 @@ try {
   const shownNames = await page.locator('.results-grid .name-text').allTextContents()
   const recent = await page.evaluate(() => JSON.parse(localStorage.getItem('neologism:recent') ?? '[]'))
   check(await page.locator('.results-grid .name-card').count() === 10, 'retry returns one full ten-card Create page')
+  check(
+    (await resultStatus.textContent())?.trim() === '10 names shown.',
+    'successful retry announces the exact visible result count through the persistent status channel',
+  )
   check(
     await generate.evaluate((element) => document.activeElement === element),
     'successful generation also leaves focus on the persistent Generate action',
@@ -160,6 +173,15 @@ try {
   check(
     wasmRequests >= initialWasmBurst && wasmRequests <= initialWasmBurst + 1,
     `one retry adds at most one local initialization request (${initialWasmBurst} → ${wasmRequests})`,
+  )
+  await page.locator('.sidebar-item', { hasText: 'Saved' }).click()
+  const statusUnmounted = await page.locator('.create-results-status').count() === 0
+  await page.locator('.sidebar-item', { hasText: 'Create' }).click()
+  check(
+    statusUnmounted
+      && (await page.locator('.create-results-status').textContent())?.trim() === ''
+      && await page.locator('.results-grid .name-card').count() === 10,
+    'leaving and returning keeps the result page but cannot replay its stale live count',
   )
   check(external.length === 0, `Create focus recovery produces zero external HTTPS requests (${external.join(' | ')})`)
   check(pageErrors.length === 0, `Create focus recovery produces zero page errors (${pageErrors.join(' | ')})`)

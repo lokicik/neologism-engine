@@ -101,6 +101,7 @@ export default function App() {
   // generation (Phase 48) — shown so users see what drove their batch.
   const [promptKeywords, setPromptKeywords] = useState<string[]>([])
   const [error, setError] = useState<string | null>(null)
+  const [generationStatus, setGenerationStatus] = useState('')
   const [feedbackError, setFeedbackError] = useState<string | null>(null)
   const [tasteReferenceError, setTasteReferenceError] = useState<string | null>(null)
   // AI model config (used by the AI Studio); configured once via Settings.
@@ -122,6 +123,10 @@ export default function App() {
     viewRef.current = next
     setView(next)
   }, [])
+
+  useEffect(() => {
+    if (view !== 'create') setGenerationStatus('')
+  }, [view])
 
   useEffect(() => {
     history.replaceState(historyStateFor(viewRef.current), '', location.href)
@@ -237,6 +242,7 @@ export default function App() {
     loadingRef.current = true
     setLoading(true)
     setError(null)
+    setGenerationStatus('')
     try {
       const cfg = cfgOverride ?? config
       // One random seed per click keeps every local sub-pool reproducible as a
@@ -323,6 +329,9 @@ export default function App() {
       // Cold Auto opens its fallback only for weak/missing or repetitive slots.
       const shown = append ? [...resultsRef.current, ...batch] : batch
       setResults(shown)
+      setGenerationStatus(
+        viewRef.current === 'create' && shown.length > 0 ? `${shown.length} names shown.` : '',
+      )
       // Recent history represents names the user actually saw. Keeping hidden
       // shortlist candidates eligible lets later pages reveal the next-best
       // options instead of burning up to fifty unseen names per click.
@@ -609,6 +618,14 @@ export default function App() {
             />
 
             <section className="canvas">
+              <div
+                className="visually-hidden create-results-status"
+                role="status"
+                aria-live="polite"
+                aria-atomic="true"
+              >
+                {generationStatus}
+              </div>
               {error && <div className="error-banner" role="alert" aria-atomic="true">{error}</div>}
 
               {promptKeywords.length > 0 && (results.length > 0 || exhausted) && (

@@ -46,6 +46,10 @@ try {
     timeout: 20000,
   })
   check(await page.locator('.name-card').count() === 10, 'the first Brandable batch remains ten names')
+  check(
+    (await page.locator('.create-results-status').textContent())?.trim() === '10 names shown.',
+    'the first long-session page announces its exact visible total',
+  )
 
   for (let attempt = 0; attempt < 12; attempt++) {
     const before = await page.locator('.name-card').count()
@@ -61,6 +65,10 @@ try {
   const names = await page.locator('.name-text').allTextContents()
   const lowered = names.map((name) => name.toLowerCase())
   check(names.length >= 100, `infinite scroll reaches at least 100 names (got ${names.length})`)
+  check(
+    (await page.locator('.create-results-status').textContent())?.trim() === `${names.length} names shown.`,
+    'infinite scroll updates the same live channel to the exact visible total',
+  )
   check(new Set(lowered).size === names.length, 'the browser session contains no repeated names')
   check(await page.locator('.exhausted-notice').count() === 0, 'the brief is not falsely marked exhausted')
   const recentCount = await page.evaluate(() => {

@@ -6264,6 +6264,39 @@ Saved data or user-visible happy path.
 
 ---
 
+## Phase 196 — Announce successful Create result totals
+
+**Bottleneck.** Create already kept keyboard focus on Generate, exposed busy semantics, announced
+failures atomically, and announced true exhaustion. A successful generation, however, only changed
+the visual grid and button text. With focus intentionally staying on Generate, assistive technology
+had no explicit completion or result-count signal.
+
+**Frozen boundary.** This phase adds one persistent visually hidden `role=status` channel inside
+Create. It is empty while local work is pending, remains empty when the existing error alert owns a
+failure, and says only `<visible total> names shown.` after success. Leaving Create clears it so a
+later navigation cannot replay a stale count. Generation, ordering, metrics, focus, storage, recent
+history, infinite-scroll timing, network behavior, WASM, and Rust remain unchanged.
+
+| Before | After |
+| --- | --- |
+| A successful ten-card page had no live completion signal. | The atomic polite channel says `10 names shown.` |
+| Long sessions changed only the visual grid. | The same channel advances to the exact 100-name visible total. |
+| Error and success messaging had no explicit ownership boundary. | Pending/success status is cleared before work; the existing atomic alert remains the sole failure message. |
+
+**Acceptance evidence.** The production Create focus fixture passes **19/19** after a held local-load
+failure and successful retry. It gates the empty pending channel, unchanged atomic error path, exact
+ten-name success, invoking focus, duplicate-work suppression, shown-name history, unrelated storage,
+and zero page errors or external HTTPS requests. The production long-brief fixture also passes,
+including exact `10 names shown.` and `100 names shown.` updates while retaining 100 unique names,
+keyword trace, recent history, and no false exhaustion.
+
+TypeScript and the production Vite build are green; `git diff --check` is green.
+
+**Decision.** Phase 196 closes the successful-generation feedback gap for assistive technology
+without adding visual noise or changing the naming workflow.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
