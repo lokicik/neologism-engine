@@ -6710,6 +6710,42 @@ that cross-reload repeat protection succeeded, and automatically repairs durabil
 
 ---
 
+## Phase 209 — Import share hashes in an already-mounted tab
+
+**Bottleneck.** Share import ran only in a mount-time effect. Navigating an existing app tab to a
+valid URL that differed only by `#names=` performs a same-document `hashchange`, not a reload. The
+app therefore stayed on Create, imported nothing, and left the valid hash untouched. The same link
+worked only when it happened to open in a fresh document.
+
+**Frozen boundary.** The existing importer is now one idempotent handler used at mount and on
+`hashchange`. A valid runtime import keeps its share-only provenance, opens Saved, and replaces the
+current hash navigation entry with the Saved state after persistence succeeds. Back therefore
+returns to the pre-share page without replaying the consumed payload. Invalid hashes still fail
+closed; a valid import whose storage write fails still retains the hash as its recovery copy.
+Payload format, validation and size limits, dedupe, storage schema, taste/export exclusion,
+clipboard, network, generation, ranking, and Rust remain unchanged.
+
+| Before | After |
+| --- | --- |
+| A valid `#names=` navigation in an open tab did nothing. | The same mounted app imports it and opens Saved. |
+| The untouched hash remained in the address bar despite no recovery action. | Success consumes that exact history entry; failure retains it for recovery. |
+| Reopening the same runtime share had no importer contract. | Reopening is idempotent and keeps one Saved row per spelling. |
+
+**Acceptance evidence.** The new production-browser fixture failed four of eight gates against the
+committed build: Saved did not open, neither name persisted, the hash remained, and reopening still
+had no imported rows. Share-only taste and the page/network-error guards already stayed correct.
+After adding the runtime listener it passes **8/8**, including exact two-name persistence, zero
+explicit likes, successful hash consumption, Back to Create, and idempotent reopening.
+
+TypeScript and the production Vite build are green. The retained full share/taste production
+fixture passes all **61** checks, and view-history including recovery-hash preservation passes all
+**24** checks.
+
+**Decision.** Phase 209 makes a share link independent of whether the browser chooses a fresh load
+or same-document navigation, without weakening the existing recovery and taste boundaries.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

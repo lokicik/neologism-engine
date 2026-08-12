@@ -202,36 +202,53 @@ export default function App() {
     rejectedRef.current = rejected
   }, [rejected])
 
-  // On mount: a share URL adds names to Saved without pretending that the
-  // recipient explicitly liked them. Taste evidence remains action-derived.
+  // A share URL adds names to Saved without pretending that the recipient
+  // explicitly liked them. Listen after mount too: navigating to a hash-only
+  // share URL in an open tab does not reload the application.
   useEffect(() => {
-    const shared = decodeShareUrl()
-    if (shared.length === 0) {
-      // Invalid or unsupported payloads are not recoverable by retrying. A
-      // valid payload whose storage write fails follows the branch below and
-      // deliberately keeps its hash as the recovery copy.
-      if (location.hash.startsWith('#names=')) {
-        history.replaceState(historyStateFor(viewRef.current), '', location.pathname)
+    const importShared = () => {
+      const shared = decodeShareUrl()
+      if (shared.length === 0) {
+        // Invalid or unsupported payloads are not recoverable by retrying. A
+        // valid payload whose storage write fails follows the branch below and
+        // deliberately keeps its hash as the recovery copy.
+        if (location.hash.startsWith('#names=')) {
+          history.replaceState(historyStateFor(viewRef.current), '', location.pathname)
+        }
+        return
       }
-      return
+      // A valid share is an intentional entry into the app. Remember it so the
+      // recipient returns to the product, not the first-visit landing page,
+      // after the recovery hash has been cleared.
+      markVisited()
+      const stubs: NameResult[] = shared.map((item) => ({
+        name: item.name,
+        style: item.style,
+        score_pronounce: 0,
+        score_novelty: 0,
+        score_memorability: 0,
+        connotations: [],
+        syllables: 0,
+      }))
+      const imported = addImportedSaved(importedSavedRef.current, stubs)
+      importedSavedRef.current = imported.items
+      setImportedSaved(imported.items)
+      viewRef.current = 'saved'
+      setShowSettings(false)
+      setView('saved')
+      // Consume the current hash navigation entry on success, so Back returns
+      // to the page that was open before the share URL. Preserve the hash as
+      // the recovery copy if browser storage rejected the import.
+      history.replaceState(
+        historyStateFor('saved'),
+        '',
+        imported.persisted ? location.pathname : location.href,
+      )
     }
-    // A valid share is an intentional entry into the app. Remember it so the
-    // recipient returns to the product, not the first-visit landing page,
-    // after the recovery hash has been cleared.
-    markVisited()
-    const stubs: NameResult[] = shared.map((item) => ({
-      name: item.name,
-      style: item.style,
-      score_pronounce: 0,
-      score_novelty: 0,
-      score_memorability: 0,
-      connotations: [],
-      syllables: 0,
-    }))
-    const imported = addImportedSaved(importedSaved, stubs)
-    setImportedSaved(imported.items)
-    // Preserve the recovery URL if browser storage rejected the write.
-    if (imported.persisted) history.replaceState(historyStateFor(viewRef.current), '', location.pathname)
+
+    addEventListener('hashchange', importShared)
+    importShared()
+    return () => removeEventListener('hashchange', importShared)
   }, [])
 
   const markSeen = (names: NameResult[]) => {
