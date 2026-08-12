@@ -122,8 +122,10 @@ try {
     'failed generation leaves focus on Generate instead of BODY',
   )
   check(
-    ((await page.locator('.error-banner').textContent()) ?? '').trim().length > 0,
-    'the existing Create error surface remains visible after failure',
+    ((await page.locator('.error-banner').textContent()) ?? '').trim().length > 0
+      && await page.locator('.error-banner').getAttribute('role') === 'alert'
+      && await page.locator('.error-banner').getAttribute('aria-atomic') === 'true',
+    'the existing Create error remains visible and is announced atomically after failure',
   )
   check(
     await page.evaluate(() => JSON.stringify(localStorage)) === storageBefore,

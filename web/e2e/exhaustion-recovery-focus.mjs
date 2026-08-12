@@ -56,7 +56,14 @@ try {
   keyboardPage.on('pageerror', (error) => pageErrors.push(error.message))
   await keyboardPage.goto(APP_URL)
   await configureImpossibleConstraint(keyboardPage)
-  check(await keyboardPage.locator('.name-card').count() === 0, 'unreachable exact constraints produce zero misleading cards')
+  const exhaustionStatus = keyboardPage.locator('.exhausted-notice')
+  check(
+    await keyboardPage.locator('.name-card').count() === 0
+      && await exhaustionStatus.getAttribute('role') === 'status'
+      && await exhaustionStatus.getAttribute('aria-live') === 'polite'
+      && await exhaustionStatus.getAttribute('aria-atomic') === 'true',
+    'unreachable exact constraints produce zero misleading cards and one atomic polite status',
+  )
 
   const recovery = keyboardPage.getByRole('button', { name: 'Clear seen names & regenerate' })
   check(await recovery.evaluate((element) => {

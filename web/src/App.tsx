@@ -593,7 +593,7 @@ export default function App() {
             />
 
             <section className="canvas">
-              {error && <div className="error-banner">{error}</div>}
+              {error && <div className="error-banner" role="alert" aria-atomic="true">{error}</div>}
 
               {promptKeywords.length > 0 && (results.length > 0 || exhausted) && (
                 <p className="keyword-line" title="The keyword stems extracted from your description — every batch is built around them">
@@ -644,7 +644,7 @@ export default function App() {
               )}
 
               {exhausted && (
-                <div className="exhausted-notice">
+                <div className="exhausted-notice" role="status" aria-live="polite" aria-atomic="true">
                   <p>
                     You've seen every name this prompt can make. Try different words or
                     another mode — or clear your seen-names history and start over.

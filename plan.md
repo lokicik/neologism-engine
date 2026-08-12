@@ -5687,6 +5687,45 @@ shown everywhere else, while the product's recovery URL remains authoritative.
 
 ---
 
+## Phase 179 — Announce Create's terminal generation states
+
+**Bottleneck.** Create's local-engine failure and exact-filter exhaustion both rendered clear
+visible text, and their recovery controls retained keyboard focus correctly, but neither terminal
+message had live-region semantics. A screen-reader user could remain on the persistent Generate or
+recovery button without being told whether work failed or the reachable name space was exhausted.
+Making the whole results grid live would instead announce every card and create noise.
+
+**Frozen boundary.** This phase strengthens the two existing production fixtures and adds semantic
+attributes only to the already-visible terminal messages: an atomic alert for engine failure and an
+atomic polite status for exhaustion. It does not add a live results grid, change copy/layout/focus,
+alter error or recovery timing, touch history/storage, generation, scoring, ranking, WASM, Rust, or
+network behavior.
+
+| Before | After |
+| --- | --- |
+| Engine failure was visible but programmatically an ordinary `div`. | The same text is an atomic alert. |
+| Exhaustion mounted with recovery guidance but no status semantics. | The same notice is an atomic polite status. |
+| Focus stayed usable but did not communicate the terminal outcome. | Existing focus recovery and the terminal announcement complement each other. |
+| A broad live-grid fix could read ten cards on every batch. | Only exceptional terminal messages are live; successful result cards remain quiet. |
+
+**Acceptance evidence.** The tightened production fixtures first failed exactly their new semantic
+checks against the pre-fix build. After the attributes landed, Create generation focus passes
+**16/16** and exhaustion recovery passes **12/12**. The former proves atomic alert semantics after a
+held local-WASM failure, retained Generate focus, duplicate-operation suppression, clean retry, and
+exact recent history. The latter proves zero misleading cards plus one atomic polite status,
+mobile-safe recovery, repeated honest exhaustion, durable history clearing, successful recovery,
+pointer neutrality, and zero page errors.
+
+TypeScript and the production Vite build are green. Both retained fixtures preserve their existing
+storage, focus, viewport, request-count, and zero-external-network boundaries; fixture syntax and
+`git diff --check` are green.
+
+**Decision.** Phase 179 makes Create's two non-success outcomes perceivable without making routine
+generation verbose. It reuses the product's already-truthful visible messages as the sole announced
+source.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
