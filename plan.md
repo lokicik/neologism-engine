@@ -5304,6 +5304,45 @@ unchanged control remain the recovery surface when storage did not.
 
 ---
 
+## Phase 169 — Announce the Landing demo's selected naming mode
+
+**Bottleneck.** Landing's live four-mode demo used `.active` styling as its only selection state.
+The native buttons worked with Enter and pointer input and retained focus, but production Chromium
+exposed no named group and no `aria-pressed`; a screen-reader user could not tell that Brandable was
+the default or that Respelled/Compound had become selected. Create's real naming mode and preset
+groups already had the correct named-group/single-pressed contract.
+
+**Frozen boundary.** This phase changes only three semantics on the existing Landing demo markup,
+adds one production-browser fixture, and updates documentation. It does not change visual classes or
+CSS, mode labels/order, demo generation/config/exclusions, focus behavior, Landing navigation,
+Create controls, storage, generator/ranker, WASM, Rust, or network behavior. The controls remain
+native buttons; no tablist, menu, roving focus, or arrow-key contract is claimed.
+
+| Before | After |
+| --- | --- |
+| Four adjacent buttons had no accessible category relationship. | Their existing wrapper is a named native-button selection group. |
+| `.active` was the only source of selected state. | Exactly the active button exposes `aria-pressed=true`; every other button exposes false. |
+| Keyboard/pointer changes were visible but not announced as selection. | The same click state drives both visual and accessibility state. |
+| A repair risked inventing tab/menu keyboard behavior. | Native button Tab/Enter/Space and pointer behavior remain unchanged. |
+
+**Acceptance evidence.** The new `landing-demo-mode-state.mjs` production fixture passes **12/12**
+after the pre-fix run failed the group role/name and every pressed-state check while order, focus,
+storage, network, and page-error controls already passed. At 390 pixels it proves the exact four
+labels/order, Brandable as the sole default, Enter moving the one true state to Respelled while that
+button retains visible focus, and pointer selection moving it to Compound. The flow leaves local and
+session storage byte-identical, issues zero external HTTPS requests, and emits zero page errors.
+
+Retained production-browser contracts remain green at Landing navigation **14/14** and Create-filter
+keyboard **46/46**, preserving view focus, pointer neutrality, real naming/preset pressed states,
+disclosure semantics, value retention, and narrow-viewport focus visibility. TypeScript, the
+production Vite build, fixture syntax, and `git diff --check` are green.
+
+**Decision.** Phase 169 closes a small but unambiguous perception gap with the semantic equivalent
+of the visual state already present. It improves the truthful Landing demo without widening it into
+a new widget model or touching the product generator.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

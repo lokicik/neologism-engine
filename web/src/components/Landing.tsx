@@ -311,11 +311,13 @@ export function Landing({ onEnter }: Props) {
       <section className="bento" data-reveal>
         <div className="tile tile-modes">
           <h3>Four ways to a name</h3>
-          <div className="tile-pills">
+          <div className="tile-pills" role="group" aria-label="Live naming mode example">
             {DEMO_MODES.map((m) => (
               <button
                 key={m.value}
+                type="button"
                 className={`tile-pill${demoMode === m.value ? ' active' : ''}`}
+                aria-pressed={demoMode === m.value}
                 onClick={() => setDemoMode(m.value)}
               >
                 {m.label}
