@@ -11,7 +11,7 @@ const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 13
+const EXPECTED_CHECKS = 14
 
 const server = spawn(process.execPath, [viteCli, 'preview', '--port', String(PORT), '--strictPort'], {
   cwd: WEB_DIR,
@@ -58,6 +58,27 @@ async function generateFocusState(page) {
   })
 }
 
+async function focusRingState(locator) {
+  return locator.evaluate((element) => {
+    const rect = element.getBoundingClientRect()
+    const style = getComputedStyle(element)
+    const outline = Number.parseFloat(style.outlineWidth) || 0
+    const offset = Number.parseFloat(style.outlineOffset) || 0
+    const margin = outline + offset
+    return {
+      active: document.activeElement === element,
+      focusVisible: element.matches(':focus-visible'),
+      outline,
+      outlineStyle: style.outlineStyle,
+      offset,
+      fits: rect.left - margin >= 0
+        && rect.top - margin >= 0
+        && rect.right + margin <= innerWidth
+        && rect.bottom + margin <= innerHeight,
+    }
+  })
+}
+
 async function setupPage(context) {
   await context.addInitScript(() => localStorage.setItem('neologism:visited', '1'))
   const page = await context.newPage()
@@ -74,7 +95,17 @@ try {
   const keyboardPage = await setupPage(keyboardContext)
   const rustExample = keyboardPage.getByRole('button', { name: /a Rust CLI that processes logs/ })
   await rustExample.focus()
-  check(await rustExample.evaluate((element) => document.activeElement === element && element.matches(':focus-visible')), 'keyboard starts from a visibly focused example prompt')
+  await keyboardPage.keyboard.press('Shift+Tab')
+  await keyboardPage.keyboard.press('Tab')
+  const rustExampleFocus = await focusRingState(rustExample)
+  check(
+    rustExampleFocus.active
+      && rustExampleFocus.focusVisible
+      && rustExampleFocus.outline >= 2
+      && rustExampleFocus.outlineStyle !== 'none'
+      && rustExampleFocus.fits,
+    `keyboard starts from an example prompt with a contained 2px ring (${JSON.stringify(rustExampleFocus)})`,
+  )
   await keyboardPage.keyboard.press('Enter')
   await keyboardPage.locator('.name-card').first().waitFor({ state: 'visible' })
   check(await keyboardPage.locator('.command-input').inputValue() === 'a Rust CLI that processes logs', 'example activation applies the exact visible brief')
@@ -99,6 +130,17 @@ try {
   const narrowPage = await setupPage(narrowContext)
   const narrowExample = narrowPage.getByRole('button', { name: /a journaling app with mood insights/ })
   await narrowExample.focus()
+  await narrowPage.keyboard.press('Shift+Tab')
+  await narrowPage.keyboard.press('Tab')
+  const narrowExampleFocus = await focusRingState(narrowExample)
+  check(
+    narrowExampleFocus.active
+      && narrowExampleFocus.focusVisible
+      && narrowExampleFocus.outline >= 2
+      && narrowExampleFocus.outlineStyle !== 'none'
+      && narrowExampleFocus.fits,
+    `320px example prompt keeps its full 2px ring visible (${JSON.stringify(narrowExampleFocus)})`,
+  )
   await narrowPage.keyboard.press('Space')
   await narrowPage.locator('.name-card').first().waitFor({ state: 'visible' })
   const narrowFocus = await generateFocusState(narrowPage)

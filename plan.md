@@ -6141,6 +6141,37 @@ the interactive demo to the closing action, including the scroll clearance the s
 
 ---
 
+## Phase 192 — Give empty-state and recovery actions a visible focus ring
+
+**Bottleneck.** Create's three example prompts, empty Saved's Go create action, and the exhaustion
+recovery action all reuse `.example-chip`. Their keyboard destination handoffs, mobile target sizes,
+storage boundaries, and failure behavior were already tested, but the initiating controls still used
+Chromium's 1px `auto` outline.
+
+**Frozen boundary.** This phase adds one shared `.example-chip:focus-visible` rule plus an 8-pixel
+block scroll margin. It strengthens the retained example-prompt fixture at 390 and 320 pixels, then
+replays the separate empty-Saved and exhaustion contracts. It does not alter prompts, generation,
+recent-history clearing, navigation, focus destinations, pointer behavior, storage, network, WASM,
+or Rust.
+
+| Before | After |
+| --- | --- |
+| Shared example/recovery actions rendered Chromium's 1px auto outline. | They render the product's 2px solid focus ring. |
+| The example fixture checked only `:focus-visible`. | It now binds width, style, and full viewport geometry. |
+| Long-page recovery controls had no shared scroll clearance. | An 8px margin protects the outward ring during keyboard scrolling. |
+
+**Acceptance evidence.** Before the CSS change, both frozen example-prompt gates failed while focus
+and box containment remained correct: the controls measured `outline-width: 1px`,
+`outline-style: auto`, and zero offset. After the shared rule, the production example fixture passes
+**14/14**. Retained empty-Saved navigation **8/8** and exhaustion recovery **12/12** remain green.
+
+TypeScript and the production Vite build are green; fixture syntax and `git diff --check` are green.
+
+**Decision.** Phase 192 completes one consistent keyboard signal across the app's three explicit
+"start here / recover here" surfaces without changing where those actions lead.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

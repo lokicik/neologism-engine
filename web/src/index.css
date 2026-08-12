@@ -1677,6 +1677,11 @@ body {
 }
 .example-chip:hover { color: var(--text); border-color: rgba(255, 255, 255, .25); }
 .example-chip:active { transform: scale(.96); }
+.example-chip:focus-visible {
+  outline: 2px solid rgba(124, 106, 249, .9);
+  outline-offset: 2px;
+}
+.example-chip { scroll-margin-block: 8px; }
 
 .exhausted-notice {
   display: flex;
