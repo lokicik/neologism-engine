@@ -5910,6 +5910,42 @@ state swap, while keeping explicit pointer navigation and reload deliberately ne
 
 ---
 
+## Phase 185 — Make Saved removal focus commit-safe
+
+**Bottleneck.** The Saved removal contract expected keyboard focus to move to the next card, the
+previous card when removing the last index, or **Go create** after the final card. Its implementation
+waited for a passive effect and then another animation frame. Current production repeatedly lost
+focus to `body` on the last-index path; the following Enter therefore did nothing and the final
+empty-state transition never occurred.
+
+**Frozen boundary.** This phase moves the existing pending-removal focus calculation into a layout
+effect and focuses the already-selected target immediately after React commits the new Saved DOM.
+It keeps the same index rule, durable-write prerequisite, refs, labels, and target controls. It adds
+failure diagnostics to the retained fixture. It does not change removal identity/confirmation,
+storage transactions, pointer behavior, card rendering, clipboard status, generation, network,
+WASM, or Rust.
+
+| Before | After |
+| --- | --- |
+| Last-index removal could leave focus on `body`. | The previous Remove action is focused in the commit cycle. |
+| A second Enter then had no actionable target. | Enter can continue naturally to the final removal. |
+| Final-card focus depended on another animation frame. | The committed empty state focuses **Go create** directly. |
+| Pointer and failed-write paths already avoided a false handoff. | Both paths remain unchanged. |
+
+**Acceptance evidence.** The retained `saved-removal-focus.mjs` production fixture failed twice in
+isolation before the repair: it showed `BODY` after last-index removal and timed out waiting for the
+final empty state. After the layout-effect change it passes **17/17**. It proves middle and
+last-index next/previous focus, visible focus, final **Go create** focus, durable empty storage,
+pointer neutrality, storage-failure alert/data/focus truth, 390-pixel stability, and zero page
+errors.
+
+TypeScript and the production Vite build are green; fixture syntax and `git diff --check` are green.
+
+**Decision.** Phase 185 aligns removal focus with the DOM commit that creates its target, removing
+the unnecessary paint/frame race without changing Saved data semantics.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

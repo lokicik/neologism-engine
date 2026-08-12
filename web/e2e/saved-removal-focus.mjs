@@ -78,7 +78,16 @@ try {
   const removeAlpha = keyboardPage.getByRole('button', { name: 'Remove FocusAlpha from Saved' })
   await removeAlpha.waitFor({ state: 'visible' })
   check(await keyboardPage.locator('.name-card').count() === 1, 'last-index keyboard removal leaves the previous Saved card')
-  check(await removeAlpha.evaluate((element) => document.activeElement === element), 'last-index keyboard removal focuses the previous Remove action')
+  const alphaFocused = await removeAlpha.evaluate((element) => document.activeElement === element)
+  if (!alphaFocused) {
+    console.log('INFO  last-index removal active element', await keyboardPage.evaluate(() => ({
+      tag: document.activeElement?.tagName,
+      className: document.activeElement?.getAttribute('class'),
+      label: document.activeElement?.getAttribute('aria-label'),
+      text: document.activeElement?.textContent?.replace(/\s+/g, ' ').trim(),
+    })))
+  }
+  check(alphaFocused, 'last-index keyboard removal focuses the previous Remove action')
 
   await keyboardPage.keyboard.press('Enter')
   const goCreate = keyboardPage.getByRole('button', { name: 'Go create' })

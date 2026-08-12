@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { NameResult } from '../lib/engine'
 import { exportText, exportJson, encodeShareUrl } from '../lib/share'
 import type { SavedNameEntry } from '../lib/taste-identity'
@@ -25,17 +25,15 @@ export function SavedPage({ entries, onRemoveSaved, onGoCreate }: Props) {
   const copyStatusTimer = useRef<number | undefined>(undefined)
   const favorites = entries.map((entry) => entry.result)
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const index = pendingRemovalFocusRef.current
     if (index === null) return
     pendingRemovalFocusRef.current = null
-    requestAnimationFrame(() => {
-      const removeButtons = rootRef.current?.querySelectorAll<HTMLButtonElement>('.star-btn') ?? []
-      const target = removeButtons.length > 0
-        ? removeButtons[Math.min(index, removeButtons.length - 1)]
-        : goCreateRef.current
-      target?.focus()
-    })
+    const removeButtons = rootRef.current?.querySelectorAll<HTMLButtonElement>('.star-btn') ?? []
+    const target = removeButtons.length > 0
+      ? removeButtons[Math.min(index, removeButtons.length - 1)]
+      : goCreateRef.current
+    target?.focus()
   }, [entries])
 
   useEffect(() => () => {
