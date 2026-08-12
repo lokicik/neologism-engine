@@ -612,6 +612,10 @@ try {
     await page.setViewportSize(viewport)
     const responsiveTrigger = reloadedValidCard.getByRole('button', { name: `Name checks for ${validName}`, exact: true })
     const responsivePanel = await openAvailability(reloadedValidCard, 'Enter')
+    const responsiveTriggerTarget = await responsiveTrigger.evaluate((element) => {
+      const rect = element.getBoundingClientRect()
+      return rect.width >= 39.5 && rect.height >= 39.5
+    })
     const panelHorizontalFit = await panelFitsViewport(reloadedValidCard, responsivePanel)
       && await focusIsVisible(responsivePanel, { vertical: false })
     await page.keyboard.press('Tab')
@@ -635,8 +639,9 @@ try {
     check(
       await isActive(responsiveTrigger)
         && await responsiveTrigger.getAttribute('aria-expanded') === 'false'
-        && await focusIsVisible(responsiveTrigger),
-      `${viewport.width}px Escape restores the exact responsive trigger with a fully visible focus ring`,
+        && await focusIsVisible(responsiveTrigger)
+        && responsiveTriggerTarget,
+      `${viewport.width}px Escape restores a fully visible, mobile-safe exact trigger`,
     )
   }
 

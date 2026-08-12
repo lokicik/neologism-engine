@@ -177,13 +177,17 @@ try {
   const fit = await firstRegion.evaluate((region) => {
     const card = region.closest('.name-card')?.getBoundingClientRect()
     const box = region.getBoundingClientRect()
+    const chipRects = Array.from(region.closest('.name-card')?.querySelectorAll('.card-chip') ?? [])
+      .map((element) => element.getBoundingClientRect())
     return Boolean(card)
       && box.left >= card.left - 1
       && box.right <= card.right + 1
       && box.left >= -1
       && box.right <= innerWidth + 1
+      && chipRects.length === 2
+      && chipRects.every((rect) => rect.width >= 39.5 && rect.height >= 39.5)
   })
-  check(fit, '390px explanation remains horizontally contained inside its card')
+  check(fit, '390px explanation stays contained and both disclosure triggers are mobile-safe')
 
   const storageAfter = await page.evaluate(() => JSON.stringify(localStorage))
   const counters = await page.evaluate(() => ({ fetches: window.__phase155Fetches ?? 0, xhrs: window.__phase155Xhrs ?? 0 }))

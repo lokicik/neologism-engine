@@ -5533,6 +5533,43 @@ changing their behavior.
 
 ---
 
+## Phase 175 — Give card disclosures real mobile targets
+
+**Bottleneck.** NameCard's three icon actions already use 32-pixel visible buttons with documented
+40-pixel pseudo hit areas, but the adjacent Why and Name checks text disclosures had no equivalent
+minimum. At 390 pixels both rendered below 40 pixels high; Name checks reached 40 at 320 only because
+its text wrapped, not because the component guaranteed a reliable target.
+
+**Frozen boundary.** This phase strengthens the existing Name checks and Why production fixtures
+and adds one mobile-only minimum height to the shared `.card-chip`. It updates documentation but
+does not change labels, widths, wrapping rules, card action order, disclosure state/focus logic,
+explanation or domain behavior, storage, generation, ranking, WASM, Rust, or network work.
+
+| Before | After |
+| --- | --- |
+| Why and Name checks could render below 40 pixels high. | Both shared card disclosures have a 40-pixel mobile floor. |
+| Name checks happened to grow at 320 only when its text wrapped. | Target size is independent of label wrapping at every width below 640 pixels. |
+| Existing responsive checks proved focus-ring containment but not hit size. | Name checks and Why gates now require both disclosure targets to be at least 40×40. |
+| A global chip change could alter desktop card density. | One mobile media rule preserves desktop dimensions and all existing widths. |
+
+**Acceptance evidence.** The tightened production fixtures first failed exactly the 390-pixel
+mobile-target checks: Name checks within the **49/49** availability matrix and both disclosures
+within the **16/16** Why matrix. After the scoped CSS change, availability passes **49/49** and Why
+passes **16/16**. Their existing checks continue to prove visible focus, exact Escape restoration,
+responsive containment, disclosure independence, domain cancellation/cache/provider boundaries,
+and zero added storage/network work.
+
+Retained production-browser contracts remain green at responsive shell **17/17** and skip-main
+**17/17**, preserving Saved/card containment at 1280/390/320, natural shell order, direct content
+entry, storage boundaries, and zero external HTTPS requests. TypeScript, the production Vite build,
+fixture syntax, and `git diff --check` are green.
+
+**Decision.** Phase 175 aligns the two text disclosures with the hit-area standard already applied
+to neighboring card actions. The repair is shared and measurable without changing the compact card
+composition or disclosure semantics.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
