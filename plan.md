@@ -5762,6 +5762,42 @@ preserving the existing pointer interaction and page design.
 
 ---
 
+## Phase 181 — Preserve focus through example generation
+
+**Bottleneck.** Create's empty-state project examples correctly filled the brief and generated a
+page, but the activated button unmounted as soon as loading began. Keyboard focus consequently fell
+to the document body while the persistent Generate action remained available. The ordinary Generate
+path already retained focus; the higher-guidance onboarding path did not.
+
+**Frozen boundary.** This phase records whether the native example-button activation was keyboard
+derived and, on that path only, moves focus to the existing Generate button on the next animation
+frame. It adds one production-browser fixture and documentation. It does not alter example copy,
+prompt values, generation timing/output, loading semantics, recent history, pointer focus, storage
+shape, network behavior, WASM, Rust, or card layout.
+
+| Before | After |
+| --- | --- |
+| Keyboard example activation unmounted its focused button and left focus on `body`. | Focus moves to the persistent Generate action before results appear. |
+| The standard Generate path had a visible focus contract but examples did not. | Both keyboard generation entry paths retain a visible place. |
+| Pointer activation risked inheriting a forced keyboard handoff. | Pointer example activation remains focus-neutral. |
+| A focus repair could accidentally change prompt/history behavior. | Exact brief, ten shown names, and recent history remain unchanged. |
+
+**Acceptance evidence.** The new `example-prompt-focus.mjs` production fixture first failed its two
+keyboard-focus checks against the pre-fix build while exact prompt, ten-card generation, pointer
+neutrality, history, storage, request, and page-error controls passed. After the repair it passes
+**13/13**. Enter at 390 pixels and Space at 320 pixels restore a fully visible Generate focus; a
+pointer-selected example does not. The fixture also proves exact prompt application, one complete
+first page, recent history equal to the shown names, only visited/recent operational storage, zero
+external HTTPS requests, and zero page errors.
+
+TypeScript and the production Vite build are green. The retained Create generation-focus contract
+remains green; fixture syntax and `git diff --check` are green.
+
+**Decision.** Phase 181 closes the focus gap in Create's guided first-use path without changing the
+generator or making pointer activation behave like keyboard navigation.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

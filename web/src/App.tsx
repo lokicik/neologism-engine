@@ -483,10 +483,15 @@ export default function App() {
     'a tool that syncs design tokens',
     'a marketplace for vintage keyboards',
   ]
-  const tryExample = (desc: string) => {
+  const tryExample = (desc: string, keyboard: boolean) => {
     const next = { ...config, description: desc }
     setConfig(next)
     void handleGenerate(false, next)
+    if (keyboard) {
+      requestAnimationFrame(() => {
+        document.querySelector<HTMLButtonElement>('.command-go')?.focus()
+      })
+    }
   }
 
   const favoriteKeys = new Set(favorites.map(tasteIdentity))
@@ -674,7 +679,11 @@ export default function App() {
                   <p>Describe what you're building — or just hit Generate.</p>
                   <div className="example-chips">
                     {examplePrompts.map((p) => (
-                      <button key={p} className="example-chip" onClick={() => tryExample(p)}>
+                      <button
+                        key={p}
+                        className="example-chip"
+                        onClick={(event) => tryExample(p, event.detail === 0)}
+                      >
                         “{p}”
                       </button>
                     ))}
