@@ -115,6 +115,10 @@ export default function App() {
   // gets a new salt; infinite-scroll pages keep it so the session feels
   // coherent instead of changing preference direction on every append.
   const preferenceSaltRef = useRef<number | null>(null)
+  // Command controls may be edited while an existing page remains visible.
+  // Infinite scroll must continue that page's project instead of mixing the
+  // next draft brief into its results and taste-evidence context.
+  const generationConfigRef = useRef<Config>(DEFAULT_CONFIG)
   const viewRef = useRef(view)
 
   const navigateView = useCallback((next: View) => {
@@ -244,7 +248,7 @@ export default function App() {
     setError(null)
     setGenerationStatus('')
     try {
-      const cfg = cfgOverride ?? config
+      const cfg = append ? generationConfigRef.current : cfgOverride ?? config
       // One random seed per click keeps every local sub-pool reproducible as a
       // unit while still giving an unseeded user a fresh result on every click.
       const generationSeed = cfg.seed ?? randomSelectionSalt()
@@ -324,6 +328,7 @@ export default function App() {
       }
       setPromptKeywords(cfg.description?.trim() ? await extractKeywords(cfg.description) : [])
       setExhausted(pool.length === 0)
+      if (!append) generationConfigRef.current = cfg
       // Taste profiles select from a larger pool and may add a small Compound
       // accent pool when positive examples strongly prefer two-part names.
       // Cold Auto opens its fallback only for weak/missing or repetitive slots.

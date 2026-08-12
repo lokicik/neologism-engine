@@ -6605,6 +6605,41 @@ identity erase the candidate order that the provider actually judged.
 
 ---
 
+## Phase 206 — Keep infinite scroll inside its visible project context
+
+**Bottleneck.** Create leaves the current result page visible while the command controls are
+edited. Infinite scroll nevertheless read the latest control state. Editing project B over project
+A's page and then reaching the sentinel therefore appended B-generated cards to A's list. Those
+cards carried truthful per-card provenance, but one visible session and its feedback evidence were
+silently split across two project contexts.
+
+**Frozen boundary.** A successful fresh generation now owns one in-memory configuration snapshot.
+Infinite scroll reads that snapshot; a new draft in the controls cannot change the visible page's
+brief, source mode, constraints, or taste context. A failed fresh attempt does not take ownership
+away from the still-visible page. Generation algorithms, ranking, storage schema, recent-history
+semantics, command editing, explicit Generate, focus, network behavior, and Rust remain unchanged.
+
+| Before | After |
+| --- | --- |
+| Editing project B while project A remained visible changed the next automatic append to B. | The append continues project A's frozen visible-session configuration. |
+| Initial and appended likes could enter different context ids on one result page. | Their stored feedback remains in one exact project evidence context. |
+| The controls had to be treated as both a next-request draft and the current page owner. | Draft controls and visible-session ownership are explicitly separated in memory. |
+
+**Acceptance evidence.** The new production-browser contract first passed five checks and failed
+exactly the two context-continuity gates: the appended favorite carried project B's brief and a
+different context id from the initial project A favorite. After the snapshot fix it passes **7/7**:
+the initial ten-card page stays unchanged while B is typed, the append remains under A, and both
+stored feedback rows share A's context. It observes zero external HTTPS requests and zero page
+errors.
+
+TypeScript and the production Vite build are green. The retained Create generation
+focus/failure/duplicate-work fixture remains **19/19**.
+
+**Decision.** Phase 206 prevents continued scrolling from manufacturing cross-project evidence
+while preserving editable next-request controls and the existing local generation path.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
