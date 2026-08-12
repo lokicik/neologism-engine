@@ -11,7 +11,7 @@ const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 39
+const EXPECTED_CHECKS = 44
 
 const server = spawn(process.execPath, [viteCli, 'preview', '--port', String(PORT), '--strictPort'], {
   cwd: WEB_DIR,
@@ -378,6 +378,57 @@ try {
     check(
       await nonJudgeStorageSnapshot(page) === storageBefore,
       'later-failure, Retry, and AI enable lifecycle leave non-judge browser storage byte-identical',
+    )
+    await context.close()
+  }
+
+  // Settings changes are request identity: never reuse the prior model's
+  // per-metric Studio result for the same pool.
+  {
+    const { context, page, calls } = await studioPage({ width: 390, height: 844 }, async (route, _call, request) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: rankedReply(request.names, `model-${request.body.model}`),
+      })
+    })
+    const generate = page.getByRole('button', { name: 'Generate', exact: true })
+    await generate.click()
+    await page.waitForFunction(() => document.querySelectorAll('.ai-studio .card-ai-reason').length === 24)
+    const initial = await resultSnapshot(page)
+    check(
+      calls.length === 1
+        && calls[0].body.model === 'fixture-model'
+        && initial.reasons.every((reason) => reason.includes('model-fixture-model')),
+      'initial Brandable ranking is visibly owned by the configured model',
+    )
+
+    await page.locator('.sidebar-settings').click()
+    const dialog = page.getByRole('dialog', { name: 'Settings' })
+    const model = dialog.getByRole('combobox', { name: /Model/ })
+    await model.fill('fixture-model-b')
+    await dialog.getByRole('button', { name: 'Save', exact: true }).click()
+    check(
+      await page.evaluate(() => JSON.parse(localStorage.getItem('neologism:judge') ?? '{}').model) === 'fixture-model-b',
+      'Settings commits the second model before the same metric is requested again',
+    )
+
+    const namesBefore = initial.names.join('|')
+    await page.getByRole('button', { name: 'Brandable', exact: true }).click()
+    await page.waitForTimeout(200)
+    const reranked = await resultSnapshot(page)
+    check(
+      calls.length === 2 && calls[1]?.body.model === 'fixture-model-b',
+      'the same metric performs a fresh request after the configured model changes',
+    )
+    check(
+      reranked.reasons.length === 24
+        && reranked.reasons.every((reason) => reason.includes('model-fixture-model-b')),
+      'the visible reasons come from the newly configured model rather than the stale metric cache',
+    )
+    check(
+      reranked.names.join('|') === namesBefore,
+      'model replacement reranks the byte-identical local pool instead of regenerating names',
     )
     await context.close()
   }

@@ -6746,6 +6746,42 @@ or same-document navigation, without weakening the existing recovery and taste b
 
 ---
 
+## Phase 210 — Scope AI Studio metric cache to its judge configuration
+
+**Bottleneck.** The shared judge cache used the full request identity after Phases 204–205, but AI
+Studio's faster per-pool cache still used only `brandable`, `premium`, `playful`, or a lowercased
+custom string. After a successful ranking, changing the configured model or localhost endpoint in
+Settings and requesting the same metric could therefore restore the previous model's order and
+reasons without making a request.
+
+**Frozen boundary.** Each Studio cache entry now includes provider, normalized effective localhost
+endpoint (or the fixed OpenRouter identity), trimmed configured model, metric, and the exact frozen
+criterion. Pool identity remains owned by the component and still clears on fresh generation.
+API keys and price metadata stay out because they do not shape the ranking request. A Retry keeps
+the failed pool and criterion but recomputes its cache identity from the currently saved judge
+configuration, which is the purpose of its Open Settings recovery path. Transport, prompt wording,
+ranking/parsing, pool generation, storage schema, focus, taste, Create, and Rust remain unchanged.
+
+| Before | After |
+| --- | --- |
+| `Brandable` under model A and model B shared one Studio cache entry. | The configured model separates their same-pool rankings. |
+| Selecting Brandable after Settings changed could make zero calls and show A's reasons. | It calls B once and replaces the view with B's reasons. |
+| Retry carried the failed attempt's coarse cache key after Settings recovery. | Retry freezes criterion/pool but uses the current provider/model/endpoint identity. |
+
+**Acceptance evidence.** The production AI Studio fixture was expanded from 39 to 44 checks. The
+committed build passed all existing behavior plus initial model ownership and Settings persistence,
+then failed exactly two gates: no second request was made and all visible reasons still belonged to
+model A. After the cache-key repair it passes **44/44**. Model B receives one request containing the
+byte-identical 24-name pool, and all 24 displayed reasons carry B's deterministic response marker.
+
+TypeScript and the production Vite build are green. Retained Settings persistence remains
+**13/13**, and Studio taste identity remains **5/5**.
+
+**Decision.** Phase 210 preserves instant exact-config metric switching without letting a Settings
+change relabel stale AI output as if the newly configured model had judged it.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

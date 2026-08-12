@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { generateBatch, type NameResult } from '../lib/engine'
 import {
+  DEFAULT_LOCAL_ENDPOINT,
   METRICS,
   metricPrompt,
   rerank,
@@ -69,7 +70,15 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
 
   const criterionFor = (m: Metric) =>
     m === 'custom' ? custom.trim() : METRICS.find((x) => x.key === m)!.criterion
-  const cacheKey = (m: Metric) => (m === 'custom' ? `custom:${custom.trim().toLowerCase()}` : m)
+  const cacheKey = (m: Metric, criterion: string) => JSON.stringify([
+    judgeConfig.provider,
+    judgeConfig.provider === 'localhost'
+      ? (judgeConfig.endpoint ?? DEFAULT_LOCAL_ENDPOINT).replace(/\/$/, '')
+      : 'openrouter',
+    judgeConfig.model?.trim() ?? '',
+    m,
+    criterion,
+  ])
   const metricLabel = (m: Metric) =>
     m === 'custom' ? custom.trim() || 'custom' : METRICS.find((x) => x.key === m)!.label
 
@@ -81,7 +90,7 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
       metric: m,
       criterion,
       label: metricLabel(m),
-      cacheKey: cacheKey(m),
+      cacheKey: cacheKey(m, criterion),
     }
   }
 
@@ -178,7 +187,7 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
     const metricSnapshot = metric
     const criterionSnapshot = criterionFor(metricSnapshot)
     const labelSnapshot = metricLabel(metricSnapshot)
-    const cacheKeySnapshot = cacheKey(metricSnapshot)
+    const cacheKeySnapshot = cacheKey(metricSnapshot, criterionSnapshot)
     setBusy('generating')
     setNotice(null)
     setRankingStatus('')
@@ -242,7 +251,10 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
 
   function retryRanking() {
     if (!failedRank || operationActive.current) return
-    void rankPool(failedRank, pool, {
+    void rankPool({
+      ...failedRank,
+      cacheKey: cacheKey(failedRank.metric, failedRank.criterion),
+    }, pool, {
       fromRetry: true,
       displayedRanking: view.rankedBy,
     })
