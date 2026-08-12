@@ -1725,6 +1725,7 @@ body {
     padding-left: .3rem;
     padding-right: .3rem;
   }
+  .page-toolbar .toolbar-btn { min-height: 40px; }
 }
 
 /* Phase 55: interface-polish pass (make-interfaces-feel-better). */

@@ -284,6 +284,8 @@ async function runScenario(viewport) {
     : Boolean(sidebar && pageBox && sidebar.bottom <= pageBox.top + 1)
   const mobileTargetsOk = viewport.layout !== 'mobile'
     || savedLayout.sidebarButtons.every((button) => button && button.height >= 39.5)
+  const mobileToolbarTargetsOk = viewport.layout !== 'mobile'
+    || savedLayout.toolbarButtons.every((button) => button && button.width >= 39.5 && button.height >= 39.5)
   const sidebarLabels = savedLayout.sidebarButtons.map((button) => button?.text.toLowerCase() ?? '')
   const expectedSidebarLabels = ['neologism', 'create', 'ai studio', 'saved', 'settings', 'about']
   const labelsVisible = sidebarLabels.length === expectedSidebarLabels.length
@@ -322,8 +324,9 @@ async function runScenario(viewport) {
       && savedLayout.toolbarButtonsFit
       && !savedLayout.toolbarButtonsOverlap
       && !savedLayout.titleToolbarOverlap
+      && mobileToolbarTargetsOk
       && toolbarVisible,
-    `${viewport.width}px keeps the Saved title, four toolbar actions, grid, and first card fully visible`,
+    `${viewport.width}px keeps the Saved title, four toolbar actions, grid, and first card fully visible and mobile-safe`,
   )
 
   storageResults.push({

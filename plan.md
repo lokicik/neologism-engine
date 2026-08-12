@@ -5496,6 +5496,43 @@ no navigation or persistence side effect.
 
 ---
 
+## Phase 174 — Make Saved's mobile toolbar actions reliably tappable
+
+**Bottleneck.** Phase 151 brought all six mobile shell controls to a 40-pixel minimum, but the four
+Saved toolbar actions still measured only 33 pixels high at both 390 and 320 pixels. They were fully
+contained and keyboard-operable, yet the primary Copy/TXT/JSON/Share actions offered materially
+smaller touch targets than the shell immediately above them.
+
+**Frozen boundary.** This phase strengthens the existing responsive-shell geometry gate and adds
+one mobile-only `min-height` rule to the existing toolbar buttons. It updates documentation but adds
+no new component or fixture. It does not change labels, order, wrapping, desktop sizing, click or
+clipboard behavior, downloads, sharing, storage, generation, ranking, WASM, Rust, or network work.
+
+| Before | After |
+| --- | --- |
+| All four actions measured 33 pixels high at 390/320. | Each action measures exactly 40 pixels high below 640 pixels. |
+| The responsive fixture proved containment but not mobile target size. | Its existing Saved-layout check now also requires every mobile toolbar action to be at least 40×40. |
+| Shell controls and Saved actions used visibly inconsistent mobile target heights. | Both persistent navigation and primary Saved actions use the same 40-pixel floor. |
+| A broad padding change could disturb desktop density. | One media-scoped `min-height` preserves desktop geometry and existing horizontal padding. |
+
+**Acceptance evidence.** The tightened `responsive-shell.mjs` production fixture first failed
+exactly the 390- and 320-pixel Saved-action checks against the 33-pixel build, then passes **17/17**
+after the scoped CSS change. Current production geometry is 40 pixels high for Copy all, TXT, JSON,
+and Share link at 320 pixels; all four remain contained, non-overlapping, correctly ordered, and
+inside a document whose width equals the viewport. The 1280-pixel layout remains contained without
+the mobile minimum.
+
+Retained production-browser contracts remain green at skip-main **17/17** and clipboard failure
+**18/18**, preserving keyboard bypass, focus containment, exact clipboard attempt counts, visible
+failure truth, storage boundaries, and zero external HTTPS requests. TypeScript, the production
+Vite build, fixture syntax, and `git diff --check` are green.
+
+**Decision.** Phase 174 closes a measured mobile interaction inconsistency with one responsive
+declaration. It improves the existing Saved actions without widening into a toolbar redesign or
+changing their behavior.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
