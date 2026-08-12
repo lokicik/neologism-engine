@@ -11,7 +11,7 @@ const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 20
+const EXPECTED_CHECKS = 23
 const VIEWPORTS = [
   { width: 1280, height: 900, layout: 'desktop' },
   { width: 390, height: 844, layout: 'mobile' },
@@ -193,20 +193,46 @@ async function captureSavedLayout(page) {
   })
 }
 
-async function naturalSidebarOrder(page) {
+async function naturalSidebarEvidence(page) {
   const controls = page.locator('.sidebar button')
-  if (await controls.count() !== 6) return []
+  if (await controls.count() !== 6) return { order: [], rings: [] }
   await controls.first().focus()
+  await page.keyboard.press('Shift+Tab')
+  await page.keyboard.press('Tab')
   const order = []
+  const rings = []
   for (let index = 0; index < 6; index++) {
     order.push(await page.evaluate(() => (
       document.activeElement instanceof HTMLElement
         ? document.activeElement.innerText.replace(/\s+/g, ' ').trim()
         : ''
     )))
+    rings.push(await page.evaluate(() => {
+      const element = document.activeElement
+      if (!(element instanceof HTMLElement)) return { ok: false }
+      const rect = element.getBoundingClientRect()
+      const style = getComputedStyle(element)
+      const outline = Number.parseFloat(style.outlineWidth) || 0
+      const offset = Number.parseFloat(style.outlineOffset) || 0
+      const margin = outline + offset
+      return {
+        ok: element.matches(':focus-visible')
+          && outline >= 2
+          && style.outlineStyle !== 'none'
+          && rect.left - margin >= 0
+          && rect.top - margin >= 0
+          && rect.right + margin <= innerWidth
+          && rect.bottom + margin <= innerHeight,
+        label: element.innerText.replace(/\s+/g, ' ').trim(),
+        focusVisible: element.matches(':focus-visible'),
+        outline,
+        outlineStyle: style.outlineStyle,
+        offset,
+      }
+    }))
     if (index < 5) await page.keyboard.press('Tab')
   }
-  return order
+  return { order, rings }
 }
 
 async function savedToolbarFocusRings(page) {
@@ -309,7 +335,8 @@ async function runScenario(viewport) {
   await page.keyboard.press('Escape')
   await dialog.waitFor({ state: 'detached' })
   const settingsRestored = await settingsButton.evaluate((button) => document.activeElement === button)
-  const tabOrder = await naturalSidebarOrder(page)
+  const sidebarEvidence = await naturalSidebarEvidence(page)
+  const tabOrder = sidebarEvidence.order
   const expectedTabOrder = ['neologism', 'create', 'ai studio', 'saved', 'settings', 'about']
   const naturalOrder = tabOrder.length === expectedTabOrder.length
     && tabOrder.every((label, index) => label.toLowerCase().includes(expectedTabOrder[index]))
@@ -355,6 +382,13 @@ async function runScenario(viewport) {
       && labelsVisible
       && mobileTargetsOk,
     `${viewport.width}px keeps all six sidebar controls visible, separate, ordered, and mobile-safe`,
+  )
+  if (!sidebarEvidence.rings.every((ring) => ring.ok)) {
+    console.log(`INFO  ${viewport.width}px sidebar focus rings`, sidebarEvidence.rings)
+  }
+  check(
+    sidebarEvidence.rings.length === 6 && sidebarEvidence.rings.every((ring) => ring.ok),
+    `${viewport.width}px gives all six shell controls a contained 2px focus ring`,
   )
   check(
     savedLayout.savedFits

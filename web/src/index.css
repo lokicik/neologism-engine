@@ -942,6 +942,10 @@ body {
 .sidebar-item:active { transform: scale(.96); }
 .sidebar-item.active { color: var(--text); background: var(--surface2); }
 .sidebar-item .count-pill { margin-left: auto; }
+.sidebar button:focus-visible {
+  outline: 2px solid rgba(124, 106, 249, .9);
+  outline-offset: 2px;
+}
 
 .sidebar-about {
   margin-top: auto;

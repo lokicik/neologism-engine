@@ -6014,6 +6014,37 @@ collection actions without widening the change into their data or export behavio
 
 ---
 
+## Phase 188 — Give every shell action a visible focus ring
+
+**Bottleneck.** The six persistent shell controls already had truthful current-page state, natural
+DOM and Tab order, responsive containment, and mobile-safe targets. Their keyboard focus still used
+Chromium's 1px `auto` outline, however, while the page controls they lead to now use a deliberate 2px
+product ring. The responsive fixture traversed the shell without measuring that mismatch.
+
+**Frozen boundary.** This phase adds one shell-scoped `button:focus-visible` rule and strengthens the
+existing natural-order traversal with computed ring geometry at 1280, 390, and 320 pixels. It does
+not alter labels, target sizes, wrapping, order, current-page state, navigation/history, Settings,
+storage, network, generation, WASM, or Rust.
+
+| Before | After |
+| --- | --- |
+| All six shell controls rendered Chromium's 1px auto outline. | All six render the product's 2px solid focus ring. |
+| The fixture proved order, containment, and target size only. | The same traversal also proves focus modality and full ring containment. |
+| Page controls had a stronger keyboard language than navigation. | Persistent navigation and page actions now use the same visible treatment. |
+
+**Acceptance evidence.** The expanded production fixture first failed at all three frozen widths:
+logo, Create, AI Studio, Saved, Settings, and About each measured `outline-width: 1px`,
+`outline-style: auto`, and zero offset. After the scoped CSS rule, `responsive-shell.mjs` passes
+**23/23**, including every retained layout, storage, toolbar-focus, and network gate. The existing
+sidebar current-page contract remains green at **12/12**.
+
+TypeScript and the production Vite build are green; fixture syntax and `git diff --check` are green.
+
+**Decision.** Phase 188 makes the application's persistent navigation as visually discoverable from
+the keyboard as the actions inside each destination, without touching routing behavior.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
