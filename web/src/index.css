@@ -844,6 +844,35 @@ body {
   min-height: 100dvh;
 }
 
+.skip-main-content {
+  position: fixed;
+  z-index: 200;
+  top: .75rem;
+  left: .75rem;
+  min-height: 40px;
+  padding: .55rem .85rem;
+  color: var(--text);
+  background: var(--surface2);
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  font: inherit;
+  font-size: .85rem;
+  font-weight: 600;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(calc(-100% - 1rem));
+  transition: opacity .15s, transform .15s;
+}
+.skip-main-content:focus-visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: none;
+  outline: 2px solid rgba(124, 106, 249, .9);
+  outline-offset: 2px;
+}
+
 .sidebar {
   width: 210px;
   flex-shrink: 0;
@@ -1241,6 +1270,10 @@ body {
   flex-direction: column;
   gap: 1.5rem;
 }
+.page:focus-visible {
+  outline: 2px solid rgba(124, 106, 249, .9);
+  outline-offset: -4px;
+}
 
 .nav-note {
   font-size: .8rem;
@@ -1621,6 +1654,7 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .skip-main-content { transition: none; }
   .name-card { animation: none; }
   .skeleton-card { animation: none; background: var(--surface); }
   .badge-checking { animation: none; }

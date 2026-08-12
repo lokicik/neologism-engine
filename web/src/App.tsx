@@ -501,6 +501,13 @@ export default function App() {
 
   return (
     <div className="shell">
+      <button
+        type="button"
+        className="skip-main-content"
+        onClick={() => document.getElementById('main-content')?.focus()}
+      >
+        Skip to main content
+      </button>
       <Sidebar
         view={view}
         savedCount={savedEntries.length}
@@ -512,7 +519,7 @@ export default function App() {
         onSettings={() => setShowSettings(true)}
       />
 
-      <main className="page">
+      <main id="main-content" className="page" tabIndex={-1}>
         {feedbackError && (
           <div className="feedback-alert" role="alert" aria-atomic="true">
             {feedbackError}

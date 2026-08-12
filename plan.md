@@ -5457,6 +5457,45 @@ command-first composition.
 
 ---
 
+## Phase 173 — Bypass repeated shell controls without touching recovery URLs
+
+**Bottleneck.** Every application page begins with the same six persistent shell controls. A
+keyboard user entering Create, AI Studio, or Saved had to traverse that entire set before reaching
+the page's command field or recovery action; production had no skip-to-main route. A conventional
+hash anchor would be unsafe here because a failed shared-name import deliberately keeps its
+`#names=` URL as the recovery copy.
+
+**Frozen boundary.** This phase adds one first-in-DOM native skip button, makes the existing `main`
+programmatically focusable, adds scoped focus/reduced-motion styling, adds one production-browser
+fixture, and updates documentation. Activation focuses `main` directly and never writes a hash. It
+does not change sidebar order, routing, current-page state, page titles/headings, visible content,
+storage, share decoding, generation, ranking, WASM, Rust, or network behavior.
+
+| Before | After |
+| --- | --- |
+| First Tab entered the repeated wordmark/sidebar sequence. | First Tab reveals a native `Skip to main content` control. |
+| Reaching content required traversing six shell actions on every page. | Enter focuses the main landmark; the next Tab reaches Create's brief, Studio's first available action, or Saved's recovery action. |
+| An anchor implementation could overwrite a retained `#names=` recovery copy. | The button moves focus without changing URL or hash. |
+| A hidden shortcut could provide no visible confirmation. | The focused control and destination main landmark both expose contained focus indicators. |
+
+**Acceptance evidence.** The new `skip-main-content.mjs` production fixture passes **17/17** after
+the pre-fix build failed every skip/focus/content-bypass check while storage, network, and page-error
+controls passed. It proves first-Tab discovery and a native accessible name at 390 pixels; visible
+main focus; unchanged current page and a retained recovery hash; direct next-Tab entry on Create,
+unconfigured AI Studio, and empty Saved; fully contained focused controls at 320 and 1280 pixels;
+byte-identical local/session storage; zero external HTTPS requests; and zero page errors.
+
+Retained production-browser contracts remain green at responsive shell **17/17** and Settings
+keyboard **48/48**, preserving the sidebar's own natural order, shell containment, modal focus
+ownership, and opener restoration. TypeScript, the production Vite build, fixture syntax, and
+`git diff --check` are green.
+
+**Decision.** Phase 173 removes a repeated core-flow keyboard cost while respecting the app's
+unusual but important share-recovery boundary. The control is visible only when used and introduces
+no navigation or persistence side effect.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
