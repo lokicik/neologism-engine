@@ -5798,6 +5798,43 @@ generator or making pointer activation behave like keyboard navigation.
 
 ---
 
+## Phase 182 — Contain all Create-card actions
+
+**Bottleneck.** The responsive shell and Saved cards were already contained at 320 pixels, but a
+generated Create card carries three icon actions instead of Saved's smaller action set. Its fixed
+single-row footer needed roughly 294 pixels inside a 246-pixel content box, pushing Save past the
+card and making the document 331 pixels wide. The controls did not overlap and their DOM order was
+correct; the row simply could not wrap.
+
+**Frozen boundary.** This phase lets the existing card action flex row wrap when space is
+insufficient and gives wrapped rows a smaller vertical gap. It adds one production-browser fixture
+and documentation. It does not reorder or resize controls, change labels/tap targets/focus behavior,
+touch Name checks lifecycle, generation, feedback, Saved identity, storage, network, WASM, or Rust.
+
+| Before | After |
+| --- | --- |
+| A five-action Create card widened the 320-pixel document to 331 pixels. | The document, grid, and card remain within 320 pixels. |
+| Save could render beyond the card's right edge. | All five actions stay inside the card without overlap. |
+| A narrow-screen fix risked reordering actions. | Why → Name checks → Copy → Pass → Save remains the DOM and Tab order. |
+| Wider layouts were already document-contained. | 1280, 390, and 360 pixels remain contained without a regression. |
+
+**Acceptance evidence.** The new `create-card-actions-responsive.mjs` production fixture first
+failed exactly its document- and card-containment checks at 320 pixels against the pre-fix build;
+all 1280/390/360 checks, the five-action Tab order, network control, and page-error control passed.
+After the CSS repair it passes **15/15** across all four widths. It proves no document overflow,
+five complete non-overlapping controls within the card, invariant DOM/Tab order, zero external HTTPS
+requests, and zero page errors. The captured 320-pixel production view confirms a clean two-row
+footer with the three icons aligned inside the card.
+
+TypeScript and the production Vite build are green. Retained Name checks **49/49** and responsive
+shell **17/17** production-browser contracts remain green; fixture syntax and `git diff --check`
+are green.
+
+**Decision.** Phase 182 fixes the generated-card width that Saved-only responsive coverage could
+not expose, using the flex row's native wrap behavior rather than clipping or horizontal scrolling.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

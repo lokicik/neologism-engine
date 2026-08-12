@@ -561,8 +561,10 @@ body {
   margin-top: auto;
   padding-top: .35rem;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: .9rem;
+  column-gap: .9rem;
+  row-gap: .45rem;
 }
 
 /* Phase 43: footer toggles use the same chip language as the command bar */
