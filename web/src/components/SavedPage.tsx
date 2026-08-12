@@ -24,6 +24,8 @@ export function SavedPage({ entries, onRemoveSaved, onGoCreate }: Props) {
   const goCreateRef = useRef<HTMLButtonElement>(null)
   const pendingRemovalFocusRef = useRef<number | null>(null)
   const copyStatusTimer = useRef<number | undefined>(undefined)
+  const copiedAllTimer = useRef<number | undefined>(undefined)
+  const copiedUrlTimer = useRef<number | undefined>(undefined)
   const favorites = entries.map((entry) => entry.result)
 
   useLayoutEffect(() => {
@@ -39,6 +41,8 @@ export function SavedPage({ entries, onRemoveSaved, onGoCreate }: Props) {
 
   useEffect(() => () => {
     if (copyStatusTimer.current !== undefined) clearTimeout(copyStatusTimer.current)
+    if (copiedAllTimer.current !== undefined) clearTimeout(copiedAllTimer.current)
+    if (copiedUrlTimer.current !== undefined) clearTimeout(copiedUrlTimer.current)
   }, [])
 
   function announceSavedAction(message: string) {
@@ -111,10 +115,12 @@ export function SavedPage({ entries, onRemoveSaved, onGoCreate }: Props) {
     setCopyError(null)
     try {
       await navigator.clipboard.writeText(text)
+      if (copiedAllTimer.current !== undefined) clearTimeout(copiedAllTimer.current)
       setCopiedAll(true)
       announceSavedAction('Saved names copied to clipboard.')
-      setTimeout(() => setCopiedAll(false), 1500)
+      copiedAllTimer.current = window.setTimeout(() => setCopiedAll(false), 1500)
     } catch {
+      if (copiedAllTimer.current !== undefined) clearTimeout(copiedAllTimer.current)
       setCopiedAll(false)
       setCopyStatus('')
       setCopyError('Could not copy the Saved names. Browser clipboard access was denied.')
@@ -129,16 +135,19 @@ export function SavedPage({ entries, onRemoveSaved, onGoCreate }: Props) {
     try {
       url = encodeShareUrl(favorites)
     } catch (error) {
+      if (copiedUrlTimer.current !== undefined) clearTimeout(copiedUrlTimer.current)
       setCopiedUrl(false)
       setCopyError(error instanceof Error ? error.message : 'Could not create the share link.')
       return
     }
     try {
       await navigator.clipboard.writeText(url)
+      if (copiedUrlTimer.current !== undefined) clearTimeout(copiedUrlTimer.current)
       setCopiedUrl(true)
       announceSavedAction('Share link copied to clipboard.')
-      setTimeout(() => setCopiedUrl(false), 1500)
+      copiedUrlTimer.current = window.setTimeout(() => setCopiedUrl(false), 1500)
     } catch {
+      if (copiedUrlTimer.current !== undefined) clearTimeout(copiedUrlTimer.current)
       setCopiedUrl(false)
       setCopyStatus('')
       setCopyError('Could not copy the share link. Browser clipboard access was denied.')

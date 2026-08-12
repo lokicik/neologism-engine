@@ -13,7 +13,7 @@ const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const SHOTS = join(E2E_DIR, 'shots')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 29
+const EXPECTED_CHECKS = 32
 
 mkdirSync(SHOTS, { recursive: true })
 
@@ -67,12 +67,32 @@ try {
     localStorage.setItem('neologism:favorites', JSON.stringify(liked))
     const state = { calls: 0, value: '' }
     window.__phase156Clipboard = state
+    const nativeSetTimeout = window.setTimeout.bind(window)
+    const nativeClearTimeout = window.clearTimeout.bind(window)
+    const visualTimers = new Set()
+    window.__phase199VisualTimers = visualTimers
+    window.setTimeout = (handler, timeout = 0, ...args) => {
+      let id
+      const wrapped = typeof handler === 'function'
+        ? (...callbackArgs) => {
+            visualTimers.delete(id)
+            handler(...callbackArgs)
+          }
+        : handler
+      id = nativeSetTimeout(wrapped, timeout, ...args)
+      if (timeout === 1500) visualTimers.add(id)
+      return id
+    }
+    window.clearTimeout = (id) => {
+      visualTimers.delete(id)
+      nativeClearTimeout(id)
+    }
     Object.defineProperty(navigator, 'clipboard', {
       configurable: true,
       value: {
         async writeText(value) {
           state.calls++
-          if ([1, 3, 5].includes(state.calls)) throw new Error('clipboard fixture rejection')
+          if ([1, 3, 6].includes(state.calls)) throw new Error('clipboard fixture rejection')
           state.value = String(value)
         },
         async readText() {
@@ -188,6 +208,13 @@ try {
       && (await savedCopyStatus.textContent())?.trim() === 'Saved names copied to clipboard.',
     'Copy all success announces one exact atomic polite status',
   )
+  await page.waitForTimeout(900)
+  await copyAll.click()
+  await page.waitForTimeout(700)
+  check(
+    await copyAll.locator('path[d="M20 6 9 17l-5-5"]').count() === 1,
+    'a second Copy all success restarts its full visual confirmation window',
+  )
 
   const txt = page.getByRole('button', { name: 'TXT' })
   await page.evaluate(() => {
@@ -262,7 +289,7 @@ try {
   )
   const afterShareFailure = await page.evaluate(() => window.__phase156Clipboard)
   check(
-    afterShareFailure.calls === 5
+    afterShareFailure.calls === 6
       && afterShareFailure.value === 'Noma\nOrbit'
       && await share.evaluate((element) => document.activeElement === element),
     'failed Share link preserves the prior clipboard and invoking focus',
@@ -291,13 +318,27 @@ try {
     (await savedCopyStatus.textContent())?.trim() === 'Share link copied to clipboard.',
     'Share link success replaces the Saved status with its exact completed operation',
   )
+  await page.waitForTimeout(900)
+  await share.click()
+  await page.waitForTimeout(700)
+  check(
+    await share.locator('path[d="M20 6 9 17l-5-5"]').count() === 1,
+    'a second Share link success restarts its full visual confirmation window',
+  )
+  const pendingBeforeLeave = await page.evaluate(() => window.__phase199VisualTimers.size)
+  await page.getByRole('button', { name: /^Create/ }).click()
+  check(
+    pendingBeforeLeave >= 1
+      && await page.evaluate(() => window.__phase199VisualTimers.size) === 0,
+    'leaving Saved clears every pending transient visual timer',
+  )
 
   const storageAfter = await page.evaluate(() => JSON.stringify(localStorage))
   check(storageAfter === storageBefore, 'all clipboard success and failure paths leave browser storage byte-identical')
   check(pageErrors.length === 0, `clipboard rejections produce zero page errors (${JSON.stringify(pageErrors)})`)
   check(external.length === 0, `clipboard actions issue zero external HTTPS requests (${JSON.stringify(external)})`)
   const finalClipboard = await page.evaluate(() => window.__phase156Clipboard)
-  check(finalClipboard.calls === 6, `exactly one clipboard attempt occurs per activation (${finalClipboard.calls})`)
+  check(finalClipboard.calls === 8, `exactly one clipboard attempt occurs per activation (${finalClipboard.calls})`)
   await context.close()
 } catch (error) {
   console.error('SCRIPT ERROR:', error instanceof Error ? error.message : error)

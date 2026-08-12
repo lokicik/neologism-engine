@@ -6364,6 +6364,39 @@ weakening the already-frozen failure truth boundary or implying that an unranked
 
 ---
 
+## Phase 199 — Restart and clean up Saved success timers
+
+**Bottleneck.** Saved's Copy all and Share link each showed a check icon for 1.5 seconds, but every
+success started an untracked timer. If a second success arrived before the first timer fired, the
+older callback cleared the newer confirmation early. Those timers also survived SavedPage unmount;
+the live status timer was already tracked and cleaned correctly.
+
+**Frozen boundary.** This phase gives the two existing visual confirmations separate timer refs.
+Each success clears its predecessor before starting a fresh 1.5-second window; failure clears the
+matching pending timer; unmount clears both beside the existing status timer. Clipboard payloads,
+attempt count, visible labels/icons, live copy, focus, downloads, sharing, storage, network, Saved
+identity, taste, generator, and Rust remain unchanged.
+
+| Before | After |
+| --- | --- |
+| A second Copy all success lost its check icon when the first timer reached 1.5 seconds. | The second success owns a complete fresh 1.5-second window. |
+| Share link had the same overlapping-timer race. | Its timer is independently restartable. |
+| Pending visual timers outlived SavedPage. | Leaving Saved clears every pending 1.5-second visual timer. |
+
+**Acceptance evidence.** The strengthened production fixture first reproduced both overlapping
+success failures against the old code. After the timer-ref repair, `clipboard-failure.mjs` passes
+**32/32**. It performs eight exact clipboard attempts, delays each second success across the first
+timer's old deadline, observes both check icons still present, then leaves Saved and observes the
+tracked pending timer set fall to zero. All retained clipboard failure/retry, live status, download
+cleanup, stable filename/payload, focus, storage, page-error, and external-HTTPS gates remain green.
+
+TypeScript and the production Vite build are green; `git diff --check` is green.
+
+**Decision.** Phase 199 removes a real transient-state race and unmount leak without changing the
+Saved happy path or extending confirmation duration.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
