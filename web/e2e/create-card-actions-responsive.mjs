@@ -11,7 +11,7 @@ const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 15
+const EXPECTED_CHECKS = 19
 const VIEWPORTS = [1280, 390, 360, 320]
 
 const server = spawn(process.execPath, [viteCli, 'preview', '--port', String(PORT), '--strictPort'], {
@@ -101,9 +101,35 @@ try {
 
     const firstAction = card.getByRole('button', { name: `Why ${name} was generated` })
     await firstAction.focus()
+    await page.keyboard.press('Shift+Tab')
+    await page.keyboard.press('Tab')
     const focusOrder = []
+    const focusRings = []
     for (let index = 0; index < 5; index++) {
       focusOrder.push(await page.evaluate(() => document.activeElement?.getAttribute('aria-label')))
+      focusRings.push(await page.evaluate(() => {
+        const element = document.activeElement
+        if (!(element instanceof HTMLElement)) return { ok: false }
+        const rect = element.getBoundingClientRect()
+        const style = getComputedStyle(element)
+        const outline = Number.parseFloat(style.outlineWidth) || 0
+        const offset = Number.parseFloat(style.outlineOffset) || 0
+        const margin = outline + offset
+        return {
+          ok: element.matches(':focus-visible')
+            && outline >= 2
+            && style.outlineStyle !== 'none'
+            && rect.left - margin >= 0
+            && rect.top - margin >= 0
+            && rect.right + margin <= innerWidth
+            && rect.bottom + margin <= innerHeight,
+          label: element.getAttribute('aria-label'),
+          focusVisible: element.matches(':focus-visible'),
+          outline,
+          outlineStyle: style.outlineStyle,
+          offset,
+        }
+      }))
       if (index < 4) await page.keyboard.press('Tab')
     }
     check(JSON.stringify(focusOrder) === JSON.stringify([
@@ -113,6 +139,8 @@ try {
       `${name} is not for me`,
       `Save ${name} to favorites`,
     ]), `${width}px wrapping preserves the five-action DOM and Tab order`)
+    if (!focusRings.every((ring) => ring.ok)) console.log(`INFO  ${width}px focus rings`, focusRings)
+    check(focusRings.every((ring) => ring.ok), `${width}px gives all five actions a contained 2px focus ring`)
     if (width === 320) {
       await page.screenshot({ path: join(E2E_DIR, 'shots', 'create-card-actions-320.png'), fullPage: true })
     }

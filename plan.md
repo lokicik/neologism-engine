@@ -5946,6 +5946,43 @@ the unnecessary paint/frame race without changing Saved data semantics.
 
 ---
 
+## Phase 186 — Give every card action a visible focus ring
+
+**Bottleneck.** Why and Name checks had the product's deliberate 2px focus treatment, while the
+adjacent Copy, Pass, and Save icon buttons relied on Chromium's 1px `auto` outline. The mismatch was
+present at every tested width. At 390 pixels, applying the stronger ring alone also left its outer
+edge at the viewport boundary because icon buttons lacked the scroll margin already used by the
+other card controls.
+
+**Frozen boundary.** This phase adds `.icon-btn` to the existing scoped NameCard `:focus-visible`
+selector and to the same 8-pixel block scroll margin. It strengthens the retained responsive fixture
+with real keyboard modality and computed ring/geometry checks at four widths. It does not resize or
+reorder controls, alter pointer styles/actions, change card layout, clipboard/feedback/Saved/domain
+behavior, storage, network, generation, WASM, or Rust.
+
+| Before | After |
+| --- | --- |
+| Why and Name checks rendered a 2px solid focus ring. | They retain that exact ring. |
+| Copy, Pass, and Save rendered only Chromium's 1px auto outline. | All three render the same 2px solid product ring. |
+| A stronger icon ring could touch the 390-pixel viewport edge. | The shared 8-pixel scroll margin keeps it fully visible. |
+| The responsive fixture proved only order and box containment. | It now proves focus modality, width/style, and ring geometry too. |
+
+**Acceptance evidence.** The expanded `create-card-actions-responsive.mjs` production fixture first
+failed its focus-ring check at all four widths: Why/Name checks measured 2px solid, while all three
+icons measured 1px auto. After the scoped selector change, a 390-pixel ring-containment failure
+identified the missing scroll margin. The final build passes **19/19** at 1280, 390, 360, and 320
+pixels, proving all five actions retain order, containment, non-overlap, keyboard modality, and a
+fully visible 2px ring with zero external HTTPS requests or page errors.
+
+TypeScript and the production Vite build are green. Retained clipboard **23/23** and Name checks
+**49/49** production-browser contracts remain green; fixture syntax and `git diff --check` are
+green.
+
+**Decision.** Phase 186 makes the entire high-frequency card footer share one visible keyboard
+language, including the narrow viewport where the stronger ring needs explicit scroll clearance.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
