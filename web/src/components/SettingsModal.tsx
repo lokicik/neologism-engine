@@ -140,6 +140,10 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
   useEffect(() => {
     if (!draft.enabled) return
     let cancelled = false
+    // A provider or endpoint change starts a different discovery scope. Do
+    // not leave the previous server's options selectable during the debounce
+    // or request; the loading row is the honest intermediate state.
+    setModels([])
     setModelsLoading(true)
     const t = setTimeout(() => {
       void fetchModels(draft).then((list) => {

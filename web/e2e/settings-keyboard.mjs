@@ -1,6 +1,6 @@
-// Phase 148/212 browser contract: Settings is a real keyboard-contained modal,
+// Phase 148/212/214 browser contract: Settings is a real keyboard-contained modal,
 // its model picker follows the aria-activedescendant combobox pattern, and a
-// reopened localhost picker reflects the model currently loaded at that URL.
+// reopened or retargeted localhost picker reflects only its current URL.
 // Run after `npm run build`: node e2e/settings-keyboard.mjs
 import { chromium } from 'playwright'
 import { spawn } from 'node:child_process'
@@ -12,7 +12,7 @@ const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 51
+const EXPECTED_CHECKS = 54
 const FOCUSABLE = [
   'a[href]',
   'button:not([disabled])',
@@ -73,6 +73,12 @@ const check = (ok, label) => {
   if (!ok) failures++
 }
 
+const deferred = () => {
+  let resolve
+  const promise = new Promise((done) => { resolve = done })
+  return { promise, resolve }
+}
+
 async function activeElementIs(locator) {
   return locator.evaluate((element) => document.activeElement === element)
 }
@@ -111,6 +117,8 @@ async function openSettingsByKeyboard(page, trigger, dialog) {
 let modelRequests = 0
 let localModelRequests = 0
 let localModel = 'local/model-a'
+let replacementEndpointRequests = 0
+const replacementEndpointResponse = deferred()
 
 try {
   const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } })
@@ -140,6 +148,16 @@ try {
       contentType: 'application/json',
       headers: { 'access-control-allow-origin': '*' },
       body: JSON.stringify({ data: [{ id: localModel }] }),
+    })
+  })
+  await context.route('http://127.0.0.1:9021/v1/models', async (route) => {
+    replacementEndpointRequests++
+    await replacementEndpointResponse.promise
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      headers: { 'access-control-allow-origin': '*' },
+      body: JSON.stringify({ data: [{ id: 'local/model-c' }] }),
     })
   })
 
@@ -453,6 +471,33 @@ try {
     await refreshedLocalCombo.inputValue() === 'local/model-b'
       && await refreshedLocalCombo.getAttribute('aria-expanded') === 'false',
     'the newly discovered localhost model remains selectable through the existing combobox',
+  )
+
+  await refreshedLocalCombo.fill('')
+  await page.keyboard.press('Escape')
+  await dialog.getByRole('textbox', { name: 'Endpoint' }).fill('http://127.0.0.1:9021/v1')
+  await refreshedLocalCombo.focus()
+  await dialog.locator('.model-empty[role="status"]').filter({ hasText: 'Loading models' }).waitFor({ state: 'visible' })
+  while (replacementEndpointRequests < 1) await page.waitForTimeout(20)
+  check(
+    replacementEndpointRequests === 1
+      && await dialog.getByRole('option', { name: /local\/model-b/ }).count() === 0,
+    'switching localhost endpoints hides the prior endpoint model while discovery is pending',
+  )
+  replacementEndpointResponse.resolve()
+  const replacementOption = dialog.getByRole('option', { name: /local\/model-c/ })
+  await replacementOption.waitFor({ state: 'visible' })
+  check(
+    replacementEndpointRequests === 1
+      && await replacementOption.count() === 1
+      && await dialog.getByRole('option', { name: /local\/model-b/ }).count() === 0,
+    'the completed replacement-endpoint discovery exposes only its own model list',
+  )
+  await replacementOption.click()
+  check(
+    await refreshedLocalCombo.inputValue() === 'local/model-c'
+      && await refreshedLocalCombo.getAttribute('aria-expanded') === 'false',
+    'the replacement endpoint model is selectable after the pending state clears',
   )
   await dialog.getByRole('button', { name: 'Cancel', exact: true }).click()
   await dialog.waitFor({ state: 'detached' })

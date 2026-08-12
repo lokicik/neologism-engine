@@ -6906,6 +6906,40 @@ reuse, and the actual provider call without broadening configuration or network 
 
 ---
 
+## Phase 214 — Hide stale model options during endpoint discovery (2026-08-13)
+
+### Bottleneck
+
+Phase 212 refreshed the final localhost list, but changing provider or endpoint inside one open
+Settings dialog left the previous `models` array rendered during the 300 ms debounce and pending
+request. The UI simultaneously said “Loading models…” and allowed a model from the old server to
+be selected for the new one.
+
+### Frozen boundary
+
+- A provider/endpoint discovery scope change clears only the transient option array, then uses the
+  existing loading row until that scope's response settles.
+- Preserve the typed model value, draft endpoint, 300 ms debounce, request cancellation guard,
+  OpenRouter session cache, combobox behavior, and save/cancel semantics.
+- Add no automatic selection, polling, endpoint validation, storage write, or extra request.
+
+### Acceptance evidence
+
+The production fixture was red first: 53 of 54 gates passed and only the new pending-discovery
+gate failed because local model B remained an option after switching to a held endpoint C. After
+clearing the old discovery scope synchronously, it passes **54/54**. While C is held, the loading
+row is visible and B is absent; once C resolves, only C is listed and it remains selectable. The
+retained modal containment, focus restoration, 65-model cap, typed/mouse selection, localhost
+reopen refresh, and OpenRouter single-request gates all remain green. TypeScript and the production
+Vite build are green.
+
+### Decision
+
+Phase 214 makes Settings' intermediate model-discovery state truthful instead of briefly mixing
+one endpoint's controls with another endpoint's data.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
