@@ -5206,6 +5206,53 @@ Create control, while pointer users retain the existing low-surprise path.
 
 ---
 
+## Phase 167 — Keep exhaustion recovery focused and honest
+
+**Bottleneck.** **Clear seen names & regenerate** cleared recent history and synchronously hid its
+own exhaustion surface before local generation completed. When exact filters were still impossible,
+the action returned but Chromium left keyboard focus on `BODY`; the recreated recovery button had no
+visible indicator. A successful retry would likewise remove the action without assigning a
+persistent destination.
+
+**Frozen boundary.** This phase changes only App's existing exhaustion action, one button ref,
+focusable busy copy/ARIA, terminal keyboard focus selection, one production-browser fixture, and
+documentation. It does not change what exhaustion means, recent-history keys/caps, filters,
+generation pools or ranking, the Create Generate contract, storage schemas, WASM, Rust, or network
+behavior. Pointer activation remains free of programmatic focus.
+
+**Retry and focus contract.** The exhaustion notice remains mounted while retrying and its action
+shows **Regenerating…**, `aria-busy=true`, and `aria-disabled=true` without native disabling or
+losing focus. The existing App operation guard rejects duplicate work. Recent history is still
+cleared before the ordinary generation path. After keyboard activation, a still-impossible result
+returns focus to the same recovery action; a successful page returns focus to persistent Generate.
+Pointer success does neither. Honest zero-result exhaustion remains distinct from an engine error.
+
+| Before | After |
+| --- | --- |
+| Recovery hid its focused button during local work. | The same action stays mounted, focusable, busy, and visibly labeled. |
+| Repeated exhaustion returned with focus on `BODY`. | The persistent recovery action owns terminal keyboard focus. |
+| A successful retry had no defined focus destination. | Keyboard success focuses persistent Generate; pointer success stays neutral. |
+| Recovery semantics were inferred only from old broad scrolling tests. | One fixed impossible-to-corrected filter flow owns focus, history, error, and page truth. |
+
+**Acceptance evidence.** The new `exhaustion-recovery-focus.mjs` production fixture passes **12/12**
+after the pre-fix run failed exactly the terminal recovery focus and visible-indicator checks. It
+combines `Starts with=zzz` and `Contains=zzzzzz`, proves zero misleading cards and an honest action,
+then retries to the same exhausted state with focus visible, no error banner, exact durable recent
+history `[]`, and `scrollX=0` at 390 pixels. Clearing those two filters makes the next keyboard retry
+return at least ten cards and focus Generate. An isolated pointer success does not force Generate,
+and both paths produce zero page errors.
+
+Retained production-browser contracts remain green at Create generation focus **16/16** and recent-
+history corruption/recovery **18/18**, preserving one logical operation, busy/failure/success focus,
+exact shown-name history, 20,000-name capacity, and non-destructive corrupt reads. TypeScript, the
+production Vite build, fixture syntax, and `git diff --check` are green.
+
+**Decision.** Phase 167 makes the long-standing exhaustion recovery action obey the same focus and
+busy truth as normal Generate. It does not promise that impossible filters can produce names; it
+keeps the user at an honest, retryable control until they change those constraints.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

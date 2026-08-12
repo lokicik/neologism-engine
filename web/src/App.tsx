@@ -85,6 +85,7 @@ export default function App() {
   const [showSettings, setShowSettings] = useState(false)
   const recentRef = useRef<string[]>(loadRecent())
   const pendingViewFocusRef = useRef<View | null>(null)
+  const exhaustedRetryRef = useRef<HTMLButtonElement>(null)
   // One nearby taste direction per visible session. A manual fresh generation
   // gets a new salt; infinite-scroll pages keep it so the session feels
   // coherent instead of changing preference direction on every append.
@@ -410,11 +411,18 @@ export default function App() {
 
   // The prompt's name space is used up against the seen-history: wipe the
   // history and regenerate. (Names already starred stay in favorites.)
-  const clearSeenAndRetry = () => {
+  const clearSeenAndRetry = async (keyboard: boolean) => {
+    if (loadingRef.current) return
     recentRef.current = []
     saveRecent([])
-    setExhausted(false)
-    void handleGenerate(false)
+    await handleGenerate(false)
+    if (keyboard) {
+      requestAnimationFrame(() => {
+        const target = exhaustedRetryRef.current
+          ?? document.querySelector<HTMLButtonElement>('.command-go')
+        target?.focus()
+      })
+    }
   }
 
   // Empty-state example prompts: set the description and generate in one click.
@@ -577,14 +585,20 @@ export default function App() {
                 </>
               )}
 
-              {exhausted && !loading && (
+              {exhausted && (
                 <div className="exhausted-notice">
                   <p>
                     You've seen every name this prompt can make. Try different words or
                     another mode — or clear your seen-names history and start over.
                   </p>
-                  <button className="example-chip" onClick={clearSeenAndRetry}>
-                    Clear seen names & regenerate
+                  <button
+                    ref={exhaustedRetryRef}
+                    className="example-chip"
+                    aria-disabled={loading}
+                    aria-busy={loading}
+                    onClick={(event) => void clearSeenAndRetry(event.detail === 0)}
+                  >
+                    {loading ? 'Regenerating…' : 'Clear seen names & regenerate'}
                   </button>
                 </div>
               )}
