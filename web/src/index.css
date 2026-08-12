@@ -1505,6 +1505,10 @@ body {
 }
 .mode-pill:hover { border-color: rgba(255, 255, 255, .22); }
 .mode-pill:active { transform: scale(.96); }
+.mode-pills .mode-pill:focus-visible {
+  outline: 2px solid rgba(124, 106, 249, .9);
+  outline-offset: 2px;
+}
 .mode-pill.selected {
   border-color: rgba(124, 106, 249, .6);
   background: rgba(124, 106, 249, .1);

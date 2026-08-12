@@ -6078,6 +6078,37 @@ download is complete; the message deliberately says only that it started.
 
 ---
 
+## Phase 190 — Give every Create naming mode a visible focus ring
+
+**Bottleneck.** Auto, Brandable, Real words, Respelled, and Compound already formed a named native
+button group with one truthful `aria-pressed` selection. Keyboard selection also retained focus, but
+every mode used Chromium's 1px `auto` outline while the adjacent Length, Creativity, and Advanced
+controls used the deliberate 2px product ring. The CommandBar fixture did not traverse the mode row.
+
+**Frozen boundary.** This phase adds one mode-group `:focus-visible` rule and extends the retained
+CommandBar fixture to bind mode order, default state, keyboard selection, retained focus, and computed
+ring geometry at 1280, 390, and 320 pixels. It does not change mode labels/examples, configuration
+mapping, generation, prompt behavior, disclosure behavior, storage, network, WASM, or Rust.
+
+| Before | After |
+| --- | --- |
+| All five modes rendered Chromium's 1px auto outline. | All five render the product's 2px solid focus ring. |
+| Selection semantics were present but outside the keyboard fixture. | The fixture now binds order, single selection, activation, and retained focus. |
+| Narrow mode wrapping had no ring-containment gate. | Every mode ring is fully visible at 390 and 320 pixels. |
+
+**Acceptance evidence.** The expanded production fixture first passed group order, Auto default, and
+keyboard selection, but failed the new ring gate: all five modes measured `outline-width: 1px`,
+`outline-style: auto`, and zero offset. After the scoped CSS rule,
+`command-chips-keyboard.mjs` passes **51/51**, including its retained disclosure, viewport, storage,
+and network gates. The existing prompt/mode regression remains fully green.
+
+TypeScript and the production Vite build are green; fixture syntax and `git diff --check` are green.
+
+**Decision.** Phase 190 gives the primary Create choice row the same visible keyboard language as
+its neighboring filters without altering any naming behavior.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

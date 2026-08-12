@@ -11,7 +11,7 @@ const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 46
+const EXPECTED_CHECKS = 51
 
 const server = spawn(process.execPath, [viteCli, 'preview', '--port', String(PORT), '--strictPort'], {
   cwd: WEB_DIR,
@@ -49,6 +49,41 @@ async function hasVisibleKeyboardFocus(locator) {
       && style.outlineStyle !== 'none'
       && Number.parseFloat(style.outlineWidth) >= 1
   })
+}
+
+async function focusRingEvidence(page, controls) {
+  const count = await controls.count()
+  if (count === 0) return []
+  await controls.first().focus()
+  await page.keyboard.press('Shift+Tab')
+  await page.keyboard.press('Tab')
+  const rings = []
+  for (let index = 0; index < count; index++) {
+    rings.push(await page.evaluate(() => {
+      const element = document.activeElement
+      if (!(element instanceof HTMLElement)) return { ok: false }
+      const rect = element.getBoundingClientRect()
+      const style = getComputedStyle(element)
+      const outline = Number.parseFloat(style.outlineWidth) || 0
+      const offset = Number.parseFloat(style.outlineOffset) || 0
+      const margin = outline + offset
+      return {
+        ok: element.matches(':focus-visible')
+          && outline >= 2
+          && style.outlineStyle !== 'none'
+          && rect.left - margin >= 0
+          && rect.top - margin >= 0
+          && rect.right + margin <= innerWidth
+          && rect.bottom + margin <= innerHeight,
+        label: element.innerText.replace(/\s+/g, ' ').trim(),
+        outline,
+        outlineStyle: style.outlineStyle,
+        offset,
+      }
+    }))
+    if (index < count - 1) await page.keyboard.press('Tab')
+  }
+  return rings
 }
 
 async function storageSnapshot(page) {
@@ -133,6 +168,27 @@ try {
   await page.goto(APP_URL)
   await page.locator('.command-area').waitFor({ state: 'visible' })
   const storedBefore = await storageSnapshot(page)
+
+  const modeGroup = page.getByRole('group', { name: 'Naming style' })
+  const modeButtons = modeGroup.locator('.mode-pill')
+  check(
+    await modeButtons.count() === 5
+      && (await modeButtons.locator('.mode-pill-label').allTextContents()).map((label) => label.trim()).join('|')
+        === 'Auto|Brandable|Real words|Respelled|Compound'
+      && await modeButtons.filter({ hasText: 'Auto' }).getAttribute('aria-pressed') === 'true',
+    'Create exposes five ordered native mode choices with Auto announced as selected',
+  )
+  const modeRings = await focusRingEvidence(page, modeButtons)
+  if (!modeRings.every((ring) => ring.ok)) console.log('INFO  Create mode focus rings', modeRings)
+  check(modeRings.every((ring) => ring.ok), 'all five Create modes expose a contained 2px keyboard focus ring')
+  const compoundMode = modeButtons.filter({ hasText: 'Compound' })
+  await page.keyboard.press('Enter')
+  check(
+    await compoundMode.getAttribute('aria-pressed') === 'true'
+      && await compoundMode.evaluate((element) => document.activeElement === element),
+    'keyboard selection moves the single pressed mode while retaining invoking focus',
+  )
+  await modeButtons.filter({ hasText: 'Auto' }).click()
 
   const chipWraps = page.locator('.chips-row .chip-wrap')
   const lengthWrap = chipWraps.nth(0)
@@ -360,6 +416,11 @@ try {
   for (const viewport of [{ width: 390, height: 844 }, { width: 320, height: 700 }]) {
     await page.setViewportSize(viewport)
     await page.evaluate(() => window.scrollTo(0, 0))
+    const narrowModeRings = await focusRingEvidence(page, modeButtons)
+    check(
+      narrowModeRings.length === 5 && narrowModeRings.every((ring) => ring.ok),
+      `${viewport.width}px keeps every Create mode focus ring fully visible`,
+    )
     await advancedTrigger.focus()
     await page.keyboard.press('Enter')
     await advancedPanel.waitFor({ state: 'visible' })
