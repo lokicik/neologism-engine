@@ -88,6 +88,11 @@ body {
 }
 .nav-cta:hover { border-color: rgba(255, 255, 255, .25); }
 .nav-cta:active { transform: scale(.96); }
+.landing button:focus-visible {
+  outline: 2px solid rgba(124, 106, 249, .9);
+  outline-offset: 2px;
+}
+.landing button { scroll-margin-block: 8px; }
 
 /* Hero */
 .landing-hero {

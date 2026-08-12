@@ -11,7 +11,7 @@ const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 12
+const EXPECTED_CHECKS = 14
 
 const server = spawn(process.execPath, [viteCli, 'preview', '--port', String(PORT), '--strictPort'], {
   cwd: WEB_DIR,
@@ -56,9 +56,50 @@ async function storageSnapshot() {
   }))
 }
 
+async function landingFocusRings() {
+  const buttons = page.locator('.landing button')
+  const count = await buttons.count()
+  const rings = []
+  await buttons.first().focus()
+  await page.keyboard.press('Shift+Tab')
+  await page.keyboard.press('Tab')
+  for (let index = 0; index < count; index++) {
+    rings.push(await page.evaluate(() => {
+      const element = document.activeElement
+      if (!(element instanceof HTMLElement)) return { ok: false }
+      const rect = element.getBoundingClientRect()
+      const style = getComputedStyle(element)
+      const outline = Number.parseFloat(style.outlineWidth) || 0
+      const offset = Number.parseFloat(style.outlineOffset) || 0
+      const margin = outline + offset
+      return {
+        ok: element.matches(':focus-visible')
+          && outline >= 2
+          && style.outlineStyle !== 'none'
+          && rect.left - margin >= 0
+          && rect.top - margin >= 0
+          && rect.right + margin <= innerWidth
+          && rect.bottom + margin <= innerHeight,
+        label: element.innerText.replace(/\s+/g, ' ').trim(),
+        outline,
+        outlineStyle: style.outlineStyle,
+        offset,
+      }
+    }))
+    if (index < count - 1) await page.keyboard.press('Tab')
+  }
+  return rings
+}
+
 try {
   await page.goto(APP_URL)
   const storageBefore = await storageSnapshot()
+  const desktopRings = await landingFocusRings()
+  if (!desktopRings.every((ring) => ring.ok)) console.log('INFO  390px Landing focus rings', desktopRings)
+  check(
+    desktopRings.length === 8 && desktopRings.every((ring) => ring.ok),
+    '390px gives all eight Landing actions a contained 2px focus ring',
+  )
   const group = page.locator('.tile-pills')
   await group.scrollIntoViewIfNeeded()
   const buttons = group.locator('button')
@@ -78,6 +119,13 @@ try {
   const compound = buttons.filter({ hasText: 'Compound' })
   await compound.click()
   check(await compound.getAttribute('aria-pressed') === 'true' && await respelled.getAttribute('aria-pressed') === 'false', 'pointer selection moves the same single pressed state to Compound')
+  await page.setViewportSize({ width: 320, height: 700 })
+  const narrowRings = await landingFocusRings()
+  if (!narrowRings.every((ring) => ring.ok)) console.log('INFO  320px Landing focus rings', narrowRings)
+  check(
+    narrowRings.length === 8 && narrowRings.every((ring) => ring.ok),
+    '320px keeps all eight Landing focus rings fully visible',
+  )
   check(await storageSnapshot() === storageBefore && externalRequests.length === 0, 'demo selection leaves storage unchanged and sends zero external HTTPS requests')
   check(pageErrors.length === 0, 'keyboard and pointer selection produce zero page errors')
   check(checks === EXPECTED_CHECKS - 1, `fixture executes exactly ${EXPECTED_CHECKS} checks`)

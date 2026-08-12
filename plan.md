@@ -6109,6 +6109,38 @@ its neighboring filters without altering any naming behavior.
 
 ---
 
+## Phase 191 — Give every Landing action a visible focus ring
+
+**Bottleneck.** Landing's Open app, two Find your name actions, How it works, and four live demo modes
+were native buttons with retained selection/navigation semantics, but all eight still used Chromium's
+1px `auto` outline. Existing Landing fixtures proved activation and destination focus without binding
+the initiating controls to the product's 2px keyboard language.
+
+**Frozen boundary.** This phase adds one Landing-scoped `button:focus-visible` rule plus an 8-pixel
+block scroll margin, and expands the retained demo fixture to traverse every Landing button at 390 and
+320 pixels. It does not change button labels/order, CTA routing, demo selection, in-page scrolling,
+animations, storage, network, generation, WASM, or Rust.
+
+| Before | After |
+| --- | --- |
+| All eight Landing actions rendered Chromium's 1px auto outline. | All eight render the product's 2px solid focus ring. |
+| CTA and live-demo focus quality had no shared gate. | One real traversal measures both interaction families. |
+| The stronger ring initially touched the 390px viewport edge in the demo row. | An 8px scroll margin keeps every focused ring fully visible. |
+
+**Acceptance evidence.** The expanded production fixture first failed both width gates with every
+action measuring `outline-width: 1px`, `outline-style: auto`, and zero offset. The scoped 2px rule
+fixed width/style; the first visual run then exposed three 390-pixel demo pills at the viewport edge.
+After the scroll-margin hardening, `landing-demo-mode-state.mjs` passes **14/14** at 390 and 320
+pixels. Retained How it works focus **15/15** and Landing/Create navigation focus **14/14** remain
+green.
+
+TypeScript and the production Vite build are green; fixture syntax and `git diff --check` are green.
+
+**Decision.** Phase 191 makes Landing's full keyboard path visually consistent from first CTA through
+the interactive demo to the closing action, including the scroll clearance the stronger ring needs.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
