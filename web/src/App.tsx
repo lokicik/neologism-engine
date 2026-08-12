@@ -108,6 +108,7 @@ export default function App() {
   const [showSettings, setShowSettings] = useState(false)
   const recentRef = useRef<string[]>(loadRecent())
   const pendingViewFocusRef = useRef<View | null>(null)
+  const pendingHistoryFocusRef = useRef(false)
   const exhaustedRetryRef = useRef<HTMLButtonElement>(null)
   // One nearby taste direction per visible session. A manual fresh generation
   // gets a new salt; infinite-scroll pages keep it so the session feels
@@ -128,6 +129,7 @@ export default function App() {
       const next = viewFromHistoryState(event.state)
       if (!next || next === viewRef.current) return
       pendingViewFocusRef.current = null
+      pendingHistoryFocusRef.current = true
       viewRef.current = next
       setShowSettings(false)
       setView(next)
@@ -146,6 +148,15 @@ export default function App() {
 
     const selector = view === 'landing' ? '.landing-title' : '.command-input'
     document.querySelector<HTMLElement>(selector)?.focus()
+  }, [view])
+
+  useEffect(() => {
+    if (!pendingHistoryFocusRef.current) return
+    pendingHistoryFocusRef.current = false
+    requestAnimationFrame(() => {
+      const selector = view === 'landing' ? '.landing-title' : '#main-content'
+      document.querySelector<HTMLElement>(selector)?.focus()
+    })
   }, [view])
   // Mirror of `results` for the append path — handleGenerate is memoized on
   // [config], so reading state directly there would be stale.

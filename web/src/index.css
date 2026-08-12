@@ -136,7 +136,7 @@ body {
   color: var(--text);
 }
 
-.landing-title:focus-visible {
+.landing-title:focus {
   outline: 2px solid rgba(124, 106, 249, .9);
   outline-offset: .35rem;
   border-radius: .2rem;
@@ -1290,7 +1290,7 @@ body {
   flex-direction: column;
   gap: 1.5rem;
 }
-.page:focus-visible {
+.page:focus {
   outline: 2px solid rgba(124, 106, 249, .9);
   outline-offset: -4px;
 }

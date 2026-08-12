@@ -5873,6 +5873,43 @@ success.
 
 ---
 
+## Phase 184 — Restore destination focus with Back and Forward
+
+**Bottleneck.** Native SPA history restored the correct state, content, current-page semantics, and
+document title, but it had no focus policy. After Back/Forward, focus stayed on a control belonging
+to the previous view or lost a meaningful destination. The retained history fixture proved only the
+visual/state half of navigation.
+
+**Frozen boundary.** This phase marks only `popstate` transitions for a post-render focus handoff.
+Application views focus the existing `main` landmark; Landing focuses its existing page heading.
+Those programmatic-only targets show their established 2px outline on `:focus` because Chromium's
+focus-visible heuristic does not classify API-driven history as keyboard input. It extends the
+retained production fixture. It does not change history entries, URLs/hashes, view state, titles,
+explicit pointer/keyboard navigation, reload focus, storage, network, generation, WASM, or Rust.
+
+| Before | After |
+| --- | --- |
+| Back/Forward restored content without a destination focus. | Restored application pages focus their main landmark. |
+| A restored Landing page had no programmatic focus context. | Forward to Landing focuses its visible `h1`. |
+| Chromium hid the ring for API-driven focus. | Programmatic destination targets expose their existing 2px outline on focus. |
+| A focus fix could affect direct navigation or recovery URLs. | Direct pointer/reload behavior and the exact `#names=` recovery copy remain unchanged. |
+
+**Acceptance evidence.** The expanded `view-history.mjs` production fixture first failed all five
+new destination-focus checks against the pre-fix build while every original state/content/title,
+hash, storage, request, and page-error check passed. After the repair and Landing forward coverage
+it passes **24/24**. It proves visible destination focus for Saved → Studio Back, Studio → Create
+Back, Create → Studio Forward, Landing ↔ Studio history traversal, and recovery-hash Back; Settings
+remains history-neutral and reload retains its existing focus policy.
+
+TypeScript and the production Vite build are green. Retained Landing navigation **14/14**,
+skip-main **17/17**, and view-title **11/11** production-browser contracts remain green; fixture
+syntax and `git diff --check` are green.
+
+**Decision.** Phase 184 makes native history a complete SPA navigation event instead of a visual
+state swap, while keeping explicit pointer navigation and reload deliberately neutral.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

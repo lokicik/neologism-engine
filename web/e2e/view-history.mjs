@@ -11,7 +11,7 @@ const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 17
+const EXPECTED_CHECKS = 24
 
 const server = spawn(process.execPath, [viteCli, 'preview', '--port', String(PORT), '--strictPort'], {
   cwd: WEB_DIR,
@@ -72,6 +72,26 @@ async function storageSnapshot() {
   }))
 }
 
+async function destinationFocus(selector) {
+  await page.waitForFunction((target) => document.activeElement?.matches(target), selector).catch(() => {})
+  const state = await page.locator(selector).evaluate((element) => {
+    const rect = element.getBoundingClientRect()
+    const style = getComputedStyle(element)
+    const outline = Number.parseFloat(style.outlineWidth) || 0
+    const state = {
+      active: document.activeElement === element,
+      outlined: outline >= 2 && style.outlineStyle !== 'none',
+      destinationVisible: rect.left >= 0
+        && rect.top >= 0
+        && rect.right <= innerWidth
+        && rect.top < innerHeight,
+    }
+    return { ...state, ok: state.active && state.outlined && state.destinationVisible }
+  })
+  if (!state.ok) console.log(`INFO  history focus ${selector}`, state)
+  return state.ok
+}
+
 const historyLabels = [
   'Back from Saved restores AI Studio state, content, and title',
   'second Back restores Create state, content, and title',
@@ -103,14 +123,17 @@ try {
     await page.goBack()
     await waitForView('studio', 'AI Studio — Neologism Engine')
     check(await stateView() === 'studio' && await currentView('ai studio') && await page.title() === 'AI Studio — Neologism Engine', historyLabels[0])
+    check(await destinationFocus('#main-content'), 'Back from Saved visibly focuses the restored Studio main landmark')
 
     await page.goBack()
     await waitForView('create', 'Create — Neologism Engine')
     check(await stateView() === 'create' && await currentView('create') && await page.title() === 'Create — Neologism Engine', historyLabels[1])
+    check(await destinationFocus('#main-content'), 'second Back visibly focuses the restored Create main landmark')
 
     await page.goForward()
     await waitForView('studio', 'AI Studio — Neologism Engine')
     check(await stateView() === 'studio' && await currentView('ai studio') && await page.title() === 'AI Studio — Neologism Engine', historyLabels[2])
+    check(await destinationFocus('#main-content'), 'Forward visibly focuses the restored Studio main landmark')
 
     const beforeSettingsLength = await page.evaluate(() => history.length)
     await page.locator('.sidebar-settings').click()
@@ -126,6 +149,20 @@ try {
     await page.goBack()
     await waitForView('studio', 'AI Studio — Neologism Engine')
     check(await stateView() === 'studio' && await currentView('ai studio'), historyLabels[6])
+    check(await destinationFocus('#main-content'), 'Back from Landing visibly focuses the restored Studio main landmark')
+
+    await page.goForward()
+    await waitForView('landing', 'Neologism Engine — Startup & Project Name Generator')
+    check(
+      await stateView() === 'landing' && await destinationFocus('.landing-title'),
+      'Forward to Landing visibly focuses its restored page heading',
+    )
+    await page.goBack()
+    await waitForView('studio', 'AI Studio — Neologism Engine')
+    check(
+      await stateView() === 'studio' && await destinationFocus('#main-content'),
+      'Back from the restored Landing page refocuses Studio main',
+    )
 
     await page.reload()
     await waitForView('studio', 'AI Studio — Neologism Engine')
@@ -137,6 +174,7 @@ try {
     await page.goBack()
     await waitForView('studio', 'AI Studio — Neologism Engine')
     check(await stateView() === 'studio' && new URL(page.url()).hash === '#names=recovery-copy' && await currentView('ai studio'), historyLabels[9])
+    check(await destinationFocus('#main-content'), 'Back with a recovery hash still visibly focuses the restored main landmark')
   } else {
     for (const label of historyLabels) check(false, label)
   }
