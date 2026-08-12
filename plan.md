@@ -5570,6 +5570,43 @@ composition or disclosure semantics.
 
 ---
 
+## Phase 176 — Make recovery actions mobile-safe
+
+**Bottleneck.** Empty Saved's Go create and Create exhaustion's Clear seen names & regenerate are
+the only direct recovery actions from their respective terminal states. Both share `.example-chip`
+and rendered below 40 pixels high on their 320/390-pixel production paths. Their focus recovery and
+pointer neutrality were already correct, but the controls users need when work stops had smaller
+touch targets than the surrounding shell and card actions.
+
+**Frozen boundary.** This phase strengthens one existing assertion in each recovery fixture and
+adds one mobile-only minimum height to the shared example-chip style. It updates documentation but
+does not change labels, prompts, recovery logic, recent-history clearing, focus modality, pointer
+behavior, storage, generation, ranking, WASM, Rust, or network work.
+
+| Before | After |
+| --- | --- |
+| Go create was visible but below the 40-pixel mobile floor. | Empty Saved guarantees one contained 40×40-or-larger recovery action. |
+| Exhaustion retry was focusable but below the same floor. | The terminal Create recovery action uses the same minimum. |
+| Recovery fixtures checked visibility and focus only. | Their existing visibility checks also require mobile-safe geometry and viewport containment. |
+| Separate one-off sizing could let the two paths drift. | Their existing shared class owns one responsive target rule. |
+
+**Acceptance evidence.** The tightened production fixtures first failed exactly their new target
+checks against the prior build. After the shared CSS change, empty-Saved navigation passes **8/8**
+at 320/390 pixels and exhaustion recovery passes **12/12** at 390 pixels. They retain keyboard-only
+meaningful focus handoffs, pointer neutrality, honest repeated exhaustion, durable history clearing,
+successful recovery, storage truth, horizontal stability, and zero page errors.
+
+Retained production-browser contracts remain green at responsive shell **17/17** and Create
+generation focus **16/16**, preserving overall mobile layout, first-load/retry focus semantics,
+duplicate-operation guards, storage boundaries, and zero external HTTPS requests. TypeScript, the
+production Vite build, fixture syntax, and `git diff --check` are green.
+
+**Decision.** Phase 176 gives the product's two terminal recovery actions the same mobile target
+floor as navigation, Saved actions, and card disclosures. It strengthens escape paths without
+changing what either recovery does.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

@@ -60,7 +60,13 @@ try {
   await keyboardPage.keyboard.press('Enter')
   const goCreate = keyboardPage.getByRole('button', { name: 'Go create' })
   await goCreate.waitFor({ state: 'visible' })
-  check(await goCreate.evaluate((element) => element.offsetWidth > 0 && element.offsetHeight > 0), 'empty Saved exposes one visible Go create action')
+  check(await goCreate.evaluate((element) => {
+    const rect = element.getBoundingClientRect()
+    return rect.width >= 39.5
+      && rect.height >= 39.5
+      && rect.left >= 0
+      && rect.right <= innerWidth
+  }), 'empty Saved exposes one visible, mobile-safe Go create action')
 
   await goCreate.focus()
   await keyboardPage.keyboard.press('Enter')

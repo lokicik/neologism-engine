@@ -59,7 +59,13 @@ try {
   check(await keyboardPage.locator('.name-card').count() === 0, 'unreachable exact constraints produce zero misleading cards')
 
   const recovery = keyboardPage.getByRole('button', { name: 'Clear seen names & regenerate' })
-  check(await recovery.isVisible(), 'exhaustion exposes its existing explicit recovery action')
+  check(await recovery.evaluate((element) => {
+    const rect = element.getBoundingClientRect()
+    return rect.width >= 39.5
+      && rect.height >= 39.5
+      && rect.left >= 0
+      && rect.right <= innerWidth
+  }), 'exhaustion exposes one visible, mobile-safe explicit recovery action')
   await recovery.focus()
   await keyboardPage.keyboard.press('Enter')
   await keyboardPage.waitForTimeout(1000)
