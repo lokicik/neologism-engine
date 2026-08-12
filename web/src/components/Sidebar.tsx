@@ -6,7 +6,7 @@ interface Props {
   view: AppView
   savedCount: number
   onNavigate: (view: AppView) => void
-  onAbout: () => void
+  onAbout: (keyboard: boolean) => void
   onSettings: () => void
 }
 
@@ -16,7 +16,7 @@ interface Props {
 export function Sidebar({ view, savedCount, onNavigate, onAbout, onSettings }: Props) {
   return (
     <nav className="sidebar">
-      <button className="wordmark sidebar-logo" onClick={onAbout} title="About — back to the landing page">
+      <button className="wordmark sidebar-logo" onClick={(event) => onAbout(event.detail === 0)} title="About — back to the landing page">
         ◈ neologism
       </button>
 
@@ -46,7 +46,7 @@ export function Sidebar({ view, savedCount, onNavigate, onAbout, onSettings }: P
         <button className="sidebar-item sidebar-settings" onClick={onSettings} title="AI model and local taste settings">
           ⚙ Settings
         </button>
-        <button className="sidebar-about" onClick={onAbout}>
+        <button className="sidebar-about" onClick={(event) => onAbout(event.detail === 0)}>
           About
         </button>
       </div>

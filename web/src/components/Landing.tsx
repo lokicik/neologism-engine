@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { generateNames, explainName, type Explanation, type NameResult } from '../lib/engine'
 
 interface Props {
-  onEnter: () => void
+  onEnter: (keyboard: boolean) => void
 }
 
 // ---------------------------------------------------------------------------
@@ -251,7 +251,7 @@ export function Landing({ onEnter }: Props) {
     <div className="landing" ref={rootRef}>
       <nav className="landing-nav">
         <span className="wordmark">◈ neologism</span>
-        <button className="nav-cta" onClick={onEnter}>Open app →</button>
+        <button className="nav-cta" onClick={(event) => onEnter(event.detail === 0)}>Open app →</button>
       </nav>
 
       <section className="landing-hero">
@@ -273,7 +273,7 @@ export function Landing({ onEnter }: Props) {
 
         <div className="hero-content">
           <span className="eyebrow">Free · open · runs entirely in your browser</span>
-          <h1 className="landing-title">Name your next big thing.</h1>
+          <h1 className="landing-title" tabIndex={-1}>Name your next big thing.</h1>
           <p className="hero-sub">
             Coined names for packages, CLIs, libraries, and brands — generated locally, with
             on-request domain evidence and manual namespace and trademark links.
@@ -302,7 +302,7 @@ export function Landing({ onEnter }: Props) {
           </div>
 
           <div className="hero-ctas">
-            <button className="landing-cta" onClick={onEnter}>Find your name →</button>
+            <button className="landing-cta" onClick={(event) => onEnter(event.detail === 0)}>Find your name →</button>
             <button className="ghost-cta" onClick={scrollToSteps}>How it works ↓</button>
           </div>
         </div>
@@ -401,7 +401,7 @@ export function Landing({ onEnter }: Props) {
 
       <section className="closing" data-reveal>
         <h2 className="closing-title">Your name is already in here.</h2>
-        <button className="landing-cta" onClick={onEnter}>Find your name →</button>
+        <button className="landing-cta" onClick={(event) => onEnter(event.detail === 0)}>Find your name →</button>
       </section>
 
       <footer className="landing-footer">

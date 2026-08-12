@@ -124,6 +124,12 @@ body {
   color: var(--text);
 }
 
+.landing-title:focus-visible {
+  outline: 2px solid rgba(124, 106, 249, .9);
+  outline-offset: .35rem;
+  border-radius: .2rem;
+}
+
 /* The decoded name — the centerpiece. Fixed height so cycling never shifts layout. */
 .decode-stage {
   display: flex;
@@ -421,6 +427,7 @@ body {
   .bento .tile:nth-child(2), .bento .tile:nth-child(3), .bento .tile:nth-child(5) { grid-area: auto; }
   .landing-steps { flex-direction: column; align-items: flex-start; gap: 1rem; }
   .landing-hero { min-height: 78dvh; }
+  .landing-title { max-width: calc(100vw - 2rem); }
   .wall-name { font-size: 1.1rem; }
   .landing-footer { justify-content: center; text-align: center; }
 }

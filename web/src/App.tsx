@@ -84,10 +84,19 @@ export default function App() {
   const [judgeConfig, setJudgeConfig] = useState<JudgeConfig>(loadJudgeConfig)
   const [showSettings, setShowSettings] = useState(false)
   const recentRef = useRef<string[]>(loadRecent())
+  const pendingViewFocusRef = useRef<View | null>(null)
   // One nearby taste direction per visible session. A manual fresh generation
   // gets a new salt; infinite-scroll pages keep it so the session feels
   // coherent instead of changing preference direction on every append.
   const preferenceSaltRef = useRef<number | null>(null)
+
+  useEffect(() => {
+    if (pendingViewFocusRef.current !== view) return
+    pendingViewFocusRef.current = null
+
+    const selector = view === 'landing' ? '.landing-title' : '.command-input'
+    document.querySelector<HTMLElement>(selector)?.focus()
+  }, [view])
   // Mirror of `results` for the append path — handleGenerate is memoized on
   // [config], so reading state directly there would be stale.
   const resultsRef = useRef<NameResult[]>([])
@@ -461,7 +470,8 @@ export default function App() {
   if (view === 'landing') {
     return (
       <Landing
-        onEnter={() => {
+        onEnter={(keyboard) => {
+          if (keyboard) pendingViewFocusRef.current = 'create'
           markVisited()
           setView('create')
         }}
@@ -475,7 +485,10 @@ export default function App() {
         view={view}
         savedCount={savedEntries.length}
         onNavigate={setView}
-        onAbout={() => setView('landing')}
+        onAbout={(keyboard) => {
+          if (keyboard) pendingViewFocusRef.current = 'landing'
+          setView('landing')
+        }}
         onSettings={() => setShowSettings(true)}
       />
 

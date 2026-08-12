@@ -5117,6 +5117,60 @@ remains authoritative; only structurally unsafe rows are denied entry to typed p
 
 ---
 
+## Phase 165 — Preserve keyboard focus across Landing view changes
+
+**Bottleneck.** Landing entry and the two persistent About actions changed the SPA view by
+unmounting the focused button without assigning a destination. Production Chromium therefore left
+`document.activeElement` on `BODY` after Enter or Space. The next Tab began from an accidental
+document position instead of Create's first field or Landing's content. Pointer entry had the same
+DOM removal, but automatically focusing the brief field there would also risk opening a mobile
+keyboard the user did not request.
+
+**Frozen boundary.** This phase changes only Landing-entry/About activation metadata, one private
+App view-focus handoff, a programmatically focusable Landing heading, its scoped focus styling, one
+production-browser fixture, and documentation. It does not change routing or visited-state policy,
+Landing generation/animation, Create defaults, sidebar order, Settings focus, storage schemas,
+generator/ranker, WASM, Rust, or network behavior. Pointer and ordinary reload paths deliberately do
+not receive automatic focus.
+
+**Modality and focus contract.** Native click detail distinguishes keyboard/synthesized activation
+from pointer activation at the existing buttons. App records only the requested target view, changes
+the view normally, and then focuses the persistent Create brief field or Landing `h1` after the new
+tree commits. The heading uses `tabIndex=-1`, so it does not add a normal Tab stop; the next Tab moves
+to the hero's **Find your name** action. On viewports at 640 pixels and below the heading box is
+constrained inside 16-pixel side margins, allowing the ordinary outward two-pixel focus ring to stay
+fully visible without drawing through the text. Pointer entry/About and a normal reload keep the
+browser's natural non-forced focus behavior.
+
+| Before | After |
+| --- | --- |
+| Keyboard entry unmounted the Landing button and left focus on `BODY`. | Focus moves to Create's brief field after the view commits. |
+| Keyboard About navigation offered no new-page context. | Focus moves to the Landing heading; the next Tab reaches the hero action. |
+| One focus fix risked forcing the same behavior on touch/pointer users. | Only keyboard/synthesized activation requests the handoff; pointer and reload remain neutral. |
+| The unconstrained narrow heading box extended beyond the viewport. | At ≤640 pixels the box keeps 16-pixel side margins and its outward ring remains visible. |
+| No production fixture owned this Landing/Create boundary. | One focused contract covers nav CTA, hero CTA, About, reload, pointer, 390/320 geometry, and page errors. |
+
+**Acceptance evidence.** The new `landing-navigation-focus.mjs` production fixture passes **14/14**
+after a pre-fix run failed the Create handoff, Landing handoff, focus visibility, natural next-Tab,
+and hero-entry checks. At 390 pixels it enters through the nav CTA, returns through About, confirms
+the focused heading's complete ring, Tabs to the hero CTA, and re-enters Create at the same brief
+field. A separate 320-pixel keyboard path keeps that ring visible and `scrollX=0`. Isolated pointer
+paths prove neither Create's field nor Landing's heading is forcibly focused, while ordinary reload
+also stays neutral; both paths produce zero page errors. Visual inspection confirms the final outer
+ring is readable around the two-line heading without clipping or crossing its glyphs.
+
+Retained production-browser contracts remain green at Create-filter keyboard **46/46** and
+responsive shell **17/17**, preserving disclosure focus, storage-neutral filter interaction, natural
+sidebar order, Settings restoration, and 1280/390/320 containment. TypeScript, the production Vite
+build, fixture syntax, and `git diff --check` are green.
+
+**Decision.** Phase 165 closes a high-frequency SPA focus discontinuity without turning every route
+change into autofocus. Keyboard users receive deterministic context at both sides of the Landing
+boundary; pointer users keep the existing low-surprise behavior and narrow screens gain an honestly
+visible focus surface.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
