@@ -6234,6 +6234,36 @@ without changing what is exported or introducing persistence, network, or schema
 
 ---
 
+## Phase 195 — Release Saved download URLs on failure too
+
+**Bottleneck.** Saved already caught TXT/JSON download exceptions and showed the correct operation
+name, but the shared download helper revoked its object URL only after a successful synthetic click.
+When that click threw, the UI recovered while the browser resource did not.
+
+**Frozen boundary.** This phase changes only the internal cleanup shape and the existing clipboard /
+download browser contract. Filenames, TXT/JSON payloads, toolbar order, visible success/error copy,
+focus behavior, Saved identity, storage, share encoding, network behavior, and every engine path stay
+unchanged.
+
+| Before | After |
+| --- | --- |
+| Saved showed a TXT error but leaked the already-created object URL. | The helper revokes that URL in `finally`. |
+| TXT and JSON were tested only on success. | The first TXT click is forced to throw; retry and JSON then run normally. |
+| Resource cleanup was implicit. | The fixture counts exactly one revocation for each failed or successful attempt. |
+
+**Acceptance evidence.** `clipboard-failure.mjs` now passes **29/29** on the production build. The
+failed TXT attempt starts no download, clears the previous Copy-all success, shows the exact live
+error, keeps the invoking focus, and revokes its URL. TXT retry and JSON each keep their stable
+filename/status/focus and add exactly one more revocation. Clipboard retry, payload, storage,
+page-error, and external-HTTPS gates remain green.
+
+TypeScript and the production Vite build are green; `git diff --check` is green.
+
+**Decision.** Phase 195 closes the remaining temporary-download resource leak without changing any
+Saved data or user-visible happy path.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

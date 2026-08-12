@@ -1,5 +1,5 @@
-// Phase 156 browser contract: clipboard rejection is visible and retryable on
-// card Copy, Saved Copy all, and Saved Share link without false success state.
+// Phase 156/195 browser contract: clipboard and Saved-download rejection is
+// visible and retryable without false success or leaked object URLs.
 // Run after `npm run build`: node e2e/clipboard-failure.mjs
 import { chromium } from 'playwright'
 import { spawn } from 'node:child_process'
@@ -13,7 +13,7 @@ const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const SHOTS = join(E2E_DIR, 'shots')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 27
+const EXPECTED_CHECKS = 29
 
 mkdirSync(SHOTS, { recursive: true })
 
@@ -190,12 +190,48 @@ try {
   )
 
   const txt = page.getByRole('button', { name: 'TXT' })
+  await page.evaluate(() => {
+    const originalClick = HTMLAnchorElement.prototype.click
+    const originalRevoke = URL.revokeObjectURL.bind(URL)
+    window.__phase195Download = { failedOnce: false, revokes: 0 }
+    HTMLAnchorElement.prototype.click = function click() {
+      if (!window.__phase195Download.failedOnce) {
+        window.__phase195Download.failedOnce = true
+        throw new Error('Saved download fixture rejection')
+      }
+      return originalClick.call(this)
+    }
+    URL.revokeObjectURL = (url) => {
+      window.__phase195Download.revokes++
+      originalRevoke(url)
+    }
+  })
+  let savedDownloads = 0
+  page.on('download', () => { savedDownloads++ })
+  await txt.click()
+  await savedError.waitFor({ state: 'visible' })
+  check(
+    (await savedError.textContent())?.trim() === 'Could not start the TXT download.'
+      && await savedError.getAttribute('role') === 'alert'
+      && await txt.evaluate((element) => document.activeElement === element),
+    'failed TXT download exposes an exact live error and preserves invoking focus',
+  )
+  check(
+    savedDownloads === 0
+      && (await savedCopyStatus.textContent())?.trim() === ''
+      && await page.evaluate(() => window.__phase195Download.revokes === 1),
+    'failed TXT starts no download, clears stale success, and revokes its object URL',
+  )
+
   const txtDownload = page.waitForEvent('download')
   await txt.click()
   check(
     (await txtDownload).suggestedFilename() === 'names.txt'
-      && await txt.evaluate((element) => document.activeElement === element),
-    'TXT starts the existing download and retains its invoking focus',
+      && savedDownloads === 1
+      && await txt.evaluate((element) => document.activeElement === element)
+      && await savedError.count() === 0
+      && await page.evaluate(() => window.__phase195Download.revokes === 2),
+    'TXT retry starts the existing download, clears its error, retains focus, and revokes its object URL',
   )
   check(
     (await savedCopyStatus.textContent())?.trim() === 'TXT download started.',
@@ -207,8 +243,10 @@ try {
   await json.click()
   check(
     (await jsonDownload).suggestedFilename() === 'names.json'
-      && await json.evaluate((element) => document.activeElement === element),
-    'JSON starts the existing download and retains its invoking focus',
+      && savedDownloads === 2
+      && await json.evaluate((element) => document.activeElement === element)
+      && await page.evaluate(() => window.__phase195Download.revokes === 3),
+    'JSON starts the existing download, retains focus, and revokes its object URL',
   )
   check(
     (await savedCopyStatus.textContent())?.trim() === 'JSON download started.',
