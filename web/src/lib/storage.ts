@@ -215,11 +215,12 @@ export function loadTasteReferences(): string {
   }
 }
 
-export function saveTasteReferences(value: string): void {
+export function saveTasteReferences(value: string): boolean {
   try {
     localStorage.setItem(TASTE_REFERENCES_KEY, value.slice(0, MAX_TASTE_REFERENCE_INPUT))
+    return true
   } catch {
-    // ignore quota / privacy-mode storage errors
+    return false
   }
 }
 

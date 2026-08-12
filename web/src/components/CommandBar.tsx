@@ -8,7 +8,8 @@ interface Props {
   onGenerate: () => void
   loading: boolean
   tasteReferences: string
-  onTasteReferencesChange: (value: string) => void
+  tasteReferenceError: string | null
+  onTasteReferencesChange: (value: string) => boolean
 }
 
 // Phase 41: command-bar dashboard (the Ideogram/Google-search pattern) — one
@@ -129,6 +130,7 @@ export function CommandBar({
   onGenerate,
   loading,
   tasteReferences,
+  tasteReferenceError,
   onTasteReferencesChange,
 }: Props) {
   const mode = currentMode(config)
@@ -252,14 +254,21 @@ export function CommandBar({
                 maxLength={240}
                 placeholder="Vercel, Linear, Notion"
                 value={tasteReferences}
-                aria-describedby="taste-reference-help"
-                onChange={(e) => onTasteReferencesChange(e.target.value)}
+                aria-describedby={`taste-reference-help${tasteReferenceError ? ' taste-reference-error' : ''}`}
+                onChange={(e) => {
+                  if (!onTasteReferencesChange(e.target.value)) e.currentTarget.value = tasteReferences
+                }}
               />
               <small id="taste-reference-help" className="menu-help">
                 {referencesNeeded === 0
                   ? 'Guiding the larger local candidate pool.'
                   : `Add ${referencesNeeded} more ${referencesNeeded === 1 ? 'name' : 'names'} to guide local ranking.`}
               </small>
+              {tasteReferenceError && (
+                <small id="taste-reference-error" className="taste-reference-error" role="alert">
+                  {tasteReferenceError}
+                </small>
+              )}
             </label>
             <label>
               <span>Seed words{mode !== 'brandable' ? ' (Brandable mode only)' : ''}</span>

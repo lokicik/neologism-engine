@@ -4814,6 +4814,55 @@ record itself is parseable but invalid, while deliberate user Save remains the o
 
 ---
 
+## Phase 159 — Persist reference names before changing the active taste profile
+
+**Bottleneck.** Advanced **Names you like** changed App's `tasteReferences` and therefore the local
+selection profile before calling `saveTasteReferences`. That storage helper swallowed quota/privacy
+errors. A rejected write therefore looked applied in the field and 3/3 progress, influenced the
+current session's ranking, and then disappeared on reload without any visible warning.
+
+**Frozen boundary.** This phase changes only the existing reference-string write result, the App-to-
+CommandBar update handshake, one field-local alert, one forced-failure production fixture, and
+documentation. It does not change the storage key or 240-character cap, reference parsing/profile
+math, candidate pools, ranking weights, Advanced disclosure semantics, explicit likes/passes,
+taste export, generator, WASM, Rust, or network behavior. No draft store or new schema is added.
+
+**Persistence, focus, and retry contract.** `saveTasteReferences` now reports success. App attempts
+that one write before replacing the active reference string. Rejection leaves both the controlled
+field and local profile on the previous durable value, returns the DOM input to that value even on a
+repeated same-message failure, and exposes an inline `role="alert"` included in the field's accessible
+description. Focus stays in the input. Retyping is a normal retry; only a successful write changes
+the input/progress/profile and clears the alert. The existing Advanced panel remains the visual owner.
+
+| Before | After |
+| --- | --- |
+| The session profile changed before reference storage was known to succeed. | The local write succeeds first; only then does App activate the new references. |
+| Rejection left the edited field and 3/3 progress looking durable. | Field, progress/help, and ranking direction remain on the previous durable references. |
+| Reload was the first sign that the user's reference names had been lost. | An inline alert explains the failure at the responsible field immediately. |
+| There was no defined retry or focus behavior. | The same focused input retries one write; success clears the alert and survives reload. |
+| A narrow popup could make recovery text or the focus ring hard to inspect. | Error and full 2-pixel input ring remain contained in Advanced at 390 pixels. |
+
+**Acceptance evidence.** The new `taste-reference-storage-failure.mjs` production fixture passes
+**13/13**. It seeds `Vercel, Linear` as a durable 2/3 profile, rejects exactly the first reference-key
+write, and proves the exact alert, old field value, old progress/help, old durable string, and input
+focus all remain truthful. At 390 pixels the alert and full focus ring must fit inside the named
+Advanced group; visual review confirms the compact red copy remains readable without crowding the
+disabled and optional filters below it. The second identical edit performs one successful retry,
+activates `Vercel, Linear, Notion` and 3/3 guidance, clears the alert, retains focus, and survives
+reload. Every non-reference local key remains byte-identical, with zero external HTTPS request or
+page error.
+
+Retained contracts remain green at Create-filter keyboard **46/46** and the 100-page personalized
+taste quality audit, including all structural, affinity, semantic-retention, and retry-spread gates.
+TypeScript, the production Vite build, fixture syntax, and `git diff --check` are green.
+
+**Decision.** Phase 159 makes reference-name teaching obey the same durable-state honesty as explicit
+feedback and AI settings. A browser-storage failure can no longer silently steer only the current
+session or advertise progress that reload will erase; the previous profile stays authoritative until
+the user's retry is actually stored.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

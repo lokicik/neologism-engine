@@ -88,6 +88,7 @@ export default function App() {
   const [promptKeywords, setPromptKeywords] = useState<string[]>([])
   const [error, setError] = useState<string | null>(null)
   const [feedbackError, setFeedbackError] = useState<string | null>(null)
+  const [tasteReferenceError, setTasteReferenceError] = useState<string | null>(null)
   // AI model config (used by the AI Studio); configured once via Settings.
   const [judgeConfig, setJudgeConfig] = useState<JudgeConfig>(loadJudgeConfig)
   const [showSettings, setShowSettings] = useState(false)
@@ -273,8 +274,13 @@ export default function App() {
 
   const handleTasteReferencesChange = useCallback((value: string) => {
     const next = value.slice(0, 240)
+    if (!saveTasteReferences(next)) {
+      setTasteReferenceError('Could not save reference names. Browser storage kept the previous names active.')
+      return false
+    }
     setTasteReferences(next)
-    saveTasteReferences(next)
+    setTasteReferenceError(null)
+    return true
   }, [])
 
   const handleToggleFavorite = useCallback((item: NameResult) => {
@@ -506,6 +512,7 @@ export default function App() {
               onGenerate={() => handleGenerate(false)}
               loading={loading}
               tasteReferences={tasteReferences}
+              tasteReferenceError={tasteReferenceError}
               onTasteReferencesChange={handleTasteReferencesChange}
             />
 
