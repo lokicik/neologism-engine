@@ -6539,6 +6539,40 @@ part of the app's consistent, focus-preserving error language.
 
 ---
 
+## Phase 204 — Scope AI judge cache to the real ranking request
+
+**Bottleneck.** The judge cache identified a ranking by provider, configured model, prompt length,
+and sorted names. It did not include prompt content or the localhost endpoint. Two distinct Custom
+criteria with the same character count could therefore reuse the first criterion's ranking without
+a request. Switching between two local OpenAI-compatible servers could likewise display a result
+produced by the previous endpoint while labeling it as the current run.
+
+**Frozen boundary.** Cache remains in-memory and exact-repeat reuse remains enabled. Its key now
+serializes the provider, normalized request base, trimmed configured model id, full prompt template,
+and sorted name set as a structured JSON tuple. It does not persist results, include the API key,
+alter prompt construction, resolve a model early, add requests, change temperature/parsing/ranking,
+or touch AI Studio's per-metric view cache. Provider transport, Settings, focus, storage, taste,
+Create, generator, and Rust remain unchanged.
+
+| Before | After |
+| --- | --- |
+| `Criterion A` and equal-length `Criterion B` shared a cache key. | Full prompt content separates the two rankings. |
+| Local ports 9001 and 9002 shared a key when model/prompt/names matched. | The normalized request base keeps endpoint results isolated. |
+| Exact identical reruns used the cache. | They still perform one provider call and return the same ranking. |
+
+**Acceptance evidence.** A new pure `judge-cache-check.ts` first produced two failures against the
+old key: same-length prompt content and distinct localhost endpoints both reused stale results. It
+now passes **4/4** with deterministic mocked ranking replies, exact URL assertions, and one-call
+repeat reuse. No live provider, model, key, or network is used.
+
+TypeScript and the production Vite build are green. The retained AI Studio failure/cache/race
+fixture remains **39/39**, and Studio taste identity passes in full; `git diff --check` is green.
+
+**Decision.** Phase 204 preserves the useful session cache while preventing it from silently
+changing which criterion or server actually judged the displayed names.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
