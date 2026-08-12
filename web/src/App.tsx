@@ -502,7 +502,10 @@ export default function App() {
           <SavedPage
             entries={savedEntries}
             onRemoveSaved={handleRemoveSaved}
-            onGoCreate={() => setView('create')}
+            onGoCreate={(keyboard) => {
+              if (keyboard) pendingViewFocusRef.current = 'create'
+              setView('create')
+            }}
           />
         ) : view === 'studio' ? (
           <AiStudio

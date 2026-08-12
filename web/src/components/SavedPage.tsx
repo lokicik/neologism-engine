@@ -8,7 +8,7 @@ import { IconCopy, IconCheck, IconDownload, IconLink } from './icons'
 interface Props {
   entries: SavedNameEntry[]
   onRemoveSaved: (r: NameResult) => void
-  onGoCreate: () => void
+  onGoCreate: (keyboard: boolean) => void
 }
 
 // Phase 47: Saved is a first-class page — large header, real icon toolbar,
@@ -87,7 +87,7 @@ export function SavedPage({ entries, onRemoveSaved, onGoCreate }: Props) {
         <div className="empty-state">
           <p>Nothing saved yet — star names you like while generating.</p>
           <div className="example-chips">
-            <button className="example-chip" onClick={onGoCreate}>
+            <button className="example-chip" onClick={(event) => onGoCreate(event.detail === 0)}>
               ✦ Go create
             </button>
           </div>

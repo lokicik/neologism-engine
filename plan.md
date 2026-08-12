@@ -5171,6 +5171,41 @@ visible focus surface.
 
 ---
 
+## Phase 166 — Return empty Saved keyboard users to Create focus
+
+**Bottleneck.** Empty Saved's **Go create** action was the remaining view-changing CTA whose focused
+button disappeared with its page. Production Chromium preserved the correct Create view and all
+storage, but left focus on `BODY`; the brief field had no visible keyboard indicator. Pointer users
+did not need an automatic form focus.
+
+**Frozen boundary.** This phase changes only the existing Saved callback's activation metadata,
+reuses Phase 165's private Create-focus handoff, adds one production-browser fixture, and updates
+documentation. It does not change Saved identity or layout, sidebar navigation, Landing/About,
+visited state, Create configuration, storage, generator/ranker, WASM, Rust, or network behavior.
+
+| Before | After |
+| --- | --- |
+| Keyboard Go create unmounted its button and dropped focus to `BODY`. | The committed Create view focuses its brief field with a visible indicator. |
+| A blanket fix could force form focus after touch or mouse entry. | Pointer Go create keeps the browser's natural non-forced behavior. |
+| This empty-state route had no direct production gate. | Keyboard/pointer paths now own focus, storage, 320-pixel scroll stability, and page-error truth. |
+
+**Acceptance evidence.** The new `empty-saved-navigation-focus.mjs` production fixture passes
+**8/8** after the pre-fix run failed exactly the brief-field focus and visible-indicator checks. At
+320 pixels, keyboard activation reaches the Create brief field, matches `:focus-visible`, keeps
+`scrollX=0`, and leaves local/session storage byte-for-byte unchanged. An isolated 390-pixel pointer
+path does not force that field, and both paths produce zero page errors.
+
+Retained production-browser contracts remain green at Landing navigation **14/14** and responsive
+shell **17/17**, preserving keyboard/synthesized Landing handoff, pointer neutrality, sidebar order,
+Settings restoration, storage stability, and 1280/390/320 containment. TypeScript, the production
+Vite build, fixture syntax, and `git diff --check` are green.
+
+**Decision.** Phase 166 closes the last known disappearing in-app view CTA with the already-proven
+modality-aware policy. It adds no new navigation abstraction: keyboard users land on a useful
+Create control, while pointer users retain the existing low-surprise path.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
