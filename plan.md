@@ -6397,6 +6397,41 @@ Saved happy path or extending confirmation duration.
 
 ---
 
+## Phase 200 — Clear stale AI ranking success when AI is disabled
+
+**Bottleneck.** AI Studio's success-only live region lived outside its configured/unconfigured
+view boundary. After a verified Brandable ranking, disabling AI in Settings hid all ranked cards
+but left `24 names ranked by Brandable.` exposed in the accessibility tree. Re-enabling AI could
+therefore restore a local view whose old completion had never actually left the live channel.
+
+**Frozen boundary.** The local 24-name pool, verified order, reasons, pick, per-metric cache, and
+selected/displayed metric remain in memory. When AI is not ready, the success region renders empty
+synchronously and its stored message is cleared; re-enabling AI may restore the verified local view
+but must not replay that old message or make a model request. Settings remains the only owner of the
+persisted AI configuration. Provider calls, prompts, ranking logic, errors, focus, taste, Create,
+generator, Rust, and non-judge browser storage remain unchanged.
+
+| Before | After |
+| --- | --- |
+| Disabling AI hid the ranked cards but left their old live success exposed. | The setup view and an empty success channel appear together. |
+| Re-enabling could inherit stale live-region state. | The cached verified view returns silently, with no new request. |
+| The failure fixture treated a Settings save as globally storage-neutral. | It now isolates the deliberately changed judge record and gates every other browser-storage entry byte-for-byte. |
+
+**Acceptance evidence.** The expanded production `ai-studio-failure.mjs` fixture first failed the
+disable lifecycle against the old render boundary. It now passes **39/39**, including synchronous
+success clearing, zero cards while disabled, restoration of all 24 verified cards, unchanged
+Brandable metadata, no fourth ranking request, empty live status after re-enable, and byte-identical
+non-judge local/session storage. All retained first/later failure, same-pool Retry, cache, race,
+focus, 320-pixel containment, page-error, and external-HTTPS gates remain green.
+
+TypeScript and the production Vite build are green. Retained Settings keyboard is **48/48**, and
+the Studio taste-identity production fixture passes in full; `git diff --check` is green.
+
+**Decision.** Phase 200 makes the visible configured boundary and the live success boundary agree
+without discarding useful local results or pretending that re-enabling AI performed new work.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

@@ -11,7 +11,7 @@ const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 37
+const EXPECTED_CHECKS = 39
 
 const server = spawn(process.execPath, [viteCli, 'preview', '--port', String(PORT), '--strictPort'], {
   cwd: WEB_DIR,
@@ -68,6 +68,16 @@ function rankedReply(names, prefix) {
 async function storageSnapshot(page) {
   return page.evaluate(() => JSON.stringify({
     local: Object.keys(localStorage).sort().map((key) => [key, localStorage.getItem(key)]),
+    session: Object.keys(sessionStorage).sort().map((key) => [key, sessionStorage.getItem(key)]),
+  }))
+}
+
+async function nonJudgeStorageSnapshot(page) {
+  return page.evaluate(() => JSON.stringify({
+    local: Object.keys(localStorage)
+      .filter((key) => key !== 'neologism:judge')
+      .sort()
+      .map((key) => [key, localStorage.getItem(key)]),
     session: Object.keys(sessionStorage).sort().map((key) => [key, sessionStorage.getItem(key)]),
   }))
 }
@@ -253,7 +263,7 @@ try {
         body: rankedReply(request.names, 'premium-retry'),
       })
     })
-    const storageBefore = await storageSnapshot(page)
+    const storageBefore = await nonJudgeStorageSnapshot(page)
     const generate = page.getByRole('button', { name: 'Generate', exact: true })
     const rankingStatus = page.locator('.studio-ranking-status')
     await generate.focus()
@@ -341,9 +351,34 @@ try {
         && await brandableChip.evaluate((button) => document.activeElement === button),
       'cached Brandable return adds no request and announces the restored verified ranking',
     )
+    await page.locator('.sidebar-settings').click()
+    let dialog = page.getByRole('dialog', { name: 'Settings' })
+    await dialog.getByRole('checkbox', { name: 'Enable AI re-rank' }).uncheck()
+    await dialog.getByRole('button', { name: 'Save', exact: true }).click()
+    await page.locator('.studio-setup').waitFor({ state: 'visible' })
+    await page.waitForFunction(() => document.querySelector('.studio-ranking-status')?.textContent?.trim() === '')
+    check(
+      (await rankingStatus.textContent())?.trim() === ''
+        && await page.locator('.ai-studio .name-card').count() === 0,
+      'disabling AI hides the ranked view and clears its stale success status',
+    )
+    await page.locator('.sidebar-settings').click()
+    dialog = page.getByRole('dialog', { name: 'Settings' })
+    await dialog.getByRole('checkbox', { name: 'Enable AI re-rank' }).check()
+    await dialog.getByRole('button', { name: 'Save', exact: true }).click()
+    await page.waitForFunction(() => document.querySelectorAll('.ai-studio .name-card').length === 24)
+    check(
+      calls.length === 3
+        && (await rankingStatus.textContent())?.trim() === ''
+        && (await page.locator('.studio-meta').textContent())?.includes('Ranked by Brandable'),
+      're-enabling AI restores the local view without replaying stale live success or adding a request',
+    )
     const fit = await horizontalFit(page)
     check(fit.fits && fit.scrollX === 0 && fit.scrollWidth <= fit.viewport + 1, `320px alert, recovery actions, and cards stay horizontally contained (${JSON.stringify(fit)})`)
-    check(await storageSnapshot(page) === storageBefore, 'later-failure and Retry lifecycle leaves browser storage byte-identical')
+    check(
+      await nonJudgeStorageSnapshot(page) === storageBefore,
+      'later-failure, Retry, and AI enable lifecycle leave non-judge browser storage byte-identical',
+    )
     await context.close()
   }
 

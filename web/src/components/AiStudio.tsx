@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { generateBatch, type NameResult } from '../lib/engine'
 import {
   METRICS,
@@ -62,6 +62,10 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
 
   const ready = isJudgeReady(judgeConfig)
   const favoriteKeys = new Set(favorites.map(tasteIdentity))
+
+  useEffect(() => {
+    if (!ready) setRankingStatus('')
+  }, [ready])
 
   const criterionFor = (m: Metric) =>
     m === 'custom' ? custom.trim() : METRICS.find((x) => x.key === m)!.criterion
@@ -259,7 +263,7 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
         aria-live="polite"
         aria-atomic="true"
       >
-        {rankingStatus}
+        {ready ? rankingStatus : ''}
       </div>
 
       {!ready ? (
