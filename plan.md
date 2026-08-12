@@ -6172,6 +6172,36 @@ TypeScript and the production Vite build are green; fixture syntax and `git diff
 
 ---
 
+## Phase 193 — Make the primary Create brief visibly focused
+
+**Bottleneck.** Create, AI Studio, and Custom ranking already exposed distinct persistent accessible
+names. Studio's two fields also inherited a 2px product focus ring, but Create's highest-frequency
+brief field declared `outline: none`; only its surrounding command bar changed border color. The field
+itself therefore had no visible outline despite matching `:focus-visible`.
+
+**Frozen boundary.** This phase adds one `.command-area .command-input:focus-visible` rule and extends
+the existing three-field fixture to bind exact ring style/geometry at 390 pixels plus Create at 320.
+It leaves field names/placeholders, the surrounding `focus-within` border, input sizing, Enter
+generation, state, storage, network, AI ranking, WASM, and Rust unchanged.
+
+| Before | After |
+| --- | --- |
+| Create matched `:focus-visible` but computed `outline-style: none`. | Create renders the same 2px solid ring as Studio fields. |
+| Only the command-bar container changed border color. | Container and directly focused field both communicate state. |
+| Studio ring quality was assumed from CSS. | All three primary fields are measured in one production contract. |
+
+**Acceptance evidence.** Before the rule, Studio brief and Custom criterion passed with 2px solid
+rings, while Create failed at 390 and 320 pixels with `outline-style: none`. After the scoped change,
+`primary-textbox-names.mjs` passes **17/17**. Retained CommandBar keyboard **51/51** and Create
+generation focus **16/16** remain green.
+
+TypeScript and the production Vite build are green; fixture syntax and `git diff --check` are green.
+
+**Decision.** Phase 193 makes the core naming input directly perceivable from the keyboard without
+changing its compact command-bar layout or behavior.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
