@@ -152,12 +152,15 @@ const modelCache = new Map<string, ModelInfo[]>()
 // Live model list. OpenRouter's /models is public (no key needed); a local
 // server exposes its loaded models at {endpoint}/models. Returns [] on ANY
 // failure (incl. CORS) so the UI falls back to the curated list + manual entry.
+// Keep the large remote catalog cached for the session, but always recheck a
+// local endpoint: desktop model servers can replace their one loaded model
+// without changing URL while Settings is open or between modal visits.
 export async function fetchModels(cfg: JudgeConfig): Promise<ModelInfo[]> {
   const url =
     cfg.provider === 'openrouter'
       ? `${OPENROUTER_BASE}/models`
       : `${(cfg.endpoint ?? DEFAULT_LOCAL_ENDPOINT).replace(/\/$/, '')}/models`
-  if (modelCache.has(url)) return modelCache.get(url)!
+  if (cfg.provider === 'openrouter' && modelCache.has(url)) return modelCache.get(url)!
   try {
     const res = await fetch(url)
     if (!res.ok) return []
@@ -188,7 +191,7 @@ export async function fetchModels(cfg: JudgeConfig): Promise<ModelInfo[]> {
       (a, b) =>
         Number(b.free) - Number(a.free) || sortPrice(a) - sortPrice(b) || a.id.localeCompare(b.id),
     )
-    modelCache.set(url, models)
+    if (cfg.provider === 'openrouter') modelCache.set(url, models)
     return models
   } catch {
     return []

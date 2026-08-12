@@ -1,5 +1,6 @@
-// Phase 148 browser contract: Settings is a real keyboard-contained modal and
-// its model picker follows the aria-activedescendant combobox pattern.
+// Phase 148/212 browser contract: Settings is a real keyboard-contained modal,
+// its model picker follows the aria-activedescendant combobox pattern, and a
+// reopened localhost picker reflects the model currently loaded at that URL.
 // Run after `npm run build`: node e2e/settings-keyboard.mjs
 import { chromium } from 'playwright'
 import { spawn } from 'node:child_process'
@@ -11,7 +12,7 @@ const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 48
+const EXPECTED_CHECKS = 51
 const FOCUSABLE = [
   'a[href]',
   'button:not([disabled])',
@@ -108,6 +109,8 @@ async function openSettingsByKeyboard(page, trigger, dialog) {
 }
 
 let modelRequests = 0
+let localModelRequests = 0
+let localModel = 'local/model-a'
 
 try {
   const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } })
@@ -128,6 +131,15 @@ try {
       contentType: 'application/json',
       headers: { 'access-control-allow-origin': '*' },
       body: JSON.stringify({ data: MOCK_MODELS }),
+    })
+  })
+  await context.route('http://127.0.0.1:9020/v1/models', async (route) => {
+    localModelRequests++
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      headers: { 'access-control-allow-origin': '*' },
+      body: JSON.stringify({ data: [{ id: localModel }] }),
     })
   })
 
@@ -409,6 +421,41 @@ try {
   check(await activeElementIs(trigger), 'Save close restores the exact Settings trigger')
 
   check(modelRequests === 1, 'fixture uses exactly one intercepted OpenRouter models request')
+
+  await openSettingsByKeyboard(page, trigger, dialog)
+  await dialog.getByRole('radio', { name: 'Localhost (Ollama / llama.cpp)' }).check()
+  await dialog.getByRole('textbox', { name: 'Endpoint' }).fill('http://127.0.0.1:9020/v1')
+  const localCombo = dialog.getByRole('combobox', { name: 'Model' })
+  await localCombo.focus()
+  await dialog.getByRole('option', { name: /local\/model-a/ }).waitFor({ state: 'visible' })
+  check(
+    localModelRequests === 1
+      && await dialog.getByRole('option', { name: /local\/model-a/ }).count() === 1,
+    'the first localhost visit discovers the model currently loaded at that endpoint',
+  )
+  await dialog.getByRole('button', { name: 'Save', exact: true }).click()
+  await dialog.waitFor({ state: 'detached' })
+
+  localModel = 'local/model-b'
+  await openSettingsByKeyboard(page, trigger, dialog)
+  const refreshedLocalCombo = dialog.getByRole('combobox', { name: 'Model' })
+  await refreshedLocalCombo.focus()
+  const refreshedOption = dialog.getByRole('option', { name: /local\/model-b/ })
+  await refreshedOption.waitFor({ state: 'visible' })
+  check(
+    localModelRequests === 2
+      && await refreshedOption.count() === 1
+      && await dialog.getByRole('option', { name: /local\/model-a/ }).count() === 0,
+    'reopening Settings rechecks the same localhost URL and replaces its stale model list',
+  )
+  await refreshedOption.click()
+  check(
+    await refreshedLocalCombo.inputValue() === 'local/model-b'
+      && await refreshedLocalCombo.getAttribute('aria-expanded') === 'false',
+    'the newly discovered localhost model remains selectable through the existing combobox',
+  )
+  await dialog.getByRole('button', { name: 'Cancel', exact: true }).click()
+  await dialog.waitFor({ state: 'detached' })
 
   await context.close()
 } catch (error) {

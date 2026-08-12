@@ -6821,6 +6821,50 @@ one lightweight model-discovery request as the necessary price for truthful cach
 
 ---
 
+## Phase 212 — Refresh localhost model discovery across Settings visits (2026-08-13)
+
+### Bottleneck
+
+Phase 211 made ranking resolve the active local model before reusing a result, but Settings used a
+separate URL-keyed `modelCache` with no expiry or invalidation. If one local server replaced model A
+with B at the same endpoint, closing and reopening Settings still rendered A for the rest of that
+tab's lifetime. The ranking path was truthful while its configuration surface remained stale.
+
+### Frozen boundary
+
+- Retain the existing session cache for OpenRouter's large public catalog.
+- Do not cache localhost discovery responses; the existing 300 ms Settings debounce already bounds
+  endpoint-edit traffic, and a modal revisit should observe the server's current list.
+- Preserve ranking cache keys, model auto-detection, request payloads, Settings form semantics, and
+  every failure fallback. This phase adds no refresh button, polling, retry, or network request
+  outside the already opt-in enabled Settings surface.
+
+| Before | After |
+| --- | --- |
+| One local URL cached model A indefinitely. | Each Settings discovery at that URL can observe B. |
+| Reopening the modal reused the stale local array. | Reopening performs one debounced local `/models` request. |
+| OpenRouter and localhost shared one cache policy. | Only the remote catalog keeps session reuse. |
+
+### Acceptance evidence
+
+The expanded pure judge contract was deliberately red first: seven of eight gates passed and only
+the new same-endpoint localhost refresh failed, while the OpenRouter cache gate remained green.
+After separating the policies it passes **8/8**: local A and B require two discovery calls, whereas
+two unchanged OpenRouter reads require one.
+
+The production Settings fixture now passes **51/51**. It retains all modal, focus, combobox, capped
+list, typed-selection, pointer, and Escape gates; then it discovers local A, saves/closes Settings,
+changes the mocked server to B at the same URL, reopens the modal, proves a second request replaced
+A with B, and selects B through the unchanged combobox. TypeScript and the production Vite build
+are green.
+
+### Decision
+
+Phase 212 closes the remaining split-brain model-discovery state without turning local discovery
+into background polling or discarding the useful OpenRouter catalog cache.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
