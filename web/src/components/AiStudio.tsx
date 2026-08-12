@@ -260,6 +260,7 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
             <input
               className="command-input"
               type="text"
+              aria-label="AI Studio project brief"
               placeholder="What are you naming? (optional)"
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
@@ -317,6 +318,7 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
               <input
                 className="command-input"
                 type="text"
+                aria-label="Custom ranking criterion"
                 placeholder="rank by how … they sound (e.g. calm and minimal)"
                 value={custom}
                 onChange={(e) => setCustom(e.target.value)}

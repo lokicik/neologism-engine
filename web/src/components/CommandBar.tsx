@@ -170,6 +170,7 @@ export function CommandBar({
         <input
           className="command-input"
           type="text"
+          aria-label="Project brief"
           placeholder="What are you building? (optional)"
           value={config.description ?? ''}
           onChange={(e) => set('description', e.target.value)}

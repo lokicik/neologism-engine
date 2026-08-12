@@ -5607,6 +5607,44 @@ changing what either recovery does.
 
 ---
 
+## Phase 177 — Name primary text fields independently of placeholders
+
+**Bottleneck.** Create's project description, AI Studio's project description, and Studio's custom
+ranking criterion exposed their placeholder copy as their only accessible name. Chromium could
+infer a purpose while each field was empty, but the visible instruction disappears as soon as the
+user types and the three fields had no explicit, stable programmatic identity. Advanced and
+Settings fields already use real labels.
+
+**Frozen boundary.** This phase adds one concise `aria-label` to each of the three existing inputs,
+adds one production-browser fixture, and updates documentation. It preserves visible placeholders,
+values, Enter behavior, focus order, component geometry, storage, generation, AI ranking, Settings,
+network transport, WASM, Rust, and every scoring rule.
+
+| Before | After |
+| --- | --- |
+| Create relied on “What are you building?” as placeholder/name. | It retains that placeholder and exposes `Project brief` as its stable name. |
+| Studio's brief used a similar placeholder-only identity. | It is distinctly named `AI Studio project brief`. |
+| The custom criterion lost its instructional identity after typing. | `Custom ranking criterion` remains programmatically stable while the placeholder stays visible when empty. |
+| A visual-label repair could alter the command-first layout. | Three semantic attributes add no visible element or geometry. |
+
+**Acceptance evidence.** The new `primary-textbox-names.mjs` production fixture passes **13/13**
+after the pre-fix build failed exactly the initial and post-typing name checks for all three fields,
+while placeholder, storage, network, and page-error controls passed. At 390 pixels it proves one
+purpose-specific name per field, exact unchanged placeholder copy, unchanged names after non-empty
+values replace those placeholders, byte-identical local/session storage, zero external HTTPS
+requests, and zero page errors.
+
+Retained production-browser contracts remain green at CommandBar keyboard **46/46** and AI Studio
+failure/race recovery **33/33**, preserving Enter/Space behavior, disclosure focus, metric selection,
+local-pool fallback, retry/race truth, storage boundaries, and zero unexpected external requests.
+TypeScript, the production Vite build, fixture syntax, and `git diff --check` are green.
+
+**Decision.** Phase 177 gives the app's three most important free-text controls stable identities
+without sacrificing their concise visible prompts. This aligns the command surfaces with the
+already-labeled Advanced and Settings forms.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
