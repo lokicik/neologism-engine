@@ -5014,6 +5014,56 @@ coalesced; that separately observed efficiency issue remains a candidate for its
 
 ---
 
+## Phase 163 — Share one in-flight WASM initialization
+
+**Bottleneck.** The web engine remembered only whether initialization had finished. A cold Auto
+operation starts several local sub-pools concurrently, so every caller observed `initialized=false`
+and invoked the same WASM loader. The production fixture measured four requests for one Generate.
+Worse, if the first request failed while the other three succeeded, one caller reported an error
+while the module was simultaneously marked initialized; the apparent retry then performed no fresh
+initialization at all.
+
+**Frozen boundary.** This phase changes only the private web-engine initialization guard, one
+production-browser fixture, and documentation. It does not change the WASM binary or exports,
+generator inputs, seeds, pool concurrency, result ordering, scoring, ranking, Create/Why UI, error
+copy, storage, Rust, or network destinations. It adds no preload, worker, timeout, retry loop, cache
+storage, service worker, or cross-page singleton.
+
+**Shared success and rejection contract.** The module now retains a single `Promise<void>` as soon
+as initialization starts. Every concurrent engine entry point awaits that same Promise. Success
+keeps the resolved Promise for all later Create, Why, keyword, and metric calls in the page. Rejection
+clears only the shared Promise and rethrows the same failure to every waiter, preventing mixed
+success/error state. Nothing retries automatically; the next explicit user action creates exactly
+one new shared initialization attempt.
+
+| Before | After |
+| --- | --- |
+| One cold Create started four requests for the same WASM module. | All concurrent sub-pools share one in-flight request. |
+| Parallel init calls could race one failure against three successes. | Every waiter observes the same success or the same rejection. |
+| A failed caller could coexist with `initialized=true`. | Rejection clears the shared attempt before any explicit retry. |
+| The apparent retry could reuse a sibling's accidental success. | One user retry starts exactly one fresh request and recovers normally. |
+| Later Create and Why calls relied on a separate boolean. | They await the retained resolved Promise without another request. |
+
+**Acceptance evidence.** The new `wasm-init-coalescing.mjs` production fixture passes **12/12**
+after five behavioral assertions failed against the pre-fix build. Its successful 390-pixel profile
+holds the first cold request, proves the count stays exactly one while all Auto callers wait, returns
+ten cards, then proves both Why and a second Create page add no WASM request. A separate profile
+rejects its only cold request, verifies no partial cards, then requires one explicit retry to raise
+the total to exactly two, clear the error, restore ten cards, and retain Phase 162 Generate focus.
+Both profiles produce zero page errors or external HTTPS requests.
+
+Retained failure/recovery contracts remain green at Create generation **16/16** (the measured cold
+burst is now `1 → 1`, retry `1 → 2`) and Why **13/13** (exactly two local requests across failure and
+retry). The production held-out cold audit remains **49/49** with its unchanged 84.85 average quality,
+0.197 mean similarity, and 19.60/30 seed diversity. TypeScript, the production Vite build, fixture
+syntax, and `git diff --check` are green.
+
+**Decision.** Phase 163 removes redundant startup work and a genuine mixed-state race with one
+private Promise. It changes neither names nor quality policy: it makes every concurrent caller agree
+on whether the local engine actually started and leaves recovery under explicit user control.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

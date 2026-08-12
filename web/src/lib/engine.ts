@@ -268,13 +268,18 @@ const preserveGuidedConstruction = (
   ))
 }
 
-let initialized = false
+let initialization: Promise<void> | null = null
 
 async function ensureInit() {
-  if (!initialized) {
-    await init()
-    initialized = true
+  if (!initialization) {
+    initialization = init()
+      .then(() => undefined)
+      .catch((error) => {
+        initialization = null
+        throw error
+      })
   }
+  await initialization
 }
 
 export async function generateNames(cfg: Config): Promise<NameResult[]> {
