@@ -6297,6 +6297,39 @@ without adding visual noise or changing the naming workflow.
 
 ---
 
+## Phase 197 — Announce durable Saved removals
+
+**Bottleneck.** Saved already moved keyboard focus to a surviving Remove action (or Go create) only
+after storage committed, and a failed multi-key removal used a native recovery alert. Successful
+removal still had no explicit completion message: the card simply disappeared, leaving assistive
+technology to infer both the removed spelling and new collection size from focus alone.
+
+**Frozen boundary.** This phase adds one persistent visually hidden atomic polite channel owned by
+Saved. It is updated only after `onRemoveSaved` reports durable success, names the removed spelling,
+and reports the exact remaining entry count with singular/plural grammar. The same channel remains
+mounted in the final empty state. Confirmation, storage transactions, failure alert, card identity,
+focus repair, pointer behavior, exports, sharing, taste data, network, generator, and Rust remain
+unchanged.
+
+| Before | After |
+| --- | --- |
+| A successful removal only changed the DOM and focus. | Saved announces `FocusBeta removed from Saved. 2 saved names remain.` |
+| The final card unmounted every card-scoped clue. | The empty state keeps `0 saved names remain.` in the same channel. |
+| Failure recovery was visible but success ownership was implicit. | A rejected storage write leaves the success channel empty while the existing alert owns failure. |
+
+**Acceptance evidence.** The production Saved-removal fixture now passes **21/21**. It gates exact
+plural, singular, and zero-count messages; atomic polite semantics; next/previous/final keyboard
+focus; pointer announcement without forced focus; durable empty storage; the unchanged recovery
+alert with no false success; retained card/data/focus on failure; narrow viewport stability; and zero
+page errors.
+
+TypeScript and the production Vite build are green; `git diff --check` is green.
+
+**Decision.** Phase 197 makes Saved removal outcomes explicit without altering collection semantics
+or adding another visible notification surface.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

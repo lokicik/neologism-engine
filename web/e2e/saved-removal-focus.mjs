@@ -1,5 +1,5 @@
-// Phase 168 browser contract: keyboard removal from Saved moves to the next
-// meaningful persistent action only after durable removal succeeds.
+// Phase 168/197 browser contract: durable Saved removal moves keyboard focus
+// and announces the exact removed name plus remaining count.
 // Run after `npm run build`: node e2e/saved-removal-focus.mjs
 import { chromium } from 'playwright'
 import { spawn } from 'node:child_process'
@@ -11,7 +11,7 @@ const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 17
+const EXPECTED_CHECKS = 21
 const STUBS = ['FocusAlpha', 'FocusBeta', 'FocusGamma'].map((name) => ({
   name,
   style: 'big_tech',
@@ -71,6 +71,13 @@ try {
   const removeGamma = keyboardPage.getByRole('button', { name: 'Remove FocusGamma from Saved' })
   await removeGamma.waitFor({ state: 'visible' })
   check(await keyboardPage.locator('.name-card').count() === 2, 'middle keyboard removal leaves the two surrounding Saved cards')
+  check(
+    await keyboardPage.locator('.saved-removal-status').getAttribute('role') === 'status'
+      && await keyboardPage.locator('.saved-removal-status').getAttribute('aria-live') === 'polite'
+      && await keyboardPage.locator('.saved-removal-status').getAttribute('aria-atomic') === 'true'
+      && (await keyboardPage.locator('.saved-removal-status').textContent())?.trim() === 'FocusBeta removed from Saved. 2 saved names remain.',
+    'middle removal announces the exact name and plural remaining count',
+  )
   check(await removeGamma.evaluate((element) => document.activeElement === element), 'middle keyboard removal focuses the next Remove action')
   check(await removeGamma.evaluate((element) => element.matches(':focus-visible')), 'next Remove action has a visible keyboard indicator')
 
@@ -78,6 +85,10 @@ try {
   const removeAlpha = keyboardPage.getByRole('button', { name: 'Remove FocusAlpha from Saved' })
   await removeAlpha.waitFor({ state: 'visible' })
   check(await keyboardPage.locator('.name-card').count() === 1, 'last-index keyboard removal leaves the previous Saved card')
+  check(
+    (await keyboardPage.locator('.saved-removal-status').textContent())?.trim() === 'FocusGamma removed from Saved. 1 saved name remains.',
+    'last-index removal updates the same channel with singular grammar',
+  )
   const alphaFocused = await removeAlpha.evaluate((element) => document.activeElement === element)
   if (!alphaFocused) {
     console.log('INFO  last-index removal active element', await keyboardPage.evaluate(() => ({
@@ -93,6 +104,10 @@ try {
   const goCreate = keyboardPage.getByRole('button', { name: 'Go create' })
   await goCreate.waitFor({ state: 'visible' })
   check(await keyboardPage.locator('.name-card').count() === 0, 'final keyboard removal reaches the honest empty Saved state')
+  check(
+    (await keyboardPage.locator('.saved-removal-status').textContent())?.trim() === 'FocusAlpha removed from Saved. 0 saved names remain.',
+    'final removal keeps its exact announcement mounted in the empty Saved state',
+  )
   await keyboardPage.waitForFunction(() => (
     document.activeElement instanceof HTMLButtonElement
     && document.activeElement.textContent?.includes('Go create')
@@ -116,6 +131,10 @@ try {
   await pointerPage.getByRole('button', { name: 'Remove FocusAlpha from Saved' }).click()
   const pointerGoCreate = pointerPage.getByRole('button', { name: 'Go create' })
   await pointerGoCreate.waitFor({ state: 'visible' })
+  check(
+    (await pointerPage.locator('.saved-removal-status').textContent())?.trim() === 'FocusAlpha removed from Saved. 0 saved names remain.',
+    'pointer removal receives the same truthful success announcement',
+  )
   check(await pointerGoCreate.evaluate((element) => document.activeElement !== element), 'pointer removal does not force focus onto Go create')
   check(await pointerPage.evaluate(() => scrollX === 0), 'pointer removal keeps the 390px viewport horizontally stable')
   await pointerContext.close()
@@ -142,7 +161,12 @@ try {
   await failedRemove.focus()
   await failurePage.keyboard.press('Enter')
   await failurePage.waitForTimeout(100)
-  check(alerts.length === 1 && alerts[0].includes('Could not remove this name completely'), 'failed durable removal exposes the existing exact recovery alert')
+  check(
+    alerts.length === 1
+      && alerts[0].includes('Could not remove this name completely')
+      && (await failurePage.locator('.saved-removal-status').textContent())?.trim() === '',
+    'failed durable removal exposes the existing exact recovery alert without false success',
+  )
   check(await failurePage.locator('.name-card').count() === 1, 'failed durable removal keeps the Saved card visible')
   check(await failurePage.evaluate(() => JSON.parse(localStorage.getItem('neologism:imported-saved') ?? '[]').length === 1), 'failed durable removal keeps the imported record intact')
   check(await failedRemove.evaluate((element) => document.activeElement === element), 'failed durable removal preserves the invoking Remove focus')

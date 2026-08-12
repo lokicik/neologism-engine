@@ -19,6 +19,7 @@ export function SavedPage({ entries, onRemoveSaved, onGoCreate }: Props) {
   const [copiedUrl, setCopiedUrl] = useState(false)
   const [copyStatus, setCopyStatus] = useState('')
   const [copyError, setCopyError] = useState<string | null>(null)
+  const [removalStatus, setRemovalStatus] = useState('')
   const rootRef = useRef<HTMLDivElement>(null)
   const goCreateRef = useRef<HTMLButtonElement>(null)
   const pendingRemovalFocusRef = useRef<number | null>(null)
@@ -83,8 +84,25 @@ export function SavedPage({ entries, onRemoveSaved, onGoCreate }: Props) {
       )) return
     }
     const index = entries.indexOf(entry)
-    if (onRemoveSaved(entry.result) && keyboard) pendingRemovalFocusRef.current = index
+    setRemovalStatus('')
+    if (!onRemoveSaved(entry.result)) return
+    if (keyboard) pendingRemovalFocusRef.current = index
+    const remaining = entries.length - 1
+    setRemovalStatus(
+      `${entry.result.name} removed from Saved. ${remaining} saved name${remaining === 1 ? '' : 's'} remain${remaining === 1 ? 's' : ''}.`,
+    )
   }
+
+  const removalStatusRegion = (
+    <div
+      className="visually-hidden saved-removal-status"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+    >
+      {removalStatus}
+    </div>
+  )
 
   async function copyAll() {
     const text = favorites.map((f) => f.name).join('\n')
@@ -130,6 +148,7 @@ export function SavedPage({ entries, onRemoveSaved, onGoCreate }: Props) {
   if (favorites.length === 0) {
     return (
       <div className="saved-page" ref={rootRef}>
+        {removalStatusRegion}
         <header className="page-header">
           <h1 className="page-title">Saved names</h1>
         </header>
@@ -147,6 +166,7 @@ export function SavedPage({ entries, onRemoveSaved, onGoCreate }: Props) {
 
   return (
     <div className="saved-page" ref={rootRef}>
+      {removalStatusRegion}
       <header className="page-header">
         <h1 className="page-title">
           Saved names <span className="count-pill">{favorites.length}</span>
