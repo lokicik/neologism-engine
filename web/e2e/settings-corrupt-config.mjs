@@ -1,0 +1,170 @@
+// Phase 158 browser contract: parseable but invalid AI settings fail closed
+// without crashing Settings/Studio or mutating the original local record.
+// Run after `npm run build`: node e2e/settings-corrupt-config.mjs
+import { chromium } from 'playwright'
+import { spawn } from 'node:child_process'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const PORT = 4217
+const APP_URL = `http://localhost:${PORT}`
+const E2E_DIR = dirname(fileURLToPath(import.meta.url))
+const WEB_DIR = join(E2E_DIR, '..')
+const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
+const EXPECTED_CHECKS = 17
+
+const server = spawn(process.execPath, [viteCli, 'preview', '--port', String(PORT), '--strictPort'], {
+  cwd: WEB_DIR,
+  stdio: 'pipe',
+})
+await new Promise((resolve, reject) => {
+  const timer = setTimeout(() => reject(new Error('vite preview did not start')), 20000)
+  server.stdout.on('data', (data) => {
+    if (data.toString().includes(String(PORT))) {
+      clearTimeout(timer)
+      resolve()
+    }
+  })
+  server.on('exit', () => reject(new Error('vite preview exited early')))
+})
+
+const browser = await chromium.launch()
+let checks = 0
+let failures = 0
+const check = (ok, label) => {
+  checks++
+  console.log(`${ok ? 'PASS' : 'FAIL'}  ${label}`)
+  if (!ok) failures++
+}
+
+async function contextFor(rawJudge) {
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 } })
+  await context.addInitScript(({ raw }) => {
+    localStorage.setItem('neologism:visited', '1')
+    localStorage.setItem('neologism:judge', raw)
+  }, { raw: rawJudge })
+  return context
+}
+
+try {
+  const invalidModelRaw = JSON.stringify({
+    enabled: true,
+    provider: 'openrouter',
+    apiKey: 'must-not-be-used',
+    model: 73,
+  })
+  const modelContext = await contextFor(invalidModelRaw)
+  const modelPageErrors = []
+  const modelPage = await modelContext.newPage()
+  modelPage.on('pageerror', (error) => modelPageErrors.push(error.message))
+  await modelPage.goto(APP_URL)
+  await modelPage.locator('.sidebar-settings').click()
+  const modelDialog = modelPage.locator('.settings-modal[role="dialog"]')
+  await modelDialog.waitFor({ state: 'visible' })
+  check(await modelDialog.isVisible(), 'invalid model type cannot crash Settings')
+  check(
+    !(await modelDialog.getByLabel('Enable AI re-rank').isChecked()),
+    'invalid model type falls back to the disabled safe config',
+  )
+  check(
+    await modelPage.evaluate(() => localStorage.getItem('neologism:judge')) === invalidModelRaw,
+    'invalid model record remains byte-identical until an explicit Save',
+  )
+  await modelDialog.getByRole('button', { name: 'Save', exact: true }).click()
+  await modelDialog.waitFor({ state: 'detached' })
+  const repairedModelConfig = await modelPage.evaluate(() => JSON.parse(localStorage.getItem('neologism:judge')))
+  check(
+    repairedModelConfig.enabled === false
+      && repairedModelConfig.provider === 'openrouter'
+      && typeof repairedModelConfig.model === 'string',
+    'explicit Save replaces the invalid record with a valid safe config',
+  )
+  await modelPage.reload()
+  await modelPage.locator('.sidebar-settings').click()
+  check(
+    !(await modelPage.locator('.settings-modal').getByLabel('Enable AI re-rank').isChecked()),
+    'repaired config remains safe after reload',
+  )
+  check(modelPageErrors.length === 0, `invalid model recovery produces no page error (${modelPageErrors.join(' | ')})`)
+  await modelContext.close()
+
+  const invalidEndpointRaw = JSON.stringify({
+    enabled: true,
+    provider: 'localhost',
+    endpoint: 11434,
+  })
+  const endpointContext = await contextFor(invalidEndpointRaw)
+  const endpointPageErrors = []
+  const endpointPage = await endpointContext.newPage()
+  endpointPage.on('pageerror', (error) => endpointPageErrors.push(error.message))
+  await endpointPage.goto(APP_URL)
+  await endpointPage.getByRole('button', { name: 'AI Studio' }).click()
+  check(
+    await endpointPage.getByRole('button', { name: 'Open Settings' }).isVisible(),
+    'invalid endpoint type cannot crash AI Studio and leaves it unconfigured',
+  )
+  check(
+    await endpointPage.evaluate(() => localStorage.getItem('neologism:judge')) === invalidEndpointRaw,
+    'invalid endpoint record is not silently repaired on read',
+  )
+  check(endpointPageErrors.length === 0, `invalid endpoint type produces no page error (${endpointPageErrors.join(' | ')})`)
+  await endpointContext.close()
+
+  const invalidArrayRaw = JSON.stringify(['openrouter', true])
+  const arrayContext = await contextFor(invalidArrayRaw)
+  const arrayPageErrors = []
+  const arrayPage = await arrayContext.newPage()
+  arrayPage.on('pageerror', (error) => arrayPageErrors.push(error.message))
+  await arrayPage.goto(APP_URL)
+  await arrayPage.locator('.sidebar-settings').click()
+  const arrayDialog = arrayPage.locator('.settings-modal[role="dialog"]')
+  check(
+    !(await arrayDialog.getByLabel('Enable AI re-rank').isChecked()),
+    'parseable non-object config also falls back safely',
+  )
+  check(
+    await arrayPage.evaluate(() => localStorage.getItem('neologism:judge')) === invalidArrayRaw,
+    'parseable non-object record remains byte-identical on read',
+  )
+  check(arrayPageErrors.length === 0, `parseable non-object config produces no page error (${arrayPageErrors.join(' | ')})`)
+  await arrayContext.close()
+
+  const validPartialRaw = JSON.stringify({
+    enabled: true,
+    provider: 'localhost',
+    endpoint: 'http://127.0.0.1:8080/v1',
+    unknownFutureField: 'preserved only in raw storage',
+  })
+  const validContext = await contextFor(validPartialRaw)
+  const validPageErrors = []
+  const validPage = await validContext.newPage()
+  validPage.on('pageerror', (error) => validPageErrors.push(error.message))
+  await validPage.goto(APP_URL)
+  await validPage.locator('.sidebar-settings').click()
+  const validDialog = validPage.locator('.settings-modal[role="dialog"]')
+  check(await validDialog.getByLabel('Enable AI re-rank').isChecked(), 'valid legacy partial config remains enabled')
+  check(
+    await validDialog.getByLabel('Endpoint').inputValue() === 'http://127.0.0.1:8080/v1',
+    'valid legacy endpoint survives normalization',
+  )
+  check(
+    (await validDialog.getByLabel(/Judge prompt/).inputValue()).includes('{{names}}'),
+    'missing valid legacy fields inherit current defaults',
+  )
+  check(
+    await validPage.evaluate(() => localStorage.getItem('neologism:judge')) === validPartialRaw,
+    'valid partial record and unknown future field remain untouched on read',
+  )
+  check(validPageErrors.length === 0, `valid partial config produces no page error (${validPageErrors.join(' | ')})`)
+  await validContext.close()
+} finally {
+  await browser.close()
+  server.kill()
+}
+
+if (checks !== EXPECTED_CHECKS) {
+  console.error(`FAIL  expected ${EXPECTED_CHECKS} checks, executed ${checks}`)
+  process.exit(1)
+}
+if (failures > 0) process.exit(1)
+console.log(`\ncorrupt settings config: all checks passed (${checks}/${EXPECTED_CHECKS})`)

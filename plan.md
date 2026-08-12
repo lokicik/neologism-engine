@@ -4765,6 +4765,55 @@ configuration that looks saved; the user sees what stayed durable and can cancel
 
 ---
 
+## Phase 158 — Validate local AI settings before they reach the UI
+
+**Bottleneck.** `loadJudgeConfig` treated every parseable JSON value as a typed partial config and
+spread it over defaults. A numeric `model` reached Settings' string normalization and could crash the
+modal; a numeric localhost `endpoint` reached `isJudgeReady().trim()` and could crash AI Studio.
+Arrays and other non-object JSON also entered the config boundary. Parse errors were safe, but
+parseable corruption was not.
+
+**Frozen boundary.** This phase changes only judge-config load validation, one production fixture,
+and documentation. It does not change the storage key or saved shape, automatically delete/migrate
+data, expose the API key, alter provider/model discovery, add a corruption banner, change the Phase
+157 write/retry contract, touch AI ranking, generator/ranker, taste/Saved, WASM, Rust, or network
+policy. Existing partial configs remain compatible.
+
+**Validation and recovery contract.** The loader accepts a non-array object, validates `enabled`, the
+two provider values, all optional string fields, and finite non-negative price fields, then copies
+only those known fields over current defaults. Unknown future fields are ignored in memory. If any
+known field has the wrong type, or the parsed value is not an object, the entire in-memory config
+falls back to the safe disabled default. Loading never rewrites the raw local record: this preserves
+the evidence and avoids a destructive repair-on-read. Opening Settings and explicitly saving the
+default draft is the recovery action that replaces the invalid record with the current valid shape.
+
+| Before | After |
+| --- | --- |
+| Parseable JSON was trusted as `Partial<JudgeConfig>` without runtime checks. | Every known field crosses an explicit type/value boundary before use. |
+| Numeric `model` could crash Settings at `.toLowerCase()`. | Settings opens with the disabled safe default and no page error. |
+| Numeric localhost `endpoint` could crash AI Studio at `.trim()`. | Studio remains unconfigured and offers its existing Open Settings action. |
+| Arrays and non-object JSON could spread into a misleading hybrid config. | Non-object values fail closed to the complete current default. |
+| A defensive read risked silently destroying the corrupt or forward-version record. | Raw storage stays byte-identical until explicit Save; unknown fields remain untouched on read. |
+| Old partial configs depended on unchecked spreading. | Valid partial configs still inherit current model/prompt defaults and retain their valid endpoint. |
+
+**Acceptance evidence.** The new `settings-corrupt-config.mjs` production fixture passes **17/17**.
+Four isolated browser profiles cover a wrong-type OpenRouter model, wrong-type localhost endpoint,
+a parseable array, and a valid partial localhost config carrying an unknown future field. It proves
+Settings and Studio do not crash; invalid records use the disabled safe config while remaining
+byte-identical on read; explicit Save produces a valid current config that remains safe after reload;
+the partial legacy endpoint and enabled state survive; omitted fields inherit the current prompt;
+unknown data is not erased by a read; and every profile produces zero page errors.
+
+Retained production-browser contracts remain green at Settings keyboard **48/48**, Settings write
+failure/retry **13/13**, and AI Studio failure/recovery **33/33**. TypeScript, the production Vite
+build, fixture syntax, and `git diff --check` are green.
+
+**Decision.** Phase 158 closes the remaining local AI-config trust gap without inventing a migration
+system. Optional AI can now fail closed both when a valid save is rejected and when the pre-existing
+record itself is parseable but invalid, while deliberate user Save remains the only repair mutation.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

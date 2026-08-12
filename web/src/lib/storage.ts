@@ -269,11 +269,38 @@ export function markVisited(): void {
 // ever sent directly from the browser to the provider the user chose.
 const JUDGE_KEY = 'neologism:judge'
 
+function judgeConfigFromUnknown(value: unknown): JudgeConfig | null {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) return null
+  const record = value as Record<string, unknown>
+  const has = (key: string) => Object.prototype.hasOwnProperty.call(record, key)
+  const strings = ['apiKey', 'model', 'endpoint', 'prompt'] as const
+  const prices = ['priceIn', 'priceOut'] as const
+
+  if (has('enabled') && typeof record.enabled !== 'boolean') return null
+  if (has('provider') && record.provider !== 'openrouter' && record.provider !== 'localhost') return null
+  if (strings.some((key) => has(key) && typeof record[key] !== 'string')) return null
+  if (prices.some((key) => (
+    has(key)
+      && (typeof record[key] !== 'number' || !Number.isFinite(record[key]) || record[key] < 0)
+  ))) return null
+
+  const config = defaultJudgeConfig()
+  if (typeof record.enabled === 'boolean') config.enabled = record.enabled
+  if (record.provider === 'openrouter' || record.provider === 'localhost') config.provider = record.provider
+  for (const key of strings) {
+    if (typeof record[key] === 'string') config[key] = record[key]
+  }
+  for (const key of prices) {
+    if (typeof record[key] === 'number') config[key] = record[key]
+  }
+  return config
+}
+
 export function loadJudgeConfig(): JudgeConfig {
   try {
     const raw = localStorage.getItem(JUDGE_KEY)
     if (!raw) return defaultJudgeConfig()
-    return { ...defaultJudgeConfig(), ...(JSON.parse(raw) as Partial<JudgeConfig>) }
+    return judgeConfigFromUnknown(JSON.parse(raw)) ?? defaultJudgeConfig()
   } catch {
     return defaultJudgeConfig()
   }
