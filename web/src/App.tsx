@@ -428,11 +428,7 @@ export default function App() {
     importedSavedRef.current = removal.importedSaved
     setFavorites(removal.favorites)
     setImportedSaved(removal.importedSaved)
-    if (!removal.removed) {
-      window.alert('Could not remove this name completely because browser storage rejected part of the change. Saved was refreshed to match durable data.')
-      return false
-    }
-    return true
+    return removal.removed
   }, [])
 
   const saveSettings = useCallback((cfg: JudgeConfig) => {

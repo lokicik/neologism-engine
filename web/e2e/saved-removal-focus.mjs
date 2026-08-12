@@ -11,7 +11,7 @@ const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 21
+const EXPECTED_CHECKS = 24
 const STUBS = ['FocusAlpha', 'FocusBeta', 'FocusGamma'].map((name) => ({
   name,
   style: 'big_tech',
@@ -143,8 +143,12 @@ try {
   await seed(failureContext, STUBS.slice(0, 1))
   await failureContext.addInitScript(() => {
     const original = Storage.prototype.setItem
+    let rejectedOnce = false
     Storage.prototype.setItem = function setItem(key, value) {
-      if (key === 'neologism:imported-saved') throw new DOMException('quota fixture', 'QuotaExceededError')
+      if (key === 'neologism:imported-saved' && !rejectedOnce) {
+        rejectedOnce = true
+        throw new DOMException('quota fixture', 'QuotaExceededError')
+      }
       return original.call(this, key, value)
     }
   })
@@ -161,15 +165,33 @@ try {
   await failedRemove.focus()
   await failurePage.keyboard.press('Enter')
   await failurePage.waitForTimeout(100)
+  const removalError = failurePage.locator('.saved-removal-error')
   check(
-    alerts.length === 1
-      && alerts[0].includes('Could not remove this name completely')
+    alerts.length === 0
+      && await removalError.getAttribute('role') === 'alert'
+      && (await removalError.textContent())?.includes('Could not remove FocusAlpha completely')
       && (await failurePage.locator('.saved-removal-status').textContent())?.trim() === '',
-    'failed durable removal exposes the existing exact recovery alert without false success',
+    'failed durable removal exposes an inline exact recovery alert without a blocking dialog or false success',
   )
   check(await failurePage.locator('.name-card').count() === 1, 'failed durable removal keeps the Saved card visible')
   check(await failurePage.evaluate(() => JSON.parse(localStorage.getItem('neologism:imported-saved') ?? '[]').length === 1), 'failed durable removal keeps the imported record intact')
   check(await failedRemove.evaluate((element) => document.activeElement === element), 'failed durable removal preserves the invoking Remove focus')
+  await failurePage.keyboard.press('Enter')
+  const retryGoCreate = failurePage.getByRole('button', { name: 'Go create' })
+  await retryGoCreate.waitFor({ state: 'visible' })
+  check(
+    await removalError.count() === 0
+      && (await failurePage.locator('.saved-removal-status').textContent())?.trim() === 'FocusAlpha removed from Saved. 0 saved names remain.',
+    'retry clears the removal error and announces the durable success',
+  )
+  check(
+    await failurePage.evaluate(() => localStorage.getItem('neologism:imported-saved') === '[]'),
+    'successful retry durably removes the previously retained record',
+  )
+  check(
+    await retryGoCreate.evaluate((element) => document.activeElement === element && element.matches(':focus-visible')),
+    'keyboard retry reaches the final visible Go create recovery focus',
+  )
   await failureContext.close()
 
   check(pageErrors.length === 0, 'keyboard and pointer removals produce zero page errors')

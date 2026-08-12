@@ -20,6 +20,7 @@ export function SavedPage({ entries, onRemoveSaved, onGoCreate }: Props) {
   const [copyStatus, setCopyStatus] = useState('')
   const [copyError, setCopyError] = useState<string | null>(null)
   const [removalStatus, setRemovalStatus] = useState('')
+  const [removalError, setRemovalError] = useState<string | null>(null)
   const rootRef = useRef<HTMLDivElement>(null)
   const goCreateRef = useRef<HTMLButtonElement>(null)
   const pendingRemovalFocusRef = useRef<number | null>(null)
@@ -92,7 +93,13 @@ export function SavedPage({ entries, onRemoveSaved, onGoCreate }: Props) {
     }
     const index = entries.indexOf(entry)
     setRemovalStatus('')
-    if (!onRemoveSaved(entry.result)) return
+    setRemovalError(null)
+    if (!onRemoveSaved(entry.result)) {
+      setRemovalError(
+        `Could not remove ${entry.result.name} completely. Browser storage rejected part of the change; Saved was refreshed to match durable data. Try again.`,
+      )
+      return
+    }
     if (keyboard) pendingRemovalFocusRef.current = index
     const remaining = entries.length - 1
     setRemovalStatus(
@@ -207,6 +214,9 @@ export function SavedPage({ entries, onRemoveSaved, onGoCreate }: Props) {
       </header>
 
       {copyError && <p className="saved-copy-error" role="alert">{copyError}</p>}
+      {removalError && (
+        <p className="saved-copy-error saved-removal-error" role="alert">{removalError}</p>
+      )}
       <p
         className="visually-hidden saved-copy-status"
         role="status"

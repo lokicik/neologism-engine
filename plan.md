@@ -6503,6 +6503,42 @@ or making a fast local action feel artificially locked.
 
 ---
 
+## Phase 203 — Make Saved removal failure inline and retryable
+
+**Bottleneck.** Saved already refreshed its in-memory rows to match durable storage when a removal
+transaction failed, kept the card and invoking focus, and avoided false success. It then reported
+that recoverable failure with `window.alert`. An imported-only failure therefore opened a blocking
+browser dialog; a multi-source removal could show its deliberate destructive confirmation and then
+a second modal solely to report the write failure.
+
+**Frozen boundary.** Multi-source removal keeps its existing native confirmation before any write.
+The storage transaction, imported/explicit source ownership, rollback/reload truth, returned boolean,
+success announcement, keyboard focus handoff, pointer behavior, and error copy remain unchanged in
+meaning. Only failure presentation moves into SavedPage: the invoking card stays mounted and focused,
+one local `role=alert` names the spelling and durable refresh, and a normal second activation retries
+the same operation. No toast system, automatic retry, storage/schema, taste, network, generator, or
+Rust change is introduced.
+
+| Before | After |
+| --- | --- |
+| Imported-only write failure opened `window.alert`. | An inline alert appears while the Remove button retains focus. |
+| Multi-source failure could create confirm plus error dialogs. | The destructive confirm remains; the later write error is inline. |
+| Recovery required dismissing a modal before retry. | Enter retries from the same focused persistent action. |
+
+**Acceptance evidence.** The strengthened production `saved-removal-focus.mjs` fixture first failed
+the no-dialog/inline-error gate against the old code. It now passes **24/24**, including a one-shot
+storage rejection, empty success channel, exact retained card/row, invoking focus, ordinary keyboard
+retry, durable empty store, exact zero-count success, and final visible Go create focus at 390 pixels.
+The retained production taste/Saved workflow also passes in full and pins the multi-source boundary:
+exactly one destructive confirmation, inline write failure, and both durable sources unchanged.
+
+TypeScript and the production Vite build are green; `git diff --check` is green.
+
+**Decision.** Phase 203 keeps destructive consent modal but makes a recoverable persistence failure
+part of the app's consistent, focus-preserving error language.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

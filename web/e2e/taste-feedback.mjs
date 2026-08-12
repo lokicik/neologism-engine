@@ -410,10 +410,12 @@ try {
   await removalFailurePage.locator('.sidebar').getByRole('button', { name: /^Saved(?:\s+\d+)?$/ }).click()
   await removalFailurePage.locator('.saved-page .star-btn').click()
   check(
-    removalDialogs.some((message) => /browser storage rejected/.test(message))
+    removalDialogs.length === 1
+      && /Remove .* from Saved everywhere/.test(removalDialogs[0])
+      && (await removalFailurePage.locator('.saved-removal-error').textContent())?.includes('Browser storage rejected part of the change')
       && await storedCount(removalFailurePage, 'neologism:favorites') === 1
       && await storedCount(removalFailurePage, 'neologism:imported-saved') === 1,
-    'a failed multi-key removal reports failure and leaves both durable sources unchanged',
+    'a failed multi-key removal keeps only its destructive confirmation modal and reports failure inline',
   )
   await removalFailurePage.reload()
   await removalFailurePage.locator('.sidebar').getByRole('button', { name: /^Saved(?:\s+\d+)?$/ }).click()
