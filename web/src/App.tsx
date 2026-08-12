@@ -361,8 +361,9 @@ export default function App() {
     setImportedSaved(removal.importedSaved)
     if (!removal.removed) {
       window.alert('Could not remove this name completely because browser storage rejected part of the change. Saved was refreshed to match durable data.')
-      return
+      return false
     }
+    return true
   }, [])
 
   const saveSettings = useCallback((cfg: JudgeConfig) => {

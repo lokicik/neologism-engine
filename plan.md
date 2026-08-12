@@ -5253,6 +5253,57 @@ keeps the user at an honest, retryable control until they change those constrain
 
 ---
 
+## Phase 168 — Preserve focus after durable Saved removal
+
+**Bottleneck.** Saved removal correctly deleted imported/explicit sources, but its focused star
+button disappeared with the card. Production Chromium left focus on `BODY` after both a middle-card
+keyboard removal and the final removal that replaced the grid with the empty state. Existing storage
+and taste fixtures proved durable identity/rollback behavior but never owned the next focus target.
+
+**Frozen boundary.** This phase changes only the NameCard callback's optional activation metadata,
+SavedPage's successful-removal focus bookkeeping, App's existing removal success result, one
+production-browser fixture, and documentation. It does not change removal confirmation or source
+semantics, storage transaction order/rollback, Saved aggregation/layout, pass preservation, Create
+cards, taste/export, schemas, generator/ranker, WASM, Rust, or network behavior.
+
+**Success, failure, and focus contract.** NameCard reports whether its native activation was
+keyboard/synthesized. App returns the existing durable removal result. Only when both are true does
+SavedPage remember the removed card index; after the parent commits the new entries it focuses the
+Remove action now at that index, falling back to the previous card when the last indexed card left.
+If no cards remain, it focuses **Go create**. Pointer success follows natural focus behavior. A
+storage rejection returns false, so no success focus is scheduled; the existing alert, visible card,
+durable source row, and invoking-control focus remain authoritative.
+
+| Before | After |
+| --- | --- |
+| Removing a keyboard-focused middle card dropped focus to `BODY`. | Focus moves to the next logical Remove action with a visible ring. |
+| Removing the final card left the empty Saved page without context. | The visible Go create recovery action receives keyboard focus. |
+| Pointer and keyboard removals shared one undefined focus outcome. | Only durable keyboard success schedules focus; pointer success stays neutral. |
+| Failed multi-key storage work could not inform the presentation layer. | App returns the durable result; failure never triggers a false focus transition. |
+| Transaction tests covered data but not the disappearing card control. | One production fixture combines first/final removal, failure, storage, focus, and viewport truth. |
+
+**Acceptance evidence.** The new `saved-removal-focus.mjs` production fixture passes **17/17** after
+the pre-fix run failed the next Remove focus, its visible indicator, and final **Go create** focus.
+At 390 pixels, three imported-only cards are removed by keyboard: a middle removal advances to its
+next action, removing that last-index card returns to the previous action, and the final removal
+enters the empty state at **Go create** while durable imported storage becomes exactly `[]`. An
+isolated pointer removal does not force the CTA and keeps
+`scrollX=0`. A third profile rejects the imported-store deletion, then proves the exact existing
+alert, retained card, intact durable record, and invoking Remove focus. All paths emit zero page
+errors.
+
+Retained contracts remain green at storage identity/transaction, Taste/Share/Migration **61/61**,
+and empty-Saved navigation **8/8**. They preserve imported-first writes, no redundant single-source
+writes, rollback/failure truth, multi-source confirmation, pass preservation, exports, and the
+keyboard/pointer Create return. TypeScript, the production Vite build, fixture syntax, and
+`git diff --check` are green.
+
+**Decision.** Phase 168 closes Saved's disappearing-card focus gap without weakening its stricter
+durability contract. Focus advances only after the browser accepted the actual removal; an alert and
+unchanged control remain the recovery surface when storage did not.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

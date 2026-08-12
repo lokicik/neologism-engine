@@ -15,7 +15,7 @@ import { IconCopy, IconCheck, IconStar, IconThumbDown } from './icons'
 interface Props {
   result: NameResult
   isFavorite: boolean
-  onToggleFavorite: (r: NameResult) => void
+  onToggleFavorite: (r: NameResult, keyboard?: boolean) => void
   /// Saved-page wording distinguishes collection membership from taste.
   favoriteAction?: 'favorite' | 'saved'
   /// Optional collection provenance shown without changing the name result.
@@ -364,7 +364,7 @@ export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction 
           )}
           <button
             className={`icon-btn star-btn${isFavorite ? ' starred' : ''}`}
-            onClick={() => onToggleFavorite(result)}
+            onClick={(event) => onToggleFavorite(result, event.detail === 0)}
             title={favoriteAction === 'saved'
               ? 'Remove from Saved'
               : isFavorite ? 'Remove from favorites' : 'Save to favorites'}

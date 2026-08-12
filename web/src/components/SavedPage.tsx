@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { NameResult } from '../lib/engine'
 import { exportText, exportJson, encodeShareUrl } from '../lib/share'
 import type { SavedNameEntry } from '../lib/taste-identity'
@@ -7,7 +7,7 @@ import { IconCopy, IconCheck, IconDownload, IconLink } from './icons'
 
 interface Props {
   entries: SavedNameEntry[]
-  onRemoveSaved: (r: NameResult) => void
+  onRemoveSaved: (r: NameResult) => boolean
   onGoCreate: (keyboard: boolean) => void
 }
 
@@ -18,7 +18,23 @@ export function SavedPage({ entries, onRemoveSaved, onGoCreate }: Props) {
   const [copiedAll, setCopiedAll] = useState(false)
   const [copiedUrl, setCopiedUrl] = useState(false)
   const [copyError, setCopyError] = useState<string | null>(null)
+  const rootRef = useRef<HTMLDivElement>(null)
+  const goCreateRef = useRef<HTMLButtonElement>(null)
+  const pendingRemovalFocusRef = useRef<number | null>(null)
   const favorites = entries.map((entry) => entry.result)
+
+  useEffect(() => {
+    const index = pendingRemovalFocusRef.current
+    if (index === null) return
+    pendingRemovalFocusRef.current = null
+    requestAnimationFrame(() => {
+      const removeButtons = rootRef.current?.querySelectorAll<HTMLButtonElement>('.star-btn') ?? []
+      const target = removeButtons.length > 0
+        ? removeButtons[Math.min(index, removeButtons.length - 1)]
+        : goCreateRef.current
+      target?.focus()
+    })
+  }, [entries])
 
   function provenance(entry: SavedNameEntry): string {
     if (entry.explicitLikes === 0) return 'Saved from a shared link · not taste evidence'
@@ -31,7 +47,7 @@ export function SavedPage({ entries, onRemoveSaved, onGoCreate }: Props) {
     return entry.imported ? `${liked} · also received by share` : liked
   }
 
-  function remove(entry: SavedNameEntry) {
+  function remove(entry: SavedNameEntry, keyboard = false) {
     const sourceCount = entry.explicitLikes + Number(entry.imported)
     if (sourceCount > 1) {
       const liked = entry.explicitLikes === 0
@@ -42,7 +58,8 @@ export function SavedPage({ entries, onRemoveSaved, onGoCreate }: Props) {
         `Remove ${entry.result.name} from Saved everywhere? This removes ${liked}${shared}. Passes are kept.`,
       )) return
     }
-    onRemoveSaved(entry.result)
+    const index = entries.indexOf(entry)
+    if (onRemoveSaved(entry.result) && keyboard) pendingRemovalFocusRef.current = index
   }
 
   async function copyAll() {
@@ -80,14 +97,14 @@ export function SavedPage({ entries, onRemoveSaved, onGoCreate }: Props) {
 
   if (favorites.length === 0) {
     return (
-      <div className="saved-page">
+      <div className="saved-page" ref={rootRef}>
         <header className="page-header">
           <h1 className="page-title">Saved names</h1>
         </header>
         <div className="empty-state">
           <p>Nothing saved yet — star names you like while generating.</p>
           <div className="example-chips">
-            <button className="example-chip" onClick={(event) => onGoCreate(event.detail === 0)}>
+            <button ref={goCreateRef} className="example-chip" onClick={(event) => onGoCreate(event.detail === 0)}>
               ✦ Go create
             </button>
           </div>
@@ -97,7 +114,7 @@ export function SavedPage({ entries, onRemoveSaved, onGoCreate }: Props) {
   }
 
   return (
-    <div className="saved-page">
+    <div className="saved-page" ref={rootRef}>
       <header className="page-header">
         <h1 className="page-title">
           Saved names <span className="count-pill">{favorites.length}</span>
@@ -126,7 +143,7 @@ export function SavedPage({ entries, onRemoveSaved, onGoCreate }: Props) {
             key={entry.result.name.toLowerCase()}
             result={entry.result}
             isFavorite
-            onToggleFavorite={() => remove(entry)}
+            onToggleFavorite={(_result, keyboard) => remove(entry, keyboard)}
             favoriteAction="saved"
             collectionNote={provenance(entry)}
             metricsAvailable={entry.explicitLikes > 0}
