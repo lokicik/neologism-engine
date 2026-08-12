@@ -15,7 +15,7 @@ interface Props {
 // bar below 900px (CSS).
 export function Sidebar({ view, savedCount, onNavigate, onAbout, onSettings }: Props) {
   return (
-    <nav className="sidebar">
+    <nav className="sidebar" aria-label="Application navigation">
       <button className="wordmark sidebar-logo" onClick={(event) => onAbout(event.detail === 0)} title="About — back to the landing page">
         ◈ neologism
       </button>
@@ -23,18 +23,21 @@ export function Sidebar({ view, savedCount, onNavigate, onAbout, onSettings }: P
       <div className="sidebar-nav">
         <button
           className={`sidebar-item${view === 'create' ? ' active' : ''}`}
+          aria-current={view === 'create' ? 'page' : undefined}
           onClick={() => onNavigate('create')}
         >
           <IconSparkle /> Create
         </button>
         <button
           className={`sidebar-item${view === 'studio' ? ' active' : ''}`}
+          aria-current={view === 'studio' ? 'page' : undefined}
           onClick={() => onNavigate('studio')}
         >
           <span className="studio-glyph" aria-hidden>✨</span> AI Studio
         </button>
         <button
           className={`sidebar-item${view === 'saved' ? ' active' : ''}`}
+          aria-current={view === 'saved' ? 'page' : undefined}
           onClick={() => onNavigate('saved')}
         >
           <IconStar filled={savedCount > 0} /> Saved

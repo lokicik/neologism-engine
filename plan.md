@@ -5343,6 +5343,45 @@ a new widget model or touching the product generator.
 
 ---
 
+## Phase 170 — Announce the current application page
+
+**Bottleneck.** The persistent sidebar already showed one active Create, AI Studio, or Saved button,
+but that state existed only as an `.active` visual class. Production navigation used native buttons
+and preserved keyboard focus correctly, yet the surrounding `nav` had no accessible name and none
+of the three page actions announced which SPA page was current. Settings and About are actions, not
+application pages, so they must not acquire the same state.
+
+**Frozen boundary.** This phase adds only a stable accessible name to the existing sidebar landmark,
+derives `aria-current=page` from the same `view` value that already drives each active class, adds one
+production-browser fixture, and updates documentation. It does not change sidebar order, styling,
+responsive layout, focus behavior, navigation callbacks, Settings/About semantics, storage,
+generation, ranking, WASM, Rust, or network behavior.
+
+| Before | After |
+| --- | --- |
+| The shell exposed an unnamed navigation landmark. | The same landmark is named `Application navigation`. |
+| `.active` was the only source of page-selection state. | Exactly one of Create, AI Studio, or Saved also exposes `aria-current=page`. |
+| Keyboard and pointer navigation changed only the visual state. | The existing `view` transition changes visual and announced state together. |
+| Opening Settings could not be distinguished from changing pages by state inspection. | Settings remains a modal action while the underlying current page stays announced. |
+
+**Acceptance evidence.** The new `sidebar-current-view.mjs` production fixture passes **12/12**
+after the pre-fix run failed the navigation-name and current-page checks while native focus already
+passed. At 390 pixels it proves exactly one named application-navigation landmark; Create as the
+initial current page; Enter navigation to AI Studio and Space navigation to Saved with visible focus;
+Settings-modal neutrality; pointer return to Create; byte-identical local/session storage; zero
+external HTTPS requests; and zero page errors.
+
+Retained production-browser contracts remain green at responsive shell **17/17** and Settings
+keyboard **48/48**, preserving natural sidebar order, narrow-shell containment, modal focus
+ownership, and exact opener restoration. TypeScript, the production Vite build, fixture syntax, and
+`git diff --check` are green.
+
+**Decision.** Phase 170 makes the persistent page selection perceivable without inventing a new
+navigation model. The semantic state is a direct projection of the already-authoritative `view`, so
+visual and announced truth cannot drift through separate interaction logic.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
