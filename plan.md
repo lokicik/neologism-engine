@@ -4911,6 +4911,54 @@ or noisy read-side migration.
 
 ---
 
+## Phase 161 — Make local Why failures terminal and retryable
+
+**Bottleneck.** `NameCard` caught and discarded every `explainName` rejection. The controlled Why
+region therefore remained `aria-busy=true` with only an ellipsis forever, even though no work was
+still running and the persistent trigger retained focus. A production-browser fixture rejected the
+first WASM load against the pre-fix build: ten of twelve intended behaviors already passed, while the
+terminal busy state and honest recovery guidance were the exact two failures.
+
+**Frozen boundary.** This phase changes only NameCard's local explanation state, one forced-failure
+production fixture, and documentation. It does not change explanation scoring or copy on success,
+WASM exports, engine initialization, generation, ranking, Name checks, Saved/taste identity, storage,
+network policy, card layout, or Rust. It adds no retry button, timer, automatic retry, or new schema.
+
+**Failure, focus, and retry contract.** Opening Why still starts one local explanation and announces
+busy state in the existing named live region. Rejection clears busy state and replaces the ellipsis
+with “Explanation unavailable — close and reopen Why to retry.” The persistent Why trigger keeps
+focus, so Escape closes the same disclosure normally. Reopening while no successful explanation is
+cached clears the prior error and starts one retry; success replaces the guidance with the existing
+structural explanation. A monotonically increasing request identity prevents a late completion for
+an old card name from populating the current result.
+
+| Before | After |
+| --- | --- |
+| A rejected local explanation was silently swallowed. | The named live region reaches a visible terminal failure state. |
+| `aria-busy` remained true forever after failure. | Busy clears as soon as the local request rejects. |
+| The ellipsis gave no recovery path. | Copy tells the user to close and reopen Why for one natural retry. |
+| Recovery behavior was accidental and untested. | The forced first failure and successful second WASM load are production-gated. |
+| An old asynchronous completion had no explicit result-name boundary. | Per-card request identity discards stale completions after the result changes. |
+
+**Acceptance evidence.** The new `why-failure.mjs` production fixture passes **13/13** after the
+two-gate pre-fix failure. A 390-pixel Saved card receives one imported-only name, aborts its first
+local WASM request, and proves busy-to-error completion, exact guidance, card containment, trigger
+focus, Escape close, reopen retry, substantive successful explanation, and exactly two local WASM
+starts. Storage remains byte-identical and the flow emits zero page errors or external HTTPS
+requests. Visual inspection confirms the error copy is readable inside the card and the focused Why
+ring remains fully visible.
+
+The retained Why disclosure contract remains green at **16/16**, including unique card ownership,
+Enter/Space/pointer behavior, polite live state, normal explanation completion, natural Tab order,
+Escape focus, 390-pixel containment, and zero added network/storage work. TypeScript, the production
+Vite build, fixture syntax, and `git diff --check` are green.
+
+**Decision.** Phase 161 makes the existing local explanation honest under its only asynchronous
+failure boundary without redesigning the card. A transient WASM load failure no longer masquerades
+as permanent work, and recovery stays explicit, focused, local, and side-effect free.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

@@ -61,9 +61,11 @@ export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction 
   const [domainsRunning, setDomainsRunning] = useState(false)
   const [showAvail, setShowAvail] = useState(false)
   const [why, setWhy] = useState<Explanation | null>(null)
+  const [whyError, setWhyError] = useState(false)
   const [showWhy, setShowWhy] = useState(false)
   const domainAbort = useRef<AbortController | null>(null)
   const domainRun = useRef(0)
+  const whyRun = useRef(0)
   const whyPanelId = useId()
   const availabilityPanelId = useId()
   const availabilityPanel = useRef<HTMLDivElement>(null)
@@ -72,12 +74,14 @@ export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction 
   useEffect(() => {
     domainAbort.current?.abort()
     domainRun.current++
+    whyRun.current++
     setDomains(idleDomainObservations(result.name))
     setDomainsRunning(false)
     setShowAvail(false)
     setCopied(false)
     setCopyError(null)
     setWhy(null)
+    setWhyError(false)
     setShowWhy(false)
     return () => domainAbort.current?.abort()
   }, [result.name])
@@ -102,7 +106,15 @@ export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction 
     const next = !showWhy
     setShowWhy(next)
     if (next && !why) {
-      explainName(result.name).then(setWhy).catch(() => {})
+      const run = ++whyRun.current
+      setWhyError(false)
+      explainName(result.name)
+        .then((explanation) => {
+          if (whyRun.current === run) setWhy(explanation)
+        })
+        .catch(() => {
+          if (whyRun.current === run) setWhyError(true)
+        })
     }
   }
 
@@ -286,7 +298,7 @@ export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction 
           role="region"
           aria-label={`Explanation for ${result.name}`}
           aria-live="polite"
-          aria-busy={!why}
+          aria-busy={!why && !whyError}
         >
           {why ? (
             <>
@@ -295,6 +307,8 @@ export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction 
                 say {why.score_pronounce} · stick {why.score_memorability} · new {why.score_novelty}
               </span>
             </>
+          ) : whyError ? (
+            <span>Explanation unavailable — close and reopen Why to retry.</span>
           ) : (
             <span>…</span>
           )}
