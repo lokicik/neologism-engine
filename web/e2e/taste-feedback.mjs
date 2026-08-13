@@ -183,7 +183,7 @@ try {
     permissions: ['clipboard-read', 'clipboard-write'],
   })
   const sharePage = await shareContext.newPage({ viewport: { width: 1440, height: 900 } })
-  const longSharedName = `Package${'x'.repeat(73)}`
+  const longSharedName = `A🚀Package${'x'.repeat(70)}`
   const sharedRows = [
     { n: 'SharedAlpha', s: 'big_tech' },
     { n: ' sharedalpha ', s: 'big_tech' },
@@ -223,6 +223,7 @@ try {
     const nameBox = name.getBoundingClientRect()
     return {
       text: name.textContent,
+      monogram: card.querySelector('.monogram')?.textContent,
       viewport: innerWidth,
       documentWidth: document.documentElement.scrollWidth,
       cardLeft: cardBox.left,
@@ -243,6 +244,10 @@ try {
       && longNameLayout.nameScrollWidth <= longNameLayout.nameClientWidth + 1
       && longNameLayout.nameHeight > 40,
     `an accepted 80-character shared spelling stays fully visible inside its 320px Saved card (${JSON.stringify(longNameLayout)})`,
+  )
+  check(
+    longNameLayout?.monogram === 'A🚀',
+    `a shared astral character stays intact in the two-character monogram (${JSON.stringify(longNameLayout?.monogram)})`,
   )
   await sharePage.screenshot({ path: join(SHOTS, 'taste-shared-long-name-320.png'), fullPage: true })
   await sharePage.setViewportSize({ width: 1440, height: 900 })

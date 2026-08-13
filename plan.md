@@ -7643,6 +7643,44 @@ only its prefix. The change is limited to rendering; share and taste semantics a
 
 ---
 
+## Phase 231 — Keep shared-name monograms surrogate-safe (2026-08-13)
+
+### Bottleneck
+
+The share path already preserved Unicode spellings, but `Monogram` derived its two visible initials
+with `name.slice(0, 2)`. That indexes UTF-16 code units rather than Unicode code points. A valid
+80-unit name beginning `A🚀…` therefore rendered the full spelling correctly while its monogram
+contained only `A` plus the rocket's unpaired high surrogate: `"A\ud83d"`.
+
+### Frozen boundary
+
+- Preserve the original name, share limit and payload, normalization, persistence, exports,
+  forwarding, card text, monogram size, color hash, and every ASCII generated-name result.
+- Change only how the two decorative initials are selected: do not split a surrogate pair. This is
+  a Unicode code-point guarantee, not a claim of language-aware grapheme or word segmentation.
+- Evolve the existing accepted 80-character Saved fixture to begin with U+1F680 and require exact
+  `A🚀` monogram text beside the retained full-spelling and 320-pixel containment gates.
+
+### Acceptance evidence
+
+The new owner assertion was red first. The exact Saved name remained
+`A🚀Package…`, but the built component exposed monogram text `"A\ud83d"`. Replacing the UTF-16 slice
+with `Array.from(name).slice(0, 2).join('')` keeps the first two Unicode code points intact before the
+existing uppercase transform.
+
+The rebuilt production owner flow now shows exact monogram `A🚀` and completes with **63** PASS
+outcomes. The 320-pixel screenshot contains both the unbroken monogram and the complete wrapped
+80-unit spelling without document overflow. TypeScript and the Vite production build pass. Normal
+generated Create cards retain their layout and action contract at **19/19** across
+1280/390/360/320 pixels; the pure share payload contract remains **9/9**.
+
+### Decision
+
+Accepted Unicode no longer survives storage only to be corrupted in the card's derived identity
+tile. The fix is presentation-only and leaves naming, taste, and share semantics unchanged.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

@@ -10,7 +10,7 @@ function nameHue(name: string): number {
 }
 
 export function Monogram({ name, size = 40 }: Props) {
-  const initials = name.slice(0, 2).toUpperCase()
+  const initials = Array.from(name).slice(0, 2).join('').toUpperCase()
   const hue = nameHue(name)
   // Phase 42: quiet tinted tiles — per-name hue kept for identity, but
   // desaturated to sit inside the restrained palette instead of shouting.
