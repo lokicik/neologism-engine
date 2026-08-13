@@ -7479,6 +7479,47 @@ without a major upgrade, a downgrade, or a product-behavior change.
 
 ---
 
+## Phase 227 — Contain AI Studio Custom ranking at 320 pixels (2026-08-13)
+
+### Bottleneck
+
+The shared narrow-screen rule made every `.command-go` button `width: 100%`, while AI Studio kept its
+Custom criterion input and Rank action in one unwrapped flex row. The existing primary-textbox gate
+measured Custom only at 390 pixels and switched back to Create before its 320-pixel check. At 320,
+the 288-pixel Custom row therefore pushed Rank to **x=368.7** and widened the document to **369px**.
+
+### Frozen boundary
+
+- Preserve AI Studio's single-row Custom layout, native input and button behavior, criterion value,
+  ranking request, disabled/busy semantics, focus styling, and all desktop/390-pixel behavior.
+- Make only that flex input shrinkable and keep only that Rank action at its natural width. Do not
+  add a breakpoint, reorder or stack the controls, hide overflow, or change the global Generate,
+  Settings, recovery-action, shell, storage, judge, generator, WASM, or Rust contracts.
+- Extend the existing primary-textbox production fixture rather than creating a parallel layout
+  harness. Hard-gate document width, row/input/button bounds, non-overlap, and the complete focused
+  input ring at 320 pixels.
+
+### Acceptance evidence
+
+The strengthened production fixture was red first at **17/18**. Every retained accessible-name,
+placeholder, 390-pixel focus, storage, network, and page-error check passed; only the new 320-pixel
+Custom row failed with `documentWidth=369`, input **16–265.6**, and Rank **275.2–368.7** inside a row
+whose visible bounds were **16–304**.
+
+Adding `min-width: 0` to the scoped Custom input and restoring natural width only to its Rank button
+produces a **320px** document. The input now measures **16–200.9**, Rank **210.5–304**, the controls
+do not overlap, and the input's visible 2px outline plus 2px offset remains fully contained. The
+updated `primary-textbox-names.mjs` passes **18/18**. TypeScript and the production Vite build pass;
+the retained AI Studio failure/cancel/retry/cache/race matrix passes **61/61**, responsive shell
+passes **23/23**, and `git diff --check` is clean.
+
+### Decision
+
+Custom ranking now remains fully usable at the project's 320-pixel floor without masking overflow
+or changing the optional AI workflow.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

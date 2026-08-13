@@ -1870,11 +1870,13 @@ body {
 .metric-custom { display: flex; align-items: center; gap: .6rem; }
 .metric-custom .command-input {
   flex: 1;
+  min-width: 0;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: .6rem .8rem;
 }
+.metric-custom .command-go { width: auto; flex: 0 0 auto; }
 .metric-custom .command-input:focus { border-color: rgba(124, 106, 249, .55); }
 .studio-meta { margin: 0; font-size: .85rem; color: var(--muted); }
 .studio-meta strong { color: var(--text); }

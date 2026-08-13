@@ -11,7 +11,7 @@ const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 17
+const EXPECTED_CHECKS = 18
 
 const server = spawn(process.execPath, [viteCli, 'preview', '--port', String(PORT), '--strictPort'], {
   cwd: WEB_DIR,
@@ -126,8 +126,33 @@ try {
   await custom.fill('trustworthy and concise')
   check(await custom.getAttribute('aria-label') === 'Custom ranking criterion' && await custom.inputValue() === 'trustworthy and concise', 'Custom criterion keeps its name after typing')
 
-  await page.getByRole('button', { name: 'Create', exact: true }).click()
   await page.setViewportSize({ width: 320, height: 700 })
+  const narrowCustomFocus = await keyboardFocusState(custom)
+  const narrowCustom = await page.locator('.metric-custom').evaluate((row) => {
+    const input = row.querySelector('input')
+    const button = row.querySelector('button')
+    if (!input || !button) return null
+    const rowRect = row.getBoundingClientRect()
+    const inputRect = input.getBoundingClientRect()
+    const buttonRect = button.getBoundingClientRect()
+    return {
+      documentWidth: document.documentElement.scrollWidth,
+      viewportWidth: innerWidth,
+      row: [rowRect.left, rowRect.right],
+      input: [inputRect.left, inputRect.right],
+      button: [buttonRect.left, buttonRect.right],
+      contained: rowRect.left >= 0
+        && rowRect.right <= innerWidth
+        && inputRect.left >= rowRect.left
+        && inputRect.right <= rowRect.right
+        && buttonRect.left >= rowRect.left
+        && buttonRect.right <= rowRect.right
+        && inputRect.right <= buttonRect.left,
+    }
+  })
+  check(Boolean(narrowCustom?.contained && narrowCustom.documentWidth <= narrowCustom.viewportWidth && hasProductRing(narrowCustomFocus)), `320px Custom ranking keeps its input, focus ring, and Rank action inside the document (${JSON.stringify({ ...narrowCustom, focus: narrowCustomFocus })})`)
+
+  await page.getByRole('button', { name: 'Create', exact: true }).click()
   const narrowCreateFocus = await keyboardFocusState(create)
   check(hasProductRing(narrowCreateFocus), `320px Create brief keeps its full 2px ring visible (${JSON.stringify(narrowCreateFocus)})`)
 
