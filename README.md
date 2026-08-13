@@ -166,6 +166,11 @@ npm run build:wasm   # rebuild wasm first if needed
 npm run build        # output in web/dist/
 ```
 
+The locked web build chain is intentionally small: Vite's WASM plugin is sufficient for the
+generated module, so the separate top-level-await transform and its SWC/UUID dependency tree are
+not installed. At the 2026-08-13 checkpoint, the committed lockfile reports zero npm advisories;
+this is build-tool hygiene, not a claim that future registry advisories cannot appear.
+
 ## Features
 
 - **Style selector** — Big Tech / Sci-Fi / Fantasy

@@ -7434,6 +7434,51 @@ mutate Ollama, and its deployment-specific command remains usable on a narrow sc
 
 ---
 
+## Phase 226 — Remove the vulnerable redundant web build transform (2026-08-13)
+
+### Bottleneck
+
+The committed npm lockfile had four build/development dependency advisories: two high-severity
+findings in the Vite/PostCSS `nanoid` and `postcss` chain, plus two moderate findings caused by the
+direct `vite-plugin-top-level-await -> uuid@10` chain. These were tooling risks rather than evidence
+of a browser-runtime exploit, but leaving a redundant transform installed widened the build supply
+chain and kept the audit red.
+
+### Frozen boundary
+
+- Keep React, Vite, `vite-plugin-wasm`, the generated WASM module, production output behavior, and
+  every user-facing generator/ranker/storage/network contract unchanged.
+- Remove `vite-plugin-top-level-await` only if the real production WASM build and cold Create path
+  work without it; do not replace it with another transform or downgrade it to the audit-suggested
+  historic release.
+- Update `postcss` and `nanoid` only inside Vite's existing compatible dependency ranges. Do not run
+  a forced major upgrade or make unrelated direct dependency changes.
+- Treat a clean live registry audit as dated checkpoint evidence, not a permanent security claim.
+  Touch no Rust source, WASM source, UI, storage schema, or generated `dist` artifact.
+
+### Acceptance evidence
+
+The initial current-registry `npm audit --json` reported **4 advisories**: **2 high**, **2 moderate**,
+and **0 critical**. The high findings were `nanoid <=3.3.16` and `postcss <8.5.22`; the moderate
+finding came from the direct top-level-await plugin pinning `uuid@10.0.0`. A dry run showed that the
+high findings could be fixed inside the existing ranges. The final lockfile contains
+`nanoid 3.3.18` and `postcss 8.5.26`, and contains neither `vite-plugin-top-level-await` nor `uuid`.
+It drops eight packages overall, from 83 audited packages to 75, and the final live npm audit reports
+**0 vulnerabilities**.
+
+TypeScript and the production Vite build pass with **57 modules transformed** and the generated WASM
+asset emitted normally. The production `wasm-init-coalescing.mjs` gate passes **12/12**, including one shared cold
+WASM request, a full Create page, failed-initialization recovery, focus retention, and zero escaped
+external HTTPS requests. Retained production browser gates also pass: Command/Create disclosures
+**51/51** and responsive shell **23/23**. `git diff --check` is clean.
+
+### Decision
+
+The web build now uses the one WASM transform it actually needs. The dated advisory baseline is clean
+without a major upgrade, a downgrade, or a product-behavior change.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
