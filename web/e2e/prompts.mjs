@@ -10,10 +10,11 @@ import { join, dirname } from 'node:path'
 const PORT = 4176
 const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
+const WEB_DIR = join(E2E_DIR, '..')
+const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
 
-const server = spawn('npx', ['vite', 'preview', '--port', String(PORT), '--strictPort'], {
-  cwd: join(E2E_DIR, '..'),
-  shell: true,
+const server = spawn(process.execPath, [viteCli, 'preview', '--port', String(PORT), '--strictPort'], {
+  cwd: WEB_DIR,
   stdio: 'pipe',
 })
 await new Promise((resolve, reject) => {
@@ -128,11 +129,7 @@ try {
   failures++
 } finally {
   await browser.close()
-  if (process.platform === 'win32') {
-    spawn('taskkill', ['/PID', String(server.pid), '/T', '/F'], { shell: true })
-  } else {
-    server.kill()
-  }
+  server.kill()
 }
 
 if (failures > 0) {

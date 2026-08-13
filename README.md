@@ -79,7 +79,7 @@ cargo test -p neologism-core
 
 > Quick quality check: `cargo run -p neologism-core --example sample` prints a batch of names for every style and variant.
 > Keyword/root check: `cargo run -p neologism-core --example keyword_probe -- "your project brief"` prints the extracted keywords, ordinary semantic groups, isolated pair groups, and focused Respell sources used by the offline engine.
-> Prompt UI check: from `web/`, `node e2e/prompts.mjs` gates normal single-keyword and marketplace generation, visible keyword relevance, the honest Real-words note, and a complete 80-character extracted term wrapped inside the 320-pixel document without truncating it.
+> Prompt UI check: from `web/`, `node e2e/prompts.mjs` launches the checked-in Vite preview CLI directly, then gates normal single-keyword and marketplace generation, visible keyword relevance, the honest Real-words note, and a complete 80-character extracted term wrapped inside the 320-pixel document without truncating it.
 > Long-session check: `cargo run -p neologism-core --example concept_compare --release` audits ten rolling batches across eight representative briefs.
 > Compound quality check: `cargo run -p neologism-core --example compound_compare --release` audits noun relevance, adjective–noun coherence, lexical echoes, structural scores, seed diversity, and 100-name capacity across twenty multi- and single-concept briefs.
 > Developer-domain check: `cargo run -p neologism-core --example dev_domain_compare --release` audits semantic coverage across sixteen held-out developer briefs and both Brandable and Compound; from `web/`, `node e2e/dev-domain-audit.mjs` pins the same behavior in Chromium/WASM.

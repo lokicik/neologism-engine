@@ -7562,6 +7562,46 @@ the engine's decision and exhaustion semantics remain unchanged.
 
 ---
 
+## Phase 229 — Remove the prompt regression runner's shell dependency (2026-08-13)
+
+### Bottleneck
+
+The production prompt fixture still launched `npx vite preview` through `shell: true`. On the bundled
+Node 24 runtime, every otherwise-green run emitted `DEP0190`: arguments passed through a shell are
+concatenated rather than escaped and this launch form is being deprecated. The same wrapper also
+needed a separate shell-launched `taskkill` path on Windows, even though the fixture only needs the
+repository's already-installed Vite CLI.
+
+### Frozen boundary
+
+- Preserve all eight prompt and narrow-keyword assertions, their port, production `dist` target,
+  browser behavior, and output. Do not touch generation, keyword extraction, CSS, WASM, storage,
+  network policy, or Rust.
+- Change only the owner fixture's preview process: execute the checked-in Vite CLI with the current
+  Node binary, without `npx`, a command shell, or a platform-specific process-tree command.
+- Require the fixture to release its preview port after completion and finish without `DEP0190`.
+  Legacy exploratory/screenshot scripts remain outside this narrow regression-runner checkpoint.
+
+### Acceptance evidence
+
+Before the change, `prompts.mjs` passed all **8/8** behavior checks but emitted Node's `DEP0190`
+warning after completion. The fixture now resolves `node_modules/vite/bin/vite.js`, launches it with
+`process.execPath`, and terminates that direct child with `server.kill()`.
+
+The same production fixture passes **8/8** without the warning: Fitness still returns a complete
+batch, the marketplace page retains its prefix-family and keyword checks, Real words keeps its
+honest note, and the 80-character token remains intact inside a 320-pixel document. `node --check`
+passes, the file contains no `npx`, `shell: true`, or `taskkill` launch path, and port 4176 has no
+listener after completion.
+
+### Decision
+
+The active prompt regression now uses the repository dependency it actually tests and no longer
+depends on deprecated shell argument handling. This is QA-process hardening, not a product or
+generator change.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
