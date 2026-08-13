@@ -183,10 +183,11 @@ try {
     permissions: ['clipboard-read', 'clipboard-write'],
   })
   const sharePage = await shareContext.newPage({ viewport: { width: 1440, height: 900 } })
+  const longSharedName = `Package${'x'.repeat(73)}`
   const sharedRows = [
     { n: 'SharedAlpha', s: 'big_tech' },
     { n: ' sharedalpha ', s: 'big_tech' },
-    { n: 'SharedBeta', s: 'big_tech' },
+    { n: longSharedName, s: 'big_tech' },
     { n: 'İsim✨', s: 'big_tech' },
   ]
   const sharedPayload = Buffer.from(JSON.stringify(sharedRows).replace(/[\u007f-\uffff]/g, (character) => (
@@ -214,6 +215,37 @@ try {
     await sharePage.locator('.saved-page .name-card').count() === 3,
     'imported Saved names survive reload after the share hash is cleared',
   )
+  await sharePage.setViewportSize({ width: 320, height: 700 })
+  const longNameLayout = await sharePage.locator('.saved-page .name-card').filter({ hasText: longSharedName }).evaluate((card, expected) => {
+    const name = card.querySelector('.name-text')
+    if (!(name instanceof HTMLElement)) return null
+    const cardBox = card.getBoundingClientRect()
+    const nameBox = name.getBoundingClientRect()
+    return {
+      text: name.textContent,
+      viewport: innerWidth,
+      documentWidth: document.documentElement.scrollWidth,
+      cardLeft: cardBox.left,
+      cardRight: cardBox.right,
+      nameLeft: nameBox.left,
+      nameRight: nameBox.right,
+      nameHeight: nameBox.height,
+      nameClientWidth: name.clientWidth,
+      nameScrollWidth: name.scrollWidth,
+      exact: name.textContent === expected,
+    }
+  }, longSharedName)
+  check(
+    longNameLayout?.exact
+      && longNameLayout.documentWidth <= longNameLayout.viewport
+      && longNameLayout.nameLeft >= longNameLayout.cardLeft - 1
+      && longNameLayout.nameRight <= longNameLayout.cardRight + 1
+      && longNameLayout.nameScrollWidth <= longNameLayout.nameClientWidth + 1
+      && longNameLayout.nameHeight > 40,
+    `an accepted 80-character shared spelling stays fully visible inside its 320px Saved card (${JSON.stringify(longNameLayout)})`,
+  )
+  await sharePage.screenshot({ path: join(SHOTS, 'taste-shared-long-name-320.png'), fullPage: true })
+  await sharePage.setViewportSize({ width: 1440, height: 900 })
   const txtPromise = sharePage.waitForEvent('download')
   await sharePage.getByRole('button', { name: 'TXT' }).click()
   const txtNames = (await readDownload(await txtPromise)).trim().split(/\r?\n/)

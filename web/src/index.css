@@ -563,6 +563,11 @@ body {
   white-space: nowrap;
 }
 
+.saved-page .name-text {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
 .card-score {
   display: flex;
   align-items: center;

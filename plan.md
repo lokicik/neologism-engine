@@ -7602,6 +7602,47 @@ generator change.
 
 ---
 
+## Phase 230 — Show accepted shared spellings in full (2026-08-13)
+
+### Bottleneck
+
+Share decoding and stored-row validation deliberately accept names up to 80 characters, but every
+Saved card inherited Create's one-line name treatment. A valid 80-character package-like spelling
+therefore survived import, reload, export, and forwarding while its visible card showed only an
+ellipsis. At the 320-pixel floor, the name had a **146px** visible box, a **1,096px** internal scroll
+width, and a single **31px** line. The document itself stayed contained, so existing responsive
+checks could not detect that the exact spelling was hidden.
+
+### Frozen boundary
+
+- Preserve the 80-character share limit, validation, normalization, deduplication, storage,
+  forwarding, exports, card controls, and all Create/AI Studio result-card behavior.
+- Show the complete spelling only in Saved. Permit natural wrapping and arbitrary break points for
+  an unbroken token; do not truncate, mutate the value, add a second copy, or mask document overflow.
+- Extend the existing share/taste production owner fixture with one accepted 80-character import,
+  reload it, and hard-gate exact text plus name/card/document containment at 320 pixels.
+
+### Acceptance evidence
+
+The strengthened owner fixture was red first: the 80-character text was exact in the DOM, but the
+name measured `clientWidth=146`, `scrollWidth=1096`, and `height=31`. One Saved-scoped override now
+allows normal wrapping with `overflow-wrap: anywhere`; Create and AI Studio retain their compact
+single-line generated-name cards.
+
+On the rebuilt production bundle, the same name measures **146/146px** client/scroll width and
+**248px** height inside a card bounded at **16–304px**; document width remains exactly **320px**.
+The screenshot confirms the complete tail is visible and the card's provenance, checks, copy, and
+Saved controls remain separate. The full share/taste run completes with **62** PASS outcomes.
+TypeScript and the Vite production build pass; the retained responsive shell passes **23/23** at
+1280/390/320 pixels, and the pure share contract passes **9/9**.
+
+### Decision
+
+Saved now treats an accepted spelling as inspectable product data rather than silently presenting
+only its prefix. The change is limited to rendering; share and taste semantics are unchanged.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
