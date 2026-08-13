@@ -7819,6 +7819,54 @@ evidence, while valid astral text is unchanged.
 
 ---
 
+## Phase 235 — Validate optional persisted result metadata (2026-08-13)
+
+### Bottleneck
+
+The persisted-row validator covered required `NameResult` data and nested context text, but accepted
+every optional field without runtime validation. A stored row could therefore claim an arbitrary
+`sourceMode`, construction, rank, concept coverage, or lexical-hazard value while still becoming
+active feedback. This was not inert JSON: `buildProfile` turns any truthy source mode into a learned
+mode bucket, the v2 export preserves the complete result, and `taste_audit` reports that exported
+string as if it were a real generator mode.
+
+### Frozen boundary
+
+- Mirror the current TypeScript contract at the persisted reader: source mode is absent or one of
+  `brandable`/`realword`/`respell`/`compound`; construction is absent or
+  `guided_metaphor`/`guided_pair`; rank is absent, 1, or 2; concept coverage is absent or a finite
+  number; lexical hazard is absent or boolean.
+- Preserve optional-field absence for old rows and every valid value. Add no cross-field inference,
+  migration, default, cleanup, enum rename, score/ranker change, schema change, or raw-storage write.
+- Extend the existing corruption owner with one invalid row per optional field and valid historical
+  and scoped examples carrying real metadata. Require valid metadata to survive the production v2
+  export exactly.
+
+### Acceptance evidence
+
+The strengthened production fixture was red first at **7/13**. Invalid rows rendered in Saved,
+inflated Settings label totals, entered both feedback-review surfaces, and contaminated the export;
+the app still generated, so the failure was silent profile/evidence pollution rather than a crash.
+
+The runtime reader now rejects a fictitious `imaginary` source mode, `suffix_wall` construction,
+rank 3, string concept coverage, and string lexical-hazard flag. Rebuilt production passes the same
+fixture at **13/13**: two valid likes and two valid passes remain, while the scoped like retains
+`brandable`, `guided_metaphor`, rank 1, coverage 1, and `lexicalHazard: false` in the v2 export.
+Raw arrays remain byte-identical, the valid astral metadata from Phase 234 remains visible, Create
+returns ten personalized cards, and the run records zero page errors or external HTTPS requests.
+
+Retained pure contracts pass at **32/32** for storage identity and **22/22** for taste data. The
+complete production share/taste owner flow again emits **64** PASS outcomes. TypeScript and the Vite
+production build pass.
+
+### Decision
+
+Persisted optional provenance can no longer invent a taste category or become unvalidated evidence.
+Old rows without those fields and current generated rows with valid metadata keep their exact
+behavior and export shape.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

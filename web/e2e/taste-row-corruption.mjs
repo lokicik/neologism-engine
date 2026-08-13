@@ -27,8 +27,21 @@ const result = (name, tasteContext) => ({
   connotations: ['clear🚀'],
   ...(tasteContext ? { tasteContext } : {}),
 })
-const VALID_LIKES = [result('LegacyLike'), result('ScopedLike', CONTEXT)]
-const VALID_PASSES = [result('LegacyPass'), result('ScopedPass', CONTEXT)]
+const VALID_LIKES = [
+  { ...result('LegacyLike'), sourceMode: 'realword', concept_coverage: 0, lexicalHazard: false },
+  {
+    ...result('ScopedLike', CONTEXT),
+    sourceMode: 'brandable',
+    construction: 'guided_metaphor',
+    constructionRank: 1,
+    concept_coverage: 1,
+    lexicalHazard: false,
+  },
+]
+const VALID_PASSES = [
+  { ...result('LegacyPass'), sourceMode: 'compound', concept_coverage: 0 },
+  { ...result('ScopedPass', CONTEXT), sourceMode: 'respell', concept_coverage: 1 },
+]
 const INVALID_ROWS = [
   {},
   { ...result('BadConnotations'), connotations: [17] },
@@ -40,6 +53,11 @@ const INVALID_ROWS = [
   result('BadDescriptionUnicode', { ...CONTEXT, description: 'Broken\uD83D' }),
   result('BadRootUnicode', { ...CONTEXT, roots: ['dash', 'Broken\uDE80'] }),
   result('BadContextIdUnicode', { ...CONTEXT, id: 'broken\uD83D' }),
+  { ...result('BadSourceMode'), sourceMode: 'imaginary' },
+  { ...result('BadConstruction'), construction: 'suffix_wall' },
+  { ...result('BadConstructionRank'), constructionRank: 3 },
+  { ...result('BadCoverage'), concept_coverage: 'many' },
+  { ...result('BadHazard'), lexicalHazard: 'yes' },
 ]
 const FAVORITES_RAW = JSON.stringify([
   VALID_LIKES[0],
@@ -49,6 +67,9 @@ const FAVORITES_RAW = JSON.stringify([
   INVALID_ROWS[4],
   INVALID_ROWS[6],
   INVALID_ROWS[8],
+  INVALID_ROWS[10],
+  INVALID_ROWS[12],
+  INVALID_ROWS[14],
 ])
 const REJECTED_RAW = JSON.stringify([
   VALID_PASSES[0],
@@ -58,6 +79,8 @@ const REJECTED_RAW = JSON.stringify([
   INVALID_ROWS[5],
   INVALID_ROWS[7],
   INVALID_ROWS[9],
+  INVALID_ROWS[11],
+  INVALID_ROWS[13],
 ])
 
 const server = spawn(process.execPath, [viteCli, 'preview', '--port', String(PORT), '--strictPort'], {
@@ -187,8 +210,16 @@ try {
       && exported.summary.liked === 2
       && exported.summary.passed === 2
       && exported.summary.comparisons === 2
-      && exported.examples.length === 4,
-    'taste export contains only the four valid examples and their scoped plus legacy pairs',
+      && exported.examples.length === 4
+      && exported.examples.some(({ result: item }) => (
+        item.name === 'ScopedLike'
+          && item.sourceMode === 'brandable'
+          && item.construction === 'guided_metaphor'
+          && item.constructionRank === 1
+          && item.concept_coverage === 1
+          && item.lexicalHazard === false
+      )),
+    'taste export contains only valid examples and preserves their optional metadata',
   )
 
   if (settingsOpen) await page.getByTitle('Close').click()

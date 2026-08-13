@@ -29,6 +29,14 @@ function isWellFormedString(value: unknown): value is string {
   return typeof value === 'string' && isWellFormedUnicode(value)
 }
 
+function isValidSourceMode(value: unknown): boolean {
+  return value === undefined
+    || value === 'brandable'
+    || value === 'realword'
+    || value === 'respell'
+    || value === 'compound'
+}
+
 function isStoredNameResult(value: unknown): value is NameResult {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) return false
   const row = value as Record<string, unknown>
@@ -66,6 +74,22 @@ function isStoredNameResult(value: unknown): value is NameResult {
     && Array.isArray(row.connotations)
     && row.connotations.every(isWellFormedString)
     && validContext
+    && isValidSourceMode(row.sourceMode)
+    && (
+      row.construction === undefined
+      || row.construction === 'guided_metaphor'
+      || row.construction === 'guided_pair'
+    )
+    && (
+      row.constructionRank === undefined
+      || row.constructionRank === 1
+      || row.constructionRank === 2
+    )
+    && (
+      row.concept_coverage === undefined
+      || (typeof row.concept_coverage === 'number' && Number.isFinite(row.concept_coverage))
+    )
+    && (row.lexicalHazard === undefined || typeof row.lexicalHazard === 'boolean')
 }
 
 export function loadFavorites(): NameResult[] {
