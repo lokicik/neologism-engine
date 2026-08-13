@@ -140,13 +140,14 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
   useEffect(() => {
     if (!draft.enabled) return
     let cancelled = false
+    const controller = new AbortController()
     // A provider or endpoint change starts a different discovery scope. Do
     // not leave the previous server's options selectable during the debounce
     // or request; the loading row is the honest intermediate state.
     setModels([])
     setModelsLoading(true)
     const t = setTimeout(() => {
-      void fetchModels(draft).then((list) => {
+      void fetchModels(draft, controller.signal).then((list) => {
         if (cancelled) return
         setModels(list)
         setModelsLoading(false)
@@ -154,6 +155,7 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
     }, 300)
     return () => {
       cancelled = true
+      controller.abort()
       clearTimeout(t)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -1,4 +1,4 @@
-// Phase 148/212/214 browser contract: Settings is a real keyboard-contained modal,
+// Phase 148/212/214/217 browser contract: Settings is a real keyboard-contained modal,
 // its model picker follows the aria-activedescendant combobox pattern, and a
 // reopened or retargeted localhost picker reflects only its current URL.
 // Run after `npm run build`: node e2e/settings-keyboard.mjs
@@ -12,7 +12,7 @@ const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 54
+const EXPECTED_CHECKS = 55
 const FOCUSABLE = [
   'a[href]',
   'button:not([disabled])',
@@ -119,6 +119,9 @@ let localModelRequests = 0
 let localModel = 'local/model-a'
 let replacementEndpointRequests = 0
 const replacementEndpointResponse = deferred()
+let closingEndpointRequests = 0
+let closingRouteAbortObserved = false
+const closingEndpointResponse = deferred()
 
 try {
   const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } })
@@ -160,8 +163,26 @@ try {
       body: JSON.stringify({ data: [{ id: 'local/model-c' }] }),
     })
   })
+  await context.route('http://127.0.0.1:9022/v1/models', async (route) => {
+    closingEndpointRequests++
+    await closingEndpointResponse.promise
+    try {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        headers: { 'access-control-allow-origin': '*' },
+        body: JSON.stringify({ data: [{ id: 'local/model-d' }] }),
+      })
+    } catch {
+      closingRouteAbortObserved = true
+    }
+  })
 
   const page = await context.newPage()
+  let failedClosingRequests = 0
+  page.on('requestfailed', (request) => {
+    if (request.url() === 'http://127.0.0.1:9022/v1/models') failedClosingRequests++
+  })
   await page.goto(APP_URL)
 
   const trigger = page.locator('.sidebar-settings')
@@ -499,8 +520,22 @@ try {
       && await refreshedLocalCombo.getAttribute('aria-expanded') === 'false',
     'the replacement endpoint model is selectable after the pending state clears',
   )
+
+  await refreshedLocalCombo.fill('')
+  await page.keyboard.press('Escape')
+  await dialog.getByRole('textbox', { name: 'Endpoint' }).fill('http://127.0.0.1:9022/v1')
+  await refreshedLocalCombo.focus()
+  await dialog.locator('.model-empty[role="status"]').filter({ hasText: 'Loading models' }).waitFor({ state: 'visible' })
+  while (closingEndpointRequests < 1) await page.waitForTimeout(20)
   await dialog.getByRole('button', { name: 'Cancel', exact: true }).click()
   await dialog.waitFor({ state: 'detached' })
+  closingEndpointResponse.resolve()
+  await page.waitForTimeout(100)
+  check(
+    await activeElementIs(trigger)
+      && (failedClosingRequests === 1 || closingRouteAbortObserved),
+    'closing Settings restores its opener and aborts the owned pending model discovery request',
+  )
 
   await context.close()
 } catch (error) {

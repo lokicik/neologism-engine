@@ -164,14 +164,14 @@ const modelCache = new Map<string, ModelInfo[]>()
 // Keep the large remote catalog cached for the session, but always recheck a
 // local endpoint: desktop model servers can replace their one loaded model
 // without changing URL while Settings is open or between modal visits.
-export async function fetchModels(cfg: JudgeConfig): Promise<ModelInfo[]> {
+export async function fetchModels(cfg: JudgeConfig, signal?: AbortSignal): Promise<ModelInfo[]> {
   const url =
     cfg.provider === 'openrouter'
       ? `${OPENROUTER_BASE}/models`
       : `${normalizeLocalEndpoint(cfg.endpoint)}/models`
   if (cfg.provider === 'openrouter' && modelCache.has(url)) return modelCache.get(url)!
   try {
-    const res = await fetch(url)
+    const res = await fetch(url, { signal })
     if (!res.ok) return []
     const data = (await res.json()) as {
       data?: Array<{ id?: string; name?: string; context_length?: number; pricing?: { prompt?: string; completion?: string } }>

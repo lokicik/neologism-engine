@@ -7027,6 +7027,43 @@ produced it, without turning a Settings edit into an implicit paid/provider call
 
 ---
 
+## Phase 217 — Abort Settings-owned model discovery (2026-08-13)
+
+### Bottleneck
+
+Settings already ignored a stale `/models` response after endpoint changes or modal unmount, but it
+did not cancel the underlying request. A slow local server or OpenRouter request could continue
+after the user closed Settings, consuming browser/provider work that no mounted surface could use.
+
+### Frozen boundary
+
+- Give each enabled Settings discovery effect one `AbortController`; pass its signal through the
+  existing `fetchModels` request and abort it on provider/endpoint change, disable, or modal unmount.
+- Preserve the 300 ms debounce, transient loading/option semantics, OpenRouter session cache,
+  localhost refresh policy, empty failure fallback, and every modal focus/save/cancel behavior.
+- Do not add timeout, retry, polling, error UI, cache eviction, persisted state, or another request.
+  Ranking cancellation remains owned by Phases 215–216 and uses its separate controller.
+
+### Acceptance evidence
+
+The production Settings fixture was red first: all 54 retained gates passed and only the held-close
+gate failed because the route still fulfilled after Cancel. It now passes **55/55**. A held 9022
+discovery begins under the existing loading row; closing Settings restores the exact opener, aborts
+the request, and leaves no mounted list to update. All modal, focus, 65-model combobox, OpenRouter
+single-request, localhost refresh, and endpoint-scope gates remain green.
+
+The pure judge contract passes **11/11**: an independently held Settings discovery observes abort
+and resolves through the existing empty-list fallback, while all ranking/cache/canonicalization
+gates remain green. Settings durable-save failure/retry remains **13/13**. TypeScript and the
+production Vite build are green.
+
+### Decision
+
+Phase 217 makes the Settings model-discovery lifecycle own its actual network work, not only the
+React state update that would have consumed it.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

@@ -1,4 +1,4 @@
-// Phase 204/205/211/212/213/215 pure contract: judge result identity and local model
+// Phase 204/205/211/212/213/215/217 pure contract: judge result identity and local model
 // discovery stay aligned with the current request configuration.
 // Run with: node --experimental-strip-types e2e/judge-cache-check.ts
 import type { NameResult } from '../src/lib/engine.ts'
@@ -32,8 +32,17 @@ let openRouterLookups = 0
 const canonicalEndpointUrls: string[] = []
 let modelResolutionAbortObserved = false
 let abortedResolutionChatCalls = 0
+let settingsDiscoveryAbortObserved = false
 globalThis.fetch = async (input, init) => {
   const url = String(input)
+  if (url.includes(':9050/')) {
+    return new Promise<Response>((_resolve, reject) => {
+      init?.signal?.addEventListener('abort', () => {
+        settingsDiscoveryAbortObserved = true
+        reject(new DOMException('fixture aborted', 'AbortError'))
+      }, { once: true })
+    })
+  }
   if (url.includes(':9040/')) {
     if (url.endsWith('/models')) {
       return new Promise<Response>((_resolve, reject) => {
@@ -233,9 +242,21 @@ check(
   'cancelling a blank-model localhost ranking aborts model resolution before chat starts',
 )
 
-if (checks !== 10 || failures > 0) {
-  console.error(`judge cache check: ${failures} failure(s), ${checks}/10 checks executed`)
+const discoveryAbortController = new AbortController()
+const abortedDiscovery = fetchModels({
+  enabled: true,
+  provider: 'localhost',
+  endpoint: 'http://127.0.0.1:9050/v1',
+}, discoveryAbortController.signal)
+discoveryAbortController.abort()
+check(
+  (await abortedDiscovery).length === 0 && settingsDiscoveryAbortObserved,
+  'cancelling Settings model discovery aborts its request and preserves the empty fallback',
+)
+
+if (checks !== 11 || failures > 0) {
+  console.error(`judge cache check: ${failures} failure(s), ${checks}/11 checks executed`)
   process.exitCode = 1
 } else {
-  console.log('judge cache check: 10/10 checks passed')
+  console.log('judge cache check: 11/11 checks passed')
 }
