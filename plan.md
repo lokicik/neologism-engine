@@ -7770,6 +7770,55 @@ silently repaired or rewritten.
 
 ---
 
+## Phase 234 — Validate nested persisted Unicode strings (2026-08-13)
+
+### Bottleneck
+
+Phase 233 rejected ill-formed Unicode in the persisted name itself, but a stored `NameResult` also
+contains connotations and a scoped context id, description, and roots. The runtime validator required
+only that these nested values were strings. A parseable row with a lone surrogate in any of them
+therefore remained active: card metadata could show a replacement glyph, Settings could render it in
+the feedback-history label, and the same malformed string could enter the v2 taste export and matched
+evidence graph.
+
+### Frozen boundary
+
+- Apply the existing well-formed UTF-16 predicate to every nested text field that the stored-row
+  validator explicitly models: connotations plus context id, optional description, and roots.
+  Preserve all existing shape, type, length, style, score, and finite-number validation.
+- Preserve valid surrogate pairs in each field. Keep the original strings, normalization behavior,
+  storage arrays, schemas, raw-data inspection, generator/ranker, and the exact legacy share-stub
+  migration boundary unchanged. Do not sanitize or partially repair one malformed row.
+- Extend the existing production corruption owner instead of adding a parallel harness. Mix each
+  malformed nested field beside valid historical/scoped rows whose name metadata and complete context
+  deliberately contain `🚀`.
+
+### Acceptance evidence
+
+The strengthened production fixture was red first: only six of its thirteen checks passed. Rows with
+ill-formed connotations/context were visible in Saved, inflated Settings counts and matched evidence,
+appeared in both review lists, and entered the v2 export. Create still generated and the app did not
+crash, demonstrating that the problem was silent data acceptance rather than an exception.
+
+A small `isWellFormedString` guard now keeps the existing type check and applies the shared Unicode
+predicate at all four nested locations. After rebuilding production, `taste-row-corruption.mjs`
+passes **13/13**: exactly two valid likes and two valid passes remain; their `clear🚀` connotation,
+`phase164-project🚀` id, `A local 🚀 developer dashboard` description, and `local🚀` root survive;
+every lone high/low-surrogate row is absent from Saved, Settings, matched evidence, and export. The
+raw arrays remain byte-identical, personalized Create still returns ten cards, and there are zero
+page errors or external HTTPS requests.
+
+The retained complete share/taste production owner flow again emits **64** PASS outcomes, including
+the accepted `A🚀` shared spelling and monogram. TypeScript and the Vite production build pass.
+
+### Decision
+
+The persisted-row trust boundary now covers every nested string it relies on, not only the displayed
+name. Invalid rows remain inspectable in raw storage but cannot become active feedback or exported
+evidence, while valid astral text is unchanged.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

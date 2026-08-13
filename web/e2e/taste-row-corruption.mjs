@@ -13,9 +13,9 @@ const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
 const EXPECTED_CHECKS = 13
 const CONTEXT = {
-  id: 'phase164-project',
-  description: 'A local developer dashboard',
-  roots: ['dash', 'local'],
+  id: 'phase164-project🚀',
+  description: 'A local 🚀 developer dashboard',
+  roots: ['dash', 'local🚀'],
 }
 const result = (name, tasteContext) => ({
   name,
@@ -24,7 +24,7 @@ const result = (name, tasteContext) => ({
   score_pronounce: 84,
   score_novelty: 91,
   score_memorability: 82,
-  connotations: ['clear'],
+  connotations: ['clear🚀'],
   ...(tasteContext ? { tasteContext } : {}),
 })
 const VALID_LIKES = [result('LegacyLike'), result('ScopedLike', CONTEXT)]
@@ -36,6 +36,10 @@ const INVALID_ROWS = [
   { ...result('BadName'), name: 42 },
   result('Broken\uD83D'),
   result('Broken\uDE80'),
+  { ...result('BadConnotationUnicode'), connotations: ['clear\uD83D'] },
+  result('BadDescriptionUnicode', { ...CONTEXT, description: 'Broken\uD83D' }),
+  result('BadRootUnicode', { ...CONTEXT, roots: ['dash', 'Broken\uDE80'] }),
+  result('BadContextIdUnicode', { ...CONTEXT, id: 'broken\uD83D' }),
 ]
 const FAVORITES_RAW = JSON.stringify([
   VALID_LIKES[0],
@@ -43,6 +47,8 @@ const FAVORITES_RAW = JSON.stringify([
   VALID_LIKES[1],
   INVALID_ROWS[1],
   INVALID_ROWS[4],
+  INVALID_ROWS[6],
+  INVALID_ROWS[8],
 ])
 const REJECTED_RAW = JSON.stringify([
   VALID_PASSES[0],
@@ -50,6 +56,8 @@ const REJECTED_RAW = JSON.stringify([
   VALID_PASSES[1],
   INVALID_ROWS[3],
   INVALID_ROWS[5],
+  INVALID_ROWS[7],
+  INVALID_ROWS[9],
 ])
 
 const server = spawn(process.execPath, [viteCli, 'preview', '--port', String(PORT), '--strictPort'], {
@@ -114,14 +122,20 @@ try {
   )
 
   let savedNames = []
+  let savedMeta = []
   if (shellReady) {
     await page.locator('.sidebar-item', { hasText: 'Saved' }).click()
     savedNames = await page.locator('.saved-page .name-text').allTextContents()
+    savedMeta = await page.locator('.saved-page .name-card').evaluateAll((cards) => (
+      cards.map((card) => card.querySelector('.card-meta-line')?.textContent ?? '')
+    ))
   }
   check(
     savedNames.length === 2
-      && VALID_LIKES.every((item) => savedNames.includes(item.name)),
-    'Saved retains the valid historical and scoped likes only',
+      && VALID_LIKES.every((item) => savedNames.includes(item.name))
+      && savedMeta.length === 2
+      && savedMeta.every((meta) => meta.includes('clear🚀')),
+    'Saved retains valid astral pairs in historical and scoped likes only',
   )
   check(
     INVALID_ROWS.every((item) => !savedNames.includes(String(item.name ?? ''))),
@@ -152,13 +166,13 @@ try {
   check(
     likedLabels.length === 2
       && likedLabels.some((label) => label.includes('Historical unscoped feedback'))
-      && likedLabels.some((label) => label.includes(CONTEXT.description) && label.includes('roots: dash, local')),
+      && likedLabels.some((label) => label.includes(CONTEXT.description) && label.includes('roots: dash, local🚀')),
     'liked review preserves one historical and one fully labeled scoped identity',
   )
   check(
     passedLabels.length === 2
       && passedLabels.some((label) => label.includes('Historical unscoped feedback'))
-      && passedLabels.some((label) => label.includes(CONTEXT.description) && label.includes('roots: dash, local')),
+      && passedLabels.some((label) => label.includes(CONTEXT.description) && label.includes('roots: dash, local🚀')),
     'passed review preserves one historical and one fully labeled scoped identity',
   )
 

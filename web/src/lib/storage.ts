@@ -25,6 +25,10 @@ const MAX_REJECTED = 200
 const MAX_TASTE_REFERENCE_INPUT = 240
 let recoveredImportedSaved: NameResult[] = []
 
+function isWellFormedString(value: unknown): value is string {
+  return typeof value === 'string' && isWellFormedUnicode(value)
+}
+
 function isStoredNameResult(value: unknown): value is NameResult {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) return false
   const row = value as Record<string, unknown>
@@ -34,14 +38,14 @@ function isStoredNameResult(value: unknown): value is NameResult {
     || (
       typeof context === 'object'
       && !Array.isArray(context)
-      && typeof (context as Record<string, unknown>).id === 'string'
+      && isWellFormedString((context as Record<string, unknown>).id)
       && (context as Record<string, unknown>).id !== ''
       && Array.isArray((context as Record<string, unknown>).roots)
       && ((context as Record<string, unknown>).roots as unknown[])
-        .every((root) => typeof root === 'string')
+        .every(isWellFormedString)
       && (
         (context as Record<string, unknown>).description === undefined
-        || typeof (context as Record<string, unknown>).description === 'string'
+        || isWellFormedString((context as Record<string, unknown>).description)
       )
     )
   return typeof row.name === 'string'
@@ -60,7 +64,7 @@ function isStoredNameResult(value: unknown): value is NameResult {
     && typeof row.score_memorability === 'number'
     && Number.isFinite(row.score_memorability)
     && Array.isArray(row.connotations)
-    && row.connotations.every((connotation) => typeof connotation === 'string')
+    && row.connotations.every(isWellFormedString)
     && validContext
 }
 
