@@ -1,4 +1,5 @@
 import type { NameResult } from './engine'
+import { normalizedName } from './taste-identity.ts'
 
 export const TASTE_DATA_SCHEMA = 'neologism-taste-v2'
 export const TASTE_EVIDENCE_TARGET = 10
@@ -96,8 +97,8 @@ export function tasteEvidenceProgress(
     // Legacy pairs remain in exports for backward-compatible audits, but an
     // absent context cannot prove that both labels answered the same brief.
     if (!likedContext || likedContext !== passedContext) continue
-    matchedLiked.add(JSON.stringify([likedContext, liked.name.trim().toLowerCase()]))
-    matchedPassed.add(JSON.stringify([passedContext, passed.name.trim().toLowerCase()]))
+    matchedLiked.add(JSON.stringify([likedContext, normalizedName(liked)]))
+    matchedPassed.add(JSON.stringify([passedContext, normalizedName(passed)]))
     matchedContexts.add(likedContext)
   }
   return {

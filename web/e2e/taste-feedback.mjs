@@ -185,8 +185,8 @@ try {
   const sharePage = await shareContext.newPage({ viewport: { width: 1440, height: 900 } })
   const longSharedName = `A🚀Package${'x'.repeat(70)}`
   const sharedRows = [
-    { n: 'SharedAlpha', s: 'big_tech' },
-    { n: ' sharedalpha ', s: 'big_tech' },
+    { n: 'Café', s: 'big_tech' },
+    { n: ' cafe\u0301 ', s: 'big_tech' },
     { n: longSharedName, s: 'big_tech' },
     { n: 'İsim✨', s: 'big_tech' },
   ]
@@ -214,6 +214,11 @@ try {
   check(
     await sharePage.locator('.saved-page .name-card').count() === 3,
     'imported Saved names survive reload after the share hash is cleared',
+  )
+  check(
+    await sharePage.locator('.saved-page .name-text', { hasText: /^Café$/ }).count() === 1
+      && await sharePage.locator('.saved-page .name-text', { hasText: /^Cafe\u0301$/ }).count() === 0,
+    'canonical Unicode variants render as one Saved card while preserving the first spelling',
   )
   await sharePage.setViewportSize({ width: 320, height: 700 })
   const longNameLayout = await sharePage.locator('.saved-page .name-card').filter({ hasText: longSharedName }).evaluate((card, expected) => {

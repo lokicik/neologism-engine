@@ -1,7 +1,7 @@
 import type { NameResult } from './engine'
 
 export function normalizedName(item: NameResult): string {
-  return item.name.trim().toLowerCase()
+  return item.name.trim().toLowerCase().normalize('NFC')
 }
 
 // Before imported share names had their own collection, App's share branch

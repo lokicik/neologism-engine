@@ -7681,6 +7681,48 @@ tile. The fix is presentation-only and leaves naming, taste, and share semantics
 
 ---
 
+## Phase 232 — Canonicalize Unicode spelling identity (2026-08-13)
+
+### Bottleneck
+
+Saved and scoped taste identity shared one spelling key, but it only trimmed and lowercased. Unicode
+permits visually identical canonical forms, so precomposed `Café` and decomposed `Cafe\u0301` became
+different Saved cards, removal targets, and same-project feedback endpoints. Settings duplicated the
+same incomplete normalization inside its matched-evidence counter, allowing equivalent rows to
+inflate progress even after the central Saved key was corrected.
+
+### Frozen boundary
+
+- Preserve every original displayed/exported spelling, the first-record-wins Saved representative,
+  project-context separation, legacy bucket, storage arrays, schema, pair rows, share payload, and
+  all ASCII identity behavior. Do not rewrite persisted data or add a read-side migration.
+- Canonicalize only comparison keys to NFC after the existing trim/lowercase steps. Use that one key
+  for taste identity, Saved dedupe/removal/provenance, and matched evidence.
+- Pin both layers: pure identity/removal tests for NFC/NFD forms, evidence endpoint dedupe, and a real
+  share import where `Café` plus trimmed/lowercase decomposed input renders one `Café` Saved card.
+
+### Acceptance evidence
+
+The storage fixture was red first on scoped taste identity; after the central key changed, a second
+new taste-data fixture remained red because matched evidence still used its private lowercased key.
+`normalizedName` now returns `trim().toLowerCase().normalize('NFC')`, and `tasteEvidenceProgress`
+calls that helper rather than reimplementing name identity.
+
+The pure storage identity contract passes **32/32**, including one taste key, one Saved card, and
+spelling-wide removal across NFC/NFD forms. Taste-data passes **22/22** and counts canonical duplicate
+likes/passes as **1/1**, not 2/2. On the rebuilt production bundle, a share containing `Café` and
+` cafe\u0301 ` renders one card using the first exact spelling and still preserves the three-name
+deduplicated shortlist through TXT, JSON, and forwarding; the full owner flow completes with **64**
+PASS outcomes. TypeScript and Vite pass, and the pure share payload contract remains **9/9**.
+
+### Decision
+
+Visually identical Unicode forms now obey the same identity rule for scoped actions, Saved
+grouping/removal, and matched-evidence readiness. Raw versioned examples and original user data
+remain untouched and inspectable.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

@@ -134,6 +134,16 @@ check(
     && duplicateProgress.matchedContexts === 1,
   'duplicate rows and comparison edges cannot inflate normalized evidence endpoints',
 )
+const canonicalDuplicateProgress = tasteEvidenceProgress(
+  [result('Café', 'brandable', 'project-d'), result('Cafe\u0301', 'brandable', 'project-d')],
+  [result('Passé', 'brandable', 'project-d'), result('Passe\u0301', 'brandable', 'project-d')],
+)
+check(
+  canonicalDuplicateProgress.matchedLiked === 1
+    && canonicalDuplicateProgress.matchedPassed === 1
+    && canonicalDuplicateProgress.matchedContexts === 1,
+  'canonical Unicode duplicates cannot inflate matched evidence endpoints',
+)
 
 const belowThreshold = tasteEvidenceProgress(matchedLikes.slice(0, 9), matchedPasses)
 check(

@@ -56,6 +56,12 @@ check(
   tasteIdentity(legacy) === tasteIdentity(result(' NOMA ')),
   'case and surrounding whitespace normalize inside one taste context',
 )
+const composedCafe = result('Café', 'project-a')
+const decomposedCafe = result(' Cafe\u0301 ', 'project-a')
+check(
+  tasteIdentity(composedCafe) === tasteIdentity(decomposedCafe),
+  'canonically equivalent Unicode spellings share one scoped taste identity',
+)
 
 const favorites = [projectA, projectB]
 const rejected = [projectB]
@@ -260,6 +266,13 @@ check(
     && saved[0] === projectA
     && saved[1] === importedLexix,
   'Saved dedupes by spelling and prefers the first explicit scored record',
+)
+const canonicalSaved = mergeSavedNames([composedCafe], [shareStub('Cafe\u0301')])
+check(
+  canonicalSaved.length === 1
+    && canonicalSaved[0] === composedCafe
+    && withoutSavedName([composedCafe, shareStub('Cafe\u0301')], composedCafe).length === 0,
+  'Saved dedupe and spelling-wide removal treat NFC and NFD forms as one name',
 )
 const entries = savedNameEntries(favorites, [importedNoma, importedLexix])
 check(
