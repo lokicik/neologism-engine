@@ -11,7 +11,7 @@ const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 22
+const EXPECTED_CHECKS = 24
 
 const server = spawn(process.execPath, [viteCli, 'preview', '--port', String(PORT), '--strictPort'], {
   cwd: WEB_DIR,
@@ -154,6 +154,27 @@ try {
       && await heroToggle.evaluate((element) => document.activeElement === element)
       && await wallTrack.evaluate((element) => getComputedStyle(element).animationPlayState === 'running'),
     'Resume restarts ordinary name motion after a full pause and keeps focus on the toggle',
+  )
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  // A target already chosen before the preference change may finish its
+  // 700ms decode; measure stability after that target becomes readable.
+  await page.waitForTimeout(800)
+  const dynamicallyReducedName = (await heroName.textContent())?.trim()
+  await page.waitForTimeout(4000)
+  check(
+    await heroToggle.getAttribute('aria-label') === 'Resume moving name examples'
+      && (await heroName.textContent())?.trim() === dynamicallyReducedName
+      && await wallTrack.evaluate((element) => getComputedStyle(element).animationName === 'none'),
+    'enabling reduced motion in an open Landing pauses both name-motion layers',
+  )
+  await page.emulateMedia({ reducedMotion: 'no-preference' })
+  const preferenceReturnName = (await heroName.textContent())?.trim()
+  await page.waitForTimeout(4000)
+  check(
+    await heroToggle.getAttribute('aria-label') === 'Resume moving name examples'
+      && (await heroName.textContent())?.trim() === preferenceReturnName
+      && await wallTrack.evaluate((element) => getComputedStyle(element).animationPlayState === 'paused'),
+    'returning to ordinary motion does not override the paused user-visible state',
   )
   await page.setViewportSize({ width: 320, height: 700 })
   await page.evaluate(() => scrollTo(0, 0))

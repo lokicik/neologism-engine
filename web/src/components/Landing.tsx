@@ -125,6 +125,17 @@ export function Landing({ onEnter }: Props) {
   const seenRef = useRef<string[]>([])
   const { display, locked } = useDecode(hero?.name ?? '')
 
+  useEffect(() => {
+    const preference = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const pauseForPreference = (event: MediaQueryListEvent) => {
+      if (event.matches) setNameMotionPaused(true)
+    }
+    // Close the tiny gap between the state initializer and effect setup.
+    if (preference.matches) setNameMotionPaused(true)
+    preference.addEventListener('change', pauseForPreference)
+    return () => preference.removeEventListener('change', pauseForPreference)
+  }, [])
+
   const refill = useCallback(async () => {
     try {
       const batch = await generateNames({

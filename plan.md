@@ -7254,6 +7254,52 @@ motion layer, while reduced-motion preference remains stronger than an optional 
 
 ---
 
+## Phase 222 — Honor reduced-motion changes in an open Landing (2026-08-13)
+
+### Bottleneck
+
+Phases 220–221 read `prefers-reduced-motion` when Landing mounted, so a visitor who already preferred
+less motion started paused. If that system/browser preference changed while Landing remained open,
+CSS immediately removed the wall animation but the React hero timer and visible Pause action kept
+running. The current page therefore disagreed with the newly active preference until it remounted
+or the visitor manually paused it.
+
+### Frozen boundary
+
+- Own one `matchMedia('(prefers-reduced-motion: reduce)')` change listener for the mounted Landing.
+  When it becomes true, move the existing name-motion state to Pause; remove the listener on
+  unmount. Recheck the current match once during effect setup to close the initializer/effect gap.
+- Treat this as a one-way safety response. A later change back to `no-preference` must not restart
+  motion automatically or override the user-visible paused state. The existing Resume action stays
+  the only way to restart after that point.
+- Keep Phase 221's explicit-Resume boundary under reduced motion: the hero may rotate without its
+  scramble, while the CSS media query continues to keep wall animation off.
+- Add no persistence, second preference state, polling, timer, network request, new control, or
+  layout change. Preserve generation, focus order, wall contents, storage, WASM, and Rust.
+
+### Acceptance evidence
+
+The production fixture was red first at **22/23**: after live emulation switched to reduced motion,
+the wall CSS stopped but the hero target changed and the action still offered Pause. The final
+`landing-demo-mode-state.mjs` passes **24/24**. It enables reduced motion in an already-running
+Landing, lets the currently chosen 700-millisecond decode finish, then proves the readable hero
+name stays fixed for another four seconds, the action changes to Resume, and the wall remains
+animation-free. Switching back to ordinary motion leaves that same name and action paused for a
+further four seconds; only explicit Resume may restart it. The separate reduced-motion context
+continues proving that explicit hero Resume cannot restart wall animation.
+
+All Phase 221 motion, 320-pixel visibility, focus-ring, storage, error, and external-request gates
+remain inside the same fixture. Landing/Create navigation remains **14/14**, How-it-works focus
+remains **15/15**, and TypeScript plus the production Vite build are green. `git diff --check` is
+clean.
+
+### Decision
+
+Reduced-motion is now a live user preference rather than a mount-time hint, without turning its
+later removal into an implicit request to animate again.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
