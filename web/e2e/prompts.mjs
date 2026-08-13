@@ -98,6 +98,31 @@ try {
     check(Boolean(note && note.includes('isn’t used')), `realword hint visible (got: ${note})`)
     await ctx.close()
   }
+  // 4. A long unbroken user term may exhaust the naming space, but its
+  // rendered keyword must not widen the 320px product shell.
+  {
+    const { ctx, page } = await freshPage()
+    await page.setViewportSize({ width: 320, height: 700 })
+    const token = 'x'.repeat(80)
+    const res = await generateWith(page, `a ${token} tool`)
+    check(res === 'cards' || res === 'exhausted', `long unbroken prompt settles honestly (got: ${res})`)
+    const evidence = await page.locator('.keyword-line').evaluate((element) => ({
+      text: element.textContent,
+      viewport: innerWidth,
+      htmlWidth: document.documentElement.scrollWidth,
+      bodyWidth: document.body.scrollWidth,
+      clientWidth: element.clientWidth,
+      scrollWidth: element.scrollWidth,
+    }))
+    check(
+      evidence.text?.includes(token)
+        && evidence.htmlWidth <= evidence.viewport
+        && evidence.bodyWidth <= evidence.viewport
+        && evidence.scrollWidth <= evidence.clientWidth + 1,
+      `80-character keyword stays wrapped inside the 320px document (${JSON.stringify(evidence)})`,
+    )
+    await ctx.close()
+  }
 } catch (err) {
   console.error('SCRIPT ERROR:', err.message)
   failures++

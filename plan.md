@@ -7520,6 +7520,48 @@ or changing the optional AI workflow.
 
 ---
 
+## Phase 228 — Wrap long extracted keywords inside Create (2026-08-13)
+
+### Bottleneck
+
+Create renders the engine's extracted brief roots in a visible `naming around:` trace. Ordinary terms
+wrapped naturally, but one long unbroken user token established the flex item's min-content width.
+At the 320-pixel product floor, an 80-character term widened both document and body to **622px** and
+gave the 288-pixel keyword line an internal scroll width of **606px**. The existing prompt fixture
+checked keyword relevance but never exercised an unbroken user term or narrow viewport.
+
+### Frozen boundary
+
+- Preserve the user's complete displayed term, extraction/generation behavior, honest exhaustion
+  state, title text, normal-word wrapping, and every input constraint. Do not truncate, ellipsize,
+  insert characters into the value, reject the brief, or change the Rust/WASM keyword engine.
+- Add wrapping only to the existing keyword trace. Do not hide document overflow globally or alter
+  cards, stats, taste state, ranking, storage, network, shell, or other copy.
+- Extend the existing prompt production fixture with one 80-character term at 320 pixels. Accept a
+  real page or honest exhaustion, but hard-gate the intact visible token, document/body containment,
+  and keyword client/scroll widths.
+
+### Acceptance evidence
+
+The strengthened production prompt fixture was red first at **7/8**. Fitness still produced a full
+batch; the marketplace page kept its prefix-family cap and keyboard keyword; Real words retained its
+honest note; and the long prompt settled as exhaustion rather than error. Only containment failed:
+`htmlWidth=622`, `bodyWidth=622`, and keyword `clientWidth/scrollWidth=288/606` at a 320px viewport.
+
+One scoped `overflow-wrap: anywhere` declaration keeps the exact 80-character term visible while
+allowing its trace to contribute a narrow min-content width. The production fixture now passes
+**8/8** with document and body at **320px** and keyword client/scroll widths both **288px**.
+TypeScript and the production Vite build pass. Retained production gates remain green: responsive
+Create-card actions **19/19**, the 100-name brief session's **8/8** checks, and responsive shell
+**23/23**. `git diff --check` is clean.
+
+### Decision
+
+Arbitrary user vocabulary can remain inspectable without breaking Create's narrow-screen layout;
+the engine's decision and exhaustion semantics remain unchanged.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

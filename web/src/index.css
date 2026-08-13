@@ -1375,6 +1375,7 @@ body {
   margin: 0;
   font-size: .85rem;
   color: var(--muted);
+  overflow-wrap: anywhere;
 }
 .keyword-stem {
   color: var(--text);
