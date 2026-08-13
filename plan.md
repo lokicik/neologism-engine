@@ -7064,6 +7064,48 @@ React state update that would have consumed it.
 
 ---
 
+## Phase 218 — Preserve first-visit share recovery until both writes persist (2026-08-13)
+
+### Bottleneck
+
+A valid share import persisted its separate Saved rows and then cleared `#names=` whenever that one
+write succeeded. The importer also called `markVisited`, but that helper swallowed storage failure
+and returned no result. If the imported key was writable while the first-visit marker was not, the
+hash disappeared; reload then opened Landing despite the recovered Saved names, with no URL left to
+re-enter the intended share flow.
+
+### Frozen boundary
+
+- Make `markVisited` report only whether its existing write succeeded. Ordinary Landing entry may
+  continue ignoring that result and retain its historical fallback behavior.
+- During share import, consume the hash only when both imported Saved rows and the first-visit
+  marker persisted. If either fails, keep the exact URL as the recovery copy; the importer remains
+  idempotent on reload and clears the hash after both writes succeed.
+- Preserve share decoding, validation, name/style-only payloads, Saved/taste separation, history
+  replacement shape, invalid-hash cleanup, storage keys, and every normal successful path. Add no
+  new schema, alert, retry timer, network request, or duplicate row.
+
+### Acceptance evidence
+
+The expanded production fixture was red first: its eight retained runtime gates and the import write
+passed, but the two new recovery gates failed because the hash cleared early and reload did not
+return to Saved. It now passes **13/13**. Under a one-time `neologism:visited` quota failure, both
+names persist, the hash remains, reload retries the marker, the import stays exactly two rows, Saved
+opens, and only then does the hash clear. The flow adds no external HTTPS request or page error.
+
+The retained share payload contract passes **9/9**, including Unicode forwarding, malformed and
+oversized rejection, maximum round-trip, and no feedback/context leakage. The full production
+taste/share browser passes **61/61**, including imported-only profile exclusion, failed import URL
+recovery, migration, deduped exports, and forwarded links. TypeScript and the production Vite build
+are green.
+
+### Decision
+
+Phase 218 treats the share URL as a recovery token for the whole first-entry transaction rather
+than only the imported-names key.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

@@ -220,7 +220,7 @@ export default function App() {
       // A valid share is an intentional entry into the app. Remember it so the
       // recipient returns to the product, not the first-visit landing page,
       // after the recovery hash has been cleared.
-      markVisited()
+      const visitedPersisted = markVisited()
       const stubs: NameResult[] = shared.map((item) => ({
         name: item.name,
         style: item.style,
@@ -242,7 +242,7 @@ export default function App() {
       history.replaceState(
         historyStateFor('saved'),
         '',
-        imported.persisted ? location.pathname : location.href,
+        imported.persisted && visitedPersisted ? location.pathname : location.href,
       )
     }
 

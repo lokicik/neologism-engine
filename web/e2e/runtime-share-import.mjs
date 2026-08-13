@@ -1,5 +1,5 @@
-// Phase 209 browser contract: a share URL opened in an already-mounted tab is
-// imported through hashchange with the same share-only semantics as first load.
+// Phase 209/218 browser contract: a share URL opened in an already-mounted tab
+// or under a first-visit persistence failure retains recoverable share-only semantics.
 // Run after `npm run build`: node e2e/runtime-share-import.mjs
 import { chromium } from 'playwright'
 import { spawn } from 'node:child_process'
@@ -11,7 +11,7 @@ const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 8
+const EXPECTED_CHECKS = 13
 const payload = Buffer.from(JSON.stringify([
   { n: 'RuntimeNova', s: 'big_tech' },
   { n: 'RuntimeVale', s: 'fantasy' },
@@ -87,6 +87,55 @@ try {
     external.length === 0 && pageErrors.length === 0,
     `runtime share import adds no external HTTPS request or page error (${JSON.stringify({ external, pageErrors })})`,
   )
+  await context.close()
+
+  const firstVisitContext = await browser.newContext({ viewport: { width: 390, height: 844 } })
+  await firstVisitContext.addInitScript(() => {
+    const original = Storage.prototype.setItem
+    Storage.prototype.setItem = function setItem(key, value) {
+      if (
+        this === localStorage
+        && key === 'neologism:visited'
+        && sessionStorage.getItem('fixture:visited-failed') !== '1'
+      ) {
+        sessionStorage.setItem('fixture:visited-failed', '1')
+        throw new DOMException('fixture quota', 'QuotaExceededError')
+      }
+      return original.call(this, key, value)
+    }
+  })
+  await firstVisitContext.route('https://**/*', async (route) => {
+    external.push(route.request().url())
+    await route.abort('blockedbyclient')
+  })
+  const firstVisitPage = await firstVisitContext.newPage()
+  firstVisitPage.on('pageerror', (error) => pageErrors.push(error.message))
+  await firstVisitPage.goto(`${APP_URL}/#names=${payload}`)
+  await firstVisitPage.getByRole('heading', { name: 'Saved names' }).waitFor({ state: 'visible' })
+  check(
+    await firstVisitPage.evaluate(() => JSON.parse(localStorage.getItem('neologism:imported-saved') ?? '[]').length) === 2,
+    'first-visit share persists its imported names even when the visited marker write fails',
+  )
+  check(
+    await firstVisitPage.evaluate(() => location.hash.startsWith('#names=')),
+    'failed first-visit persistence retains the share hash as a reload recovery copy',
+  )
+  await firstVisitPage.reload()
+  await firstVisitPage.getByRole('heading', { name: 'Saved names' }).waitFor({ state: 'visible' })
+  check(
+    await firstVisitPage.evaluate(() => localStorage.getItem('neologism:visited')) === '1'
+      && await firstVisitPage.evaluate(() => JSON.parse(localStorage.getItem('neologism:imported-saved') ?? '[]').length) === 2,
+    'reload retries the visited marker and keeps the recovered import idempotent',
+  )
+  check(
+    await firstVisitPage.evaluate(() => location.hash === ''),
+    'the recovery hash clears only after both share and first-visit persistence succeed',
+  )
+  check(
+    external.length === 0 && pageErrors.length === 0,
+    `first-visit recovery adds no external HTTPS request or page error (${JSON.stringify({ external, pageErrors })})`,
+  )
+  await firstVisitContext.close()
 } finally {
   await browser.close()
   server.kill()

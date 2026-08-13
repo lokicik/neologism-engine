@@ -303,11 +303,13 @@ export function hasVisited(): boolean {
   }
 }
 
-export function markVisited(): void {
+export function markVisited(): boolean {
   try {
     localStorage.setItem(VISITED_KEY, '1')
+    return true
   } catch {
     // ignore — landing will just show again next time
+    return false
   }
 }
 
