@@ -57,12 +57,20 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
   const cache = useRef<Map<string, Ranked>>(new Map())
   const operationActive = useRef(false)
   const rankRequestId = useRef(0)
+  const rankAbortController = useRef<AbortController | null>(null)
   const poolId = useRef(0)
   const metricButtons = useRef<Map<Metric, HTMLButtonElement>>(new Map())
   const customRankButton = useRef<HTMLButtonElement>(null)
 
   const ready = isJudgeReady(judgeConfig)
   const favoriteKeys = new Set(favorites.map(tasteIdentity))
+
+  useEffect(() => () => {
+    ++rankRequestId.current
+    rankAbortController.current?.abort()
+    rankAbortController.current = null
+    operationActive.current = false
+  }, [])
 
   useEffect(() => {
     if (!ready) setRankingStatus('')
@@ -128,9 +136,11 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
       operationActive.current = true
     }
     const requestId = ++rankRequestId.current
+    let requestController: AbortController | null = null
     setRankingStatus('')
     const finish = () => {
       if (requestId !== rankRequestId.current) return
+      if (rankAbortController.current === requestController) rankAbortController.current = null
       operationActive.current = false
       setActiveRank(null)
       setBusy('idle')
@@ -151,10 +161,12 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
       setNotice(null)
       setFailedRank(null)
     }
+    requestController = new AbortController()
+    rankAbortController.current = requestController
     const result = await rerank(poolToRank, {
       ...judgeConfig,
       prompt: metricPrompt(attempt.criterion),
-    })
+    }, requestController.signal)
     if (requestId !== rankRequestId.current || attempt.poolId !== poolId.current) return
     if (!result) {
       setNotice(options.displayedRanking
@@ -265,6 +277,23 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
       fromRetry: true,
       displayedRanking: view.rankedBy,
     })
+  }
+
+  function cancelRanking() {
+    if (busy !== 'ranking' || !activeRank) return
+    const attempt = activeRank
+    focusRankControl(attempt)
+    ++rankRequestId.current
+    rankAbortController.current?.abort()
+    rankAbortController.current = null
+    operationActive.current = false
+    setActiveRank(null)
+    setBusy('idle')
+    setRankingStatus('')
+    setNotice(view.rankedBy
+      ? `${attempt.label} ranking cancelled. Still showing the ${view.rankedBy} ranking.`
+      : `${attempt.label} ranking cancelled. Showing the unranked local pool.`)
+    setFailedRank(attempt)
   }
 
   return (
@@ -392,6 +421,14 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
                 </span>
               )}
             </p>
+          )}
+
+          {busy === 'ranking' && activeRank && (
+            <div className="studio-ranking-actions">
+              <button type="button" className="toolbar-btn" onClick={cancelRanking}>
+                Cancel ranking
+              </button>
+            </div>
           )}
 
           {notice && (

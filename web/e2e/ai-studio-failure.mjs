@@ -1,4 +1,5 @@
-// Phase 152 browser contract: an AI ranking failure never hides the local pool,
+// Phase 152/215 browser contract: an AI ranking failure or explicit cancellation
+// never hides the local pool,
 // lies about the displayed order, drops keyboard focus, or starts a second call.
 // Run after `npm run build`: node e2e/ai-studio-failure.mjs
 import { chromium } from 'playwright'
@@ -11,7 +12,7 @@ const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 48
+const EXPECTED_CHECKS = 56
 
 const server = spawn(process.execPath, [viteCli, 'preview', '--port', String(PORT), '--strictPort'], {
   cwd: WEB_DIR,
@@ -148,6 +149,120 @@ async function studioPage(viewport, respond) {
 }
 
 try {
+  // A provider that never settles must not leave Studio without a user-owned
+  // recovery action once the local pool is already available.
+  {
+    const hangingGate = deferred()
+    let routedAbortObserved = false
+    const { context, page, calls } = await studioPage({ width: 390, height: 844 }, async (route, call, request) => {
+      if (call === 1) {
+        await hangingGate.promise
+        try {
+          await route.fulfill({ status: 503, body: 'released hanging fixture' })
+        } catch {
+          routedAbortObserved = true
+        }
+        return
+      }
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: rankedReply(request.names, 'cancel-retry'),
+      })
+    })
+    let failedChatRequests = 0
+    page.on('requestfailed', (request) => {
+      if (request.url().endsWith('/chat/completions')) failedChatRequests++
+    })
+    const storageBefore = await storageSnapshot(page)
+    const rankingStatus = page.locator('.studio-ranking-status')
+    const generate = page.getByRole('button', { name: 'Generate', exact: true })
+    await generate.focus()
+    await page.keyboard.press('Enter')
+    await page.waitForFunction(() => document.querySelectorAll('.ai-studio .name-card').length === 24)
+    const pending = await resultSnapshot(page)
+    const cancel = page.getByRole('button', { name: 'Cancel ranking' })
+    check(
+      calls.length === 1
+        && await cancel.count() === 1
+        && pending.names.join('|') === calls[0].names.join('|')
+        && pending.reasons.length === 0
+        && pending.picks.length === 0,
+      'a pending provider ranking exposes one cancellation action beside the untouched local pool',
+    )
+    await cancel.focus()
+    const cancelFocus = await cancel.evaluate((button) => {
+      const rect = button.getBoundingClientRect()
+      return {
+        active: document.activeElement === button,
+        focusVisible: button.matches(':focus-visible'),
+        contained: rect.left >= 4 && rect.right <= window.innerWidth - 4,
+      }
+    })
+    check(
+      cancelFocus.active
+        && cancelFocus.focusVisible
+        && cancelFocus.contained
+        && await generate.getAttribute('aria-busy') === 'true',
+      'the contained cancellation action owns visible keyboard focus while Generate remains honestly busy',
+    )
+    await page.keyboard.press('Enter')
+    const alert = page.getByRole('alert')
+    await alert.waitFor({ state: 'visible' })
+    const cancelled = await resultSnapshot(page)
+    check(
+      (await alert.textContent())?.includes('Brandable ranking cancelled. Showing the unranked local pool.')
+        && (await rankingStatus.textContent())?.trim() === ''
+        && cancelled.names.join('|') === pending.names.join('|')
+        && cancelled.reasons.length === 0
+        && cancelled.picks.length === 0
+        && cancelled.meta.includes('Unranked local pool'),
+      'cancellation reports the exact fallback and preserves the local pool without AI claims',
+    )
+    const brandable = page.getByRole('button', { name: 'Brandable', exact: true })
+    check(
+      await brandable.evaluate((button) => document.activeElement === button)
+        && await generate.getAttribute('aria-busy') === 'false'
+        && await generate.getAttribute('aria-disabled') === 'false'
+        && await cancel.count() === 0,
+      'cancellation unlocks Studio and restores focus to the persistent invoking metric',
+    )
+    hangingGate.resolve()
+    await page.waitForTimeout(100)
+    check(
+      calls.length === 1 && (failedChatRequests === 1 || routedAbortObserved),
+      'cancellation aborts the held provider request and ignores its released completion',
+    )
+    const retry = alert.getByRole('button', { name: 'Retry ranking' })
+    await retry.click()
+    await page.waitForFunction(() => document.querySelectorAll('.ai-studio .card-ai-reason').length === 24)
+    check(
+      calls.length === 2
+        && calls[1].names.join('|') === calls[0].names.join('|')
+        && calls[1].criterion === calls[0].criterion,
+      'Retry after cancellation sends the same pool and frozen criterion exactly once',
+    )
+    const recovered = await resultSnapshot(page)
+    check(
+      recovered.reasons.length === 24
+        && recovered.reasons.every((reason) => reason.includes('cancel-retry'))
+        && recovered.picks.length === 1
+        && recovered.meta.includes('Ranked by Brandable')
+        && (await rankingStatus.textContent())?.trim() === '24 names ranked by Brandable.'
+        && await brandable.evaluate((button) => document.activeElement === button),
+      'Retry after cancellation replaces fallback truth with one verified Brandable ranking',
+    )
+    const fit = await horizontalFit(page)
+    check(
+      await storageSnapshot(page) === storageBefore
+        && fit.fits
+        && fit.scrollX === 0
+        && fit.scrollWidth <= fit.viewport + 1,
+      `cancellation and Retry stay storage-neutral and 390px-contained (${JSON.stringify(fit)})`,
+    )
+    await context.close()
+  }
+
   // First ranking failure: preserve and truthfully expose the local engine pool.
   {
     const retryGate = deferred()

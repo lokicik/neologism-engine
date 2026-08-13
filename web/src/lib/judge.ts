@@ -122,11 +122,16 @@ function baseAndHeaders(cfg: JudgeConfig): { base: string; headers: Record<strin
 
 // Localhost servers often expose a single loaded model; auto-detect it so the
 // user doesn't have to type the id. OpenRouter requires an explicit model.
-async function resolveModel(cfg: JudgeConfig, base: string, headers: Record<string, string>): Promise<string | null> {
+async function resolveModel(
+  cfg: JudgeConfig,
+  base: string,
+  headers: Record<string, string>,
+  signal?: AbortSignal,
+): Promise<string | null> {
   if (cfg.model?.trim()) return cfg.model.trim()
   if (cfg.provider === 'openrouter') return DEFAULT_OPENROUTER_MODEL
   try {
-    const res = await fetch(`${base}/models`, { headers })
+    const res = await fetch(`${base}/models`, { headers, signal })
     if (!res.ok) return null
     const data = (await res.json()) as { data?: { id: string }[] }
     return data.data?.[0]?.id ?? null
@@ -241,7 +246,11 @@ function extractArray(content: string): unknown | null {
  * reason per name. Returns null on ANY failure so the caller falls back to the
  * offline order. Pure read-only network call; nothing is mutated.
  */
-export async function rerank(names: NameResult[], cfg: JudgeConfig): Promise<RankedJudgment[] | null> {
+export async function rerank(
+  names: NameResult[],
+  cfg: JudgeConfig,
+  signal?: AbortSignal,
+): Promise<RankedJudgment[] | null> {
   if (!isJudgeReady(cfg)) return null
   if (names.length === 0) return []
 
@@ -250,7 +259,7 @@ export async function rerank(names: NameResult[], cfg: JudgeConfig): Promise<Ran
   const { base, headers } = baseAndHeaders(cfg)
 
   try {
-    const model = await resolveModel(cfg, base, headers)
+    const model = await resolveModel(cfg, base, headers, signal)
     if (!model) return null
     const key = JSON.stringify([
       cfg.provider,
@@ -264,6 +273,7 @@ export async function rerank(names: NameResult[], cfg: JudgeConfig): Promise<Ran
     const res = await fetch(`${base}/chat/completions`, {
       method: 'POST',
       headers,
+      signal,
       body: JSON.stringify({
         model,
         messages: [{ role: 'user', content: buildPrompt(template, labels) }],

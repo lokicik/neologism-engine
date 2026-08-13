@@ -1855,6 +1855,7 @@ body {
 .studio-meta { margin: 0; font-size: .85rem; color: var(--muted); }
 .studio-meta strong { color: var(--text); }
 .studio-est { font-variant-numeric: tabular-nums; }
+.studio-ranking-actions { display: flex; align-items: center; }
 .studio-alert {
   display: flex;
   align-items: center;

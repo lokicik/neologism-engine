@@ -6940,6 +6940,50 @@ one endpoint's controls with another endpoint's data.
 
 ---
 
+## Phase 215 — Cancel a stalled AI Studio ranking (2026-08-13)
+
+### Bottleneck
+
+AI Studio recovered truthfully after a provider returned an error, but it had no terminal path when
+`/models` or `/chat/completions` never settled. The local 24-name pool was already visible, yet the
+single-operation guard stayed active forever and every ranking/generation control remained busy.
+Inventing a global timeout would penalize legitimately slow local models without giving the user
+control.
+
+### Frozen boundary
+
+- While a network ranking is pending, expose one **Cancel ranking** action. It aborts the request,
+  invalidates that run id, preserves the displayed local or previously verified view, clears busy
+  state, and restores focus to the persistent metric that invoked it.
+- Treat cancellation as an explicit recoverable terminal state: the alert names the cancelled
+  metric and true displayed fallback, and the existing Retry uses the same pool and frozen
+  criterion under the current saved model configuration.
+- Thread one optional `AbortSignal` through local auto-model discovery and chat fetch. Component
+  unmount aborts the same owned request. Preserve provider payloads, cache identity, ranking order,
+  failure behavior, storage, taste, generation, and the one-active-operation guard. Add no timer,
+  polling, automatic retry, persisted state, or new provider.
+
+### Acceptance evidence
+
+The production fixture was red first: all 48 retained gates passed while the new held-provider gate
+failed because no cancellation action existed. The final fixture passes **56/56**. A keyboard-started
+ranking exposes one focus-visible cancel action beside the untouched 24-name pool; cancellation
+aborts the held request, ignores its released completion, reports the exact unranked fallback,
+removes every AI reason/pick, unlocks Generate, and restores Brandable focus. Retry sends the same
+24 names and criterion exactly once, then produces one complete verified Brandable view. Storage is
+byte-identical and the whole cycle remains contained at 390 pixels.
+
+The pure judge contract passes **10/10**, including an abort held inside blank-model localhost
+resolution: `/models` observes the signal and no chat request starts. The retained Studio taste
+fixture passes **5/5**. TypeScript and the production Vite build are green.
+
+### Decision
+
+Phase 215 replaces an unbounded busy dead end with user-owned cancellation while keeping slow-model
+policy, fallback truth, and retry ownership explicit.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

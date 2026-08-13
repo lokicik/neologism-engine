@@ -1,4 +1,4 @@
-// Phase 204/205/211/212/213 pure contract: judge result identity and local model
+// Phase 204/205/211/212/213/215 pure contract: judge result identity and local model
 // discovery stay aligned with the current request configuration.
 // Run with: node --experimental-strip-types e2e/judge-cache-check.ts
 import type { NameResult } from '../src/lib/engine.ts'
@@ -30,8 +30,21 @@ let discoveryModel = 'discovery-model-a'
 let discoveryLookups = 0
 let openRouterLookups = 0
 const canonicalEndpointUrls: string[] = []
+let modelResolutionAbortObserved = false
+let abortedResolutionChatCalls = 0
 globalThis.fetch = async (input, init) => {
   const url = String(input)
+  if (url.includes(':9040/')) {
+    if (url.endsWith('/models')) {
+      return new Promise<Response>((_resolve, reject) => {
+        init?.signal?.addEventListener('abort', () => {
+          modelResolutionAbortObserved = true
+          reject(new DOMException('fixture aborted', 'AbortError'))
+        }, { once: true })
+      })
+    }
+    abortedResolutionChatCalls++
+  }
   if (url.includes(':9030/')) canonicalEndpointUrls.push(url)
   if (url.endsWith('/models')) {
     if (url.includes(':9020/')) {
@@ -205,9 +218,24 @@ check(
   'localhost discovery and ranking share one trimmed trailing-slash-free request base',
 )
 
-if (checks !== 9 || failures > 0) {
-  console.error(`judge cache check: ${failures} failure(s), ${checks}/9 checks executed`)
+const abortController = new AbortController()
+const abortedResolution = rerank(names('AbortResolution'), {
+  enabled: true,
+  provider: 'localhost',
+  endpoint: 'http://127.0.0.1:9040/v1',
+  prompt: promptA,
+}, abortController.signal)
+abortController.abort()
+check(
+  await abortedResolution === null
+    && modelResolutionAbortObserved
+    && abortedResolutionChatCalls === 0,
+  'cancelling a blank-model localhost ranking aborts model resolution before chat starts',
+)
+
+if (checks !== 10 || failures > 0) {
+  console.error(`judge cache check: ${failures} failure(s), ${checks}/10 checks executed`)
   process.exitCode = 1
 } else {
-  console.log('judge cache check: 9/9 checks passed')
+  console.log('judge cache check: 10/10 checks passed')
 }
