@@ -120,6 +120,7 @@ export function Landing({ onEnter }: Props) {
 
   // --- Hero: decoded name from a prefetched queue --------------------------
   const [hero, setHero] = useState<NameResult | null>(null)
+  const [heroPaused, setHeroPaused] = useState(reducedMotion)
   const queueRef = useRef<NameResult[]>([])
   const seenRef = useRef<string[]>([])
   const { display, locked } = useDecode(hero?.name ?? '')
@@ -145,25 +146,30 @@ export function Landing({ onEnter }: Props) {
 
   useEffect(() => {
     let cancelled = false
-    let id: ReturnType<typeof setInterval> | undefined
 
     async function start() {
       await refill()
       if (cancelled) return
       const next = queueRef.current.shift()
       if (next) setHero(next)
-      id = setInterval(() => {
-        const n = queueRef.current.shift()
-        if (n) setHero(n)
-        if (queueRef.current.length < 4) void refill()
-      }, CYCLE_MS)
     }
     void start()
     return () => {
       cancelled = true
-      if (id) clearInterval(id)
     }
   }, [refill])
+
+  useEffect(() => {
+    if (heroPaused || !hero) return
+    const id = setTimeout(() => {
+      const next = queueRef.current.shift()
+      if (next) setHero(next)
+      if (queueRef.current.length < 4) void refill()
+    }, CYCLE_MS)
+    return () => {
+      clearTimeout(id)
+    }
+  }, [hero, heroPaused, refill])
 
   // --- Name wall background -------------------------------------------------
   const [wall, setWall] = useState<string[][]>([])
@@ -308,6 +314,14 @@ export function Landing({ onEnter }: Props) {
             <button className="landing-cta" onClick={(event) => onEnter(event.detail === 0)}>Find your name →</button>
             <button className="ghost-cta" onClick={scrollToSteps}>How it works ↓</button>
           </div>
+          <button
+            type="button"
+            className="hero-cycle-toggle"
+            aria-label={`${heroPaused ? 'Resume' : 'Pause'} rotating name examples`}
+            onClick={() => setHeroPaused((paused) => !paused)}
+          >
+            {heroPaused ? 'Resume name rotation' : 'Pause name rotation'}
+          </button>
         </div>
       </section>
 

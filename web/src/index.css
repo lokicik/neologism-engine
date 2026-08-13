@@ -189,6 +189,23 @@ body {
   opacity: .55;
 }
 
+.hero-cycle-toggle {
+  margin-top: -.8rem;
+  min-height: 32px;
+  padding: .35rem .7rem;
+  font-size: .72rem;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: color .15s, border-color .15s;
+}
+.hero-cycle-toggle:hover {
+  color: var(--text);
+  border-color: var(--border);
+}
+
 .hero-ctas {
   display: flex;
   align-items: center;

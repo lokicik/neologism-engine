@@ -11,7 +11,7 @@ const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 14
+const EXPECTED_CHECKS = 21
 
 const server = spawn(process.execPath, [viteCli, 'preview', '--port', String(PORT), '--strictPort'], {
   cwd: WEB_DIR,
@@ -97,8 +97,8 @@ try {
   const desktopRings = await landingFocusRings()
   if (!desktopRings.every((ring) => ring.ok)) console.log('INFO  390px Landing focus rings', desktopRings)
   check(
-    desktopRings.length === 8 && desktopRings.every((ring) => ring.ok),
-    '390px gives all eight Landing actions a contained 2px focus ring',
+    desktopRings.length === 9 && desktopRings.every((ring) => ring.ok),
+    '390px gives all nine Landing actions a contained 2px focus ring',
   )
   const group = page.locator('.tile-pills')
   await group.scrollIntoViewIfNeeded()
@@ -119,15 +119,95 @@ try {
   const compound = buttons.filter({ hasText: 'Compound' })
   await compound.click()
   check(await compound.getAttribute('aria-pressed') === 'true' && await respelled.getAttribute('aria-pressed') === 'false', 'pointer selection moves the same single pressed state to Compound')
+
+  const heroName = page.locator('.decode-name')
+  const heroToggle = page.locator('.hero-cycle-toggle')
+  await page.waitForFunction(() => document.querySelector('.decode-name')?.textContent?.trim())
+  await heroToggle.scrollIntoViewIfNeeded()
+  check(
+    await heroToggle.getAttribute('aria-pressed') === null
+      && await heroToggle.getAttribute('aria-label') === 'Pause rotating name examples',
+    'ordinary motion starts with one explicit Pause action without conflicting toggle semantics',
+  )
+  await heroToggle.click()
+  // Pause owns the next hero target; let any already-started 700ms letter
+  // decode finish before comparing the stable visible spelling.
+  await page.waitForTimeout(800)
+  const pausedName = (await heroName.textContent())?.trim()
+  await page.waitForTimeout(4000)
+  check(
+    (await heroName.textContent())?.trim() === pausedName
+      && await heroToggle.getAttribute('aria-label') === 'Resume rotating name examples'
+      && await heroToggle.evaluate((element) => document.activeElement === element),
+    'Pause keeps the current example stable beyond one interval and preserves the invoking control',
+  )
+  await heroToggle.click()
+  await page.waitForFunction(
+    (previous) => document.querySelector('.decode-name')?.textContent?.trim() !== previous,
+    pausedName,
+    { timeout: 5000 },
+  )
+  check(
+    await heroToggle.getAttribute('aria-label') === 'Pause rotating name examples'
+      && await heroToggle.evaluate((element) => document.activeElement === element),
+    'Resume restarts rotation after a full user-controlled pause and keeps focus on the toggle',
+  )
   await page.setViewportSize({ width: 320, height: 700 })
   const narrowRings = await landingFocusRings()
   if (!narrowRings.every((ring) => ring.ok)) console.log('INFO  320px Landing focus rings', narrowRings)
   check(
-    narrowRings.length === 8 && narrowRings.every((ring) => ring.ok),
-    '320px keeps all eight Landing focus rings fully visible',
+    narrowRings.length === 9 && narrowRings.every((ring) => ring.ok),
+    '320px keeps all nine Landing focus rings fully visible',
   )
   check(await storageSnapshot() === storageBefore && externalRequests.length === 0, 'demo selection leaves storage unchanged and sends zero external HTTPS requests')
   check(pageErrors.length === 0, 'keyboard and pointer selection produce zero page errors')
+
+  const reducedContext = await browser.newContext({
+    viewport: { width: 390, height: 844 },
+    reducedMotion: 'reduce',
+  })
+  const reducedPage = await reducedContext.newPage()
+  const reducedErrors = []
+  const reducedExternalRequests = []
+  reducedPage.on('pageerror', (error) => reducedErrors.push(error.message))
+  reducedPage.on('request', (request) => {
+    const url = new URL(request.url())
+    if (url.protocol === 'https:') reducedExternalRequests.push(request.url())
+  })
+  try {
+    await reducedPage.goto(APP_URL)
+    const hero = reducedPage.locator('.decode-name')
+    const toggle = reducedPage.locator('.hero-cycle-toggle')
+    await reducedPage.waitForFunction(() => document.querySelector('.decode-name')?.textContent?.trim())
+    const firstReducedName = (await hero.textContent())?.trim()
+    check(
+      await toggle.getAttribute('aria-pressed') === null
+        && await toggle.getAttribute('aria-label') === 'Resume rotating name examples',
+      'reduced-motion starts paused with one explicit Resume action and no conflicting pressed state',
+    )
+    await reducedPage.waitForTimeout(4400)
+    check(
+      (await hero.textContent())?.trim() === firstReducedName,
+      'reduced-motion keeps the first generated hero name stable beyond one rotation interval',
+    )
+    await toggle.click()
+    await reducedPage.waitForFunction(
+      (previous) => document.querySelector('.decode-name')?.textContent?.trim() !== previous,
+      firstReducedName,
+      { timeout: 5000 },
+    )
+    check(
+      await toggle.getAttribute('aria-label') === 'Pause rotating name examples'
+        && await toggle.evaluate((element) => document.activeElement === element),
+      'reduced-motion can explicitly resume the same local rotation without losing focus',
+    )
+    check(
+      reducedErrors.length === 0 && reducedExternalRequests.length === 0,
+      'reduced-motion Landing produces zero page errors or external HTTPS requests',
+    )
+  } finally {
+    await reducedContext.close()
+  }
   check(checks === EXPECTED_CHECKS - 1, `fixture executes exactly ${EXPECTED_CHECKS} checks`)
 } finally {
   await context.close()

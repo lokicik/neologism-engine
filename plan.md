@@ -7156,6 +7156,54 @@ and the complete evidence trail below them.
 
 ---
 
+## Phase 220 — Put the Landing hero rotation under user control (2026-08-13)
+
+### Bottleneck
+
+Landing already removed its letter-scramble, wall drift, tile entrance, and reveal animations for
+`prefers-reduced-motion`, but its generated hero spelling still changed automatically every 3.6
+seconds forever. No visible control could pause that auto-updating example, and reduced-motion users
+received the same continuing rotation after the initial no-scramble render.
+
+### Frozen boundary
+
+- Keep one locally generated hero example on first load. Ordinary motion may retain the existing
+  3.6-second rotation, but expose one visible native Pause/Resume button and preserve that button's
+  focus and announced action label across both states. Do not combine a changing action label with
+  conflicting `aria-pressed` toggle semantics.
+- Start reduced-motion visitors paused. They may explicitly resume; resumed names still render
+  without the existing scramble because the motion preference remains authoritative.
+- Pausing must cancel the pending rotation without changing the current target. Resuming waits a
+  full normal interval rather than replacing the spelling immediately.
+- Preserve the primary Landing focus contract: when navigation restores focus to the page heading,
+  the next Tab still reaches **Find your name**, not the secondary rotation control. Keep the new
+  control later in natural DOM order; add no focus trap or programmatic focus move.
+- Change no engine inputs/output, recent history, storage, network, routing, WASM, Rust, or other
+  Landing demos.
+
+### Acceptance evidence
+
+The expanded production fixture was red first: its 15 retained/new checks passed and only the
+reduced-motion stability gate failed because the first spelling changed after one rotation
+interval. The final `landing-demo-mode-state.mjs` passes **21/21**. It proves ordinary Pause keeps
+the decoded spelling stable beyond one interval, Resume restarts only after explicit activation,
+reduced motion starts paused but remains resumable, both states retain the invoking control, all
+nine Landing actions keep contained 2px rings at 390 and 320 pixels, storage stays byte-identical,
+and no external HTTPS request or page error appears.
+
+A retained navigation run initially caught the new control before the main CTA in DOM order. Moving
+it after the two hero actions restored the intended heading-to-CTA path. Landing/Create navigation
+passes **14/14** and the in-page How-it-works contract passes **15/15**. Production visual inspection
+at 320 pixels measured the final control at 32 pixels high, fully inside the viewport with a visible
+quiet border. TypeScript and the production Vite build are green; `git diff --check` is clean.
+
+### Decision
+
+The Landing hero can still demonstrate local variety, but it no longer owns an unstoppable visual
+update loop or ignores an explicit reduced-motion preference.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
