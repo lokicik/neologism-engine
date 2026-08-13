@@ -7391,6 +7391,49 @@ model-catalog lookup with an AI ranking or implying that the stored API key acco
 
 ---
 
+## Phase 225 — Scope Ollama CORS guidance to this app origin (2026-08-13)
+
+### Bottleneck
+
+The localhost Settings hint told every Ollama user to run with `OLLAMA_ORIGINS=*`. Ollama's official
+FAQ documents `OLLAMA_ORIGINS` as the way to add web origins and supports explicit origin patterns;
+opening every web origin was unnecessary for a browser client whose exact `location.origin` is
+already known at render time.
+
+### Frozen boundary
+
+- Keep the localhost endpoint, model discovery, OpenAI-compatible request shape, and provider
+  behavior unchanged. Replace only the wildcard setup instruction with
+  `OLLAMA_ORIGINS=<current app origin>` and tell the user to restart Ollama after changing it.
+- Render the actual runtime origin, including scheme and non-default port, rather than hard-coding
+  localhost, a development port, or a future deployment host.
+- Preserve the visible command as copyable text, but allow a safe line break between the variable
+  assignment and origin so a production/deployment URL cannot widen the 390-pixel modal.
+- Add no proxy, server mutation, automatic environment detection, clipboard action, network call,
+  storage write, new setting, provider fallback, or Rust/WASM change.
+
+### Acceptance evidence
+
+The production Settings fixture was red first at **58/59**: every Phase 224 network, API-key,
+keyboard, focus, model-list, refresh, and abort gate passed; only the retained wildcard guidance
+failed the new exact-origin assertion. Replacing it produced **59/59**, but direct 390-pixel visual
+inspection then found the unbroken `OLLAMA_ORIGINS=http://localhost:4215` code span widening the
+312-pixel modal and exposing a horizontal scrollbar.
+
+The final command retains the exact text while adding one semantic word-break opportunity. The
+strengthened `settings-keyboard.mjs` now passes **60/60**, including a 390-pixel hard gate that the
+modal's scroll width does not exceed its client width. Rebuilt production inspection measures both
+at **312 pixels**, the document remains inside its viewport, and the current origin is fully visible
+without a wildcard assignment. TypeScript and the production Vite build pass; `git diff --check`
+is clean.
+
+### Decision
+
+Local AI setup now follows least-privilege origin guidance without asking the app to configure or
+mutate Ollama, and its deployment-specific command remains usable on a narrow screen.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

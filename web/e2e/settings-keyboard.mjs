@@ -12,7 +12,7 @@ const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 58
+const EXPECTED_CHECKS = 60
 const FOCUSABLE = [
   'a[href]',
   'button:not([disabled])',
@@ -479,6 +479,17 @@ try {
 
   await openSettingsByKeyboard(page, trigger, dialog)
   await dialog.getByRole('radio', { name: 'Localhost (Ollama / llama.cpp)' }).check()
+  check(
+    (await dialog.locator('.settings-hint').first().textContent())?.replace(/\s+/g, ' ').trim()
+      === `Ollama: http://localhost:11434/v1 · llama.cpp: http://127.0.0.1:8080/v1. The browser needs CORS allowed. For Ollama, add this app origin instead of *: OLLAMA_ORIGINS=${APP_URL}. Restart Ollama after changing it.`,
+    'localhost guidance scopes Ollama CORS to the exact current app origin instead of a wildcard',
+  )
+  await page.setViewportSize({ width: 390, height: 844 })
+  check(
+    await dialog.evaluate((modal) => modal.scrollWidth <= modal.clientWidth + 1),
+    'origin-scoped Ollama guidance keeps the 390px Settings modal free of horizontal overflow',
+  )
+  await page.setViewportSize({ width: 1440, height: 1000 })
   await dialog.getByRole('textbox', { name: 'Endpoint' }).fill('http://127.0.0.1:9020/v1')
   const localCombo = dialog.getByRole('combobox', { name: 'Model' })
   await localCombo.focus()

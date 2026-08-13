@@ -508,8 +508,9 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
               {modelField('auto', '(blank = auto-detect)')}
               <p className="settings-hint">
                 Ollama: <code>http://localhost:11434/v1</code> · llama.cpp: <code>http://127.0.0.1:8080/v1</code>.
-                The browser needs CORS allowed — for Ollama run it with{' '}
-                <code>OLLAMA_ORIGINS=*</code>.
+                The browser needs CORS allowed. For Ollama, add this app origin instead of{' '}
+                <code>*</code>: <code>OLLAMA_ORIGINS=<wbr />{location.origin}</code>. Restart Ollama after
+                changing it.
               </p>
             </>
           )}
