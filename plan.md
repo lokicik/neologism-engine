@@ -7346,6 +7346,51 @@ feedback, Settings, and share recovery, without turning a recoverable preference
 
 ---
 
+## Phase 224 — Disclose Settings-owned model discovery (2026-08-13)
+
+### Bottleneck
+
+The Settings introduction said the app stayed fully offline by default and that AI ran only in AI
+Studio on demand. Ranking did obey that boundary, but an enabled Settings modal also automatically
+requested the selected provider's model list. The OpenRouter request was a public catalog read with
+no API-key header, yet the visible copy did not distinguish that Settings-owned network operation
+from the later key-bearing Studio ranking.
+
+### Frozen boundary
+
+- Keep provider/model discovery exactly as built. State in the dialog introduction that ranking
+  runs only in AI Studio on demand and that enabled Settings requests model choices from the
+  selected provider.
+- Under the OpenRouter key field, distinguish the two request classes: catalog discovery does not
+  include the key; AI Studio sends it straight to OpenRouter only when the user ranks.
+- Hard-gate both visible statements and the absence of an Authorization header on the intercepted
+  OpenRouter `/models` request. Preserve the existing key storage warning, public catalog cache,
+  localhost refresh, debounce/abort ownership, request URLs, ranking payloads, modal behavior,
+  storage schemas, generator, taste, WASM, and Rust.
+
+### Acceptance evidence
+
+The strengthened production Settings fixture was red first at **56/57** effective passes: every
+retained modal, focus, combobox, provider-refresh, request-count, and abort check passed, and the
+intercepted OpenRouter catalog request already carried no Authorization header; only the new
+truthful introductory copy was absent. After adding the separate key-field disclosure, the final
+`settings-keyboard.mjs` passes **58/58**.
+
+The matrix now proves the modal's accessible description names Settings model discovery, the
+OpenRouter hint separates catalog traffic from key-bearing ranking, one automatic catalog request
+is made, and its Authorization header is absent. All 55 retained keyboard, focus, 65-model capped
+combobox, localhost replacement, stale-option, and close-abort checks remain green. TypeScript and
+the production Vite build pass. At 390 pixels, direct production inspection measured the intro at
+48.6–327.0 pixels and the key hint at 65.2–295.5 pixels; both remain readable and contained inside
+the modal. `git diff --check` is clean.
+
+### Decision
+
+Settings now tells users about the network request it actually owns without conflating a public
+model-catalog lookup with an AI ranking or implying that the stored API key accompanies discovery.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

@@ -445,8 +445,8 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
         </div>
         <p className="settings-intro" id={settingsIntroId}>
           Configure the model the AI Studio uses to rank your names — OpenRouter (your key)
-          or a local server. The app stays fully offline by default; AI only runs in the AI
-          Studio, on demand.
+          or a local server. Ranking runs only in AI Studio, on demand. When AI is enabled,
+          Settings requests model choices from the selected provider.
         </p>
 
         <label className="settings-toggle">
@@ -490,7 +490,8 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
               <p className="settings-hint">
                 Free <code>:free</code> models work well here. Get a key at{' '}
                 <a href="https://openrouter.ai/keys" target="_blank" rel="noreferrer">openrouter.ai/keys</a>.
-                Your key is stored in this browser only and sent straight to OpenRouter.
+                Your key is stored in this browser only. Settings model-list requests do not include
+                it; AI Studio sends it straight to OpenRouter only when you rank.
               </p>
             </>
           ) : (

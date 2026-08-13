@@ -12,7 +12,7 @@ const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 55
+const EXPECTED_CHECKS = 58
 const FOCUSABLE = [
   'a[href]',
   'button:not([disabled])',
@@ -115,6 +115,7 @@ async function openSettingsByKeyboard(page, trigger, dialog) {
 }
 
 let modelRequests = 0
+let openRouterModelAuthorization = null
 let localModelRequests = 0
 let localModel = 'local/model-a'
 let replacementEndpointRequests = 0
@@ -137,6 +138,7 @@ try {
   }, { firstModel: FIRST_MODEL, passStub: PASS_STUB })
   await context.route('https://openrouter.ai/api/v1/models', async (route) => {
     modelRequests++
+    openRouterModelAuthorization = route.request().headers().authorization ?? null
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -206,6 +208,16 @@ try {
     Boolean(describedBy)
       && ((await dialog.locator(`#${describedBy}`).textContent()) ?? '').trim().length > 0,
     'dialog description resolves to visible introductory copy',
+  )
+  check(
+    ((await dialog.locator(`#${describedBy}`).textContent()) ?? '').replace(/\s+/g, ' ').trim()
+      === 'Configure the model the AI Studio uses to rank your names — OpenRouter (your key) or a local server. Ranking runs only in AI Studio, on demand. When AI is enabled, Settings requests model choices from the selected provider.',
+    'intro distinguishes on-demand Studio ranking from Settings model discovery',
+  )
+  check(
+    (await dialog.locator('.settings-hint').first().textContent())?.replace(/\s+/g, ' ').trim()
+      === 'Free :free models work well here. Get a key at openrouter.ai/keys. Your key is stored in this browser only. Settings model-list requests do not include it; AI Studio sends it straight to OpenRouter only when you rank.',
+    'OpenRouter hint distinguishes catalog discovery from key-bearing ranking',
   )
 
   const close = dialog.getByRole('button', { name: 'Close settings' })
@@ -460,6 +472,10 @@ try {
   check(await activeElementIs(trigger), 'Save close restores the exact Settings trigger')
 
   check(modelRequests === 1, 'fixture uses exactly one intercepted OpenRouter models request')
+  check(
+    openRouterModelAuthorization === null,
+    'the automatic OpenRouter model-catalog request carries no API-key authorization header',
+  )
 
   await openSettingsByKeyboard(page, trigger, dialog)
   await dialog.getByRole('radio', { name: 'Localhost (Ollama / llama.cpp)' }).check()
