@@ -7867,6 +7867,53 @@ behavior and export shape.
 
 ---
 
+## Phase 236 — Validate persisted reference names on read (2026-08-13)
+
+### Bottleneck
+
+Advanced **Names you like** enforced a 240-unit field/write cap and made each edit durable before
+changing the local profile, but `loadTasteReferences` returned the raw storage string without any
+validation. A parseable value written outside the UI could therefore exceed the controlled input's
+own maximum or contain an unpaired surrogate. It became the visible input and reference-profile
+source immediately on startup even though the app itself could never persist that state through its
+normal writer.
+
+### Frozen boundary
+
+- Match the read boundary to the existing writer and HTML input: accept only well-formed Unicode
+  whose JavaScript length is at most 240 UTF-16 units. Preserve the storage key, controlled field,
+  parsing, eight-reference cap, profile/ranking behavior, write-first state transition, and error UI.
+- Fail closed to an empty active reference string. Do not truncate, sanitize, repair, rewrite, or
+  delete the raw value on read; the next explicit successful edit remains the only recovery write.
+- Extend the existing reference-storage production owner. Keep its rejected-write/retry/focus
+  contract, use `Linear🚀` to prove a valid surrogate pair survives write and reload, then separately
+  seed one lone surrogate and a 241-unit string.
+
+### Acceptance evidence
+
+The strengthened owner was red first at **13/15**. All existing persist-before-profile, failure,
+focus, retry, and reload checks passed, including the valid `Linear🚀` value. Only the malformed and
+oversized startup records loaded into Advanced instead of failing closed.
+
+`loadTasteReferences` now returns the raw string only when it is within the same 240-unit limit and
+passes the shared well-formed Unicode predicate. The rebuilt production owner passes **15/15**:
+`Vercel, Linear🚀` begins as an active 2/3 profile, the rejected expansion stays unchanged, the
+successful `Vercel, Linear🚀, Notion` retry reaches 3/3 and survives reload, while the lone-surrogate
+and 241-unit records both show an empty 0/3 active state. Their original localStorage values remain
+byte-identical. The run has zero page errors and external HTTPS requests.
+
+Retained production matrices pass at **51/51** for CommandBar keyboard/responsive behavior and **64**
+PASS outcomes for the complete share/taste/reference flow. TypeScript and the Vite production build
+pass.
+
+### Decision
+
+The reference profile can no longer start from a value the app's own input/writer would reject.
+Valid Unicode references keep their exact persistence semantics, and malformed raw data is neither
+activated nor silently destroyed.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

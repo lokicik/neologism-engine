@@ -13,9 +13,9 @@ const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const SHOTS = join(E2E_DIR, 'shots')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 13
-const OLD_REFERENCES = 'Vercel, Linear'
-const NEW_REFERENCES = 'Vercel, Linear, Notion'
+const EXPECTED_CHECKS = 15
+const OLD_REFERENCES = 'Vercel, Linear🚀'
+const NEW_REFERENCES = 'Vercel, Linear🚀, Notion'
 
 mkdirSync(SHOTS, { recursive: true })
 const server = spawn(process.execPath, [viteCli, 'preview', '--port', String(PORT), '--strictPort'], {
@@ -158,6 +158,46 @@ try {
     Object.fromEntries(Object.entries(localStorage).filter(([key]) => key !== 'neologism:taste-references')),
   ))
   check(storageAfter === storageBefore, 'reference failure and retry leave every other local key byte-identical')
+
+  const corruptContext = await browser.newContext({ viewport: { width: 390, height: 844 } })
+  await corruptContext.addInitScript(() => {
+    if (localStorage.getItem('phase236:seeded') !== '1') {
+      localStorage.setItem('neologism:visited', '1')
+      localStorage.setItem('neologism:taste-references', 'Vercel\uD83D')
+      localStorage.setItem('phase236:seeded', '1')
+    }
+  })
+  await corruptContext.route('https://**/*', async (route) => {
+    external.push(route.request().url())
+    await route.abort()
+  })
+  const corruptPage = await corruptContext.newPage()
+  corruptPage.on('pageerror', (error) => pageErrors.push(error.message))
+  await corruptPage.goto(APP_URL)
+  await corruptPage.getByRole('button', { name: /Advanced filters/ }).click()
+  const corruptInput = corruptPage.getByRole('group', { name: 'Advanced filters' })
+    .getByPlaceholder('Vercel, Linear, Notion')
+  check(
+    await corruptInput.inputValue() === ''
+      && (await corruptPage.locator('.menu-progress').textContent())?.trim() === '0/3'
+      && await corruptPage.evaluate(() => localStorage.getItem('neologism:taste-references')) === 'Vercel\uD83D',
+    'an ill-formed persisted reference fails closed without rewriting its raw recovery copy',
+  )
+
+  const oversizedReferences = 'V'.repeat(241)
+  await corruptPage.evaluate((value) => {
+    localStorage.setItem('neologism:taste-references', value)
+  }, oversizedReferences)
+  await corruptPage.reload()
+  await corruptPage.getByRole('button', { name: /Advanced filters/ }).click()
+  check(
+    await corruptPage.getByRole('group', { name: 'Advanced filters' })
+      .getByPlaceholder('Vercel, Linear, Notion').inputValue() === ''
+      && await corruptPage.evaluate(() => localStorage.getItem('neologism:taste-references')) === oversizedReferences,
+    'an oversized persisted reference fails closed at the write limit without destructive truncation',
+  )
+  await corruptContext.close()
+
   check(external.length === 0, `reference editing produces zero external HTTPS requests (${external.join(' | ')})`)
   check(pageErrors.length === 0, `reference failure and retry produce no page errors (${pageErrors.join(' | ')})`)
 } finally {

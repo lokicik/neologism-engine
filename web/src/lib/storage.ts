@@ -278,7 +278,12 @@ export function removeSavedEverywhere(
 // ranker. They are deliberately stored separately from explicit likes/passes.
 export function loadTasteReferences(): string {
   try {
-    return localStorage.getItem(TASTE_REFERENCES_KEY) ?? ''
+    const value = localStorage.getItem(TASTE_REFERENCES_KEY)
+    return value !== null
+      && value.length <= MAX_TASTE_REFERENCE_INPUT
+      && isWellFormedUnicode(value)
+      ? value
+      : ''
   } catch {
     return ''
   }
