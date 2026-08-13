@@ -120,7 +120,7 @@ export function Landing({ onEnter }: Props) {
 
   // --- Hero: decoded name from a prefetched queue --------------------------
   const [hero, setHero] = useState<NameResult | null>(null)
-  const [heroPaused, setHeroPaused] = useState(reducedMotion)
+  const [nameMotionPaused, setNameMotionPaused] = useState(reducedMotion)
   const queueRef = useRef<NameResult[]>([])
   const seenRef = useRef<string[]>([])
   const { display, locked } = useDecode(hero?.name ?? '')
@@ -160,7 +160,7 @@ export function Landing({ onEnter }: Props) {
   }, [refill])
 
   useEffect(() => {
-    if (heroPaused || !hero) return
+    if (nameMotionPaused || !hero) return
     const id = setTimeout(() => {
       const next = queueRef.current.shift()
       if (next) setHero(next)
@@ -169,7 +169,7 @@ export function Landing({ onEnter }: Props) {
     return () => {
       clearTimeout(id)
     }
-  }, [hero, heroPaused, refill])
+  }, [hero, nameMotionPaused, refill])
 
   // --- Name wall background -------------------------------------------------
   const [wall, setWall] = useState<string[][]>([])
@@ -257,7 +257,11 @@ export function Landing({ onEnter }: Props) {
   }
 
   return (
-    <div className="landing" ref={rootRef}>
+    <div
+      className="landing"
+      ref={rootRef}
+      data-name-motion={nameMotionPaused ? 'paused' : 'running'}
+    >
       <nav className="landing-nav">
         <span className="wordmark">◈ neologism</span>
         <button className="nav-cta" onClick={(event) => onEnter(event.detail === 0)}>Open app →</button>
@@ -317,10 +321,10 @@ export function Landing({ onEnter }: Props) {
           <button
             type="button"
             className="hero-cycle-toggle"
-            aria-label={`${heroPaused ? 'Resume' : 'Pause'} rotating name examples`}
-            onClick={() => setHeroPaused((paused) => !paused)}
+            aria-label={`${nameMotionPaused ? 'Resume' : 'Pause'} moving name examples`}
+            onClick={() => setNameMotionPaused((paused) => !paused)}
           >
-            {heroPaused ? 'Resume name rotation' : 'Pause name rotation'}
+            {nameMotionPaused ? 'Resume name motion' : 'Pause name motion'}
           </button>
         </div>
       </section>

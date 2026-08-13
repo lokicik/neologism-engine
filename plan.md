@@ -7204,6 +7204,56 @@ update loop or ignores an explicit reduced-motion preference.
 
 ---
 
+## Phase 221 — Make Pause own all Landing name motion (2026-08-13)
+
+### Bottleneck
+
+Phase 220 stopped the 3.6-second hero spelling rotation, but the four generated name-wall rows
+behind that same hero continued drifting on 80–125-second infinite animations. The visible control
+therefore stopped one name-motion layer while an equally automatic layer kept moving. At 320×700,
+moving the control after the main CTAs had also pushed it below the first viewport for longer
+two-line metadata, so the motion stop was not immediately discoverable.
+
+### Frozen boundary
+
+- Rename the action from hero “rotation” to name “motion.” One existing state owns both the hero
+  timer and the four wall tracks; Pause freezes all current targets/positions, and Resume restarts
+  ordinary motion without replacing the hero name immediately.
+- Express the wall state through one Landing data attribute and scoped `animation-play-state` rule.
+  Do not inspect or manipulate transforms, restart animations from their origin, or add another
+  timer/control.
+- Preserve reduced-motion authority: the existing media query keeps wall `animation-name: none`
+  even after the visitor explicitly resumes hero-name changes.
+- At widths up to 640 pixels and heights up to 760 pixels only, compact hero gaps/padding enough to
+  expose the full 32-pixel control plus its 2-pixel ring and 2-pixel offset without scrolling. Keep
+  the natural heading → Find your name → How it works → motion-control DOM/Tab order.
+- Change no generation input/output, wall contents, navigation, storage, network, recent history,
+  WASM, Rust, or other Landing demos.
+
+### Acceptance evidence
+
+The strengthened Phase 220 fixture was red first: **20/21** checks passed and only Pause failed
+because the first wall track still reported `animation-play-state: running`. After binding the wall
+to the same state, the production behavior passed, but visual inspection exposed the control at
+756.6–788.6 pixels in a 700-pixel viewport. The new visibility gate was then red at **21/22**.
+
+The final `landing-demo-mode-state.mjs` passes **22/22**. It proves all four wall tracks pause and
+resume with the hero action, reduced motion keeps `animation-name: none` after explicit Resume, the
+320-pixel control and its four-pixel ring clearance are initially visible, all nine Landing rings
+remain contained, storage stays byte-identical, and no external HTTPS request or page error occurs.
+The final 320×700 production measurement places the 32-pixel control at 660.6–692.6 pixels; direct
+inspection after Pause reports the Landing state `paused` and four `paused` wall tracks.
+
+Landing/Create navigation remains **14/14**, How-it-works focus remains **15/15**, and TypeScript
+plus the production Vite build are green. `git diff --check` is clean.
+
+### Decision
+
+Landing now has one truthful, immediately discoverable stop for every continuing generated-name
+motion layer, while reduced-motion preference remains stronger than an optional hero Resume.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

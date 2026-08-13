@@ -11,7 +11,7 @@ const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 21
+const EXPECTED_CHECKS = 22
 
 const server = spawn(process.execPath, [viteCli, 'preview', '--port', String(PORT), '--strictPort'], {
   cwd: WEB_DIR,
@@ -122,11 +122,12 @@ try {
 
   const heroName = page.locator('.decode-name')
   const heroToggle = page.locator('.hero-cycle-toggle')
+  const wallTrack = page.locator('.wall-track').first()
   await page.waitForFunction(() => document.querySelector('.decode-name')?.textContent?.trim())
   await heroToggle.scrollIntoViewIfNeeded()
   check(
     await heroToggle.getAttribute('aria-pressed') === null
-      && await heroToggle.getAttribute('aria-label') === 'Pause rotating name examples',
+      && await heroToggle.getAttribute('aria-label') === 'Pause moving name examples',
     'ordinary motion starts with one explicit Pause action without conflicting toggle semantics',
   )
   await heroToggle.click()
@@ -137,9 +138,10 @@ try {
   await page.waitForTimeout(4000)
   check(
     (await heroName.textContent())?.trim() === pausedName
-      && await heroToggle.getAttribute('aria-label') === 'Resume rotating name examples'
-      && await heroToggle.evaluate((element) => document.activeElement === element),
-    'Pause keeps the current example stable beyond one interval and preserves the invoking control',
+      && await heroToggle.getAttribute('aria-label') === 'Resume moving name examples'
+      && await heroToggle.evaluate((element) => document.activeElement === element)
+      && await wallTrack.evaluate((element) => getComputedStyle(element).animationPlayState === 'paused'),
+    'Pause keeps the current hero and wall motion stable while preserving the invoking control',
   )
   await heroToggle.click()
   await page.waitForFunction(
@@ -148,11 +150,24 @@ try {
     { timeout: 5000 },
   )
   check(
-    await heroToggle.getAttribute('aria-label') === 'Pause rotating name examples'
-      && await heroToggle.evaluate((element) => document.activeElement === element),
-    'Resume restarts rotation after a full user-controlled pause and keeps focus on the toggle',
+    await heroToggle.getAttribute('aria-label') === 'Pause moving name examples'
+      && await heroToggle.evaluate((element) => document.activeElement === element)
+      && await wallTrack.evaluate((element) => getComputedStyle(element).animationPlayState === 'running'),
+    'Resume restarts ordinary name motion after a full pause and keeps focus on the toggle',
   )
   await page.setViewportSize({ width: 320, height: 700 })
+  await page.evaluate(() => scrollTo(0, 0))
+  check(
+    await heroToggle.evaluate((element) => {
+      const rect = element.getBoundingClientRect()
+      const ring = 4 // Landing's 2px focus ring plus its 2px outline offset.
+      return rect.top - ring >= 0
+        && rect.bottom + ring <= innerHeight
+        && rect.left - ring >= 0
+        && rect.right + ring <= innerWidth
+    }),
+    '320px initially exposes the full motion-control focus ring without scrolling',
+  )
   const narrowRings = await landingFocusRings()
   if (!narrowRings.every((ring) => ring.ok)) console.log('INFO  320px Landing focus rings', narrowRings)
   check(
@@ -182,7 +197,7 @@ try {
     const firstReducedName = (await hero.textContent())?.trim()
     check(
       await toggle.getAttribute('aria-pressed') === null
-        && await toggle.getAttribute('aria-label') === 'Resume rotating name examples',
+        && await toggle.getAttribute('aria-label') === 'Resume moving name examples',
       'reduced-motion starts paused with one explicit Resume action and no conflicting pressed state',
     )
     await reducedPage.waitForTimeout(4400)
@@ -197,9 +212,10 @@ try {
       { timeout: 5000 },
     )
     check(
-      await toggle.getAttribute('aria-label') === 'Pause rotating name examples'
-        && await toggle.evaluate((element) => document.activeElement === element),
-      'reduced-motion can explicitly resume the same local rotation without losing focus',
+      await toggle.getAttribute('aria-label') === 'Pause moving name examples'
+        && await toggle.evaluate((element) => document.activeElement === element)
+        && await reducedPage.locator('.wall-track').first().evaluate((element) => getComputedStyle(element).animationName === 'none'),
+      'reduced-motion can resume hero rotation without restarting wall motion or losing focus',
     )
     check(
       reducedErrors.length === 0 && reducedExternalRequests.length === 0,

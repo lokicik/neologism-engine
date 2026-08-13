@@ -271,6 +271,7 @@ body {
 .wall-row-1 .wall-track { animation-duration: 110s; animation-direction: reverse; }
 .wall-row-2 .wall-track { animation-duration: 95s; }
 .wall-row-3 .wall-track { animation-duration: 125s; animation-direction: reverse; }
+.landing[data-name-motion='paused'] .wall-track { animation-play-state: paused; }
 
 @keyframes wall-drift {
   from { transform: translateX(0); }
@@ -470,6 +471,12 @@ body {
   .landing-title { max-width: calc(100vw - 2rem); }
   .wall-name { font-size: 1.1rem; }
   .landing-footer { justify-content: center; text-align: center; }
+}
+
+@media (max-width: 640px) and (max-height: 760px) {
+  .hero-content { gap: .8rem; padding: 2rem 0 1.5rem; }
+  .decode-stage { gap: .35rem; min-height: 8.5rem; }
+  .hero-ctas { gap: .5rem; }
 }
 
 
