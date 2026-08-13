@@ -34,9 +34,23 @@ const INVALID_ROWS = [
   { ...result('BadConnotations'), connotations: [17] },
   { ...result('BadStyle'), style: 'unknown' },
   { ...result('BadName'), name: 42 },
+  result('Broken\uD83D'),
+  result('Broken\uDE80'),
 ]
-const FAVORITES_RAW = JSON.stringify([VALID_LIKES[0], INVALID_ROWS[0], VALID_LIKES[1], INVALID_ROWS[1]])
-const REJECTED_RAW = JSON.stringify([VALID_PASSES[0], INVALID_ROWS[2], VALID_PASSES[1], INVALID_ROWS[3]])
+const FAVORITES_RAW = JSON.stringify([
+  VALID_LIKES[0],
+  INVALID_ROWS[0],
+  VALID_LIKES[1],
+  INVALID_ROWS[1],
+  INVALID_ROWS[4],
+])
+const REJECTED_RAW = JSON.stringify([
+  VALID_PASSES[0],
+  INVALID_ROWS[2],
+  VALID_PASSES[1],
+  INVALID_ROWS[3],
+  INVALID_ROWS[5],
+])
 
 const server = spawn(process.execPath, [viteCli, 'preview', '--port', String(PORT), '--strictPort'], {
   cwd: WEB_DIR,

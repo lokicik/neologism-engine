@@ -1,4 +1,5 @@
 import type { NameResult, Style } from './engine'
+import { isWellFormedUnicode } from './unicode.ts'
 
 const SHARE_STYLES = new Set<Style>(['big_tech', 'sci_fi', 'fantasy'])
 export const MAX_SHARE_NAMES = 200
@@ -52,6 +53,7 @@ export function decodeShareUrl(): Array<{ name: string; style: Style }> {
         && (item as { n: string }).n.trim().length > 0
         && (item as { n: string }).n.trim().length <= MAX_SHARE_NAME_LENGTH
         && !/[\u0000-\u001f\u007f]/.test((item as { n: string }).n)
+        && isWellFormedUnicode((item as { n: string }).n)
         && SHARE_STYLES.has((item as { s: Style }).s)
       ))
       .map((item) => ({ name: item.n.trim(), style: item.s }))

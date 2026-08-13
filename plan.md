@@ -7723,6 +7723,53 @@ remain untouched and inspectable.
 
 ---
 
+## Phase 233 — Reject ill-formed Unicode input rows (2026-08-13)
+
+### Bottleneck
+
+Phase 231 kept valid astral characters intact when deriving a two-code-point monogram, and Phase
+232 unified canonically equivalent spelling keys. Neither boundary rejected an already ill-formed
+JavaScript string. JSON can represent a lone UTF-16 high or low surrogate, so a crafted share hash
+or parseable browser-storage row could still reach Saved as a replacement glyph. The same exact
+old-share shape could also enter the legacy share-stub migration.
+
+### Frozen boundary
+
+- Reject only strings containing an unpaired UTF-16 surrogate at the external share decoder,
+  stored `NameResult` reader, and exact legacy share-stub predicate. Preserve valid surrogate pairs,
+  including astral emoji, every displayed/exported spelling, NFC comparison identity, limits,
+  schemas, storage keys, and all generator/ranker output.
+- Use one deterministic code-unit validator rather than depending on a newer runtime's optional
+  `String.prototype.isWellFormed`. This is a well-formed UTF-16 guarantee, not grapheme, script,
+  language, or aesthetic validation.
+- Keep reads non-destructive. Invalid stored rows are ignored in memory; their raw arrays are not
+  rewritten. Preserve the existing explicitly documented legacy share-stub migration as the only
+  read-side write path.
+
+### Acceptance evidence
+
+The new share assertion was red first: both lone-surrogate rows survived decoding beside a valid
+`Rocket🚀` row. The legacy migration predicate likewise accepted a lone trailing high surrogate.
+The first helper implementation exposed a separate end-of-string edge because `charCodeAt` returns
+`NaN` beyond the string; an explicit final-unit guard closed that case before the green run.
+
+The pure share contract now passes **10/10** and rejects lone high/low surrogates while preserving
+the valid astral pair. Storage identity remains **32/32**, including the exact historical-stub
+rejection. On the rebuilt production bundle, the corruption fixture mixes both malformed Unicode
+forms into valid historical and scoped likes/passes and passes **13/13**: Saved, Settings, matched
+evidence, v2 export, and personalized Create see only valid rows, the raw arrays remain byte-identical,
+and there are zero page errors or external HTTPS requests. The retained full share/taste owner flow
+completes with **64** PASS outcomes, including the accepted `A🚀` spelling and monogram. TypeScript
+and the Vite production build pass.
+
+### Decision
+
+Parseable but ill-formed Unicode can no longer cross the share or persisted-name acceptance
+boundaries. Valid Unicode behavior from Phases 231–232 remains unchanged, and no stored data is
+silently repaired or rewritten.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

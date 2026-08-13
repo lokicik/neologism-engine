@@ -13,6 +13,7 @@ import {
   type TasteLabel,
   type TasteToggleResult,
 } from './taste-identity'
+import { isWellFormedUnicode } from './unicode.ts'
 
 export { mergeSavedNames } from './taste-identity'
 
@@ -47,6 +48,7 @@ function isStoredNameResult(value: unknown): value is NameResult {
     && row.name.trim().length > 0
     && row.name.trim().length <= 80
     && !/[\u0000-\u001f\u007f]/.test(row.name)
+    && isWellFormedUnicode(row.name)
     && (row.style === 'big_tech' || row.style === 'sci_fi' || row.style === 'fantasy')
     && typeof row.syllables === 'number'
     && Number.isFinite(row.syllables)

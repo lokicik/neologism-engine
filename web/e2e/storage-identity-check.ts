@@ -293,7 +293,8 @@ check(
   isLegacyShareStub(importedNoma)
     && !isLegacyShareStub(legacy)
     && !isLegacyShareStub({ ...importedNoma, tasteContext: projectA.tasteContext })
-    && !isLegacyShareStub({ ...importedNoma, sourceMode: 'brandable' }),
+    && !isLegacyShareStub({ ...importedNoma, sourceMode: 'brandable' })
+    && !isLegacyShareStub(shareStub('Broken\uD83D')),
   'only the exact historical unscoped share shape is migration-eligible',
 )
 

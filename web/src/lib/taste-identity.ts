@@ -1,4 +1,5 @@
 import type { NameResult } from './engine'
+import { isWellFormedUnicode } from './unicode.ts'
 
 export function normalizedName(item: NameResult): string {
   return item.name.trim().toLowerCase().normalize('NFC')
@@ -26,6 +27,7 @@ export function isLegacyShareStub(item: unknown): item is NameResult {
     && row.name.trim().length > 0
     && row.name.trim().length <= 80
     && !/[\u0000-\u001f\u007f]/.test(row.name)
+    && isWellFormedUnicode(row.name)
     && (row.style === 'big_tech' || row.style === 'sci_fi' || row.style === 'fantasy')
     && row.syllables === 0
     && row.score_pronounce === 0

@@ -17,7 +17,10 @@ function check(ok: boolean, message: string): void {
 }
 
 function setPayload(value: unknown): void {
-  fakeLocation.hash = `#names=${btoa(JSON.stringify(value))}`
+  const asciiJson = JSON.stringify(value).replace(/[^\u0000-\u007e]/g, (character) => (
+    `\\u${character.charCodeAt(0).toString(16).padStart(4, '0')}`
+  ))
+  fakeLocation.hash = `#names=${btoa(asciiJson)}`
 }
 
 setPayload([
@@ -34,6 +37,18 @@ check(
     { name: 'Mythra', style: 'fantasy' },
   ]),
   'share decoding trims valid rows and discards malformed or unsafe rows',
+)
+
+setPayload([
+  { n: 'Broken\uD83D', s: 'big_tech' },
+  { n: 'Broken\uDE80', s: 'big_tech' },
+  { n: 'Rocket🚀', s: 'big_tech' },
+])
+check(
+  JSON.stringify(decodeShareUrl()) === JSON.stringify([
+    { name: 'Rocket🚀', style: 'big_tech' },
+  ]),
+  'share decoding rejects unpaired surrogates while preserving a valid astral pair',
 )
 
 setPayload(Array.from({ length: 205 }, (_, index) => ({ n: `Name${index}`, s: 'big_tech' })))
