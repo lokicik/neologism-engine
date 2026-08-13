@@ -1,11 +1,22 @@
-# Neologism Engine — Future Options (not yet built)
+# Neologism Engine — Roadmap, decisions, and build history
 
-The engine is complete through phase 18 (overlap blending + MMR diversity). The grounded,
-high-value engine work is done. This document records the **remaining options** with honest
-advantages and disadvantages, so a future decision is informed. None of these are implemented.
+This file opens with the original post-Phase-18 options and then records what was actually tried,
+shipped, rejected, or deferred through Phase 219. The option descriptions and effort estimates in
+items 3–6 are retained as historical decision context; the old claim that none were implemented is
+no longer current.
 
-> Quick orientation: items 1–2 (overlap blending, MMR diversity) are **already built**. The
-> items below are 3–6 from the research report.
+> Current orientation (2026-08-13): items 1–2 (overlap blending and MMR diversity) were already
+> built before this snapshot. Item 3 remains an unbuilt, low-priority metric refinement. Item 4's
+> full reference-conditioned onset–nucleus–coda generator remains unbuilt; Phases 142–143 rejected
+> narrower spelling-profile and exact orthographic-template proxies, not that broader capability.
+> Item 5's neural **generation** remains out of scope; the shipped optional AI Studio ranks names
+> that the offline engine already generated. Item 6 is partial: deterministic monograms and
+> explicit domain evidence plus manual provider/trademark links are built, and `netlify.toml`
+> contains a build recipe. This repository snapshot does not prove a live deployment; generated
+> image logos, automated social-handle checks, and language flavors remain unbuilt.
+
+> The items immediately below are 3–6 from the original research report. Later phase entries are
+> the authoritative implementation and experiment record.
 
 ---
 
@@ -7103,6 +7114,45 @@ are green.
 
 Phase 218 treats the share URL as a recovery token for the whole first-entry transaction rather
 than only the imported-names key.
+
+---
+
+## Phase 219 — Refresh the roadmap orientation against the built product (2026-08-13)
+
+### Bottleneck
+
+The canonical plan still opened as “Future Options (not yet built),” said the engine was complete
+through Phase 18, and claimed none of items 3–6 were implemented. The same file now reaches Phase
+219, so that introduction could send the next audit toward work that already shipped or make an
+experiment rejection sound broader than its evidence.
+
+### Frozen boundary
+
+- Preserve the original option descriptions, advantages, disadvantages, effort estimates, and all
+  phase history. Change only the orientation that tells a reader how to interpret them today.
+- Distinguish the unbuilt Wuggy-style capability from the narrower Phase 142 spelling-profile and
+  Phase 143 orthographic-template rejections. Distinguish neural generation from AI Studio's
+  optional ranking of an offline-generated pool.
+- Record only repository-verifiable productization: deterministic monograms, explicit domain
+  observations, manual provider/trademark links, and the Netlify build recipe. Do not infer that a
+  live deployment exists, or call manual links automated availability or clearance.
+- Change no code, dependencies, runtime behavior, generated data, tests, or user-owned Rust files.
+
+### Acceptance evidence
+
+The refreshed introduction agrees with the current scoring implementation (heuristic CV-based
+pronounceability), the Phase 142–143 decisions, the Phase 42 monogram, the Phase 56 AI Studio
+boundary, the Phase 146 Name checks boundary, and the checked-in `netlify.toml`. Targeted searches
+find no Wuggy-style subsyllabic generator, neural generator, generated-image logo service,
+automated social-handle checker, or repository evidence of a live deployment.
+
+`git diff --check` is clean. This documentation-only phase leaves the production build and every
+retained runtime gate unchanged by construction.
+
+### Decision
+
+The plan now starts as a current navigation surface while retaining its original research options
+and the complete evidence trail below them.
 
 ---
 
