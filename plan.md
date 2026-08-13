@@ -7300,6 +7300,52 @@ later removal into an implicit request to animate again.
 
 ---
 
+## Phase 223 — Report ordinary first-visit persistence failure (2026-08-13)
+
+### Bottleneck
+
+Phase 218 made the share URL a recovery copy when either its imported shortlist or the existing
+`neologism:visited` marker could not be stored. It deliberately left ordinary Landing entry on its
+historical fallback: `markVisited()` returned `false`, Create still opened, and the result was
+ignored. A visitor whose browser rejected that write therefore saw a working app with no
+explanation that a later root visit could show the welcome page again.
+
+### Frozen boundary
+
+- Consume the existing `markVisited()` boolean only in ordinary Landing entry. A failed write must
+  still open Create and retain the keyboard brief-field focus, but expose one exact session-only
+  alert.
+- Describe the real navigation boundary: reloading the current history entry may remain in Create,
+  while a new root visit falls back to Landing until the marker is durably present. Do not claim
+  that every reload returns to Landing.
+- Preserve the visited key/helper, history state and push behavior, share-import recovery token,
+  landing controls, generation, storage schemas, network behavior, WASM, and Rust. Add no retry
+  timer, new persistence record, blocking modal, or forced pointer focus.
+
+### Acceptance evidence
+
+The production fixture was red first after all **12** retained navigation checks passed: the new
+first-visit storage rejection produced no alert, and waiting for one timed out. The first repair
+then reached **17/18**, exposing an incorrect test assumption that a same-entry reload must return
+to Landing. Current history state truthfully kept that reload in Create, while a separate root visit
+returned to Landing because the marker was absent; the message and gate were narrowed to that
+actual boundary.
+
+The final `landing-navigation-focus.mjs` passes **20/20**. It proves successful keyboard/pointer
+navigation is unchanged, a rejected marker still opens Create with the brief field focused, exactly
+one visible alert names the later-visit consequence, no durable marker is claimed, the same history
+entry survives reload, a later root visit returns to Landing, and the full matrix produces zero page
+errors. The retained Landing motion/reduced-motion fixture passes **24/24**, and the independent
+share-import/visited recovery contract remains **13/13**. TypeScript and the production Vite build
+are green; `git diff --check` is clean.
+
+### Decision
+
+Ordinary entry now reports the same storage truth the product already applies to recent history,
+feedback, Settings, and share recovery, without turning a recoverable preference write into a gate.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

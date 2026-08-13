@@ -11,7 +11,7 @@ const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 14
+const EXPECTED_CHECKS = 20
 
 const server = spawn(process.execPath, [viteCli, 'preview', '--port', String(PORT), '--strictPort'], {
   cwd: WEB_DIR,
@@ -130,6 +130,50 @@ try {
   check(await pointerTitle.evaluate((element) => document.activeElement !== element), 'pointer About navigation does not force heading focus')
   check(await pointerPage.evaluate(() => scrollX === 0), 'pointer view changes keep the 390px viewport horizontally stable')
   await pointerContext.close()
+
+  const failedVisitContext = await browser.newContext({ viewport: { width: 390, height: 844 } })
+  await failedVisitContext.addInitScript(() => {
+    const nativeSetItem = Storage.prototype.setItem
+    Storage.prototype.setItem = function setItem(key, value) {
+      if (this === localStorage && key === 'neologism:visited') {
+        throw new DOMException('Landing visit fixture rejection', 'QuotaExceededError')
+      }
+      nativeSetItem.call(this, key, value)
+    }
+  })
+  const failedVisitPage = await failedVisitContext.newPage()
+  failedVisitPage.on('pageerror', (error) => pageErrors.push(error.message))
+  await failedVisitPage.goto(APP_URL)
+  await failedVisitPage.getByRole('button', { name: 'Open app' }).focus()
+  await failedVisitPage.keyboard.press('Enter')
+  const failedVisitInput = failedVisitPage.locator('.command-input')
+  await failedVisitInput.waitFor({ state: 'visible' })
+  check(
+    await failedVisitInput.evaluate((element) => document.activeElement === element),
+    'failed first-visit persistence retains the keyboard Create focus handoff',
+  )
+  check(await failedVisitPage.getByRole('alert').count() === 1, 'failed first-visit persistence exposes one visible alert')
+  check(
+    (await failedVisitPage.getByRole('alert').textContent())?.trim()
+      === 'Could not remember this visit. The app still works, but the welcome page may return on a later visit.',
+    'the visit alert names the exact current-session and later-visit boundary',
+  )
+  check(
+    await failedVisitPage.evaluate(() => localStorage.getItem('neologism:visited')) === null,
+    'failed first-visit persistence does not claim a durable marker',
+  )
+  await failedVisitPage.reload()
+  check(
+    await failedVisitPage.locator('.command-input').count() === 1,
+    'reload of the current history entry honestly remains in Create',
+  )
+  const laterVisitPage = await failedVisitContext.newPage()
+  await laterVisitPage.goto(APP_URL)
+  check(
+    await laterVisitPage.getByRole('heading', { name: 'Name your next big thing.' }).count() === 1,
+    'a later root visit returns to Landing when the marker was not stored',
+  )
+  await failedVisitContext.close()
 
   check(pageErrors.length === 0, 'both navigation paths produce zero page errors')
   check(checks === EXPECTED_CHECKS - 1, `fixture executes exactly ${EXPECTED_CHECKS} checks`)

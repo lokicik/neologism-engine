@@ -103,6 +103,7 @@ export default function App() {
   const [promptKeywords, setPromptKeywords] = useState<string[]>([])
   const [error, setError] = useState<string | null>(null)
   const [generationStatus, setGenerationStatus] = useState('')
+  const [visitHistoryError, setVisitHistoryError] = useState<string | null>(null)
   const [recentHistoryError, setRecentHistoryError] = useState<string | null>(null)
   const [feedbackError, setFeedbackError] = useState<string | null>(null)
   const [tasteReferenceError, setTasteReferenceError] = useState<string | null>(null)
@@ -582,7 +583,9 @@ export default function App() {
       <Landing
         onEnter={(keyboard) => {
           if (keyboard) pendingViewFocusRef.current = 'create'
-          markVisited()
+          setVisitHistoryError(markVisited()
+            ? null
+            : 'Could not remember this visit. The app still works, but the welcome page may return on a later visit.')
           navigateView('create')
         }}
       />
@@ -610,6 +613,11 @@ export default function App() {
       />
 
       <main id="main-content" className="page" tabIndex={-1}>
+        {visitHistoryError && (
+          <div className="error-banner visit-history-error" role="alert" aria-atomic="true">
+            {visitHistoryError}
+          </div>
+        )}
         {feedbackError && (
           <div className="feedback-alert" role="alert" aria-atomic="true">
             {feedbackError}
