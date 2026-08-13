@@ -1,4 +1,4 @@
-// Phase 152/215 browser contract: an AI ranking failure or explicit cancellation
+// Phase 152/215/216 browser contract: an AI ranking failure or cancellation
 // never hides the local pool,
 // lies about the displayed order, drops keyboard focus, or starts a second call.
 // Run after `npm run build`: node e2e/ai-studio-failure.mjs
@@ -12,7 +12,7 @@ const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 56
+const EXPECTED_CHECKS = 61
 
 const server = spawn(process.execPath, [viteCli, 'preview', '--port', String(PORT), '--strictPort'], {
   cwd: WEB_DIR,
@@ -259,6 +259,98 @@ try {
         && fit.scrollX === 0
         && fit.scrollWidth <= fit.viewport + 1,
       `cancellation and Retry stay storage-neutral and 390px-contained (${JSON.stringify(fit)})`,
+    )
+    await context.close()
+  }
+
+  // Saving a new request-shaping AI configuration while the prior ranking is
+  // held must retire that request instead of displaying it under the new one.
+  {
+    const staleConfigGate = deferred()
+    let staleRouteAbortObserved = false
+    const { context, page, calls } = await studioPage({ width: 390, height: 844 }, async (route, call, request) => {
+      if (call === 1) {
+        await staleConfigGate.promise
+        try {
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: rankedReply(request.names, 'stale-model-a'),
+          })
+        } catch {
+          // A successful config-change abort makes the held route unfulfillable.
+          staleRouteAbortObserved = true
+        }
+        return
+      }
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: rankedReply(request.names, `fresh-${request.body.model}`),
+      })
+    })
+    let failedChatRequests = 0
+    page.on('requestfailed', (request) => {
+      if (request.url().endsWith('/chat/completions')) failedChatRequests++
+    })
+    const storageBefore = await nonJudgeStorageSnapshot(page)
+    await page.getByRole('button', { name: 'Generate', exact: true }).click()
+    await page.waitForFunction(() => document.querySelectorAll('.ai-studio .name-card').length === 24)
+    const pending = await resultSnapshot(page)
+    await page.locator('.sidebar-settings').click()
+    const dialog = page.getByRole('dialog', { name: 'Settings' })
+    await dialog.getByRole('combobox', { name: /Model/ }).fill('fixture-model-b')
+    await dialog.getByRole('button', { name: 'Save', exact: true }).click()
+    const alert = page.getByRole('alert')
+    await page.waitForTimeout(100)
+    const alertText = await alert.count() === 1 ? await alert.textContent() : ''
+    const cancelled = await resultSnapshot(page)
+    check(
+      calls.length === 1
+        && await page.evaluate(() => JSON.parse(localStorage.getItem('neologism:judge') ?? '{}').model) === 'fixture-model-b'
+        && alertText?.includes('Brandable ranking cancelled because AI settings changed. Showing the unranked local pool.')
+        && await page.getByRole('button', { name: 'Generate', exact: true }).getAttribute('aria-busy') === 'false'
+        && await page.locator('.sidebar-settings').evaluate((button) => document.activeElement === button)
+        && cancelled.names.join('|') === pending.names.join('|')
+        && cancelled.reasons.length === 0
+        && cancelled.picks.length === 0,
+      'saving a new model retires the held old-model ranking into a truthful retryable fallback',
+    )
+    staleConfigGate.resolve()
+    await page.waitForTimeout(100)
+    check(
+      calls.length === 1
+        && (failedChatRequests === 1 || staleRouteAbortObserved)
+        && (await resultSnapshot(page)).reasons.length === 0,
+      'the released old-model completion is aborted and cannot update the fallback',
+    )
+    await alert.getByRole('button', { name: 'Retry ranking' }).click()
+    await page.waitForFunction(() => document.querySelectorAll('.ai-studio .card-ai-reason').length === 24)
+    check(
+      calls.length === 2
+        && calls[1].body.model === 'fixture-model-b'
+        && calls[1].names.join('|') === calls[0].names.join('|')
+        && calls[1].criterion === calls[0].criterion,
+      'config-change Retry sends the frozen pool and criterion under the newly saved model',
+    )
+    const recovered = await resultSnapshot(page)
+    const brandable = page.getByRole('button', { name: 'Brandable', exact: true })
+    check(
+      recovered.reasons.length === 24
+        && recovered.reasons.every((reason) => reason.includes('fresh-fixture-model-b'))
+        && recovered.reasons.every((reason) => !reason.includes('stale-model-a'))
+        && recovered.picks.length === 1
+        && recovered.meta.includes('Ranked by Brandable')
+        && await brandable.evaluate((button) => document.activeElement === button),
+      'the new-model Retry alone owns the verified reasons, pick, label, and restored focus',
+    )
+    const fit = await horizontalFit(page)
+    check(
+      await nonJudgeStorageSnapshot(page) === storageBefore
+        && fit.fits
+        && fit.scrollX === 0
+        && fit.scrollWidth <= fit.viewport + 1,
+      `config retirement and Retry preserve non-judge storage and 390px containment (${JSON.stringify(fit)})`,
     )
     await context.close()
   }

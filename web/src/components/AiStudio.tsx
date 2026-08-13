@@ -64,6 +64,15 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
 
   const ready = isJudgeReady(judgeConfig)
   const favoriteKeys = new Set(favorites.map(tasteIdentity))
+  const judgeRequestIdentity = JSON.stringify([
+    judgeConfig.enabled,
+    judgeConfig.provider,
+    judgeConfig.provider === 'localhost'
+      ? normalizeLocalEndpoint(judgeConfig.endpoint)
+      : (judgeConfig.apiKey ?? ''),
+    judgeConfig.model?.trim() ?? '',
+  ])
+  const previousJudgeRequestIdentity = useRef(judgeRequestIdentity)
 
   useEffect(() => () => {
     ++rankRequestId.current
@@ -75,6 +84,17 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
   useEffect(() => {
     if (!ready) setRankingStatus('')
   }, [ready])
+
+  useEffect(() => {
+    const changed = previousJudgeRequestIdentity.current !== judgeRequestIdentity
+    previousJudgeRequestIdentity.current = judgeRequestIdentity
+    if (changed && rankAbortController.current && activeRank) {
+      cancelRanking('settings')
+    }
+    // This effect intentionally runs only when the saved request identity
+    // changes, not when a ranking starts or its local state advances.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [judgeRequestIdentity])
 
   const criterionFor = (m: Metric) =>
     m === 'custom' ? custom.trim() : METRICS.find((x) => x.key === m)!.criterion
@@ -279,10 +299,10 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
     })
   }
 
-  function cancelRanking() {
+  function cancelRanking(reason: 'user' | 'settings') {
     if (busy !== 'ranking' || !activeRank) return
     const attempt = activeRank
-    focusRankControl(attempt)
+    if (reason === 'user') focusRankControl(attempt)
     ++rankRequestId.current
     rankAbortController.current?.abort()
     rankAbortController.current = null
@@ -290,9 +310,12 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
     setActiveRank(null)
     setBusy('idle')
     setRankingStatus('')
-    setNotice(view.rankedBy
-      ? `${attempt.label} ranking cancelled. Still showing the ${view.rankedBy} ranking.`
-      : `${attempt.label} ranking cancelled. Showing the unranked local pool.`)
+    const suffix = view.rankedBy
+      ? `Still showing the ${view.rankedBy} ranking.`
+      : 'Showing the unranked local pool.'
+    setNotice(reason === 'settings'
+      ? `${attempt.label} ranking cancelled because AI settings changed. ${suffix}`
+      : `${attempt.label} ranking cancelled. ${suffix}`)
     setFailedRank(attempt)
   }
 
@@ -425,7 +448,7 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
 
           {busy === 'ranking' && activeRank && (
             <div className="studio-ranking-actions">
-              <button type="button" className="toolbar-btn" onClick={cancelRanking}>
+              <button type="button" className="toolbar-btn" onClick={() => cancelRanking('user')}>
                 Cancel ranking
               </button>
             </div>

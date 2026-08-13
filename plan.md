@@ -6984,6 +6984,49 @@ policy, fallback truth, and retry ownership explicit.
 
 ---
 
+## Phase 216 — Retire pending rankings when AI settings change (2026-08-13)
+
+### Bottleneck
+
+Phase 215 let the user cancel a stalled request, but the persistent sidebar still allowed Settings
+to save a new provider/model configuration while a ranking was pending. The old request retained
+its captured config and could later render model A's reasons after the app had committed model B,
+making the visible result look owned by the wrong current configuration.
+
+### Frozen boundary
+
+- Derive one Studio request identity from enabled state, provider, the exact OpenRouter key or
+  normalized localhost endpoint, and trimmed model id. Price fields and the generic Settings prompt
+  do not shape Studio's metric request and therefore do not retire it.
+- When that saved identity changes during an active ranking, abort and invalidate the old request,
+  preserve the local or last verified view, expose the same frozen-attempt Retry, and do not move
+  focus away from the Settings opener. Retry computes its cache/request identity from the newly
+  saved config.
+- Preserve ordinary user cancellation focus, storage persistence, provider payloads, candidate
+  pool/order, criterion, cache semantics, and all failure paths. Add no automatic rerank, polling,
+  timeout, persisted pool, or second request.
+
+### Acceptance evidence
+
+The production fixture was red first: all 56 retained gates passed and only the held-config-change
+gate failed because model A remained busy after model B was saved. The final fixture passes
+**61/61**. Saving B aborts the one held A request, keeps the byte-identical unranked 24-name pool,
+shows the exact config-change cancellation message, unlocks Generate, and preserves focus on the
+Settings opener. Releasing A cannot add a reason. One explicit Retry sends the same names and
+criterion under B, renders 24 `fresh-fixture-model-b` reasons with one verified pick, restores
+Brandable focus, and contains no `stale-model-a` output. Non-judge storage stays byte-identical and
+the cycle remains contained at 390 pixels.
+
+TypeScript and the production Vite build are green. Phase 215's judge contract remains **10/10**
+and the retained Studio taste fixture remains **5/5**.
+
+### Decision
+
+Phase 216 binds every completed Studio ranking to the saved request configuration that actually
+produced it, without turning a Settings edit into an implicit paid/provider call.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
