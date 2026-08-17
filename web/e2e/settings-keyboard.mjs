@@ -1,4 +1,4 @@
-// Phase 148/212/214/217/261 browser contract: Settings is a real keyboard-contained
+// Phase 148/212/214/217/261/262 browser contract: Settings is a real keyboard-contained
 // modal, its model picker follows the aria-activedescendant combobox pattern, and
 // provider fallbacks plus reopened/retargeted discovery stay truthful.
 // Run after `npm run build`: node e2e/settings-keyboard.mjs
@@ -704,18 +704,28 @@ try {
     catalogRecoveryRequests === 2
       && catalogRecoveryAuthorization.every((header) => header === null)
       && await recoveredCombo.inputValue() === STALE_SAVED_MODEL
+      && await catalogRecoveryPage.evaluate(() => (
+        JSON.parse(localStorage.getItem('neologism:judge') ?? '{}').model
+      )) === STALE_SAVED_MODEL
       && recoveredVisibleWithoutClearing
       && await catalogRecoveryDialog.locator('.model-catalog-fallback').count() === 0
+      && await catalogRecoveryDialog.locator('.model-catalog-stale[role="status"]').count() === 1
+      && (await catalogRecoveryDialog.locator('.model-catalog-stale[role="status"]').textContent())?.trim()
+        === 'Current model is not in the live catalog. Choose a listed model or verify the id before ranking.'
       && await catalogRecoveryDialog.evaluate((modal) => modal.scrollWidth <= modal.clientWidth + 1),
-    'a recovered live catalog stays browsable beside a stale saved model without clearing the field',
+    'a recovered live catalog stays browsable and labels the stale saved model without clearing the field',
   )
   if (!recoveredVisibleWithoutClearing) await recoveredCombo.fill('')
   await recoveredOption.waitFor({ state: 'visible' })
   await recoveredOption.click()
+  const recoveredSelected = await recoveredCombo.inputValue() === 'recovered/openrouter-model'
+    && await recoveredCombo.getAttribute('aria-expanded') === 'false'
+  await recoveredCombo.click()
   check(
-    await recoveredCombo.inputValue() === 'recovered/openrouter-model'
-      && await recoveredCombo.getAttribute('aria-expanded') === 'false',
-    'the recovered live model remains selectable through the same combobox',
+    recoveredSelected
+      && await recoveredCombo.getAttribute('aria-expanded') === 'true'
+      && await catalogRecoveryDialog.locator('.model-catalog-stale').count() === 0,
+    'selecting the recovered live model clears the stale-id warning through the same combobox',
   )
   await catalogRecoveryContext.close()
 } catch (error) {

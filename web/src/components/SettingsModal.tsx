@@ -268,6 +268,13 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
   }
   const query = (draft.model ?? '').toLowerCase()
   const selected = pickList.find((m) => m.id === draft.model)
+  const currentModel = draft.model?.trim() ?? ''
+  const currentModelMissingFromLiveCatalog = draft.provider === 'openrouter'
+    && modelsAttempted
+    && models.length > 0
+    && !modelFilterEdited
+    && currentModel !== ''
+    && !models.some((model) => model.id === currentModel)
   // When the field holds a fully-selected id (or is empty) show the whole list
   // so the user can browse/switch; only filter while they're typing a partial.
   // Keep an exact selection visible even when it falls beyond the 60-row cap.
@@ -461,6 +468,11 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
             {!modelsLoading && modelsAttempted && draft.provider === 'openrouter' && models.length === 0 && (
               <div className="model-empty model-catalog-fallback" role="status">
                 No live models discovered — showing OpenRouter's free-model router. The routed model may vary.
+              </div>
+            )}
+            {!modelsLoading && currentModelMissingFromLiveCatalog && (
+              <div className="model-empty model-catalog-stale" role="status">
+                Current model is not in the live catalog. Choose a listed model or verify the id before ranking.
               </div>
             )}
             {!modelsLoading && filtered.length === 0 && (

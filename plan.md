@@ -9013,6 +9013,45 @@ no longer expires merely because one upstream model id does.
 
 ---
 
+## Phase 262 — Label a current model missing from the live catalog (2026-08-17)
+
+### Bottleneck
+
+Phase 260 kept a refreshed catalog browseable beside an old saved id, and Phase 261 replaced the
+app-owned stale defaults. User-owned saved ids still correctly remained untouched, but Settings
+gave no visible indication when one was absent from the newly settled provider catalog. The field
+looked current even though ranking with it could fail immediately.
+
+### Frozen boundary
+
+- Only after a nonempty OpenRouter catalog settles, compare its exact ids with the trimmed current
+  model field. If the untouched current id is absent, show one live status that says it was not found
+  and offers the two honest actions: choose a listed model or verify the typed id.
+- Hide the status while the user is actively filtering, during loading, for empty/fallback catalogs,
+  and as soon as an exact live option is selected. Preserve the field value, saved configuration,
+  custom-id escape hatch, catalog contents/order/cache, requests, ranking, generation, taste, WASM,
+  and Rust.
+- Strengthen the existing stale-id recovery sequence rather than adding a second fixture or any live
+  provider dependency.
+
+### Acceptance evidence
+
+The strengthened production owner was deliberately red at **68/69** against Phase 261: the live
+replacement model remained browseable beside the unchanged stale id, but no status exposed the
+mismatch. After the narrow display-state addition, the rebuilt owner passes **69/69**: the exact
+warning appears with the recovered catalog inside the 390-pixel modal, selection clears it, both
+catalog calls remain key-free, and the saved stale value is never rewritten. TypeScript and the
+production Vite build pass; the retained pure judge/discovery/cache owner remains green at
+**36/36**.
+
+### Decision
+
+Settings now distinguishes “this value is still editable” from “the provider just returned this
+value.” Existing choices remain user-owned, but catalog evidence no longer silently validates a
+model id that was not actually present.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
