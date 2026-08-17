@@ -8763,6 +8763,45 @@ silently collapsing a different local request path.
 
 ---
 
+## Phase 256 — Reject control characters in AI reasons (2026-08-17)
+
+### Bottleneck
+
+The judge parser bounded each provider reason by Unicode validity, non-emptiness, eight words, and
+160 UTF-16 units, but still accepted ASCII controls. A reason containing only NUL was well-formed,
+non-empty, one word, and short, so the whole response became a successful verified ranking even
+though its visible AI evidence was empty or misleading.
+
+### Frozen boundary
+
+- Reject C0 controls and DEL in every provider reason before adding that row to the exact index map.
+  Repair or strip nothing: one invalid reason rejects the complete response through the existing
+  `null` result and AI Studio fallback.
+- Preserve ordinary space-separated and punctuation-bearing text, exact eight-word and 160-unit
+  accepted boundaries, score/index/cardinality checks, response ordering, cache behavior, fallback,
+  Retry, focus, generation, storage, taste, WASM, and Rust.
+- Extend the existing pure response-boundary owner rather than adding another browser harness. Keep
+  production coverage owned by AI Studio's retained failure/fallback/Retry contract.
+
+### Acceptance evidence
+
+The expanded pure owner was deliberately red at **33/34** against Phase 255: a NUL-only reason
+survived every prior bound and returned a non-null ranking, while all 33 response, request, cache,
+catalog, endpoint, credential, discovery, and cancellation gates remained green.
+
+The shared parser now rejects ASCII controls before accepting a reason. The pure owner passes
+**34/34**, including the new invisible-evidence case and both exact accepted boundaries. The rebuilt
+production AI Studio cancellation/config/failure/Retry/race/cache/model/credential/focus contract
+remains green at **65/65**. TypeScript and the Vite production build pass; no live provider or key
+was used.
+
+### Decision
+
+A provider cannot make an invisible control string count as verified AI evidence. Invalid text keeps
+the existing honest local-pool or last-good ranking authoritative.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

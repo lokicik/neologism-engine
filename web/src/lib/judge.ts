@@ -427,6 +427,7 @@ export async function rerank(
         || !reason
         || reason.length > MAX_JUDGE_REASON_UNITS
         || !isWellFormedUnicode(reason)
+        || /[\u0000-\u001f\u007f]/.test(reason)
         || reason.split(/\s+/u).length > 8
       ) return
       byIndex.set(idx, { score, reason })

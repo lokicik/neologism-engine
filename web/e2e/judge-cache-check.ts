@@ -153,6 +153,7 @@ globalThis.fetch = async (input, init) => {
   if (prompt.includes('Oversized reason')) judgments[0].reason = 'x'.repeat(161)
   if (prompt.includes('Boundary reason')) judgments[0].reason = 'x'.repeat(160)
   if (prompt.includes('Malformed reason')) judgments[0].reason = '\uD83D'
+  if (prompt.includes('Control reason')) judgments[0].reason = '\u0000'
   if (prompt.includes('Extra duplicate')) judgments.push({ i: 2, score: 10, reason: 'duplicate override' })
   if (prompt.includes('Extra invalid')) judgments.push({ i: 99, score: 10, reason: 'out of range' })
   return new Response(JSON.stringify({
@@ -487,6 +488,10 @@ check(
   'an ill-formed Unicode provider reason fails closed before it reaches the UI',
 )
 check(
+  await rerank(invalidResponseNames, { ...openRouterBase, prompt: 'Control reason {{names}}' }) === null,
+  'a control-only provider reason fails closed instead of producing invisible AI evidence',
+)
+check(
   await rerank(invalidResponseNames, { ...openRouterBase, prompt: 'Extra duplicate {{names}}' }) === null,
   'an extra duplicate row cannot overwrite one otherwise complete provider ranking',
 )
@@ -547,9 +552,9 @@ check(
   'changing the OpenRouter credential performs one fresh request before exact-repeat cache reuse',
 )
 
-if (checks !== 33 || failures > 0) {
-  console.error(`judge cache check: ${failures} failure(s), ${checks}/33 checks executed`)
+if (checks !== 34 || failures > 0) {
+  console.error(`judge cache check: ${failures} failure(s), ${checks}/34 checks executed`)
   process.exitCode = 1
 } else {
-  console.log('judge cache check: 33/33 checks passed')
+  console.log('judge cache check: 34/34 checks passed')
 }
