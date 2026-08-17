@@ -9052,6 +9052,46 @@ model id that was not actually present.
 
 ---
 
+## Phase 263 — Carry missing-model truth into localhost hot swaps (2026-08-17)
+
+### Bottleneck
+
+Phase 262 deliberately started with OpenRouter, but Settings already rechecks a localhost endpoint on
+every visit because its loaded model can change without the URL changing. When a user had explicitly
+saved local model A and the server later reported only model B, the picker removed A from the list and
+showed B while leaving the field at A. That preservation was correct; the missing mismatch status was
+not.
+
+### Frozen boundary
+
+- Reuse the same settled, nonempty, untouched-current-id predicate for localhost discovery. Keep the
+  existing OpenRouter copy, and give localhost exact guidance that the current model was not reported
+  by this endpoint: choose the loaded model or verify the id.
+- Never auto-select B, rewrite the saved A, or turn a missing-list observation into a ranking failure.
+  Hide the warning while loading/filtering, for an empty discovery, and after the user explicitly
+  chooses B. Preserve endpoint refresh, manual ids, local auto-detect, requests, cache, ranking,
+  generation, taste, storage schema, WASM, and Rust.
+- Strengthen the existing A-to-B production flow by explicitly selecting/saving A before the mocked
+  server changes to B; do not invent a second fixture or a live local-server dependency.
+
+### Acceptance evidence
+
+The realistic production owner was deliberately red at **68/69** against Phase 262: after the saved
+`local/model-a` endpoint reported only `local/model-b`, the field and durable record correctly stayed
+at A and B remained selectable, but no status named the discrepancy. After generalizing only the
+display predicate and provider-specific copy, the rebuilt owner passes **69/69**. Selecting B clears
+the warning on reopen, the saved A is not rewritten during discovery, and every retained OpenRouter,
+endpoint-switch, empty-discovery, focus, and containment check remains green. TypeScript and the
+production Vite build pass.
+
+### Decision
+
+Provider discovery is now equally honest on both transports. A current model may remain a deliberate
+manual choice, but neither a live OpenRouter catalog nor a local `/models` response silently certifies
+an id it did not report.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

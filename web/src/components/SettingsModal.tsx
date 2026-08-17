@@ -269,8 +269,7 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
   const query = (draft.model ?? '').toLowerCase()
   const selected = pickList.find((m) => m.id === draft.model)
   const currentModel = draft.model?.trim() ?? ''
-  const currentModelMissingFromLiveCatalog = draft.provider === 'openrouter'
-    && modelsAttempted
+  const currentModelMissingFromCatalog = modelsAttempted
     && models.length > 0
     && !modelFilterEdited
     && currentModel !== ''
@@ -470,9 +469,11 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
                 No live models discovered — showing OpenRouter's free-model router. The routed model may vary.
               </div>
             )}
-            {!modelsLoading && currentModelMissingFromLiveCatalog && (
+            {!modelsLoading && currentModelMissingFromCatalog && (
               <div className="model-empty model-catalog-stale" role="status">
-                Current model is not in the live catalog. Choose a listed model or verify the id before ranking.
+                {draft.provider === 'openrouter'
+                  ? 'Current model is not in the live catalog. Choose a listed model or verify the id before ranking.'
+                  : 'Current model is not reported by this local endpoint. Choose the loaded model or verify the id before ranking.'}
               </div>
             )}
             {!modelsLoading && filtered.length === 0 && (

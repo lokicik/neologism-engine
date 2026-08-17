@@ -1,4 +1,4 @@
-// Phase 148/212/214/217/261/262 browser contract: Settings is a real keyboard-contained
+// Phase 148/212/214/217/261/262/263 browser contract: Settings is a real keyboard-contained
 // modal, its model picker follows the aria-activedescendant combobox pattern, and
 // provider fallbacks plus reopened/retargeted discovery stay truthful.
 // Run after `npm run build`: node e2e/settings-keyboard.mjs
@@ -544,12 +544,15 @@ try {
   await dialog.getByRole('textbox', { name: 'Endpoint' }).fill('http://127.0.0.1:9020/v1')
   const localCombo = dialog.getByRole('combobox', { name: 'Model' })
   await localCombo.focus()
-  await dialog.getByRole('option', { name: /local\/model-a/ }).waitFor({ state: 'visible' })
+  const initialLocalOption = dialog.getByRole('option', { name: /local\/model-a/ })
+  await initialLocalOption.waitFor({ state: 'visible' })
   check(
     localModelRequests === 1
-      && await dialog.getByRole('option', { name: /local\/model-a/ }).count() === 1,
+      && await initialLocalOption.count() === 1,
     'the first localhost visit discovers the model currently loaded at that endpoint',
   )
+  await initialLocalOption.click()
+  const staleLocalModel = await localCombo.inputValue()
   await dialog.getByRole('button', { name: 'Save', exact: true }).click()
   await dialog.waitFor({ state: 'detached' })
 
@@ -559,17 +562,39 @@ try {
   await refreshedLocalCombo.focus()
   const refreshedOption = dialog.getByRole('option', { name: /local\/model-b/ })
   await refreshedOption.waitFor({ state: 'visible' })
+  const localWarning = dialog.locator('.model-catalog-stale[role="status"]')
+  const localWarningCount = await localWarning.count()
+  const localRefreshState = {
+    requests: localModelRequests,
+    refreshedCount: await refreshedOption.count(),
+    staleOptionCount: await dialog.getByRole('option', { name: /local\/model-a/ }).count(),
+    input: await refreshedLocalCombo.inputValue(),
+    durable: await page.evaluate(() => JSON.parse(
+      localStorage.getItem('neologism:judge') ?? '{}',
+    ).model),
+    warningCount: localWarningCount,
+    warning: localWarningCount === 1 ? (await localWarning.textContent())?.trim() : null,
+  }
   check(
-    localModelRequests === 2
-      && await refreshedOption.count() === 1
-      && await dialog.getByRole('option', { name: /local\/model-a/ }).count() === 0,
-    'reopening Settings rechecks the same localhost URL and replaces its stale model list',
+    localRefreshState.requests === 2
+      && localRefreshState.refreshedCount === 1
+      && localRefreshState.staleOptionCount === 0
+      && localRefreshState.input === staleLocalModel
+      && localRefreshState.durable === staleLocalModel
+      && localRefreshState.warningCount === 1
+      && localRefreshState.warning
+        === 'Current model is not reported by this local endpoint. Choose the loaded model or verify the id before ranking.',
+    'reopening Settings rechecks localhost and labels the unchanged current model missing from its new list',
   )
   await refreshedOption.click()
+  const refreshedLocalSelected = await refreshedLocalCombo.inputValue() === 'local/model-b'
+    && await refreshedLocalCombo.getAttribute('aria-expanded') === 'false'
+  await refreshedLocalCombo.click()
   check(
-    await refreshedLocalCombo.inputValue() === 'local/model-b'
-      && await refreshedLocalCombo.getAttribute('aria-expanded') === 'false',
-    'the newly discovered localhost model remains selectable through the existing combobox',
+    refreshedLocalSelected
+      && await refreshedLocalCombo.getAttribute('aria-expanded') === 'true'
+      && await dialog.locator('.model-catalog-stale').count() === 0,
+    'selecting the newly discovered localhost model clears the stale-id warning through the same combobox',
   )
 
   await refreshedLocalCombo.fill('')
