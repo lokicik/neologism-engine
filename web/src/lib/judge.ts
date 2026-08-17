@@ -1,4 +1,5 @@
 import type { NameResult } from './engine'
+import { isWellFormedUnicode } from './unicode.ts'
 
 // Optional "Sharpen with AI" judge. The offline engine generates well but judges
 // badly — its scores are structural proxies blind to brand taste/meaning (proven
@@ -43,6 +44,21 @@ export const DEFAULT_OPENROUTER_MODEL = 'meta-llama/llama-3.3-70b-instruct:free'
 
 export function normalizeLocalEndpoint(endpoint?: string): string {
   return (endpoint ?? DEFAULT_LOCAL_ENDPOINT).trim().replace(/\/+$/, '')
+}
+
+export function isValidLocalEndpoint(endpoint?: string): boolean {
+  const normalized = normalizeLocalEndpoint(endpoint)
+  if (!isWellFormedUnicode(normalized)) return false
+  try {
+    const url = new URL(normalized)
+    return (url.protocol === 'http:' || url.protocol === 'https:')
+      && url.username === ''
+      && url.password === ''
+      && url.search === ''
+      && url.hash === ''
+  } catch {
+    return false
+  }
 }
 
 // Free ids drift over time — these are editable in the UI; this is just the list
@@ -105,7 +121,7 @@ export function defaultJudgeConfig(): JudgeConfig {
 export function isJudgeReady(cfg: JudgeConfig): boolean {
   if (!cfg.enabled) return false
   if (cfg.provider === 'openrouter') return Boolean(cfg.apiKey?.trim())
-  return Boolean((cfg.endpoint ?? DEFAULT_LOCAL_ENDPOINT).trim())
+  return isValidLocalEndpoint(cfg.endpoint)
 }
 
 const cache = new Map<string, RankedJudgment[]>()
@@ -165,6 +181,7 @@ const modelCache = new Map<string, ModelInfo[]>()
 // local endpoint: desktop model servers can replace their one loaded model
 // without changing URL while Settings is open or between modal visits.
 export async function fetchModels(cfg: JudgeConfig, signal?: AbortSignal): Promise<ModelInfo[]> {
+  if (cfg.provider === 'localhost' && !isValidLocalEndpoint(cfg.endpoint)) return []
   const url =
     cfg.provider === 'openrouter'
       ? `${OPENROUTER_BASE}/models`

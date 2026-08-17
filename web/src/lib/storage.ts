@@ -1,5 +1,5 @@
 import type { NameResult } from './engine'
-import { defaultJudgeConfig, type JudgeConfig } from './judge'
+import { defaultJudgeConfig, isValidLocalEndpoint, type JudgeConfig } from './judge'
 import {
   hasTasteItem,
   isLegacyShareStub,
@@ -366,6 +366,8 @@ function judgeConfigFromUnknown(value: unknown): JudgeConfig | null {
   if (has('enabled') && typeof record.enabled !== 'boolean') return null
   if (has('provider') && record.provider !== 'openrouter' && record.provider !== 'localhost') return null
   if (JUDGE_TEXT_FIELDS.some((key) => has(key) && !isWellFormedString(record[key]))) return null
+  if (record.enabled === true && record.provider === 'localhost'
+    && !isValidLocalEndpoint(typeof record.endpoint === 'string' ? record.endpoint : undefined)) return null
   if (prices.some((key) => (
     has(key)
       && (typeof record[key] !== 'number' || !Number.isFinite(record[key]) || record[key] < 0)
@@ -398,6 +400,7 @@ export function saveJudgeConfig(cfg: JudgeConfig): boolean {
     const value = cfg[key]
     return value !== undefined && !isWellFormedString(value)
   })) return false
+  if (cfg.enabled && cfg.provider === 'localhost' && !isValidLocalEndpoint(cfg.endpoint)) return false
   try {
     localStorage.setItem(JUDGE_KEY, JSON.stringify(cfg))
     return true

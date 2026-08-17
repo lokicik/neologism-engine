@@ -2,7 +2,13 @@
 // discovery stay aligned with the current request configuration.
 // Run with: node --experimental-strip-types e2e/judge-cache-check.ts
 import type { NameResult } from '../src/lib/engine.ts'
-import { fetchModels, rerank, type JudgeConfig } from '../src/lib/judge.ts'
+import {
+  fetchModels,
+  isJudgeReady,
+  isValidLocalEndpoint,
+  rerank,
+  type JudgeConfig,
+} from '../src/lib/judge.ts'
 
 let checks = 0
 let failures = 0
@@ -33,7 +39,9 @@ const canonicalEndpointUrls: string[] = []
 let modelResolutionAbortObserved = false
 let abortedResolutionChatCalls = 0
 let settingsDiscoveryAbortObserved = false
+let fetchCalls = 0
 globalThis.fetch = async (input, init) => {
+  fetchCalls++
   const url = String(input)
   if (url.includes(':9050/')) {
     return new Promise<Response>((_resolve, reject) => {
@@ -254,9 +262,45 @@ check(
   'cancelling Settings model discovery aborts its request and preserves the empty fallback',
 )
 
-if (checks !== 11 || failures > 0) {
-  console.error(`judge cache check: ${failures} failure(s), ${checks}/11 checks executed`)
+check(
+  [
+    undefined,
+    'http://localhost:11434/v1',
+    'https://192.168.1.20:8080/openai/v1',
+    '  http://127.0.0.1:8080/v1///  ',
+  ].every(isValidLocalEndpoint)
+    && [
+      '',
+      'javascript:alert(1)',
+      'ftp://127.0.0.1:8080/v1',
+      'http://user:secret@127.0.0.1:8080/v1',
+      'http://127.0.0.1:8080/v1?tenant=a',
+      'http://127.0.0.1:8080/v1#models',
+      'http://127.0.0.1:8080/v1\uD83D',
+    ].every((endpoint) => !isValidLocalEndpoint(endpoint)),
+  'local endpoint validation accepts exact HTTP bases and rejects ambiguous or unsafe URL forms',
+)
+
+const fetchCallsBeforeInvalid = fetchCalls
+const invalidNetworkConfig: JudgeConfig = {
+  enabled: true,
+  provider: 'localhost',
+  endpoint: 'javascript:alert(1)',
+  model: 'fixture-model',
+}
+const invalidDiscovery = await fetchModels(invalidNetworkConfig)
+const invalidRanking = await rerank(names('InvalidEndpoint'), invalidNetworkConfig)
+check(
+  !isJudgeReady(invalidNetworkConfig)
+    && invalidDiscovery.length === 0
+    && invalidRanking === null
+    && fetchCalls === fetchCallsBeforeInvalid,
+  'invalid local endpoints stay unready and cannot start discovery or ranking requests',
+)
+
+if (checks !== 13 || failures > 0) {
+  console.error(`judge cache check: ${failures} failure(s), ${checks}/13 checks executed`)
   process.exitCode = 1
 } else {
-  console.log('judge cache check: 11/11 checks passed')
+  console.log('judge cache check: 13/13 checks passed')
 }

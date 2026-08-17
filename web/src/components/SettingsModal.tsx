@@ -4,6 +4,7 @@ import {
   DEFAULT_LOCAL_ENDPOINT,
   OPENROUTER_FREE_MODELS,
   fetchModels,
+  isValidLocalEndpoint,
   type JudgeConfig,
   type JudgeProvider,
   type ModelInfo,
@@ -15,6 +16,7 @@ import {
   tasteEvidenceProgress,
 } from '../lib/taste-data'
 import { tasteIdentity } from '../lib/taste-identity'
+import { isWellFormedUnicode } from '../lib/unicode.ts'
 import { IconDownload } from './icons'
 
 interface Props {
@@ -165,6 +167,17 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
     setDraft((d) => ({ ...d, [key]: value }))
 
   const save = () => {
+    const endpoint = draft.endpoint ?? DEFAULT_LOCAL_ENDPOINT
+    if (draft.enabled
+      && draft.provider === 'localhost'
+      && isWellFormedUnicode(endpoint)
+      && !isValidLocalEndpoint(endpoint)) {
+      setSaveError(
+        'Enter a complete http:// or https:// endpoint without credentials, a query, or a fragment.',
+      )
+      requestAnimationFrame(() => saveRef.current?.scrollIntoView({ block: 'nearest' }))
+      return
+    }
     if (!onSave(draft)) {
       setSaveError('Could not save AI settings. Browser storage kept the previous settings unchanged.')
       requestAnimationFrame(() => saveRef.current?.scrollIntoView({ block: 'nearest' }))

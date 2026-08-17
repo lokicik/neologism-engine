@@ -11,7 +11,7 @@ const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 23
+const EXPECTED_CHECKS = 29
 
 const server = spawn(process.execPath, [viteCli, 'preview', '--port', String(PORT), '--strictPort'], {
   cwd: WEB_DIR,
@@ -135,6 +135,31 @@ try {
   )
   await illFormedContext.close()
 
+  const unsafeEndpointRaw = JSON.stringify({
+    enabled: true,
+    provider: 'localhost',
+    endpoint: 'javascript:alert(1)',
+  })
+  const unsafeContext = await contextFor(unsafeEndpointRaw)
+  const unsafePageErrors = []
+  const unsafePage = await unsafeContext.newPage()
+  unsafePage.on('pageerror', (error) => unsafePageErrors.push(error.message))
+  await unsafePage.goto(APP_URL)
+  await unsafePage.getByRole('button', { name: 'AI Studio' }).click()
+  check(
+    await unsafePage.getByRole('button', { name: 'Open Settings' }).isVisible(),
+    'non-HTTP endpoint leaves AI Studio safely unconfigured',
+  )
+  check(
+    await unsafePage.evaluate(() => localStorage.getItem('neologism:judge')) === unsafeEndpointRaw,
+    'non-HTTP endpoint record is not silently repaired on read',
+  )
+  check(
+    unsafePageErrors.length === 0,
+    `non-HTTP endpoint produces no page error (${unsafePageErrors.join(' | ')})`,
+  )
+  await unsafeContext.close()
+
   const invalidArrayRaw = JSON.stringify(['openrouter', true])
   const arrayContext = await contextFor(invalidArrayRaw)
   const arrayPageErrors = []
@@ -194,6 +219,24 @@ try {
   check(
     await validPage.evaluate(() => localStorage.getItem('neologism:judge')) === validPartialRaw,
     'ill-formed endpoint write preserves the prior durable settings exactly',
+  )
+  await validDialog.getByLabel('Endpoint').evaluate((input) => {
+    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set
+    setter.call(input, 'javascript:alert(1)')
+    input.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText' }))
+  })
+  await validDialog.getByRole('button', { name: 'Save', exact: true }).click()
+  const endpointAlert = validDialog.getByRole('alert')
+  check(await validDialog.isVisible(), 'non-HTTP endpoint write keeps Settings open')
+  check(
+    await endpointAlert.count() === 1
+      && (await endpointAlert.textContent())?.trim()
+        === 'Enter a complete http:// or https:// endpoint without credentials, a query, or a fragment.',
+    'non-HTTP endpoint write exposes an exact validation error',
+  )
+  check(
+    await validPage.evaluate(() => localStorage.getItem('neologism:judge')) === validPartialRaw,
+    'non-HTTP endpoint write preserves the prior durable settings exactly',
   )
   check(validPageErrors.length === 0, `valid partial config produces no page error (${validPageErrors.join(' | ')})`)
   await validContext.close()

@@ -8052,6 +8052,55 @@ valid replacement.
 
 ---
 
+## Phase 240 — Validate the local AI request base (2026-08-17)
+
+### Bottleneck
+
+Phase 239 made persisted AI text Unicode-safe, but any well-formed non-empty endpoint still made the
+local provider ready. A stored or typed value such as `javascript:alert(1)` therefore presented AI
+Studio as configured and could be saved over a valid record even though browser `fetch` cannot use
+it as an OpenAI-compatible request base. URL credentials, query strings, and fragments were also
+ambiguous once the app appended `/models` or `/chat/completions`.
+
+### Frozen boundary
+
+- For an enabled localhost provider, accept only an absolute `http://` or `https://` URL with no
+  username, password, query, or fragment. Preserve arbitrary hosts, ports, and paths, plus the
+  existing outer-whitespace and trailing-slash normalization. This is request-base validation, not
+  a localhost-only host allowlist or a live reachability test.
+- Use one validator in persisted reads/writes, runtime readiness, model discovery, and ranking.
+  Invalid bases must remain unconfigured and start zero network work; malformed raw storage stays
+  untouched until an explicit valid Save.
+- Keep Phase 239's separate Unicode-write path. A well-formed but invalid URL gets exact Settings
+  guidance and preserves the prior durable record; an ill-formed string still reaches the existing
+  generic persist-before-state failure without being written.
+
+### Acceptance evidence
+
+The strengthened production owner was red at **25/29** against Phase 239. A persisted non-HTTP base
+incorrectly left Studio configured. Submitting the same value closed Settings, exposed no endpoint
+guidance, and replaced the valid legacy record. All wrong-type, malformed-Unicode, non-object,
+legacy-default, raw-preservation, recovery, and page-error checks remained green.
+
+The shared validator now owns readiness and request construction before any fetch. The rebuilt
+corrupt-config owner passes **29/29**: the non-HTTP record stays raw but inactive, while an explicit
+invalid write keeps Settings open, reports the exact accepted URL shape, and leaves the prior value
+byte-identical. The expanded pure judge owner passes **13/13**. It accepts the default, loopback,
+explicit HTTP(S) host/path, and padded/trailing-slash bases; rejects empty, `javascript:`, `ftp:`, credential,
+query, fragment, and ill-formed forms; and proves invalid discovery plus ranking add zero fetches.
+
+TypeScript and the Vite production build pass. Retained production contracts remain green at
+Settings keyboard **60/60**, Settings storage failure/retry **13/13**, and AI Studio's complete
+cancellation/config/failure/Retry/race/cache/model/focus/containment owner **61/61**.
+
+### Decision
+
+The editable local-model field is now an honest request base rather than merely a non-empty string.
+Invalid URLs cannot activate Studio, mutate durable settings, or reach browser networking; valid
+OpenAI-compatible HTTP(S) bases and all existing provider behavior remain unchanged.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
