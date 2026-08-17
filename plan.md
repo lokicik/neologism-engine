@@ -9554,6 +9554,50 @@ returned complete choices without changing the protocol.
 
 ---
 
+## Phase 274 — Package one self-validating offline blind evaluator (2026-08-17)
+
+### Bottleneck
+
+Phase 273 separated evaluator choices from answer-key ownership, but operating its Vite page still
+left a human handoff hazard: the owner had to serve a research build and separately select the
+correct `blind-study.json`. A loosely shared directory could also include `answer-key.json` or the
+provider source by mistake. The smallest stronger handoff is therefore one generated artifact that
+can contain only the validated blind study and the evaluator code required to judge it.
+
+### Offline kit boundary
+
+- Refactor the canonical Node validator to validate a blind study without receiving an answer key.
+  Require the exact top-level and per-case fields, frozen protocol hash, source/study SHA-256 values,
+  42 unique case ids, ten valid names per side, and trimmed bounded briefs before packaging.
+- Add `pack-evaluator.mjs`. It reads only a blind study and the already-built evaluator entry, inlines
+  that entry's CSS and JavaScript, removes its now-unneeded module-preload dependency, embeds the
+  exact study as inert escaped JSON, and writes one HTML file with `wx` no-overwrite semantics.
+- Give the single file a restrictive CSP with `connect-src 'none'`; retain no remote asset path.
+  Opening it directly through `file://` validates and auto-loads the embedded study, hides/disables
+  replacement-study input, permits key-free partial/final choice downloads, and keeps Reset bound
+  to the same study. An altered embedded study must fail its own hash before a page is displayed.
+- Do not include the ranking source, answer key, model identity, credentials, production modules,
+  storage, or any new human result. The owner still performs binding and scoring separately.
+
+### Acceptance evidence
+
+The expanded production-build evaluator owner passes **35/35**. In addition to the Phase 273
+server-path contract, it proves a bounded self-contained HTML artifact, exact study identity, no
+answer-key hash, no `/assets/` reference, no-connect CSP, byte-identical replay, overwrite rejection, leaked-side-field
+rejection, automatic `file://` rendering, key-free offline export, study-bound Reset, zero HTTP
+requests, zero browser storage, and post-package tamper rejection before choices appear. The
+dependency-free study suite remains **23/23**; collector TypeScript and the isolated Vite build pass.
+
+### Decision
+
+The human handoff can now be exactly one blind, self-validating file rather than a directory that
+risks co-shipping the key. This improves evidence integrity and makes the already-frozen experiment
+practical without changing any name. It still reports **no preference result** and supplies no
+architectural win by itself. A real fixed ranking source and 42 human decisions remain mandatory
+before any production selection change.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

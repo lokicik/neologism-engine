@@ -3,8 +3,9 @@ import { spawn } from 'node:child_process'
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import { chromium } from '../../web/node_modules/playwright/index.mjs'
+import { packEvaluator } from './pack-evaluator.mjs'
 import { bindChoices, prepareStudy, scoreStudy } from './study-tools.mjs'
 import protocol from './protocol.json' with { type: 'json' }
 
@@ -12,7 +13,7 @@ const HERE = resolve(fileURLToPath(new URL('.', import.meta.url)))
 const REPO = resolve(HERE, '..', '..')
 const WEB = join(REPO, 'web')
 const APP_URL = 'http://127.0.0.1:4202/evaluator.html'
-const EXPECTED_CHECKS = 24
+const EXPECTED_CHECKS = 35
 
 let checks = 0
 function check(condition, label) {
@@ -119,13 +120,41 @@ try {
   leaky.cases[0].candidateSide = 'left'
   await writeFile(leakyPath, `${JSON.stringify(leaky, null, 2)}\n`)
 
+  const kitPath = join(temporary, 'blind-evaluation.html')
+  const packed = await packEvaluator({
+    study: studyPath,
+    dist: join(HERE, '.collector-dist'),
+    out: kitPath,
+  })
+  const kitText = await readFile(kitPath, 'utf8')
+  check(packed.studySha256 === prepared.study.studySha256 && packed.bytes === Buffer.byteLength(kitText)
+      && packed.bytes < 100_000,
+  'packer creates one bounded HTML evaluator bound to the exact blind study')
+  check(!kitText.includes(prepared.key.keySha256)
+      && !kitText.includes('/assets/')
+      && /connect-src 'none'/.test(kitText),
+  'offline kit contains no key hash or external asset and declares a no-connect CSP')
+  const secondKitPath = join(temporary, 'blind-evaluation-second.html')
+  await packEvaluator({ study: studyPath, dist: join(HERE, '.collector-dist'), out: secondKitPath })
+  check(await readFile(secondKitPath, 'utf8') === kitText,
+    'identical study and build produce byte-identical offline kits')
+  let overwriteRejected = false
+  try { await packEvaluator({ study: studyPath, dist: join(HERE, '.collector-dist'), out: kitPath }) } catch { overwriteRejected = true }
+  check(overwriteRejected, 'packer refuses to overwrite existing evaluator evidence')
+  const leakyKitPath = join(temporary, 'leaky-evaluation.html')
+  let leakyRejected = false
+  try { await packEvaluator({ study: leakyPath, dist: join(HERE, '.collector-dist'), out: leakyKitPath }) } catch { leakyRejected = true }
+  check(leakyRejected, 'packer rejects a study carrying an answer-side field')
+
   await waitForServer(APP_URL)
   const browser = await chromium.launch({ headless: true })
   const context = await browser.newContext({ acceptDownloads: true, viewport: { width: 1280, height: 900 } })
   const externalRequests = []
   context.on('request', (request) => {
     const url = new URL(request.url())
-    if (url.hostname !== '127.0.0.1') externalRequests.push(request.url())
+    if ((url.protocol === 'http:' || url.protocol === 'https:') && url.hostname !== '127.0.0.1') {
+      externalRequests.push(request.url())
+    }
   })
   const page = await context.newPage()
   await page.goto(APP_URL)
@@ -171,7 +200,9 @@ try {
   const resumed = await context.newPage()
   await resumed.goto(APP_URL)
   await loadFile(resumed, '#study-file', studyPath)
+  await resumed.locator('#workspace').waitFor({ state: 'visible' })
   await loadFile(resumed, '#choices-file', partialPath)
+  await resumed.getByText('Resumed 2 blind choices for this exact study.').waitFor()
   const resumedStatus = await resumed.locator('#load-status').innerText()
   const resumedCase = await resumed.locator('#case-id').textContent()
   check(resumedStatus === 'Resumed 2 blind choices for this exact study.'
@@ -183,6 +214,7 @@ try {
   const wrongChoicesPath = join(temporary, 'wrong-study-choices.json')
   await writeFile(wrongChoicesPath, `${JSON.stringify(wrongChoices, null, 2)}\n`)
   await loadFile(resumed, '#choices-file', wrongChoicesPath)
+  await resumed.locator('#error').waitFor({ state: 'visible' })
   const wrongError = await resumed.locator('#error').innerText()
   const retainedProgress = await resumed.locator('#answer-progress').innerText()
   check(await resumed.locator('#error').isVisible()
@@ -263,6 +295,48 @@ try {
   check(await page.locator('#brief-heading').getAttribute('tabindex') === '-1'
       && await page.getByRole('navigation', { name: 'Study case navigation' }).isVisible(),
   'case changes expose a focus target and named navigation landmark')
+
+  const offlineContext = await browser.newContext({ acceptDownloads: true, viewport: { width: 390, height: 844 } })
+  const offlineHttpRequests = []
+  offlineContext.on('request', (request) => {
+    const url = new URL(request.url())
+    if (url.protocol === 'http:' || url.protocol === 'https:') offlineHttpRequests.push(request.url())
+  })
+  const offline = await offlineContext.newPage()
+  await offline.goto(pathToFileURL(kitPath).href)
+  check(await offline.locator('#workspace').isVisible()
+      && await offline.locator('#study-label').isHidden()
+      && await offline.locator('#study-file').isDisabled(),
+  'single-file kit auto-loads its exact study without exposing a replacement-study input')
+  check(await offline.locator('#load-status').innerText() === 'Loaded 42 bundled blind cases. No answer key was read.'
+      && await offline.locator('#left-names li').count() === 10,
+  'offline file execution validates and renders the bundled study')
+  await offline.getByRole('button', { name: 'Choose left page' }).click()
+  const offlinePartialPath = join(temporary, 'offline-blind-choices.partial.json')
+  const offlinePartial = await downloadJson(offline, 'Export partial choices', offlinePartialPath)
+  check(offlinePartial.answers.length === 1
+      && offlinePartial.studySha256 === prepared.study.studySha256
+      && !JSON.stringify(offlinePartial).includes(prepared.key.keySha256),
+  'offline kit exports a key-free choice bound to its embedded study')
+  offline.once('dialog', (dialog) => dialog.accept())
+  await offline.getByRole('button', { name: 'Reset' }).click()
+  check(await offline.locator('#answer-progress').innerText() === '0 of 42 answered'
+      && await offline.locator('#workspace').isVisible()
+      && /Reset 42 bundled blind cases/.test(await offline.locator('#load-status').innerText()),
+  'bundled reset clears choices but cannot detach the evaluator from its study')
+  check(offlineHttpRequests.length === 0
+      && await offline.evaluate(() => localStorage.length === 0 && sessionStorage.length === 0),
+  'file-based evaluator performs zero HTTP requests and writes no browser storage')
+  const tamperedKitPath = join(temporary, 'tampered-blind-evaluation.html')
+  const originalBrief = prepared.study.cases[0].brief
+  await writeFile(tamperedKitPath, kitText.replace(originalBrief, `${originalBrief} altered`))
+  const tamperedOffline = await offlineContext.newPage()
+  await tamperedOffline.goto(pathToFileURL(tamperedKitPath).href)
+  await tamperedOffline.locator('#error').waitFor({ state: 'visible' })
+  check(await tamperedOffline.locator('#workspace').isHidden()
+      && /content hash is invalid/i.test(await tamperedOffline.locator('#error').innerText()),
+  'post-package study tampering fails closed before any choice is shown')
+  await offlineContext.close()
   check(checks + 1 === EXPECTED_CHECKS, `fixture executed exactly ${EXPECTED_CHECKS} checks`)
 
   await browser.close()

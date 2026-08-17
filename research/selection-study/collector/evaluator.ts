@@ -44,6 +44,7 @@ const resetButton = element<HTMLButtonElement>('reset')
 let study: BlindStudy | null = null
 let choices = new Map<string, Choice>()
 let caseIndex = 0
+let bundledStudy: BlindStudy | null = null
 
 function stableJson(value: unknown): string {
   if (Array.isArray(value)) return `[${value.map(stableJson).join(',')}]`
@@ -249,6 +250,15 @@ async function loadChoicesFile(): Promise<void> {
 
 function reset(): void {
   if (!study || (choices.size > 0 && !window.confirm('Discard the loaded study and every in-memory choice?'))) return
+  if (bundledStudy) {
+    study = bundledStudy
+    choices = new Map()
+    caseIndex = 0
+    clearError()
+    loadStatus.textContent = `Reset ${bundledStudy.cases.length} bundled blind cases. No answer key was read.`
+    render(true)
+    return
+  }
   study = null
   choices = new Map()
   caseIndex = 0
@@ -269,4 +279,21 @@ exportButton.addEventListener('click', exportChoices)
 resetButton.addEventListener('click', reset)
 window.addEventListener('beforeunload', (event) => { if (choices.size > 0) event.preventDefault() })
 
-render()
+async function initialize(): Promise<void> {
+  const embedded = document.getElementById('bundled-study')
+  if (!embedded) { render(); return }
+  try {
+    const loaded = await validateStudy(JSON.parse(embedded.textContent ?? ''))
+    bundledStudy = loaded
+    study = loaded
+    studyInput.disabled = true
+    element<HTMLElement>('study-label').hidden = true
+    loadStatus.textContent = `Loaded ${loaded.cases.length} bundled blind cases. No answer key was read.`
+    render(true)
+  } catch (error) {
+    showError(`Bundled study rejected: ${error instanceof Error ? error.message : String(error)}`)
+    render()
+  }
+}
+
+void initialize()

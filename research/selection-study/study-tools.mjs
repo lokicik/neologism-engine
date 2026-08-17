@@ -330,17 +330,52 @@ export function prepareStudy(rawSource, rawProtocol) {
   return { study, key }
 }
 
-function validateStudyAndKey(rawStudy, rawKey, protocol) {
+export function validateBlindStudy(rawStudy, rawProtocol) {
+  const protocol = validateProtocol(rawProtocol)
   const study = object(rawStudy, 'study')
-  const key = object(rawKey, 'key')
+  if (Object.keys(study).sort().join(',') !== 'cases,instructions,protocolSha256,schema,sourceSha256,studySha256') {
+    fail('blind study must contain only schema, protocolSha256, sourceSha256, studySha256, instructions, and cases')
+  }
   if (study.schema !== 'neologism-blind-page-study-v1') fail('unsupported study schema')
-  if (key.schema !== 'neologism-blind-page-key-v1') fail('unsupported answer-key schema')
+  if (!SHA256.test(study.protocolSha256) || study.protocolSha256 !== sha256Json(protocol)) {
+    fail('study protocol hash does not match the frozen protocol')
+  }
+  if (!SHA256.test(study.sourceSha256)) fail('study source hash must be lowercase SHA-256')
+  string(study.instructions, 'study.instructions', 20, 500)
+  if (/[\u0000-\u001f\u007f]/.test(study.instructions)) fail('study instructions must be single-line text without controls')
   const studyBase = { ...study }
   delete studyBase.studySha256
   const computedStudySha256 = sha256Json(studyBase)
   if (!SHA256.test(study.studySha256) || study.studySha256 !== computedStudySha256) {
     fail('study content hash is invalid')
   }
+  if (!Array.isArray(study.cases) || study.cases.length !== 42) fail('study must contain 42 blind cases')
+  const studyIds = new Set()
+  const studyById = new Map()
+  study.cases.forEach((rawCase, index) => {
+    const row = object(rawCase, `study.cases[${index}]`)
+    if (Object.keys(row).sort().join(',') !== 'brief,caseId,left,right') {
+      fail(`study case ${index + 1} contains unexpected or missing fields`)
+    }
+    string(row.caseId, `study.cases[${index}].caseId`, 3, 3)
+    if (!/^c(?:0[1-9]|[1-3][0-9]|4[0-2])$/.test(row.caseId)) fail(`invalid study case id ${row.caseId}`)
+    string(row.brief, `${row.caseId}.brief`, 10, 240)
+    if (row.brief !== row.brief.trim() || /[\u0000-\u001f\u007f]/.test(row.brief)) {
+      fail(`${row.caseId}.brief must be trimmed single-line text without controls`)
+    }
+    validatePage(row.left, `${row.caseId}.left`)
+    validatePage(row.right, `${row.caseId}.right`)
+    if (studyIds.has(row.caseId)) fail(`duplicate study case id ${row.caseId}`)
+    studyIds.add(row.caseId)
+    studyById.set(row.caseId, row)
+  })
+  return { study, studyById }
+}
+
+function validateStudyAndKey(rawStudy, rawKey, protocol) {
+  const { study, studyById } = validateBlindStudy(rawStudy, protocol)
+  const key = object(rawKey, 'key')
+  if (key.schema !== 'neologism-blind-page-key-v1') fail('unsupported answer-key schema')
   const keyBase = { ...key }
   delete keyBase.keySha256
   if (!SHA256.test(key.keySha256) || key.keySha256 !== sha256Json(keyBase)) {
@@ -352,27 +387,12 @@ function validateStudyAndKey(rawStudy, rawKey, protocol) {
     || study.protocolSha256 !== sha256Json(protocol)) {
     fail('study/key/protocol hashes do not agree')
   }
-  if (!SHA256.test(study.sourceSha256)
-    || !SHA256.test(study.protocolSha256)
-    || key.primaryWinGate !== protocol.primaryWinGate
+  if (key.primaryWinGate !== protocol.primaryWinGate
     || key.reversalConsistencyGate !== protocol.reversalConsistencyGate) {
     fail('study/key frozen hashes or gates are invalid')
   }
-  if (!Array.isArray(study.cases) || study.cases.length !== 42) fail('study must contain 42 blind cases')
   if (!Array.isArray(key.entries) || key.entries.length !== 42) fail('answer key must contain 42 entries')
-  const studyIds = new Set()
-  const studyById = new Map()
-  study.cases.forEach((rawCase, index) => {
-    const row = object(rawCase, `study.cases[${index}]`)
-    string(row.caseId, `study.cases[${index}].caseId`, 3, 3)
-    if (!/^c(?:0[1-9]|[1-3][0-9]|4[0-2])$/.test(row.caseId)) fail(`invalid study case id ${row.caseId}`)
-    string(row.brief, `${row.caseId}.brief`, 10, 240)
-    validatePage(row.left, `${row.caseId}.left`)
-    validatePage(row.right, `${row.caseId}.right`)
-    if (studyIds.has(row.caseId)) fail(`duplicate study case id ${row.caseId}`)
-    studyIds.add(row.caseId)
-    studyById.set(row.caseId, row)
-  })
+  const studyIds = new Set(study.cases.map((row) => row.caseId))
 
   const keyById = new Map()
   const primaryBriefIds = new Set()

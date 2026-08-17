@@ -84,9 +84,10 @@ numbered pool. It writes:
 - `answer-key.json`: arm ownership, source hash, and reversal links.
 
 Candidate placement is balanced: 15/15 across primary pages and 6/6 across
-reversals. The key has its own content hash; answers bind to both the blind
-study and key hashes. Give the evaluator only `blind-study.json`, never the
-source or answer key.
+reversals. The key has its own content hash. Blind choices bind only to the
+study hash; the owner binds them to the key after evaluation. Give the
+evaluator only the packed blind HTML described below, never the source or
+answer key.
 
 ## Collect a real source
 
@@ -133,27 +134,62 @@ The mocked browser contract is dependency-local and sends no real provider call:
 node research/selection-study/collector-check.mjs
 ```
 
-The answer file contains exactly one `left` or `right` choice for every blind
-case and binds to the hashes written in the blind package and key:
+## Run the blind evaluation
+
+After the isolated Vite build and `study-tools.mjs prepare` have succeeded,
+package the exact study into one offline evaluator:
+
+```powershell
+node research/selection-study/pack-evaluator.mjs `
+  --study path/to/blind-study.json `
+  --out path/to/blind-evaluation.html
+```
+
+The packer accepts no answer-key or source argument. It validates the exact
+study schema and hashes, inlines only the built evaluator CSS/JavaScript plus
+the inert blind-study JSON, applies a no-connect CSP, and refuses to overwrite
+an existing output. Send only `blind-evaluation.html` to the evaluator. It
+opens directly through `file://`, auto-loads its bound study, stores nothing in
+the browser, and exports key-free partial or complete choices. Partial choices
+can resume the same exact study.
+
+The evaluator's complete choice file contains exactly one `left` or `right`
+decision for every blind case and no answer-key hash:
 
 ```json
 {
-  "schema": "neologism-blind-page-answers-v1",
+  "schema": "neologism-blind-page-choices-v1",
   "studySha256": "...",
-  "keySha256": "...",
   "answers": [
     { "caseId": "c01", "choice": "left" }
   ]
 }
 ```
 
-Score it with:
+The study owner then binds those 42 decisions to the separately retained key:
+
+```powershell
+node research/selection-study/study-tools.mjs bind `
+  --study path/to/blind-study.json `
+  --key path/to/answer-key.json `
+  --choices path/to/blind-choices.json `
+  --out path/to/bound-answers.json
+```
+
+Only the bound output carries `keySha256`. Score that owner-side artifact with:
 
 ```powershell
 node research/selection-study/study-tools.mjs score `
   --study path/to/blind-study.json `
   --key path/to/answer-key.json `
-  --answers path/to/answers.json
+  --answers path/to/bound-answers.json
+```
+
+The combined server/offline evaluator contract is dependency-local and uses a
+synthetic study only:
+
+```powershell
+node research/selection-study/evaluator-check.mjs
 ```
 
 Run the dependency-free protocol and adversarial fixture checks with:
