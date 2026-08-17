@@ -92,6 +92,7 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
   const [modelsLoading, setModelsLoading] = useState(false)
   const [modelsAttempted, setModelsAttempted] = useState(false)
   const [modelOpen, setModelOpen] = useState(false)
+  const [modelFilterEdited, setModelFilterEdited] = useState(false)
   const [activeModelIndex, setActiveModelIndex] = useState(-1)
   const [passedOpen, setPassedOpen] = useState(false)
   const [likedOpen, setLikedOpen] = useState(false)
@@ -167,6 +168,7 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
     setModels([])
     setModelsAttempted(false)
     setModelsLoading(true)
+    setModelFilterEdited(false)
     const t = setTimeout(() => {
       void fetchModels(draft, controller.signal).then((list) => {
         if (cancelled) return
@@ -269,7 +271,7 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
   // When the field holds a fully-selected id (or is empty) show the whole list
   // so the user can browse/switch; only filter while they're typing a partial.
   // Keep an exact selection visible even when it falls beyond the 60-row cap.
-  const filtered = modelOptions(query, selected)
+  const filtered = modelOptions(modelFilterEdited ? query : '', selected)
   const tasteSummary = useMemo(
     () => buildTasteDataset(favorites, rejected).summary,
     [favorites, rejected],
@@ -299,6 +301,7 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
 
   const selectModel = (m: ModelInfo) => {
     setModelError(null)
+    setModelFilterEdited(false)
     setDraft((d) => ({ ...d, model: m.id, ...priceFields(m) }))
     setModelOpen(false)
     setActiveModelIndex(-1)
@@ -419,6 +422,7 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
             const id = e.target.value
             const exactModel = pickList.find((model) => model.id === id)
             const nextFiltered = modelOptions(id.toLowerCase(), exactModel)
+            setModelFilterEdited(!exactModel)
             setDraft((d) => ({ ...d, model: id, ...priceFields(exactModel) }))
             setModelOpen(true)
             setActiveModelIndex(exactModel
@@ -556,6 +560,7 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
                     setApiKeyError(null)
                     setEndpointError(null)
                     setModelError(null)
+                    setModelFilterEdited(false)
                     setDraft((d) => ({ ...d, provider: p, model: undefined, priceIn: undefined, priceOut: undefined }))
                   }}
                 />

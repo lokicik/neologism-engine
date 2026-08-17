@@ -697,17 +697,21 @@ try {
   const recoveredCombo = catalogRecoveryDialog.getByRole('combobox', { name: 'Model' })
   await recoveredCombo.focus()
   while (catalogRecoveryRequests < 2) await catalogRecoveryPage.waitForTimeout(20)
-  await recoveredCombo.fill('')
   const recoveredOption = catalogRecoveryDialog.getByRole('option', { name: /recovered\/openrouter-model/ })
-  await recoveredOption.waitFor({ state: 'visible' })
+  await catalogRecoveryPage.waitForTimeout(100)
+  const recoveredVisibleWithoutClearing = await recoveredOption.count() === 1
+    && await recoveredOption.isVisible().catch(() => false)
   check(
     catalogRecoveryRequests === 2
       && catalogRecoveryAuthorization.every((header) => header === null)
-      && await recoveredOption.count() === 1
+      && await recoveredCombo.inputValue() === FALLBACK_MODELS[0]
+      && recoveredVisibleWithoutClearing
       && await catalogRecoveryDialog.locator('.model-catalog-fallback').count() === 0
       && await catalogRecoveryDialog.evaluate((modal) => modal.scrollWidth <= modal.clientWidth + 1),
-    'the next Settings visit replaces the fallback with the recovered live catalog at 390 pixels',
+    'a recovered live catalog stays browsable beside a stale saved model without clearing the field',
   )
+  if (!recoveredVisibleWithoutClearing) await recoveredCombo.fill('')
+  await recoveredOption.waitFor({ state: 'visible' })
   await recoveredOption.click()
   check(
     await recoveredCombo.inputValue() === 'recovered/openrouter-model'

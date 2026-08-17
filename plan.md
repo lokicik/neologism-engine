@@ -8927,6 +8927,49 @@ misses without expanding its network or storage behavior.
 
 ---
 
+## Phase 260 — Keep refreshed catalogs browsable beside stale ids (2026-08-17)
+
+### Bottleneck
+
+The model combobox inferred browsing versus filtering only from whether the field exactly matched a
+row in the current pick list. If a saved/manual model disappeared from a refreshed provider catalog,
+its complete id no longer matched and was treated like a partial search query. Every newly discovered
+option vanished behind **No matches** until the user manually cleared the field.
+
+### Frozen boundary
+
+- Track whether the user has actively edited the model field in this Settings session. An untouched
+  saved/manual value keeps the current catalog browseable even when absent from it; actual typing
+  filters normally, while an exact typed or clicked option returns to selected/browse state.
+- Reset active filtering when provider/endpoint/enabled discovery scope changes. Preserve the input's
+  exact visible value, editable custom ids, selected prices, 60-option cap/substitution, keyboard and
+  mouse selection, native Home/End, active-descendant scrolling, fallback labeling, requests, cache,
+  focus, storage, ranking, generation, taste, WASM, and Rust.
+- Strengthen the existing Phase 259 recovery sequence: after the built-in fallback is cancelled and
+  a live catalog arrives, require its new option to be visible beside the still-unchanged saved id,
+  without clearing or rewriting the field first.
+
+### Acceptance evidence
+
+The strengthened production owner was deliberately red at **68/69** against Phase 259: the second
+key-free request returned `recovered/openrouter-model` and removed the fallback status, but the stale
+saved fallback id filtered that live row out. The fixture cleared the field only to let its retained
+selection checks finish; every other Settings, recovery, focus, and containment gate remained green.
+
+The combobox now separates an untouched saved value from an active user query. The rebuilt owner
+passes **69/69**: `recovered/openrouter-model` is immediately visible while the input still contains
+the old saved id, then remains selectable through the existing keyboard/mouse contract. TypeScript
+and the Vite production build pass. The retained pure judge/discovery/cache owner remains green at
+**35/35**; no live provider or key was used.
+
+### Decision
+
+A model disappearing upstream no longer turns its saved id into an accidental permanent filter.
+Catalog browsing and deliberate text filtering now remain distinct without changing the saved value
+or inventing a migration.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
