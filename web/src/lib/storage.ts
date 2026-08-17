@@ -23,6 +23,7 @@ const IMPORTED_SAVED_KEY = 'neologism:imported-saved'
 const TASTE_REFERENCES_KEY = 'neologism:taste-references'
 const MAX_REJECTED = 200
 const MAX_TASTE_REFERENCE_INPUT = 240
+const JUDGE_TEXT_FIELDS = ['apiKey', 'model', 'endpoint', 'prompt'] as const
 let recoveredImportedSaved: NameResult[] = []
 
 function isWellFormedString(value: unknown): value is string {
@@ -360,12 +361,11 @@ function judgeConfigFromUnknown(value: unknown): JudgeConfig | null {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) return null
   const record = value as Record<string, unknown>
   const has = (key: string) => Object.prototype.hasOwnProperty.call(record, key)
-  const strings = ['apiKey', 'model', 'endpoint', 'prompt'] as const
   const prices = ['priceIn', 'priceOut'] as const
 
   if (has('enabled') && typeof record.enabled !== 'boolean') return null
   if (has('provider') && record.provider !== 'openrouter' && record.provider !== 'localhost') return null
-  if (strings.some((key) => has(key) && typeof record[key] !== 'string')) return null
+  if (JUDGE_TEXT_FIELDS.some((key) => has(key) && !isWellFormedString(record[key]))) return null
   if (prices.some((key) => (
     has(key)
       && (typeof record[key] !== 'number' || !Number.isFinite(record[key]) || record[key] < 0)
@@ -374,7 +374,7 @@ function judgeConfigFromUnknown(value: unknown): JudgeConfig | null {
   const config = defaultJudgeConfig()
   if (typeof record.enabled === 'boolean') config.enabled = record.enabled
   if (record.provider === 'openrouter' || record.provider === 'localhost') config.provider = record.provider
-  for (const key of strings) {
+  for (const key of JUDGE_TEXT_FIELDS) {
     if (typeof record[key] === 'string') config[key] = record[key]
   }
   for (const key of prices) {
@@ -394,6 +394,10 @@ export function loadJudgeConfig(): JudgeConfig {
 }
 
 export function saveJudgeConfig(cfg: JudgeConfig): boolean {
+  if (JUDGE_TEXT_FIELDS.some((key) => {
+    const value = cfg[key]
+    return value !== undefined && !isWellFormedString(value)
+  })) return false
   try {
     localStorage.setItem(JUDGE_KEY, JSON.stringify(cfg))
     return true

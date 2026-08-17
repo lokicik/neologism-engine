@@ -8005,6 +8005,53 @@ rather than being silently destroyed during startup.
 
 ---
 
+## Phase 239 — Validate persisted AI text at both boundaries (2026-08-17)
+
+### Bottleneck
+
+The AI settings reader validated object shape, provider, primitive types, and finite prices, but its
+four text fields still accepted unpaired UTF-16 surrogates. A malformed local endpoint therefore
+made AI Studio appear configured and could flow into model discovery/ranking URLs. The writer had
+the same gap: a programmatic malformed edit reported success, closed Settings, replaced the prior
+durable record, and would only become invalid if a stricter future reload rejected it.
+
+### Frozen boundary
+
+- Validate only the known `apiKey`, `model`, `endpoint`, and `prompt` fields with the shared
+  deterministic Unicode predicate. Preserve provider/type/price rules, legacy default filling,
+  unknown raw fields, endpoint normalization, API ownership, and all network behavior.
+- On read, fail closed to the existing disabled default without rewriting the malformed raw record.
+  On write, return `false` before storage so the existing Settings error path keeps the dialog,
+  edited draft, and prior durable config together.
+- Extend the existing corrupt-config production owner in both directions: one persisted malformed
+  endpoint and one native-input write that bypasses ordinary text entry.
+
+### Acceptance evidence
+
+The strengthened owner was red at **19/23** against the Phase 238 bundle. The malformed stored
+endpoint incorrectly left Studio configured. Submitting the same malformed endpoint from Settings
+closed the dialog, exposed no error, and overwrote the valid legacy record. The other invalid-type,
+non-object, valid-partial, raw-preservation, defaults, recovery, and page-error checks stayed green.
+
+The shared text-field list now drives both reader and writer validation. The rebuilt owner passes
+**23/23**: malformed persisted Unicode leaves Studio safely unconfigured while raw storage remains
+byte-identical; a malformed write keeps Settings open, shows its existing save failure, and
+preserves the prior durable settings exactly. TypeScript and the Vite production build pass.
+
+Retained production contracts also remain green: Settings storage failure/retry passes **13/13**,
+and the full AI Studio cancellation, config replacement, first/later failure, same-pool Retry,
+race/cache, model hot-swap, focus, containment, storage-neutrality, and unexpected-request owner
+passes **61/61**.
+
+### Decision
+
+Persisted AI text can no longer make runtime and reload disagree or turn a malformed local record
+into an apparently configured network client. Valid legacy settings and explicit provider behavior
+are unchanged; malformed data remains visible in raw storage until the user explicitly saves a
+valid replacement.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

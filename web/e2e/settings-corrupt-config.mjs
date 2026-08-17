@@ -11,7 +11,7 @@ const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 17
+const EXPECTED_CHECKS = 23
 
 const server = spawn(process.execPath, [viteCli, 'preview', '--port', String(PORT), '--strictPort'], {
   cwd: WEB_DIR,
@@ -110,6 +110,31 @@ try {
   check(endpointPageErrors.length === 0, `invalid endpoint type produces no page error (${endpointPageErrors.join(' | ')})`)
   await endpointContext.close()
 
+  const illFormedEndpointRaw = JSON.stringify({
+    enabled: true,
+    provider: 'localhost',
+    endpoint: 'http://127.0.0.1:8080/v1\uD83D',
+  })
+  const illFormedContext = await contextFor(illFormedEndpointRaw)
+  const illFormedPageErrors = []
+  const illFormedPage = await illFormedContext.newPage()
+  illFormedPage.on('pageerror', (error) => illFormedPageErrors.push(error.message))
+  await illFormedPage.goto(APP_URL)
+  await illFormedPage.getByRole('button', { name: 'AI Studio' }).click()
+  check(
+    await illFormedPage.getByRole('button', { name: 'Open Settings' }).isVisible(),
+    'ill-formed endpoint Unicode leaves AI Studio safely unconfigured',
+  )
+  check(
+    await illFormedPage.evaluate(() => localStorage.getItem('neologism:judge')) === illFormedEndpointRaw,
+    'ill-formed endpoint record is not silently repaired on read',
+  )
+  check(
+    illFormedPageErrors.length === 0,
+    `ill-formed endpoint produces no page error (${illFormedPageErrors.join(' | ')})`,
+  )
+  await illFormedContext.close()
+
   const invalidArrayRaw = JSON.stringify(['openrouter', true])
   const arrayContext = await contextFor(invalidArrayRaw)
   const arrayPageErrors = []
@@ -154,6 +179,21 @@ try {
   check(
     await validPage.evaluate(() => localStorage.getItem('neologism:judge')) === validPartialRaw,
     'valid partial record and unknown future field remain untouched on read',
+  )
+  await validDialog.getByLabel('Endpoint').evaluate((input) => {
+    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set
+    setter.call(input, 'http://127.0.0.1:8080/v1\uD83D')
+    input.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText' }))
+  })
+  await validDialog.getByRole('button', { name: 'Save', exact: true }).click()
+  check(await validDialog.isVisible(), 'ill-formed endpoint write keeps Settings open')
+  check(
+    await validDialog.getByRole('alert').isVisible(),
+    'ill-formed endpoint write exposes the existing visible save failure',
+  )
+  check(
+    await validPage.evaluate(() => localStorage.getItem('neologism:judge')) === validPartialRaw,
+    'ill-formed endpoint write preserves the prior durable settings exactly',
   )
   check(validPageErrors.length === 0, `valid partial config produces no page error (${validPageErrors.join(' | ')})`)
   await validContext.close()
