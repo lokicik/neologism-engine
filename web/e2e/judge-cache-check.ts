@@ -36,6 +36,7 @@ let autoModel = 'auto-model-a'
 let discoveryModel = 'discovery-model-a'
 let discoveryLookups = 0
 let openRouterLookups = 0
+let mixedResolutionLookups = 0
 const canonicalEndpointUrls: string[] = []
 let modelResolutionAbortObserved = false
 let abortedResolutionChatCalls = 0
@@ -65,6 +66,18 @@ globalThis.fetch = async (input, init) => {
   }
   if (url.includes(':9030/')) canonicalEndpointUrls.push(url)
   if (url.endsWith('/models')) {
+    if (url.includes(':9070/')) {
+      mixedResolutionLookups++
+      return new Response(JSON.stringify({ data: [
+        { id: 17 },
+        { id: 'broken\uD83D' },
+        { id: '   ' },
+        { id: '  valid-auto-model  ' },
+      ] }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    }
     if (url.includes(':9020/')) {
       discoveryLookups++
       return new Response(JSON.stringify({ data: [{ id: discoveryModel }] }), {
@@ -214,6 +227,21 @@ check(
     && autoB?.[0]?.reason === 'auto-model-b-second'
     && JSON.stringify(autoBAgain) === JSON.stringify(autoB),
   'localhost auto-detection resolves the active model before exact-result cache reuse',
+)
+
+const callsBeforeMixedResolution = calls.length
+const mixedResolution = await rerank(names('MixedResolution'), {
+  enabled: true,
+  provider: 'localhost',
+  endpoint: 'http://127.0.0.1:9070/v1',
+  prompt: promptA,
+})
+check(
+  mixedResolutionLookups === 1
+    && calls.length === callsBeforeMixedResolution + 1
+    && calls.at(-1)?.model === 'valid-auto-model'
+    && mixedResolution?.length === 2,
+  'localhost auto-resolution skips malformed leading rows and sends the first valid normalized model id',
 )
 
 const discoveryConfig: JudgeConfig = {
@@ -387,9 +415,9 @@ check(
   'an exact 160-unit provider reason remains valid without truncation',
 )
 
-if (checks !== 24 || failures > 0) {
-  console.error(`judge cache check: ${failures} failure(s), ${checks}/24 checks executed`)
+if (checks !== 25 || failures > 0) {
+  console.error(`judge cache check: ${failures} failure(s), ${checks}/25 checks executed`)
   process.exitCode = 1
 } else {
-  console.log('judge cache check: 24/24 checks passed')
+  console.log('judge cache check: 25/25 checks passed')
 }

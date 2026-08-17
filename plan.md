@@ -8302,6 +8302,48 @@ estimation now share the same fail-closed boundary.
 
 ---
 
+## Phase 245 — Share catalog validation with localhost auto-model resolution (2026-08-17)
+
+### Bottleneck
+
+Phase 244 validated every model row shown in Settings, but AI Studio's blank-model localhost path
+still read `data[0].id` directly from its separate `/models` request. A numeric or ill-formed first
+row could therefore reach the chat payload or make resolution fail, while a valid second row stayed
+unused. Settings and ranking did not yet agree on what counted as a usable local model identity.
+
+### Frozen boundary
+
+- Reuse the Phase 244 row parser inside blank-model resolution. Skip invalid leading rows and select
+  the first valid normalized id. A non-array or all-invalid response still returns the existing null
+  fallback.
+- Use that one normalized id for the request body and shared ranking cache identity. Preserve the
+  configured-model fast path, one `/models` lookup per ranking attempt, live re-resolution before
+  cache reuse, cancellation, failure fallback, and Settings' independently refreshed catalog.
+- Do not add polling, retries, model preference rules, provider requests, UI, storage, generation,
+  taste, WASM, or Rust changes.
+
+### Acceptance evidence
+
+The expanded pure judge owner was deliberately red at **24/25** against Phase 244. A localhost
+catalog containing numeric, ill-formed, and blank leading ids followed by `  valid-auto-model  `
+failed to produce one successful chat request with the normalized model. The other 24 catalog, price,
+endpoint, cache, cancellation, response-validation, and auto-model hot-swap gates remained green.
+
+Blank-model resolution now walks the response through the same parser used by Settings. The pure
+owner passes **25/25**: it performs one lookup, skips all three malformed rows, sends exactly
+`valid-auto-model`, and returns the complete two-name ranking. TypeScript and the Vite production
+build pass. AI Studio's retained cancellation/config/failure/Retry/race/cache/model/focus contract,
+including the live localhost A-to-B model replacement, remains green at **61/61**. No live local
+server, provider, or key was used.
+
+### Decision
+
+Settings and AI Studio now share one definition of a valid discovered model. A malformed leading
+row cannot choose the chat model, poison cache identity, or starve a valid later row; existing
+fallback, cancellation, and hot-swap behavior remain intact.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

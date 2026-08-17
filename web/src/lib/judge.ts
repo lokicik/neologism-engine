@@ -150,8 +150,13 @@ async function resolveModel(
   try {
     const res = await fetch(`${base}/models`, { headers, signal })
     if (!res.ok) return null
-    const data = (await res.json()) as { data?: { id: string }[] }
-    return data.data?.[0]?.id ?? null
+    const data = (await res.json()) as { data?: unknown }
+    if (!Array.isArray(data.data)) return null
+    for (const row of data.data) {
+      const model = modelInfoFromUnknown(row, cfg.provider)
+      if (model) return model.id
+    }
+    return null
   } catch {
     return null
   }
