@@ -1,0 +1,23 @@
+{
+  "class_rows_before_qid_dedup": {
+    "mobile_app": 1156,
+    "software": 7694,
+    "website": 4639
+  },
+  "classes": {
+    "mobile_app": "Q620615",
+    "software": "Q7397",
+    "website": "Q35127"
+  },
+  "endpoint": "https://query.wikidata.org/sparql",
+  "license": "CC0-1.0",
+  "metadata_batch": 200,
+  "page_size": 1000,
+  "query_template_sha256": "b08eda86eced02008319b18732d485451e8fa3be6641be35dd1262acb57c10f4",
+  "records": 13267,
+  "requests": 82,
+  "retrieved_utc": "2026-08-17T16:37:03+00:00",
+  "schema": "neologism-holistic-wikidata-v1",
+  "snapshot_sha256": "5ee2d1a80e2ac9a2fe4c1877a9eef010101ae1efa8e1c66105e202ac0c2cbcea",
+  "uncompressed_sha256": "0ba957fdc36996aced619321051afd13c1cefedf0f5865637c257f00d1d9748e"
+}

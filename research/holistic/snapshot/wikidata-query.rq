@@ -1,0 +1,37 @@
+# Base query
+SELECT ?item ?name ?description
+WHERE {
+  ?item wdt:P31 wd:CLASS_QID;
+        rdfs:label ?name;
+        schema:description ?description.
+  FILTER(LANG(?name) = "en")
+  FILTER(LANG(?description) = "en")
+  FILTER(REGEX(STR(?name), "^[A-Za-z]{4,12}$"))
+}
+ORDER BY ?item
+LIMIT 1000
+OFFSET OFFSET
+
+# Metadata query
+SELECT ?item
+       (GROUP_CONCAT(DISTINCT ?alias; separator="") AS ?aliases)
+       (GROUP_CONCAT(DISTINCT ?genreLabel; separator="") AS ?genres)
+       (GROUP_CONCAT(DISTINCT ?useLabel; separator="") AS ?uses)
+       (GROUP_CONCAT(DISTINCT ?industryLabel; separator="") AS ?industries)
+       (GROUP_CONCAT(DISTINCT ?subjectLabel; separator="") AS ?subjects)
+       (GROUP_CONCAT(DISTINCT STR(?developer); separator="") AS ?developers)
+       (GROUP_CONCAT(DISTINCT STR(?owner); separator="") AS ?owners)
+       (GROUP_CONCAT(DISTINCT STR(?parent); separator="") AS ?parents)
+WHERE {
+  VALUES ?item { QID_BATCH }
+  OPTIONAL { ?item skos:altLabel ?alias. FILTER(LANG(?alias) = "en") }
+  OPTIONAL { ?item wdt:P136 ?genre. ?genre rdfs:label ?genreLabel. FILTER(LANG(?genreLabel) = "en") }
+  OPTIONAL { ?item wdt:P366 ?use. ?use rdfs:label ?useLabel. FILTER(LANG(?useLabel) = "en") }
+  OPTIONAL { ?item wdt:P452 ?industry. ?industry rdfs:label ?industryLabel. FILTER(LANG(?industryLabel) = "en") }
+  OPTIONAL { ?item wdt:P921 ?subject. ?subject rdfs:label ?subjectLabel. FILTER(LANG(?subjectLabel) = "en") }
+  OPTIONAL { ?item wdt:P178 ?developer }
+  OPTIONAL { ?item wdt:P127 ?owner }
+  OPTIONAL { ?item wdt:P749 ?parent }
+}
+GROUP BY ?item
+ORDER BY ?item
