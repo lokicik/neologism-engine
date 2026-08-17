@@ -88,6 +88,7 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
   useEffect(() => {
     const changed = previousJudgeRequestIdentity.current !== judgeRequestIdentity
     previousJudgeRequestIdentity.current = judgeRequestIdentity
+    if (changed) cache.current.clear()
     if (changed && rankAbortController.current && activeRank) {
       cancelRanking('settings')
     }
@@ -105,11 +106,7 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
     // be hidden by this faster per-pool cache.
     if (judgeConfig.provider === 'localhost' && !configuredModel) return null
     return JSON.stringify([
-      judgeConfig.provider,
-      judgeConfig.provider === 'localhost'
-        ? normalizeLocalEndpoint(judgeConfig.endpoint)
-        : 'openrouter',
-      configuredModel,
+      judgeRequestIdentity,
       m,
       criterion,
     ])

@@ -12,7 +12,7 @@ const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 61
+const EXPECTED_CHECKS = 65
 
 const server = spawn(process.execPath, [viteCli, 'preview', '--port', String(PORT), '--strictPort'], {
   cwd: WEB_DIR,
@@ -54,7 +54,7 @@ function requestSnapshot(request) {
   const content = body.messages?.[0]?.content ?? ''
   const names = [...content.matchAll(/^\s*\d+\.\s+(.+)$/gm)].map((match) => match[1].trim())
   const criterion = content.match(/on ONE criterion: how much each name (.+)\.\s*$/m)?.[1] ?? ''
-  return { names, criterion, body }
+  return { names, criterion, body, authorization: request.headers().authorization ?? '' }
 }
 
 function rankedReply(names, prefix) {
@@ -636,6 +636,56 @@ try {
     check(
       reranked.names.join('|') === namesBefore,
       'model replacement reranks the byte-identical local pool instead of regenerating names',
+    )
+    await context.close()
+  }
+
+  // A saved OpenRouter credential is part of request identity. Re-ranking the
+  // same pool and metric after a key change must exercise that key once before
+  // the new exact request can be reused.
+  {
+    const { context, page, calls } = await studioPage({ width: 390, height: 844 }, async (route, _call, request) => {
+      const keyLabel = request.authorization.replace(/^Bearer\s+/, '')
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: rankedReply(request.names, `key-${keyLabel}`),
+      })
+    })
+    const generate = page.getByRole('button', { name: 'Generate', exact: true })
+    await generate.click()
+    await page.waitForFunction(() => document.querySelectorAll('.ai-studio .card-ai-reason').length === 24)
+    const initial = await resultSnapshot(page)
+    check(
+      calls.length === 1
+        && calls[0].authorization === 'Bearer fixture-key'
+        && initial.reasons.every((reason) => reason.includes('key-fixture-key')),
+      'initial Brandable ranking is visibly owned by the saved OpenRouter credential',
+    )
+
+    await page.locator('.sidebar-settings').click()
+    const dialog = page.getByRole('dialog', { name: 'Settings' })
+    await dialog.getByLabel('API key').fill('fixture-key-b')
+    await dialog.getByRole('button', { name: 'Save', exact: true }).click()
+    check(
+      await page.evaluate(() => JSON.parse(localStorage.getItem('neologism:judge') ?? '{}').apiKey)
+        === 'fixture-key-b',
+      'Settings commits the replacement credential before the same metric is requested again',
+    )
+
+    const namesBefore = initial.names.join('|')
+    await page.getByRole('button', { name: 'Brandable', exact: true }).click()
+    await page.waitForTimeout(200)
+    const reranked = await resultSnapshot(page)
+    check(
+      calls.length === 2 && calls[1]?.authorization === 'Bearer fixture-key-b',
+      'the same metric performs a fresh request with the replacement OpenRouter credential',
+    )
+    check(
+      reranked.reasons.length === 24
+        && reranked.reasons.every((reason) => reason.includes('key-fixture-key-b'))
+        && reranked.names.join('|') === namesBefore,
+      'credential replacement reranks the same local pool with only the new verified reasons',
     )
     await context.close()
   }

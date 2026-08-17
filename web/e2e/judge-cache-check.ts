@@ -30,7 +30,7 @@ const names = (prefix: string): NameResult[] => ['Alpha', 'Beta'].map((suffix) =
   connotations: [],
 }))
 
-const calls: Array<{ url: string; prompt: string; model: string }> = []
+const calls: Array<{ url: string; prompt: string; model: string; authorization: string }> = []
 let modelLookups = 0
 let autoModel = 'auto-model-a'
 let discoveryModel = 'discovery-model-a'
@@ -122,7 +122,12 @@ globalThis.fetch = async (input, init) => {
     messages?: Array<{ content?: string }>
   }
   const prompt = body.messages?.[0]?.content ?? ''
-  calls.push({ url, prompt, model: body.model ?? '' })
+  calls.push({
+    url,
+    prompt,
+    model: body.model ?? '',
+    authorization: new Headers(init?.headers).get('Authorization') ?? '',
+  })
 
   const secondWins = prompt.includes('Criterion B') || url.includes(':9002/') || body.model === 'auto-model-b'
   const reasonPrefix = body.model?.startsWith('auto-model-')
@@ -498,9 +503,35 @@ check(
   'the 128-entry ranking cache refreshes exact-repeat recency and evicts its least-recent request',
 )
 
-if (checks !== 32 || failures > 0) {
-  console.error(`judge cache check: ${failures} failure(s), ${checks}/32 checks executed`)
+const credentialNames = names('Credential')
+const credentialCallsBefore = calls.length
+const credentialA = await rerank(credentialNames, {
+  ...openRouterBase,
+  apiKey: 'credential-a',
+  prompt: promptA,
+})
+const credentialB = await rerank(credentialNames, {
+  ...openRouterBase,
+  apiKey: 'credential-b',
+  prompt: promptA,
+})
+const credentialBAgain = await rerank(credentialNames, {
+  ...openRouterBase,
+  apiKey: 'credential-b',
+  prompt: promptA,
+})
+check(
+  calls.length === credentialCallsBefore + 2
+    && calls.at(-2)?.authorization === 'Bearer credential-a'
+    && calls.at(-1)?.authorization === 'Bearer credential-b'
+    && JSON.stringify(credentialBAgain) === JSON.stringify(credentialB)
+    && JSON.stringify(credentialA) === JSON.stringify(credentialB),
+  'changing the OpenRouter credential performs one fresh request before exact-repeat cache reuse',
+)
+
+if (checks !== 33 || failures > 0) {
+  console.error(`judge cache check: ${failures} failure(s), ${checks}/33 checks executed`)
   process.exitCode = 1
 } else {
-  console.log('judge cache check: 32/32 checks passed')
+  console.log('judge cache check: 33/33 checks passed')
 }

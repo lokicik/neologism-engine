@@ -143,6 +143,21 @@ export function isJudgeReady(cfg: JudgeConfig): boolean {
 const cache = new Map<string, RankedJudgment[]>()
 const JUDGE_CACHE_LIMIT = 128
 const MAX_JUDGE_REASON_UNITS = 160
+let openRouterCredential: string | undefined
+let openRouterCredentialScope = 0
+
+function rankingCredentialScope(cfg: JudgeConfig): number {
+  if (cfg.provider !== 'openrouter') return 0
+  const next = cfg.apiKey ?? ''
+  if (next !== openRouterCredential) {
+    // Keep the secret out of structured cache keys while giving every saved
+    // credential its own exact-result scope.
+    openRouterCredential = next
+    openRouterCredentialScope++
+    cache.clear()
+  }
+  return openRouterCredentialScope
+}
 
 function cachedRanking(key: string): RankedJudgment[] | undefined {
   const cached = cache.get(key)
@@ -346,6 +361,7 @@ export async function rerank(
   if (!isJudgeReady(cfg)) return null
   if (names.length === 0) return []
 
+  const credentialScope = rankingCredentialScope(cfg)
   const labels = names.map((n) => n.name)
   const template = cfg.prompt || DEFAULT_JUDGE_PROMPT
   const { base, headers } = baseAndHeaders(cfg)
@@ -357,6 +373,7 @@ export async function rerank(
       cfg.provider,
       base,
       model,
+      credentialScope,
       template,
       labels,
     ])
@@ -412,7 +429,9 @@ export async function rerank(
       .sort((a, b) => b.score - a.score || a.i - b.i)
       .map(({ name, score, reason }) => ({ name, score, reason }))
 
-    cacheRanking(key, ranked)
+    if (cfg.provider !== 'openrouter' || credentialScope === openRouterCredentialScope) {
+      cacheRanking(key, ranked)
+    }
     return ranked
   } catch {
     return null

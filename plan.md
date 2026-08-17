@@ -8629,6 +8629,54 @@ same safe string at discovery, configuration, persistence, readiness, and reques
 
 ---
 
+## Phase 253 — Scope AI ranking caches to the active credential (2026-08-17)
+
+### Bottleneck
+
+The shared judge cache identified an OpenRouter ranking by provider, base, model, prompt, and ordered
+names, while AI Studio's per-pool cache used the same request shape without the saved API key. After
+replacing a key in Settings, selecting the same metric could therefore show the prior key's cached
+ranking without sending a request under the new credential. The saved config was truthful, but the
+visible result and apparent connectivity were not.
+
+### Frozen boundary
+
+- Treat an OpenRouter credential change as request identity in both cache layers. Keep the raw key
+  out of the shared structured cache key by advancing an in-memory credential scope and clearing the
+  bounded result map when that credential changes. A late completion from an older scope cannot
+  populate the current scope.
+- Clear AI Studio's small per-pool cache whenever its saved request identity changes, and include
+  that current identity in each same-pool metric key. The next selection reranks the byte-identical
+  local pool once; only its exact repeat may reuse the new result.
+- Preserve cache capacity and LRU behavior, model/endpoint/prompt/name identity, localhost live
+  model resolution, cancellation, fallback, Retry, ranking order, generation, storage schema,
+  taste, WASM, and Rust.
+
+### Acceptance evidence
+
+The expanded pure owner was deliberately red at **32/33** against Phase 252: credential A made one
+request, but credential B inherited its cached ranking and never sent its own Authorization header.
+The rebuilt production owner was red at **63/65**: Settings durably saved key B, yet the same
+Brandable selection added no request and kept key A's reasons over the unchanged 24-name pool.
+Every retained failure, cancellation, model-change, cache, focus, and containment check remained
+green.
+
+The shared cache now uses a credential generation rather than embedding the secret in its structured
+key, while Studio clears and rekeys its local metric cache on the saved request identity. The pure
+owner passes **33/33**. The production owner passes **65/65**: the replacement key produces exactly
+one fresh request, the Authorization header carries only key B, the same 24 names receive only key
+B's verified reasons, and subsequent exact reuse remains available. Retained production contracts
+remain green at Settings keyboard **63/63**, corrupt Settings config **57/57**, and Settings storage
+failure/retry **13/13**. TypeScript and the Vite production build pass; no live provider or key was
+used.
+
+### Decision
+
+A saved credential can no longer look operational by inheriting another credential's ranking. Cache
+reuse remains bounded and fast, but only inside the active request identity.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
