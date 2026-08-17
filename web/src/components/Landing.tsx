@@ -400,11 +400,13 @@ export function Landing({ onEnter }: Props) {
         </div>
 
         <div className="tile">
-          <h3>No server. No account. No tracking.</h3>
+          <h3>Local generation. No app account or tracking.</h3>
           <p className="tile-body">
-            A Rust engine compiled to WebAssembly, running on your machine. Works offline.
+            The naming engine runs locally as WebAssembly and works offline.
           </p>
-          <p className="tile-foot">your ideas never leave the tab</p>
+          <p className="tile-foot">
+            Optional checks and AI ranking contact third-party providers only when you start them.
+          </p>
         </div>
 
         <div className="tile tile-desc">
@@ -447,7 +449,7 @@ export function Landing({ onEnter }: Props) {
 
       <footer className="landing-footer">
         <span className="wordmark">◈ neologism</span>
-        <span>Rust compiled to WebAssembly — no servers, no accounts, no tracking.</span>
+        <span>Local WebAssembly generation — no app backend, account, or tracking.</span>
       </footer>
     </div>
   )

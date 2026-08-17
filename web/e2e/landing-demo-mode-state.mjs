@@ -1,5 +1,6 @@
-// Phase 169 browser contract: Landing's live mode demo exposes its visual
-// single-selection state without pretending to be tabs or an ARIA menu.
+// Phase 169/220-222/265 browser contract: Landing's live mode demo exposes its
+// visual single-selection state without pretending to be tabs or an ARIA menu,
+// while its privacy copy keeps local generation distinct from optional providers.
 // Run after `npm run build`: node e2e/landing-demo-mode-state.mjs
 import { chromium } from 'playwright'
 import { spawn } from 'node:child_process'
@@ -11,7 +12,7 @@ const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 24
+const EXPECTED_CHECKS = 25
 
 const server = spawn(process.execPath, [viteCli, 'preview', '--port', String(PORT), '--strictPort'], {
   cwd: WEB_DIR,
@@ -94,6 +95,16 @@ async function landingFocusRings() {
 try {
   await page.goto(APP_URL)
   const storageBefore = await storageSnapshot()
+  const landingCopy = (await page.locator('.landing').innerText()).replace(/\s+/g, ' ').trim()
+  check(
+    landingCopy.includes('Local generation. No app account or tracking.')
+      && landingCopy.includes('The naming engine runs locally as WebAssembly and works offline.')
+      && landingCopy.includes('Optional checks and AI ranking contact third-party providers only when you start them.')
+      && landingCopy.includes('Local WebAssembly generation — no app backend, account, or tracking.')
+      && !landingCopy.includes('your ideas never leave the tab')
+      && !landingCopy.includes('No server. No account. No tracking.'),
+    'Landing scopes local-generation privacy without hiding optional third-party actions',
+  )
   const desktopRings = await landingFocusRings()
   if (!desktopRings.every((ring) => ring.ok)) console.log('INFO  390px Landing focus rings', desktopRings)
   check(

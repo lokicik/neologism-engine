@@ -9125,6 +9125,45 @@ without receiving a false guarantee about an id the catalog did not report.
 
 ---
 
+## Phase 265 — Scope Landing privacy claims to local generation (2026-08-17)
+
+### Bottleneck
+
+Landing accurately disclosed its on-request domain evidence and manual third-party links, but a
+separate tile still promised that **your ideas never leave the tab** and the footer said there were
+**no servers**. Name generation is local and offline; optional domain evidence and AI ranking can
+send the displayed names to user-chosen providers. The absolute copy therefore contradicted the
+same page's narrower request boundary.
+
+### Frozen boundary
+
+- Keep every generation, availability, AI, storage, navigation, and animation behavior unchanged.
+  Change only the Landing tile/footer wording and one assertion in the retained Landing production
+  fixture.
+- Describe the naming engine as local WebAssembly that works offline. Attribute the absence of a
+  backend, account, and tracking to this app rather than implying that optional provider actions
+  make no network request.
+- Name optional checks and AI ranking as user-started third-party actions. Preserve the existing
+  provider-specific disclosure beside Name checks and do not turn Landing into a legal or privacy
+  policy.
+
+### Acceptance evidence
+
+The strengthened production owner was deliberately red at **24/25** against Phase 264: every mode,
+motion, reduced-motion, focus, storage, and zero-request check passed, while the new truth-boundary
+assertion found the old absolute phrases. After the copy-only repair, the rebuilt owner passes
+**25/25**. TypeScript and the Vite production build pass; no external provider request is made by the
+fixture. A separate 320-pixel production visual inspection confirms that the longer privacy tile
+wraps inside its card without horizontal clipping.
+
+### Decision
+
+Landing now promises exactly what the product controls: offline local name generation and no app
+backend/account/tracking. It no longer hides the explicit third-party boundary of optional checks
+or AI ranking behind a contradictory absolute privacy slogan.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
