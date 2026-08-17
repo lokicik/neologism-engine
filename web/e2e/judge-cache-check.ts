@@ -383,6 +383,9 @@ check(
       'http://user:secret@127.0.0.1:8080/v1',
       'http://127.0.0.1:8080/v1?tenant=a',
       'http://127.0.0.1:8080/v1#models',
+      'http://127.0.0.1:8080/v1/../admin',
+      'http://127.0.0.1:8080/v1/./models',
+      'http://127.0.0.1:8080/v1/%2e%2e/admin',
       'http://127.0.0.1:8080/v1\uD83D',
     ].every((endpoint) => !isValidLocalEndpoint(endpoint)),
   'local endpoint validation accepts exact HTTP bases and rejects ambiguous or unsafe URL forms',
@@ -436,19 +439,26 @@ check(
 )
 
 const fetchCallsBeforeRewrittenEndpoint = fetchCalls
-const rewrittenEndpointConfig: JudgeConfig = {
+const rewrittenEndpointConfigs: JudgeConfig[] = [
+  'http://127.0.0.1:8\n080/v1',
+  'http://127.0.0.1:8080/v1/../admin',
+  'http://127.0.0.1:8080/v1/%2e%2e/admin',
+].map((endpoint) => ({
   enabled: true,
   provider: 'localhost',
-  endpoint: 'http://127.0.0.1:8\n080/v1',
+  endpoint,
   model: 'fixture-model',
   prompt: promptA,
-}
+}))
+const rewrittenEndpointResults = await Promise.all(rewrittenEndpointConfigs.map(async (config) => (
+  !isValidLocalEndpoint(config.endpoint)
+    && (await fetchModels(config)).length === 0
+    && await rerank(names('RewrittenEndpoint'), config) === null
+)))
 check(
-  !isValidLocalEndpoint(rewrittenEndpointConfig.endpoint)
-    && (await fetchModels(rewrittenEndpointConfig)).length === 0
-    && await rerank(names('RewrittenEndpoint'), rewrittenEndpointConfig) === null
+  rewrittenEndpointResults.every(Boolean)
     && fetchCalls === fetchCallsBeforeRewrittenEndpoint,
-  'a parser-rewritten local endpoint cannot become ready or start discovery and ranking requests',
+  'parser-rewritten local endpoints cannot become ready or start discovery and ranking requests',
 )
 
 const invalidResponseNames = names('InvalidResponse')

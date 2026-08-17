@@ -8720,6 +8720,49 @@ Settings ambiguous or silently change the selected model's cost metadata.
 
 ---
 
+## Phase 255 — Reject parser-rewritten local endpoint paths (2026-08-17)
+
+### Bottleneck
+
+Phase 250 rejected controls and backslashes before URL parsing, but the browser URL parser also
+collapses exact `.` and `..` path segments, including their `%2e` encodings. Settings could display
+and persist `/v1/../admin` while model discovery or ranking actually contacted `/admin`; the visible
+request base and cache identity therefore did not necessarily describe the path sent on the wire.
+
+### Frozen boundary
+
+- After the existing trim/trailing-slash normalization and before URL parsing, reject any
+  slash-delimited path segment made of one or two literal or percent-encoded dots. Matching is
+  case-insensitive and covers mixed literal/encoded pairs, but does not reject ordinary dotted
+  filenames, encoded characters generally, or substrings inside a longer segment.
+- Reuse the shared endpoint validator for Settings writes, persisted-config loading, readiness,
+  model discovery, ranking, and cache identity. Keep the invalid draft focused with a precise field
+  error; keep an invalid persisted record byte-exact but inactive.
+- Preserve ordinary HTTP(S) host/path behavior, default-port and trailing-slash normalization,
+  localhost auto-detect, provider/cache/model semantics, storage schema, generation, taste, WASM,
+  and Rust.
+
+### Acceptance evidence
+
+The pure judge/cache owner was deliberately red at **31/33** against Phase 254: both the generic
+endpoint-validation gate and the no-request transport gate admitted parser-collapsed dot paths. The
+rebuilt production corruption owner was red at **60/63**: saving literal `/v1/../admin` closed the
+dialog and replaced storage, while persisted `/v1/%2e%2e/admin` remained enabled.
+
+The shared validator now rejects only exact one/two-dot path segments before `URL` can rewrite them.
+The pure owner passes **33/33** and the rebuilt production corruption owner passes **63/63**, covering
+literal and percent-encoded paths, raw-value preservation, exact field error/focus, and zero page
+errors. Retained production contracts remain green at Settings keyboard **64/64** and AI Studio
+cancellation/config/failure/Retry/race/cache/model/credential/focus **65/65**. TypeScript and the Vite
+production build pass; no live provider or key was used.
+
+### Decision
+
+The endpoint shown, stored, validated, and used for cache ownership can no longer rely on the browser
+silently collapsing a different local request path.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

@@ -11,7 +11,7 @@ const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 57
+const EXPECTED_CHECKS = 63
 
 const server = spawn(process.execPath, [viteCli, 'preview', '--port', String(PORT), '--strictPort'], {
   cwd: WEB_DIR,
@@ -366,7 +366,7 @@ try {
       && await rewrittenEndpointWriteDialog.locator(`#${rewrittenEndpointErrorId}`).getAttribute('role').catch(() => null)
         === 'alert'
       && await rewrittenEndpointWriteDialog.locator(`#${rewrittenEndpointErrorId}`).textContent().catch(() => null)
-        === 'Enter a complete http:// or https:// endpoint without credentials, control characters, backslashes, a query, or a fragment.'
+        === 'Enter a complete http:// or https:// endpoint without credentials, control characters, backslashes, dot path segments, a query, or a fragment.'
       && await rewrittenEndpointInput.evaluate((input) => (
         document.activeElement === input && input.matches(':focus-visible')
       )).catch(() => false),
@@ -405,6 +405,71 @@ try {
     `parser-rewritten endpoint record produces no page error (${rewrittenStoredEndpointErrors.join(' | ')})`,
   )
   await rewrittenStoredEndpointContext.close()
+
+  const dotSegmentWriteContext = await contextFor(priorSafeEndpointRaw)
+  const dotSegmentWriteErrors = []
+  const dotSegmentWritePage = await dotSegmentWriteContext.newPage()
+  dotSegmentWritePage.on('pageerror', (error) => dotSegmentWriteErrors.push(error.message))
+  await dotSegmentWritePage.goto(APP_URL)
+  await dotSegmentWritePage.locator('.sidebar-settings').click()
+  const dotSegmentWriteDialog = dotSegmentWritePage.locator('.settings-modal[role="dialog"]')
+  const dotSegmentInput = dotSegmentWriteDialog.getByLabel('Endpoint')
+  await dotSegmentInput.fill('http://127.0.0.1:8080/v1/../admin')
+  await dotSegmentWriteDialog.getByRole('button', { name: 'Save', exact: true }).click()
+  const dotSegmentDialogVisible = await dotSegmentWriteDialog.isVisible().catch(() => false)
+  check(
+    dotSegmentDialogVisible
+      && await dotSegmentWritePage.evaluate(() => localStorage.getItem('neologism:judge'))
+        === priorSafeEndpointRaw,
+    'dot-segment endpoint Save keeps Settings open and preserves the prior durable config',
+  )
+  const dotSegmentErrorId = dotSegmentDialogVisible
+    ? await dotSegmentInput.getAttribute('aria-describedby').catch(() => null)
+    : null
+  check(
+    dotSegmentErrorId !== null
+      && await dotSegmentWriteDialog.locator(`#${dotSegmentErrorId}`).getAttribute('role').catch(() => null)
+        === 'alert'
+      && await dotSegmentWriteDialog.locator(`#${dotSegmentErrorId}`).textContent().catch(() => null)
+        === 'Enter a complete http:// or https:// endpoint without credentials, control characters, backslashes, dot path segments, a query, or a fragment.'
+      && await dotSegmentInput.evaluate((input) => (
+        document.activeElement === input && input.matches(':focus-visible')
+      )).catch(() => false),
+    'dot-segment endpoint Save exposes and focuses its field-owned validation error',
+  )
+  check(
+    dotSegmentWriteErrors.length === 0,
+    `dot-segment endpoint Save produces no page error (${dotSegmentWriteErrors.join(' | ')})`,
+  )
+  await dotSegmentWriteContext.close()
+
+  const encodedDotEndpointRaw = JSON.stringify({
+    enabled: true,
+    provider: 'localhost',
+    endpoint: 'http://127.0.0.1:8080/v1/%2e%2e/admin',
+    model: 'fixture-model',
+  })
+  const encodedDotContext = await contextFor(encodedDotEndpointRaw)
+  const encodedDotErrors = []
+  const encodedDotPage = await encodedDotContext.newPage()
+  encodedDotPage.on('pageerror', (error) => encodedDotErrors.push(error.message))
+  await encodedDotPage.goto(APP_URL)
+  await encodedDotPage.locator('.sidebar-settings').click()
+  const encodedDotDialog = encodedDotPage.locator('.settings-modal[role="dialog"]')
+  check(
+    !(await encodedDotDialog.getByLabel('Enable AI re-rank').isChecked()),
+    'persisted encoded dot-segment endpoint fails closed',
+  )
+  check(
+    await encodedDotPage.evaluate(() => localStorage.getItem('neologism:judge'))
+      === encodedDotEndpointRaw,
+    'encoded dot-segment endpoint record is not silently repaired on read',
+  )
+  check(
+    encodedDotErrors.length === 0,
+    `encoded dot-segment endpoint produces no page error (${encodedDotErrors.join(' | ')})`,
+  )
+  await encodedDotContext.close()
 
   const invalidEndpointRaw = JSON.stringify({
     enabled: true,
@@ -551,7 +616,7 @@ try {
   check(
     await endpointAlert.count() === 1
       && (await endpointAlert.textContent())?.trim()
-        === 'Enter a complete http:// or https:// endpoint without credentials, control characters, backslashes, a query, or a fragment.',
+        === 'Enter a complete http:// or https:// endpoint without credentials, control characters, backslashes, dot path segments, a query, or a fragment.',
     'non-HTTP endpoint write exposes an exact validation error',
   )
   check(

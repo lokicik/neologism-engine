@@ -199,7 +199,7 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
       && !isValidLocalEndpoint(endpoint)) {
       setSaveError(null)
       setEndpointError(
-        'Enter a complete http:// or https:// endpoint without credentials, control characters, backslashes, a query, or a fragment.',
+        'Enter a complete http:// or https:// endpoint without credentials, control characters, backslashes, dot path segments, a query, or a fragment.',
       )
       requestAnimationFrame(() => {
         endpointInputRef.current?.scrollIntoView({ block: 'nearest' })
