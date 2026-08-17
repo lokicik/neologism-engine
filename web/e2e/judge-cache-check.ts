@@ -425,9 +425,25 @@ check(
   'an exact 160-unit provider reason remains valid without truncation',
 )
 
-if (checks !== 27 || failures > 0) {
-  console.error(`judge cache check: ${failures} failure(s), ${checks}/27 checks executed`)
+const cacheCallsBeforeBound = calls.length
+for (let index = 0; index < 128; index++) {
+  await rerank(names(`CacheBound${index}`), {
+    ...openRouterBase,
+    prompt: `Cache bound ${index} {{names}}`,
+  })
+}
+await rerank(names('CacheBound0'), { ...openRouterBase, prompt: 'Cache bound 0 {{names}}' })
+await rerank(names('CacheBound128'), { ...openRouterBase, prompt: 'Cache bound 128 {{names}}' })
+await rerank(names('CacheBound0'), { ...openRouterBase, prompt: 'Cache bound 0 {{names}}' })
+await rerank(names('CacheBound1'), { ...openRouterBase, prompt: 'Cache bound 1 {{names}}' })
+check(
+  calls.length === cacheCallsBeforeBound + 130,
+  'the 128-entry ranking cache refreshes exact-repeat recency and evicts its least-recent request',
+)
+
+if (checks !== 28 || failures > 0) {
+  console.error(`judge cache check: ${failures} failure(s), ${checks}/28 checks executed`)
   process.exitCode = 1
 } else {
-  console.log('judge cache check: 27/27 checks passed')
+  console.log('judge cache check: 28/28 checks passed')
 }

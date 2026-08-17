@@ -8426,6 +8426,42 @@ production caller would ignore.
 
 ---
 
+## Phase 248 — Bound the AI judge result cache (2026-08-17)
+
+### Bottleneck
+
+The exact-request judge cache was session-only but unbounded. Every distinct candidate order,
+criterion, endpoint, or model could retain another verified result array for the lifetime of the
+page, so a long AI Studio session accumulated entries that could never be reclaimed.
+
+### Frozen boundary
+
+- Keep the existing structured cache identity and exact-repeat reuse. Limit only the shared result
+  map to 128 entries, refresh a hit's recency, and evict the least-recent entry on overflow.
+- Cache only the same fully validated rankings as before. Do not persist entries, cache failures or
+  pending promises, alter provider calls, prompt construction, parsing, ranking, model discovery,
+  AI Studio's per-pool cache, fallback, focus, storage, taste, generation, WASM, or Rust.
+
+### Acceptance evidence
+
+The expanded pure owner was deliberately red at **27/28** against Phase 247. After 128 unique exact
+requests, touching the oldest, and adding one more, the formerly unbounded map still reused the
+second-oldest entry instead of evicting it. All 27 existing cache-identity, catalog, endpoint,
+cancellation, and response-validation gates remained green.
+
+The shared result map now promotes an exact hit and removes its least-recent key whenever insertion
+would exceed 128 entries. The pure owner passes **28/28**: the touched oldest request stays cached,
+the second-oldest request is fetched again, and every prior boundary remains unchanged. TypeScript
+and the Vite production build pass. AI Studio's retained cancellation/config/failure/Retry/race/
+cache/model/focus/fallback contract remains green at **61/61**; no live provider or key was used.
+
+### Decision
+
+Exact-repeat acceleration remains useful without allowing browsing duration and exploratory metric
+changes to grow the verified-result cache forever.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

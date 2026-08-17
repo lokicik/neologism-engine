@@ -125,7 +125,26 @@ export function isJudgeReady(cfg: JudgeConfig): boolean {
 }
 
 const cache = new Map<string, RankedJudgment[]>()
+const JUDGE_CACHE_LIMIT = 128
 const MAX_JUDGE_REASON_UNITS = 160
+
+function cachedRanking(key: string): RankedJudgment[] | undefined {
+  const cached = cache.get(key)
+  if (cached === undefined) return undefined
+  cache.delete(key)
+  cache.set(key, cached)
+  return cached
+}
+
+function cacheRanking(key: string, ranked: RankedJudgment[]): void {
+  cache.delete(key)
+  cache.set(key, ranked)
+  while (cache.size > JUDGE_CACHE_LIMIT) {
+    const oldest = cache.keys().next().value
+    if (oldest === undefined) break
+    cache.delete(oldest)
+  }
+}
 
 function baseAndHeaders(cfg: JudgeConfig): { base: string; headers: Record<string, string> } {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' }
@@ -317,7 +336,8 @@ export async function rerank(
       template,
       labels,
     ])
-    if (cache.has(key)) return cache.get(key)!
+    const cached = cachedRanking(key)
+    if (cached) return cached
 
     const res = await fetch(`${base}/chat/completions`, {
       method: 'POST',
@@ -368,7 +388,7 @@ export async function rerank(
       .sort((a, b) => b.score - a.score || a.i - b.i)
       .map(({ name, score, reason }) => ({ name, score, reason }))
 
-    cache.set(key, ranked)
+    cacheRanking(key, ranked)
     return ranked
   } catch {
     return null
