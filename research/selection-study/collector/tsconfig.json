@@ -4,5 +4,5 @@
     "tsBuildInfoFile": "../../../web/node_modules/.tmp/tsconfig.selection-study-collector.tsbuildinfo",
     "resolveJsonModule": true
   },
-  "include": ["collector.ts", "seed-audit.ts"]
+  "include": ["collector.ts", "evaluator.ts", "seed-audit.ts"]
 }

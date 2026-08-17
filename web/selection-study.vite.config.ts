@@ -17,6 +17,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         collector: resolve(collectorRoot, 'index.html'),
+        evaluator: resolve(collectorRoot, 'evaluator.html'),
         seedAudit: resolve(collectorRoot, 'seed-audit.html'),
       },
     },

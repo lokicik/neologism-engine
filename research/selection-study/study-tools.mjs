@@ -478,6 +478,47 @@ export function scoreStudy(rawStudy, rawKey, rawAnswers, rawProtocol) {
   return { ...result, passed: result.efficacyGate && result.reversalGate }
 }
 
+function validateBlindChoices(rawChoices, study, complete) {
+  const choices = object(rawChoices, 'choices')
+  if (Object.keys(choices).sort().join(',') !== 'answers,schema,studySha256') {
+    fail('blind choices must contain only schema, studySha256, and answers')
+  }
+  if (choices.schema !== 'neologism-blind-page-choices-v1') fail('unsupported blind choices schema')
+  if (choices.studySha256 !== study.studySha256) fail('blind choices target a different study hash')
+  if (!Array.isArray(choices.answers) || (complete && choices.answers.length !== 42)) {
+    fail(complete ? 'blind choices must contain exactly 42 decisions' : 'blind choices answers must be an array')
+  }
+  const studyIds = new Set(study.cases.map((row) => row.caseId))
+  const byId = new Map()
+  for (const rawChoice of choices.answers) {
+    const choice = object(rawChoice, 'blind choice')
+    if (Object.keys(choice).sort().join(',') !== 'caseId,choice') {
+      fail('blind choice rows must contain only caseId and choice')
+    }
+    if (!studyIds.has(choice.caseId) || byId.has(choice.caseId)) {
+      fail(`invalid or duplicate blind choice ${choice.caseId}`)
+    }
+    if (choice.choice !== 'left' && choice.choice !== 'right') {
+      fail(`invalid blind choice for ${choice.caseId}`)
+    }
+    byId.set(choice.caseId, choice.choice)
+  }
+  if (complete && byId.size !== studyIds.size) fail('blind choices do not cover every study case')
+  return { choices, byId }
+}
+
+export function bindChoices(rawStudy, rawKey, rawChoices, rawProtocol) {
+  const protocol = validateProtocol(rawProtocol)
+  const { study, key } = validateStudyAndKey(rawStudy, rawKey, protocol)
+  const { byId } = validateBlindChoices(rawChoices, study, true)
+  return {
+    schema: 'neologism-blind-page-answers-v1',
+    studySha256: study.studySha256,
+    keySha256: key.keySha256,
+    answers: study.cases.map(({ caseId }) => ({ caseId, choice: byId.get(caseId) })),
+  }
+}
+
 function assertFrozenBriefsUnseen(protocol) {
   const canonical = readJson(join(REPO, 'research', 'holistic', 'canonical_briefs.json'), 'canonical briefs')
   const heldoutText = readFileSync(join(REPO, 'web', 'e2e', 'heldout-cold-quality-audit.mjs'), 'utf8').toLowerCase()
@@ -555,6 +596,14 @@ function answersFor(study, key, primaryWins, consistentReversals) {
   }
 }
 
+function blindChoicesFor(answers) {
+  return {
+    schema: 'neologism-blind-page-choices-v1',
+    studySha256: answers.studySha256,
+    answers: answers.answers,
+  }
+}
+
 function expectFailure(action, contains) {
   try {
     action()
@@ -599,6 +648,21 @@ function selfTest(protocol) {
   )
 
   const passingAnswers = answersFor(first.study, first.key, 21, 10)
+  const blindChoices = blindChoicesFor(passingAnswers)
+  const boundAnswers = bindChoices(first.study, first.key, blindChoices, protocol)
+  check(stableJson(boundAnswers) === stableJson(passingAnswers),
+    'owner-side binding adds the hidden key hash without changing blind decisions')
+  check(!stableJson(blindChoices).includes(first.key.keySha256)
+      && Object.keys(blindChoices).sort().join(',') === 'answers,schema,studySha256',
+  'blind choices contain no answer-key hash or arm ownership')
+  const partialChoices = JSON.parse(JSON.stringify(blindChoices))
+  partialChoices.answers.pop()
+  expectFailure(() => bindChoices(first.study, first.key, partialChoices, protocol), 'exactly 42')
+  check(true, 'incomplete blind choices cannot be bound for scoring')
+  const wrongStudyChoices = JSON.parse(JSON.stringify(blindChoices))
+  wrongStudyChoices.studySha256 = '0'.repeat(64)
+  expectFailure(() => bindChoices(first.study, first.key, wrongStudyChoices, protocol), 'different study')
+  check(true, 'blind choices cannot be rebound to another study')
   const passing = scoreStudy(first.study, first.key, passingAnswers, protocol)
   check(passing.passed && passing.primaryCandidateWins === 21 && passing.reversalConsistent === 10,
     'exact 21/30 and 10/12 boundaries pass')
@@ -658,8 +722,8 @@ function selfTest(protocol) {
   expectFailure(() => prepareStudy(leaked, protocol), 'forbidden')
   check(true, 'credential-shaped fields are rejected from study sources')
 
-  if (checks !== 19) fail(`expected 19 self-test checks, ran ${checks}`)
-  console.log(`\nselection study self-test: ${checks}/19 passed`)
+  if (checks !== 23) fail(`expected 23 self-test checks, ran ${checks}`)
+  console.log(`\nselection study self-test: ${checks}/23 passed`)
 }
 
 function argsAfterCommand(argv) {
@@ -687,6 +751,13 @@ function writeStudy(outDir, study, key) {
   writeFileSync(studyPath, `${JSON.stringify(study, null, 2)}\n`, { flag: 'wx' })
   writeFileSync(keyPath, `${JSON.stringify(key, null, 2)}\n`, { flag: 'wx' })
   return { studyPath, keyPath }
+}
+
+function writeBoundAnswers(path, answers) {
+  if (existsSync(path)) fail('answer output already exists; refusing to overwrite evidence')
+  mkdirSync(dirname(path), { recursive: true })
+  writeFileSync(path, `${JSON.stringify(answers, null, 2)}\n`, { flag: 'wx' })
+  return path
 }
 
 function main() {
@@ -719,7 +790,16 @@ function main() {
     if (!result.passed) process.exitCode = 1
     return
   }
-  fail('usage: study-tools.mjs self-test | validate-briefs | prepare --source FILE --out DIR | score --study FILE --key FILE --answers FILE')
+  if (command === 'bind') {
+    const study = readJson(requireArg(args, 'study'), 'study')
+    const key = readJson(requireArg(args, 'key'), 'answer key')
+    const choices = readJson(requireArg(args, 'choices'), 'blind choices')
+    const answers = bindChoices(study, key, choices, protocol)
+    const output = writeBoundAnswers(requireArg(args, 'out'), answers)
+    console.log(JSON.stringify({ output, studySha256: answers.studySha256, keySha256: answers.keySha256 }, null, 2))
+    return
+  }
+  fail('usage: study-tools.mjs self-test | validate-briefs | prepare --source FILE --out DIR | bind --study FILE --key FILE --choices FILE --out FILE | score --study FILE --key FILE --answers FILE')
 }
 
 if (fileURLToPath(import.meta.url) === resolve(process.argv[1] ?? join(tmpdir(), 'missing'))) {

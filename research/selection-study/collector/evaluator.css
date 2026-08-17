@@ -1,0 +1,68 @@
+:root {
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  color: #f7f4ff;
+  background: #0e0d14;
+  font-synthesis: none;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; min-width: 320px; background: radial-gradient(circle at 50% -20%, #282044, transparent 36rem), #0e0d14; }
+button, input { font: inherit; }
+button, .file-button {
+  min-height: 42px;
+  border: 1px solid #413b57;
+  border-radius: .7rem;
+  color: #fff;
+  background: #735ff0;
+}
+button { padding: .65rem 1rem; cursor: pointer; }
+button.secondary, .file-button.secondary { background: #252231; }
+button:disabled, .file-button[aria-disabled=true] { cursor: not-allowed; opacity: .5; }
+button:focus-visible, .file-button:focus-within { outline: 2px solid #c1b9ff; outline-offset: 3px; }
+
+main { width: min(1040px, calc(100% - 2rem)); margin: 0 auto; padding: 3rem 0 5rem; }
+header { max-width: 760px; margin-bottom: 2rem; }
+.eyebrow, .case-id { margin: 0 0 .45rem; color: #b9afff; font-size: .76rem; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; }
+h1, h2, h3, p { margin-top: 0; }
+h1 { margin-bottom: .8rem; font-size: clamp(2.2rem, 6vw, 4rem); line-height: 1; }
+h2 { margin-bottom: .45rem; }
+.lede, .status, .load-panel p, .brief-card p, .export-panel p { color: #c8c3d6; line-height: 1.55; }
+
+.load-panel, .brief-card, .name-page, .export-panel {
+  border: 1px solid #332e45;
+  border-radius: 1rem;
+  background: rgba(24, 22, 34, .94);
+  box-shadow: 0 18px 60px rgba(0, 0, 0, .18);
+}
+.load-panel, .export-panel { padding: 1.25rem; }
+.file-actions, .case-nav, .progress-row, .export-panel { display: flex; align-items: center; gap: .75rem; }
+.file-actions { flex-wrap: wrap; margin: 1rem 0; }
+.file-button { position: relative; display: inline-flex; align-items: center; padding: .65rem 1rem; cursor: pointer; }
+.file-button input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.status { margin-bottom: 0; }
+
+#workspace { margin-top: 1.25rem; }
+.progress-row { justify-content: space-between; color: #b9afff; font-variant-numeric: tabular-nums; }
+.brief-card { padding: 1.3rem; text-align: center; }
+.brief-card h2 { font-size: clamp(1.4rem, 4vw, 2rem); }
+.brief-card p:last-child { margin-bottom: 0; }
+.pages { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin: 1rem 0; }
+.name-page { padding: 1.2rem; }
+.name-page h3 { text-align: center; }
+.name-page ol { display: grid; gap: .5rem; min-height: 22rem; margin: 1rem 0; padding-left: 2rem; }
+.name-page li { padding: .45rem .55rem; border-radius: .45rem; background: #17151f; font-size: 1.05rem; }
+.name-page button { width: 100%; }
+.name-page button[aria-pressed=true] { border-color: #c1b9ff; background: #4e3bc8; box-shadow: 0 0 0 2px rgba(193,185,255,.22); }
+.case-nav { justify-content: center; margin-top: 1rem; flex-wrap: wrap; }
+.export-panel { justify-content: space-between; margin-top: 1.25rem; }
+.export-panel p { margin-bottom: 0; }
+.error { position: sticky; bottom: 1rem; margin: 1rem 0 0; padding: .9rem 1rem; border: 1px solid #a74f64; border-radius: .75rem; color: #ffd5dd; background: #3b1720; }
+code { color: #ddd5ff; }
+
+@media (max-width: 680px) {
+  main { padding-top: 1.5rem; }
+  .pages { grid-template-columns: 1fr; }
+  .name-page ol { min-height: 0; }
+  .export-panel { align-items: flex-start; flex-direction: column; }
+}

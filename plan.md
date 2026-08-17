@@ -9504,6 +9504,56 @@ one exact model, collect all 30 cases through the explicit UI, validate the sour
 
 ---
 
+## Phase 273 — Separate blind evaluation from answer-key ownership (2026-08-17)
+
+### Bottleneck
+
+Phase 272 can create a valid provider ranking source and Phase 271 can derive a blinded 42-case
+package, but the old answer format required the hidden answer-key hash inside the evaluator's file.
+Giving that artifact to the evaluator would unnecessarily expose arm ownership infrastructure;
+asking the study owner to copy 42 choices later would instead create an avoidable transcription
+path. The evaluation surface therefore needs its own strictly key-free evidence format.
+
+### Isolated evaluator boundary
+
+- Add a dedicated evaluator entry to the research-only selection-study Vite build. It accepts only the exact
+  hashed `blind-study.json`; extra fields, malformed pages, duplicate case ids, altered content,
+  oversized files, and nonmatching resume files fail closed. It has no source, model, provider,
+  credential, answer-key, production, or storage input.
+- Keep one in-memory left/right choice per blinded case. Partial exports can resume the exact same
+  study and complete exports contain only `schema`, `studySha256`, and ordered `{caseId, choice}`
+  rows. Reload deliberately clears unexported work; neither localStorage nor sessionStorage is used.
+- Bind complete blind choices to `answer-key.json` only in the study owner's CLI. That step verifies
+  the study and key hashes, requires all 42 unique cases, adds `keySha256`, and emits the existing
+  scorer input without changing a recorded side. The output writer refuses to overwrite evidence.
+- Keep the evaluator responsive and keyboard-native, with two complete ten-name pages, persistent
+  pressed-state choices, explicit previous/next-unanswered navigation, a case-change focus target,
+  and visible partial-export recovery. Do not turn this into a provider or product screen.
+
+### Acceptance evidence
+
+The dependency-free protocol suite now passes **23/23**, adding key-free choice shape, exact
+owner-side binding, incomplete-choice rejection, and cross-study rejection. The independent
+production-build evaluator fixture passes **24/24**: it rejects a leaked answer-side field, loads
+the exact 42-case hashed study, preserves decisions across navigation, exports and resumes two
+partial choices, rejects a wrong-study resume without losing progress, completes 42 unique choices,
+binds and scores them only on the owner side, writes no browser storage, sends no external request,
+exposes no credential input, and remains horizontally contained with stacked pages at 390 and 320
+pixels. Collector TypeScript and the separate three-entry Vite build are green. Direct browser
+review confirms the empty evaluator's key-free boundary, disabled pre-study recovery actions, and
+clear load/save hierarchy.
+
+### Decision
+
+The evaluator can now remain blind through the final human click while the owner retains the key
+needed for scoring. This phase still reports **no preference result**: no fixed real ranking source
+has been collected and no human has supplied the 42 decisions. Production remains at Phase 270;
+the next honest step is to obtain one fixed model/source,
+prepare the blind package, hand only `blind-study.json` to an evaluator, then bind and score the
+returned complete choices without changing the protocol.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

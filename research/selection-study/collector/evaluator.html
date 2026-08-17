@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <title>Blind page evaluator</title>
+    <link rel="stylesheet" href="./evaluator.css" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="eyebrow">Research only · Phase 273 blinded evaluator</p>
+        <h1>Choose the stronger page</h1>
+        <p class="lede">
+          Judge each pair only for the displayed project brief. This page never
+          loads the answer key, arm ownership, provider source, or API credentials.
+        </p>
+      </header>
+
+      <section class="load-panel" aria-labelledby="load-title">
+        <div>
+          <h2 id="load-title">Load blind evidence</h2>
+          <p>Start with <code>blind-study.json</code>. A partial choices file can resume this exact study.</p>
+        </div>
+        <div class="file-actions">
+          <label class="file-button">
+            Load blind study
+            <input id="study-file" type="file" accept="application/json,.json" />
+          </label>
+          <label class="file-button secondary" aria-disabled="true" id="choices-label">
+            Resume choices
+            <input id="choices-file" type="file" accept="application/json,.json" disabled />
+          </label>
+          <button id="reset" class="secondary" type="button" disabled>Reset</button>
+        </div>
+        <p id="load-status" class="status" role="status" aria-live="polite">No study loaded.</p>
+      </section>
+
+      <section id="workspace" hidden aria-labelledby="brief-heading">
+        <div class="progress-row">
+          <p id="case-progress">Case 1 of 42</p>
+          <p id="answer-progress">0 of 42 answered</p>
+        </div>
+        <article class="brief-card">
+          <p id="case-id" class="case-id">c01</p>
+          <h2 id="brief-heading" tabindex="-1">Project brief</h2>
+          <p>Choose the stronger full page for this project. Do not score individual names independently.</p>
+        </article>
+
+        <div class="pages" aria-label="Blind page pair">
+          <section class="name-page" aria-labelledby="left-title">
+            <h3 id="left-title">Left page</h3>
+            <ol id="left-names"></ol>
+            <button id="choose-left" type="button" aria-pressed="false">Choose left page</button>
+          </section>
+          <section class="name-page" aria-labelledby="right-title">
+            <h3 id="right-title">Right page</h3>
+            <ol id="right-names"></ol>
+            <button id="choose-right" type="button" aria-pressed="false">Choose right page</button>
+          </section>
+        </div>
+
+        <p id="choice-status" class="status" role="status" aria-live="polite">No choice for this case.</p>
+        <nav class="case-nav" aria-label="Study case navigation">
+          <button id="previous" class="secondary" type="button">Previous</button>
+          <button id="next-unanswered" class="secondary" type="button">Next unanswered</button>
+          <button id="next" class="secondary" type="button">Next</button>
+        </nav>
+      </section>
+
+      <section class="export-panel" aria-labelledby="export-title">
+        <div>
+          <h2 id="export-title">Save blind choices</h2>
+          <p>Partial exports can resume later. Only a complete 42-choice file can be bound for scoring.</p>
+        </div>
+        <button id="export" type="button" disabled>Export choices</button>
+      </section>
+
+      <p id="error" class="error" role="alert" hidden></p>
+    </main>
+    <script type="module" src="./evaluator.ts"></script>
+  </body>
+</html>
