@@ -9238,6 +9238,156 @@ in the product.
 
 ---
 
+## Phase 268 — Reject the first brief-conditioned holistic GRU (2026-08-17)
+
+### Bottleneck
+
+Phase 141 measured a real structural ceiling: 1,038/1,050 canonical Brandable cards match a known
+assembled surface template and 72/105 pages contain a six-card single-shape wall. Further tuning of
+the existing root/suffix/metaphor stack risks moving cards between visible template families rather
+than creating genuinely holistic forms. The smallest architecturally distinct experiment was a
+brief-conditioned character GRU that emits an entire spelling without concatenating prompt roots.
+
+### Frozen boundary
+
+- Keep production `generate()`, WASM, Auto, public `NameResult`, taste export, storage, and web types
+  untouched. The new path lives only under `research/holistic/` and the isolated
+  `core/examples/holistic_probe` harness.
+- Pin a CC0 Wikidata snapshot of direct software, website, and mobile-app instances; allow network
+  access only through explicit `--refresh`. Accept only English-described, single-token ASCII
+  labels matching `[A-Za-z]{4,12}`; do not transliterate or delete spaces.
+- Split by connected owner/developer/parent plus normalized stem group before train-only vocabulary
+  construction. Reserve a deterministic minimum train-observed keyword cover for the frozen 35
+  canonical compatibility briefs, then fill the fixed 512-word budget by train frequency.
+- Freeze the requested 24/64/96 one-layer GRU, validation-only 3x3 temperature/top-k matrix,
+  per-row symmetric int8 export, 128 KiB ceiling, and sealed test conditioning gates. BigTech remains
+  collision/control data, never training data.
+- Stop before generation, hybrid shadow replacement, or human preference work if either technical
+  conditioning gate fails. Do not retain the failing binary or connect it to product code.
+
+### Acceptance evidence
+
+The frozen snapshot contains 13,267 QID-deduplicated records and hashes to
+`5ee2d1a80e2ac9a2fe4c1877a9eef010101ae1efa8e1c66105e202ac0c2cbcea`. The derived grouped dataset
+contains 12,591 eligible names: 10,138 train, 1,260 validation, and 1,193 sealed test rows across
+12,021 groups, with zero cross-partition name/group leakage and 35/35 canonical keyword coverage.
+
+Two clean Python 3.12/PyTorch 2.6 CPU runs produced the byte-identical 90,543-byte quantized model
+hash `a0282ed8dbafb90c432d4721dc538c4ef2d69b224075de68f5432a68c62c6c12`. The Rust parser rejected
+bad magic, version, tensor count, dimensions, and scale artifacts 5/5. Across 100 validation-derived
+parity cases, Python/Rust maximum logit difference was 0.000002 and next-token top-1 agreement was
+100/100. The validation-only sampling matrix selected temperature 0.65/top-k 8.
+
+The decisive gates failed. At epoch 31, conditioned sealed-test NLL was 2.506795 versus 2.513341 for
+the empty-condition ablation: only **0.2605%** improvement, far below 5%. The true condition beat
+nine deterministic wrong conditions in **55.8443%** of comparisons, below 65%. Therefore the
+105-page generation audit, Phase-141 shadow hybrid audit, and blind human study were not run. The
+failing binary was deleted after validation and is not a product artifact.
+
+### Decision
+
+This particular mean-condition-to-initial-hidden GRU is rejected. It is compact, deterministic, and
+faithfully portable to Rust, but it does not establish that the brief materially controls the name.
+Surface quality cannot rescue that causal failure. The snapshot, offline builders, locked training
+recipe, parser, and evidence report remain as a reproducible negative research checkpoint; production
+Auto remains byte-identical.
+
+---
+
+## Phase 269 — Reject the contrastive brief/name scorer preflight (2026-08-17)
+
+### Bottleneck
+
+Phase 268 showed that a mean-condition-to-initial-hidden GRU could learn brand-like character
+statistics while nearly ignoring its brief. The strongest remaining small architecture separated
+the jobs: a future holistic denoiser would propose whole spellings, while an independent
+contrastive scorer would select candidates relevant to the brief. Before paying for that generator,
+the scorer alone had to prove that the frozen Wikidata description/name pairs contain a
+generalizable semantic signal.
+
+### Frozen boundary
+
+- Reuse the exact Phase-268 dataset and owner/developer/parent plus normalized-name-family split.
+  Do not refresh data, change production, or inspect sealed test results during checkpoint selection.
+- Encode briefs as the mean of train-only 512-word embeddings and names as stable-hashed character
+  2/3/4-grams. Freeze 48 dimensions, 4,096 name buckets, symmetric batch contrastive loss,
+  temperature 0.10, seed 29, and validation-loss early stopping.
+- Evaluate each correct pair against nine deterministic wrong pairs in both directions. Credit
+  exact ties fractionally so an all-zero lexical baseline receives its honest random expectation.
+- Require 35% bidirectional 10-way top-1, 70% pairwise wins, 0.05 correct-minus-wrong cosine margin,
+  and at least five points of pairwise uplift over a fixed character-trigram lexical baseline.
+- Do not implement the denoising generator if any scorer gate fails.
+
+### Acceptance evidence
+
+The best validation checkpoint arrived at epoch 2. Two clean runs produced the same float-state hash,
+`6c16abaeaa27d28bac8d4be672526d10932cf5f14a563baeb1935c900ad6e3af`.
+On the 1,193-row sealed test partition, learned bidirectional top-1 was **12.0275%**, pairwise wins
+were **52.9175%**, and correct-minus-wrong cosine margin was **0.004769**. The fixed lexical baseline
+was stronger at **18.0152%** top-1 and **55.0806%** pairwise, so learned pairwise uplift was
+**-2.1631 points**. All four gates failed.
+
+### Decision
+
+The two-stage scorer path is rejected for this corpus. The result does not prove that every
+contrastive naming model is impossible; it proves that these noisy product descriptions and
+spellings do not supply the supervision needed to justify a larger denoising generator. The
+predeclared stop rule held: no generator, selector integration, WASM, web, or storage change was
+made, and production remains byte-identical.
+
+---
+
+## Phase 270 — Make optional AI Studio selection brief-aware (2026-08-17)
+
+### Bottleneck
+
+The two isolated local-learning checkpoints failed for the same upstream reason: the frozen
+Wikidata description/name pairs did not carry enough generalizable brief-to-spelling signal. The
+existing optional AI Studio already offered a stronger semantic model, but its ranking prompt sent
+only a generic metric and the 24 displayed names. The project brief affected local generation and
+then disappeared exactly where semantic selection was supposed to happen.
+
+### Frozen boundary
+
+- Keep the offline engine as the sole candidate generator. Do not ask the provider to invent names,
+  change Create/Auto/WASM/Rust, or connect either rejected research model to the product.
+- Treat the trimmed AI Studio brief as immutable pool provenance. Metric changes, cost estimation,
+  failure/Retry, and both cache layers must use the brief that created the current 24-name pool;
+  later draft edits apply only after a new local generation.
+- Preserve the old generic metric prompt when the pool brief is empty. With a brief, quote it as
+  context rather than instructions, bind the candidate placeholder exactly once, and ask the judge
+  to consider both project fit and the selected metric.
+- Bound the provider-bound Studio brief to 240 input units and disclose beside the Studio action
+  that an on-demand ranking sends the displayed names, selected criterion, and batch brief to the
+  configured provider. No provider request occurs merely by opening Studio.
+- Keep ranking optional, failure-safe, non-persistent, and outside the default Create path. This is
+  a more relevant selector contract, not proof that users prefer its ordering.
+
+### Acceptance evidence
+
+The pure judge contract passes **38/38**, including blank versus contextual metric prompts and a
+brief/custom-criterion attempt to impersonate the sole `{{names}}` marker. The new production
+browser owner passes **15/15** with a mocked provider: it sends 24 distinct displayed names plus the
+frozen brief and criterion, keeps that brief through metric changes and a byte-identical Retry,
+adopts an edited draft only with a newly generated pool, and retains the generic path for a blank
+brief. It observes no unexpected external request or page error.
+
+The retained AI Studio failure/cancellation/cache owner passes **65/65**. TypeScript, the Vite
+production build, and the existing 390/320 responsive behavior remain green. Direct production
+visual review at 390 and 320 pixels measured document width equal to viewport, `scrollX=0`, and the
+new disclosure fully inside the Studio column (390: 15.99–374.19 px; 320: 15.99–304.55 px).
+
+### Decision
+
+AI Studio now supplies the missing project context to its optional selection model without turning
+the model into a generator or hidden Create dependency. This is the strongest remaining bounded
+architecture after the local learned paths failed: diverse local proposal followed by
+brief-and-criterion-aware semantic selection. It is still only a mechanism correction. A claim of
+better names requires the already-defined frozen blind page-preference study; no production Auto
+weight or default path changes on this evidence alone.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
@@ -9329,7 +9479,20 @@ construction, only one of eight reference shapes had enough candidates in every 
 returned **304/400**, and mean composite fell **92.84 → 88.38**. Relaxing that hard layout would
 collapse back into the transparent local shape reranker already shipped for reference names; this
 failed probe remains disconnected from production and carries no semantic or aesthetic claim.
-AI Studio remains an optional, separate batch judge rather than a hidden dependency of Create.
+A genuinely holistic brief-conditioned character GRU was then tested in an isolated, offline
+research lane. Its 90,543-byte int8 export was byte-identical across two CPU trainings and matched
+Rust inference, but conditioned sealed-test NLL improved only **0.2605%** and the true condition beat
+nine wrong conditions only **55.8443%** of the time. Both preregistered mechanism gates failed, so
+generation, shadow replacement, and human preference work did not run; no model entered production.
+A follow-up two-stage preflight then separated holistic proposal from brief relevance, but the
+contrastive scorer was also effectively random: **12.03%** 10-way top-1 and **52.92%** pairwise,
+both worse than the fixed lexical-overlap control. Its stop rule prevented implementation of the
+larger masked-denoising generator. The current Wikidata description/name pairs are therefore an
+insufficient semantic supervision source, not evidence that a bigger network should be tried.
+AI Studio remains an optional, separate batch judge rather than a hidden dependency of Create. Its
+24-name local pool now owns the brief that produced it, so metric selection and Retry can judge
+project fit instead of generic brand quality alone; this mechanism fix still carries no human
+preference claim.
 
 Local taste now distinguishes its three-signal personalization trigger from scorer evidence. The
 Saved collection also distinguishes explicit project likes from names received through a share:

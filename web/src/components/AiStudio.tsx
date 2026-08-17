@@ -34,6 +34,7 @@ interface RankAttempt {
   metric: Metric
   criterion: string
   label: string
+  projectBrief: string
   cacheKey: string | null
 }
 
@@ -45,6 +46,7 @@ const POOL_SIZE = 24
 export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSettings }: Props) {
   const [prompt, setPrompt] = useState('')
   const [pool, setPool] = useState<NameResult[]>([])
+  const [poolBrief, setPoolBrief] = useState('')
   const [metric, setMetric] = useState<Metric>('brandable')
   const [custom, setCustom] = useState('')
   const [view, setView] = useState<Ranked>({ ranked: [], reasons: new Map() })
@@ -99,7 +101,7 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
 
   const criterionFor = (m: Metric) =>
     m === 'custom' ? custom.trim() : METRICS.find((x) => x.key === m)!.criterion
-  const cacheKey = (m: Metric, criterion: string) => {
+  const cacheKey = (m: Metric, criterion: string, projectBrief: string) => {
     const configuredModel = judgeConfig.model?.trim() ?? ''
     // A blank localhost model is resolved live by rerank(). Let that shared
     // cache own reuse so a different model loaded at the same endpoint cannot
@@ -109,6 +111,7 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
       judgeRequestIdentity,
       m,
       criterion,
+      projectBrief,
     ])
   }
   const metricLabel = (m: Metric) =>
@@ -122,7 +125,8 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
       metric: m,
       criterion,
       label: metricLabel(m),
-      cacheKey: cacheKey(m, criterion),
+      projectBrief: poolBrief,
+      cacheKey: cacheKey(m, criterion, poolBrief),
     }
   }
 
@@ -136,8 +140,14 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
   const estimateCriterion = activeRank?.criterion
     ?? failedRank?.criterion
     ?? criterionFor(metric)
+  const estimateBrief = activeRank?.projectBrief
+    ?? failedRank?.projectBrief
+    ?? poolBrief
   const est = pool.length
-    ? estimateTokens(pool, { ...judgeConfig, prompt: metricPrompt(estimateCriterion || ' ') })
+    ? estimateTokens(pool, {
+        ...judgeConfig,
+        prompt: metricPrompt(estimateCriterion || ' ', estimateBrief),
+      })
     : null
   const cost = est ? estimateCost(est, judgeConfig.priceIn, judgeConfig.priceOut) : null
   const costLabel = cost === null ? '$?' : cost === 0 ? '$0' : `≈ $${cost.toFixed(4)}`
@@ -182,7 +192,7 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
     rankAbortController.current = requestController
     const result = await rerank(poolToRank, {
       ...judgeConfig,
-      prompt: metricPrompt(attempt.criterion),
+      prompt: metricPrompt(attempt.criterion, attempt.projectBrief),
     }, requestController.signal)
     if (requestId !== rankRequestId.current || attempt.poolId !== poolId.current) return
     if (!result) {
@@ -223,7 +233,8 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
     const metricSnapshot = metric
     const criterionSnapshot = criterionFor(metricSnapshot)
     const labelSnapshot = metricLabel(metricSnapshot)
-    const cacheKeySnapshot = cacheKey(metricSnapshot, criterionSnapshot)
+    const briefSnapshot = prompt.trim()
+    const cacheKeySnapshot = cacheKey(metricSnapshot, criterionSnapshot, briefSnapshot)
     setBusy('generating')
     setNotice(null)
     setRankingStatus('')
@@ -239,11 +250,12 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
         variety: 0.4,
         roots: [],
         variant: 'auto',
-        description: prompt.trim() || undefined,
+        description: briefSnapshot || undefined,
       })
       const nextPoolId = ++poolId.current
       cache.current.clear()
       setPool(p)
+      setPoolBrief(briefSnapshot)
       setView({ ranked: p, reasons: new Map() })
       if (!criterionSnapshot) {
         setRankingStatus(`${p.length} unranked local names shown.`)
@@ -256,6 +268,7 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
         metric: metricSnapshot,
         criterion: criterionSnapshot,
         label: labelSnapshot,
+        projectBrief: briefSnapshot,
         cacheKey: cacheKeySnapshot,
       }, p, { ownsOperation: true })
     } catch {
@@ -289,7 +302,11 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
     if (!failedRank || operationActive.current) return
     void rankPool({
       ...failedRank,
-      cacheKey: cacheKey(failedRank.metric, failedRank.criterion),
+      cacheKey: cacheKey(
+        failedRank.metric,
+        failedRank.criterion,
+        failedRank.projectBrief,
+      ),
     }, pool, {
       fromRetry: true,
       displayedRanking: view.rankedBy,
@@ -325,6 +342,10 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
         Generate a batch, then rank it by what matters — the engine creates the names, your
         configured model ranks them and says why.
       </p>
+      <p className="studio-privacy">
+        Ranking is optional and on demand. It sends the displayed names, your selected criterion,
+        and this batch&apos;s project brief (when provided) to your configured model provider.
+      </p>
       <div
         className="visually-hidden studio-ranking-status"
         role="status"
@@ -348,6 +369,7 @@ export function AiStudio({ judgeConfig, favorites, onToggleFavorite, onOpenSetti
               type="text"
               aria-label="AI Studio project brief"
               placeholder="What are you naming? (optional)"
+              maxLength={240}
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               onKeyDown={(e) => {
