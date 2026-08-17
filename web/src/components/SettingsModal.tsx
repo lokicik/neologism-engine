@@ -97,6 +97,7 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
   const [tasteExportError, setTasteExportError] = useState<string | null>(null)
   const [tasteExportStatus, setTasteExportStatus] = useState<string | null>(null)
   const [saveError, setSaveError] = useState<string | null>(null)
+  const [endpointError, setEndpointError] = useState<string | null>(null)
   const modalRef = useRef<HTMLDivElement>(null)
   const closeRef = useRef<HTMLButtonElement>(null)
   const cancelRef = useRef<HTMLButtonElement>(null)
@@ -104,12 +105,14 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
   const tasteExportRef = useRef<HTMLButtonElement>(null)
   const comboRef = useRef<HTMLDivElement>(null)
   const modelInputRef = useRef<HTMLInputElement>(null)
+  const endpointInputRef = useRef<HTMLInputElement>(null)
   const settingsTitleId = useId()
   const settingsIntroId = useId()
   const modelLabelId = useId()
   const modelListId = useId()
   const likedListId = useId()
   const passedListId = useId()
+  const endpointErrorId = useId()
   const likedToggleRef = useRef<HTMLButtonElement>(null)
   const likedBodyRef = useRef<HTMLDivElement>(null)
   const passedToggleRef = useRef<HTMLButtonElement>(null)
@@ -172,12 +175,17 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
       && draft.provider === 'localhost'
       && isWellFormedUnicode(endpoint)
       && !isValidLocalEndpoint(endpoint)) {
-      setSaveError(
+      setSaveError(null)
+      setEndpointError(
         'Enter a complete http:// or https:// endpoint without credentials, a query, or a fragment.',
       )
-      requestAnimationFrame(() => saveRef.current?.scrollIntoView({ block: 'nearest' }))
+      requestAnimationFrame(() => {
+        endpointInputRef.current?.scrollIntoView({ block: 'nearest' })
+        endpointInputRef.current?.focus()
+      })
       return
     }
+    setEndpointError(null)
     if (!onSave(draft)) {
       setSaveError('Could not save AI settings. Browser storage kept the previous settings unchanged.')
       requestAnimationFrame(() => saveRef.current?.scrollIntoView({ block: 'nearest' }))
@@ -466,7 +474,10 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
           <input
             type="checkbox"
             checked={draft.enabled}
-            onChange={(e) => set('enabled', e.target.checked)}
+            onChange={(e) => {
+              setEndpointError(null)
+              set('enabled', e.target.checked)
+            }}
           />
           <span>Enable AI re-rank</span>
         </label>
@@ -480,7 +491,10 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
                   type="radio"
                   name="provider"
                   checked={draft.provider === p}
-                  onChange={() => setDraft((d) => ({ ...d, provider: p, model: undefined, priceIn: undefined, priceOut: undefined }))}
+                  onChange={() => {
+                    setEndpointError(null)
+                    setDraft((d) => ({ ...d, provider: p, model: undefined, priceIn: undefined, priceOut: undefined }))
+                  }}
                 />
                 {p === 'openrouter' ? 'OpenRouter (your key)' : 'Localhost (Ollama / llama.cpp)'}
               </label>
@@ -512,11 +526,22 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
               <label className="settings-field">
                 <span>Endpoint</span>
                 <input
+                  ref={endpointInputRef}
                   type="text"
                   placeholder={DEFAULT_LOCAL_ENDPOINT}
                   value={draft.endpoint ?? ''}
-                  onChange={(e) => set('endpoint', e.target.value)}
+                  aria-invalid={endpointError ? true : undefined}
+                  aria-describedby={endpointError ? endpointErrorId : undefined}
+                  onChange={(e) => {
+                    setEndpointError(null)
+                    set('endpoint', e.target.value)
+                  }}
                 />
+                {endpointError && (
+                  <span id={endpointErrorId} className="settings-save-error" role="alert">
+                    {endpointError}
+                  </span>
+                )}
               </label>
               {modelField('auto', '(blank = auto-detect)')}
               <p className="settings-hint">

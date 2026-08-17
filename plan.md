@@ -8101,6 +8101,52 @@ OpenAI-compatible HTTP(S) bases and all existing provider behavior remain unchan
 
 ---
 
+## Phase 241 — Return invalid endpoint focus to its field (2026-08-17)
+
+### Bottleneck
+
+Phase 240 rejected an invalid local AI request base and kept Settings open, but its error remained in
+the generic Save region at the bottom of the dialog while keyboard focus stayed on **Save**. The
+endpoint itself exposed neither `aria-invalid` nor an error relationship. A user therefore learned
+that saving failed without being taken back to the exact control that needed correction, and the
+stale error remained after editing began.
+
+### Frozen boundary
+
+- Change only Settings presentation and the existing corrupt-config owner. Keep the Phase 239/240
+  validators, storage result, raw-record policy, request readiness, model discovery, ranking, and
+  provider behavior unchanged.
+- Give semantic endpoint validation its own inline live error, `aria-invalid`, and
+  `aria-describedby`. After rejection, scroll and visibly focus the endpoint on the next animation
+  frame; typing, disabling AI, or changing provider clears only that endpoint error.
+- Preserve the generic persist-before-state error for ill-formed Unicode and browser-storage
+  failures, including its existing Save-focused recovery. A valid endpoint retry still uses the
+  ordinary save path and persists the exact typed value.
+
+### Acceptance evidence
+
+The strengthened Phase 240 production owner was red at **30/32**. URL rejection, exact guidance,
+dialog retention, and prior-value preservation already passed. The endpoint lacked invalid/error
+semantics and focus, and editing left the stale alert active. A valid retry nevertheless saved.
+
+`SettingsModal` now owns endpoint validation separately from durable-write failure. Two fresh runs
+of the rebuilt production owner pass **32/32**, and the final run confirms the same result. The
+invalid field is active, `:focus-visible`, horizontally and vertically inside the 390-pixel
+viewport, and linked to its exact alert; editing removes both ARIA attributes and the alert before
+retry; a valid retry closes Settings and persists the exact replacement endpoint.
+
+TypeScript and the Vite production build pass. Retained production contracts remain green at
+Settings keyboard **60/60**, Settings storage failure/retry **13/13**, and AI Studio's full
+cancellation/config/failure/Retry/race/cache/model/focus/containment owner **61/61**.
+
+### Decision
+
+An invalid local endpoint now has a complete correction path, not merely a rejected Save. The error,
+focus, field semantics, edit cleanup, and valid retry all agree while unrelated storage and network
+contracts remain untouched.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

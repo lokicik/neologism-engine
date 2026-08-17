@@ -11,7 +11,7 @@ const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 29
+const EXPECTED_CHECKS = 32
 
 const server = spawn(process.execPath, [viteCli, 'preview', '--port', String(PORT), '--strictPort'], {
   cwd: WEB_DIR,
@@ -237,6 +237,60 @@ try {
   check(
     await validPage.evaluate(() => localStorage.getItem('neologism:judge')) === validPartialRaw,
     'non-HTTP endpoint write preserves the prior durable settings exactly',
+  )
+  const endpointInput = validDialog.getByLabel('Endpoint')
+  await validPage.waitForFunction(() => (
+    document.activeElement instanceof HTMLInputElement
+      && document.activeElement.getAttribute('aria-invalid') === 'true'
+  ))
+  const endpointErrorId = await endpointInput.getAttribute('aria-describedby')
+  const endpointRecovery = {
+    invalid: await endpointInput.getAttribute('aria-invalid'),
+    endpointErrorId,
+    role: endpointErrorId === null
+      ? null
+      : await validDialog.locator(`#${endpointErrorId}`).getAttribute('role'),
+    focus: await endpointInput.evaluate((input) => {
+      const rect = input.getBoundingClientRect()
+      return {
+        active: document.activeElement === input,
+        visible: input.matches(':focus-visible'),
+        fits: rect.left >= -1
+          && rect.right <= innerWidth + 1
+          && rect.top >= -1
+          && rect.bottom <= innerHeight + 1,
+      }
+    }),
+  }
+  if (!(endpointRecovery.invalid === 'true'
+    && endpointRecovery.endpointErrorId !== null
+    && endpointRecovery.role === 'alert'
+    && endpointRecovery.focus.active
+    && endpointRecovery.focus.visible
+    && endpointRecovery.focus.fits)) console.log('INFO  endpoint recovery', endpointRecovery)
+  check(
+    endpointRecovery.invalid === 'true'
+      && endpointRecovery.endpointErrorId !== null
+      && endpointRecovery.role === 'alert'
+      && endpointRecovery.focus.active
+      && endpointRecovery.focus.visible
+      && endpointRecovery.focus.fits,
+    'invalid endpoint recovery identifies and visibly focuses its exact field',
+  )
+  await endpointInput.fill('http://127.0.0.1:9090/v1')
+  check(
+    await endpointInput.getAttribute('aria-invalid') === null
+      && await endpointInput.getAttribute('aria-describedby') === null
+      && await validDialog.getByRole('alert').count() === 0,
+    'editing the endpoint clears stale validation semantics before retry',
+  )
+  await validDialog.getByRole('button', { name: 'Save', exact: true }).click()
+  const recoveredEndpoint = await validPage.evaluate(() => JSON.parse(
+    localStorage.getItem('neologism:judge') ?? '{}',
+  ).endpoint)
+  check(
+    await validDialog.count() === 0 && recoveredEndpoint === 'http://127.0.0.1:9090/v1',
+    'a valid focused retry closes Settings and persists the exact replacement endpoint',
   )
   check(validPageErrors.length === 0, `valid partial config produces no page error (${validPageErrors.join(' | ')})`)
   await validContext.close()
