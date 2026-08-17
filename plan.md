@@ -9092,6 +9092,39 @@ an id it did not report.
 
 ---
 
+## Phase 264 — Stop promising that any model id works (2026-08-17)
+
+### Bottleneck
+
+The nonempty-catalog search miss still said **No matches — any model id works**. Manual ids are a
+deliberate escape hatch, but neither OpenRouter nor a local endpoint guarantees that an arbitrary
+string names a usable model. The picker therefore converted “this field accepts text” into an
+unsupported provider-success claim.
+
+### Frozen boundary
+
+- Keep the same zero-filtered-row state, editable field, listbox roles, and custom-id behavior. Change
+  only its terminal guidance to say that no catalog row matched and manual entry remains possible.
+- Do not validate against the live list, block Save, infer provider support, add a request, or change
+  fallback/empty-discovery/missing-current-id behavior.
+- Add one assertion inside the existing production Settings owner using a nonempty mocked catalog and
+  a deliberately absent manual id.
+
+### Acceptance evidence
+
+The expanded owner was deliberately red at **69/70** against Phase 263: the absent manual id stayed
+editable and no option rendered, but the status still promised that any id worked. After the copy-only
+correction, the rebuilt owner passes **70/70**; exact typed selection, missing-current-id warnings,
+fallback recovery, localhost refresh, keyboard focus, and containment remain green. TypeScript and
+the production Vite build pass.
+
+### Decision
+
+Settings now distinguishes input freedom from provider support. Users retain the manual escape hatch
+without receiving a false guarantee about an id the catalog did not report.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

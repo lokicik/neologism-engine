@@ -1,4 +1,4 @@
-// Phase 148/212/214/217/261/262/263 browser contract: Settings is a real keyboard-contained
+// Phase 148/212/214/217/261/262/263/264 browser contract: Settings is a real keyboard-contained
 // modal, its model picker follows the aria-activedescendant combobox pattern, and
 // provider fallbacks plus reopened/retargeted discovery stay truthful.
 // Run after `npm run build`: node e2e/settings-keyboard.mjs
@@ -12,7 +12,7 @@ const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 69
+const EXPECTED_CHECKS = 70
 const FOCUSABLE = [
   'a[href]',
   'button:not([disabled])',
@@ -458,6 +458,18 @@ try {
     'Enter preserves and selects the exact typed model id, then closes the listbox',
   )
   check(await activeElementIs(combo), 'combobox keeps focus after keyboard selection')
+
+  await combo.click()
+  await combo.fill('manual/not-listed')
+  check(
+    (await dialog.locator('.model-empty[role="status"]').textContent())?.trim()
+      === 'No catalog matches — you can still enter a model id manually.'
+      && await options.count() === 0
+      && await combo.inputValue() === 'manual/not-listed',
+    'a nonempty catalog search miss permits manual entry without promising that any id works',
+  )
+  await combo.fill(TYPED_MODEL)
+  await page.keyboard.press('Enter')
 
   await combo.click()
   await page.keyboard.press('Control+A')

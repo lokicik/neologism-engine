@@ -480,7 +480,7 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
               <div className="model-empty" role="status">
                 {pickList.length === 0
                   ? 'No models discovered — type a model id or check the endpoint and CORS.'
-                  : 'No matches — any model id works.'}
+                  : 'No catalog matches — you can still enter a model id manually.'}
               </div>
             )}
             {filtered.map((m, index) => (
