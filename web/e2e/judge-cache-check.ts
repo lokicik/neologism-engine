@@ -3,6 +3,7 @@
 // Run with: node --experimental-strip-types e2e/judge-cache-check.ts
 import type { NameResult } from '../src/lib/engine.ts'
 import {
+  estimateCost,
   fetchModels,
   isJudgeReady,
   isValidLocalEndpoint,
@@ -73,7 +74,25 @@ globalThis.fetch = async (input, init) => {
     }
     if (url === 'https://openrouter.ai/api/v1/models') {
       openRouterLookups++
-      return new Response(JSON.stringify({ data: [{ id: 'remote-catalog-model' }] }), {
+      return new Response(JSON.stringify({ data: [
+        {
+          id: 'explicit-free',
+          name: 'Explicit Free',
+          context_length: 32_000,
+          pricing: { prompt: '0', completion: '0' },
+        },
+        {
+          id: 'explicit-paid',
+          name: 'Explicit Paid',
+          context_length: 128_000,
+          pricing: { prompt: '0.000002', completion: '0.000003' },
+        },
+        { id: 'suffix-priced:free', pricing: { prompt: '0.1', completion: '0.2' } },
+        { id: 'remote-catalog-model' },
+        { id: 'malformed-price', pricing: { prompt: 'not-a-price', completion: '0' } },
+        { id: 17 },
+        { id: 'broken\uD83D' },
+      ] }), {
         status: 200,
         headers: { 'Content-Type': 'application/json' },
       })
@@ -221,9 +240,35 @@ const remoteCatalog = await fetchModels(remoteConfig)
 const remoteCatalogAgain = await fetchModels(remoteConfig)
 check(
   openRouterLookups === 1
-    && remoteCatalog[0]?.id === 'remote-catalog-model'
     && JSON.stringify(remoteCatalogAgain) === JSON.stringify(remoteCatalog),
   'unchanged OpenRouter model discovery retains the existing session cache',
+)
+check(
+  remoteCatalog.map((model) => model.id).join('|')
+    === 'explicit-free|suffix-priced:free|explicit-paid|malformed-price|remote-catalog-model',
+  'malformed catalog rows are skipped without hiding independently valid model choices',
+)
+const remoteById = new Map(remoteCatalog.map((model) => [model.id, model]))
+check(
+  remoteById.get('explicit-free')?.free === true
+    && remoteById.get('explicit-free')?.priceIn === 0
+    && remoteById.get('explicit-free')?.priceOut === 0
+    && remoteById.get('explicit-paid')?.free === false
+    && remoteById.get('suffix-priced:free')?.free === true
+    && remoteById.get('suffix-priced:free')?.priceIn === 0
+    && remoteById.get('suffix-priced:free')?.priceOut === 0
+    && remoteById.get('remote-catalog-model')?.free === false
+    && remoteById.get('remote-catalog-model')?.priceIn === -1
+    && remoteById.get('remote-catalog-model')?.priceOut === -1
+    && remoteById.get('malformed-price')?.free === false
+    && remoteById.get('malformed-price')?.priceIn === -1,
+  'only a free-suffix model or explicit zero pricing is free while unknown prices stay unknown',
+)
+check(
+  estimateCost({ input: 100, output: 50, total: 150 }, -1, 0) === null
+    && estimateCost({ input: 100, output: 50, total: 150 }, 0, 0) === 0
+    && estimateCost({ input: 100, output: 50, total: 150 }, 0.001, 0.002) === 0.2,
+  'unknown price sentinels never render a negative estimate while zero and paid estimates remain exact',
 )
 
 const paddedEndpointConfig: JudgeConfig = {
@@ -342,9 +387,9 @@ check(
   'an exact 160-unit provider reason remains valid without truncation',
 )
 
-if (checks !== 21 || failures > 0) {
-  console.error(`judge cache check: ${failures} failure(s), ${checks}/21 checks executed`)
+if (checks !== 24 || failures > 0) {
+  console.error(`judge cache check: ${failures} failure(s), ${checks}/24 checks executed`)
   process.exitCode = 1
 } else {
-  console.log('judge cache check: 21/21 checks passed')
+  console.log('judge cache check: 24/24 checks passed')
 }

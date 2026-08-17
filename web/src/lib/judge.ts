@@ -173,6 +173,46 @@ export interface ModelInfo {
   free: boolean
 }
 
+function catalogPrice(value: unknown): number | null {
+  if (typeof value !== 'number' && typeof value !== 'string') return null
+  if (typeof value === 'string' && value.trim() === '') return null
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : null
+}
+
+function modelInfoFromUnknown(value: unknown, provider: JudgeProvider): ModelInfo | null {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) return null
+  const row = value as Record<string, unknown>
+  if (typeof row.id !== 'string' || !isWellFormedUnicode(row.id)) return null
+  const id = row.id.trim()
+  if (!id) return null
+
+  const pricing = row.pricing !== null && typeof row.pricing === 'object' && !Array.isArray(row.pricing)
+    ? row.pricing as Record<string, unknown>
+    : null
+  const rawIn = catalogPrice(pricing?.prompt)
+  const rawOut = catalogPrice(pricing?.completion)
+  const freeId = provider === 'openrouter' && id.endsWith(':free')
+  const fallback = provider === 'localhost' || freeId ? 0 : -1
+  const completePricing = rawIn !== null && rawOut !== null
+  const variablePricing = completePricing && (rawIn < 0 || rawOut < 0)
+  const priceIn = !freeId && completePricing && !variablePricing ? rawIn : fallback
+  const priceOut = !freeId && completePricing && !variablePricing ? rawOut : fallback
+
+  return {
+    id,
+    name: typeof row.name === 'string' && isWellFormedUnicode(row.name) ? row.name : undefined,
+    priceIn,
+    priceOut,
+    contextLength: typeof row.context_length === 'number'
+      && Number.isFinite(row.context_length)
+      && row.context_length > 0
+      ? row.context_length
+      : undefined,
+    free: freeId || (priceIn === 0 && priceOut === 0),
+  }
+}
+
 const modelCache = new Map<string, ModelInfo[]>()
 
 // Live model list. OpenRouter's /models is public (no key needed); a local
@@ -191,24 +231,10 @@ export async function fetchModels(cfg: JudgeConfig, signal?: AbortSignal): Promi
   try {
     const res = await fetch(url, { signal })
     if (!res.ok) return []
-    const data = (await res.json()) as {
-      data?: Array<{ id?: string; name?: string; context_length?: number; pricing?: { prompt?: string; completion?: string } }>
-    }
-    const models: ModelInfo[] = (data.data ?? [])
-      .map((m) => {
-        const priceIn = parseFloat(m.pricing?.prompt ?? '0') || 0
-        const priceOut = parseFloat(m.pricing?.completion ?? '0') || 0
-        const id = m.id ?? ''
-        return {
-          id,
-          name: typeof m.name === 'string' ? m.name : undefined,
-          priceIn,
-          priceOut,
-          contextLength: typeof m.context_length === 'number' ? m.context_length : undefined,
-          free: id.endsWith(':free') || (priceIn === 0 && priceOut === 0),
-        }
-      })
-      .filter((m) => m.id)
+    const data = (await res.json()) as { data?: unknown }
+    const models: ModelInfo[] = (Array.isArray(data.data) ? data.data : [])
+      .map((model) => modelInfoFromUnknown(model, cfg.provider))
+      .filter((model): model is ModelInfo => model !== null)
     // Free first, then cheapest, then alphabetical. Negative/sentinel prices
     // (e.g. openrouter/auto reports -1 for variable pricing) sort to the bottom
     // of the paid group rather than above genuinely cheap models.
@@ -242,7 +268,7 @@ export function estimateTokens(names: NameResult[], cfg: JudgeConfig): TokenEsti
 
 // USD cost for an estimate at the given per-token prices, or null if unknown.
 export function estimateCost(est: TokenEstimate, priceIn?: number, priceOut?: number): number | null {
-  if (priceIn === undefined || priceOut === undefined) return null
+  if (priceIn === undefined || priceOut === undefined || priceIn < 0 || priceOut < 0) return null
   return est.input * priceIn + est.output * priceOut
 }
 

@@ -8248,6 +8248,60 @@ be called AI-ranked; otherwise the existing truthful fallback remains in control
 
 ---
 
+## Phase 244 — Keep model-catalog rows and prices truthful (2026-08-17)
+
+### Bottleneck
+
+Model discovery cast the provider JSON to its expected shape and mapped the whole array inside one
+`try`. One numeric or otherwise malformed `id` could throw at `endsWith`, discard every independently
+valid option, and prevent the OpenRouter catalog from entering its session cache. Missing or
+nonnumeric pricing also passed through `parseFloat(...) || 0`, so an unknown paid model was labeled
+**Free**. The existing negative variable-price sentinel could then produce a negative cost estimate.
+
+### Frozen boundary
+
+- Parse every catalog row independently. Keep only a non-empty, well-formed string id; normalize its
+  outer whitespace. Ignore a malformed row without hiding valid neighbors. Retain an optional name
+  only when it is well-formed Unicode and an optional context length only when it is finite and
+  positive.
+- Treat pricing as a complete pair. For OpenRouter, a missing, malformed, or negative pair becomes
+  the existing `-1` unknown/variable sentinel; an explicit `:free` id may retain the provider's free
+  convention. Only that suffix or a finite zero/zero pair is free. Localhost keeps its existing zero
+  fallback when its catalog omits prices.
+- A negative price sentinel must make the estimate unknown, never negative. Preserve valid paid and
+  zero estimates, free-first/price/alphabetical sorting, catalog cache identity, endpoint refresh,
+  combobox behavior, request headers, ranking, storage, generation, WASM, and Rust.
+
+### Acceptance evidence
+
+The expanded pure judge owner was red at **20/24** against Phase 243. A mixed OpenRouter response
+containing five valid rows, one numeric id, and one ill-formed id collapsed to an empty catalog, so
+repeat discovery also missed the cache. Missing/malformed prices could not remain unknown, and a
+negative sentinel produced a negative estimate. Every retained response, endpoint, ranking,
+cancellation, and cache-identity check stayed green. A follow-up provider contradiction was red at
+**23/24** against the first fix: a `:free` id with positive catalog prices produced a free label but
+a paid estimate.
+
+The new row parser admits each valid model independently and assigns provider-aware pricing only
+after both price values parse. The final pure owner passes **24/24**: malformed rows disappear,
+explicit free and paid models remain exact, unknown prices are `-1`, repeated OpenRouter discovery
+uses one request, a `:free` id resolves consistently to zero, and estimates distinguish unknown,
+zero, and paid values.
+
+The production Settings owner now feeds 65 valid rows plus a numeric and ill-formed id through the
+real combobox and passes **61/61**. Its price-less model beyond the 60-row cap is still typeable,
+selectable, visible, and labeled `variable`, not `Free`. AI Studio's retained cancellation/config/
+failure/Retry/race/cache/model/focus owner passes **61/61**. TypeScript and the Vite production build
+pass; no live provider or key was used.
+
+### Decision
+
+Settings no longer turns one bad provider row into an empty model picker or absent pricing into a
+false free claim. Valid catalog choices, cache behavior, visible price truth, and AI Studio cost
+estimation now share the same fail-closed boundary.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

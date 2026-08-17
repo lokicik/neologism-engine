@@ -12,7 +12,7 @@ const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 60
+const EXPECTED_CHECKS = 61
 const FOCUSABLE = [
   'a[href]',
   'button:not([disabled])',
@@ -27,7 +27,7 @@ const MOCK_MODELS = Array.from({ length: 65 }, (_, index) => {
     id: `mock/model-${suffix}`,
     name: `Model ${suffix}`,
     context_length: 8192 + index * 1024,
-    pricing: { prompt: '0', completion: '0' },
+    ...(index === 64 ? {} : { pricing: { prompt: '0', completion: '0' } }),
   }
 })
 const FIRST_MODEL = MOCK_MODELS[0].id
@@ -143,7 +143,7 @@ try {
       status: 200,
       contentType: 'application/json',
       headers: { 'access-control-allow-origin': '*' },
-      body: JSON.stringify({ data: MOCK_MODELS }),
+      body: JSON.stringify({ data: [...MOCK_MODELS, { id: 17 }, { id: 'broken\uD83D' }] }),
     })
   })
   await context.route('http://127.0.0.1:9020/v1/models', async (route) => {
@@ -397,6 +397,10 @@ try {
     typedOptionNames.length === 60
       && typedOptionNames.some((option) => option.includes(TYPED_MODEL)),
     'exact source model beyond index 59 is substituted into the capped rendered list',
+  )
+  check(
+    typedOptionNames.some((option) => option.includes(TYPED_MODEL) && option.includes('variable')),
+    'a selected OpenRouter model with missing pricing is labeled variable rather than free',
   )
   check((await activeModelText(combo)).includes(TYPED_MODEL), 'exact typed model becomes the active option')
   const typedOptionVisible = await combo.evaluate((element) => {
