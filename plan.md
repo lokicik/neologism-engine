@@ -9388,6 +9388,54 @@ weight or default path changes on this evidence alone.
 
 ---
 
+## Phase 271 — Freeze the blind brief-aware ranking study protocol (2026-08-17)
+
+### Bottleneck
+
+Phase 270 corrected the selection mechanism, but mocked request tests cannot establish that people
+prefer its ordering. Treating 24 names or 120 derived comparisons as independent would also repeat
+the pseudoreplication error already identified in Phase 145. The next admissible evidence therefore
+needs a frozen brief-level experiment before any live provider output or human choice is inspected.
+
+### Frozen boundary
+
+- Keep this under `research/selection-study/`; do not change generation, ranking weights, AI Studio,
+  storage, WASM, Rust, or any public schema. The tool itself performs no network call.
+- Freeze 30 semantically distinct primary briefs that do not exactly reuse the canonical or
+  wording-stress matrices. Each brief owns one local 24-name pool and contributes one forced
+  full-page choice between generic and brief-aware top-ten rankings from the same frozen model.
+- Require both stored provider prompts to hash exactly, contain the same numbered pool and criterion,
+  and differ on the declared brief block. Both ranked lists must be exact permutations of that pool.
+- Generate 12 concealed reversals by swapping exact primary pages. Exclude them from efficacy and use
+  them only for consistency. Balance candidate placement 15/15 on primaries and 6/6 on reversals.
+- Bind blind pages, answer-key ownership, and answers with separate SHA-256 hashes. Reject
+  credential-shaped source fields, duplicate candidates, missing decisions, mismatched prompts,
+  altered pages, altered keys, and any protocol drift.
+- Keep the original gates: at least 21/30 brief-aware primary wins and 10/12 consistent reversals.
+  One evaluator supports only that evaluator's preference.
+
+### Acceptance evidence
+
+The canonical protocol hash is
+`5f4dc48f8e4f0c4dc9ef794275bc44e1aee63a8e076c6cd3c36940e24fd9250d`.
+All 30 brief strings are unique and absent from the current canonical and wording-stress source
+matrices. The dependency-free adversarial fixture passes **17/17** in two fresh processes with
+byte-identical output. It proves deterministic 42-case construction, 30/12 ownership, hidden arm
+labels, exact page reversal, balanced sides, the passing 21/30 plus 10/12 boundary, independent
+20/30 and 9/12 failures, missing-answer rejection, study/key tamper and rehashed-side-balance
+rejection, pool uniqueness,
+stored-prompt hash and generic-control enforcement, and credential-field exclusion.
+
+### Decision
+
+The human gate is now executable without weakening its inferential unit or leaking arm labels into
+the evaluator package. This phase intentionally reports **no preference result**: no real provider
+ranking source and no 42-choice answer file exist yet. Production remains at Phase 270. The next
+authorized integration decision can occur only after a frozen source is prepared and the complete
+study passes both gates.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
@@ -9493,6 +9541,8 @@ AI Studio remains an optional, separate batch judge rather than a hidden depende
 24-name local pool now owns the brief that produced it, so metric selection and Retry can judge
 project fit instead of generic brand quality alone; this mechanism fix still carries no human
 preference claim.
+Its next human gate is now frozen as 30 unseen brief-level choices plus 12 concealed reversals; the
+study tooling has no result until one real same-pool ranking source and all 42 human decisions exist.
 
 Local taste now distinguishes its three-signal personalization trigger from scorer evidence. The
 Saved collection also distinguishes explicit project likes from names received through a share:
