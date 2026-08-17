@@ -67,7 +67,7 @@ async function mockJudge(page) {
     const names = [...content.matchAll(/^\s*\d+\.\s+(.+)$/gm)].map((match) => match[1].trim())
     const ranked = names.map((_, index) => ({
       i: index + 1,
-      score: names.length - index,
+      score: 10 - (index * 9) / Math.max(names.length - 1, 1),
       reason: `mock reason ${index + 1}`,
     }))
     await route.fulfill({

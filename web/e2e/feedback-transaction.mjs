@@ -71,7 +71,11 @@ async function createContext({ judge = false } = {}) {
       const body = JSON.parse(route.request().postData() ?? '{}')
       const content = body.messages?.[0]?.content ?? ''
       const names = [...content.matchAll(/^\s*\d+\.\s+(.+)$/gm)].map((match) => match[1].trim())
-      const ranked = names.map((_, index) => ({ i: index + 1, score: names.length - index, reason: `fixture-${index + 1}` }))
+      const ranked = names.map((_, index) => ({
+        i: index + 1,
+        score: 10 - (index * 9) / Math.max(names.length - 1, 1),
+        reason: `fixture-${index + 1}`,
+      }))
       await route.fulfill({
         status: 200,
         contentType: 'application/json',

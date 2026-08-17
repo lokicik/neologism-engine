@@ -125,6 +125,7 @@ export function isJudgeReady(cfg: JudgeConfig): boolean {
 }
 
 const cache = new Map<string, RankedJudgment[]>()
+const MAX_JUDGE_REASON_UNITS = 160
 
 function baseAndHeaders(cfg: JudgeConfig): { base: string; headers: Record<string, string> } {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' }
@@ -311,10 +312,22 @@ export async function rerank(
     const byIndex = new Map<number, { score: number; reason: string }>()
     arr.forEach((item, pos) => {
       const o = item as { i?: unknown; score?: unknown; reason?: unknown }
-      const idx = typeof o.i === 'number' ? o.i - 1 : pos
+      const idx = o.i === undefined ? pos : typeof o.i === 'number' ? o.i - 1 : NaN
       const score = typeof o.score === 'number' ? o.score : NaN
-      if (idx < 0 || idx >= labels.length || Number.isNaN(score)) return
-      byIndex.set(idx, { score, reason: typeof o.reason === 'string' ? o.reason : '' })
+      const reason = typeof o.reason === 'string' ? o.reason.trim() : ''
+      if (
+        !Number.isInteger(idx)
+        || idx < 0
+        || idx >= labels.length
+        || !Number.isFinite(score)
+        || score < 1
+        || score > 10
+        || !reason
+        || reason.length > MAX_JUDGE_REASON_UNITS
+        || !isWellFormedUnicode(reason)
+        || reason.split(/\s+/u).length > 8
+      ) return
+      byIndex.set(idx, { score, reason })
     })
     // Require coverage of every candidate — a partial reply is treated as failure.
     if (byIndex.size !== labels.length) return null

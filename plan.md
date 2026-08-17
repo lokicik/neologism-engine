@@ -8197,6 +8197,57 @@ now agree without narrowing which valid keys or models the user may choose.
 
 ---
 
+## Phase 243 — Validate every AI judge row before ranking (2026-08-17)
+
+### Bottleneck
+
+The judge prompt requested a score from 1 to 10 and a reason of at most eight words, but the response
+parser enforced neither boundary. Any numeric value, an absent explanation, a nine-word sentence, a
+single arbitrarily long token, or an ill-formed Unicode string could therefore enter the sorted
+result and render on every AI Studio card. Full candidate coverage alone did not make that external
+response trustworthy.
+
+### Frozen boundary
+
+- Validate the provider response at its existing shared parser. A missing `i` may keep the historical
+  positional fallback, but an explicit `i` must resolve to an integer input index. Every row also needs
+  a finite score inside the inclusive 1–10 range and a trimmed non-empty reason that is
+  well-formed Unicode, no more than eight whitespace-separated words, and no more than 160 UTF-16
+  units. Preserve decimal scores, provider order tie-breaking, response caching, and the exact
+  eight-word/160-unit boundaries.
+- Reject the complete response when one row is invalid. Reuse AI Studio's already-proven unranked
+  local-pool or last-successful-ranking fallback; do not truncate provider text, clamp scores,
+  synthesize explanations, accept a partial ranking, add another alert, or retry automatically.
+- Keep prompts, request bodies, model discovery, cache identity, cancellation, generation, local
+  scoring, taste, storage, WASM, and Rust unchanged. Fixture replies must obey the same public 1–10
+  protocol instead of relying on artificial scores up to 24.
+
+### Acceptance evidence
+
+The expanded pure judge owner was deliberately red at **13/18** against Phase 242. Its retained
+cache, endpoint, cancellation, and discovery checks all passed, while the parser accepted each of
+five invalid complete responses: score 11, an empty reason, nine words, 161 units, and an unpaired
+surrogate. A follow-up explicit string index was then red at **20/21** against the first fix: the
+parser still treated malformed `i: "1"` as if the field were absent.
+
+The shared parser now checks one complete row before admitting it to the result map. The final pure
+owner passes **21/21**: all six invalid responses fail closed, while exact eight-word and 160-unit
+reasons remain valid without truncation. A genuinely absent index retains the existing positional
+fallback. Browser mocks that rank 24 names now use fractional values inside 1–10 while preserving
+their prior deterministic order.
+
+TypeScript and the Vite production build pass. Retained production contracts remain green at AI
+Studio cancellation/config/failure/Retry/race/cache/model/focus **61/61**, feedback transaction
+**20/20**, and Studio taste identity **5/5**. No live provider, key, or external model was used.
+
+### Decision
+
+AI Studio no longer treats prompt compliance as trust. A provider must return one bounded,
+well-formed explanation and an in-range score for every name before its order, reasons, or pick can
+be called AI-ranked; otherwise the existing truthful fallback remains in control.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

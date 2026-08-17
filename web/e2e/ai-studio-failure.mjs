@@ -60,7 +60,7 @@ function requestSnapshot(request) {
 function rankedReply(names, prefix) {
   const judgments = names.map((_, index) => ({
     i: index + 1,
-    score: index + 1,
+    score: 1 + (index * 9) / Math.max(names.length - 1, 1),
     reason: `${prefix}-${index + 1}`,
   }))
   return JSON.stringify({ choices: [{ message: { content: JSON.stringify(judgments) } }] })

@@ -28,7 +28,11 @@ async function mockJudge(page) {
     const body = JSON.parse(route.request().postData() ?? '{}')
     const content = body.messages?.[0]?.content ?? ''
     const names = [...content.matchAll(/^\s*\d+\.\s+(.+)$/gm)].map((m) => m[1].trim())
-    const arr = names.map((_, i) => ({ i: i + 1, score: i + 1, reason: `mock reason ${i + 1}` }))
+    const arr = names.map((_, i) => ({
+      i: i + 1,
+      score: 1 + (i * 9) / Math.max(names.length - 1, 1),
+      reason: `mock reason ${i + 1}`,
+    }))
     await route.fulfill({
       status: 200, contentType: 'application/json',
       body: JSON.stringify({ choices: [{ message: { content: JSON.stringify(arr) } }] }),

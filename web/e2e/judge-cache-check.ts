@@ -97,10 +97,18 @@ globalThis.fetch = async (input, init) => {
     : prompt.includes('Criterion B')
     ? 'criterion-b'
     : url.includes(':9002/') ? 'endpoint-9002' : url.includes(':9001/') ? 'endpoint-9001' : 'criterion-a'
-  const judgments = [
+  const judgments: Array<{ i: unknown; score: number; reason: string }> = [
     { i: 1, score: secondWins ? 2 : 9, reason: `${reasonPrefix}-first` },
     { i: 2, score: secondWins ? 9 : 2, reason: `${reasonPrefix}-second` },
   ]
+  if (prompt.includes('Invalid score')) judgments[0].score = 11
+  if (prompt.includes('Invalid index')) judgments[0].i = '1'
+  if (prompt.includes('Missing reason')) judgments[0].reason = ''
+  if (prompt.includes('Long reason')) judgments[0].reason = 'one two three four five six seven eight nine'
+  if (prompt.includes('Eight word reason')) judgments[0].reason = 'one two three four five six seven eight'
+  if (prompt.includes('Oversized reason')) judgments[0].reason = 'x'.repeat(161)
+  if (prompt.includes('Boundary reason')) judgments[0].reason = 'x'.repeat(160)
+  if (prompt.includes('Malformed reason')) judgments[0].reason = '\uD83D'
   return new Response(JSON.stringify({
     choices: [{ message: { content: JSON.stringify(judgments) } }],
   }), {
@@ -298,9 +306,45 @@ check(
   'invalid local endpoints stay unready and cannot start discovery or ranking requests',
 )
 
-if (checks !== 13 || failures > 0) {
-  console.error(`judge cache check: ${failures} failure(s), ${checks}/13 checks executed`)
+const invalidResponseNames = names('InvalidResponse')
+check(
+  await rerank(invalidResponseNames, { ...openRouterBase, prompt: 'Invalid score {{names}}' }) === null,
+  'a provider score outside the requested 1-10 range rejects the complete ranking',
+)
+check(
+  await rerank(invalidResponseNames, { ...openRouterBase, prompt: 'Invalid index {{names}}' }) === null,
+  'an explicitly malformed provider index cannot silently become positional',
+)
+check(
+  await rerank(invalidResponseNames, { ...openRouterBase, prompt: 'Missing reason {{names}}' }) === null,
+  'a missing provider reason rejects the complete ranking instead of inventing an explanation',
+)
+check(
+  await rerank(invalidResponseNames, { ...openRouterBase, prompt: 'Long reason {{names}}' }) === null,
+  'a provider reason beyond the requested eight-word limit rejects the complete ranking',
+)
+check(
+  await rerank(invalidResponseNames, { ...openRouterBase, prompt: 'Oversized reason {{names}}' }) === null,
+  'a single oversized provider reason cannot enter the rendered ranking',
+)
+check(
+  await rerank(invalidResponseNames, { ...openRouterBase, prompt: 'Malformed reason {{names}}' }) === null,
+  'an ill-formed Unicode provider reason fails closed before it reaches the UI',
+)
+check(
+  (await rerank(invalidResponseNames, { ...openRouterBase, prompt: 'Eight word reason {{names}}' }))?.[0]?.reason
+    === 'one two three four five six seven eight',
+  'an exact eight-word provider reason remains valid',
+)
+check(
+  (await rerank(invalidResponseNames, { ...openRouterBase, prompt: 'Boundary reason {{names}}' }))?.[0]?.reason.length
+    === 160,
+  'an exact 160-unit provider reason remains valid without truncation',
+)
+
+if (checks !== 21 || failures > 0) {
+  console.error(`judge cache check: ${failures} failure(s), ${checks}/21 checks executed`)
   process.exitCode = 1
 } else {
-  console.log('judge cache check: 13/13 checks passed')
+  console.log('judge cache check: 21/21 checks passed')
 }
