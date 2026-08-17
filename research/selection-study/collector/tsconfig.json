@@ -1,0 +1,8 @@
+{
+  "extends": "../../../web/tsconfig.app.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "../../../web/node_modules/.tmp/tsconfig.selection-study-collector.tsbuildinfo",
+    "resolveJsonModule": true
+  },
+  "include": ["collector.ts", "seed-audit.ts"]
+}

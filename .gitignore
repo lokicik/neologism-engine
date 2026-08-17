@@ -3,4 +3,5 @@
 /web/dist/
 /web/src/wasm/
 /web/e2e/shots/
+/research/selection-study/.collector-dist/
 .claude/

@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <title>Blind ranking source collector</title>
+    <link rel="stylesheet" href="./collector.css" />
+  </head>
+  <body>
+    <main>
+      <header class="hero">
+        <p class="eyebrow">Research only · Phase 272</p>
+        <h1>Blind ranking source collector</h1>
+        <p class="lede">
+          Build the frozen 30-case ranking source without changing production.
+          Each case uses one deterministic, prompt-independent local 24-name pool and, only after a
+          separate confirmation, up to two provider ranking requests.
+        </p>
+      </header>
+
+      <section class="notice" aria-labelledby="boundary-title">
+        <h2 id="boundary-title">Privacy and cost boundary</h2>
+        <ul>
+          <li>Prepare is local and sends no ranking request.</li>
+          <li>Run sends the displayed brief, criterion, and 24 names to the selected provider.</li>
+          <li>The API key stays in this page session and is never stored or exported.</li>
+          <li>Provider pricing and retention terms apply. Reload clears unfinished work.</li>
+        </ul>
+      </section>
+
+      <section class="panel" aria-labelledby="configuration-title">
+        <div class="panel-heading">
+          <div>
+            <p class="step">Step 1</p>
+            <h2 id="configuration-title">Freeze the source identity</h2>
+          </div>
+          <button id="reset-session" class="secondary" type="button">Reset session</button>
+        </div>
+
+        <div class="form-grid">
+          <label>
+            Provider
+            <select id="provider">
+              <option value="localhost">Local OpenAI-compatible server</option>
+              <option value="openrouter">OpenRouter</option>
+            </select>
+          </label>
+          <label>
+            Exact model ID
+            <input id="model-id" required autocomplete="off" placeholder="for example, qwen2.5:14b" />
+          </label>
+          <label id="endpoint-field">
+            Local endpoint
+            <input id="endpoint" value="http://localhost:11434/v1" autocomplete="off" />
+          </label>
+          <label id="api-key-field" hidden>
+            OpenRouter API key
+            <input id="api-key" type="password" autocomplete="off" spellcheck="false" />
+          </label>
+          <label>
+            Generator commit
+            <input id="generator-commit" required autocomplete="off" placeholder="git commit id" />
+          </label>
+          <label>
+            Selector commit
+            <input id="selector-commit" required autocomplete="off" placeholder="git commit id" />
+          </label>
+          <label class="wide">
+            Model artifact SHA-256 <span>(optional for hosted models)</span>
+            <input id="artifact-sha" autocomplete="off" spellcheck="false" placeholder="64 lowercase hex characters" />
+          </label>
+        </div>
+        <p class="criterion"><strong>Frozen criterion:</strong> <span id="criterion"></span></p>
+      </section>
+
+      <section class="panel" aria-labelledby="case-title">
+        <div class="panel-heading">
+          <div>
+            <p class="step">Step 2</p>
+            <h2 id="case-title">Prepare and rank one case</h2>
+          </div>
+          <p id="progress" class="progress">0 / 30 recorded</p>
+        </div>
+
+        <div class="case-card">
+          <p id="case-id" class="case-id">p01 · seed 271001</p>
+          <h3 id="brief">Loading frozen brief…</h3>
+          <p id="case-status" class="status" role="status" aria-live="polite">
+            Configure the frozen source identity, then prepare the first case.
+          </p>
+          <ol id="pool" class="pool" aria-label="Prepared candidate pool"></ol>
+          <p id="estimate" class="estimate" hidden></p>
+          <div class="actions">
+            <button id="prepare-case" type="button">Prepare locally</button>
+            <button id="run-case" type="button" disabled>Run two rankings</button>
+            <button id="cancel-case" class="secondary" type="button" hidden>Cancel request</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel export-panel" aria-labelledby="export-title">
+        <div>
+          <p class="step">Step 3</p>
+          <h2 id="export-title">Export the complete source</h2>
+          <p>Export unlocks only after all 30 cases pass the local and provider checks.</p>
+        </div>
+        <button id="download-source" type="button" disabled>Download ranking source</button>
+      </section>
+
+      <p id="error" class="error" role="alert" hidden></p>
+    </main>
+    <script type="module" src="./collector.ts"></script>
+  </body>
+</html>

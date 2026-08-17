@@ -80,6 +80,21 @@ export function validateProtocol(raw) {
   if (protocol.reversalCount !== 12) fail('protocol must freeze exactly 12 reversals')
   if (protocol.primaryWinGate !== 21) fail('primary win gate must remain 21/30')
   if (protocol.reversalConsistencyGate !== 10) fail('reversal gate must remain 10/12')
+  const expectedPoolPolicy = {
+    style: 'big_tech',
+    variant: 'auto',
+    count: 24,
+    minLength: 4,
+    maxLength: 12,
+    temperature: 0.85,
+    variety: 0.4,
+    roots: [],
+    description: null,
+    deterministicDoubleRun: true,
+  }
+  if (stableJson(protocol.poolPolicy) !== stableJson(expectedPoolPolicy)) {
+    fail('protocol pool policy must remain the frozen prompt-independent 24-name Auto control')
+  }
   if (!Array.isArray(protocol.briefs) || protocol.briefs.length !== protocol.primaryCount) {
     fail('protocol brief count does not match primaryCount')
   }
@@ -90,18 +105,25 @@ export function validateProtocol(raw) {
 
   const ids = new Set()
   const briefs = new Set()
+  const seeds = new Set()
   protocol.briefs.forEach((rawBrief, index) => {
     const row = object(rawBrief, `briefs[${index}]`)
     const expectedId = `p${String(index + 1).padStart(2, '0')}`
     if (row.id !== expectedId) fail(`brief ${index + 1} must use id ${expectedId}`)
     const brief = string(row.brief, `${row.id}.brief`, 10, 240)
+    if (!Number.isSafeInteger(row.seed) || row.seed <= 0 || row.seed > 0xffff_ffff) {
+      fail(`${row.id}.seed must be a positive unsigned 32-bit integer`)
+    }
     if (brief !== brief.trim() || /[\u0000-\u001f\u007f]/.test(brief)) {
       fail(`${row.id}.brief must be trimmed single-line text without controls`)
     }
     const normalized = normalize(brief)
-    if (ids.has(row.id) || briefs.has(normalized)) fail(`duplicate protocol brief ${row.id}`)
+    if (ids.has(row.id) || briefs.has(normalized) || seeds.has(row.seed)) {
+      fail(`duplicate protocol brief id, text, or seed at ${row.id}`)
+    }
     ids.add(row.id)
     briefs.add(normalized)
+    seeds.add(row.seed)
   })
 
   const reversalIds = new Set(protocol.reversalPrimaryIds)
@@ -165,6 +187,9 @@ export function validateSource(raw, protocol) {
   if (source.schema !== 'neologism-ranking-source-v1') fail('unsupported source schema')
   const protocolSha256 = sha256Json(protocol)
   if (source.protocolSha256 !== protocolSha256) fail('source protocol hash does not match frozen protocol')
+  if (stableJson(source.poolPolicy) !== stableJson(protocol.poolPolicy)) {
+    fail('source pool policy does not match the frozen prompt-independent control')
+  }
   const model = object(source.model, 'source.model')
   string(model.provider, 'source.model.provider', 1, 80)
   string(model.id, 'source.model.id', 1, 240)
@@ -184,6 +209,7 @@ export function validateSource(raw, protocol) {
     if (row.briefId !== frozen.id || row.brief !== frozen.brief) {
       fail(`source case ${index + 1} does not match frozen ${frozen.id} brief`)
     }
+    if (row.seed !== frozen.seed) fail(`${row.briefId}.seed does not match the frozen generator seed`)
     if (byId.has(row.briefId)) fail(`duplicate source case ${row.briefId}`)
     const criterion = string(row.criterion, `${row.briefId}.criterion`, 3, 500)
     if (criterion !== criterion.trim() || /[\u0000-\u001f\u007f]/.test(criterion)) {
@@ -201,6 +227,7 @@ export function validateSource(raw, protocol) {
     byId.set(row.briefId, {
       briefId: row.briefId,
       brief: row.brief,
+      seed: row.seed,
       criterion,
       pool: pool.names,
       generic,
@@ -474,6 +501,7 @@ function syntheticSource(protocol) {
   return {
     schema: 'neologism-ranking-source-v1',
     protocolSha256: sha256Json(protocol),
+    poolPolicy: protocol.poolPolicy,
     model: { provider: 'localhost', id: 'synthetic-fixture-model' },
     generatorCommit: '1234567',
     selectorCommit: '89abcde',
@@ -486,6 +514,7 @@ function syntheticSource(protocol) {
       return {
         briefId: row.id,
         brief: row.brief,
+        seed: row.seed,
         criterion,
         pool,
         generic: {
@@ -607,6 +636,14 @@ function selfTest(protocol) {
   duplicatePool.cases[0].pool[1] = duplicatePool.cases[0].pool[0]
   expectFailure(() => prepareStudy(duplicatePool, protocol), 'duplicate name')
   check(true, 'duplicate candidate pools fail closed')
+  const wrongSeed = JSON.parse(JSON.stringify(source))
+  wrongSeed.cases[0].seed++
+  expectFailure(() => prepareStudy(wrongSeed, protocol), 'frozen generator seed')
+  check(true, 'source cases cannot drift from their frozen generator seeds')
+  const wrongPoolPolicy = JSON.parse(JSON.stringify(source))
+  wrongPoolPolicy.poolPolicy.description = source.cases[0].brief
+  expectFailure(() => prepareStudy(wrongPoolPolicy, protocol), 'pool policy')
+  check(true, 'source cannot silently precondition the shared pool on a brief')
   const promptTamper = JSON.parse(JSON.stringify(source))
   promptTamper.cases[0].contextual.prompt += ' tampered'
   expectFailure(() => prepareStudy(promptTamper, protocol), 'does not hash')
@@ -621,8 +658,8 @@ function selfTest(protocol) {
   expectFailure(() => prepareStudy(leaked, protocol), 'forbidden')
   check(true, 'credential-shaped fields are rejected from study sources')
 
-  if (checks !== 17) fail(`expected 17 self-test checks, ran ${checks}`)
-  console.log(`\nselection study self-test: ${checks}/17 passed`)
+  if (checks !== 19) fail(`expected 19 self-test checks, ran ${checks}`)
+  console.log(`\nselection study self-test: ${checks}/19 passed`)
 }
 
 function argsAfterCommand(argv) {

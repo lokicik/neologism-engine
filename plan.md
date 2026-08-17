@@ -9436,6 +9436,74 @@ study passes both gates.
 
 ---
 
+## Phase 272 — Build the opt-in real ranking-source collector (2026-08-17)
+
+### Bottleneck and pre-data correction
+
+Phase 271 froze the blind package but still had no safe way to create its real 30-case provider
+source. A direct audit also found that reusing the current brief-conditioned AI Studio generation
+call could not satisfy the protocol's 24-name invariant: **12/30** frozen briefs returned fewer
+than 24 names at their declared seeds, including pools as small as one name. Choosing different
+seeds does not fix a brief-driven capacity ceiling and would turn source construction into hidden
+post-hoc search.
+
+Before any real provider result or human answer existed, amend the protocol to freeze a more causal
+control: each brief owns one explicit seed, but its 24-name Big Tech Auto pool is generated without
+the brief. Both rankers receive that exact ordered pool; only the candidate prompt receives the
+brief. This isolates brief-aware selection instead of preconditioning both arms during proposal.
+The source must carry the exact pool policy and seed, and the fail-closed validator rejects drift in
+either field. The superseding canonical protocol hash is
+`3b89d5efc4f0899143a12637f991a9e252003e141d39d51f25df3a3ea6b0ad6a`.
+
+### Isolated collector boundary
+
+- Keep the collector under `research/selection-study/` with a separate Vite configuration. It
+  imports the exact production `generateBatch`, `metricPrompt`, `buildPrompt`, and `rerank` code but
+  is not imported by the product entry point and does not change AI Studio, Create, WASM, storage,
+  taste data, or any public schema.
+- Split every case into two explicit actions. **Prepare locally** generates the frozen pool twice,
+  requires an exact ordered match and 24 unique `[A-Za-z]{4,12}` names, and sends zero provider
+  requests. **Run two rankings** sends the generic and contextual prompts sequentially only after
+  that second user action. There is no automatic 60-request burst.
+- Freeze provider, exact model ID, optional model-artifact hash, generator commit, and selector
+  commit on the first prepared case. Keep a provider credential only in page/module memory; never
+  store or export it. Reset/reload discards in-memory progress. Disclose that provider pricing,
+  privacy, retention, and hosted-weight drift remain external constraints.
+- Record a case only after both provider replies pass the existing exact-cardinality/range/reason
+  parser and each ranked list is an exact pool permutation. Failure and cancellation retain the
+  prepared pool but write no partial case. An identical generic/contextual top ten terminally fails
+  the frozen source; do not omit that brief or switch models after inspection. Export unlocks only
+  at 30/30 and still has to pass the canonical Node validator before blind-package construction.
+
+### Acceptance evidence
+
+The current seed audit proves **30/30** prompt-independent frozen pools are 24/24 eligible and
+byte-identical across two production-engine runs; the adjacent brief-conditioned measurement
+reproduces **12/30** short pools. The mocked full collection contract passes **32/32**: zero provider
+requests on open/Prepare, exact generic-then-contextual request order, identical 24-name prompt
+pools, model/temperature identity, failure/cancel no-partial semantics, bounded sequential retry,
+30-case export, canonical validation, frozen seeds/policy, credential exclusion, zero web storage,
+and no unexpected endpoint. Its 64 local mock requests include intentionally failed, cancelled,
+and identical-page terminal probes; the real UI remains one explicitly confirmed case at a time.
+
+The dependency-free protocol/adversarial suite now passes **19/19**, adding direct seed-drift and
+pool-preconditioning rejection. Collector TypeScript and its independent Vite/WASM build pass.
+Direct visual review found and fixed a hidden-attribute CSS override that exposed the irrelevant
+API-key field for localhost; localhost and OpenRouter now show only their own field. At 390 pixels,
+the page has no horizontal overflow and every visible control remains inside the viewport.
+The unchanged production TypeScript/Vite build, Rust **160/160**, example compile, and held-out
+**49/49** audit remain green at quality **84.85**, similarity **0.197**, and seed diversity **19.60**.
+
+### Decision
+
+The missing source-production path is now executable without weakening the blind study or changing
+production. It still creates **no human evidence** by itself: no real provider source, blind answer
+file, or preference result exists. The next action is operational rather than architectural—choose
+one exact model, collect all 30 cases through the explicit UI, validate the source, then obtain the
+42 blind choices. Production remains at Phase 270 until both human gates pass.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
