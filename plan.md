@@ -8802,6 +8802,47 @@ the existing honest local-pool or last-good ranking authoritative.
 
 ---
 
+## Phase 257 — Let empty OpenRouter catalogs recover (2026-08-17)
+
+### Bottleneck
+
+OpenRouter's public model list was cached for the browser session after every HTTP-success response,
+including a response whose `data` rows were absent or all rejected by the row validator. One
+transient empty/malformed response therefore made Settings reuse an empty catalog for the rest of
+the tab; closing and reopening the modal could not recover even after the provider returned a valid
+list.
+
+### Frozen boundary
+
+- Cache a filtered OpenRouter catalog only when at least one valid model remains. A later Settings
+  discovery may retry after an empty result; once a nonempty list arrives, preserve the existing
+  exact URL-scoped session reuse.
+- Keep HTTP errors, JSON failures, localhost every-visit discovery, row validation, exact-id
+  deduplication, sorting, 60-option rendering, cancellation, key/privacy behavior, ranking, storage,
+  generation, taste, WASM, and Rust unchanged. Add no timer, automatic retry loop, or live request.
+- Extend the existing pure discovery/cache owner with an isolated fresh module cache so the new
+  empty-then-valid sequence cannot disturb its retained valid-catalog assertions.
+
+### Acceptance evidence
+
+The expanded pure owner was deliberately red at **34/35** against Phase 256: after an HTTP-success
+catalog whose only rows were invalid, the next two discoveries reused the cached empty array and
+never observed the recovered valid row. Every other response, request, cache, catalog, endpoint,
+credential, discovery, and cancellation gate remained green.
+
+Only nonempty filtered OpenRouter lists now enter the session map. The pure owner passes **35/35**:
+the empty result performs no hidden loop, the next explicit discovery retrieves `recovered-model`,
+and its exact repeat reuses that recovered list without a third request. The rebuilt production
+Settings modal/combobox/discovery/focus contract remains green at **64/64**. TypeScript and the Vite
+production build pass; no live provider or key was used.
+
+### Decision
+
+A transient empty provider catalog no longer poisons the rest of the browser tab. Successful lists
+stay fast, while recovery remains explicit and user-owned through the next Settings discovery.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

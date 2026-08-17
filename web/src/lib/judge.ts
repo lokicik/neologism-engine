@@ -309,7 +309,7 @@ export async function fetchModels(cfg: JudgeConfig, signal?: AbortSignal): Promi
       (a, b) =>
         Number(b.free) - Number(a.free) || sortPrice(a) - sortPrice(b) || a.id.localeCompare(b.id),
     )
-    if (cfg.provider === 'openrouter') modelCache.set(url, models)
+    if (cfg.provider === 'openrouter' && models.length > 0) modelCache.set(url, models)
     return models
   } catch {
     return []

@@ -36,6 +36,8 @@ let autoModel = 'auto-model-a'
 let discoveryModel = 'discovery-model-a'
 let discoveryLookups = 0
 let openRouterLookups = 0
+let openRouterCatalogMode: 'normal' | 'empty-then-valid' = 'normal'
+let recoveryCatalogLookups = 0
 let mixedResolutionLookups = 0
 const canonicalEndpointUrls: string[] = []
 let modelResolutionAbortObserved = false
@@ -87,6 +89,17 @@ globalThis.fetch = async (input, init) => {
     }
     if (url === 'https://openrouter.ai/api/v1/models') {
       openRouterLookups++
+      if (openRouterCatalogMode === 'empty-then-valid') {
+        recoveryCatalogLookups++
+        return new Response(JSON.stringify({
+          data: recoveryCatalogLookups === 1
+            ? [{ id: 17 }, { id: 'broken\uD83D' }]
+            : [{ id: 'recovered-model', pricing: { prompt: '0', completion: '0' } }],
+        }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        })
+      }
       return new Response(JSON.stringify({ data: [
         {
           id: 'explicit-free',
@@ -286,6 +299,19 @@ check(
     && JSON.stringify(remoteCatalogAgain) === JSON.stringify(remoteCatalog),
   'unchanged OpenRouter model discovery retains the existing session cache',
 )
+openRouterCatalogMode = 'empty-then-valid'
+const { fetchModels: fetchModelsWithFreshCache } = await import('../src/lib/judge.ts?empty-retry')
+const emptyRemoteCatalog = await fetchModelsWithFreshCache(remoteConfig)
+const recoveredRemoteCatalog = await fetchModelsWithFreshCache(remoteConfig)
+const recoveredRemoteCatalogAgain = await fetchModelsWithFreshCache(remoteConfig)
+check(
+  recoveryCatalogLookups === 2
+    && emptyRemoteCatalog.length === 0
+    && recoveredRemoteCatalog[0]?.id === 'recovered-model'
+    && JSON.stringify(recoveredRemoteCatalogAgain) === JSON.stringify(recoveredRemoteCatalog),
+  'an empty filtered OpenRouter catalog is retried once and only the recovered list is session-cached',
+)
+openRouterCatalogMode = 'normal'
 check(
   remoteCatalog.map((model) => model.id).join('|')
     === 'explicit-free|suffix-priced:free|explicit-paid|malformed-price|remote-catalog-model',
@@ -552,9 +578,9 @@ check(
   'changing the OpenRouter credential performs one fresh request before exact-repeat cache reuse',
 )
 
-if (checks !== 34 || failures > 0) {
-  console.error(`judge cache check: ${failures} failure(s), ${checks}/34 checks executed`)
+if (checks !== 35 || failures > 0) {
+  console.error(`judge cache check: ${failures} failure(s), ${checks}/35 checks executed`)
   process.exitCode = 1
 } else {
-  console.log('judge cache check: 34/34 checks passed')
+  console.log('judge cache check: 35/35 checks passed')
 }
