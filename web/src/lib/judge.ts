@@ -336,7 +336,7 @@ export async function rerank(
     if (!content) return null
 
     const arr = extractArray(content)
-    if (!Array.isArray(arr) || arr.length === 0) return null
+    if (!Array.isArray(arr) || arr.length !== labels.length) return null
 
     // Map each judgment to its input name. Prefer an explicit 1-based "i";
     // fall back to array position when the array lines up with the input.
@@ -360,7 +360,7 @@ export async function rerank(
       ) return
       byIndex.set(idx, { score, reason })
     })
-    // Require coverage of every candidate — a partial reply is treated as failure.
+    // Require one valid row per candidate — partial, duplicate, or extra replies fail.
     if (byIndex.size !== labels.length) return null
 
     const ranked: RankedJudgment[] = labels

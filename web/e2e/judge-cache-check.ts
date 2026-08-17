@@ -141,6 +141,8 @@ globalThis.fetch = async (input, init) => {
   if (prompt.includes('Oversized reason')) judgments[0].reason = 'x'.repeat(161)
   if (prompt.includes('Boundary reason')) judgments[0].reason = 'x'.repeat(160)
   if (prompt.includes('Malformed reason')) judgments[0].reason = '\uD83D'
+  if (prompt.includes('Extra duplicate')) judgments.push({ i: 2, score: 10, reason: 'duplicate override' })
+  if (prompt.includes('Extra invalid')) judgments.push({ i: 99, score: 10, reason: 'out of range' })
   return new Response(JSON.stringify({
     choices: [{ message: { content: JSON.stringify(judgments) } }],
   }), {
@@ -405,6 +407,14 @@ check(
   'an ill-formed Unicode provider reason fails closed before it reaches the UI',
 )
 check(
+  await rerank(invalidResponseNames, { ...openRouterBase, prompt: 'Extra duplicate {{names}}' }) === null,
+  'an extra duplicate row cannot overwrite one otherwise complete provider ranking',
+)
+check(
+  await rerank(invalidResponseNames, { ...openRouterBase, prompt: 'Extra invalid {{names}}' }) === null,
+  'an extra out-of-range row cannot be ignored beside an otherwise complete provider ranking',
+)
+check(
   (await rerank(invalidResponseNames, { ...openRouterBase, prompt: 'Eight word reason {{names}}' }))?.[0]?.reason
     === 'one two three four five six seven eight',
   'an exact eight-word provider reason remains valid',
@@ -415,9 +425,9 @@ check(
   'an exact 160-unit provider reason remains valid without truncation',
 )
 
-if (checks !== 25 || failures > 0) {
-  console.error(`judge cache check: ${failures} failure(s), ${checks}/25 checks executed`)
+if (checks !== 27 || failures > 0) {
+  console.error(`judge cache check: ${failures} failure(s), ${checks}/27 checks executed`)
   process.exitCode = 1
 } else {
-  console.log('judge cache check: 25/25 checks passed')
+  console.log('judge cache check: 27/27 checks passed')
 }

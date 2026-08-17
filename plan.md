@@ -8344,6 +8344,48 @@ fallback, cancellation, and hot-swap behavior remain intact.
 
 ---
 
+## Phase 246 — Require exactly one AI judgment per candidate (2026-08-17)
+
+### Bottleneck
+
+Phase 243 required every candidate index to appear in the parsed response, but it did not require
+the response array itself to have the same cardinality as the candidate list. A provider could
+return both valid rows plus a duplicate that overwrote an earlier score/reason, or append an invalid
+out-of-range row that the parser silently ignored. Either response still became a verified ranking.
+
+### Frozen boundary
+
+- Require the extracted top-level array length to equal the ordered candidate count before parsing
+  any row. Keep the existing index map as the second guard, so missing and duplicate indices still
+  fail even when cardinality happens to match.
+- Reject partial, duplicate, and extra replies through the existing null result. Preserve AI
+  Studio's unranked-local/last-good fallback, alert, Retry, focus, and cache behavior; do not select,
+  overwrite, truncate, or repair provider rows.
+- Keep the prompt, request body, score/reason bounds, configured and auto-detected model paths,
+  discovery, cache identity, generation, storage, taste, WASM, and Rust unchanged.
+
+### Acceptance evidence
+
+The expanded pure judge owner was deliberately red at **25/27** against Phase 245. A three-row
+response containing the two valid candidates plus a duplicate index was accepted and let the extra
+row overwrite the prior judgment. A second three-row response with an out-of-range extra index was
+also accepted after the invalid row was ignored. All 25 retained response-boundary, discovery,
+price, endpoint, cancellation, and cache gates remained green.
+
+The shared parser now rejects any extracted array whose length differs from the candidate count
+before building its index map. The pure owner passes **27/27**: both extra-row cases fail closed while
+valid exact-cardinality replies and every Phase 243–245 boundary remain unchanged. TypeScript and
+the Vite production build pass. AI Studio's retained cancellation/config/failure/Retry/race/cache/
+model/focus/fallback contract remains green at **61/61**. No live provider or key was used.
+
+### Decision
+
+Candidate coverage can no longer hide surplus provider output. A ranking is verified only when the
+array cardinality and unique valid index coverage both equal the exact ordered input; otherwise the
+existing truthful fallback remains authoritative.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
