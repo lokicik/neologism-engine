@@ -61,6 +61,13 @@ export function isValidLocalEndpoint(endpoint?: string): boolean {
   }
 }
 
+export function isValidOpenRouterApiKey(value: unknown): boolean {
+  return typeof value === 'string'
+    && isWellFormedUnicode(value)
+    && value.trim() !== ''
+    && !/[\u0000-\u001f\u007f]/.test(value)
+}
+
 // Free ids drift over time — these are editable in the UI; this is just the list
 // the model dropdown seeds with.
 export const OPENROUTER_FREE_MODELS = [
@@ -120,7 +127,7 @@ export function defaultJudgeConfig(): JudgeConfig {
 // "Sharpen" button should act or open Settings first).
 export function isJudgeReady(cfg: JudgeConfig): boolean {
   if (!cfg.enabled) return false
-  if (cfg.provider === 'openrouter') return Boolean(cfg.apiKey?.trim())
+  if (cfg.provider === 'openrouter') return isValidOpenRouterApiKey(cfg.apiKey)
   return isValidLocalEndpoint(cfg.endpoint)
 }
 

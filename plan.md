@@ -8462,6 +8462,49 @@ changes to grow the verified-result cache forever.
 
 ---
 
+## Phase 249 — Reject HTTP-unsafe OpenRouter keys (2026-08-17)
+
+### Bottleneck
+
+Phase 242 required a trimmed non-empty key before OpenRouter could be enabled, but any otherwise
+well-formed string still passed storage and readiness. A key containing an ASCII control character
+therefore rendered AI Studio as configured even though it could not safely form an Authorization
+header; every ranking then fell into the generic provider failure path.
+
+### Frozen boundary
+
+- Share one validator across runtime readiness and the existing persisted read/write boundaries.
+  An active OpenRouter key must be a well-formed, non-blank string without ASCII control characters
+  or DEL. Keep surrounding spaces and provider-specific key shapes unchanged; do not trim, rewrite,
+  prefix-check, migrate, expose, or otherwise normalize the secret.
+- Keep dormant keys inert when AI is disabled or localhost is selected. Preserve no-repair-on-read,
+  exact prior storage on a rejected Save, and the existing empty-key message.
+- Give a non-empty unsafe key its own API-field error and existing focus semantics. Do not change
+  model discovery, request/cache identity, prompts, responses, ranking, generation, taste, WASM, or
+  Rust.
+
+### Acceptance evidence
+
+The pure judge owner was deliberately red at **28/29** against Phase 248: a control-character key was
+considered ready and reached the mocked ranking transport. The production corrupt-config owner was
+red at **42/45**: an unsafe explicit Save closed Settings and replaced durable data, while the same
+unsafe key loaded from storage left the enabled toggle active. All retained boundaries stayed green.
+
+The shared validator now blocks that key before a request, before an active record is admitted, and
+before an explicit Save mutates storage. The pure owner passes **29/29**. The rebuilt production
+corrupt-config owner passes **45/45**, including exact raw preservation, the field-owned control-
+character error, and no page errors. Retained production contracts remain green at Settings keyboard
+**62/62**, Settings storage failure/retry **13/13**, and AI Studio cancellation/config/failure/Retry/
+race/cache/model/focus/fallback **61/61**. TypeScript and the Vite production build pass; no live
+provider or key was used.
+
+### Decision
+
+Visible readiness, durable configuration, Settings recovery, and the actual Authorization boundary
+now agree on whether an active OpenRouter secret can safely reach Fetch.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

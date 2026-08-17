@@ -4,6 +4,7 @@ import {
   OPENROUTER_FREE_MODELS,
   fetchModels,
   isValidLocalEndpoint,
+  isValidOpenRouterApiKey,
   type JudgeConfig,
   type JudgeProvider,
   type ModelInfo,
@@ -172,10 +173,12 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
     setDraft((d) => ({ ...d, [key]: value }))
 
   const save = () => {
-    if (draft.enabled && draft.provider === 'openrouter' && !draft.apiKey?.trim()) {
+    if (draft.enabled && draft.provider === 'openrouter' && !isValidOpenRouterApiKey(draft.apiKey)) {
       setSaveError(null)
       setEndpointError(null)
-      setApiKeyError('Enter an OpenRouter API key before enabling AI re-rank.')
+      setApiKeyError(draft.apiKey?.trim()
+        ? 'Remove invalid Unicode, line breaks, or control characters from the OpenRouter API key.'
+        : 'Enter an OpenRouter API key before enabling AI re-rank.')
       requestAnimationFrame(() => {
         apiKeyInputRef.current?.scrollIntoView({ block: 'nearest' })
         apiKeyInputRef.current?.focus()

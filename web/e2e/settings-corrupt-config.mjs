@@ -11,7 +11,7 @@ const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 39
+const EXPECTED_CHECKS = 45
 
 const server = spawn(process.execPath, [viteCli, 'preview', '--port', String(PORT), '--strictPort'], {
   cwd: WEB_DIR,
@@ -170,6 +170,81 @@ try {
     `whitespace-key record produces no page error (${missingKeyPageErrors.join(' | ')})`,
   )
   await missingKeyContext.close()
+
+  const priorSafeKeyRaw = JSON.stringify({
+    enabled: true,
+    provider: 'openrouter',
+    apiKey: 'fixture-key',
+    model: 'fixture-model',
+  })
+  const unsafeKeyWriteContext = await contextFor(priorSafeKeyRaw)
+  const unsafeKeyWriteErrors = []
+  const unsafeKeyWritePage = await unsafeKeyWriteContext.newPage()
+  unsafeKeyWritePage.on('pageerror', (error) => unsafeKeyWriteErrors.push(error.message))
+  await unsafeKeyWritePage.goto(APP_URL)
+  await unsafeKeyWritePage.locator('.sidebar-settings').click()
+  const unsafeKeyWriteDialog = unsafeKeyWritePage.locator('.settings-modal[role="dialog"]')
+  const unsafeKeyInput = unsafeKeyWriteDialog.getByLabel('API key')
+  await unsafeKeyInput.evaluate((input) => {
+    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set
+    setter.call(input, 'fixture\u0001key')
+    input.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText' }))
+  })
+  await unsafeKeyWriteDialog.getByRole('button', { name: 'Save', exact: true }).click()
+  check(
+    await unsafeKeyWriteDialog.isVisible().catch(() => false)
+      && await unsafeKeyWritePage.evaluate(() => localStorage.getItem('neologism:judge')) === priorSafeKeyRaw,
+    'control-character API-key Save keeps Settings open and preserves the prior durable config',
+  )
+  if (await unsafeKeyWriteDialog.isVisible().catch(() => false)) {
+    await unsafeKeyWritePage.waitForFunction(() => {
+      const input = document.querySelector('.settings-modal input[type="password"]')
+      return document.activeElement === input && input?.getAttribute('aria-invalid') === 'true'
+    })
+  }
+  const unsafeKeyErrorId = await unsafeKeyInput.getAttribute('aria-describedby').catch(() => null)
+  check(
+    unsafeKeyErrorId !== null
+      && await unsafeKeyWriteDialog.locator(`#${unsafeKeyErrorId}`).getAttribute('role').catch(() => null) === 'alert'
+      && await unsafeKeyWriteDialog.locator(`#${unsafeKeyErrorId}`).textContent().catch(() => null)
+        === 'Remove invalid Unicode, line breaks, or control characters from the OpenRouter API key.'
+      && await unsafeKeyInput.evaluate((input) => (
+        document.activeElement === input && input.matches(':focus-visible')
+      )).catch(() => false),
+    'control-character API-key Save exposes and focuses its exact field-owned validation error',
+  )
+  check(
+    unsafeKeyWriteErrors.length === 0,
+    `control-character API-key Save produces no page error (${unsafeKeyWriteErrors.join(' | ')})`,
+  )
+  await unsafeKeyWriteContext.close()
+
+  const unsafeStoredKeyRaw = JSON.stringify({
+    enabled: true,
+    provider: 'openrouter',
+    apiKey: 'fixture\u0001key',
+    model: 'fixture-model',
+  })
+  const unsafeStoredKeyContext = await contextFor(unsafeStoredKeyRaw)
+  const unsafeStoredKeyErrors = []
+  const unsafeStoredKeyPage = await unsafeStoredKeyContext.newPage()
+  unsafeStoredKeyPage.on('pageerror', (error) => unsafeStoredKeyErrors.push(error.message))
+  await unsafeStoredKeyPage.goto(APP_URL)
+  await unsafeStoredKeyPage.locator('.sidebar-settings').click()
+  const unsafeStoredKeyDialog = unsafeStoredKeyPage.locator('.settings-modal[role="dialog"]')
+  check(
+    !(await unsafeStoredKeyDialog.getByLabel('Enable AI re-rank').isChecked()),
+    'persisted enabled OpenRouter config with a control-character key fails closed',
+  )
+  check(
+    await unsafeStoredKeyPage.evaluate(() => localStorage.getItem('neologism:judge')) === unsafeStoredKeyRaw,
+    'control-character key record is not silently repaired on read',
+  )
+  check(
+    unsafeStoredKeyErrors.length === 0,
+    `control-character key record produces no page error (${unsafeStoredKeyErrors.join(' | ')})`,
+  )
+  await unsafeStoredKeyContext.close()
 
   const invalidEndpointRaw = JSON.stringify({
     enabled: true,
