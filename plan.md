@@ -8843,6 +8843,46 @@ stay fast, while recovery remains explicit and user-owned through the next Setti
 
 ---
 
+## Phase 258 — Tell an empty discovery from a search miss (2026-08-17)
+
+### Bottleneck
+
+Settings used the same **No matches — any model id works** status for two different states: a valid
+catalog filtered by the user's text, and a localhost discovery that returned no valid model at all.
+When an endpoint was unreachable, blocked by CORS, empty, or malformed, the picker therefore implied
+that its text search had simply missed instead of pointing to the actual recovery surface.
+
+### Frozen boundary
+
+- When the provider pick list itself is empty after loading, report that no model was discovered and
+  point to manual id entry plus endpoint/CORS checks. Keep **No matches** only for a nonempty list
+  filtered to zero by the current query.
+- Preserve the combobox/listbox roles, live status, editable id fallback, loading state, endpoint
+  requests, row validation, OpenRouter curated fallback, focus, storage, ranking, generation, taste,
+  WASM, and Rust. Add no retry button, request, error inference, or new state machine.
+- Extend the existing production Settings owner with one HTTP-success localhost response containing
+  only malformed rows, and keep the resulting guidance contained at 390 pixels.
+
+### Acceptance evidence
+
+The expanded production owner was deliberately red at **64/65** against Phase 257: all malformed
+rows were correctly excluded and no option rendered, but the terminal status still said **No
+matches**. The other 64 modal, combobox, discovery, cancellation, focus, pricing, and containment
+gates remained green.
+
+The model picker now branches only on whether its underlying pick list is empty. The rebuilt owner
+passes **65/65**: the empty localhost result exposes exact manual-id/endpoint/CORS guidance, renders
+no invalid option, and stays inside the 390-pixel modal. TypeScript and the Vite production build
+pass. The retained pure judge/discovery/cache owner remains green at **35/35**; no live provider,
+local server, or key was used.
+
+### Decision
+
+Settings no longer turns provider discovery failure into a fictitious search result. The user sees
+the next truthful action without adding hidden retries or changing the manual model-id escape hatch.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

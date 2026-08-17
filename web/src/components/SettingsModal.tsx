@@ -447,7 +447,11 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
           <div className="model-menu" id={modelListId} role="listbox" aria-label="Available models">
             {modelsLoading && <div className="model-empty" role="status">Loading models…</div>}
             {!modelsLoading && filtered.length === 0 && (
-              <div className="model-empty" role="status">No matches — any model id works.</div>
+              <div className="model-empty" role="status">
+                {pickList.length === 0
+                  ? 'No models discovered — type a model id or check the endpoint and CORS.'
+                  : 'No matches — any model id works.'}
+              </div>
             )}
             {filtered.map((m, index) => (
               <button

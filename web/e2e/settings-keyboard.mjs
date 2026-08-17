@@ -12,7 +12,7 @@ const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 64
+const EXPECTED_CHECKS = 65
 const FOCUSABLE = [
   'a[href]',
   'button:not([disabled])',
@@ -125,6 +125,7 @@ let localModelRequests = 0
 let localModel = 'local/model-a'
 let replacementEndpointRequests = 0
 const replacementEndpointResponse = deferred()
+let emptyEndpointRequests = 0
 let closingEndpointRequests = 0
 let closingRouteAbortObserved = false
 const closingEndpointResponse = deferred()
@@ -190,6 +191,15 @@ try {
     } catch {
       closingRouteAbortObserved = true
     }
+  })
+  await context.route('http://127.0.0.1:9023/v1/models', async (route) => {
+    emptyEndpointRequests++
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      headers: { 'access-control-allow-origin': '*' },
+      body: JSON.stringify({ data: [{ id: 17 }, { id: 'broken\uD83D' }] }),
+    })
   })
 
   const page = await context.newPage()
@@ -587,6 +597,24 @@ try {
 
   await refreshedLocalCombo.fill('')
   await page.keyboard.press('Escape')
+  await page.setViewportSize({ width: 390, height: 844 })
+  await dialog.getByRole('textbox', { name: 'Endpoint' }).fill('http://127.0.0.1:9023/v1')
+  await refreshedLocalCombo.focus()
+  await page.waitForFunction(() => {
+    const status = document.querySelector('.model-empty[role="status"]')
+    return status && !status.textContent?.includes('Loading models')
+  })
+  check(
+    emptyEndpointRequests === 1
+      && (await dialog.locator('.model-empty[role="status"]').textContent())?.trim()
+        === 'No models discovered — type a model id or check the endpoint and CORS.'
+      && await dialog.getByRole('option').count() === 0
+      && await dialog.evaluate((modal) => modal.scrollWidth <= modal.clientWidth + 1),
+    'an empty filtered localhost catalog exposes truthful discovery recovery instead of a search miss',
+  )
+
+  await page.keyboard.press('Escape')
+  await page.setViewportSize({ width: 1440, height: 1000 })
   await dialog.getByRole('textbox', { name: 'Endpoint' }).fill('http://127.0.0.1:9022/v1')
   await refreshedLocalCombo.focus()
   await dialog.locator('.model-empty[role="status"]').filter({ hasText: 'Loading models' }).waitFor({ state: 'visible' })
