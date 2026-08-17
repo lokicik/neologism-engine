@@ -324,7 +324,7 @@ body {
 }
 
 .tile-body { font-size: .85rem; color: var(--muted); line-height: 1.55; }
-.tile-foot { margin-top: auto; font-size: .7rem; color: var(--muted); opacity: .6; letter-spacing: .03em; }
+.tile-foot { margin-top: auto; font-size: .7rem; color: var(--muted); letter-spacing: .03em; }
 
 .tile-pills { display: flex; gap: .4rem; flex-wrap: wrap; }
 .tile-pill {

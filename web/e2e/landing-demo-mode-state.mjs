@@ -1,6 +1,6 @@
-// Phase 169/220-222/265-266 browser contract: Landing's live mode demo exposes its
+// Phase 169/220-222/265-267 browser contract: Landing's live mode demo exposes its
 // visual single-selection state without pretending to be tabs or an ARIA menu,
-// while its product copy stays within the shipped privacy and repeat boundaries.
+// while its product copy stays truthful and visibly readable.
 // Run after `npm run build`: node e2e/landing-demo-mode-state.mjs
 import { chromium } from 'playwright'
 import { spawn } from 'node:child_process'
@@ -12,7 +12,7 @@ const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 26
+const EXPECTED_CHECKS = 27
 
 const server = spawn(process.execPath, [viteCli, 'preview', '--port', String(PORT), '--strictPort'], {
   cwd: WEB_DIR,
@@ -109,6 +109,27 @@ try {
   check(
     repeatCopy === '20,000 recently shown names in the rolling guard. Exact repeats stay outside that window. the shipped app boundary',
     'Landing states the shipped rolling repeat boundary instead of a 100k research sweep',
+  )
+  const footContrasts = await page.locator('.tile-foot').evaluateAll((elements) => {
+    const rgb = (value) => (value.match(/[\d.]+/g) ?? []).slice(0, 3).map(Number)
+    const luminance = (channels) => channels
+      .map((value) => value / 255)
+      .map((value) => value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4)
+      .reduce((sum, value, index) => sum + value * [0.2126, 0.7152, 0.0722][index], 0)
+    return elements.map((element) => {
+      const style = getComputedStyle(element)
+      const foreground = rgb(style.color)
+      const tile = element.closest('.tile')
+      const background = rgb(tile ? getComputedStyle(tile).backgroundColor : getComputedStyle(document.body).backgroundColor)
+      const opacity = Number(style.opacity)
+      const rendered = foreground.map((value, index) => value * opacity + background[index] * (1 - opacity))
+      const [light, dark] = [luminance(rendered), luminance(background)].sort((a, b) => b - a)
+      return (light + 0.05) / (dark + 0.05)
+    })
+  })
+  check(
+    footContrasts.length >= 5 && footContrasts.every((ratio) => ratio >= 4.5),
+    'every small Landing tile footnote keeps at least 4.5:1 rendered contrast',
   )
   const desktopRings = await landingFocusRings()
   if (!desktopRings.every((ring) => ring.ok)) console.log('INFO  390px Landing focus rings', desktopRings)

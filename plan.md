@@ -9202,6 +9202,42 @@ false product guarantee.
 
 ---
 
+## Phase 267 — Restore readable Landing footnote contrast (2026-08-17)
+
+### Bottleneck
+
+Landing's five small tile footnotes used the shared muted color and then reduced the whole element to
+60% opacity. On the shipped `#121215` tile surface that composited to approximately `rgb(86,86,94)`,
+only **2.59:1** contrast. The 0.7rem captions include the domain/provider privacy boundary and the
+repeat-window qualification, so the most important caveats were also the least readable text.
+
+### Frozen boundary
+
+- Change only the shared `.tile-foot` opacity and extend the existing Landing production owner. Keep
+  font family, size, spacing, layout, text, tile surface, palette variables, motion, focus, storage,
+  network, generation, WASM, and Rust unchanged.
+- Measure the rendered foreground after opacity compositing against the actual tile background. Gate
+  every current footnote at **4.5:1** or higher rather than asserting one raw CSS token.
+- Preserve the restrained hierarchy: reuse the existing muted color at full opacity instead of
+  promoting captions to primary text or adding a new palette value.
+
+### Acceptance evidence
+
+The expanded Landing owner was deliberately red at **26/27** against Phase 266: all content, mode,
+motion, focus, storage, and zero-request gates passed, while every footnote remained below the new
+rendered-contrast floor. Removing only the second opacity reduction raises the computed ratio to
+approximately **5.06:1**. The rebuilt production owner passes **27/27**; TypeScript and the Vite
+production build pass. A 320-pixel production visual review confirms that the brighter captions keep
+their existing hierarchy and wrapping without clipping.
+
+### Decision
+
+Landing's supporting caveats remain visually secondary, but they are no longer functionally hidden.
+The privacy and repeat qualifications now carry the same readable muted color already used elsewhere
+in the product.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
