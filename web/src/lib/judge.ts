@@ -287,9 +287,15 @@ export async function fetchModels(cfg: JudgeConfig, signal?: AbortSignal): Promi
     const res = await fetch(url, { signal })
     if (!res.ok) return []
     const data = (await res.json()) as { data?: unknown }
+    const seenIds = new Set<string>()
     const models: ModelInfo[] = (Array.isArray(data.data) ? data.data : [])
       .map((model) => modelInfoFromUnknown(model, cfg.provider))
       .filter((model): model is ModelInfo => model !== null)
+      .filter((model) => {
+        if (seenIds.has(model.id)) return false
+        seenIds.add(model.id)
+        return true
+      })
     // Free first, then cheapest, then alphabetical. Negative/sentinel prices
     // (e.g. openrouter/auto reports -1 for variable pricing) sort to the bottom
     // of the paid group rather than above genuinely cheap models.

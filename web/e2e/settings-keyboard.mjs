@@ -12,7 +12,7 @@ const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 63
+const EXPECTED_CHECKS = 64
 const FOCUSABLE = [
   'a[href]',
   'button:not([disabled])',
@@ -148,7 +148,14 @@ try {
       status: 200,
       contentType: 'application/json',
       headers: { 'access-control-allow-origin': '*' },
-      body: JSON.stringify({ data: [...MOCK_MODELS, { id: 17 }, { id: 'broken\uD83D' }] }),
+      body: JSON.stringify({
+        data: [
+          ...MOCK_MODELS,
+          { ...MOCK_MODELS[5], name: 'Conflicting duplicate' },
+          { id: 17 },
+          { id: 'broken\uD83D' },
+        ],
+      }),
     })
   })
   await context.route('http://127.0.0.1:9020/v1/models', async (route) => {
@@ -348,6 +355,10 @@ try {
       && [FIRST_MODEL, MOCK_MODELS[17].id, MOCK_MODELS[59].id]
         .every((name) => optionNames.some((option) => option.includes(name))),
     '65 mocked models render as a capped list of 60 named options',
+  )
+  check(
+    optionNames.filter((option) => option.includes(MOCK_MODELS[5].id)).length === 1,
+    'a repeated provider model id renders as one unambiguous combobox option',
   )
   check(
     !optionNames.some((option) => option.includes(TYPED_MODEL)),

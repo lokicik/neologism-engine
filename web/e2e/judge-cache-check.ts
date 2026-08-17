@@ -100,6 +100,12 @@ globalThis.fetch = async (input, init) => {
           context_length: 128_000,
           pricing: { prompt: '0.000002', completion: '0.000003' },
         },
+        {
+          id: 'explicit-paid',
+          name: 'Conflicting Duplicate',
+          context_length: 256_000,
+          pricing: { prompt: '0', completion: '0' },
+        },
         { id: 'suffix-priced:free', pricing: { prompt: '0.1', completion: '0.2' } },
         { id: 'remote-catalog-model' },
         { id: 'malformed-price', pricing: { prompt: 'not-a-price', completion: '0' } },
@@ -282,7 +288,7 @@ check(
 check(
   remoteCatalog.map((model) => model.id).join('|')
     === 'explicit-free|suffix-priced:free|explicit-paid|malformed-price|remote-catalog-model',
-  'malformed catalog rows are skipped without hiding independently valid model choices',
+  'malformed and duplicate catalog rows are removed without hiding independently valid model choices',
 )
 const remoteById = new Map(remoteCatalog.map((model) => [model.id, model]))
 check(
@@ -290,6 +296,8 @@ check(
     && remoteById.get('explicit-free')?.priceIn === 0
     && remoteById.get('explicit-free')?.priceOut === 0
     && remoteById.get('explicit-paid')?.free === false
+    && remoteById.get('explicit-paid')?.priceIn === 0.000002
+    && remoteById.get('explicit-paid')?.priceOut === 0.000003
     && remoteById.get('suffix-priced:free')?.free === true
     && remoteById.get('suffix-priced:free')?.priceIn === 0
     && remoteById.get('suffix-priced:free')?.priceOut === 0

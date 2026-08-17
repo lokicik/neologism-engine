@@ -8677,6 +8677,49 @@ reuse remains bounded and fast, but only inside the active request identity.
 
 ---
 
+## Phase 254 — Deduplicate model catalogs by exact id (2026-08-17)
+
+### Bottleneck
+
+Each provider catalog row was validated independently, but two valid rows with the same model id
+both survived sorting and caching. Settings then rendered duplicate React keys and two accessible
+options for one identity; conflicting price metadata could make the same model look free and paid,
+and the extra row displaced a later model from the 60-option keyboard window.
+
+### Frozen boundary
+
+- After row validation and before sorting, keep only the first valid occurrence of each exact model
+  id. Preserve that row's complete price, context, and optional-name metadata; never merge fields or
+  let a later duplicate overwrite it. Model-id comparison remains case-sensitive.
+- Apply the same deterministic list to Settings and the existing OpenRouter session cache. Preserve
+  malformed-row isolation, valid-row ordering rules after deduplication, the 60-option cap, exact
+  typed selection, first-valid localhost auto-resolution, discovery refresh/cancellation, prices,
+  ranking, storage, generation, taste, WASM, and Rust.
+
+### Acceptance evidence
+
+The pure owner was deliberately red at **32/33** against Phase 253: a repeated `explicit-paid` id
+survived beside its first row, producing a duplicate catalog identity. The production Settings owner
+could not complete its **64**-check run: before stopping at check 45, it showed two `mock/model-05`
+options, displaced the expected capped-list row and active-index path, then Playwright's strict mouse
+selection failed because the supposedly unique option resolved twice. All preceding modal, focus,
+disclosure, and network-truth checks stayed green.
+
+Validated rows now pass through one exact-id set before sorting or caching. The first row's paid
+metadata survives and the conflicting free duplicate disappears. The pure owner passes **33/33**;
+the rebuilt production Settings owner passes **64/64**, including one unambiguous option, the full
+60-row window, off-screen keyboard navigation, exact typed substitution, and mouse selection.
+Retained production contracts remain green at AI Studio cancellation/config/failure/Retry/race/
+cache/model/credential/focus **65/65** and corrupt Settings config **57/57**. TypeScript and the Vite
+production build pass; no live provider or key was used.
+
+### Decision
+
+One model id now has one deterministic catalog meaning. Provider duplication can no longer make
+Settings ambiguous or silently change the selected model's cost metadata.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
