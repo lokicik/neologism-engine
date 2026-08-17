@@ -8547,6 +8547,45 @@ to become the endpoint the app actually contacts.
 
 ---
 
+## Phase 251 — Keep overflowed AI prices unknown (2026-08-17)
+
+### Bottleneck
+
+Catalog parsing correctly rejected a non-finite raw price, but a very large finite value could still
+overflow when Settings multiplied it into a per-million label or AI Studio multiplied it into an
+estimated request total. Those derived values were rendered as `$Infinity/M` or `≈ $Infinity`
+instead of the existing truthful unknown-price state.
+
+### Frozen boundary
+
+- Keep finite non-negative raw prices, catalog ordering, selection, and persistence unchanged. At
+  display time, show `$?/M` when the per-million product is non-finite. At estimate time, return the
+  existing `null`/`$?` state when either input price or the derived total is non-finite.
+- Preserve exact zero and normal paid estimates, variable/missing sentinels, `:free` handling, token
+  estimates, prompts, transport, cache, ranking, Settings interaction, generation, taste, WASM, and
+  Rust.
+
+### Acceptance evidence
+
+The pure owner was deliberately red at **30/31** against Phase 250: non-finite direct inputs and an
+overflowed total returned `NaN`/`Infinity` instead of `null`. The production Settings owner was red
+at **62/63**: a finite `Number.MAX_VALUE` catalog price rendered `$Infinity/M`. Every retained gate
+stayed green.
+
+Derived prices now cross a final `Number.isFinite` boundary before display. The pure owner passes
+**31/31**, preserving exact negative-sentinel, zero, and ordinary paid results. The rebuilt Settings
+owner passes **63/63** and labels the overflowed per-million value `$?/M`. Retained production
+contracts remain green at corrupt-config **51/51** and AI Studio cancellation/config/failure/Retry/
+race/cache/model/focus/fallback **61/61**. TypeScript and the Vite production build pass; no live
+provider or key was used.
+
+### Decision
+
+External prices can remain broad without allowing an unrepresentable derived number to masquerade
+as a real cost in either configuration or ranking UI.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

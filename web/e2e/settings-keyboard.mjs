@@ -12,7 +12,7 @@ const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 62
+const EXPECTED_CHECKS = 63
 const FOCUSABLE = [
   'a[href]',
   'button:not([disabled])',
@@ -27,10 +27,15 @@ const MOCK_MODELS = Array.from({ length: 65 }, (_, index) => {
     id: `mock/model-${suffix}`,
     name: `Model ${suffix}`,
     context_length: 8192 + index * 1024,
-    ...(index === 64 ? {} : { pricing: { prompt: '0', completion: '0' } }),
+    ...(index === 64
+      ? {}
+      : index === 63
+        ? { pricing: { prompt: String(Number.MAX_VALUE), completion: String(Number.MAX_VALUE) } }
+        : { pricing: { prompt: '0', completion: '0' } }),
   }
 })
 const FIRST_MODEL = MOCK_MODELS[0].id
+const EXTREME_PRICE_MODEL = MOCK_MODELS[63].id
 const TYPED_MODEL = MOCK_MODELS[64].id
 const PASS_STUB = {
   name: 'FixturePass',
@@ -428,6 +433,18 @@ try {
     'Enter preserves and selects the exact typed model id, then closes the listbox',
   )
   check(await activeElementIs(combo), 'combobox keeps focus after keyboard selection')
+
+  await combo.click()
+  await page.keyboard.press('Control+A')
+  await page.keyboard.type(EXTREME_PRICE_MODEL)
+  const extremePriceOption = dialog.getByRole('option', { name: new RegExp(EXTREME_PRICE_MODEL) })
+  await extremePriceOption.waitFor({ state: 'visible' })
+  const extremePriceText = (await extremePriceOption.textContent()) ?? ''
+  check(
+    extremePriceText.includes('$?/M') && !extremePriceText.includes('Infinity'),
+    'an overflowed per-million catalog price is labeled unknown instead of Infinity',
+  )
+  await page.keyboard.press('Enter')
 
   await combo.click()
   await listbox.waitFor({ state: 'visible' })

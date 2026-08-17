@@ -299,8 +299,16 @@ export function estimateTokens(names: NameResult[], cfg: JudgeConfig): TokenEsti
 
 // USD cost for an estimate at the given per-token prices, or null if unknown.
 export function estimateCost(est: TokenEstimate, priceIn?: number, priceOut?: number): number | null {
-  if (priceIn === undefined || priceOut === undefined || priceIn < 0 || priceOut < 0) return null
-  return est.input * priceIn + est.output * priceOut
+  if (
+    priceIn === undefined
+    || priceOut === undefined
+    || !Number.isFinite(priceIn)
+    || !Number.isFinite(priceOut)
+    || priceIn < 0
+    || priceOut < 0
+  ) return null
+  const cost = est.input * priceIn + est.output * priceOut
+  return Number.isFinite(cost) ? cost : null
 }
 
 // Pull the first top-level JSON array out of a reply that may be wrapped in prose

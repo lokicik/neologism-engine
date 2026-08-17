@@ -300,6 +300,16 @@ check(
     && estimateCost({ input: 100, output: 50, total: 150 }, 0.001, 0.002) === 0.2,
   'unknown price sentinels never render a negative estimate while zero and paid estimates remain exact',
 )
+check(
+  estimateCost({ input: 100, output: 50, total: 150 }, Number.NaN, 0) === null
+    && estimateCost({ input: 100, output: 50, total: 150 }, Number.POSITIVE_INFINITY, 0) === null
+    && estimateCost(
+      { input: 100, output: 50, total: 150 },
+      Number.MAX_VALUE,
+      Number.MAX_VALUE,
+    ) === null,
+  'non-finite inputs and overflowed derived costs remain unknown instead of rendering NaN or Infinity',
+)
 
 const paddedEndpointConfig: JudgeConfig = {
   enabled: true,
@@ -472,9 +482,9 @@ check(
   'the 128-entry ranking cache refreshes exact-repeat recency and evicts its least-recent request',
 )
 
-if (checks !== 30 || failures > 0) {
-  console.error(`judge cache check: ${failures} failure(s), ${checks}/30 checks executed`)
+if (checks !== 31 || failures > 0) {
+  console.error(`judge cache check: ${failures} failure(s), ${checks}/31 checks executed`)
   process.exitCode = 1
 } else {
-  console.log('judge cache check: 30/30 checks passed')
+  console.log('judge cache check: 31/31 checks passed')
 }

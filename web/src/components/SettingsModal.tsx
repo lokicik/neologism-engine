@@ -29,7 +29,10 @@ interface Props {
   onClose: () => void
 }
 
-const perM = (pricePerToken: number) => `$${(pricePerToken * 1e6).toFixed(2)}/M`
+const perM = (pricePerToken: number) => {
+  const pricePerMillion = pricePerToken * 1e6
+  return Number.isFinite(pricePerMillion) ? `$${pricePerMillion.toFixed(2)}/M` : '$?/M'
+}
 const priceTag = (m: ModelInfo) => (m.free ? 'FREE' : m.priceIn < 0 ? 'variable' : perM(m.priceIn))
 const ctxK = (m: ModelInfo) => (m.contextLength ? `${Math.round(m.contextLength / 1000)}k ctx` : '')
 const optionTag = (m: ModelInfo) => [priceTag(m), ctxK(m)].filter(Boolean).join(' · ')
