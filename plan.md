@@ -9164,6 +9164,44 @@ or AI ranking behind a contradictory absolute privacy slogan.
 
 ---
 
+## Phase 266 — Replace the 100k repeat slogan with the shipped window (2026-08-17)
+
+### Bottleneck
+
+Landing presented **100,000 names generated in one session — zero repeats** as a product statistic.
+Phase 35 produced that result only by feeding the core a full-session exclusion list. The shipped web
+app deliberately caps its rolling recent-name record at 20,000; its own 25,000-name measurement was
+97.5% distinct with a worst recurrence of two. Calling the research sweep the visible app boundary
+was therefore materially stronger than the code users run.
+
+### Frozen boundary
+
+- Replace only the Landing statistic and extend its retained production assertion. Do not change the
+  exclusion algorithm, recent-history cap, persistence, generation, scores, animation, storage
+  schema, WASM, or Rust.
+- Derive the visible number from the exported `RECENT_WINDOW` constant rather than duplicating
+  `20,000` in component logic. State the exact narrow invariant: recently shown names inside that
+  rolling window are excluded from the next generation requests.
+- Keep the 100,000-name sweep in the research history, including its full-session exclusion setup and
+  quality drift. Stop presenting it as the shipped browser app's zero-repeat promise.
+
+### Acceptance evidence
+
+The strengthened Landing owner was deliberately red at **25/26** against Phase 265: all privacy,
+mode, motion, reduced-motion, focus, storage, and zero-request checks passed, while the product still
+rendered the research-only 100,000/zero-repeat slogan. After the bounded replacement, the rebuilt
+production fixture passes **26/26**. TypeScript and the Vite production build pass; the responsive
+stat card remains inside the existing Landing layout at 320 pixels. The independent recent-history
+corruption/recovery owner remains green at **28/28**, including the exact 20,000-name load/save cap.
+
+### Decision
+
+Landing now advertises the anti-repeat horizon implemented by the browser app, not a stronger
+experimental protocol. The research result remains useful evidence in this plan without becoming a
+false product guarantee.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

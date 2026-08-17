@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type MouseEvent } from 'react'
 import { generateNames, explainName, type Explanation, type NameResult } from '../lib/engine'
+import { RECENT_WINDOW } from '../lib/storage'
 
 interface Props {
   onEnter: (keyboard: boolean) => void
@@ -394,9 +395,9 @@ export function Landing({ onEnter }: Props) {
         </div>
 
         <div className="tile tile-stat">
-          <div className="stat-big">100,000</div>
-          <p>names generated in one session. <strong>Zero repeats.</strong></p>
-          <p className="tile-foot">measured, not promised</p>
+          <div className="stat-big">{RECENT_WINDOW.toLocaleString('en-US')}</div>
+          <p>recently shown names in the rolling guard. <strong>Exact repeats stay outside that window.</strong></p>
+          <p className="tile-foot">the shipped app boundary</p>
         </div>
 
         <div className="tile">

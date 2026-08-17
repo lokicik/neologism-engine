@@ -1,6 +1,6 @@
-// Phase 169/220-222/265 browser contract: Landing's live mode demo exposes its
+// Phase 169/220-222/265-266 browser contract: Landing's live mode demo exposes its
 // visual single-selection state without pretending to be tabs or an ARIA menu,
-// while its privacy copy keeps local generation distinct from optional providers.
+// while its product copy stays within the shipped privacy and repeat boundaries.
 // Run after `npm run build`: node e2e/landing-demo-mode-state.mjs
 import { chromium } from 'playwright'
 import { spawn } from 'node:child_process'
@@ -12,7 +12,7 @@ const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 25
+const EXPECTED_CHECKS = 26
 
 const server = spawn(process.execPath, [viteCli, 'preview', '--port', String(PORT), '--strictPort'], {
   cwd: WEB_DIR,
@@ -104,6 +104,11 @@ try {
       && !landingCopy.includes('your ideas never leave the tab')
       && !landingCopy.includes('No server. No account. No tracking.'),
     'Landing scopes local-generation privacy without hiding optional third-party actions',
+  )
+  const repeatCopy = (await page.locator('.tile-stat').innerText()).replace(/\s+/g, ' ').trim()
+  check(
+    repeatCopy === '20,000 recently shown names in the rolling guard. Exact repeats stay outside that window. the shipped app boundary',
+    'Landing states the shipped rolling repeat boundary instead of a 100k research sweep',
   )
   const desktopRings = await landingFocusRings()
   if (!desktopRings.every((ring) => ring.ok)) console.log('INFO  390px Landing focus rings', desktopRings)
