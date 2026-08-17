@@ -4,6 +4,7 @@ import {
   OPENROUTER_FREE_MODELS,
   fetchModels,
   isValidLocalEndpoint,
+  isValidModelId,
   isValidOpenRouterApiKey,
   type JudgeConfig,
   type JudgeProvider,
@@ -102,6 +103,7 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
   const [saveError, setSaveError] = useState<string | null>(null)
   const [apiKeyError, setApiKeyError] = useState<string | null>(null)
   const [endpointError, setEndpointError] = useState<string | null>(null)
+  const [modelError, setModelError] = useState<string | null>(null)
   const modalRef = useRef<HTMLDivElement>(null)
   const closeRef = useRef<HTMLButtonElement>(null)
   const cancelRef = useRef<HTMLButtonElement>(null)
@@ -119,6 +121,7 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
   const passedListId = useId()
   const apiKeyErrorId = useId()
   const endpointErrorId = useId()
+  const modelErrorId = useId()
   const likedToggleRef = useRef<HTMLButtonElement>(null)
   const likedBodyRef = useRef<HTMLDivElement>(null)
   const passedToggleRef = useRef<HTMLButtonElement>(null)
@@ -205,6 +208,17 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
       return
     }
     setEndpointError(null)
+    if (draft.enabled && !isValidModelId(draft.model)) {
+      setSaveError(null)
+      setApiKeyError(null)
+      setModelError('Remove invalid Unicode, line breaks, or control characters from the model id.')
+      requestAnimationFrame(() => {
+        modelInputRef.current?.scrollIntoView({ block: 'nearest' })
+        modelInputRef.current?.focus()
+      })
+      return
+    }
+    setModelError(null)
     if (!onSave(draft)) {
       setSaveError('Could not save AI settings. Browser storage kept the previous settings unchanged.')
       requestAnimationFrame(() => saveRef.current?.scrollIntoView({ block: 'nearest' }))
@@ -276,6 +290,7 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
   }, [activeModelIndex, modelListId, modelOpen])
 
   const selectModel = (m: ModelInfo) => {
+    setModelError(null)
     setDraft((d) => ({ ...d, model: m.id, ...priceFields(m) }))
     setModelOpen(false)
     setActiveModelIndex(-1)
@@ -378,6 +393,8 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
           aria-autocomplete="list"
           aria-haspopup="listbox"
           aria-labelledby={modelLabelId}
+          aria-invalid={modelError ? true : undefined}
+          aria-describedby={modelError ? modelErrorId : undefined}
           aria-expanded={modelOpen}
           aria-controls={modelListId}
           aria-activedescendant={modelOpen && activeModelIndex >= 0
@@ -390,6 +407,7 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
             if (!modelOpen) openModelMenu()
           }}
           onChange={(e) => {
+            setModelError(null)
             const id = e.target.value
             const exactModel = pickList.find((model) => model.id === id)
             const nextFiltered = modelOptions(id.toLowerCase(), exactModel)
@@ -453,6 +471,11 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
           </div>
         )}
       </div>
+      {modelError && (
+        <span id={modelErrorId} className="settings-save-error" role="alert">
+          {modelError}
+        </span>
+      )}
       {selected && (
         <span className="settings-hint">
           {selected.free
@@ -496,6 +519,7 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
             onChange={(e) => {
               setApiKeyError(null)
               setEndpointError(null)
+              setModelError(null)
               set('enabled', e.target.checked)
             }}
           />
@@ -514,6 +538,7 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
                   onChange={() => {
                     setApiKeyError(null)
                     setEndpointError(null)
+                    setModelError(null)
                     setDraft((d) => ({ ...d, provider: p, model: undefined, priceIn: undefined, priceOut: undefined }))
                   }}
                 />

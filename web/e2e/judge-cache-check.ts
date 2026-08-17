@@ -103,6 +103,7 @@ globalThis.fetch = async (input, init) => {
         { id: 'suffix-priced:free', pricing: { prompt: '0.1', completion: '0.2' } },
         { id: 'remote-catalog-model' },
         { id: 'malformed-price', pricing: { prompt: 'not-a-price', completion: '0' } },
+        { id: 'control\u0001model', pricing: { prompt: '0', completion: '0' } },
         { id: 17 },
         { id: 'broken\uD83D' },
       ] }), {
@@ -406,6 +407,21 @@ check(
   'an HTTP-unsafe OpenRouter key cannot become ready or start a ranking request',
 )
 
+const fetchCallsBeforeUnsafeModel = fetchCalls
+const unsafeModelConfig: JudgeConfig = {
+  enabled: true,
+  provider: 'openrouter',
+  apiKey: 'fixture-key',
+  model: 'fixture\u0001model',
+  prompt: promptA,
+}
+check(
+  !isJudgeReady(unsafeModelConfig)
+    && await rerank(names('UnsafeModel'), unsafeModelConfig) === null
+    && fetchCalls === fetchCallsBeforeUnsafeModel,
+  'an unsafe explicit model id cannot become ready or start a ranking request',
+)
+
 const fetchCallsBeforeRewrittenEndpoint = fetchCalls
 const rewrittenEndpointConfig: JudgeConfig = {
   enabled: true,
@@ -482,9 +498,9 @@ check(
   'the 128-entry ranking cache refreshes exact-repeat recency and evicts its least-recent request',
 )
 
-if (checks !== 31 || failures > 0) {
-  console.error(`judge cache check: ${failures} failure(s), ${checks}/31 checks executed`)
+if (checks !== 32 || failures > 0) {
+  console.error(`judge cache check: ${failures} failure(s), ${checks}/32 checks executed`)
   process.exitCode = 1
 } else {
-  console.log('judge cache check: 31/31 checks passed')
+  console.log('judge cache check: 32/32 checks passed')
 }

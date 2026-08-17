@@ -11,7 +11,7 @@ const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 51
+const EXPECTED_CHECKS = 57
 
 const server = spawn(process.execPath, [viteCli, 'preview', '--port', String(PORT), '--strictPort'], {
   cwd: WEB_DIR,
@@ -143,6 +143,85 @@ try {
   }
   check(modelPageErrors.length === 0, `invalid model recovery produces no page error (${modelPageErrors.join(' | ')})`)
   await modelContext.close()
+
+  const priorSafeModelRaw = JSON.stringify({
+    enabled: true,
+    provider: 'openrouter',
+    apiKey: 'fixture-key',
+    model: 'fixture-model',
+  })
+  const unsafeModelWriteContext = await contextFor(priorSafeModelRaw)
+  const unsafeModelWriteErrors = []
+  const unsafeModelWritePage = await unsafeModelWriteContext.newPage()
+  unsafeModelWritePage.on('pageerror', (error) => unsafeModelWriteErrors.push(error.message))
+  await unsafeModelWritePage.goto(APP_URL)
+  await unsafeModelWritePage.locator('.sidebar-settings').click()
+  const unsafeModelWriteDialog = unsafeModelWritePage.locator('.settings-modal[role="dialog"]')
+  const unsafeModelInput = unsafeModelWriteDialog.getByRole('combobox', { name: 'Model' })
+  await unsafeModelInput.evaluate((input) => {
+    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set
+    setter.call(input, 'fixture\u0001model')
+    input.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText' }))
+  })
+  await unsafeModelWriteDialog.getByRole('button', { name: 'Save', exact: true }).click()
+  const unsafeModelDialogVisible = await unsafeModelWriteDialog.isVisible().catch(() => false)
+  check(
+    unsafeModelDialogVisible
+      && await unsafeModelWritePage.evaluate(() => localStorage.getItem('neologism:judge')) === priorSafeModelRaw,
+    'control-character model Save keeps Settings open and preserves the prior durable config',
+  )
+  if (unsafeModelDialogVisible) {
+    await unsafeModelWritePage.waitForFunction(() => {
+      const input = document.querySelector('.settings-modal [role="combobox"][aria-invalid="true"]')
+      return document.activeElement === input
+    })
+  }
+  const unsafeModelErrorId = unsafeModelDialogVisible
+    ? await unsafeModelInput.getAttribute('aria-describedby').catch(() => null)
+    : null
+  check(
+    unsafeModelErrorId !== null
+      && await unsafeModelWriteDialog.locator(`#${unsafeModelErrorId}`).getAttribute('role').catch(() => null)
+        === 'alert'
+      && await unsafeModelWriteDialog.locator(`#${unsafeModelErrorId}`).textContent().catch(() => null)
+        === 'Remove invalid Unicode, line breaks, or control characters from the model id.'
+      && await unsafeModelInput.evaluate((input) => (
+        document.activeElement === input && input.matches(':focus-visible')
+      )).catch(() => false),
+    'control-character model Save exposes and focuses its exact field-owned validation error',
+  )
+  check(
+    unsafeModelWriteErrors.length === 0,
+    `control-character model Save produces no page error (${unsafeModelWriteErrors.join(' | ')})`,
+  )
+  await unsafeModelWriteContext.close()
+
+  const unsafeStoredModelRaw = JSON.stringify({
+    enabled: true,
+    provider: 'openrouter',
+    apiKey: 'fixture-key',
+    model: 'fixture\u0001model',
+  })
+  const unsafeStoredModelContext = await contextFor(unsafeStoredModelRaw)
+  const unsafeStoredModelErrors = []
+  const unsafeStoredModelPage = await unsafeStoredModelContext.newPage()
+  unsafeStoredModelPage.on('pageerror', (error) => unsafeStoredModelErrors.push(error.message))
+  await unsafeStoredModelPage.goto(APP_URL)
+  await unsafeStoredModelPage.locator('.sidebar-settings').click()
+  const unsafeStoredModelDialog = unsafeStoredModelPage.locator('.settings-modal[role="dialog"]')
+  check(
+    !(await unsafeStoredModelDialog.getByLabel('Enable AI re-rank').isChecked()),
+    'persisted enabled config with a control-character model id fails closed',
+  )
+  check(
+    await unsafeStoredModelPage.evaluate(() => localStorage.getItem('neologism:judge')) === unsafeStoredModelRaw,
+    'control-character model record is not silently repaired on read',
+  )
+  check(
+    unsafeStoredModelErrors.length === 0,
+    `control-character model record produces no page error (${unsafeStoredModelErrors.join(' | ')})`,
+  )
+  await unsafeStoredModelContext.close()
 
   const missingKeyRaw = JSON.stringify({
     enabled: true,

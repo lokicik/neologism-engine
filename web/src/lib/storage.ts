@@ -2,6 +2,7 @@ import type { NameResult } from './engine'
 import {
   defaultJudgeConfig,
   isValidLocalEndpoint,
+  isValidModelId,
   isValidOpenRouterApiKey,
   type JudgeConfig,
 } from './judge'
@@ -371,6 +372,7 @@ function judgeConfigFromUnknown(value: unknown): JudgeConfig | null {
   if (has('enabled') && typeof record.enabled !== 'boolean') return null
   if (has('provider') && record.provider !== 'openrouter' && record.provider !== 'localhost') return null
   if (JUDGE_TEXT_FIELDS.some((key) => has(key) && !isWellFormedString(record[key]))) return null
+  if (has('model') && !isValidModelId(record.model)) return null
   if (record.enabled === true && record.provider !== 'localhost'
     && !isValidOpenRouterApiKey(record.apiKey)) return null
   if (record.enabled === true && record.provider === 'localhost'
@@ -407,6 +409,7 @@ export function saveJudgeConfig(cfg: JudgeConfig): boolean {
     const value = cfg[key]
     return value !== undefined && !isWellFormedString(value)
   })) return false
+  if (!isValidModelId(cfg.model)) return false
   if (cfg.enabled && cfg.provider === 'openrouter' && !isValidOpenRouterApiKey(cfg.apiKey)) return false
   if (cfg.enabled && cfg.provider === 'localhost' && !isValidLocalEndpoint(cfg.endpoint)) return false
   try {

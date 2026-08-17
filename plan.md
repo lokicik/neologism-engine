@@ -8586,6 +8586,49 @@ as a real cost in either configuration or ranking UI.
 
 ---
 
+## Phase 252 — Validate explicit and discovered model ids (2026-08-17)
+
+### Bottleneck
+
+Phase 245 made localhost auto-detection skip numeric, ill-formed, and empty catalog rows, but the
+shared row parser still admitted control-character ids. A hand-typed or persisted nonblank model id
+had no equivalent content check at all. Either path could leave AI Studio visibly configured while
+every request carried an unusable model identity and fell into generic provider failure.
+
+### Frozen boundary
+
+- Share one model-id validator across catalog parsing, runtime readiness, and persisted reads/writes.
+  `undefined`, empty, and space-only values remain valid blank selections for OpenRouter default or
+  localhost auto-detect. A nonblank value must be well-formed Unicode without ASCII control
+  characters or DEL; do not impose provider prefixes, character alphabets, or length policy.
+- Skip one invalid catalog row independently without hiding valid neighbors. Reject an unsafe
+  explicit Save with a model-field alert, semantics, and visible focus; preserve exact prior storage
+  and no-repair-on-read behavior.
+- Keep trimmed valid model resolution, prices, discovery/cache identity, provider/key/endpoint,
+  prompts, responses, ranking, generation, taste, WASM, and Rust unchanged.
+
+### Acceptance evidence
+
+The pure owner was deliberately red at **30/32** against Phase 251: a control-character catalog row
+entered the returned list, and the same shape used explicitly was considered ready and reached the
+mocked ranking transport. The production corrupt-config owner was red at **54/57**: an unsafe model
+Save closed Settings and replaced durable data, while the persisted equivalent remained enabled.
+All retained boundaries stayed green.
+
+The shared validator now filters the discovered row, blocks an unsafe explicit request before
+transport, rejects it at persisted read/write boundaries, and gives Settings an exact model-owned
+recovery path. The pure owner passes **32/32** and the rebuilt production owner passes **57/57**.
+Retained production contracts remain green at Settings keyboard **63/63**, Settings storage
+failure/retry **13/13**, and AI Studio cancellation/config/failure/Retry/race/cache/model/focus/
+fallback **61/61**. TypeScript and the Vite production build pass; no live provider or key was used.
+
+### Decision
+
+Blank auto/default behavior remains convenient, while every nonblank model identity now means the
+same safe string at discovery, configuration, persistence, readiness, and request time.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

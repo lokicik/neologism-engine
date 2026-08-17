@@ -68,6 +68,14 @@ export function isValidOpenRouterApiKey(value: unknown): boolean {
     && !/[\u0000-\u001f\u007f]/.test(value)
 }
 
+export function isValidModelId(value: unknown): boolean {
+  return value === undefined || (
+    typeof value === 'string'
+    && isWellFormedUnicode(value)
+    && !/[\u0000-\u001f\u007f]/.test(value)
+  )
+}
+
 // Free ids drift over time — these are editable in the UI; this is just the list
 // the model dropdown seeds with.
 export const OPENROUTER_FREE_MODELS = [
@@ -127,6 +135,7 @@ export function defaultJudgeConfig(): JudgeConfig {
 // "Sharpen" button should act or open Settings first).
 export function isJudgeReady(cfg: JudgeConfig): boolean {
   if (!cfg.enabled) return false
+  if (!isValidModelId(cfg.model)) return false
   if (cfg.provider === 'openrouter') return isValidOpenRouterApiKey(cfg.apiKey)
   return isValidLocalEndpoint(cfg.endpoint)
 }
@@ -214,7 +223,7 @@ function catalogPrice(value: unknown): number | null {
 function modelInfoFromUnknown(value: unknown, provider: JudgeProvider): ModelInfo | null {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) return null
   const row = value as Record<string, unknown>
-  if (typeof row.id !== 'string' || !isWellFormedUnicode(row.id)) return null
+  if (typeof row.id !== 'string' || !isValidModelId(row.id)) return null
   const id = row.id.trim()
   if (!id) return null
 
