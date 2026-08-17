@@ -396,6 +396,22 @@ check(
   'an HTTP-unsafe OpenRouter key cannot become ready or start a ranking request',
 )
 
+const fetchCallsBeforeRewrittenEndpoint = fetchCalls
+const rewrittenEndpointConfig: JudgeConfig = {
+  enabled: true,
+  provider: 'localhost',
+  endpoint: 'http://127.0.0.1:8\n080/v1',
+  model: 'fixture-model',
+  prompt: promptA,
+}
+check(
+  !isValidLocalEndpoint(rewrittenEndpointConfig.endpoint)
+    && (await fetchModels(rewrittenEndpointConfig)).length === 0
+    && await rerank(names('RewrittenEndpoint'), rewrittenEndpointConfig) === null
+    && fetchCalls === fetchCallsBeforeRewrittenEndpoint,
+  'a parser-rewritten local endpoint cannot become ready or start discovery and ranking requests',
+)
+
 const invalidResponseNames = names('InvalidResponse')
 check(
   await rerank(invalidResponseNames, { ...openRouterBase, prompt: 'Invalid score {{names}}' }) === null,
@@ -456,9 +472,9 @@ check(
   'the 128-entry ranking cache refreshes exact-repeat recency and evicts its least-recent request',
 )
 
-if (checks !== 29 || failures > 0) {
-  console.error(`judge cache check: ${failures} failure(s), ${checks}/29 checks executed`)
+if (checks !== 30 || failures > 0) {
+  console.error(`judge cache check: ${failures} failure(s), ${checks}/30 checks executed`)
   process.exitCode = 1
 } else {
-  console.log('judge cache check: 29/29 checks passed')
+  console.log('judge cache check: 30/30 checks passed')
 }

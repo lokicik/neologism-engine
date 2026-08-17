@@ -11,7 +11,7 @@ const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 45
+const EXPECTED_CHECKS = 51
 
 const server = spawn(process.execPath, [viteCli, 'preview', '--port', String(PORT), '--strictPort'], {
   cwd: WEB_DIR,
@@ -246,6 +246,87 @@ try {
   )
   await unsafeStoredKeyContext.close()
 
+  const priorSafeEndpointRaw = JSON.stringify({
+    enabled: true,
+    provider: 'localhost',
+    endpoint: 'http://127.0.0.1:8080/v1',
+    model: 'fixture-model',
+  })
+  const rewrittenEndpointWriteContext = await contextFor(priorSafeEndpointRaw)
+  const rewrittenEndpointWriteErrors = []
+  const rewrittenEndpointWritePage = await rewrittenEndpointWriteContext.newPage()
+  rewrittenEndpointWritePage.on('pageerror', (error) => rewrittenEndpointWriteErrors.push(error.message))
+  await rewrittenEndpointWritePage.goto(APP_URL)
+  await rewrittenEndpointWritePage.locator('.sidebar-settings').click()
+  const rewrittenEndpointWriteDialog = rewrittenEndpointWritePage.locator('.settings-modal[role="dialog"]')
+  const rewrittenEndpointInput = rewrittenEndpointWriteDialog.getByLabel('Endpoint')
+  await rewrittenEndpointInput.evaluate((input) => {
+    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set
+    setter.call(input, 'http:\\\\127.0.0.1:8080\\v1')
+    input.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText' }))
+  })
+  await rewrittenEndpointWriteDialog.getByRole('button', { name: 'Save', exact: true }).click()
+  const rewrittenEndpointDialogVisible = await rewrittenEndpointWriteDialog.isVisible().catch(() => false)
+  check(
+    rewrittenEndpointDialogVisible
+      && await rewrittenEndpointWritePage.evaluate(() => localStorage.getItem('neologism:judge'))
+        === priorSafeEndpointRaw,
+    'parser-rewritten endpoint Save keeps Settings open and preserves the prior durable config',
+  )
+  if (rewrittenEndpointDialogVisible) {
+    await rewrittenEndpointWritePage.waitForFunction(() => {
+      const input = document.querySelector('.settings-modal input[aria-invalid="true"]')
+      return document.activeElement === input && input?.getAttribute('type') === 'text'
+    })
+  }
+  const rewrittenEndpointErrorId = rewrittenEndpointDialogVisible
+    ? await rewrittenEndpointInput.getAttribute('aria-describedby').catch(() => null)
+    : null
+  check(
+    rewrittenEndpointErrorId !== null
+      && await rewrittenEndpointWriteDialog.locator(`#${rewrittenEndpointErrorId}`).getAttribute('role').catch(() => null)
+        === 'alert'
+      && await rewrittenEndpointWriteDialog.locator(`#${rewrittenEndpointErrorId}`).textContent().catch(() => null)
+        === 'Enter a complete http:// or https:// endpoint without credentials, control characters, backslashes, a query, or a fragment.'
+      && await rewrittenEndpointInput.evaluate((input) => (
+        document.activeElement === input && input.matches(':focus-visible')
+      )).catch(() => false),
+    'parser-rewritten endpoint Save exposes and focuses its exact field-owned validation error',
+  )
+  check(
+    rewrittenEndpointWriteErrors.length === 0,
+    `parser-rewritten endpoint Save produces no page error (${rewrittenEndpointWriteErrors.join(' | ')})`,
+  )
+  await rewrittenEndpointWriteContext.close()
+
+  const rewrittenStoredEndpointRaw = JSON.stringify({
+    enabled: true,
+    provider: 'localhost',
+    endpoint: 'http://127.0.0.1:8\t080/v1',
+    model: 'fixture-model',
+  })
+  const rewrittenStoredEndpointContext = await contextFor(rewrittenStoredEndpointRaw)
+  const rewrittenStoredEndpointErrors = []
+  const rewrittenStoredEndpointPage = await rewrittenStoredEndpointContext.newPage()
+  rewrittenStoredEndpointPage.on('pageerror', (error) => rewrittenStoredEndpointErrors.push(error.message))
+  await rewrittenStoredEndpointPage.goto(APP_URL)
+  await rewrittenStoredEndpointPage.locator('.sidebar-settings').click()
+  const rewrittenStoredEndpointDialog = rewrittenStoredEndpointPage.locator('.settings-modal[role="dialog"]')
+  check(
+    !(await rewrittenStoredEndpointDialog.getByLabel('Enable AI re-rank').isChecked()),
+    'persisted enabled localhost config with a parser-rewritten endpoint fails closed',
+  )
+  check(
+    await rewrittenStoredEndpointPage.evaluate(() => localStorage.getItem('neologism:judge'))
+      === rewrittenStoredEndpointRaw,
+    'parser-rewritten endpoint record is not silently repaired on read',
+  )
+  check(
+    rewrittenStoredEndpointErrors.length === 0,
+    `parser-rewritten endpoint record produces no page error (${rewrittenStoredEndpointErrors.join(' | ')})`,
+  )
+  await rewrittenStoredEndpointContext.close()
+
   const invalidEndpointRaw = JSON.stringify({
     enabled: true,
     provider: 'localhost',
@@ -391,7 +472,7 @@ try {
   check(
     await endpointAlert.count() === 1
       && (await endpointAlert.textContent())?.trim()
-        === 'Enter a complete http:// or https:// endpoint without credentials, a query, or a fragment.',
+        === 'Enter a complete http:// or https:// endpoint without credentials, control characters, backslashes, a query, or a fragment.',
     'non-HTTP endpoint write exposes an exact validation error',
   )
   check(

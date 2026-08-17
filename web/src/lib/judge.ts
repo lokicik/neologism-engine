@@ -48,7 +48,7 @@ export function normalizeLocalEndpoint(endpoint?: string): string {
 
 export function isValidLocalEndpoint(endpoint?: string): boolean {
   const normalized = normalizeLocalEndpoint(endpoint)
-  if (!isWellFormedUnicode(normalized)) return false
+  if (!isWellFormedUnicode(normalized) || /[\u0000-\u001f\u007f\\]/.test(normalized)) return false
   try {
     const url = new URL(normalized)
     return (url.protocol === 'http:' || url.protocol === 'https:')

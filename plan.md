@@ -8505,6 +8505,48 @@ now agree on whether an active OpenRouter secret can safely reach Fetch.
 
 ---
 
+## Phase 250 — Reject parser-rewritten localhost endpoints (2026-08-17)
+
+### Bottleneck
+
+The local-endpoint validator passed its raw normalized string into `URL`. That parser silently drops
+embedded tabs and line breaks and treats backslashes as forward slashes for HTTP(S). The app could
+therefore admit and store one visible endpoint string while discovery/ranking reached a different
+serialized address; the raw pre-parser string also remained part of request/cache identity.
+
+### Frozen boundary
+
+- After the existing outer-whitespace and trailing-slash normalization, reject embedded ASCII
+  control characters, DEL, and backslashes before URL parsing. Keep ordinary HTTP(S) host/path,
+  surrounding spaces, and trailing-slash behavior unchanged.
+- Extend the existing invalid-endpoint Settings error to name control characters and backslashes;
+  preserve its focus, no-repair read, and exact prior-storage behavior. Block invalid endpoints
+  before both model discovery and ranking; do not canonicalize or silently rewrite the stored field.
+- Keep valid endpoint transport/cache identity, model selection, credentials, prompts, responses,
+  ranking, generation, taste, WASM, and Rust unchanged.
+
+### Acceptance evidence
+
+The pure owner was deliberately red at **29/30** against Phase 249: an endpoint containing an
+embedded line break was considered ready and reached both mocked discovery and ranking. The
+production corrupt-config owner was red at **48/51**: a backslash endpoint Save closed Settings and
+replaced durable data, while an embedded-tab endpoint loaded from storage remained enabled. All
+retained boundaries stayed green.
+
+The validator now rejects those parser-rewritten forms before constructing `URL`. The pure owner
+passes **30/30** with zero discovery/ranking calls from that configuration. The rebuilt production
+owner passes **51/51**, including exact raw preservation, field-owned error/focus, and no page errors.
+Retained production contracts remain green at Settings keyboard **62/62**, Settings storage
+failure/retry **13/13**, and AI Studio cancellation/config/failure/Retry/race/cache/model/focus/
+fallback **61/61**. TypeScript and the Vite production build pass; no live provider or key was used.
+
+### Decision
+
+The endpoint the user sees and stores can no longer depend on URL-parser removal or slash rewriting
+to become the endpoint the app actually contacts.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
