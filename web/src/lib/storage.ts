@@ -366,6 +366,8 @@ function judgeConfigFromUnknown(value: unknown): JudgeConfig | null {
   if (has('enabled') && typeof record.enabled !== 'boolean') return null
   if (has('provider') && record.provider !== 'openrouter' && record.provider !== 'localhost') return null
   if (JUDGE_TEXT_FIELDS.some((key) => has(key) && !isWellFormedString(record[key]))) return null
+  if (record.enabled === true && record.provider !== 'localhost'
+    && (typeof record.apiKey !== 'string' || record.apiKey.trim() === '')) return null
   if (record.enabled === true && record.provider === 'localhost'
     && !isValidLocalEndpoint(typeof record.endpoint === 'string' ? record.endpoint : undefined)) return null
   if (prices.some((key) => (
@@ -400,6 +402,7 @@ export function saveJudgeConfig(cfg: JudgeConfig): boolean {
     const value = cfg[key]
     return value !== undefined && !isWellFormedString(value)
   })) return false
+  if (cfg.enabled && cfg.provider === 'openrouter' && !cfg.apiKey?.trim()) return false
   if (cfg.enabled && cfg.provider === 'localhost' && !isValidLocalEndpoint(cfg.endpoint)) return false
   try {
     localStorage.setItem(JUDGE_KEY, JSON.stringify(cfg))

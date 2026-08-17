@@ -97,6 +97,7 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
   const [tasteExportError, setTasteExportError] = useState<string | null>(null)
   const [tasteExportStatus, setTasteExportStatus] = useState<string | null>(null)
   const [saveError, setSaveError] = useState<string | null>(null)
+  const [apiKeyError, setApiKeyError] = useState<string | null>(null)
   const [endpointError, setEndpointError] = useState<string | null>(null)
   const modalRef = useRef<HTMLDivElement>(null)
   const closeRef = useRef<HTMLButtonElement>(null)
@@ -105,6 +106,7 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
   const tasteExportRef = useRef<HTMLButtonElement>(null)
   const comboRef = useRef<HTMLDivElement>(null)
   const modelInputRef = useRef<HTMLInputElement>(null)
+  const apiKeyInputRef = useRef<HTMLInputElement>(null)
   const endpointInputRef = useRef<HTMLInputElement>(null)
   const settingsTitleId = useId()
   const settingsIntroId = useId()
@@ -112,6 +114,7 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
   const modelListId = useId()
   const likedListId = useId()
   const passedListId = useId()
+  const apiKeyErrorId = useId()
   const endpointErrorId = useId()
   const likedToggleRef = useRef<HTMLButtonElement>(null)
   const likedBodyRef = useRef<HTMLDivElement>(null)
@@ -170,6 +173,17 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
     setDraft((d) => ({ ...d, [key]: value }))
 
   const save = () => {
+    if (draft.enabled && draft.provider === 'openrouter' && !draft.apiKey?.trim()) {
+      setSaveError(null)
+      setEndpointError(null)
+      setApiKeyError('Enter an OpenRouter API key before enabling AI re-rank.')
+      requestAnimationFrame(() => {
+        apiKeyInputRef.current?.scrollIntoView({ block: 'nearest' })
+        apiKeyInputRef.current?.focus()
+      })
+      return
+    }
+    setApiKeyError(null)
     const endpoint = draft.endpoint ?? DEFAULT_LOCAL_ENDPOINT
     if (draft.enabled
       && draft.provider === 'localhost'
@@ -475,6 +489,7 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
             type="checkbox"
             checked={draft.enabled}
             onChange={(e) => {
+              setApiKeyError(null)
               setEndpointError(null)
               set('enabled', e.target.checked)
             }}
@@ -492,6 +507,7 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
                   name="provider"
                   checked={draft.provider === p}
                   onChange={() => {
+                    setApiKeyError(null)
                     setEndpointError(null)
                     setDraft((d) => ({ ...d, provider: p, model: undefined, priceIn: undefined, priceOut: undefined }))
                   }}
@@ -506,12 +522,23 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
               <label className="settings-field">
                 <span>API key</span>
                 <input
+                  ref={apiKeyInputRef}
                   type="password"
                   placeholder="sk-or-..."
                   value={draft.apiKey ?? ''}
-                  onChange={(e) => set('apiKey', e.target.value)}
+                  aria-invalid={apiKeyError ? true : undefined}
+                  aria-describedby={apiKeyError ? apiKeyErrorId : undefined}
+                  onChange={(e) => {
+                    setApiKeyError(null)
+                    set('apiKey', e.target.value)
+                  }}
                   autoComplete="off"
                 />
+                {apiKeyError && (
+                  <span id={apiKeyErrorId} className="settings-save-error" role="alert">
+                    {apiKeyError}
+                  </span>
+                )}
               </label>
               {modelField(OPENROUTER_FREE_MODELS[0])}
               <p className="settings-hint">

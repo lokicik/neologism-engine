@@ -11,7 +11,7 @@ const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 32
+const EXPECTED_CHECKS = 39
 
 const server = spawn(process.execPath, [viteCli, 'preview', '--port', String(PORT), '--strictPort'], {
   cwd: WEB_DIR,
@@ -40,8 +40,10 @@ const check = (ok, label) => {
 async function contextFor(rawJudge) {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 } })
   await context.addInitScript(({ raw }) => {
+    if (sessionStorage.getItem('phase158:seeded') === '1') return
     localStorage.setItem('neologism:visited', '1')
     localStorage.setItem('neologism:judge', raw)
+    sessionStorage.setItem('phase158:seeded', '1')
   }, { raw: rawJudge })
   return context
 }
@@ -72,7 +74,8 @@ try {
   )
   await modelDialog.getByRole('button', { name: 'Save', exact: true }).click()
   await modelDialog.waitFor({ state: 'detached' })
-  const repairedModelConfig = await modelPage.evaluate(() => JSON.parse(localStorage.getItem('neologism:judge')))
+  const repairedModelRaw = await modelPage.evaluate(() => localStorage.getItem('neologism:judge'))
+  const repairedModelConfig = JSON.parse(repairedModelRaw)
   check(
     repairedModelConfig.enabled === false
       && repairedModelConfig.provider === 'openrouter'
@@ -85,8 +88,88 @@ try {
     !(await modelPage.locator('.settings-modal').getByLabel('Enable AI re-rank').isChecked()),
     'repaired config remains safe after reload',
   )
+  await modelDialog.getByLabel('Enable AI re-rank').click()
+  await modelDialog.getByRole('button', { name: 'Save', exact: true }).click()
+  const blankKeyDialogOpen = await modelDialog.isVisible()
+  const blankKeyDurable = await modelPage.evaluate(() => localStorage.getItem('neologism:judge'))
+  if (!(blankKeyDialogOpen && blankKeyDurable === repairedModelRaw)) console.log(
+    'INFO  blank key persistence',
+    { blankKeyDialogOpen, blankKeyDurable, repairedModelRaw },
+  )
+  check(
+    blankKeyDialogOpen && blankKeyDurable === repairedModelRaw,
+    'blank OpenRouter key keeps Settings open and preserves the prior durable config',
+  )
+  if (blankKeyDialogOpen) {
+    const apiKeyInput = modelDialog.getByLabel('API key')
+    await modelPage.waitForFunction(() => (
+      document.activeElement instanceof HTMLInputElement
+        && document.activeElement.getAttribute('aria-invalid') === 'true'
+    ))
+    const apiKeyErrorId = await apiKeyInput.getAttribute('aria-describedby')
+    check(
+      await apiKeyInput.getAttribute('aria-invalid') === 'true'
+        && apiKeyErrorId !== null
+        && await modelDialog.locator(`#${apiKeyErrorId}`).getAttribute('role') === 'alert'
+        && (await modelDialog.locator(`#${apiKeyErrorId}`).textContent())?.trim()
+          === 'Enter an OpenRouter API key before enabling AI re-rank.'
+        && await apiKeyInput.evaluate((input) => (
+          document.activeElement === input && input.matches(':focus-visible')
+        )),
+      'blank OpenRouter key identifies and visibly focuses its exact field',
+    )
+    await apiKeyInput.fill('fixture-key')
+    check(
+      await apiKeyInput.getAttribute('aria-invalid') === null
+        && await apiKeyInput.getAttribute('aria-describedby') === null
+        && await modelDialog.getByRole('alert').count() === 0,
+      'typing an API key clears stale validation semantics before retry',
+    )
+    await modelDialog.getByRole('button', { name: 'Save', exact: true }).click()
+    const recoveredKeyConfig = await modelPage.evaluate(() => JSON.parse(
+      localStorage.getItem('neologism:judge') ?? '{}',
+    ))
+    check(
+      await modelDialog.count() === 0
+        && recoveredKeyConfig.enabled === true
+        && recoveredKeyConfig.provider === 'openrouter'
+        && recoveredKeyConfig.apiKey === 'fixture-key',
+      'a valid API-key retry closes Settings and persists the enabled config',
+    )
+  } else {
+    check(false, 'blank OpenRouter key identifies and visibly focuses its exact field')
+    check(false, 'typing an API key clears stale validation semantics before retry')
+    check(false, 'a valid API-key retry closes Settings and persists the enabled config')
+  }
   check(modelPageErrors.length === 0, `invalid model recovery produces no page error (${modelPageErrors.join(' | ')})`)
   await modelContext.close()
+
+  const missingKeyRaw = JSON.stringify({
+    enabled: true,
+    provider: 'openrouter',
+    apiKey: '   ',
+    model: 'fixture-model',
+  })
+  const missingKeyContext = await contextFor(missingKeyRaw)
+  const missingKeyPageErrors = []
+  const missingKeyPage = await missingKeyContext.newPage()
+  missingKeyPage.on('pageerror', (error) => missingKeyPageErrors.push(error.message))
+  await missingKeyPage.goto(APP_URL)
+  await missingKeyPage.locator('.sidebar-settings').click()
+  const missingKeyDialog = missingKeyPage.locator('.settings-modal[role="dialog"]')
+  check(
+    !(await missingKeyDialog.getByLabel('Enable AI re-rank').isChecked()),
+    'persisted enabled OpenRouter config with a whitespace-only key fails closed',
+  )
+  check(
+    await missingKeyPage.evaluate(() => localStorage.getItem('neologism:judge')) === missingKeyRaw,
+    'whitespace-key record is not silently repaired on read',
+  )
+  check(
+    missingKeyPageErrors.length === 0,
+    `whitespace-key record produces no page error (${missingKeyPageErrors.join(' | ')})`,
+  )
+  await missingKeyContext.close()
 
   const invalidEndpointRaw = JSON.stringify({
     enabled: true,

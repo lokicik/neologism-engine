@@ -8147,6 +8147,56 @@ contracts remain untouched.
 
 ---
 
+## Phase 242 — Require the key before enabling OpenRouter (2026-08-17)
+
+### Bottleneck
+
+OpenRouter readiness already required a non-empty key, but Settings and persisted-config validation
+did not. Enabling AI with an empty key therefore reported a successful Save and closed the dialog,
+while AI Studio immediately returned to its unconfigured state. A stored enabled record with no key
+or only whitespace likewise rendered Settings as enabled even though it could never rank.
+
+### Frozen boundary
+
+- Require a trimmed non-empty API key only when OpenRouter is enabled. Disabled configs may still
+  omit it. Do not impose a provider-specific prefix, rewrite/trim the secret, change model-list
+  discovery while Settings is open, or alter request headers, ranking, caching, and network policy.
+- Apply the same invariant on read and write. A malformed enabled record fails closed without raw
+  repair; an incomplete Save cannot mutate durable config or App state.
+- Give the API-key field the same bounded correction contract as Phase 241's endpoint: inline live
+  error, `aria-invalid`, `aria-describedby`, visible focus, edit cleanup, and an ordinary valid retry.
+  Provider/enable changes clear only field-validation state; browser-storage failures keep their
+  existing Save-owned error path.
+
+### Acceptance evidence
+
+The strengthened production owner was red at **34/39** against Phase 241. Empty-key Save closed the
+dialog and overwrote the repaired disabled config, so every field-owned recovery assertion failed.
+A persisted enabled OpenRouter record without a key also remained visibly enabled. The other 34
+corrupt-type, Unicode, endpoint, recovery, raw-preservation, and page-error checks stayed green.
+
+Reader and writer now share the enabled-OpenRouter key invariant, while `SettingsModal` owns the
+actionable field error. The rebuilt owner passes **39/39**. A whitespace-only stored key fails closed
+without rewriting raw data; blank Save preserves the prior config and visibly focuses the linked
+invalid field; typing clears stale semantics; the valid retry closes Settings and persists the
+enabled config with the exact key.
+
+This phase also corrected an old fixture weakness: its initialization script previously reseeded the
+invalid model record on every reload, so the historical reload assertion did not observe the saved
+repair. A one-time session marker now makes that assertion verify the actual durable replacement.
+
+TypeScript and the Vite production build pass. Retained contracts remain green at Settings keyboard
+**60/60**, Settings storage failure/retry **13/13**, pure judge/cache/request-base **13/13**, and AI
+Studio's full cancellation/config/failure/Retry/race/cache/model/focus owner **61/61**.
+
+### Decision
+
+Settings can no longer claim that an enabled OpenRouter configuration was saved when its mandatory
+credential is absent. Persisted readiness, visible state, field feedback, durable data, and retry
+now agree without narrowing which valid keys or models the user may choose.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
