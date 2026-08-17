@@ -8883,6 +8883,50 @@ the next truthful action without adding hidden retries or changing the manual mo
 
 ---
 
+## Phase 259 — Label built-in OpenRouter fallback data (2026-08-17)
+
+### Bottleneck
+
+Phase 257 made an empty OpenRouter catalog retryable, but Settings silently replaced that empty live
+result with three curated model ids. Those ids are useful as a manual escape hatch, yet the combobox
+presented them exactly like provider-returned rows. A transient catalog failure could therefore make
+stale built-in choices look live and verified.
+
+### Frozen boundary
+
+- Track only whether the current provider discovery has completed. If OpenRouter completes with no
+  valid row, keep the existing curated options but add one live status that names them as built-in
+  ids and asks the user to verify the model before ranking.
+- Clear that status when a new discovery scope starts and omit it whenever at least one live row is
+  available. Preserve fallback selection, catalog retry/cache behavior, key-free model requests,
+  combobox roles, loading, focus, endpoint behavior, ranking, storage, generation, taste, WASM, and
+  Rust. Add no request, timer, persistence, or provider inference.
+- Extend the production Settings owner in an isolated 390-pixel context: first return only malformed
+  rows, select a labeled fallback, reopen Settings, return one valid live model, and prove that the
+  fallback status disappears.
+
+### Acceptance evidence
+
+The expanded production owner was deliberately red at **68/69** against Phase 258: all three curated
+ids appeared and remained selectable after the empty response, the request carried no Authorization
+header, and next-visit live recovery already worked, but no status distinguished the built-in rows
+from a live catalog. Every other Settings, discovery, focus, and containment gate remained green.
+
+Settings now records the settled discovery boundary separately from its model array. The rebuilt
+owner passes **69/69**: the empty response exposes exact built-in-fallback guidance, fallback
+selection remains available, both catalog requests stay key-free, and the next visit replaces the
+status and choices with `recovered/openrouter-model` inside the 390-pixel modal. TypeScript and the
+Vite production build pass. The retained pure judge/discovery/cache owner remains green at
+**35/35**; no live provider or key was used.
+
+### Decision
+
+Curated model ids remain a useful recovery option without masquerading as current provider data.
+Settings now distinguishes loading, live, built-in fallback, local discovery failure, and text-search
+misses without expanding its network or storage behavior.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

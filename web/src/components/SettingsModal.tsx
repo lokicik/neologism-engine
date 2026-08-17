@@ -90,6 +90,7 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
   const [draft, setDraft] = useState<JudgeConfig>(config)
   const [models, setModels] = useState<ModelInfo[]>([])
   const [modelsLoading, setModelsLoading] = useState(false)
+  const [modelsAttempted, setModelsAttempted] = useState(false)
   const [modelOpen, setModelOpen] = useState(false)
   const [activeModelIndex, setActiveModelIndex] = useState(-1)
   const [passedOpen, setPassedOpen] = useState(false)
@@ -152,18 +153,25 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
 
   // Live model list — debounced so typing a localhost endpoint doesn't spam.
   useEffect(() => {
-    if (!draft.enabled) return
+    if (!draft.enabled) {
+      setModels([])
+      setModelsAttempted(false)
+      setModelsLoading(false)
+      return
+    }
     let cancelled = false
     const controller = new AbortController()
     // A provider or endpoint change starts a different discovery scope. Do
     // not leave the previous server's options selectable during the debounce
     // or request; the loading row is the honest intermediate state.
     setModels([])
+    setModelsAttempted(false)
     setModelsLoading(true)
     const t = setTimeout(() => {
       void fetchModels(draft, controller.signal).then((list) => {
         if (cancelled) return
         setModels(list)
+        setModelsAttempted(true)
         setModelsLoading(false)
       })
     }, 300)
@@ -446,6 +454,11 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
         {modelOpen && (
           <div className="model-menu" id={modelListId} role="listbox" aria-label="Available models">
             {modelsLoading && <div className="model-empty" role="status">Loading models…</div>}
+            {!modelsLoading && modelsAttempted && draft.provider === 'openrouter' && models.length === 0 && (
+              <div className="model-empty model-catalog-fallback" role="status">
+                No live models discovered — showing built-in ids. Verify the model before ranking.
+              </div>
+            )}
             {!modelsLoading && filtered.length === 0 && (
               <div className="model-empty" role="status">
                 {pickList.length === 0
