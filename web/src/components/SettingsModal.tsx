@@ -1,6 +1,5 @@
 import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react'
 import {
-  DEFAULT_JUDGE_PROMPT,
   DEFAULT_LOCAL_ENDPOINT,
   OPENROUTER_FREE_MODELS,
   fetchModels,
@@ -579,22 +578,6 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
               </p>
             </>
           )}
-
-          <label className="settings-field">
-            <span>Judge prompt <code>{'{{names}}'}</code> is the candidate list</span>
-            <textarea
-              rows={6}
-              value={draft.prompt ?? ''}
-              onChange={(e) => set('prompt', e.target.value)}
-            />
-            <button
-              type="button"
-              className="settings-reset"
-              onClick={() => set('prompt', DEFAULT_JUDGE_PROMPT)}
-            >
-              Reset to default
-            </button>
-          </label>
         </fieldset>}
 
         {draft.enabled && (

@@ -266,6 +266,7 @@ try {
     enabled: true,
     provider: 'localhost',
     endpoint: 'http://127.0.0.1:8080/v1',
+    prompt: 'legacy unused prompt {{names}}',
     unknownFutureField: 'preserved only in raw storage',
   })
   const validContext = await contextFor(validPartialRaw)
@@ -281,8 +282,9 @@ try {
     'valid legacy endpoint survives normalization',
   )
   check(
-    (await validDialog.getByLabel(/Judge prompt/).inputValue()).includes('{{names}}'),
-    'missing valid legacy fields inherit current defaults',
+    await validDialog.getByLabel(/Judge prompt/).count() === 0
+      && await validDialog.getByRole('button', { name: 'Reset to default' }).count() === 0,
+    'legacy prompt data does not resurrect the retired Settings control',
   )
   check(
     await validPage.evaluate(() => localStorage.getItem('neologism:judge')) === validPartialRaw,

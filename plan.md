@@ -8386,6 +8386,46 @@ existing truthful fallback remains authoritative.
 
 ---
 
+## Phase 247 — Remove the unused Settings judge prompt (2026-08-17)
+
+### Bottleneck
+
+Settings exposed an editable **Judge prompt** and a reset action, but AI Studio is the only
+production ranking caller and always replaces that stored value with its selected metric or visible
+custom criterion. Saving the field therefore appeared successful while having no effect on the
+ranking request.
+
+### Frozen boundary
+
+- Remove only the no-effect Settings textarea, reset action, and now-unused component import. Keep
+  provider, model, endpoint, key, discovery, save/cancel, failure, and focus behavior unchanged.
+- Keep `JudgeConfig.prompt`, its default, stored-record parsing, prompt construction, and the public
+  rerank library path intact for backward compatibility. Do not rewrite or migrate existing local
+  records merely because they contain a legacy prompt.
+- Keep AI Studio's visible metric and **Custom ranking criterion** as the sole production ranking
+  instruction surface. Do not change its request body, cache identity, fallback, Retry, generation,
+  storage schema, taste, WASM, or Rust behavior.
+
+### Acceptance evidence
+
+The Settings owner was deliberately red at **61/62** against Phase 246: the new assertion found both
+the misleading textarea and its reset action, while all 61 retained modal, combobox, discovery,
+focus, and storage-neutral gates remained green.
+
+After removing that UI, the production Settings owner passes **62/62**. The corrupt-config owner
+passes **39/39** with a valid legacy partial record that still contains a prompt: the raw record
+remains compatible, but neither the retired field nor its reset action reappears. AI Studio's
+retained cancellation/config/failure/Retry/race/cache/model/focus/fallback contract remains green at
+**61/61**. TypeScript and the Vite production build pass; no live provider or key was used.
+
+### Decision
+
+The product now has one truthful place to author a ranking instruction: AI Studio's visible metric
+or custom criterion. Compatibility data remains accepted without presenting a control that the
+production caller would ignore.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

@@ -12,7 +12,7 @@ const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 61
+const EXPECTED_CHECKS = 62
 const FOCUSABLE = [
   'a[href]',
   'button:not([disabled])',
@@ -271,6 +271,11 @@ try {
   check(
     unnamedControls.length === 0,
     `every rendered Settings control has an accessible name${unnamedControls.length ? ` (${unnamedControls.join(', ')})` : ''}`,
+  )
+  check(
+    await dialog.getByLabel(/Judge prompt/).count() === 0
+      && await dialog.getByRole('button', { name: 'Reset to default' }).count() === 0,
+    'Settings exposes no editable prompt that AI Studio would silently replace',
   )
 
   const passedToggle = dialog.getByRole('button', { name: /Review passed names/ })
