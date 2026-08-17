@@ -1,12 +1,14 @@
-// Phase 204/205/211/212/213/215/217 pure contract: judge result identity and local model
-// discovery stay aligned with the current request configuration.
+// Phase 204/205/211/212/213/215/217/261 pure contract: judge result identity, stable
+// provider fallback, and local model discovery stay aligned with the current request configuration.
 // Run with: node --experimental-strip-types e2e/judge-cache-check.ts
 import type { NameResult } from '../src/lib/engine.ts'
 import {
+  DEFAULT_OPENROUTER_MODEL,
   estimateCost,
   fetchModels,
   isJudgeReady,
   isValidLocalEndpoint,
+  OPENROUTER_FREE_MODELS,
   rerank,
   type JudgeConfig,
 } from '../src/lib/judge.ts'
@@ -18,6 +20,12 @@ const check = (ok: boolean, label: string): void => {
   if (!ok) failures++
   console.log(`${ok ? 'PASS' : 'FAIL'}  ${label}`)
 }
+
+check(
+  DEFAULT_OPENROUTER_MODEL === 'openrouter/free'
+    && JSON.stringify(OPENROUTER_FREE_MODELS) === JSON.stringify(['openrouter/free']),
+  'the built-in OpenRouter default uses the stable free-model router instead of drifting model ids',
+)
 
 const names = (prefix: string): NameResult[] => ['Alpha', 'Beta'].map((suffix) => ({
   name: `${prefix}${suffix}`,
@@ -578,9 +586,9 @@ check(
   'changing the OpenRouter credential performs one fresh request before exact-repeat cache reuse',
 )
 
-if (checks !== 35 || failures > 0) {
-  console.error(`judge cache check: ${failures} failure(s), ${checks}/35 checks executed`)
+if (checks !== 36 || failures > 0) {
+  console.error(`judge cache check: ${failures} failure(s), ${checks}/36 checks executed`)
   process.exitCode = 1
 } else {
-  console.log('judge cache check: 35/35 checks passed')
+  console.log('judge cache check: 36/36 checks passed')
 }

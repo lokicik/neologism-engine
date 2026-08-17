@@ -40,7 +40,7 @@ export interface RankedJudgment {
 
 export const OPENROUTER_BASE = 'https://openrouter.ai/api/v1'
 export const DEFAULT_LOCAL_ENDPOINT = 'http://localhost:11434/v1'
-export const DEFAULT_OPENROUTER_MODEL = 'meta-llama/llama-3.3-70b-instruct:free'
+export const DEFAULT_OPENROUTER_MODEL = 'openrouter/free'
 
 export function normalizeLocalEndpoint(endpoint?: string): string {
   return (endpoint ?? DEFAULT_LOCAL_ENDPOINT).trim().replace(/\/+$/, '')
@@ -80,12 +80,10 @@ export function isValidModelId(value: unknown): boolean {
   )
 }
 
-// Free ids drift over time — these are editable in the UI; this is just the list
-// the model dropdown seeds with.
+// Specific free model ids drift over time. OpenRouter's stable free-model router
+// keeps the offline fallback usable without pretending a stale catalog is live.
 export const OPENROUTER_FREE_MODELS = [
-  'meta-llama/llama-3.3-70b-instruct:free',
-  'deepseek/deepseek-r1:free',
-  'google/gemini-2.0-flash-exp:free',
+  DEFAULT_OPENROUTER_MODEL,
 ]
 
 export const DEFAULT_JUDGE_PROMPT = `You are a branding expert judging invented startup/product names.

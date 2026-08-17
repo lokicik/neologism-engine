@@ -460,7 +460,7 @@ export function SettingsModal({ config, favorites, rejected, onSave, onUndoFavor
             {modelsLoading && <div className="model-empty" role="status">Loading models…</div>}
             {!modelsLoading && modelsAttempted && draft.provider === 'openrouter' && models.length === 0 && (
               <div className="model-empty model-catalog-fallback" role="status">
-                No live models discovered — showing built-in ids. Verify the model before ranking.
+                No live models discovered — showing OpenRouter's free-model router. The routed model may vary.
               </div>
             )}
             {!modelsLoading && filtered.length === 0 && (

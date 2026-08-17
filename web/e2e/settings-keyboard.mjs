@@ -1,6 +1,6 @@
-// Phase 148/212/214/217 browser contract: Settings is a real keyboard-contained modal,
-// its model picker follows the aria-activedescendant combobox pattern, and a
-// reopened or retargeted localhost picker reflects only its current URL.
+// Phase 148/212/214/217/261 browser contract: Settings is a real keyboard-contained
+// modal, its model picker follows the aria-activedescendant combobox pattern, and
+// provider fallbacks plus reopened/retargeted discovery stay truthful.
 // Run after `npm run build`: node e2e/settings-keyboard.mjs
 import { chromium } from 'playwright'
 import { spawn } from 'node:child_process'
@@ -38,10 +38,9 @@ const FIRST_MODEL = MOCK_MODELS[0].id
 const EXTREME_PRICE_MODEL = MOCK_MODELS[63].id
 const TYPED_MODEL = MOCK_MODELS[64].id
 const FALLBACK_MODELS = [
-  'meta-llama/llama-3.3-70b-instruct:free',
-  'deepseek/deepseek-r1:free',
-  'google/gemini-2.0-flash-exp:free',
+  'openrouter/free',
 ]
+const STALE_SAVED_MODEL = 'meta-llama/llama-3.3-70b-instruct:free'
 const PASS_STUB = {
   name: 'FixturePass',
   style: 'big_tech',
@@ -639,15 +638,15 @@ try {
   let catalogRecoveryRequests = 0
   const catalogRecoveryAuthorization = []
   const catalogRecoveryContext = await browser.newContext({ viewport: { width: 390, height: 844 } })
-  await catalogRecoveryContext.addInitScript(() => {
+  await catalogRecoveryContext.addInitScript(({ staleSavedModel }) => {
     localStorage.setItem('neologism:visited', '1')
     localStorage.setItem('neologism:judge', JSON.stringify({
       enabled: true,
       provider: 'openrouter',
       apiKey: 'fallback-fixture-key',
-      model: 'meta-llama/llama-3.3-70b-instruct:free',
+      model: staleSavedModel,
     }))
-  })
+  }, { staleSavedModel: STALE_SAVED_MODEL })
   await catalogRecoveryContext.route('https://openrouter.ai/api/v1/models', async (route) => {
     catalogRecoveryRequests++
     catalogRecoveryAuthorization.push(route.request().headers().authorization ?? null)
@@ -679,15 +678,15 @@ try {
       && await catalogRecoveryDialog.getByRole('option').count() === FALLBACK_MODELS.length
       && await catalogRecoveryDialog.locator('.model-catalog-fallback[role="status"]').count() === 1
       && (await catalogRecoveryDialog.locator('.model-catalog-fallback[role="status"]').textContent())?.trim()
-        === 'No live models discovered — showing built-in ids. Verify the model before ranking.',
-    'an empty OpenRouter discovery labels its unauthenticated built-in fallback instead of presenting it as live',
+        === "No live models discovered — showing OpenRouter's free-model router. The routed model may vary.",
+    'an empty OpenRouter discovery labels its unauthenticated free-model router instead of presenting it as live',
   )
   const fallbackOption = catalogRecoveryDialog.getByRole('option', {
-    name: new RegExp(FALLBACK_MODELS[1].replace(/[.*+?^${}()|[\]\\]/g, '\\$&')),
+    name: new RegExp(FALLBACK_MODELS[0].replace(/[.*+?^${}()|[\]\\]/g, '\\$&')),
   })
   await fallbackOption.click()
   check(
-    await fallbackCombo.inputValue() === FALLBACK_MODELS[1]
+    await fallbackCombo.inputValue() === FALLBACK_MODELS[0]
       && await fallbackCombo.getAttribute('aria-expanded') === 'false',
     'the explicitly labeled built-in fallback remains selectable',
   )
@@ -704,7 +703,7 @@ try {
   check(
     catalogRecoveryRequests === 2
       && catalogRecoveryAuthorization.every((header) => header === null)
-      && await recoveredCombo.inputValue() === FALLBACK_MODELS[0]
+      && await recoveredCombo.inputValue() === STALE_SAVED_MODEL
       && recoveredVisibleWithoutClearing
       && await catalogRecoveryDialog.locator('.model-catalog-fallback').count() === 0
       && await catalogRecoveryDialog.evaluate((modal) => modal.scrollWidth <= modal.clientWidth + 1),

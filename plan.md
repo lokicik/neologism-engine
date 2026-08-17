@@ -8970,6 +8970,49 @@ or inventing a migration.
 
 ---
 
+## Phase 261 — Replace drifting free-model defaults with OpenRouter's router (2026-08-17)
+
+### Bottleneck
+
+The empty-catalog recovery path was now honest and browseable, but its three built-in choices and the
+blank-model default were still specific `:free` ids copied from an older provider catalog. That made
+the fallback itself time-sensitive: a removed free variant could survive as the app's default even
+after Settings had correctly explained that live discovery failed.
+
+OpenRouter's official catalog and routing documentation expose `openrouter/free` specifically for
+this job: it is a zero-price provider-owned router over the currently available free models, and the
+actual routed model may vary. The product can therefore stop pretending that a hard-coded model
+snapshot is a durable default.
+
+### Frozen boundary
+
+- Make `openrouter/free` the exact OpenRouter default used by blank ranking requests and the only
+  built-in empty-catalog option. Keep all live provider rows, custom typed ids, existing saved ids,
+  stale-id browsing, prices, caches, credentials, request bodies, and retry behavior unchanged.
+- Label the fallback as OpenRouter's free-model router and say that the routed model may vary. Do not
+  call it a live discovery result or imply that one specific model was verified.
+- Add a pure constant/default contract and update the existing production Settings recovery owner.
+  Use mocked catalogs only; make no live ranking request and never send a real key.
+
+### Acceptance evidence
+
+The new pure owner was deliberately red with **one failure across 36 executed checks**: the prior
+default and fallback array still named three drifting model variants. After the narrow replacement,
+the pure judge/discovery/cache owner passes **36/36**, and the rebuilt production Settings owner
+passes **69/69**, including the variable-model label, explicit fallback selection, key-free empty
+catalog request, and later live-catalog recovery beside the unchanged stale saved id. TypeScript and
+the production Vite build pass. The retained corrupt-config and AI Studio failure/recovery owners
+remain green at **63/63** and **65/65** respectively, so the new default does not weaken fail-closed
+loading or change an established same-pool ranking lifecycle.
+
+### Decision
+
+The app's recovery default now delegates changing free-model availability to the provider mechanism
+designed for it. Users may still choose or type a specific model, while the built-in zero-cost path
+no longer expires merely because one upstream model id does.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
