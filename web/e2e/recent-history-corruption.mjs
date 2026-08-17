@@ -11,7 +11,7 @@ const APP_URL = `http://localhost:${PORT}`
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 24
+const EXPECTED_CHECKS = 28
 
 const server = spawn(process.execPath, [viteCli, 'preview', '--port', String(PORT), '--strictPort'], {
   cwd: WEB_DIR,
@@ -102,6 +102,29 @@ try {
   )
   check(mixedRun.pageErrors.length === 0, `mixed-history recovery produces no page error (${mixedRun.pageErrors.join(' | ')})`)
   await mixedRun.context.close()
+
+  const illFormedRaw = JSON.stringify(['Seen\uD83D'])
+  const illFormedRun = await pageFor(illFormedRaw)
+  check(
+    await illFormedRun.page.evaluate(() => localStorage.getItem('neologism:recent')) === illFormedRaw,
+    'ill-formed string history is not destructively rewritten on read',
+  )
+  await generateAndSettle(illFormedRun.page)
+  const illFormedCards = illFormedRun.page.locator('.results-grid .name-card')
+  const illFormedRecentRaw = await illFormedRun.page.evaluate(() => localStorage.getItem('neologism:recent'))
+  const illFormedRecent = JSON.parse(illFormedRecentRaw)
+  check(await illFormedCards.count() === 10, 'ill-formed string history cannot block a full Create page')
+  check(
+    Array.isArray(illFormedRecent)
+      && illFormedRecent.length === 10
+      && illFormedRecent.every((name) => typeof name === 'string' && name.length > 0),
+    'normal generation replaces ill-formed string history with the ten shown names',
+  )
+  check(
+    illFormedRun.pageErrors.length === 0,
+    `ill-formed history recovery produces no page error (${illFormedRun.pageErrors.join(' | ')})`,
+  )
+  await illFormedRun.context.close()
 
   const validNames = ['AlphaLegacy', 'BetaLegacy']
   const validRaw = JSON.stringify(validNames)

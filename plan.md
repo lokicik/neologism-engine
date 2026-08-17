@@ -7962,6 +7962,49 @@ silent profile loss on reload.
 
 ---
 
+## Phase 238 — Keep malformed recent names out of WASM exclusion (2026-08-17)
+
+### Bottleneck
+
+Recent history is operational input, not merely display data: every loaded string is copied into
+the next generation request's `exclude` list and crosses the JSON/WASM boundary. `loadRecent`
+validated the array shape and JavaScript type but still accepted an unpaired UTF-16 surrogate.
+The raw record therefore passed the browser reader yet prevented the core request from returning
+a Create page.
+
+### Frozen boundary
+
+- Keep the existing key, non-destructive read, 20,000-name tail, successful-generation repair,
+  persistence warning, and exact exclusion behavior. Do not normalize, truncate, rewrite, or add an
+  arbitrary name-length policy.
+- Reuse the shared deterministic UTF-16 well-formedness predicate for every string in the recent
+  array. Any malformed element makes the complete record fail closed to an empty in-memory history;
+  the raw value remains untouched until the existing successful-generation write repairs it.
+- Extend the existing production owner with one raw lone-surrogate record and retain the real
+  100-name brief session as the capacity/exclusion regression.
+
+### Acceptance evidence
+
+The strengthened owner was red at **26/28** against the Phase 237 production bundle: it preserved
+the malformed raw value without crashing, but the ill-formed exclusion blocked the full ten-name
+Create page and therefore could not repair history. The other object, mixed, valid, oversized,
+write-failure, recovery, page-error, and external-HTTPS checks remained green.
+
+`loadRecent` now requires every string to satisfy the same well-formed Unicode predicate used by
+the other persisted name boundaries. The rebuilt owner passes **28/28**: the malformed raw record
+is not rewritten on read, cannot enter WASM exclusion, and is replaced by the ten names shown after
+normal generation. TypeScript and the Vite production build pass. The retained brief-session
+fixture passes **8/8**, reaches exactly 100 unique names, keeps browser history equal to every shown
+name, and reports no false exhaustion.
+
+### Decision
+
+Recent history can no longer become a malformed cross-runtime generation input. Valid history and
+its 20,000-name exclusion semantics are unchanged; corrupt data remains recoverable and auditable
+rather than being silently destroyed during startup.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

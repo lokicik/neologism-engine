@@ -310,7 +310,8 @@ export function loadRecent(): string[] {
     const raw = localStorage.getItem(RECENT_KEY)
     if (!raw) return []
     const parsed = JSON.parse(raw) as unknown
-    return Array.isArray(parsed) && parsed.every((name) => typeof name === 'string')
+    return Array.isArray(parsed)
+      && parsed.every((name) => typeof name === 'string' && isWellFormedUnicode(name))
       ? parsed.slice(-RECENT_WINDOW)
       : []
   } catch {
