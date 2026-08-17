@@ -290,8 +290,9 @@ export function loadTasteReferences(): string {
 }
 
 export function saveTasteReferences(value: string): boolean {
+  if (value.length > MAX_TASTE_REFERENCE_INPUT || !isWellFormedUnicode(value)) return false
   try {
-    localStorage.setItem(TASTE_REFERENCES_KEY, value.slice(0, MAX_TASTE_REFERENCE_INPUT))
+    localStorage.setItem(TASTE_REFERENCES_KEY, value)
     return true
   } catch {
     return false

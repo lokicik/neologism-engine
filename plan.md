@@ -7914,6 +7914,54 @@ activated nor silently destroyed.
 
 ---
 
+## Phase 237 — Preserve reference writes at the Unicode limit (2026-08-17)
+
+### Bottleneck
+
+Phase 236 made reference reads fail closed, but the writer still used
+`value.slice(0, 240)` and returned success. A valid string containing 239 BMP units followed by an
+astral character has length 241; slicing it at 240 stores only the high surrogate. App then activates
+the original unsliced state because the write reported success, while reload rejects the malformed
+durable value. One edit could therefore create three contradictory truths: valid session text,
+ill-formed storage, and an empty post-reload profile.
+
+### Frozen boundary
+
+- Preserve the existing controlled input, 240 UTF-16-unit limit, boolean writer result,
+  persist-before-state App handler, inline failure behavior, parsing/profile semantics, key, and raw
+  storage. Do not truncate, normalize, repair, or partially persist a rejected edit.
+- Accept and write the exact value only when it is well-formed Unicode and at most 240 units. Return
+  `false` before `localStorage.setItem` for an over-limit or ill-formed value so the existing App
+  contract keeps the prior durable and active references together.
+- Extend the existing owner with native input events that bypass HTML `maxLength`: a valid value of
+  238 BMP units plus `🚀` (exactly 240), a 239-plus-`🚀` overflow (241), and a lone high surrogate.
+
+### Acceptance evidence
+
+After correcting the fixture's one-time quota failure so reload did not re-arm it, the strengthened
+production owner was red at **16/18**. The exact 240-unit astral value persisted intact. Only the
+241-unit and ill-formed edits failed: the writer sliced/wrote them and App accepted the original
+state instead of retaining the prior value.
+
+`saveTasteReferences` now validates length and well-formedness before its existing storage `try` and
+writes the exact accepted string without slicing. The rebuilt owner passes **18/18**. The 240-unit
+value remains byte-exact; both invalid edits leave that same value in the controlled input and
+localStorage, expose one failure alert, and perform no partial state transition. Phase 236's malformed
+and oversized read checks, valid `Linear🚀` quota/retry/reload flow, focus, containment, non-reference
+storage, page-error, and external-HTTPS gates remain green.
+
+Retained production matrices pass at **51/51** for CommandBar keyboard/responsive behavior and **64**
+PASS outcomes for the complete share/taste/reference flow. TypeScript and the Vite production build
+pass.
+
+### Decision
+
+The reference writer now honors the same exact-value contract as App state and the validated reader.
+A Unicode boundary can no longer turn a reported successful edit into malformed durable data and
+silent profile loss on reload.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

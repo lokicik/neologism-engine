@@ -13,7 +13,7 @@ const E2E_DIR = dirname(fileURLToPath(import.meta.url))
 const WEB_DIR = join(E2E_DIR, '..')
 const SHOTS = join(E2E_DIR, 'shots')
 const viteCli = join(WEB_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
-const EXPECTED_CHECKS = 15
+const EXPECTED_CHECKS = 18
 const OLD_REFERENCES = 'Vercel, Linear🚀'
 const NEW_REFERENCES = 'Vercel, Linear🚀, Notion'
 
@@ -44,6 +44,14 @@ const check = (ok, label) => {
   if (!ok) failures++
 }
 
+async function dispatchInput(input, value) {
+  await input.evaluate((element, next) => {
+    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set
+    setter?.call(element, next)
+    element.dispatchEvent(new Event('input', { bubbles: true }))
+  }, value)
+}
+
 try {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 } })
   await context.addInitScript(({ oldReferences }) => {
@@ -54,13 +62,17 @@ try {
       nativeSetItem.call(localStorage, 'phase159:sentinel', 'unchanged')
       nativeSetItem.call(localStorage, 'phase159:seeded', '1')
     }
-    const state = { writes: 0, remainingFailures: 1 }
+    const state = {
+      writes: 0,
+      remainingFailures: sessionStorage.getItem('phase159:failure-used') === '1' ? 0 : 1,
+    }
     window.__phase159Storage = state
     Storage.prototype.setItem = function (key, value) {
       if (this === localStorage && key === 'neologism:taste-references') {
         state.writes++
         if (state.remainingFailures > 0) {
           state.remainingFailures--
+          sessionStorage.setItem('phase159:failure-used', '1')
           throw new DOMException('fixture quota rejection', 'QuotaExceededError')
         }
       }
@@ -154,6 +166,36 @@ try {
       .getByPlaceholder('Vercel, Linear, Notion').inputValue() === NEW_REFERENCES,
     'reload restores the successfully persisted references',
   )
+
+  const reloadedPanel = page.getByRole('group', { name: 'Advanced filters' })
+  const reloadedInput = reloadedPanel.getByPlaceholder('Vercel, Linear, Notion')
+  const validBoundary = `${'V'.repeat(238)}🚀`
+  await dispatchInput(reloadedInput, validBoundary)
+  check(
+    validBoundary.length === 240
+      && await reloadedInput.inputValue() === validBoundary
+      && await page.evaluate(() => localStorage.getItem('neologism:taste-references')) === validBoundary,
+    'a valid astral pair ending exactly at the 240-unit boundary persists intact',
+  )
+
+  const splitBoundary = `${'V'.repeat(239)}🚀`
+  await dispatchInput(reloadedInput, splitBoundary)
+  check(
+    splitBoundary.length === 241
+      && await reloadedInput.inputValue() === validBoundary
+      && await page.evaluate(() => localStorage.getItem('neologism:taste-references')) === validBoundary
+      && await reloadedPanel.getByRole('alert').count() === 1,
+    'an over-limit astral edit is rejected without splitting persistence or active state',
+  )
+
+  await dispatchInput(reloadedInput, 'Vercel\uD83D')
+  check(
+    await reloadedInput.inputValue() === validBoundary
+      && await page.evaluate(() => localStorage.getItem('neologism:taste-references')) === validBoundary
+      && await reloadedPanel.getByRole('alert').count() === 1,
+    'an ill-formed edit is rejected before persistence or active state can change',
+  )
+
   const storageAfter = await page.evaluate(() => JSON.stringify(
     Object.fromEntries(Object.entries(localStorage).filter(([key]) => key !== 'neologism:taste-references')),
   ))
