@@ -9598,6 +9598,60 @@ before any production selection change.
 
 ---
 
+## Phase 275 — Reject raw phonetic-stream Pareto crossover (2026-08-23)
+
+### Bottleneck
+
+Phase 268/269 rejected weak Wikidata supervision, not every LLM-free architecture. The next
+architecturally distinct preflight therefore removed learned supervision entirely: the existing
+transparent brief lexicon supplied two semantic root groups, while an isolated generator crossed
+their consonant/vowel streams into whole spellings and selected non-dominated candidates across
+quality, source trace, distance from source roots, and visible-template avoidance. Production
+suffix and metaphor inventories were never appended.
+
+### Frozen boundary
+
+- Run a one-off isolated Rust harness without importing it from production, WASM, web, storage,
+  taste, or a public type. Retain the frozen protocol and result, then remove the red harness after
+  capture because the next eligible representation cannot reuse its raw stream crossover.
+- Freeze the 35 canonical briefs, seeds 13/67/313, 120-candidate pools, 10-card pages, 20,000-attempt
+  ceiling, and protocol SHA-256
+  `4c860e6319bc951b624cf31a086b1f68441d793995d3183c750ce601af9392e7` before the first run.
+- Reuse production keyword/root grouping, phonotactics, sonority, scoring, ILAD, dictionaries, and
+  the Phase-268 review index. Treat source trace as a mechanistic conditioning diagnostic, never
+  semantic perception or beauty.
+- Require the correct two source groups to beat nine deterministic wrong briefs in at least 75% of
+  selected-name comparisons. Stop before shadow replacement or human testing if any frozen gate
+  fails; do not lower a threshold after seeing output.
+
+### Acceptance evidence
+
+The model-free probe filled all 105 pages and all 120-name pools. Every card cleared 75 composite;
+average quality was **90.975**, mean/minimum ILAD **0.8587/0.7558**, cross-seed overlap
+**0.1429** average and **2** maximum, every brief retained at least 27/30 unique names, all 105 page
+sets were unique, and review-index exact/edit-one collisions stayed zero. Only **38/1,050 (3.62%)**
+selected names ended in a known suffix/metaphor tail and **2/1,050 (0.19%)** visibly contained an
+unchanged four-plus-letter source root.
+
+The decisive conditioning gate failed: the intended source pair beat nine wrong-brief group sets in
+only **5,908/9,450 (62.5185%)** comparisons. High mechanical scores also admitted visibly weak
+strings such as `Rehcir`, `Tnatat`, `Dnira`, and `Hpyli`, proving that the retained quality proxy is
+not calibrated for this candidate distribution. Two fresh release processes exited 1 with
+byte-identical summary SHA-256
+`5423fb21376387cdf2989f3da8dbbb401c8cbdec202ed7dc8ec592c5194c70c0`.
+
+### Decision
+
+This raw character-stream crossover is rejected. It proves that template avoidance is easy to game
+and that high legacy quality/diversity scores do not make arbitrary phonetic strings good names. No
+production shadow or human study ran, and the one-off red harness was removed. A follow-up is
+eligible only if it changes representation:
+use explicit onset/nucleus/coda states plus articulatory traits, calibrate plausibility on that output
+family, and separate development from held-out briefs before inspecting the latter. Production
+remains at Phase 270.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
