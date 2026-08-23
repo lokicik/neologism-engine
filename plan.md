@@ -9793,6 +9793,42 @@ in collision control. Research code was removed; production remains at Phase 270
 
 ---
 
+## Phase 279 — Pass train-only contextual edit-transducer data preflight (2026-08-23)
+
+### Bottleneck
+
+Phase 278 showed that three hand-written respelling transforms are both too narrow and visibly
+typo-like. The next non-LLM route asks a smaller question before generating anything: does the
+existing CC0 Wikidata **training split** contain enough independently observed software-label edits
+to define a compact finite-state spelling-style inventory?
+
+### Frozen boundary
+
+- Pair only train-split `[a-z]{4,12}` software labels with an edit-one WordNet/common-word anchor;
+  validation and test records are invisible to rule mining.
+- Choose ambiguous anchors by SemCor count, curated-word preference, then lexical order. Represent
+  one insertion/deletion/substitution with exact character change, head/interior/tail position, and
+  neighboring boundary/vowel/consonant classes.
+- Require each rule to cover at least eight distinct labels and five developer/owner groups; retain
+  at most 64. Require 200 pairs/150 groups, eight eligible rules, and eligible-rule coverage of
+  120 labels/100 groups.
+- This learns orthographic style only. It uses no description/name supervision and makes no
+  production change.
+
+### Acceptance evidence
+
+The frozen preflight passed all six gates. It found **977** unique label/anchor pairs across **947**
+groups and **13** eligible contextual rules covering **179** labels across **169** groups. All
+**2,453** validation/test records were excluded. Two fresh runs produced byte-identical report
+SHA-256 `071d3f3ad90be53ad99952bf387c90a9125c01144051bca98c067e704d58f588`.
+
+The inventory contains plausible brand edits (`-o/-a/-r/-y`, `i-/e-/x-`) and suspect but supported
+families such as plural `-s` and initial `m-`. They are retained rather than cherry-picked after
+inspection. This data pass opens only an isolated development application of the frozen inventory
+to WordNet semantic anchors; it does not establish aesthetic quality or allow held-out evaluation.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
