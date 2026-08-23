@@ -10127,6 +10127,33 @@ adopting the observed 3,290 count would be post-hoc and is not allowed.
 
 ---
 
+## Phase 295 — Validate retrieval semantics, reject generative effect size (2026-08-23)
+
+A pre-model mathematical audit authorized a round 3,000-record minimum: the
+fixed 2,000-item condition diagnostic has a worst-case 95% Wilson half-width of
+2.19 points, and 1,300/2,000 wins has exact one-sided probability `8.15e-42`
+under a 50% null. The audit also added a deterministic owner-component bootstrap
+99% lower-bound gate for paired NLL gain.
+
+The unchanged clean split then passed at 48,224/3,290/3,322 train/validation/
+sealed records. Sparse TF-IDF retrieval over package descriptions was the first
+automatic non-LLM lane in this sequence to show strong brief discrimination:
+the validation-selected `k=64`, `alpha=0.25` local character model beat nine
+wrong descriptions in **74.817%** of 18,000 comparisons, retained 99.544%
+full-neighbor coverage, and had positive bootstrap lower gain.
+
+The frozen generative effect gate still failed. Global mean NLL `2.601788`
+fell to `2.549466`, only **2.011%** improvement versus the required 5%. Two
+clean five-artifact runs were byte-identical. Sealed retrieval, generation, and
+shadowing were not run, and the official dump's missing explicit content
+license remains an independent production blocker.
+
+The result keeps retrieval as a credible research semantic signal but rejects
+this local-Markov generator application. The license-independent non-LLM path
+to a better-name claim remains actual context-matched human preference learning.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
