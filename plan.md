@@ -9698,6 +9698,55 @@ one-off builder was removed after evidence capture; production remains at Phase 
 
 ---
 
+## Phase 277 — Reject root-group-conditioned WordNet selection on source-feasibility (2026-08-23)
+
+### Bottleneck
+
+Phase 276 established that exact extracted keywords do not bridge all product jargon into WordNet.
+The next isolated non-LLM route therefore declared production `brand_root_groups` as its semantic
+input before execution. It selected single-token real words from WordNet rather than joining roots,
+suffixes, or metaphors.
+
+### Frozen boundary
+
+- Use local WordNet 3.0 at SHA-256
+  `cbda5ea6eef7f36a97a43d4a75f85e07fccbb4f23657d27b4ccbc93e2646ab59`; no network, learned
+  embedding, model training, or Python reimplementation of production semantics.
+- Traverse declared synonym, hypernym/hyponym, instance, similar-to, and derivational links to depth
+  two from Rust-produced root groups. Require a common/curated word, SemCor evidence, and zero
+  exact/edit-one review or BigTech collision.
+- Retain Phase 276's FNV-sorted 24-development/11-held-out split and its downstream gates. Cap every
+  graph source at four cards and stop before sealed evaluation on any development failure.
+- Keep production, WASM, web, taste, storage, and public types unchanged.
+
+### Acceptance evidence
+
+The root bridge passed its capacity preflight: all **24/24** development briefs had supported seeds,
+the minimum post-collision graph pool was **51**, and two fresh builds produced the same candidate
+artifact SHA-256 `2bda0536a55f7ee0828e1471198e76a25d3b84b0e040372cc81376f8bf8e8208`.
+
+The selector's surviving 714 cards averaged **88.84** quality. Page ILAD averaged **0.8691** with a
+**0.7414** minimum; cross-seed overlap was zero, lexical hazards were zero, and true-brief graph
+scores beat nine deterministic wrong briefs in **91.53%** of comparisons. Those scores do not rescue
+the decisive page-completeness failure.
+
+`an environment variable manager` had three supported seeds (`dot/secret/var`), but `var` produced
+no eligible candidates. With only `dot` and `secret` productive and each capped at four cards, all
+three pages stopped at **8/10**. Overall output was **714/720** and the per-brief 27/30 uniqueness gate
+also failed. The sealed 11 briefs did not run.
+
+### Decision
+
+Root-group-conditioned direct real-word selection is rejected under its frozen protocol. It proves
+that a deterministic lexical graph can condition outputs without an LLM, but not that the results are
+better names: high-scoring pages still include literal or weak brand choices such as `Decree`,
+`Healthy`, `Discharge`, `Police`, and `Chemical`. The source cap cannot be relaxed after inspection.
+Any next route must declare a different semantic unit up front and should transform one evocative
+anchor into a novel single-piece form rather than presenting the dictionary word unchanged. The
+research executables were removed; production remains at Phase 270.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
