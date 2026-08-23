@@ -9652,6 +9652,52 @@ remains at Phase 270.
 
 ---
 
+## Phase 276 — Reject exact-keyword-only WordNet expansion before selection (2026-08-23)
+
+### Bottleneck
+
+Phase 275 showed that avoiding suffix/metaphor tails is trivial if relevance is allowed to collapse.
+Rather than repeat Phase 31's rejected unconditional subsyllabic generator or game the Phase 141
+multi-concept proxy with another blend, the next non-LLM preflight tested a genuinely single-piece
+family: evocative English real words reached through explicit WordNet 3.0 relations from production
+`extract_keywords` output.
+
+### Frozen boundary
+
+- Use the local WordNet 3.0 ZIP at SHA-256
+  `cbda5ea6eef7f36a97a43d4a75f85e07fccbb4f23657d27b4ccbc93e2646ab59`; no network, NLTK package,
+  learned embedding, or product/name supervision.
+- Traverse only declared synonym, hypernym/hyponym, instance, similar-to, and derivational relations
+  to depth two. Permit only WordNet exception morphology, not an invented stemmer.
+- Freeze the 35 briefs into 24 development and 11 sealed held-out cases by sorted FNV-1a hash. Require
+  at least one supported keyword and 40 eligible candidates per brief before Rust selection.
+- Stop before held-out, shadowing, or human evaluation on any development failure. Keep production,
+  WASM, web, storage, taste, and public types untouched.
+
+### Acceptance evidence
+
+The standard-library builder parsed the verified WordNet ZIP and used the compiled production
+keyword helper. It supported **35/35** briefs and produced byte-identical candidate artifacts twice
+at SHA-256 `5e8c2043e837dc41d81ef146f9db51d641b081493bae4bfbbe3a6eb7eadac85b`.
+Candidate capacity ranged from 36 to 300 before downstream collision, semantic-root, phonotactic, and
+quality filters.
+
+The decisive development capacity gate failed. `a code formatter and linter` yielded keywords
+`code/formatter/linter`, but WordNet 3.0 directly supported only `code`; its raw graph pool contained
+**36**, below the frozen minimum 40. The protocol explicitly prohibited silently stemming the two
+unsupported product terms after inspection, so Rust selection and the sealed 11-brief partition did
+not run.
+
+### Decision
+
+Exact-keyword-only WordNet expansion is rejected as the brief-to-graph interface. WordNet remains a
+viable local semantic source; the failure establishes that developer jargon needs the engine's
+already-transparent concept expansion before graph traversal. A separate preflight may declare
+`brand_root_groups` as seed input while retaining this partition and every downstream gate. The
+one-off builder was removed after evidence capture; production remains at Phase 270.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
