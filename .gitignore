@@ -4,4 +4,5 @@
 /web/src/wasm/
 /web/e2e/shots/
 /research/selection-study/.collector-dist/
+/research/wordnet-gloss-retrieval/work/
 .claude/
