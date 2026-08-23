@@ -11,9 +11,13 @@ brief-local character model.
 - [Normalization freeze](NORMALIZATION-FREEZE.md)
 - [Preparation implementation freeze](PREPARATION-IMPLEMENTATION-FREEZE.md)
 - [Phase 293 negative checkpoint](NEGATIVE-CHECKPOINT.md)
+- [Phase 294 successor protocol](PROTOCOL-V2.md)
+- [Phase 294 preparation freeze](PREPARATION-V2-IMPLEMENTATION-FREEZE.md)
+- [Phase 294 negative checkpoint](NEGATIVE-CHECKPOINT-V2.md)
 - `refresh.py --refresh` is the only network-enabled command.
 - `extract.py` extracts only the frozen six-table subset offline.
 - `prepare.py` enforces eligibility, leakage components, split, and coverage.
+- `prepare_v2.py` implements Phase 294's non-percolating leakage rule.
 
 Raw crates.io data is ignored and is not redistributed. Nothing here is
 imported by production, WASM, Auto, web types, storage, or taste.

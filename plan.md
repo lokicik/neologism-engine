@@ -10107,6 +10107,26 @@ items before any retrieval score opens.
 
 ---
 
+## Phase 294 — Clean edit-one leakage, stop at evaluation cardinality (2026-08-23)
+
+The successor kept the exact Phase-293 source and normalization but replaced
+the percolating name-family closure. Owner plus exact-description components
+were preserved, the one overconnected 4,401-item hub was excluded whole, and
+validation/test names within edit one of an earlier partition were removed
+rather than moved or repaired.
+
+This produced 54,836 final records, 35/35 brief coverage, a largest retained
+component of only 102, and zero cross-partition exact/edit-one leakage. It still
+failed before modeling: the preliminary 6,013/6,043 evaluation partitions lost
+2,723/2,721 near-name records, leaving **3,290 validation and 3,322 test** versus
+the frozen 5,000 minimum. No normalized model file or retrieval score exists.
+
+A separate pre-model power audit may justify a round 3,000 minimum from the
+declared 2,000-item binomial diagnostic and NLL precision requirements. Merely
+adopting the observed 3,290 count would be post-hoc and is not allowed.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
