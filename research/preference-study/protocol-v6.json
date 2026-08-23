@@ -1,0 +1,9 @@
+{
+  "schema": "neologism-pairwise-preference-protocol-v6",
+  "extends": "research/preference-study/protocol-v5.json",
+  "baseSha256": "0eb999b00ec1511788a01941d491128abe8def19decabb0002b88e654cf11b5b",
+  "poolOverrides": {
+    "targetCount": 32,
+    "minimumEligibleNames": 20
+  }
+}

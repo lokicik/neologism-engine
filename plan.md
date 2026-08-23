@@ -9877,6 +9877,89 @@ trace, or a generator whose structure is not one-character decoration.
 
 ---
 
+## Phase 281 — Reject the current engine as a complete blind-study source (2026-08-23)
+
+The frozen 30-brief preference-study UI and local evidence schema were built,
+but no human collection opened. Eight successively frozen source preflights
+tested realistic Auto and multi-lane pools. The broadest admissible version
+could form five mechanically valid same-brief pairs for only **22/30** briefs;
+brief `p23` had only **21** total eligible candidates against the required 24.
+Lowering the count, quality, or pairability gates after inspection was
+forbidden. The collector therefore has no ranking artifact or human result,
+and production remains unchanged.
+
+---
+
+## Phase 282 — Reject an articulatory WFST proposal lane (2026-08-23)
+
+A deterministic syllable-frame WFST trained from the fixed Wikidata training
+split filled all **72/72** development pages and produced high automatic
+quality (`86.75`) with zero overlap, hazards, or root leakage. It nevertheless
+failed the frozen minimum page-diversity gate (`0.5915 < 0.60`) and visibly
+admitted strings such as `Trirt`, `Tridemc`, and `Pirtirst`. Two fresh runs were
+byte-identical. Held-out and shadow evaluation did not open, the one-off Rust
+probe was removed, and no model entered production.
+
+---
+
+## Phase 283 — Reject synthetic-corruption aesthetic energy (2026-08-23)
+
+A signed character-feature energy model separated real software labels from
+deterministic corruptions in **84.85%** of validation pairs, but global AUC was
+only **0.6924** and its pairwise uplift over an order-3 Markov baseline was just
+**0.45 points**. Both preregistered novelty gates failed. The sealed test never
+opened; no scorer or model artifact was retained.
+
+---
+
+## Phase 284 — Stop BRAND liking before modeling for insufficient data (2026-08-23)
+
+The public BRAND workbook contains 597 brands with human familiarity and liking
+measurements, but only **300** distinct names satisfy the frozen single-token
+ASCII product-name boundary. The protocol required 350 family-disjoint names.
+No threshold or normalization changed after inspection, and no residual model
+or test exists.
+
+---
+
+## Phase 285 — Find a human form-ranking signal, reject sealed calibration (2026-08-23)
+
+The Gatti et al. public pseudovalence source supplied 1,500 eligible English
+pseudowords and 2,000 human-rating records. An isolated, non-LLM ridge model
+used only signed character 2/3/4-grams and transparent form features; source
+predictions, embeddings, and lexical-neighbor valence were excluded. Exact and
+edit-one families stayed inside a 1,050/225/225 item split.
+
+Validation passed (`Spearman 0.4321`, MAE improvement `+7.67%`) and therefore
+opened the sealed test. The ranking signal reproduced there (`Spearman 0.4162`,
+family-preserving permutation `p=0.0099`, positive in both source experiments),
+but absolute calibration did not: MAE was **3.48% worse** than the train-mean
+baseline instead of at least 5% better. Two fresh full runs were byte-identical.
+The predeclared overall gate fails, so no scorer is connected to generation or
+ranking. This is exploratory evidence for a future ordinal preference model,
+not evidence that the engine's names are better; a successor needs new
+prospective human choices or an untouched external evaluation source.
+
+---
+
+## Phase 286 — Reject fixed form scorer at untouched external effect-size gate (2026-08-23)
+
+The unchanged Phase-285 scorer was evaluated on the independent Martínez-Tomás
+et al. Spanish norm, using only 1,125 pseudo-root plus pseudo-suffix items with
+25+ human valence and wordlikeness ratings. No Spanish outcome fitted the
+model. Wordlikeness and the source base-word valence were rank-residualized as
+controls; raw files remained ignored because the OSF node declares no explicit
+project license.
+
+The controlled effect transferred (`partial Spearman 0.0904`, permutation
+`p=0.001`) and the required length bucket stayed positive. The primary raw
+effect was also significant but reached only **0.0954**, narrowly below the
+frozen `0.10` gate. Two clean runs were byte-identical. The threshold was not
+lowered, no engine application opened, and the result remains evidence for a
+weak ordinal prior rather than a sufficient universal aesthetic scorer.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
@@ -9997,5 +10080,14 @@ still requires a separately preregistered, context-disjoint blind/reversal study
 continue to provide the transparent local approximation of “name like X”; neither the rejected
 exact spelling template nor broader language templates substitute for proving better English
 dev-name selection on real human preference data.
+
+The latest non-LLM sequence confirms that another architectural direction does
+exist, but not as a larger unsupervised generator. A human-supervised spelling
+energy model learned a reproducible ordinal valence signal that was materially
+stronger than corpus likelihood; its sealed absolute-error gate still failed,
+so it remains research-only. The next legitimate move is a prospectively
+evaluated ordinal reranker or preference learner over rich production pools,
+with quality, semantic coverage, collision, and diversity constraints retained.
+The already-opened Phase-285 test cannot be reused to tune that successor.
 
 See `README.md` for the research bibliography and `~/.claude/plans/` for the full build history.

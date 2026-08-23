@@ -1,0 +1,54 @@
+{
+  "schema": "neologism-pairwise-preference-protocol-v4",
+  "briefSource": "research/selection-study/protocol.json",
+  "briefSourceSha256": "55fd0a4b95068f7b8df8711f830a607d7f74f59645d9836b5ea98fe2ad127f56",
+  "sourceIdentity": {
+    "wasmSha256": "10c602517dbe8af5b3bc6824199f73930990f406494ab46d183897490341ce2e",
+    "wasmBridgeSha256": "c2b07a79fcdafa1f64d28da213ef48a4d41e984e797ca0fad816d102e1758549",
+    "engineCommit": "31a9d23bd89a75610a10bd6022b1f3c48ccf8b9b",
+    "autoCommit": "3cff2859814ce1387dd5ca9a1c84f34ff26998e4"
+  },
+  "poolPolicy": {
+    "style": "big_tech",
+    "variant": "auto",
+    "targetCount": 24,
+    "pageCount": 10,
+    "maximumPages": 4,
+    "seedStride": 2654435769,
+    "seedModulus": 4294967296,
+    "minLength": 4,
+    "maxLength": 12,
+    "temperature": 0.85,
+    "variety": 0.4,
+    "roots": [],
+    "deterministicDoubleRun": true,
+    "minimumPairQuality": 75,
+    "minimumEligibleNames": 16
+  },
+  "pairPolicy": {
+    "pairsPerBrief": 5,
+    "maximumCompositeDifference": 2,
+    "onePrimaryAppearancePerName": true,
+    "preferDifferentConstruction": true,
+    "pairTieBreak": "fnv1a64-brief-and-normalized-names-v1"
+  },
+  "splitPolicy": {
+    "algorithm": "fnv1a64-brief-ascending-v1",
+    "trainBriefs": 20,
+    "validationBriefs": 5,
+    "testBriefs": 5
+  },
+  "repeatPolicy": {
+    "count": 24,
+    "selection": "lowest-sha256-case-id-repeat-v1",
+    "reverseSides": true,
+    "consistencyGate": 20
+  },
+  "decisionPolicy": {
+    "choices": ["left", "right", "neither"],
+    "minimumDecisiveTotal": 120,
+    "minimumDecisiveTrain": 80,
+    "minimumDecisiveValidation": 20,
+    "minimumDecisiveTest": 20
+  }
+}
