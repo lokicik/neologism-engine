@@ -10018,6 +10018,29 @@ PLOS outcome files remained unopened. Phase 287 and production are unchanged.
 
 ---
 
+## Phase 290 — Replace the underpowered preference split before collection (2026-08-23)
+
+The Phase-287 source and blind collector remain valid, but a prospective power
+audit rejected its fixed 20/5/5 model evaluation before any human choice was
+made. The 25-comparison sealed test needs 18/25 correct to satisfy its exact
+sign gate. A genuinely 70%-accurate model would clear that gate only **51.18%**
+of the time, below the frozen 80% design-power requirement.
+
+The same 150 primary comparisons support six complete five-brief outer folds.
+A nested grouped-CV successor now performs every preprocessing and L2 choice
+inside each outer training set, then aggregates one out-of-fold prediction per
+scorable decisive pair. Its optimistic 70%-truth power is **99.65%** without
+adding human tasks. One pre-outcome pair, `Glossaryai` / `Glossaryio`, is exact-
+identical in all 21 features and is declared structurally unscorable; it stays
+in the blind collection and repeat audit but cannot count as model evidence.
+
+The successor keeps the same transparent features and adds paired baseline
+and brief-level gates. Two deterministic synthetic structural runs were byte-
+identical, but they are not preference evidence. No human choice, fitted real
+model, reranker, better-name claim, or production change exists yet.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
