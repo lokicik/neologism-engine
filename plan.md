@@ -9829,6 +9829,54 @@ to WordNet semantic anchors; it does not establish aesthetic quality or allow he
 
 ---
 
+## Phase 280 — Reject learned-edit WordNet generator on sealed coverage (2026-08-23)
+
+### Bottleneck
+
+Phase 279 found a reproducible train-only edit inventory, but data sufficiency did not show that the
+rules make good names. Phase 280 applied all 13 frozen contextual rules to WordNet semantic anchors,
+with no cherry-picking, and evaluated development before opening the sealed brief partition.
+
+### Frozen boundary
+
+- Use the exact rule report SHA-256
+  `071d3f3ad90be53ad99952bf387c90a9125c01144051bca98c067e704d58f588`; apply an edit only where its
+  character, position, and neighboring character classes match.
+- Retain WordNet depth-two anchors, full review/BigTech edit-one collision control, the 24/11 split,
+  one-edit trace, one-anchor-per-page rule, and all Phase-278 quality/diversity/conditioning gates.
+- Require at least three edit-rule families per page, cap each family at four cards, and represent two
+  semantic concept groups whenever two have eligible outputs.
+- Freeze selection before development and never retune from held-out evidence. Keep every product
+  surface unchanged.
+
+### Acceptance evidence
+
+Development passed every gate: **72/72** pages, 720 cards, minimum eligible pool **140**, average
+quality **88.06**, average/minimum ILAD **0.9205/0.8717**, zero overlap, 72/72 unique page sets,
+**95.43%** true-anchor contrast, and zero lexical hazards. Candidate and development artifacts were
+byte-identical across two fresh processes.
+
+This opened the sealed 11 briefs. Their 33 pages also filled 330/330 with average quality **88.40**,
+average/minimum ILAD **0.9168/0.8739**, zero overlap/hazards, and **95.52%** anchor contrast. Two fresh
+processes reproduced held-out report SHA-256
+`3865daf7c23a531b3d708a5b14f13634bab90d8e89058556f000304af0d362f1`.
+
+The decisive sealed concept-coverage gate failed. `a personal budget and expense tracker`, seed 313,
+had eligible outputs from two concept groups but selected all ten from group 0. The page included
+`Totaly`, `Ecount`, `Provida`, `Answerr`, `Gaino`, `Dollaro`, and `Icancel`. Held-out-driven group
+reservation or weight changes are prohibited.
+
+### Decision
+
+The tested learned-edit WordNet generator is rejected before shadowing. Its deeper weakness is
+visible despite high automatic scores: `Mmode`, `Ilimit`, `Glorys`, and `Totaly` are shallow letter
+decorations, not evidence of stronger naming. Phase 279's train-data result remains a valid research
+artifact, but the application builder and Rust helpers were removed and production remains at Phase
+270. A genuinely new route needs aesthetic supervision stronger than pronounceability plus edit-one
+trace, or a generator whose structure is not one-character decoration.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
