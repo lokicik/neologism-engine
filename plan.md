@@ -9960,6 +9960,28 @@ weak ordinal prior rather than a sufficient universal aesthetic scorer.
 
 ---
 
+## Phase 287 — Pass prospective same-brief preference source recruitment (2026-08-23)
+
+The remaining non-LLM architecture is now frozen as a transparent
+Bradley-Terry preference learner over actual engine candidates. It will use
+only existing quality/shape/provenance features and human same-brief choices;
+no prompt model, embedding, generated supervision, or external API is allowed.
+
+Phase 281's source failure was addressed without lowering any name or pair
+gate. A 60-brief bank was frozen before generation, all briefs were built twice,
+and the first 30 passing briefs were selected by FNV hash. **57/60** briefs
+passed; the retained set contains 1,254 candidates and all **150/150** required
+quality-matched pairs. Two final full browser runs produced identical source
+SHA-256 `a763cbaa45ad49e592b88c78d09c96907f7492d9bafab3f3b869209cafb9e02a`.
+
+The blind collector is implemented and verified at desktop and mobile widths.
+It contains 150 primary choices plus 24 concealed reversed repeats, resumes
+only against exact source/protocol hashes, and reveals no scores or provenance.
+No human decision has been made, so no preference model, test accuracy, better-
+name claim, or product integration exists yet.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
@@ -10089,5 +10111,14 @@ so it remains research-only. The next legitimate move is a prospectively
 evaluated ordinal reranker or preference learner over rich production pools,
 with quality, semantic coverage, collision, and diversity constraints retained.
 The already-opened Phase-285 test cannot be reused to tune that successor.
+
+Phase 287 now freezes that successor prospectively. Real production Auto
+recruited 57/60 unseen briefs; deterministic selection retained 30 disjoint
+briefs and 150 same-brief pairs. A blind collector presents those pairs plus
+24 concealed side-reversed repeats, while a frozen 21-feature Bradley-Terry
+fitter keeps validation and sealed-test gates separate. The collector and
+fitter are mechanically verified, but no choice has been made and no model has
+been fit. Human decisions are the next evidence step; production remains
+unchanged until every frozen gate passes.
 
 See `README.md` for the research bibliography and `~/.claude/plans/` for the full build history.

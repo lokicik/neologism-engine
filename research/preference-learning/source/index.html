@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Preference source recruitment</title>
+    <link rel="stylesheet" href="./source.css" />
+  </head>
+  <body>
+    <main>
+      <p class="eyebrow">Phase 287 · local research only</p>
+      <h1>Preference source recruitment</h1>
+      <p>Audit all 60 frozen briefs, then retain the first 30 mechanically passing sources by hash.</p>
+      <div class="actions">
+        <button id="build">Build frozen source</button>
+        <button id="download" disabled>Download source JSON</button>
+      </div>
+      <progress id="progress" value="0" max="60"></progress>
+      <p id="status" role="status">Ready. No source has been generated.</p>
+      <pre id="summary"></pre>
+    </main>
+    <script type="module" src="./source.ts"></script>
+  </body>
+</html>

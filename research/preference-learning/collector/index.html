@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blind name preference study</title>
+    <link rel="stylesheet" href="./collector.css" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="eyebrow">Local blind study</p>
+        <p id="progress-text">Preparing frozen choices…</p>
+        <progress id="progress" value="0" max="174"></progress>
+      </header>
+      <section id="choice-panel" hidden>
+        <p class="prompt-label">Which name fits this product better?</p>
+        <h1 id="brief"></h1>
+        <div class="choices">
+          <button id="left" class="name-card"><span id="left-name"></span></button>
+          <button id="right" class="name-card"><span id="right-name"></span></button>
+        </div>
+        <button id="neither" class="neither">Neither name works</button>
+      </section>
+      <section id="complete-panel" hidden>
+        <p class="eyebrow">Collection complete</p>
+        <h1>Choices are frozen.</h1>
+        <p id="complete-summary"></p>
+        <button id="download">Download immutable collection</button>
+      </section>
+      <p id="status" role="status"></p>
+    </main>
+    <script type="module" src="./collector.ts"></script>
+  </body>
+</html>

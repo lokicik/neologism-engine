@@ -1,0 +1,5 @@
+.source-dist/
+.collector-dist/
+work/
+__pycache__/
+*.pyc

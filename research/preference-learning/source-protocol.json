@@ -1,0 +1,55 @@
+{
+  "schema": "neologism-preference-learning-source-protocol-v1",
+  "briefBank": "research/preference-learning/brief-bank.json",
+  "briefBankSha256": "a9df3b6e60e24c8c8049e36f4b0b0eb415d11012061008e8387b0e7660b7a712",
+  "sourceIdentity": {
+    "wasmSha256": "10c602517dbe8af5b3bc6824199f73930990f406494ab46d183897490341ce2e",
+    "wasmBridgeSha256": "c2b07a79fcdafa1f64d28da213ef48a4d41e984e797ca0fad816d102e1758549",
+    "engineCommit": "31a9d23bd89a75610a10bd6022b1f3c48ccf8b9b",
+    "autoCommit": "3cff2859814ce1387dd5ca9a1c84f34ff26998e4"
+  },
+  "poolPolicy": {
+    "style": "big_tech",
+    "minimumCount": 24,
+    "seedStride": 2654435769,
+    "seedModulus": 4294967296,
+    "minLength": 4,
+    "maxLength": 12,
+    "temperature": 0.85,
+    "variety": 0.4,
+    "roots": [],
+    "deterministicDoubleRun": true,
+    "minimumPairQuality": 75,
+    "merge": "lane-round-robin-v1",
+    "lanes": [
+      { "id": "auto", "count": 10, "variant": "auto", "compound": false },
+      { "id": "brandable", "count": 10, "variant": null, "compound": false },
+      { "id": "metaphor", "count": 10, "variant": "metaphor", "compound": false },
+      { "id": "concept_pair", "count": 10, "variant": "concept_pair", "compound": false },
+      { "id": "compound", "count": 10, "variant": null, "compound": true }
+    ]
+  },
+  "pairPolicy": {
+    "pairsPerBrief": 5,
+    "maximumCompositeDifference": 2,
+    "onePrimaryAppearancePerName": true,
+    "preferDifferentConstruction": true,
+    "pairTieBreak": "fnv1a64-brief-and-normalized-names-v1"
+  },
+  "recruitmentPolicy": {
+    "bankSize": 60,
+    "requiredPassingBriefs": 30,
+    "selection": "first-30-passing-by-fnv1a64-brief-ascending-v1"
+  },
+  "splitPolicy": {
+    "trainBriefs": 20,
+    "validationBriefs": 5,
+    "testBriefs": 5
+  },
+  "repeatPolicy": {
+    "count": 24,
+    "selection": "lowest-sha256-case-id-repeat-v1",
+    "reverseSides": true,
+    "consistencyGate": 20
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "schema": "neologism-preference-learning-collector-protocol-v1",
+  "sourcePayloadSha256": "a763cbaa45ad49e592b88c78d09c96907f7492d9bafab3f3b869209cafb9e02a",
+  "primaryCount": 150,
+  "repeatCount": 24,
+  "choices": ["left", "right", "neither"],
+  "primaryOrientation": "fnv1a64-pair-id-parity-v1",
+  "repeatSelection": "lowest-sha256-pair-id-v1",
+  "repeatOrientation": "reverse-primary-v1",
+  "taskOrder": "sha256-task-id-ascending-v1",
+  "consistencyGate": 20,
+  "minimumDecisive": {
+    "train": 80,
+    "validation": 20,
+    "test": 20
+  },
+  "resumeStorageKey": "neologism-phase287-collection-v1"
+}
