@@ -10081,6 +10081,32 @@ not another unsupervised character factorization.
 
 ---
 
+## Phase 293 — Stop crates.io retrieval conditioning at the family graph (2026-08-23)
+
+A new non-LLM semantic route was frozen around the official daily crates.io
+database dump: sparse description TF-IDF would retrieve related train packages,
+then their observed names would fit a brief-local character model. The official
+1.764 GB dump yielded 64,681 direct `[a-z]{4,12}` crate names with sufficient
+descriptions and owner identity, and train vocabulary covered all 35 canonical
+briefs.
+
+The model never ran. The declared leakage graph joined shared owners, exact
+descriptions, and transitive exact/edit-one name families. Its largest component
+contained **48,491/64,681 (74.97%)** items, far above the frozen 5% limit.
+Read-only diagnosis showed the cause: edit-one connectivity alone percolated
+through 24,800 names, while the largest exact-description group was only 29 and
+the largest owner component 3,283. At registry scale, a transitive edit-one
+graph is not a defensible morphological family definition.
+
+No threshold was relaxed, no normalized model records were emitted, and raw
+metadata remains ignored because the dump declares public information but no
+explicit content license. A distinct successor may keep owner/description
+groups and remove cross-partition edit-one evaluation cases without taking
+their global transitive closure; it must retain 5,000 clean validation and test
+items before any retrieval score opens.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic

@@ -1,0 +1,22 @@
+# Retrieval-conditioned crate-name research
+
+This isolated non-LLM lane retrieves semantically related package descriptions
+with sparse TF-IDF, then uses only the retrieved package names to construct a
+brief-local character model.
+
+- [Frozen protocol](PROTOCOL.md)
+- [Pre-inspection freeze](PRE-INSPECTION-FREEZE.md)
+- [Table-selection freeze](TABLE-SELECTION-FREEZE.md)
+- [Extraction freeze](EXTRACTION-FREEZE.md)
+- [Normalization freeze](NORMALIZATION-FREEZE.md)
+- [Preparation implementation freeze](PREPARATION-IMPLEMENTATION-FREEZE.md)
+- [Phase 293 negative checkpoint](NEGATIVE-CHECKPOINT.md)
+- `refresh.py --refresh` is the only network-enabled command.
+- `extract.py` extracts only the frozen six-table subset offline.
+- `prepare.py` enforces eligibility, leakage components, split, and coverage.
+
+Raw crates.io data is ignored and is not redistributed. Nothing here is
+imported by production, WASM, Auto, web types, storage, or taste.
+
+Phase 293 stopped before modeling because the frozen transitive edit-one graph
+formed a 48,491-item component. A successor needs a different leakage rule.
