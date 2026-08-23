@@ -9982,6 +9982,42 @@ name claim, or product integration exists yet.
 
 ---
 
+## Phase 288 — Stop multi-domain iconicity before data inspection (2026-08-23)
+
+The next non-LLM feature proposal was frozen before source inspection: recover
+eight human sound-symbolic dimensions from written pseudowords, then expose the
+representation only as a nested Phase-287 preference feature block. The cited
+publication states that stimuli, ratings, and scripts are at OSF node `hdm7w`,
+but the explicit inventory-only refresh received HTTP 401 from the official
+node endpoint and HTTP 404 from the registration endpoint. No source metadata,
+filename, license field, or human outcome was returned.
+
+The minimum 500 items across all eight domains cannot be reconstructed from
+paper-level aggregate correlations. No model ran, no threshold changed, and
+Phase 287 and production remain untouched. A separate shape-only source is
+eligible only under a new protocol with an independent external transfer gate.
+
+---
+
+## Phase 289 — Stop shape-iconicity at the frozen ASCII data gate (2026-08-23)
+
+The independently public shape-rating source was inventoried and an exact
+eight-file development subset was frozen before contents were opened. It does
+contain 537 CVCV auditory stimuli, a 31 by 537 human-rating matrix, documented
+rounded-to-pointed scale direction, and item identifiers. The spelling-only
+contract nevertheless fails before modeling: direct concatenation of the four
+source segment fields yields only **221** distinct lowercase ASCII strings,
+and only **219** also retain the required 25 human ratings. The protocol
+requires 500.
+
+Reaching the threshold would require choosing post-inspection grapheme
+translations for `I`, `ɛ`, `ʊ`, `tʃ`, and `dʒ`. That would silently replace
+the frozen spelling model with a romanized phoneme model, so the normalization
+was not changed. No split or model ran, and the already-downloaded external
+PLOS outcome files remained unopened. Phase 287 and production are unchanged.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
