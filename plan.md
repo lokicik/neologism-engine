@@ -10041,6 +10041,46 @@ model, reranker, better-name claim, or production change exists yet.
 
 ---
 
+## Phase 291 — Reject product-manifold kNN before sealed human outcomes (2026-08-23)
+
+An isolated non-LLM preflight tested whether local neighborhoods in 10,138
+train-only real product-name spellings predict independent PseudoLex human
+wordlikeness better than a global character model. The source supplied 8,394
+eligible ASCII items in 7,026 exact/edit-one families; development, validation,
+and sealed-test partitions contained 5,036/1,678/1,680 items.
+
+The selected sparse character 2/3/4-gram kNN was genuinely predictive on
+validation (`raw Spearman 0.5172`, orthographic-length-controlled `0.5164`),
+but the fixed global train-product trigram baseline was stronger (`0.5975 /
+0.6120`). Controlled uplift was **-0.0956**, failing the required `+0.05`.
+Sealed-test ratings were not aggregated. Two clean runs reproduced all seven
+artifacts byte-for-byte; no scorer or product path changed.
+
+---
+
+## Phase 292 — Reject brief-conditioned product-of-experts generation (2026-08-23)
+
+The next architecture combined the Phase-291 global product-form prior with a
+separate brief-root character expert at every generated character. It sampled
+the complete spelling end to end, rejected unchanged four-letter source roots,
+and never appended a production suffix or metaphor. The probe ran from a clean
+archive of committed core `ccdb67b`, excluding unrelated worktree changes.
+
+Mechanically the architecture was abundant: all 72 development pages and
+160-name pools filled, average/minimum quality reached `89.06/77`, mean/minimum
+ILAD `0.9154/0.8635`, minimum cross-seed uniqueness `29/30`, maximum overlap
+one, and only `33/720` selections matched a known template tail. Yet own-brief
+likelihood beat nine frozen wrong briefs on only **42.22%** of cards, versus the
+required 70%. Examples such as `Nowmc` and `Cadass` also passed every automatic
+form gate, again showing that corpus plausibility is not aesthetic judgment.
+
+Two clean reports were byte-identical. No parameter was retuned, the sealed 11
+briefs were not run, and nothing entered production. The remaining evidence-led
+non-LLM route is the already frozen context-matched human preference learner,
+not another unsupervised character factorization.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
