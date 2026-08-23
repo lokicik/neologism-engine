@@ -9747,6 +9747,52 @@ research executables were removed; production remains at Phase 270.
 
 ---
 
+## Phase 278 — Reject WordNet-anchor single-transform respelling (2026-08-23)
+
+### Bottleneck
+
+Phase 277's literal real words were semantically traceable but often weak as brands. The next
+non-LLM architecture kept WordNet anchors hidden and passed each through the existing one-step
+`respell_options` transducer. It treated a root group as one semantic concept, never joined roots or
+suffixes, and required every output to remain edit-one from its anchor.
+
+### Frozen boundary
+
+- Keep the local WordNet source, FNV 24/11 development/held-out split, depth-two relations,
+  vocabulary/collision filters, and production Rust semantic bridge from Phase 277.
+- Emit only an existing production `respell_options` result; forbid direct anchors, chained edits,
+  repair fallbacks, Python transform reimplementation, learned models, or network access.
+- Require at least 40 collision-clean transformed candidates and 30 structural/quality survivors per
+  development brief before opening sealed evaluation.
+- Keep production, WASM, web, taste, storage, and public types untouched.
+
+### Acceptance evidence
+
+The raw transformation preflight passed: every development brief was supported and the minimum
+collision-clean pool was **44**. Two fresh builds reproduced artifact SHA-256
+`a240c2fe8e1d7c54f50956ea3a38a85d8da9fac4d741292b6142ae9ce26e0790`.
+
+Selection filled all **72/72** development pages and 720 cards. Average quality was **87.41**;
+average/minimum ILAD was **0.8252/0.6572**; true anchors beat nine deterministic wrong briefs in
+**90.40%** of comparisons; lexical hazards were zero; and same-process replay was byte-identical.
+
+The decisive post-quality capacity gate failed. `an online course and study app` retained only
+**23** candidates, below 30. Its seed-13 and seed-313 pages were the same ten names in a different
+order: maximum overlap reached **10**, only **71/72** page sets were unique, and 27/30 per-brief
+uniqueness failed. One veterinary page also missed required two-group coverage. The sealed partition
+did not run.
+
+### Decision
+
+The fixed respelling transducer is rejected for WordNet-conditioned generation. It is too narrow and
+too visibly typo-like: mechanically strong outputs include `Tuytion`, `Belyef`, `Contnt`, `Testyng`,
+`Dyscharge`, and `Mysteryous`. A distinct next preflight may learn a small, support-thresholded
+finite-state edit inventory from dictionary-near software labels in the existing CC0 Wikidata
+**training split**, while keeping validation/test labels out of edit mining and the full review index
+in collision control. Research code was removed; production remains at Phase 270.
+
+---
+
 ## Bottom line
 
 Big-tech Auto remains the product's strongest path. A guided first page is now semantic
