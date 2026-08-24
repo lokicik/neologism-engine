@@ -38,7 +38,7 @@ before computing a Phase 305 metric or selected page.
 - Phase 303 sealed report SHA-256:
   `7457f1439be84dfb5f7d3a4891961a5fa81686baf8517671f890fa218243f525`.
 - Phase 303 reports are immutable generated traces. Phase 305 uses the first
-  120 candidates in recorded acceptance order from each pool. The size is
+  120 candidates in each report's recorded deterministic pool order. The size is
   fixed from Phase 303's already-known sealed minimum of 137, not from any
   Phase 305 score.
 - The background for the anchor-coherence preflight is the immutable Phase 303
