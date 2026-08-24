@@ -1,0 +1,18 @@
+{
+  "schema": "neologism-personal-positive-anchors-v1",
+  "collectedAt": "2026-08-24",
+  "collectionMethod": "explicit user-provided names they genuinely like",
+  "anchors": [
+    {"name": "Linear", "normalized": "linear", "family": "lexical"},
+    {"name": "Vercel", "normalized": "vercel", "family": "coined"},
+    {"name": "Stripe", "normalized": "stripe", "family": "lexical"},
+    {"name": "Anthropic", "normalized": "anthropic", "family": "derived"},
+    {"name": "OpenAI", "normalized": "openai", "family": "derived"},
+    {"name": "Perplexity", "normalized": "perplexity", "family": "lexical"},
+    {"name": "Notion", "normalized": "notion", "family": "lexical"},
+    {"name": "Obsidian", "normalized": "obsidian", "family": "lexical"},
+    {"name": "Godot", "normalized": "godot", "family": "coined"},
+    {"name": "Instagram", "normalized": "instagram", "family": "derived"},
+    {"name": "Twitch", "normalized": "twitch", "family": "lexical"}
+  ]
+}
