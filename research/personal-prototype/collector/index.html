@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>İsim uygunluğu</title>
+    <link rel="stylesheet" href="collector.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header>
+        <p class="eyebrow">Kişisel isim testi</p>
+        <div class="progress-row">
+          <span id="progressText">Hazırlanıyor…</span>
+          <div class="track" aria-hidden="true"><div id="progressBar"></div></div>
+        </div>
+      </header>
+
+      <section id="ratingView" class="rating-view" hidden>
+        <div class="brief-block">
+          <p class="label">Ürün brief’i</p>
+          <p id="brief" class="brief"></p>
+        </div>
+        <div class="name-block">
+          <p class="prompt">Bu ürün için bu adı gerçekten kullanır mıydın?</p>
+          <h1 id="name"></h1>
+        </div>
+        <div class="choices" aria-label="Yanıt seçenekleri">
+          <button data-choice="use"><span>Kullanırım</span><kbd>1</kbd></button>
+          <button data-choice="maybe"><span>Belki</span><kbd>2</kbd></button>
+          <button data-choice="no"><span>Hayır</span><kbd>3</kbd></button>
+        </div>
+        <button id="back" class="back" type="button">← Önceki</button>
+      </section>
+
+      <section id="doneView" class="done-view" hidden>
+        <p class="eyebrow">Tamamlandı</p>
+        <h1>30 karar kaydedildi.</h1>
+        <p>Sonuçları değerlendirebilmem için dosyayı indirip sohbete ekle.</p>
+        <button id="download" class="download" type="button">Sonuç dosyasını indir</button>
+        <button id="review" class="back" type="button">← Kararları gözden geçir</button>
+      </section>
+
+      <p id="error" class="error" role="alert" hidden></p>
+    </main>
+    <script type="module" src="collector.js"></script>
+  </body>
+</html>
