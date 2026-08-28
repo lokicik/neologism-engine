@@ -8,6 +8,7 @@ pub mod phonemes;
 pub mod phonology;
 pub mod phonotactics;
 pub mod score;
+pub mod seamblend;
 pub mod style;
 
 use rand::SeedableRng;
@@ -348,6 +349,22 @@ pub fn generate_with_tuning(cfg: &Config, tuning: &BigTechTuning) -> Vec<NameRes
     // fresh build_dictionary(), so output is unchanged for every style.
     let dict = DICT.get_or_init(build_dictionary);
     let seed = cfg.seed.unwrap_or_else(|| rand::random());
+
+    // Phase 141: the seam-blend family runs on its own ChaCha stream and its
+    // own enumerate→filter→rank pipeline. Early return BEFORE the production
+    // RNG below is constructed keeps every existing page bit-identical
+    // (`unknown_variant_matches_default_bigtech` + the held-out audit guard it).
+    if cfg.style == Style::BigTech
+        && cfg
+            .variant
+            .as_deref()
+            .map(str::to_lowercase)
+            .as_deref()
+            == Some("seamblend")
+    {
+        return seamblend::generate_seamblend(cfg, dict, seed);
+    }
+
     let mut rng = ChaCha8Rng::seed_from_u64(seed);
 
     match cfg.style {
