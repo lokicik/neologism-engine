@@ -265,8 +265,8 @@ pub fn generate_seamblend(cfg: &Config, dict: &HashSet<String>, seed: u64) -> Ve
                         if !family::passes_name_filters(&f.lower, cfg, dict, st, &exclude) {
                             continue;
                         }
-                        let overlap_bonus = (f.overlap.min(3) as f64) * 0.4;
-                        pool.push((f.lower, overlap_bonus));
+                        let bonus = taste_bonus(a, b, &f, &st.common_words);
+                        pool.push((f.lower, bonus));
                     }
                 }
             }
@@ -277,6 +277,26 @@ pub fn generate_seamblend(cfg: &Config, dict: &HashSet<String>, seed: u64) -> Ve
 
 /// The family returns ordinary `NameResult`s (same shape the web layer knows).
 pub type NameOut = crate::NameResult;
+
+/// Generic tech-suffix tails the owner's taste run rejected wholesale
+/// (Probyte, Specrate, Datascop, Mobyte). A candidate ending in one is demoted.
+/// This is the one clean, defensible signal from that run: a -byte/-rate/-scop
+/// ending reliably marks a name the owner passed. The deeper "Confield is bland
+/// but Tabalong is good" distinction is semantic coherence, which offline
+/// scoring structurally cannot judge — so it is deliberately NOT encoded here.
+const GENERIC_TAILS: &[&str] = &["byte", "rate", "ify", "scop", "trace", "istry", "tics"];
+
+/// Rank bonus for the seam-blend pool (Lab-only; production Auto untouched).
+/// A clean phoneme overlap reads as a more inevitable fusion, and a generic
+/// tech tail marks a name the owner rejected.
+fn taste_bonus(_a: &str, _b: &str, f: &Fusion, _common: &HashSet<String>) -> f64 {
+    let overlap = (f.overlap.min(3) as f64) * 0.4;
+    overlap - if GENERIC_TAILS.iter().any(|t| f.lower.ends_with(t)) {
+        0.8
+    } else {
+        0.0
+    }
+}
 
 #[cfg(test)]
 mod tests {
