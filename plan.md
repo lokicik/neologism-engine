@@ -10314,4 +10314,24 @@ single-shape walls from 72/105 to 43/105, with seam-blend counted as its own
 shape, zero starved pools, zero exact brand hits, and zero HireHub-class
 pairs (`core/examples/collision_report.rs`). Production Auto is untouched;
 promotion into Auto stays gated on taste evidence per the Phase 287 protocol.
+Phase 141 (roadmap phase 2) adds semantic-field expansion to the seam-blend
+family. `core/src/semfield.rs` maps a brief keyword to brand-worthy related
+words from a precomputed GloVe 6B neighbor table (`core/data/semfield/
+neighbors.tsv`, 18.5k keys; PDDL / public domain, edges only, anchored to the
+engine's own wordlists — builder `research/semantic-field/build_neighbors.py`,
+raw vectors gitignored). The seam-blend family widens THIN ingredient groups
+(< 5 words) with neighbors of both the group's words and the brief keywords, so
+briefs whose distinctive term is off-embedding (backlinks) still expand through
+their ordinary words. On eight deliberately off-lexicon briefs this lifts the
+family from 46 to 73 usable names; the "note taking app with backlinks" page
+goes 2 → 10 (verified live in the browser). Recognized briefs are untouched
+(augmentation only fires on thin groups), so the canonical saturation numbers
+hold: template-match proxy 98.9% → 79.0%, walls 72 → 43/105, 0 starved pools.
+Crucially the two data tables (pron_lexicon.tsv, neighbors.tsv) are now
+`cfg(not(target_arch = "wasm32"))`-gated OUT of the wasm binary and injected at
+runtime via new `load_semfield` / `load_pron_lexicon` exports; the web layer
+fetches them as lazy `?raw` chunks only when the Lab seam-blend mode is used.
+Production Auto's wasm dropped 1137 → 724 KB, so the whole non-template line
+(phases 1-2) costs production users nothing until they opt into the Lab mode.
+Held-out audit stays green (49 PASS). Promotion into Auto remains taste-gated.
 See `README.md` for the research bibliography and `~/.claude/plans/` for the full build history.
