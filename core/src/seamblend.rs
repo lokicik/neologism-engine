@@ -204,9 +204,10 @@ fn ingredient_groups(cfg: &Config) -> Vec<Vec<String>> {
                 .collect(),
         );
     }
-    if groups.len() < 2 {
-        groups.push(CONCEPT_METAPHORS.iter().map(|m| m.to_string()).collect());
-    }
+    // Always offer the strong evocative-anchor palette as its own group, so
+    // most fusions pair a brief word with a spark/vault/forge-grade anchor —
+    // the shape of every name the owner kept in the 2026-08-28 taste run.
+    groups.push(CONCEPT_METAPHORS.iter().map(|m| m.to_string()).collect());
     // Bound the enumeration space; groups are already priority-ordered.
     for g in &mut groups {
         g.truncate(24);
@@ -286,16 +287,25 @@ pub type NameOut = crate::NameResult;
 /// scoring structurally cannot judge — so it is deliberately NOT encoded here.
 const GENERIC_TAILS: &[&str] = &["byte", "rate", "ify", "scop", "trace", "istry", "tics"];
 
+/// True if `w` is a strong evocative anchor (the curated metaphor palette:
+/// spark, vault, forge, craft, atlas, pulse, prism…).
+fn is_anchor(w: &str) -> bool {
+    CONCEPT_METAPHORS.contains(&w)
+}
+
 /// Rank bonus for the seam-blend pool (Lab-only; production Auto untouched).
-/// A clean phoneme overlap reads as a more inevitable fusion, and a generic
-/// tech tail marks a name the owner rejected.
-fn taste_bonus(_a: &str, _b: &str, f: &Fusion, _common: &HashSet<String>) -> f64 {
-    let overlap = (f.overlap.min(3) as f64) * 0.4;
-    overlap - if GENERIC_TAILS.iter().any(|t| f.lower.ends_with(t)) {
-        0.8
-    } else {
-        0.0
-    }
+/// Encodes the 2026-08-28 taste run: every kept name (Sparktic, Invault,
+/// Stacraft, Groupane) carried a strong evocative anchor that survived intact,
+/// while the passed names leaned on weak fragments or generic -byte/-rate tails.
+/// So reward an anchor that survives at the head or tail, credit a clean
+/// overlap, and demote a generic tail. The remaining "is the pairing coherent"
+/// judgment is the offline ceiling and is deliberately left to selection.
+fn taste_bonus(a: &str, b: &str, f: &Fusion, _common: &HashSet<String>) -> f64 {
+    let overlap = (f.overlap.min(3) as f64) * 0.3;
+    let anchor_survives = (is_anchor(a) && f.lower.starts_with(a)) as u8
+        + (is_anchor(b) && f.lower.ends_with(b)) as u8;
+    let generic = GENERIC_TAILS.iter().any(|t| f.lower.ends_with(t));
+    overlap + 0.7 * anchor_survives as f64 - if generic { 0.8 } else { 0.0 }
 }
 
 #[cfg(test)]
