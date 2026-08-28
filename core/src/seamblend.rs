@@ -153,18 +153,24 @@ fn seam_preserves_consonants(fusion: &Fusion) -> bool {
 /// recognized briefs keep their curated behavior.
 const THIN_GROUP: usize = 5;
 
-/// Add semantic-field neighbors of a group's own words until it reaches
-/// `THIN_GROUP`, skipping words already present in any group. This is the fix
-/// for briefs whose curated concept groups starve the blender (e.g.
-/// "backlinks"): GloVe-derived neighbors are all known-real, brand-worthy
-/// English words, and they only ever act as blend ingredients.
-fn augment_thin_groups(groups: &mut [Vec<String>]) {
+/// Widen thin ingredient groups with semantic-field neighbors until each
+/// reaches `THIN_GROUP`, skipping words already present in any group. Seeds are
+/// the group's own words first, then the brief keywords — so a brief whose
+/// distinctive word is off-embedding (e.g. "backlink", absent from GloVe) still
+/// expands through its ordinary words ("note", "taking"). GloVe-derived
+/// neighbors are all known-real, brand-worthy English words that only ever act
+/// as blend ingredients.
+fn augment_thin_groups(groups: &mut [Vec<String>], brief_keywords: &[String]) {
     let mut present: HashSet<String> = groups.iter().flatten().cloned().collect();
     for gi in 0..groups.len() {
         if groups[gi].len() >= THIN_GROUP {
             continue;
         }
-        let seeds: Vec<String> = groups[gi].clone();
+        let seeds: Vec<String> = groups[gi]
+            .clone()
+            .into_iter()
+            .chain(brief_keywords.iter().cloned())
+            .collect();
         'seed: for seed in seeds {
             for nb in semfield::expand(&seed, 8) {
                 if groups[gi].len() >= THIN_GROUP {
@@ -186,7 +192,7 @@ fn ingredient_groups(cfg: &Config) -> Vec<Vec<String>> {
     if let Some(desc) = cfg.description.as_deref().filter(|d| !d.trim().is_empty()) {
         let kws = keywords::extract_keywords(desc, 6);
         groups = keywords::brand_root_groups(&kws, 16);
-        augment_thin_groups(&mut groups);
+        augment_thin_groups(&mut groups, &kws);
     }
     if groups.is_empty() && !cfg.roots.is_empty() {
         groups.push(

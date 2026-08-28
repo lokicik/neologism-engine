@@ -32,8 +32,8 @@ OUT = os.path.join(ROOT, "core", "data", "semfield", "neighbors.tsv")
 FREQ_RANK_CUTOFF = 30000
 KEY_MIN, KEY_MAX = 3, 12       # brief keywords
 NB_MIN, NB_MAX = 3, 9          # brand-worthy blend ingredients
-NEIGHBORS_PER_KEY = 16
-MIN_COSINE = 0.30              # below this the "relation" is noise
+NEIGHBORS_PER_KEY = 8          # enough to widen a thin group; keeps the table small
+MIN_COSINE = 0.38             # below this the "relation" is noise
 
 # Function words and generic filler make poor blend ingredients.
 STOP = set("""
