@@ -27,6 +27,11 @@ const SEAMBLEND_STREAM: u64 = 0x5EA6_B1E4;
 /// Brand-shape ceiling, same value as `BigTechTuning::syllable_cap`.
 const SYLLABLE_CAP: usize = 3;
 
+/// HANDOFF Phase 140 lesson (HireHub): transparent {real word}+{generic tail}
+/// pairs are near-certainly taken by an in-domain product. This family must
+/// never emit that class, per the roadmap's collision discipline.
+const GENERIC_PAIR_TAILS: &[&str] = &["hub", "map", "set", "arc", "lab", "beam", "seed"];
+
 /// One enumerated fusion candidate (pre-filter).
 #[derive(Debug, Clone)]
 struct Fusion {
@@ -321,6 +326,14 @@ fn passes_filters(
         return false;
     }
     if mimics_real_brand_indexed(lower, &st.corpus_by_len) {
+        return false;
+    }
+    // Transparent generic pair (HireHub class): real word + generic tail.
+    if GENERIC_PAIR_TAILS.iter().any(|tail| {
+        lower
+            .strip_suffix(tail)
+            .is_some_and(|stem| stem.len() >= 3 && st.common_words.contains(stem))
+    }) {
         return false;
     }
     if !passes_constraints(lower, cfg) {

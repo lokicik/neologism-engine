@@ -13,10 +13,27 @@
 //! cargo run -p neologism-core --example collision_report --release
 //! ```
 
-use neologism_core::score::levenshtein;
 use neologism_core::style::{Config, Style};
 use std::collections::HashSet;
 use std::fs;
+
+/// Local copy — `score::levenshtein` is crate-private and score.rs is frozen.
+fn levenshtein(a: &str, b: &str) -> usize {
+    let b_chars: Vec<char> = b.chars().collect();
+    let mut row: Vec<usize> = (0..=b_chars.len()).collect();
+    for (i, ca) in a.chars().enumerate() {
+        let mut prev = row[0];
+        row[0] = i + 1;
+        for (j, &cb) in b_chars.iter().enumerate() {
+            let old = row[j + 1];
+            row[j + 1] = (row[j + 1] + 1)
+                .min(row[j] + 1)
+                .min(prev + usize::from(ca != cb));
+            prev = old;
+        }
+    }
+    row[b_chars.len()]
+}
 
 const BLOCKLIST_TAILS: &[&str] = &["hub", "map", "set", "arc", "lab", "beam", "seed"];
 
