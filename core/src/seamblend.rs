@@ -16,7 +16,8 @@ use crate::phonology::{best_spanned, pronounce, syllabify, Phoneme, SpannedPhone
 use crate::style::{Config, Style};
 use crate::{
     capitalize, connotation, exclude::ExcludeSet, keywords, metrics, mimics_real_brand_indexed,
-    passes_constraints, rank_jitter, score, BigtechStatic, BAD_SUBSTRINGS, CONCEPT_METAPHORS,
+    passes_constraints, rank_jitter, score, semfield, BigtechStatic, BAD_SUBSTRINGS,
+    CONCEPT_METAPHORS,
 };
 use std::collections::{HashMap, HashSet};
 
@@ -147,6 +148,36 @@ fn seam_preserves_consonants(fusion: &Fusion) -> bool {
     }
 }
 
+/// A thin ingredient group is widened toward this many words via semantic-
+/// field expansion; rich curated groups (>= this) are left untouched so
+/// recognized briefs keep their curated behavior.
+const THIN_GROUP: usize = 5;
+
+/// Add semantic-field neighbors of a group's own words until it reaches
+/// `THIN_GROUP`, skipping words already present in any group. This is the fix
+/// for briefs whose curated concept groups starve the blender (e.g.
+/// "backlinks"): GloVe-derived neighbors are all known-real, brand-worthy
+/// English words, and they only ever act as blend ingredients.
+fn augment_thin_groups(groups: &mut [Vec<String>]) {
+    let mut present: HashSet<String> = groups.iter().flatten().cloned().collect();
+    for gi in 0..groups.len() {
+        if groups[gi].len() >= THIN_GROUP {
+            continue;
+        }
+        let seeds: Vec<String> = groups[gi].clone();
+        'seed: for seed in seeds {
+            for nb in semfield::expand(&seed, 8) {
+                if groups[gi].len() >= THIN_GROUP {
+                    break 'seed;
+                }
+                if present.insert(nb.to_string()) {
+                    groups[gi].push(nb.to_string());
+                }
+            }
+        }
+    }
+}
+
 /// Deterministic ingredient groups for the brief: description concept groups
 /// when available, else user roots, padded with the curated metaphor palette
 /// so there is always a second group to fuse across.
@@ -155,6 +186,7 @@ fn ingredient_groups(cfg: &Config) -> Vec<Vec<String>> {
     if let Some(desc) = cfg.description.as_deref().filter(|d| !d.trim().is_empty()) {
         let kws = keywords::extract_keywords(desc, 6);
         groups = keywords::brand_root_groups(&kws, 16);
+        augment_thin_groups(&mut groups);
     }
     if groups.is_empty() && !cfg.roots.is_empty() {
         groups.push(
@@ -432,6 +464,30 @@ mod tests {
             assert!(lower.len() >= cfg.min_len && lower.len() <= cfg.max_len, "{}", r.name);
             assert!(!st.common_words.contains(&lower), "real word leaked: {}", r.name);
             assert!(!st.corpus_set.contains(&lower), "brand leaked: {}", r.name);
+        }
+    }
+
+    #[test]
+    fn expansions_never_leak_as_names() {
+        // A semantic-field neighbor is an ingredient, never a name. Every
+        // emitted name must fail to be a plain real word (the filter chain
+        // guarantees this); this pins that guarantee against the expansion.
+        let cfg = Config {
+            style: Style::BigTech,
+            variant: Some("seamblend".to_string()),
+            description: Some("a note taking app with backlinks".to_string()),
+            seed: Some(7),
+            ..Config::default()
+        };
+        let dict = crate::DICT.get_or_init(crate::build_dictionary);
+        let st = BigtechStatic::get();
+        for r in generate_seamblend(&cfg, dict, 7) {
+            let lower = r.name.to_lowercase();
+            assert!(!st.common_words.contains(&lower), "real word leaked: {}", r.name);
+            // Any neighbor we might have expanded to must not be the whole name.
+            for nb in semfield::expand("backlink", 16) {
+                assert_ne!(lower, nb, "expansion surfaced verbatim: {}", r.name);
+            }
         }
     }
 

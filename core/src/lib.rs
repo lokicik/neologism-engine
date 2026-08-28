@@ -9,6 +9,7 @@ pub mod phonology;
 pub mod phonotactics;
 pub mod score;
 pub mod seamblend;
+pub mod semfield;
 pub mod style;
 
 use rand::SeedableRng;
