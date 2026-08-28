@@ -36,6 +36,7 @@ export const constructionShape = (item) => {
   if (item.sourceMode === 'realword') return 'realword'
   if (item.sourceMode === 'compound') return 'compound'
   if (item.sourceMode === 'seamblend') return 'seamblend'
+  if (item.sourceMode === 'morpheme') return 'morpheme'
   if (item.construction === 'guided_metaphor') return 'root_metaphor'
   if (isDirectSuffix(item)) return 'direct_suffix'
   if (item.sourceMode === 'brandable' && (item.concept_coverage ?? 0) >= 2) {

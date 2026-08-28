@@ -10,9 +10,11 @@ const FIXTURE = [
   [{ name: 'Meridian', sourceMode: 'realword' }, 'realword'],
   [{ name: 'SwiftForge', sourceMode: 'compound' }, 'compound'],
   [{ name: 'Shipulse', sourceMode: 'seamblend' }, 'seamblend'],
+  [{ name: 'Aqualum', sourceMode: 'morpheme' }, 'morpheme'],
   // sourceMode wins over construction/coverage.
   [{ name: 'Keyflow', sourceMode: 'respell', construction: 'guided_metaphor' }, 'respell'],
   [{ name: 'Pinlens', sourceMode: 'seamblend', concept_coverage: 2 }, 'seamblend'],
+  [{ name: 'Lucastro', sourceMode: 'morpheme', concept_coverage: 2 }, 'morpheme'],
   // Guided metaphor beats the direct-suffix check.
   [{ name: 'Lexify', sourceMode: 'brandable', construction: 'guided_metaphor', concept_coverage: 1 }, 'root_metaphor'],
   // Direct suffix requires coverage exactly 1.

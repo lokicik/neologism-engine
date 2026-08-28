@@ -12,7 +12,7 @@ import { autoModeCounts, isReadableAutoRespell, mergeAutoBatches } from './auto'
 import { tasteContextForConfig } from './taste-context'
 
 export type Style = 'big_tech' | 'sci_fi' | 'fantasy'
-export type NamingMode = 'brandable' | 'realword' | 'respell' | 'compound' | 'seamblend'
+export type NamingMode = 'brandable' | 'realword' | 'respell' | 'compound' | 'seamblend' | 'morpheme'
 
 export interface TasteContext {
   id: string
@@ -308,7 +308,7 @@ async function ensureSeamblendData() {
 
 export async function generateNames(cfg: Config): Promise<NameResult[]> {
   await ensureInit()
-  if (cfg.variant === 'seamblend') await ensureSeamblendData()
+  if (cfg.variant === 'seamblend' || cfg.variant === 'morpheme') await ensureSeamblendData()
   const json = generate_names(JSON.stringify(cfg))
   const parsed = JSON.parse(json) as NameResult[] | { error: string }
   if ('error' in parsed) throw new Error((parsed as { error: string }).error)
@@ -346,9 +346,11 @@ export async function generateNames(cfg: Config): Promise<NameResult[]> {
       ? 'respell'
       : cfg.variant === 'seamblend'
         ? 'seamblend'
-        : cfg.compound
-          ? 'compound'
-          : 'brandable'
+        : cfg.variant === 'morpheme'
+          ? 'morpheme'
+          : cfg.compound
+            ? 'compound'
+            : 'brandable'
   return contextual.map((result) => ({ ...result, sourceMode }))
 }
 
