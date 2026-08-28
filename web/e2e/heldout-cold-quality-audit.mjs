@@ -5,6 +5,15 @@ import { chromium } from 'playwright'
 import { spawn } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
+// Phase 141: shape classifier extracted verbatim (fixture-guarded) so the
+// seam-blend saturation probe measures with the audit's own classifier.
+import {
+  ASSEMBLED_CONSTRUCTION_SHAPES,
+  TEMPLATE_CONSTRUCTION_SHAPES,
+  constructionShape,
+  isDirectSuffix,
+  letters,
+} from './lib/construction-shapes.mjs'
 
 const PORT = 4200
 const E2E_DIR = dirname(fileURLToPath(import.meta.url))
@@ -124,17 +133,6 @@ const PROMPTS = [
   ...CLOUD_DEPLOYMENT_VARIANTS,
 ]
 const SEEDS = [13, 67, 313]
-const DIRECT_SUFFIXES = ['ify', 'ora', 'ion', 'era', 'io', 'ia', 'ix', 'el', 'en', 'on']
-const ROOT_METAPHOR_TAILS = [
-  'flow', 'forge', 'spark', 'seed', 'craft', 'nest', 'lab', 'wave', 'link', 'pulse',
-  'beam', 'grid', 'vault', 'relay', 'trace', 'scope', 'prism', 'lumen', 'nova', 'peak',
-  'trail', 'path', 'signal', 'hive', 'smith', 'harbor', 'grove', 'spring', 'frame',
-  'glow', 'flux', 'loom', 'muse', 'atlas',
-]
-const ASSEMBLED_CONSTRUCTION_SHAPES = new Set([
-  'direct_suffix', 'root_metaphor', 'multi_concept',
-])
-const TEMPLATE_CONSTRUCTION_SHAPES = new Set(['direct_suffix', 'root_metaphor'])
 const REVIEWED_RESPELLS = new Set(['browsr', 'lybrary', 'pryvate', 'vysual'])
 
 const server = spawn(process.execPath, [viteCli, '--port', String(PORT), '--strictPort'], {
@@ -212,7 +210,6 @@ try {
   const quality = (item) => (
     item.score_pronounce * 0.4 + item.score_memorability * 0.3 + item.score_novelty * 0.3
   )
-  const letters = (value) => value.toLowerCase().replace(/[^a-z]/g, '')
   const editDistance = (left, right) => {
     const row = Array.from({ length: right.length + 1 }, (_, index) => index)
     for (let i = 1; i <= left.length; i++) {
@@ -230,34 +227,6 @@ try {
     const a = letters(left)
     const b = letters(right)
     return 1 - editDistance(a, b) / Math.max(a.length, b.length)
-  }
-  const isDirectSuffix = (item) => (
-    item.sourceMode === 'brandable'
-    && item.concept_coverage === 1
-    && DIRECT_SUFFIXES.some((ending) => letters(item.name).endsWith(ending))
-  )
-  // This is a visible-shape diagnostic, not generator provenance. It measures
-  // how assembled a page reads without claiming which random branch emitted a
-  // candidate. Keep it observation-only until human preference data validates
-  // which construction shares actually predict a name someone would choose.
-  const constructionShape = (item) => {
-    if (item.sourceMode === 'respell') return 'respell'
-    if (item.sourceMode === 'realword') return 'realword'
-    if (item.sourceMode === 'compound') return 'compound'
-    if (item.construction === 'guided_metaphor') return 'root_metaphor'
-    if (isDirectSuffix(item)) return 'direct_suffix'
-    if (item.sourceMode === 'brandable' && (item.concept_coverage ?? 0) >= 2) {
-      return 'multi_concept'
-    }
-    const normalized = letters(item.name)
-    if (
-      item.sourceMode === 'brandable'
-      && (item.concept_coverage ?? 0) > 0
-      && ROOT_METAPHOR_TAILS.some((ending) => (
-        normalized.length >= ending.length + 2 && normalized.endsWith(ending)
-      ))
-    ) return 'root_metaphor'
-    return 'other_brandable'
   }
   const basePrompts = new Set(BASE_PROMPTS)
   const auditRows = rows.filter((row) => basePrompts.has(row.prompt))
