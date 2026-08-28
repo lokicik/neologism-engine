@@ -38,18 +38,18 @@ fn main() {
         "a real time collaborative code editor",
         "a package registry for private modules",
     ];
+    // Round 2: seam-blend only (the owner passed every morpheme name), 8 per
+    // brief, so the anchor-biased pool gets a fair selection.
     let mut items: Vec<String> = Vec::new();
     for (bi, brief) in briefs.iter().enumerate() {
         let seed = 40 + bi as u64 * 7;
-        for variant in ["seamblend", "morpheme"] {
-            for name in page(variant, brief, seed, 5) {
-                items.push(format!(
-                    "{{\"name\":\"{}\",\"brief\":\"{}\",\"family\":\"{}\"}}",
-                    esc(&name),
-                    esc(brief),
-                    variant
-                ));
-            }
+        for name in page("seamblend", brief, seed, 8) {
+            items.push(format!(
+                "{{\"name\":\"{}\",\"brief\":\"{}\",\"family\":\"{}\"}}",
+                esc(&name),
+                esc(brief),
+                "seamblend"
+            ));
         }
     }
     println!("[\n  {}\n]", items.join(",\n  "));
