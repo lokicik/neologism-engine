@@ -72,17 +72,19 @@ fn main() {
     let seeds = [13u64, 67, 313];
 
     let mut all: Vec<String> = Vec::new();
-    for brief in briefs {
-        for seed in seeds {
-            let cfg = Config {
-                style: Style::BigTech,
-                variant: Some("seamblend".to_string()),
-                description: Some(brief.to_string()),
-                seed: Some(seed),
-                ..Config::default()
-            };
-            for r in neologism_core::generate(&cfg) {
-                all.push(r.name.to_lowercase());
+    for variant in ["seamblend", "morpheme"] {
+        for brief in briefs {
+            for seed in seeds {
+                let cfg = Config {
+                    style: Style::BigTech,
+                    variant: Some(variant.to_string()),
+                    description: Some(brief.to_string()),
+                    seed: Some(seed),
+                    ..Config::default()
+                };
+                for r in neologism_core::generate(&cfg) {
+                    all.push(r.name.to_lowercase());
+                }
             }
         }
     }
@@ -114,7 +116,7 @@ fn main() {
     }
 
     println!(
-        "{} unique seam-blend candidates across {} briefs x {} seeds",
+        "{} unique seam-blend + morpheme candidates across {} briefs x {} seeds",
         all.len(),
         briefs.len(),
         seeds.len()
