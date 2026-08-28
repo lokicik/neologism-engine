@@ -13,5 +13,6 @@
 /research/conceptnet-guided-sampler/work/
 /research/personal-acceptability/work/
 /research/cmudict/
-/research/semantic-field/
+/research/semantic-field/glove.6B.zip
+/research/semantic-field/*.txt
 .claude/
