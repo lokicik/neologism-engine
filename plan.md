@@ -10334,4 +10334,22 @@ fetches them as lazy `?raw` chunks only when the Lab seam-blend mode is used.
 Production Auto's wasm dropped 1137 → 724 KB, so the whole non-template line
 (phases 1-2) costs production users nothing until they opt into the Lab mode.
 Held-out audit stays green (49 PASS). Promotion into Auto remains taste-gated.
+Phase 141 (roadmap phase 3) adds the morpheme-composition family. `core/src/
+morphemes.rs` + `core/data/morphemes.tsv` (~180 curated Greek/Latin root forms
+with glosses and semantic tags; Wikipedia "List of Greek and Latin roots in
+English", CC BY-SA, ~6 KB) select roots whose meaning matches the brief (via
+the phase-2 semantic field) and compose two of them with classical linking
+vowels (photo+o+graph) into a decodable coinage — a register the seam blender
+can't reach, with a linking-vowel shape distinct from seam overlaps. The shared
+filter/rank/MMR pipeline was extracted to `core/src/family.rs` and seam-blend
+refactored onto it (6/6 tests unchanged, output-identical). Examples read as
+real brand names — light: Solstella, Lucastro, Novalum; water: Maraqua,
+Hydronex, Marisol; security: Cryptarca, Tutarca, Secovault; language: Vocalex,
+Lingulex, Codexlex (all browser-verified). The brandable pad only fills thin
+briefs so the same tails don't wall a page. Reachable only via `variant ==
+"morpheme"` (a second Lab pill); its own ChaCha stream keeps production Auto
+bit-identical (held-out 49 PASS). Collision report across both Lab families:
+0 exact brand hits, 0 HireHub-class pairs. The morpheme register is the highest
+trademark-collision space, so promotion into Auto stays gated on the phase-4
+collision bloom AND taste evidence; it is Lab-only until then.
 See `README.md` for the research bibliography and `~/.claude/plans/` for the full build history.
