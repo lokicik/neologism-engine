@@ -62,6 +62,11 @@ pub(crate) fn passes_name_filters(
     if !passes_constraints(lower, cfg) {
         return false;
     }
+    // Existing package/brand name (bloom membership; no-op until the bloom is
+    // loaded, so native tests and un-injected wasm degrade gracefully).
+    if crate::collision::likely_taken(lower) {
+        return false;
+    }
     // Exact-only exclusion: the reachable space is brief-constrained, and the
     // fuzzy/stem layers are documented to starve constrained modes.
     if exclude.rejects(lower, false, false) {

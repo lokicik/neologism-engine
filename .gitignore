@@ -15,4 +15,5 @@
 /research/cmudict/
 /research/semantic-field/glove.6B.zip
 /research/semantic-field/*.txt
+/research/collision/*.txt
 .claude/

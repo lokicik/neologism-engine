@@ -7,6 +7,7 @@ import init, {
   extract_keywords,
   load_semfield,
   load_pron_lexicon,
+  load_collision,
 } from '../wasm/neologism_wasm.js'
 import { autoModeCounts, isReadableAutoRespell, mergeAutoBatches } from './auto'
 import { tasteContextForConfig } from './taste-context'
@@ -292,12 +293,15 @@ async function ensureSeamblendData() {
   if (!seamblendData) {
     seamblendData = (async () => {
       await ensureInit()
-      const [neighbors, pron] = await Promise.all([
+      const [neighbors, pron, bloomUrl] = await Promise.all([
         import('../../../core/data/semfield/neighbors.tsv?raw'),
         import('../../../core/data/pron_lexicon.tsv?raw'),
+        import('../../../core/data/collision.bloom?url'),
       ])
       load_semfield(neighbors.default)
       load_pron_lexicon(pron.default)
+      const bloom = await fetch(bloomUrl.default)
+      load_collision(new Uint8Array(await bloom.arrayBuffer()))
     })().catch((error) => {
       seamblendData = null
       throw error

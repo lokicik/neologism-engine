@@ -21,6 +21,27 @@ pub fn load_pron_lexicon(tsv: &str) {
     neologism_core::phonology::load_lexicon(tsv);
 }
 
+/// Inject the name-collision bloom filter (binary). Lazy, like the tables above.
+#[wasm_bindgen]
+pub fn load_collision(bytes: &[u8]) {
+    neologism_core::collision::load_from_bytes(bytes);
+}
+
+/// For each supplied name, whether it is probably an existing package/brand
+/// (bloom membership; a `true` may be a ~0.5% false positive). JSON in/out.
+#[wasm_bindgen]
+pub fn collision_risk(names_json: &str) -> String {
+    let names: Vec<String> = match serde_json::from_str(names_json) {
+        Ok(n) => n,
+        Err(e) => return format!("{{\"error\":\"{}\"}}", e),
+    };
+    let flags: Vec<bool> = names
+        .iter()
+        .map(|n| neologism_core::collision::likely_taken(n))
+        .collect();
+    serde_json::to_string(&flags).unwrap_or_else(|_| "[]".to_string())
+}
+
 /// Takes a JSON-encoded Config, returns a JSON-encoded Vec<NameResult>.
 #[wasm_bindgen]
 pub fn generate_names(config_json: &str) -> String {
