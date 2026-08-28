@@ -12,26 +12,15 @@
 //! Reachable only through `Config.variant == "seamblend"` — production Auto
 //! and every existing mode are byte-identical with this module present.
 
+use crate::family;
 use crate::phonology::{best_spanned, pronounce, syllabify, Phoneme, SpannedPhoneme};
-use crate::style::{Config, Style};
-use crate::{
-    capitalize, connotation, exclude::ExcludeSet, keywords, metrics, mimics_real_brand_indexed,
-    passes_constraints, rank_jitter, score, semfield, BigtechStatic, BAD_SUBSTRINGS,
-    CONCEPT_METAPHORS,
-};
+use crate::style::Config;
+use crate::{exclude::ExcludeSet, keywords, semfield, BigtechStatic, CONCEPT_METAPHORS};
 use std::collections::{HashMap, HashSet};
 
 /// Dedicated ChaCha stream id — provably disjoint from production Auto's
 /// stream 0 for the same user seed.
 const SEAMBLEND_STREAM: u64 = 0x5EA6_B1E4;
-
-/// Brand-shape ceiling, same value as `BigTechTuning::syllable_cap`.
-const SYLLABLE_CAP: usize = 3;
-
-/// HANDOFF Phase 140 lesson (HireHub): transparent {real word}+{generic tail}
-/// pairs are near-certainly taken by an in-domain product. This family must
-/// never emit that class, per the roadmap's collision discipline.
-const GENERIC_PAIR_TAILS: &[&str] = &["hub", "map", "set", "arc", "lab", "beam", "seed"];
 
 /// One enumerated fusion candidate (pre-filter).
 #[derive(Debug, Clone)]
@@ -228,11 +217,6 @@ fn ingredient_groups(cfg: &Config) -> Vec<Vec<String>> {
 /// Generate a seam-blend page. `seed` only affects rank jitter and therefore
 /// which of several near-equal candidates surface — never the candidate set.
 pub fn generate_seamblend(cfg: &Config, dict: &HashSet<String>, seed: u64) -> Vec<NameOut> {
-    use rand::SeedableRng;
-    let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(seed);
-    rng.set_stream(SEAMBLEND_STREAM);
-    let salt = rand::Rng::gen::<u64>(&mut rng);
-
     let st = BigtechStatic::get();
     let exclude = ExcludeSet::new(&cfg.exclude, 2000);
     let groups = ingredient_groups(cfg);
@@ -245,8 +229,10 @@ pub fn generate_seamblend(cfg: &Config, dict: &HashSet<String>, seed: u64) -> Ve
         }
     }
 
-    // Enumerate: ordered cross-group pairs, overlap fusion first, then splices.
-    let mut pool: Vec<(Fusion, f64)> = Vec::new();
+    // Enumerate (pure): ordered cross-group pairs, overlap fusion first, then
+    // splices. Filters run on the materialized pool below, so adding one never
+    // reshuffles the deterministic order.
+    let mut pool: Vec<(String, f64)> = Vec::new();
     let mut seen: HashSet<String> = HashSet::new();
     for (gi, ga) in groups.iter().enumerate() {
         for (gj, gb) in groups.iter().enumerate() {
@@ -271,136 +257,31 @@ pub fn generate_seamblend(cfg: &Config, dict: &HashSet<String>, seed: u64) -> Ve
                         if !seen.insert(f.lower.clone()) {
                             continue;
                         }
-                        if !passes_filters(&f, cfg, dict, st, &exclude) {
+                        // Seam-specific guard (Busharbor class), then the shared
+                        // name-filter chain.
+                        if !seam_preserves_consonants(&f) {
                             continue;
                         }
-                        let ll = st.model.log_likelihood(&f.lower);
-                        pool.push((f, ll));
+                        if !family::passes_name_filters(&f.lower, cfg, dict, st, &exclude) {
+                            continue;
+                        }
+                        let overlap_bonus = (f.overlap.min(3) as f64) * 0.4;
+                        pool.push((f.lower, overlap_bonus));
                     }
                 }
             }
         }
     }
-    if pool.is_empty() {
-        return Vec::new();
-    }
-
-    // Bounded, z-normalized ranking (no unnormalized lead term — the scale
-    // mismatch in the legacy ranker is a documented defect, not a pattern).
-    let mean = pool.iter().map(|(_, ll)| *ll).sum::<f64>() / pool.len() as f64;
-    let var = pool.iter().map(|(_, ll)| (*ll - mean).powi(2)).sum::<f64>() / pool.len() as f64;
-    let std = var.sqrt().max(f64::EPSILON);
-    let jitter_w = 0.15 + 0.35 * cfg.variety.clamp(0.0, 1.0);
-    let ranked: Vec<(f64, &Fusion)> = pool
-        .iter()
-        .map(|(f, ll)| {
-            let z = ((ll - mean) / std).clamp(-2.0, 2.0) / 2.0;
-            let syllables = syllabify(&pronounce(&f.lower).unwrap_or_default()).len();
-            let syl_score = match syllables {
-                2 => 0.6,
-                3 => 0.3,
-                1 => 0.2,
-                _ => 0.0,
-            };
-            let len_score = match f.lower.len() {
-                5..=8 => 0.3,
-                4 | 9 => 0.15,
-                _ => 0.0,
-            };
-            let overlap_bonus = (f.overlap.min(3) as f64) * 0.4;
-            let rank = z + overlap_bonus + syl_score + len_score + rank_jitter(&f.lower, salt) * jitter_w;
-            (rank, f)
-        })
-        .collect();
-    let mut decorated = ranked;
-    decorated.sort_by(|a, b| b.0.partial_cmp(&a.0).unwrap_or(std::cmp::Ordering::Equal));
-
-    let rank_min = decorated.last().map(|(r, _)| *r).unwrap_or(0.0);
-    let rank_span = (decorated.first().map(|(r, _)| *r).unwrap_or(0.0) - rank_min).max(f64::EPSILON);
-    let results: Vec<crate::NameResult> = decorated
-        .iter()
-        .take(cfg.count * 2)
-        .map(|(_, f)| to_result(&f.lower))
-        .collect();
-    let relevance: HashMap<String, f64> = decorated
-        .iter()
-        .take(cfg.count * 2)
-        .map(|(r, f)| (capitalize(&f.lower), ((*r - rank_min) / rank_span).clamp(0.0, 1.0)))
-        .collect();
-    let cap = ((cfg.count as f64 * 0.2).ceil() as usize).max(1);
-    metrics::mmr_select_capped_by(&results, cfg.count, 0.7, cap, |r| {
-        relevance.get(&r.name).copied().unwrap_or(0.0)
-    })
+    family::rank_select(&pool, cfg, seed, SEAMBLEND_STREAM)
 }
 
 /// The family returns ordinary `NameResult`s (same shape the web layer knows).
 pub type NameOut = crate::NameResult;
 
-fn passes_filters(
-    f: &Fusion,
-    cfg: &Config,
-    dict: &HashSet<String>,
-    st: &BigtechStatic,
-    exclude: &ExcludeSet,
-) -> bool {
-    let lower = &f.lower;
-    if lower.len() < cfg.min_len || lower.len() > cfg.max_len {
-        return false;
-    }
-    if !seam_preserves_consonants(f) {
-        return false;
-    }
-    let Some(ph) = pronounce(lower) else {
-        return false;
-    };
-    let syllables = syllabify(&ph).len();
-    if syllables == 0 || syllables > SYLLABLE_CAP {
-        return false;
-    }
-    if BAD_SUBSTRINGS.iter().any(|b| lower.contains(b)) {
-        return false;
-    }
-    if st.corpus_set.contains(lower) || dict.contains(lower) || st.common_words.contains(lower) {
-        return false;
-    }
-    if mimics_real_brand_indexed(lower, &st.corpus_by_len) {
-        return false;
-    }
-    // Transparent generic pair (HireHub class): real word + generic tail.
-    if GENERIC_PAIR_TAILS.iter().any(|tail| {
-        lower
-            .strip_suffix(tail)
-            .is_some_and(|stem| stem.len() >= 3 && st.common_words.contains(stem))
-    }) {
-        return false;
-    }
-    if !passes_constraints(lower, cfg) {
-        return false;
-    }
-    // Exact-only exclusion: the reachable space is brief-constrained, and the
-    // fuzzy/stem layers are documented to starve constrained modes.
-    if exclude.rejects(lower, false, false) {
-        return false;
-    }
-    true
-}
-
-fn to_result(lower: &str) -> crate::NameResult {
-    let name = capitalize(lower);
-    crate::NameResult {
-        syllables: crate::phonotactics::syllable_count(lower),
-        score_pronounce: score::score_pronounceability(lower),
-        score_novelty: score::score_novelty(lower, crate::DICT.get_or_init(crate::build_dictionary)),
-        score_memorability: score::score_memorability(lower),
-        connotations: connotation::connotations(&name),
-        name,
-        style: Style::BigTech,
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::style::Style;
 
     fn spanned(w: &str) -> Vec<SpannedPhoneme> {
         best_spanned(w).unwrap()

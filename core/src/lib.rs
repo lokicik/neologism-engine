@@ -1,9 +1,11 @@
 pub mod blend;
 pub mod connotation;
 pub mod exclude;
+pub mod family;
 pub mod keywords;
 pub mod markov;
 pub mod metrics;
+pub mod morphemes;
 pub mod phonemes;
 pub mod phonology;
 pub mod phonotactics;
@@ -355,15 +357,12 @@ pub fn generate_with_tuning(cfg: &Config, tuning: &BigTechTuning) -> Vec<NameRes
     // own enumerate→filter→rank pipeline. Early return BEFORE the production
     // RNG below is constructed keeps every existing page bit-identical
     // (`unknown_variant_matches_default_bigtech` + the held-out audit guard it).
-    if cfg.style == Style::BigTech
-        && cfg
-            .variant
-            .as_deref()
-            .map(str::to_lowercase)
-            .as_deref()
-            == Some("seamblend")
-    {
-        return seamblend::generate_seamblend(cfg, dict, seed);
+    if cfg.style == Style::BigTech {
+        match cfg.variant.as_deref().map(str::to_lowercase).as_deref() {
+            Some("seamblend") => return seamblend::generate_seamblend(cfg, dict, seed),
+            Some("morpheme") => return morphemes::generate_morpheme(cfg, dict, seed),
+            _ => {}
+        }
     }
 
     let mut rng = ChaCha8Rng::seed_from_u64(seed);
