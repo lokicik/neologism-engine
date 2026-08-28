@@ -10,7 +10,7 @@ import { autoModeCounts, isReadableAutoRespell, mergeAutoBatches } from './auto'
 import { tasteContextForConfig } from './taste-context'
 
 export type Style = 'big_tech' | 'sci_fi' | 'fantasy'
-export type NamingMode = 'brandable' | 'realword' | 'respell' | 'compound'
+export type NamingMode = 'brandable' | 'realword' | 'respell' | 'compound' | 'seamblend'
 
 export interface TasteContext {
   id: string
@@ -319,9 +319,11 @@ export async function generateNames(cfg: Config): Promise<NameResult[]> {
     ? 'realword'
     : cfg.variant === 'respell'
       ? 'respell'
-      : cfg.compound
-        ? 'compound'
-        : 'brandable'
+      : cfg.variant === 'seamblend'
+        ? 'seamblend'
+        : cfg.compound
+          ? 'compound'
+          : 'brandable'
   return contextual.map((result) => ({ ...result, sourceMode }))
 }
 
