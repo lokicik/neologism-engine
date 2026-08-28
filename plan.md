@@ -10352,4 +10352,28 @@ bit-identical (held-out 49 PASS). Collision report across both Lab families:
 0 exact brand hits, 0 HireHub-class pairs. The morpheme register is the highest
 trademark-collision space, so promotion into Auto stays gated on the phase-4
 collision bloom AND taste evidence; it is Lab-only until then.
+Phase 141 (roadmap phase 4a) hardens the Lab families with a name-collision
+bloom filter. `core/src/collision.rs` holds ~85k package/brand names (crates.io
+crate names — facts, license-clean, distinct from the blocked description dump —
+plus bigtech.txt) in a 113 KB bloom at ~0.5% false-positive rate (builder
+`core/examples/build_collision_set.rs`, names extracted by
+`research/collision/extract_names.py`). `family::passes_name_filters` now drops
+any candidate the bloom flags, so neither Lab family can emit an already-taken
+name; the collision report confirms 0 exact hits and 0 HireHub-class pairs
+across both families. New wasm exports `load_collision` (binary, lazy) and
+`collision_risk(names)` are added; the bloom is `cfg`-gated out of the wasm
+binary and fetched lazily with the other Lab data (production Auto's wasm holds
+steady ~750 KB). This is the gate the morpheme family needed to become
+deployable; it remains Lab-only pending promotion. 192 Rust tests, held-out 49
+PASS.
+
+Phase 4b (sound-symbolism generation bias + UX) and 4c (rank-feature
+refinements such as a brand-LM vs English-LM likelihood ratio) are deliberately
+NOT shipped yet. They change aesthetic/ranking behavior, and both this plan and
+the Phase 140 finding require aesthetic changes to be gated on real preference
+evidence rather than optimized as a proxy — adding them blind would repeat the
+documented metric-gaming mistake. The genuine next step is taste-data
+collection: use the two Lab modes on real briefs to accumulate >=10 liked and
+>=10 passed names (via `core/examples/taste_audit.rs`), which gates both the
+rank refinements and the Phase 5 promotion of these families into Auto.
 See `README.md` for the research bibliography and `~/.claude/plans/` for the full build history.
