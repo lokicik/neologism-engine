@@ -6,11 +6,11 @@
 //! and any downstream recommendation rules are pragmatic design choices, not
 //! drawn from a paper.
 
-use std::collections::HashMap;
-use serde::{Deserialize, Serialize};
-use crate::NameResult;
-use crate::score::levenshtein;
 use crate::blend::tech_suffix_of;
+use crate::score::levenshtein;
+use crate::NameResult;
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 /// Single "overall" score (0–100): a weighted blend of the three per-name scores.
 /// Weights are a pragmatic choice (favor easy-to-say + memorable, then original).
@@ -65,7 +65,11 @@ pub fn mmr_select(items: &[NameResult], count: usize, lambda: f64) -> Vec<NameRe
     // Seed with the highest-relevance item.
     let first = *remaining
         .iter()
-        .max_by(|&&i, &&j| rel(&items[i]).partial_cmp(&rel(&items[j])).unwrap_or(std::cmp::Ordering::Equal))
+        .max_by(|&&i, &&j| {
+            rel(&items[i])
+                .partial_cmp(&rel(&items[j]))
+                .unwrap_or(std::cmp::Ordering::Equal)
+        })
         .unwrap();
     selected.push(first);
     remaining.retain(|&i| i != first);
@@ -96,7 +100,12 @@ pub fn mmr_select(items: &[NameResult], count: usize, lambda: f64) -> Vec<NameRe
 ///
 /// `mmr_select` is untouched — Sci-Fi/Fantasy call it directly, so their
 /// output remains byte-for-byte identical.
-pub fn mmr_select_capped(items: &[NameResult], count: usize, lambda: f64, cap: usize) -> Vec<NameResult> {
+pub fn mmr_select_capped(
+    items: &[NameResult],
+    count: usize,
+    lambda: f64,
+    cap: usize,
+) -> Vec<NameResult> {
     mmr_select_capped_by(items, count, lambda, cap, |r| {
         composite_score(r) as f64 / 100.0
     })
@@ -133,7 +142,11 @@ where
     // Seed with the highest-relevance item (same as mmr_select).
     let first = *remaining
         .iter()
-        .max_by(|&&i, &&j| rel(&items[i]).partial_cmp(&rel(&items[j])).unwrap_or(std::cmp::Ordering::Equal))
+        .max_by(|&&i, &&j| {
+            rel(&items[i])
+                .partial_cmp(&rel(&items[j]))
+                .unwrap_or(std::cmp::Ordering::Equal)
+        })
         .unwrap();
     let first_lower = items[first].name.to_lowercase();
     if let Some(suf) = tech_suffix_of(&first_lower) {
@@ -159,8 +172,9 @@ where
                     .copied()
                     .filter(|&i| {
                         let lower = items[i].name.to_lowercase();
-                        let suf_ok = tech_suffix_of(&lower)
-                            .map_or(true, |s| suffix_counts.get(s).copied().unwrap_or(0) < eff_cap);
+                        let suf_ok = tech_suffix_of(&lower).map_or(true, |s| {
+                            suffix_counts.get(s).copied().unwrap_or(0) < eff_cap
+                        });
                         let pre: String = lower.chars().take(3).collect();
                         let pre_ok = prefix_counts.get(&pre).copied().unwrap_or(0) < eff_cap;
                         suf_ok && pre_ok
@@ -245,8 +259,7 @@ pub fn batch_stats(results: &[NameResult]) -> BatchStats {
     let sum_len: usize = results.iter().map(|r| r.name.chars().count()).sum();
     let sum_syl: usize = results.iter().map(|r| r.syllables).sum();
 
-    let unique: std::collections::HashSet<&str> =
-        results.iter().map(|r| r.name.as_str()).collect();
+    let unique: std::collections::HashSet<&str> = results.iter().map(|r| r.name.as_str()).collect();
 
     let best_index = results
         .iter()
@@ -312,7 +325,12 @@ mod tests {
         let picked = mmr_select(&pool, 3, 0.7);
         assert_eq!(picked.len(), 3);
         let plain: Vec<NameResult> = pool.iter().take(3).cloned().collect();
-        assert!(diversity(&picked) > diversity(&plain), "mmr {} vs plain {}", diversity(&picked), diversity(&plain));
+        assert!(
+            diversity(&picked) > diversity(&plain),
+            "mmr {} vs plain {}",
+            diversity(&picked),
+            diversity(&plain)
+        );
     }
 
     #[test]
@@ -339,7 +357,10 @@ mod tests {
         ];
         let picked = mmr_select_capped(&pool, 6, 0.85, 2);
         assert_eq!(picked.len(), 6);
-        let ify_count = picked.iter().filter(|r| r.name.to_lowercase().ends_with("ify")).count();
+        let ify_count = picked
+            .iter()
+            .filter(|r| r.name.to_lowercase().ends_with("ify"))
+            .count();
         assert!(ify_count <= 2, "expected ≤ 2 -ify names, got {}", ify_count);
         // Suppress unused warning
         let _ = pool.pop();
@@ -369,17 +390,21 @@ mod tests {
         let plain = mmr_select(&pool, 3, 0.7);
         let capped_names: Vec<&str> = capped.iter().map(|r| r.name.as_str()).collect();
         let plain_names: Vec<&str> = plain.iter().map(|r| r.name.as_str()).collect();
-        assert_eq!(capped_names, plain_names, "cap=usize::MAX should reproduce mmr_select");
+        assert_eq!(
+            capped_names, plain_names,
+            "cap=usize::MAX should reproduce mmr_select"
+        );
     }
 
     #[test]
     fn custom_relevance_survives_capped_selection() {
-        let pool = vec![
-            r("generic", 99, 99, 99),
-            r("semantic", 40, 40, 40),
-        ];
+        let pool = vec![r("generic", 99, 99, 99), r("semantic", 40, 40, 40)];
         let picked = mmr_select_capped_by(&pool, 1, 0.85, usize::MAX, |item| {
-            if item.name == "semantic" { 1.0 } else { 0.0 }
+            if item.name == "semantic" {
+                1.0
+            } else {
+                0.0
+            }
         });
         assert_eq!(picked[0].name, "semantic");
     }

@@ -63,10 +63,10 @@ pub fn is_valid_clustered(name: &str, style: Style, max_run: u32) -> bool {
 /// Higher = more sonorous. `h` is dropped before this is consulted (digraphs).
 fn sonority(c: char) -> u8 {
     match c {
-        'w' | 'j' => 4,       // glides
-        'l' | 'r' => 3,       // liquids
-        'm' | 'n' => 2,       // nasals
-        _ => 1,               // obstruents
+        'w' | 'j' => 4, // glides
+        'l' | 'r' => 3, // liquids
+        'm' | 'n' => 2, // nasals
+        _ => 1,         // obstruents
     }
 }
 
@@ -184,9 +184,9 @@ mod tests {
 
     #[test]
     fn sonority_accepts_natural_clusters() {
-        assert!(respects_sonority("tract"));     // tr onset, ct... coda
-        assert!(respects_sonority("strand"));    // str onset (s-adjunct), nd coda
-        assert!(respects_sonority("solindra"));  // ndr medial
+        assert!(respects_sonority("tract")); // tr onset, ct... coda
+        assert!(respects_sonority("strand")); // str onset (s-adjunct), nd coda
+        assert!(respects_sonority("solindra")); // ndr medial
         assert!(respects_sonority("caladriel")); // dr medial
         assert!(respects_sonority("thandriel")); // th digraph, ndr medial
         assert!(respects_sonority("nexus"));
@@ -194,8 +194,8 @@ mod tests {
 
     #[test]
     fn sonority_rejects_unnatural_clusters() {
-        assert!(!respects_sonority("sptai"));  // "spt" onset: pt doesn't rise
-        assert!(!respects_sonority("figm"));   // "gm" coda rises (g<m)
-        assert!(!respects_sonority("rtmang"));  // "rtm" reversal
+        assert!(!respects_sonority("sptai")); // "spt" onset: pt doesn't rise
+        assert!(!respects_sonority("figm")); // "gm" coda rises (g<m)
+        assert!(!respects_sonority("rtmang")); // "rtm" reversal
     }
 }

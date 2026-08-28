@@ -10293,4 +10293,25 @@ fitter are mechanically verified, but no choice has been made and no model has
 been fit. Human decisions are the next evidence step; production remains
 unchanged until every frozen gate passes.
 
+Phase 141 opens the first non-template generator family since the plateau was
+measured: a phoneme layer (`core/src/phonology.rs` — rule G2P with letter
+spans, CMUdict-subset lexicon with span alignment, onset-maximizing
+syllabification) and a seam-blend family (`core/src/seamblend.rs`) that fuses
+two meaning-bearing words at a phonetic overlap or a syllable splice. The
+family is reachable only through `variant: "seamblend"` (a Lab pill in the
+web app); dispatch is an early return ahead of the production RNG, so every
+existing page is bit-identical and the full held-out audit stays green
+(49 PASS). Architecture differs deliberately from `generate_bigtech`:
+enumeration is a pure function of the brief, filters run on the materialized
+pool, and the ranker uses only bounded z-normalized features — adding the
+transparent-generic-pair collision filter later shifted no page, which was the
+point. The construction-shape classifier moved verbatim into
+`web/e2e/lib/construction-shapes.mjs` (fixture-guarded, 20 pinned
+classifications) so `web/e2e/seamblend-saturation-probe.mjs` measures with the
+gate's own eyes: on the 105 canonical pages a simulated two-slot accent drops
+the template-match proxy from 1038/1050 (98.9%) to 838/1050 (79.8%) and
+single-shape walls from 72/105 to 43/105, with seam-blend counted as its own
+shape, zero starved pools, zero exact brand hits, and zero HireHub-class
+pairs (`core/examples/collision_report.rs`). Production Auto is untouched;
+promotion into Auto stays gated on taste evidence per the Phase 287 protocol.
 See `README.md` for the research bibliography and `~/.claude/plans/` for the full build history.

@@ -1,5 +1,5 @@
-use std::collections::HashMap;
 use rand::Rng;
+use std::collections::HashMap;
 
 const START: char = '^';
 const END: char = '$';
@@ -25,7 +25,11 @@ pub struct Model {
 impl Model {
     pub fn train(names: &[&str], order: usize) -> Self {
         let counts = Self::count_at_order(names, order);
-        Self { order, counts, lower: Vec::new() }
+        Self {
+            order,
+            counts,
+            lower: Vec::new(),
+        }
     }
 
     /// Train an order-`order` model that can back off to all lower orders.
@@ -33,7 +37,11 @@ impl Model {
         let counts = Self::count_at_order(names, order);
         let lower: Vec<HashMap<String, HashMap<char, u32>>> =
             (0..order).map(|k| Self::count_at_order(names, k)).collect();
-        Self { order, counts, lower }
+        Self {
+            order,
+            counts,
+            lower,
+        }
     }
 
     /// Build the (context -> next-char counts) table for a single order `k`.
@@ -76,7 +84,13 @@ impl Model {
     }
 
     /// Sample a name; temperature rescales frequencies (< 1 = peaked, > 1 = flat).
-    pub fn sample<R: Rng>(&self, rng: &mut R, temperature: f64, min_len: usize, max_len: usize) -> Option<String> {
+    pub fn sample<R: Rng>(
+        &self,
+        rng: &mut R,
+        temperature: f64,
+        min_len: usize,
+        max_len: usize,
+    ) -> Option<String> {
         let mut result = String::new();
         let mut context: String = std::iter::repeat(START).take(self.order).collect();
 
@@ -156,7 +170,12 @@ impl Model {
         0.0
     }
 
-    fn weighted_sample<R: Rng>(&self, rng: &mut R, dist: &HashMap<char, u32>, temperature: f64) -> Option<char> {
+    fn weighted_sample<R: Rng>(
+        &self,
+        rng: &mut R,
+        dist: &HashMap<char, u32>,
+        temperature: f64,
+    ) -> Option<char> {
         let t = temperature.max(0.01);
         // Sort by char to make sampling order-independent (HashMap iteration is non-deterministic)
         let mut weights: Vec<(char, f64)> = dist
@@ -182,12 +201,14 @@ impl Model {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use rand_chacha::ChaCha8Rng;
     use rand::SeedableRng;
+    use rand_chacha::ChaCha8Rng;
 
     #[test]
     fn log_likelihood_prefers_typical() {
-        let names = vec!["google", "amazon", "spotify", "stripe", "notion", "vercel", "shopify"];
+        let names = vec![
+            "google", "amazon", "spotify", "stripe", "notion", "vercel", "shopify",
+        ];
         let model = Model::train(&names, 2);
         let typical = model.log_likelihood("shoptify");
         let junk = model.log_likelihood("xqzkph");
@@ -198,8 +219,10 @@ mod tests {
     fn backoff_separates_brandlike_from_junk() {
         // Order-3 with backoff should score a coherent coinage well above junk,
         // where the old order-2 floor (1e-6) flattened them together.
-        let brands = vec!["google", "amazon", "spotify", "stripe", "notion", "vercel",
-            "shopify", "figma", "linear", "render", "supabase"];
+        let brands = vec![
+            "google", "amazon", "spotify", "stripe", "notion", "vercel", "shopify", "figma",
+            "linear", "render", "supabase",
+        ];
         let model = Model::train_backoff(&brands, 3);
         let brandlike = model.log_likelihood("vercet");
         let junk = model.log_likelihood("porducku");
@@ -216,7 +239,9 @@ mod tests {
         let mut rng = ChaCha8Rng::seed_from_u64(7);
         let mut produced = 0;
         for _ in 0..50 {
-            if model.sample(&mut rng, 0.9, 4, 12).is_some() { produced += 1; }
+            if model.sample(&mut rng, 0.9, 4, 12).is_some() {
+                produced += 1;
+            }
         }
         assert!(produced > 0, "backoff model produced no samples");
     }

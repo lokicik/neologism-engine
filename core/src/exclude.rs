@@ -30,8 +30,8 @@
 //! Total ≈ 660 × 12 = ~8 k ops per probe, run only on candidates that
 //! survived every cheaper filter. Well under 1 ms per generate() call.
 
-use std::collections::{HashMap, HashSet};
 use crate::blend::tech_suffix_of;
+use std::collections::{HashMap, HashSet};
 
 /// True iff Levenshtein(a, b) ≤ 1. Inputs must be lowercase.
 ///
@@ -106,12 +106,19 @@ impl ExcludeSet {
             let lower = name.to_lowercase();
             if i >= fuzzy_from {
                 let stem = stem_of(&lower).to_string();
-                by_len.entry(lower.chars().count()).or_default().push(lower.clone());
+                by_len
+                    .entry(lower.chars().count())
+                    .or_default()
+                    .push(lower.clone());
                 stems.insert(stem);
             }
             exact.insert(lower);
         }
-        Self { exact, by_len, stems }
+        Self {
+            exact,
+            by_len,
+            stems,
+        }
     }
 
     /// True if `lower` (already lowercase) should be rejected.
@@ -247,7 +254,7 @@ mod tests {
         // Fuzzy/stem layers only cover the recent window: keyston variants pass…
         assert!(!ex.rejects("keystona", true, true)); // edit-1 of old entry
         assert!(!ex.rejects("keystonify", true, true)); // stem of old entry
-        // …while variants of the recent entry are still rejected.
+                                                        // …while variants of the recent entry are still rejected.
         assert!(ex.rejects("vantas", true, true)); // edit-1 of recent entry
     }
 
@@ -257,7 +264,14 @@ mod tests {
         // entry is covered by all three layers.
         let names = vec!["keyston".to_string(), "vanta".to_string()];
         let ex = ExcludeSet::new(&names, usize::MAX);
-        let probes = ["keyston", "keystona", "keystonify", "vanta", "vantas", "glorbnex"];
+        let probes = [
+            "keyston",
+            "keystona",
+            "keystonify",
+            "vanta",
+            "vantas",
+            "glorbnex",
+        ];
         let expected = [true, true, true, true, true, false];
         for (p, want) in probes.iter().zip(expected) {
             assert_eq!(ex.rejects(p, true, true), want, "probe {p}");
