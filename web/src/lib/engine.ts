@@ -5,6 +5,8 @@ import init, {
   lexical_hazards,
   explain_name,
   extract_keywords,
+  load_semfield,
+  load_pron_lexicon,
 } from '../wasm/neologism_wasm.js'
 import { autoModeCounts, isReadableAutoRespell, mergeAutoBatches } from './auto'
 import { tasteContextForConfig } from './taste-context'
@@ -282,8 +284,31 @@ async function ensureInit() {
   await initialization
 }
 
+// The seam-blend Lab mode's data tables (~0.5 MB gzipped) are kept out of the
+// wasm binary so production Auto's first load is unaffected. Fetch them as
+// separate lazy chunks and inject them the first time seam-blend is used.
+let seamblendData: Promise<void> | null = null
+async function ensureSeamblendData() {
+  if (!seamblendData) {
+    seamblendData = (async () => {
+      await ensureInit()
+      const [neighbors, pron] = await Promise.all([
+        import('../../../core/data/semfield/neighbors.tsv?raw'),
+        import('../../../core/data/pron_lexicon.tsv?raw'),
+      ])
+      load_semfield(neighbors.default)
+      load_pron_lexicon(pron.default)
+    })().catch((error) => {
+      seamblendData = null
+      throw error
+    })
+  }
+  await seamblendData
+}
+
 export async function generateNames(cfg: Config): Promise<NameResult[]> {
   await ensureInit()
+  if (cfg.variant === 'seamblend') await ensureSeamblendData()
   const json = generate_names(JSON.stringify(cfg))
   const parsed = JSON.parse(json) as NameResult[] | { error: string }
   if ('error' in parsed) throw new Error((parsed as { error: string }).error)

@@ -15,20 +15,44 @@
 use std::collections::HashMap;
 use std::sync::OnceLock;
 
+/// Native (test/example) builds embed the table so `cargo test` and the probes
+/// work offline. The wasm build deliberately does NOT — `neighbors.tsv` is
+/// ~0.5 MB gzipped and only the Lab seam-blend mode uses it, so the web layer
+/// fetches it lazily and injects it via `load_from_tsv`, keeping it out of the
+/// binary every production-Auto user downloads. See DATA-LICENSES.md.
+#[cfg(not(target_arch = "wasm32"))]
 const NEIGHBORS: &str = include_str!("../data/semfield/neighbors.tsv");
 
-static TABLE: OnceLock<HashMap<&'static str, Vec<&'static str>>> = OnceLock::new();
+static TABLE: OnceLock<HashMap<String, Vec<String>>> = OnceLock::new();
 
-fn table() -> &'static HashMap<&'static str, Vec<&'static str>> {
+fn parse(tsv: &str) -> HashMap<String, Vec<String>> {
+    tsv.lines()
+        .filter_map(|line| {
+            let (key, rest) = line.split_once('\t')?;
+            let neighbors: Vec<String> = rest.split_whitespace().map(str::to_string).collect();
+            (!neighbors.is_empty()).then_some((key.to_string(), neighbors))
+        })
+        .collect()
+}
+
+/// Inject the neighbor table at runtime (the wasm lazy-load path). First call
+/// wins; later calls and the native embedded fallback are ignored.
+pub fn load_from_tsv(tsv: &str) {
+    let _ = TABLE.set(parse(tsv));
+}
+
+fn table() -> &'static HashMap<String, Vec<String>> {
     TABLE.get_or_init(|| {
-        NEIGHBORS
-            .lines()
-            .filter_map(|line| {
-                let (key, rest) = line.split_once('\t')?;
-                let neighbors: Vec<&str> = rest.split_whitespace().collect();
-                (!neighbors.is_empty()).then_some((key, neighbors))
-            })
-            .collect()
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            parse(NEIGHBORS)
+        }
+        // Wasm without an injected table: expansion is simply a no-op, so the
+        // seam-blend family still runs (thin briefs just stay thin).
+        #[cfg(target_arch = "wasm32")]
+        {
+            HashMap::new()
+        }
     })
 }
 
@@ -39,7 +63,7 @@ pub fn expand(keyword: &str, k: usize) -> Vec<&'static str> {
     let lower = keyword.trim().to_ascii_lowercase();
     table()
         .get(lower.as_str())
-        .map(|ns| ns.iter().take(k).copied().collect())
+        .map(|ns| ns.iter().take(k).map(String::as_str).collect())
         .unwrap_or_default()
 }
 

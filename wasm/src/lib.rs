@@ -8,6 +8,19 @@ pub fn init() {
     console_error_panic_hook::set_once();
 }
 
+/// Inject the seam-blend data tables the wasm binary omits to stay small
+/// (Phase 141). The web layer fetches these lazily and calls these once, only
+/// when the Lab seam-blend mode is used. Both are idempotent (first call wins).
+#[wasm_bindgen]
+pub fn load_semfield(tsv: &str) {
+    neologism_core::semfield::load_from_tsv(tsv);
+}
+
+#[wasm_bindgen]
+pub fn load_pron_lexicon(tsv: &str) {
+    neologism_core::phonology::load_lexicon(tsv);
+}
+
 /// Takes a JSON-encoded Config, returns a JSON-encoded Vec<NameResult>.
 #[wasm_bindgen]
 pub fn generate_names(config_json: &str) -> String {

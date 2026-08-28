@@ -13,27 +13,46 @@ use std::ops::Range;
 use std::sync::OnceLock;
 
 /// CMUdict subset (BSD-2-Clause, github.com/cmusphinx/cmudict) built by
-/// `core/examples/build_pron_lexicon.rs` — see DATA-LICENSES.md.
+/// `core/examples/build_pron_lexicon.rs` — see DATA-LICENSES.md. Native builds
+/// embed it; the wasm build injects it lazily via `load_lexicon` (only the Lab
+/// seam-blend mode consults it), keeping it out of the production-Auto binary.
+#[cfg(not(target_arch = "wasm32"))]
 const PRON_LEXICON: &str = include_str!("../data/pron_lexicon.tsv");
 
-static LEXICON: OnceLock<HashMap<&'static str, Vec<Phoneme>>> = OnceLock::new();
+static LEXICON: OnceLock<HashMap<String, Vec<Phoneme>>> = OnceLock::new();
 
-fn lexicon() -> &'static HashMap<&'static str, Vec<Phoneme>> {
+fn parse_lexicon(tsv: &str) -> HashMap<String, Vec<Phoneme>> {
+    tsv.lines()
+        .filter_map(|line| {
+            let (word, phones) = line.split_once('\t')?;
+            let parsed: Option<Vec<Phoneme>> =
+                phones.split_whitespace().map(Phoneme::from_arpabet).collect();
+            Some((word.to_string(), parsed?))
+        })
+        .collect()
+}
+
+/// Inject the pronunciation lexicon at runtime (the wasm lazy-load path).
+/// First call wins; without it, `best_spanned` simply falls back to rule G2P.
+pub fn load_lexicon(tsv: &str) {
+    let _ = LEXICON.set(parse_lexicon(tsv));
+}
+
+fn lexicon() -> &'static HashMap<String, Vec<Phoneme>> {
     LEXICON.get_or_init(|| {
-        PRON_LEXICON
-            .lines()
-            .filter_map(|line| {
-                let (word, phones) = line.split_once('\t')?;
-                let parsed: Option<Vec<Phoneme>> =
-                    phones.split_whitespace().map(Phoneme::from_arpabet).collect();
-                Some((word, parsed?))
-            })
-            .collect()
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            parse_lexicon(PRON_LEXICON)
+        }
+        #[cfg(target_arch = "wasm32")]
+        {
+            HashMap::new()
+        }
     })
 }
 
-/// Dictionary pronunciation of `word` (lowercased), if the shipped CMUdict
-/// subset has it.
+/// Dictionary pronunciation of `word` (lowercased), if the CMUdict subset has
+/// it (embedded natively, injected on wasm).
 pub fn lexicon_pronounce(word: &str) -> Option<&'static [Phoneme]> {
     lexicon()
         .get(word.to_ascii_lowercase().as_str())
