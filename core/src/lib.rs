@@ -5,6 +5,7 @@ pub mod keywords;
 pub mod markov;
 pub mod metrics;
 pub mod phonemes;
+pub mod phonology;
 pub mod phonotactics;
 pub mod score;
 pub mod style;
