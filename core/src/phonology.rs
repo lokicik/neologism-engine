@@ -8,7 +8,37 @@
 //! enough for the short root/adjective vocabulary the blender draws from; a
 //! CMUdict-subset lexicon refines real-word pronunciations where available.
 
+use std::collections::HashMap;
 use std::ops::Range;
+use std::sync::OnceLock;
+
+/// CMUdict subset (BSD-2-Clause, github.com/cmusphinx/cmudict) built by
+/// `core/examples/build_pron_lexicon.rs` — see DATA-LICENSES.md.
+const PRON_LEXICON: &str = include_str!("../data/pron_lexicon.tsv");
+
+static LEXICON: OnceLock<HashMap<&'static str, Vec<Phoneme>>> = OnceLock::new();
+
+fn lexicon() -> &'static HashMap<&'static str, Vec<Phoneme>> {
+    LEXICON.get_or_init(|| {
+        PRON_LEXICON
+            .lines()
+            .filter_map(|line| {
+                let (word, phones) = line.split_once('\t')?;
+                let parsed: Option<Vec<Phoneme>> =
+                    phones.split_whitespace().map(Phoneme::from_arpabet).collect();
+                Some((word, parsed?))
+            })
+            .collect()
+    })
+}
+
+/// Dictionary pronunciation of `word` (lowercased), if the shipped CMUdict
+/// subset has it.
+pub fn lexicon_pronounce(word: &str) -> Option<&'static [Phoneme]> {
+    lexicon()
+        .get(word.to_ascii_lowercase().as_str())
+        .map(|v| v.as_slice())
+}
 
 /// The 39 stress-free ARPAbet phonemes (CMUdict inventory).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -289,6 +319,78 @@ pub fn pronounce(word: &str) -> Option<Vec<Phoneme>> {
     pronounce_spanned(word).map(|v| v.into_iter().map(|(p, _)| p).collect())
 }
 
+/// Best available spanned pronunciation: the CMUdict subset entry when the
+/// word has one (its phonemes are the real pronunciation; spans are recovered
+/// by aligning against the rule G2P output), else the rule output as-is.
+/// This is the entry point the seam blender uses.
+pub fn best_spanned(word: &str) -> Option<Vec<SpannedPhoneme>> {
+    let rule = pronounce_spanned(word)?;
+    match lexicon_pronounce(word) {
+        Some(lex) => Some(align_spans(lex, &rule, word.len())),
+        None => Some(rule),
+    }
+}
+
+/// Transfer letter spans from a rule-G2P sequence onto a dictionary phoneme
+/// sequence via minimal-edit alignment. Matched/substituted phonemes take the
+/// rule phoneme's span; inserted ones get an empty span; deleted rule phonemes
+/// merge into their neighbor during the final normalization pass, which keeps
+/// the output a partition of the word (same contract as `pronounce_spanned`).
+fn align_spans(lex: &[Phoneme], rule: &[SpannedPhoneme], len: usize) -> Vec<SpannedPhoneme> {
+    let m = lex.len();
+    let n = rule.len();
+    let mut dp = vec![vec![0u32; n + 1]; m + 1];
+    for (i, row) in dp.iter_mut().enumerate() {
+        row[0] = i as u32;
+    }
+    for j in 0..=n {
+        dp[0][j] = j as u32;
+    }
+    for i in 1..=m {
+        for j in 1..=n {
+            let sub = dp[i - 1][j - 1] + u32::from(lex[i - 1] != rule[j - 1].0);
+            dp[i][j] = sub.min(dp[i - 1][j] + 1).min(dp[i][j - 1] + 1);
+        }
+    }
+    let mut spans: Vec<Option<Range<usize>>> = vec![None; m];
+    let (mut i, mut j) = (m, n);
+    while i > 0 && j > 0 {
+        let sub = dp[i - 1][j - 1] + u32::from(lex[i - 1] != rule[j - 1].0);
+        if dp[i][j] == sub {
+            spans[i - 1] = Some(rule[j - 1].1.clone());
+            i -= 1;
+            j -= 1;
+        } else if dp[i][j] == dp[i - 1][j] + 1 {
+            i -= 1;
+        } else {
+            j -= 1;
+        }
+    }
+    let mut out: Vec<SpannedPhoneme> = Vec::with_capacity(m);
+    let mut cursor = 0usize;
+    for (k, p) in lex.iter().enumerate() {
+        let r = spans[k].clone().unwrap_or(cursor..cursor);
+        let start = r.start.clamp(cursor, len);
+        let end = r.end.clamp(start, len);
+        out.push((*p, start..end));
+        cursor = end;
+    }
+    if let Some(first) = out.first_mut() {
+        first.1.start = 0;
+    }
+    for k in 1..out.len() {
+        let prev_end = out[k - 1].1.end;
+        if out[k].1.start != prev_end {
+            out[k].1.start = prev_end;
+            out[k].1.end = out[k].1.end.max(prev_end);
+        }
+    }
+    if let Some(last) = out.last_mut() {
+        last.1.end = len;
+    }
+    out
+}
+
 /// True if `cluster` is a legal English syllable onset. Singletons always;
 /// two-consonant clusters from the standard table; s+stop+liquid for three.
 pub fn legal_onset(cluster: &[Phoneme]) -> bool {
@@ -489,6 +591,42 @@ mod tests {
         assert_eq!(Phoneme::from_arpabet("AH0"), Some(AH));
         assert_eq!(Phoneme::from_arpabet("K"), Some(K));
         assert_eq!(Phoneme::from_arpabet("ZZZ"), None);
+    }
+
+    #[test]
+    fn lexicon_beats_rules_for_real_words() {
+        // harbor: rules give /HH AE R B AA R/, the dictionary /HH AA R B ER/.
+        let lex = lexicon_pronounce("harbor").unwrap();
+        assert_eq!(lex, &[HH, AA, R, B, ER]);
+        // OOV coined strings fall back to rules.
+        assert!(lexicon_pronounce("zorvex").is_none());
+        assert!(best_spanned("zorvex").is_some());
+    }
+
+    #[test]
+    fn best_spanned_keeps_the_partition_contract() {
+        for word in ["harbor", "lumen", "signal", "atlas", "pulse", "quest", "zorvex"] {
+            let sp = best_spanned(word).unwrap();
+            assert_eq!(sp.first().unwrap().1.start, 0, "{word}");
+            assert_eq!(sp.last().unwrap().1.end, word.len(), "{word}");
+            for pair in sp.windows(2) {
+                assert_eq!(pair[0].1.end, pair[1].1.start, "gap in {word}: {sp:?}");
+            }
+        }
+    }
+
+    #[test]
+    fn aligned_spans_stay_anchored_to_letters() {
+        // pulse /P AH L S/: the L phoneme must map to a span containing 'l'.
+        let sp = best_spanned("pulse").unwrap();
+        let (l_idx, _) = sp
+            .iter()
+            .enumerate()
+            .find(|(_, (p, _))| *p == L)
+            .map(|(i, sp)| (i, sp))
+            .unwrap();
+        let range = sp[l_idx].1.clone();
+        assert!("pulse"[range].contains('l'), "{sp:?}");
     }
 
     #[test]
