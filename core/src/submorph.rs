@@ -103,18 +103,25 @@ pub struct SubmorphDecode {
 }
 
 /// Light inflection strip so `verify` matches field words `verified`,
-/// `verifies`; `deploy` matches `deploys`.
-fn norm(w: &str) -> String {
+/// `verifies`; `deploy` matches `deploys`. Shared with the reason family.
+pub(crate) fn norm(w: &str) -> String {
     if let Some(stem) = w.strip_suffix("ies") {
         if stem.len() >= 3 {
             return format!("{stem}y");
         }
     }
-    for suf in ["ing", "ed", "es", "er", "s"] {
+    // Multi-letter suffixes need a stem of >=4 so "speed" doesn't become "spe";
+    // the plain plural strip is safe at >=3 ("apps" -> "app").
+    for suf in ["ing", "ed", "es", "er"] {
         if let Some(stem) = w.strip_suffix(suf) {
-            if stem.len() >= 3 {
+            if stem.len() >= 4 {
                 return stem.to_string();
             }
+        }
+    }
+    if let Some(stem) = w.strip_suffix('s') {
+        if stem.len() >= 3 {
+            return stem.to_string();
         }
     }
     w.to_string()

@@ -1,0 +1,202 @@
+﻿# Story knowledge base (Phase 143, reason family). Curated by hand — this file
+# IS the engine's world knowledge; every naming chain ends at one of these.
+# Columns: name <TAB> kind <TAB> origin <TAB> gloss <TAB> tags(comma) <TAB> spice(0-1)
+# kind: myth | foreign | craft | nautical | astro | nature | literary
+# tags are lowercase concepts the activation map can hit (mundane or imagery).
+# spice: 0 = familiar/safe, 1 = exotic/bold — the Wild register prefers high.
+Mimir	myth	Norse	well that holds all memory and wisdom	memory,wisdom,knowledge,archive,recall,note	0.5
+Fylgja	myth	Norse	spirit that quietly follows a person	follow,state,companion,track,shadow,sync	0.9
+Huginn	myth	Norse	Odin's raven Thought, flying the world	thought,observe,scout,message,watch,mind	0.6
+Muninn	myth	Norse	Odin's raven Memory, flying the world	memory,observe,recall,note,archive	0.6
+Heimdall	myth	Norse	ever-watchful guardian of the gate	watch,guard,gate,alert,monitor,log	0.4
+Bifrost	myth	Norse	rainbow bridge between worlds	bridge,connect,link,gateway,transfer	0.5
+Yggdrasil	myth	Norse	world tree binding the nine realms	tree,structure,root,connect,graph,world	0.7
+Norn	myth	Norse	weaver of every fate thread	weave,thread,fate,schedule,pipeline	0.6
+Skald	myth	Norse	court poet who keeps the sagas	write,story,record,docs,verse	0.6
+Kenning	literary	Norse	two-word poetic riddle-name	name,word,language,compose,riddle	0.8
+Saga	literary	Norse	long told history of deeds	story,history,record,log,journal	0.2
+Runa	foreign	Old Norse	secret lore; a rune	secret,symbol,code,cipher,letter	0.5
+Seidr	myth	Norse	weaving magic that reads fate	weave,predict,magic,analyze	1.0
+Valka	myth	Norse	chooser of the worthy (valkyrie root)	choose,select,filter,curate	0.8
+Argus	myth	Greek	hundred-eyed watchman who never sleeps	watch,monitor,log,observe,alert,guard	0.3
+Talos	myth	Greek	bronze automaton guarding the island	automation,robot,guard,build,patrol	0.5
+Daedal	myth	Greek	of Daedalus, the master builder	build,craft,invent,architect,maze	0.8
+Ariadne	myth	Greek	her thread leads out of the labyrinth	thread,navigate,guide,debug,trace,path	0.5
+Charon	myth	Greek	ferryman across the river	transfer,move,migrate,ship,carry	0.5
+Hermes	myth	Greek	swift messenger between worlds	message,fast,deliver,notify,queue	0.2
+Iris	myth	Greek	rainbow messenger of the gods	message,color,notify,bridge	0.2
+Mnemos	myth	Greek	from Mnemosyne, memory herself	memory,note,recall,archive,cache	0.7
+Lethe	myth	Greek	river of forgetting	forget,clear,clean,delete,reset	0.7
+Kairos	foreign	Greek	the exactly right moment	time,timing,moment,schedule,cron	0.6
+Chronos	myth	Greek	time itself personified	time,clock,schedule,history	0.3
+Aegis	myth	Greek	the protecting shield of Zeus	protect,shield,secure,guard,auth	0.3
+Helios	myth	Greek	the sun who sees everything	sun,light,observe,energy,day	0.3
+Eos	myth	Greek	dawn who begins every day	dawn,start,begin,fresh,daily	0.5
+Boreas	myth	Greek	the north wind	wind,fast,cold,force,stream	0.6
+Zephyr	myth	Greek	the gentle west wind	wind,fast,light,gentle,breeze	0.3
+Orpheus	myth	Greek	music that moves stones	music,sound,audio,charm,play	0.4
+Kalliope	myth	Greek	muse of the beautiful voice	voice,music,write,epic,audio	0.6
+Atlas	myth	Greek	carries the world on his shoulders	carry,map,world,hold,support	0.1
+Pharos	craft	Greek	the great lighthouse of Alexandria	lighthouse,guide,beacon,log,navigate,signal	0.6
+Agora	foreign	Greek	the open market and meeting square	market,gather,community,forum,trade	0.4
+Krypta	foreign	Greek	hidden vaulted chamber	hidden,secret,vault,crypto,store	0.7
+Lexis	foreign	Greek	word; way of speaking	word,language,name,dictionary,text	0.5
+Techne	foreign	Greek	art, craft, skill	craft,skill,build,tool,art	0.7
+Ostraka	craft	Greek	pottery shards used as ballots and notes	vote,note,fragment,record	1.0
+Janus	myth	Roman	two faces watching door and passage	gate,door,transition,migrate,proxy,version	0.4
+Vesta	myth	Roman	keeper of the hearth fire	keep,home,warm,constant,uptime	0.4
+Terminus	myth	Roman	god of the boundary stone	boundary,limit,end,edge,border	0.5
+Fortuna	myth	Roman	fortune who turns the wheel	luck,chance,random,fortune	0.3
+Lumen	foreign	Latin	a measure of light	light,bright,clear,lamp	0.2
+Nexus	foreign	Latin	the binding knot	connect,link,join,hub	0.1
+Verax	foreign	Latin	truth-telling	true,verify,honest,check,validate	0.7
+Celer	foreign	Latin	swift	fast,speed,quick,performance	0.7
+Custos	foreign	Latin	the guardian	guard,protect,secure,watch,keep	0.7
+Arcanum	foreign	Latin	the sealed secret	secret,hidden,vault,password,mystery	0.6
+Codex	craft	Latin	the first bound book	book,record,document,rules,archive	0.2
+Scriba	craft	Latin	the scribe who writes it down	write,record,note,document,log	0.7
+Fabrica	craft	Latin	the workshop where things are made	build,workshop,make,factory,forge	0.5
+Silva	foreign	Latin	the forest	forest,tree,nature,collection,graph	0.5
+Stella	foreign	Latin	star	star,light,guide,shine	0.2
+Vela	nautical	Latin	the sails	sail,speed,travel,ship,deploy	0.4
+Ancora	nautical	Latin	the anchor	anchor,stable,hold,state,fix	0.6
+Portus	nautical	Latin	safe harbor	harbor,port,safe,deploy,host	0.6
+Insula	foreign	Latin	island; an apartment block of old Rome	island,isolate,module,container	0.7
+Kilit	foreign	Turkish	the lock	lock,secure,password,key,protect	0.8
+Koru	foreign	Turkish	to protect; a sheltered grove	protect,guard,grove,shelter,backup	0.8
+Yol	foreign	Turkish	the road ahead	road,path,route,navigate,journey	0.8
+Birlik	foreign	Turkish	unity, acting as one	unity,together,collaborate,team,merge	0.9
+Demir	foreign	Turkish	iron; an anchor	iron,strong,anchor,solid,stable	0.8
+Kule	foreign	Turkish	the tower	tower,watch,tall,monitor,overview	0.8
+Kaynak	foreign	Turkish	the source; a spring	source,origin,spring,data,root	0.9
+Pusula	foreign	Turkish	the compass	compass,navigate,direction,guide	0.9
+Kervan	foreign	Turkish	the caravan moving goods	caravan,transport,batch,queue,pipeline	0.8
+Liman	foreign	Turkish	the harbor	harbor,port,safe,deploy,host	0.8
+Anka	myth	Turkish	the phoenix of Anatolia	phoenix,rebirth,restart,resilient,recover	0.8
+Kura	foreign	Japanese	storehouse for treasures	store,archive,treasure,package,registry	0.7
+Torii	craft	Japanese	gate between mundane and sacred	gate,entrance,auth,threshold,api	0.5
+Kaizen	foreign	Japanese	continuous small improvement	improve,iterate,optimize,refactor	0.3
+Ma	foreign	Japanese	the meaningful pause between things	space,pause,minimal,silence,gap	1.0
+Kintsugi	craft	Japanese	mending cracks with gold	repair,fix,merge,heal,patch	0.4
+Hikari	foreign	Japanese	light	light,bright,fast,shine	0.6
+Kompas	foreign	Dutch	the compass	compass,navigate,direction,course	0.7
+Fjord	nature	Norse	deep carved sea valley	deep,water,channel,stream,inlet	0.4
+Skerry	nautical	Norse	small rocky isle sailors mark	island,marker,waypoint,small,rock	0.9
+Kedge	nautical	English	small anchor used to maneuver	anchor,maneuver,adjust,state,position	0.8
+Portolan	nautical	Italian	harbor-to-harbor navigation chart	map,navigate,chart,route,log	0.9
+Sextant	nautical	English	instrument that fixes your position	measure,navigate,position,locate,precision	0.4
+Ballast	nautical	English	weight that keeps the ship steady	stable,balance,steady,foundation	0.4
+Moor	nautical	English	to make fast to a fixed point	fix,attach,bind,deploy,stable	0.5
+Bosun	nautical	English	keeper of the ship's gear	manage,maintain,crew,operations	0.7
+Galley	nautical	English	the working kitchen of a ship	work,kitchen,prepare,build	0.4
+Sonar	craft	English	finding shape by sound	sound,find,search,detect,scan	0.2
+Beacon	craft	English	fire on a hill that signals	signal,alert,guide,notify,light	0.1
+Forge	craft	English	where metal becomes tools	build,make,create,tool,fire	0.1
+Anvil	craft	English	the surface that takes every blow	build,solid,foundation,strong	0.2
+Loom	craft	English	frame where threads become cloth	weave,thread,combine,build,pattern	0.2
+Quill	craft	English	the writing feather	write,note,document,pen,text	0.2
+Vellum	craft	English	parchment made to last centuries	document,durable,record,page,archive	0.3
+Atelier	craft	French	the artist's workshop	workshop,create,design,studio,craft	0.3
+Donjon	craft	French	innermost keep of the castle	keep,vault,secure,protect,core	0.7
+Bastion	craft	French	the strongest point of the wall	defend,strong,secure,fortress	0.3
+Cache	craft	French	a hidden store of supplies	store,hidden,fast,memory,stash	0.1
+Depot	craft	French	where goods wait, organized	store,warehouse,registry,package	0.2
+Relais	craft	French	post house where fresh horses wait	relay,pass,forward,proxy,queue	0.8
+Grimoire	literary	French	book of working spells	book,magic,recipes,scripts,commands	0.5
+Alembic	craft	alchemy	vessel that distills the essence	distill,refine,extract,transform,pure	0.6
+Athanor	craft	alchemy	furnace of slow constant heat	constant,heat,build,patient,uptime	0.9
+Azoth	craft	alchemy	the universal solvent	universal,solve,transform,essence	1.0
+Tincture	craft	alchemy	essence drawn into liquid	extract,essence,color,distill	0.6
+Zenith	astro	Arabic	the point straight overhead	top,peak,high,best,summit	0.2
+Nadir	astro	Arabic	the point straight below	bottom,low,depth,base	0.4
+Azimut	astro	Arabic	the bearing toward a target	direction,bearing,aim,navigate	0.8
+Altair	astro	Arabic	the flying eagle star	star,fast,flight,bright	0.4
+Vega	astro	Arabic	the swooping eagle star	star,bright,fall,swift	0.2
+Rigel	astro	Arabic	the giant's blazing foot	star,bright,giant,power	0.4
+Deneb	astro	Arabic	the swan's tail star	star,tail,bright,end	0.7
+Sirius	astro	Greek	the brightest star, the scorcher	star,bright,serious,intense	0.2
+Polaris	astro	Latin	the star that never moves	north,constant,guide,fixed,reliable	0.2
+Umbra	astro	Latin	the deep core of a shadow	shadow,dark,hidden,eclipse	0.4
+Corona	astro	Latin	the crown of light around the sun	crown,light,ring,edge	0.3
+Quasar	astro	English	impossibly bright distant engine	bright,power,distant,energy,extreme	0.4
+Parsec	astro	English	the astronomer's long measure	measure,distance,scale,huge	0.4
+Syzygy	astro	Greek	three bodies in perfect line	align,order,sync,rare,line	1.0
+Petrichor	nature	Greek	the smell of rain on dry earth	rain,fresh,earth,after,renewal	0.5
+Aurora	nature	Latin	dawn light across the sky	dawn,light,color,north,display	0.2
+Halcyon	myth	Greek	the kingfisher's calm seas	calm,peace,golden,stable,serene	0.4
+Meander	nature	Anatolian	the river that curves like thought	river,curve,flow,wander,stream	0.4
+Tuvana	foreign	Turkish	bright and wise	bright,wise,clear,smart	1.0
+Sarnic	craft	Turkish	underground water cistern (sarnıç)	store,water,underground,reserve,cache	1.0
+Cesme	craft	Turkish	the public fountain (çeşme)	fountain,source,share,public,flow	0.9
+Bedesten	craft	Turkish	the covered market's secure heart	market,secure,trade,vault,center	1.0
+Divit	craft	Turkish	the scribe's portable pen case	write,portable,pen,tool,note	1.0
+Mihenk	craft	Turkish	the touchstone that tests gold	test,verify,standard,benchmark,assay	1.0
+Terkip	foreign	Turkish	composition; putting parts together	compose,combine,build,mix,synthesis	1.0
+Nazar	foreign	Turkish	the watching eye that protects	watch,protect,eye,guard,charm	0.7
+Ledger	craft	English	the book where every entry stays	record,account,money,log,history	0.1
+Skein	craft	English	yarn wound loosely for use	thread,yarn,bundle,collect,weave	0.5
+Gnomon	craft	Greek	the sundial's shadow-caster that tells time	time,shadow,measure,indicator	0.9
+Astrolab	craft	Greek	instrument that solves the sky	navigate,compute,sky,instrument,solve	0.8
+Orrery	craft	English	clockwork model of the planets	model,system,simulate,orbit,clockwork	0.9
+Verdigris	nature	French	the green of aged copper	green,age,patina,color,time	0.8
+Argot	literary	French	the private language of a group	language,private,slang,code,group	0.8
+Palimpsest	literary	Greek	page written over but history shows	history,layers,rewrite,versions,trace	0.6
+Marginalia	literary	Latin	notes living in the margins	note,annotate,comment,margin,docs	0.6
+Colophon	literary	Greek	the maker's mark at the book's end	mark,signature,end,credit,meta	0.8
+Incipit	literary	Latin	the opening words of a text	begin,start,open,first,intro	0.9
+Lacuna	literary	Latin	the meaningful gap in a manuscript	gap,missing,space,todo,blank	0.6
+Solfege	craft	Italian	the syllables that teach melody	music,learn,scale,notes,teach	0.6
+Tessitura	craft	Italian	the range where a voice lives best	range,voice,music,comfort,fit	0.9
+Intarsia	craft	Italian	pictures inlaid from wood pieces	inlay,compose,pattern,pieces,design	0.9
+Bottega	craft	Italian	the master's workshop of apprentices	workshop,learn,craft,studio,team	0.7
+Regatta	nautical	Italian	the race of many boats together	race,speed,compete,together,fleet	0.4
+Fresco	craft	Italian	painting into wet plaster, no undo	paint,permanent,art,commit,bold	0.3
+Staccato	craft	Italian	notes cut short and crisp	short,crisp,fast,rhythm,burst	0.4
+Legato	craft	Italian	notes bound smoothly together	smooth,connect,flow,bind,music	0.5
+Presto	foreign	Italian	very fast	fast,quick,speed,instant	0.2
+Volta	literary	Italian	the turn where the poem changes	turn,change,pivot,transform,moment	0.4
+Duende	foreign	Spanish	the dark thrill great art gives	art,soul,thrill,magic,passion	0.7
+Querencia	foreign	Spanish	the place where you are strongest	home,safe,strength,base,refuge	1.0
+Saudade	foreign	Portuguese	longing for what is absent	longing,memory,absent,past	0.7
+Farol	nautical	Portuguese	the lighthouse	lighthouse,guide,signal,beacon,log	0.9
+Hanse	craft	German	the merchant cities' trading league	trade,league,network,market,alliance	0.8
+Wander	foreign	German	to roam with purpose (wandern)	roam,explore,walk,journey,browse	0.3
+Gestalt	foreign	German	the whole greater than parts	whole,pattern,perceive,structure,sum	0.4
+Zeitgeist	foreign	German	the spirit of the moment	trend,time,spirit,current,now	0.4
+Fernweh	foreign	German	ache for far places	travel,far,longing,explore	0.9
+Sisu	foreign	Finnish	grit that outlasts the storm	grit,persist,endure,resilient,tough	0.5
+Rune	craft	Norse	letter carved to last	letter,carve,symbol,code,durable	0.3
+Glyph	craft	Greek	the carved sign	symbol,sign,character,icon,font	0.2
+Sigil	craft	Latin	a sign with intent sealed in	symbol,seal,intent,mark,magic	0.5
+Umbral	astro	Latin	of the shadow's core	shadow,dark,edge,threshold	0.7
+Cairn	craft	Gaelic	stones stacked to mark the way	marker,path,waypoint,stack,trail	0.4
+Bothy	craft	Scottish	open shelter for any traveler	shelter,open,rest,free,refuge	0.9
+Clachan	craft	Gaelic	the small stone village	village,small,community,cluster	1.0
+Coracle	nautical	Welsh	the one-person round boat	small,boat,solo,light,agile	0.9
+Eisteddfod	craft	Welsh	the gathering of poets competing	gather,compete,poetry,festival	1.0
+Amber	nature	Arabic	resin that preserves time	preserve,freeze,snapshot,golden,capture	0.2
+Basalt	nature	Latin	stone born of cooled fire	stone,solid,volcanic,foundation,dark	0.4
+Geode	nature	Greek	plain rock, crystal heart	hidden,crystal,inside,surprise,beauty	0.4
+Strata	nature	Latin	layers laid down in order	layers,order,history,stack,geology	0.3
+Delta	nature	Greek	where the river fans and deposits	river,change,diff,branch,mouth	0.2
+Riffle	nature	English	shallow fast water over stones	fast,shallow,water,shuffle,quick	0.6
+Eddy	nature	English	the current that circles back	loop,circle,current,cycle	0.3
+Tarn	nature	Norse	small mountain lake, very clear	clear,small,lake,pure,still	0.7
+Karst	nature	German	limestone carved into caves	carve,cave,hidden,network,erode	0.7
+Sylvan	nature	Latin	of the deep woods	forest,green,wood,natural	0.4
+Arbor	nature	Latin	the tree; the shaded walk	tree,branch,structure,shade	0.3
+Bower	nature	English	shelter woven from living branches	shelter,woven,nest,home,green	0.5
+Warren	nature	English	the rabbits' connected tunnels	tunnels,network,connected,maze,busy	0.3
+Apiary	craft	Latin	where the hives are kept	bees,hive,organize,collect,busy	0.6
+Dovecote	craft	English	home the messengers return to	message,return,home,pigeon,inbox	0.8
+Falconer	craft	English	one who flies the swift hunter	fast,precise,command,hunt,control	0.4
+Meridian	astro	Latin	the line of highest sun	line,peak,noon,reference,map	0.2
+Tropic	astro	Greek	the turning line of the sun	turn,line,boundary,warm	0.4
+Solstice	astro	Latin	the day the sun stands still	moment,extreme,turn,season,still	0.3
+Equinox	astro	Latin	day and night in balance	balance,equal,moment,fair	0.3
+Aphelion	astro	Greek	the orbit's farthest point	far,orbit,extreme,distance	0.8
+Lagrange	astro	French	the point where forces balance	balance,stable,point,orbit,physics	0.5
+Pulsar	astro	English	the star that keeps perfect time	pulse,regular,signal,timing,beacon	0.3
+Nebula	astro	Latin	the cloud where stars are born	cloud,birth,create,form,cosmic	0.2
+Comet	astro	Greek	the long-haired wanderer	fast,visitor,trail,bright,rare	0.2
+Borealis	astro	Latin	of the north wind's light	north,light,display,cold,aurora	0.4

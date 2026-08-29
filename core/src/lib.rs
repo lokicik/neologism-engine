@@ -9,6 +9,7 @@ pub mod metrics;
 pub mod morphemes;
 pub mod phonemes;
 pub mod phonology;
+pub mod reason;
 pub mod phonotactics;
 pub mod score;
 pub mod seamblend;
@@ -364,6 +365,7 @@ pub fn generate_with_tuning(cfg: &Config, tuning: &BigTechTuning) -> Vec<NameRes
             Some("seamblend") => return seamblend::generate_seamblend(cfg, dict, seed),
             Some("morpheme") => return morphemes::generate_morpheme(cfg, dict, seed),
             Some("submorph") => return submorph::generate_submorph(cfg, dict, seed),
+            Some("reason") => return reason::generate_reason(cfg, dict, seed),
             _ => {}
         }
     }
