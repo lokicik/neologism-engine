@@ -71,6 +71,20 @@ HAND_ROWS = [
     ("vig", "H", "vigilant:0.80,vigor:0.70", "vigilant · vigor"),
     ("vol", "H", "volume:0.75,evolve:0.60", "volume · evolve"),
     ("zen", "H", "zen:0.85,zenith:0.75", "calm · zenith"),
+    # Wild-register bouncy tails (Tabalong class): two-syllable phrase-words.
+    # In normal mode the seamlessness rules reject them (they are common
+    # words); the engine's wild mode relaxes those rules, so these only ever
+    # surface when the user asks for Wild creativity.
+    ("along", "T", "along:0.80", "tag along"),
+    ("away", "T", "away:0.80", "up and away"),
+    ("aloft", "T", "aloft:0.75", "held high"),
+    ("ahead", "T", "ahead:0.80", "out in front"),
+    ("aglow", "T", "aglow:0.80", "glowing"),
+    ("adrift", "T", "adrift:0.70", "set loose"),
+    ("afloat", "T", "afloat:0.75", "buoyant"),
+    ("awake", "T", "awake:0.80", "wide awake"),
+    ("arise", "T", "arise:0.75", "rising"),
+    ("amigo", "T", "amigo:0.70", "friend"),
 ]
 
 

@@ -204,8 +204,21 @@ fn fuse(h: &Fragment, t: &Fragment) -> Option<(String, &'static str, Vec<Phoneme
     Some((format!("{}{}", h.letters, t.letters), "direct", skel))
 }
 
+/// True when a fragment carries a "spicy" letter — the rare-consonant zing of
+/// Zapier/Kazoo-class names. Wild mode rewards these.
+fn spicy(letters: &str) -> bool {
+    letters.chars().any(|c| matches!(c, 'z' | 'j' | 'k' | 'w' | 'x'))
+}
+
+/// The bouncy A-phrase tail class (along, aglow, adrift…) that builds
+/// Tabalong-shaped trisyllables. Wild-only — the default register's
+/// seamlessness rules reject these visible words by design.
+fn is_bouncy_tail(letters: &str) -> bool {
+    letters.len() >= 4 && letters.starts_with('a')
+}
+
 /// Structure checks on the fused string, as a reader would sound it.
-fn passes_structure(fused: &str, t: &Fragment, expected_skel: &[Phoneme]) -> bool {
+fn passes_structure(fused: &str, t: &Fragment, expected_skel: &[Phoneme], wild: bool) -> bool {
     let Some(ph) = pronounce(fused) else {
         return false;
     };
@@ -218,7 +231,9 @@ fn passes_structure(fused: &str, t: &Fragment, expected_skel: &[Phoneme]) -> boo
         return false;
     }
     let syls = syllabify(&ph);
-    let trisyl_ok = t.quality && TRISYL_TAILS.contains(&t.letters.as_str());
+    // Wild mode opens the bouncy trisyllabic register (Tabalong class) for any
+    // tail; the default register keeps the tight 2-syllable Vercel shape.
+    let trisyl_ok = wild || (t.quality && TRISYL_TAILS.contains(&t.letters.as_str()));
     match syls.len() {
         2 => {}
         3 if trisyl_ok => {}
@@ -294,15 +309,32 @@ pub fn generate_submorph_explained(cfg: &Config, seed: u64) -> (Vec<NameResult>,
     // rel = the fragment's strongest association. Vercel itself needs no brief
     // — verify+excel is simply two strong syllables.
     let no_brief = field.is_empty();
+    // The Creativity chip's Wild setting (temperature >= 1.0) switches the
+    // family into its playful register: bouncy trisyllables, relaxed
+    // visible-word rules, and a bonus for spicy letters.
+    let wild = cfg.temperature >= 1.0;
+    let bar = if wild { 0.45 } else { 0.6 };
+    let quality_score = |f: &Fragment| {
+        let top = f.assocs.first().map(|(_, s)| *s).unwrap_or(0.0);
+        let spice = if wild && spicy(&f.letters) { 0.15 } else { 0.0 };
+        if top >= bar {
+            (top + spice).min(1.0)
+        } else {
+            0.0
+        }
+    };
     let mut heads: Vec<(&Fragment, f64, Vec<String>)> = Vec::new();
     let mut tails: Vec<(&Fragment, f64, Vec<String>)> = Vec::new();
     for f in inv {
         if f.head && !f.quality {
             let (rel, hits) = if no_brief {
-                let top = f.assocs.first().map(|(_, s)| *s).unwrap_or(0.0);
-                (if top >= 0.6 { top } else { 0.0 }, Vec::new())
+                (quality_score(f), Vec::new())
             } else {
-                relevance(f, &field)
+                let (mut r, h) = relevance(f, &field);
+                if wild && r > 0.05 && spicy(&f.letters) {
+                    r = (r + 0.15).min(1.0);
+                }
+                (r, h)
             };
             if rel > 0.05 {
                 heads.push((f, rel, hits));
@@ -313,10 +345,13 @@ pub fn generate_submorph_explained(cfg: &Config, seed: u64) -> (Vec<NameResult>,
                 tails.push((f, 0.0, Vec::new()));
             } else {
                 let (rel, hits) = if no_brief {
-                    let top = f.assocs.first().map(|(_, s)| *s).unwrap_or(0.0);
-                    (if top >= 0.6 { top } else { 0.0 }, Vec::new())
+                    (quality_score(f), Vec::new())
                 } else {
-                    relevance(f, &field)
+                    let (mut r, h) = relevance(f, &field);
+                    if wild && r > 0.05 && spicy(&f.letters) {
+                        r = (r + 0.15).min(1.0);
+                    }
+                    (r, h)
                 };
                 if rel > 0.05 {
                     tails.push((f, rel, hits));
@@ -341,6 +376,22 @@ pub fn generate_submorph_explained(cfg: &Config, seed: u64) -> (Vec<NameResult>,
     }
     heads.truncate(40);
     tails.truncate(60);
+    if wild {
+        // The bouncy A-phrase tails are the wild register's signature; seed
+        // rotation must never spin them out of the admission window.
+        for f in inv {
+            if f.tail
+                && !f.quality
+                && is_bouncy_tail(&f.letters)
+                && !tails.iter().any(|(t, _, _)| t.letters == f.letters)
+            {
+                let top = f.assocs.first().map(|(_, s)| *s).unwrap_or(0.0);
+                if top >= bar {
+                    tails.push((f, top, Vec::new()));
+                }
+            }
+        }
+    }
 
     // Enumerate round-robin by head so dedup never biases one head family.
     let mut pool: Vec<(String, f64)> = Vec::new();
@@ -360,10 +411,13 @@ pub fn generate_submorph_explained(cfg: &Config, seed: u64) -> (Vec<NameResult>,
             // The seam sits at the end of the head's letters (overlap keeps
             // one shared copy inside the head's span).
             let seam = h.letters.len().min(fused.len());
-            if !passes_structure(&fused, t, &expected_skel) {
+            if !passes_structure(&fused, t, &expected_skel, wild) {
                 continue;
             }
-            if !is_seamless(&fused, &h.letters, &t.letters, seam, &st.common_words) {
+            // Wild mode keeps only the phoneme-level reparse guard (S4, inside
+            // passes_structure): the visible-word rules are exactly what a
+            // Tabalong-class pun needs to break. Default mode keeps them all.
+            if !wild && !is_seamless(&fused, &h.letters, &t.letters, seam, &st.common_words) {
                 continue;
             }
             if !family::passes_name_filters(&fused, cfg, dict, st, &exclude) {
@@ -376,9 +430,13 @@ pub fn generate_submorph_explained(cfg: &Config, seed: u64) -> (Vec<NameResult>,
             };
             let trisyl = t.quality && TRISYL_TAILS.contains(&t.letters.as_str());
             let overlap_bonus = if junction == "overlap" { 0.25 } else { 0.0 };
-            let bonus = (0.45 * rel_h + 0.45 * rel_tail_eff + overlap_bonus
-                - if trisyl { 0.35 } else { 0.0 })
-            .clamp(0.0, 1.4);
+            // Wild mode does not tax the third syllable — the bounce is the point —
+            // and actively rewards the bouncy A-phrase tails (Tabalong class).
+            let trisyl_penalty = if trisyl && !wild { 0.35 } else { 0.0 };
+            let bounce_bonus = if wild && is_bouncy_tail(&t.letters) { 0.45 } else { 0.0 };
+            let bonus =
+                (0.45 * rel_h + 0.45 * rel_tail_eff + overlap_bonus + bounce_bonus - trisyl_penalty)
+                    .clamp(0.0, 1.4);
             decodes.insert(
                 fused.clone(),
                 SubmorphDecode {
@@ -401,8 +459,11 @@ pub fn generate_submorph_explained(cfg: &Config, seed: u64) -> (Vec<NameResult>,
     // page-shape caps greedily (tail ≤2, final-letter class ≤3, trisyl ≤3,
     // quality-tail ≤4 per 10 — scaled to the requested count).
     let mut wide = cfg.clone();
-    wide.count = cfg.count * 2;
-    let ranked = family::rank_select(&pool, &wide, seed, SUBMORPH_STREAM);
+    wide.count = cfg.count * if wild { 3 } else { 2 };
+    // Wild discounts the brand-canon conformity prior — wildness IS deviation
+    // from the canon, so the canon must not be allowed to veto it.
+    let ll_scale = if wild { 0.35 } else { 1.0 };
+    let ranked = family::rank_select_scaled(&pool, &wide, seed, SUBMORPH_STREAM, ll_scale);
     let scale = (cfg.count as f64 / 10.0).max(0.5);
     let cap_tail = ((2.0 * scale).ceil() as usize).max(1);
     let cap_class = ((3.0 * scale).ceil() as usize).max(1);
@@ -416,40 +477,60 @@ pub fn generate_submorph_explained(cfg: &Config, seed: u64) -> (Vec<NameResult>,
     let mut qual_n = 0usize;
     let mut out: Vec<NameResult> = Vec::new();
     let mut out_decodes: Vec<SubmorphDecode> = Vec::new();
-    for r in ranked {
-        if out.len() >= cfg.count {
-            break;
-        }
-        let lower = r.name.to_lowercase();
-        let Some(d) = decodes.get(&lower) else { continue };
-        let last = lower.chars().last().unwrap_or('x');
-        let trisyl = TRISYL_TAILS.contains(&d.tail.as_str()) && d.tail_quality;
-        if head_n.get(&d.head).copied().unwrap_or(0) >= cap_head {
+    let mut taken: HashSet<String> = HashSet::new();
+    // Wild pages reserve slots for the bouncy Tabalong register up front —
+    // otherwise the 2-syllable canon shapes always out-rank them.
+    let bounce_quota = if wild { (cfg.count / 3).max(2) } else { 0 };
+    for want_bouncy in [true, false] {
+        if want_bouncy && bounce_quota == 0 {
             continue;
         }
-        if tail_n.get(&d.tail).copied().unwrap_or(0) >= cap_tail {
-            continue;
+        for r in &ranked {
+            if out.len() >= cfg.count {
+                break;
+            }
+            let lower = r.name.to_lowercase();
+            if taken.contains(&lower) {
+                continue;
+            }
+            let Some(d) = decodes.get(&lower) else { continue };
+            let bouncy = is_bouncy_tail(&d.tail);
+            if want_bouncy {
+                let bouncy_taken = out_decodes.iter().filter(|x| is_bouncy_tail(&x.tail)).count();
+                if !bouncy || bouncy_taken >= bounce_quota {
+                    continue;
+                }
+            }
+            let last = lower.chars().last().unwrap_or('x');
+            let trisyl = TRISYL_TAILS.contains(&d.tail.as_str()) && d.tail_quality;
+            if head_n.get(&d.head).copied().unwrap_or(0) >= cap_head {
+                continue;
+            }
+            if tail_n.get(&d.tail).copied().unwrap_or(0) >= cap_tail {
+                continue;
+            }
+            if class_n.get(&last).copied().unwrap_or(0) >= cap_class {
+                continue;
+            }
+            if trisyl && tri_n >= cap_tri {
+                continue;
+            }
+            if d.tail_quality && qual_n >= cap_quality {
+                continue;
+            }
+            taken.insert(lower);
+            *head_n.entry(d.head.clone()).or_default() += 1;
+            *tail_n.entry(d.tail.clone()).or_default() += 1;
+            *class_n.entry(last).or_default() += 1;
+            if trisyl {
+                tri_n += 1;
+            }
+            if d.tail_quality {
+                qual_n += 1;
+            }
+            out_decodes.push(d.clone());
+            out.push(r.clone());
         }
-        if class_n.get(&last).copied().unwrap_or(0) >= cap_class {
-            continue;
-        }
-        if trisyl && tri_n >= cap_tri {
-            continue;
-        }
-        if d.tail_quality && qual_n >= cap_quality {
-            continue;
-        }
-        *head_n.entry(d.head.clone()).or_default() += 1;
-        *tail_n.entry(d.tail.clone()).or_default() += 1;
-        *class_n.entry(last).or_default() += 1;
-        if trisyl {
-            tri_n += 1;
-        }
-        if d.tail_quality {
-            qual_n += 1;
-        }
-        out_decodes.push(d.clone());
-        out.push(r);
     }
     (out, out_decodes)
 }

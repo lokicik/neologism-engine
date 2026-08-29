@@ -1,12 +1,22 @@
 # Submorpheme inventory (Phase 142). Curated from research/submorph/draft.tsv
 # by research/submorph/curate.py; hand rows appended. Schema:
 # fragment	position	class	canon_weight	associations	gloss
+adrift	T	meaning	0.00	adrift:0.70	set loose
+afloat	T	meaning	0.00	afloat:0.75	buoyant
+aglow	T	meaning	0.00	aglow:0.80	glowing
+ahead	T	meaning	0.00	ahead:0.80	out in front
 ain	T	meaning	0.00	moraine:0.69	moraine
 aine	T	meaning	0.00	moraine:0.69	moraine
+aloft	T	meaning	0.00	aloft:0.75	held high
+along	T	meaning	0.00	along:0.80	tag along
+amigo	T	meaning	0.00	amigo:0.70	friend
 ant	T	meaning	0.00	giant:0.74	giant
 arc	H	meaning	0.00	arctic:0.75	arctic
+arise	T	meaning	0.00	arise:0.75	rising
 art	H	meaning	0.00	artful:0.75	artful
 aur	H	meaning	0.00	aura:0.80,aurora:0.75	aura · aurora
+awake	T	meaning	0.00	awake:0.80	wide awake
+away	T	meaning	0.00	away:0.80	up and away
 bal	T	meaning	0.00	global:0.69,football:0.69	global · football
 balt	T	meaning	0.00	cobalt:0.77	cobalt
 ban	T	meaning	0.00	urban:0.81	urban

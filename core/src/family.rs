@@ -99,6 +99,20 @@ pub(crate) fn rank_select(
     seed: u64,
     stream: u64,
 ) -> Vec<NameResult> {
+    rank_select_scaled(pool, cfg, seed, stream, 1.0)
+}
+
+/// `rank_select` with an explicit weight on the brand-canon log-likelihood
+/// term. The canon LL is a *conformity* prior — exactly what a family's wild
+/// register wants to discount (submorph passes ~0.35 there), while the default
+/// register keeps full weight. Existing callers are unchanged via the wrapper.
+pub(crate) fn rank_select_scaled(
+    pool: &[(String, f64)],
+    cfg: &Config,
+    seed: u64,
+    stream: u64,
+    ll_scale: f64,
+) -> Vec<NameResult> {
     use rand::SeedableRng;
     if pool.is_empty() {
         return Vec::new();
@@ -131,7 +145,8 @@ pub(crate) fn rank_select(
                 4 | 9 => 0.15,
                 _ => 0.0,
             };
-            let rank = z + bonus + syl_score + len_score + rank_jitter(lower, salt) * jitter_w;
+            let rank =
+                z * ll_scale + bonus + syl_score + len_score + rank_jitter(lower, salt) * jitter_w;
             (rank, to_result(lower))
         })
         .collect();

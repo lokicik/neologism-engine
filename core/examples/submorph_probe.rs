@@ -80,4 +80,24 @@ fn main() {
                 .join(", ")
         );
     }
+    // Wild register (Creativity → Wild): bouncy, spicy, pun-tolerant.
+    for seed in [1u64, 2, 3] {
+        let cfg = Config {
+            style: Style::BigTech,
+            variant: Some("submorph".to_string()),
+            seed: Some(seed),
+            count: 10,
+            temperature: 1.2,
+            ..Config::default()
+        };
+        let (_, decodes) = generate_submorph_explained(&cfg, seed);
+        println!(
+            "(WILD, seed {seed}) {}",
+            decodes
+                .iter()
+                .map(|d| d.name.clone())
+                .collect::<Vec<_>>()
+                .join(", ")
+        );
+    }
 }
