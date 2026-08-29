@@ -98,6 +98,16 @@ def legal_opening(frag: str) -> bool:
     return True
 
 
+# Fragments the probe rounds exposed as dud generators: heads whose top
+# association is too weak/absurd to carry a name (foo←footage, wel←well),
+# and chopped-word tails that read as amputations rather than suffixes.
+DENYLIST = {
+    "foo", "wel", "tal", "nee", "ster", "dow", "sha", "sui",
+    "tists", "ducts", "shing", "ning", "blic", "blish", "rance",
+    "lop", "tee", "quat", "quate", "cking", "sess",
+}
+
+
 def load_common():
     path = os.path.join(ROOT, "core", "data", "common_words.txt")
     with open(path, encoding="utf-8") as f:
@@ -123,6 +133,8 @@ def main():
             # word can. Interior-syllable mining otherwise yields "ccess",
             # "cking", "tter", "nnect" — phonetic syllables, unwritable openings.
             if not legal_opening(frag):
+                continue
+            if frag in DENYLIST:
                 continue
             pairs = [a.split(":") for a in assocs.split(",") if ":" in a]
             words = [p[0] for p in pairs]
