@@ -1,0 +1,5 @@
+source words: 1023
+fragments kept: 429 (241 head-capable, 264 tail-capable)
+canon tails (count>=8): 88
+rejected: visible-word 263, weak-assoc 10, illegal-onset(head-demoted) 0
+canon tail list: ai(9) al(11) an(12) ba(8) base(23) bi(10) bird(10) bit(10) ble(9) bly(8) bo(9) book(14) bot(11) box(18) ca(12) cal(13) cket(10) co(16) code(10) cus(9) da(21) dash(11) der(24) desk(9) do(20) dy(8) er(11) fer(8) fi(11) flow(34) ful(10) fy(27) ga(8) gen(10) gent(11) go(15) joy(9) ka(9) ker(12) kit(8) ko(8) ku(8) la(19) li(12) lla(11) lo(15) loop(14) ly(56) ma(28) ment(11) mi(14) mo(12) na(43) nal(10) ngo(8) ni(13) nic(9) no(11) note(9) on(27) os(12) pay(19) per(11) pi(10) port(8) ra(56) re(52) ri(18) ro(27) ry(28) so(8) ta(44) ter(23) tes(8) tic(14) tive(11) to(39) tor(16) tra(9) tter(13) tus(8) ty(27) um(17) us(17) va(18) ver(14) vo(16) vy(8)
