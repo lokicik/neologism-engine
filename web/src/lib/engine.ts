@@ -13,7 +13,7 @@ import { autoModeCounts, isReadableAutoRespell, mergeAutoBatches } from './auto'
 import { tasteContextForConfig } from './taste-context'
 
 export type Style = 'big_tech' | 'sci_fi' | 'fantasy'
-export type NamingMode = 'brandable' | 'realword' | 'respell' | 'compound' | 'seamblend' | 'morpheme'
+export type NamingMode = 'brandable' | 'realword' | 'respell' | 'compound' | 'seamblend' | 'morpheme' | 'submorph'
 
 export interface TasteContext {
   id: string
@@ -312,7 +312,9 @@ async function ensureSeamblendData() {
 
 export async function generateNames(cfg: Config): Promise<NameResult[]> {
   await ensureInit()
-  if (cfg.variant === 'seamblend' || cfg.variant === 'morpheme') await ensureSeamblendData()
+  if (cfg.variant === 'seamblend' || cfg.variant === 'morpheme' || cfg.variant === 'submorph') {
+    await ensureSeamblendData()
+  }
   const json = generate_names(JSON.stringify(cfg))
   const parsed = JSON.parse(json) as NameResult[] | { error: string }
   if ('error' in parsed) throw new Error((parsed as { error: string }).error)
@@ -352,9 +354,11 @@ export async function generateNames(cfg: Config): Promise<NameResult[]> {
         ? 'seamblend'
         : cfg.variant === 'morpheme'
           ? 'morpheme'
-          : cfg.compound
-            ? 'compound'
-            : 'brandable'
+          : cfg.variant === 'submorph'
+            ? 'submorph'
+            : cfg.compound
+              ? 'compound'
+              : 'brandable'
   return contextual.map((result) => ({ ...result, sourceMode }))
 }
 
@@ -549,7 +553,12 @@ export async function generateBatch(cfg: Config): Promise<NameResult[]> {
     )
   }
 
+  // Promptless Auto (Phase 142): the submorph dense-coinage engine leads the
+  // page — meaning-dense two-syllable coinages (the Vercel construction, e.g.
+  // Zendant, Synthos, Storcel) — while the classic four-mode sampler stays in
+  // as accent variety. Brief-driven Auto above is untouched.
   const subs: Config[] = [
+    { ...cfg, variant: 'submorph', compound: false, count: total },
     { ...cfg, variant: undefined, compound: false, count: brandable },
     { ...cfg, variant: 'realword', compound: false, count: realword },
     { ...cfg, variant: 'respell', compound: false, count: respell },
@@ -557,8 +566,8 @@ export async function generateBatch(cfg: Config): Promise<NameResult[]> {
   ]
   const batches = await Promise.all(subs.map((c) => (c.count ? generateNames(c) : Promise.resolve([]))))
   // Round-robin only the accent modes, then place them at even intervals among
-  // Brandable results. The old one-from-each round robin made three of the first
-  // four cards accent modes even though Brandable was the quality lead.
+  // the primary results. The old one-from-each round robin made three of the
+  // first four cards accent modes even though the primary was the quality lead.
   return mergeAutoBatches(batches, total)
 }
 

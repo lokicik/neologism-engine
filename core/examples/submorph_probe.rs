@@ -61,4 +61,23 @@ fn main() {
             tri
         );
     }
+    // The promptless Auto page, three seeds — must be strong AND vary.
+    for seed in [1u64, 2, 3] {
+        let cfg = Config {
+            style: Style::BigTech,
+            variant: Some("submorph".to_string()),
+            seed: Some(seed),
+            count: 10,
+            ..Config::default()
+        };
+        let (_, decodes) = generate_submorph_explained(&cfg, seed);
+        println!(
+            "(no brief, seed {seed}) {}",
+            decodes
+                .iter()
+                .map(|d| d.name.clone())
+                .collect::<Vec<_>>()
+                .join(", ")
+        );
+    }
 }

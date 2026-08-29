@@ -17,7 +17,7 @@ interface Props {
 // always big_tech here; the engine still supports the creative styles, they
 // are just no longer part of the web product.
 
-type Mode = 'auto' | 'brandable' | 'realword' | 'respell' | 'compound' | 'seamblend' | 'morpheme'
+type Mode = 'auto' | 'brandable' | 'realword' | 'respell' | 'compound' | 'seamblend' | 'morpheme' | 'submorph'
 
 const MODES: { value: Mode; label: string; example: string; desc: string }[] = [
   { value: 'auto', label: 'Auto', example: 'best fit', desc: 'Chooses a brief-aware mix — the default' },
@@ -27,6 +27,7 @@ const MODES: { value: Mode; label: string; example: string; desc: string }[] = [
   { value: 'compound', label: 'Compound', example: 'SwiftForge', desc: 'Two-word names — SwiftForge' },
   { value: 'seamblend', label: 'Seam blend', example: 'Pinterest', desc: 'Lab: two words fused at a phonetic seam — experimental' },
   { value: 'morpheme', label: 'Morpheme', example: 'Novalux', desc: 'Lab: Greek/Latin roots composed by meaning — experimental' },
+  { value: 'submorph', label: 'Dense coinage', example: 'Vercel', desc: 'Lab: every syllable carries meaning, seam invisible — the promptless Auto lead' },
 ]
 
 const LENGTHS: { label: string; chip: string; min: number; max: number }[] = [
@@ -49,6 +50,7 @@ function currentMode(config: Config): Mode {
   if (config.variant === 'respell') return 'respell'
   if (config.variant === 'seamblend') return 'seamblend'
   if (config.variant === 'morpheme') return 'morpheme'
+  if (config.variant === 'submorph') return 'submorph'
   return 'brandable'
 }
 
@@ -159,6 +161,7 @@ export function CommandBar({
       compound: m === 'compound',
       variant:
         m === 'realword' || m === 'respell' || m === 'auto' || m === 'seamblend' || m === 'morpheme'
+          || m === 'submorph'
           ? m
           : undefined,
     })

@@ -289,8 +289,10 @@ pub fn generate_submorph_explained(cfg: &Config, seed: u64) -> (Vec<NameResult>,
     let field = brief_field(cfg);
     let inv = inventory();
 
-    // Admissible fragments. With no brief, fall back to strong-association
-    // heads so the promptless Lab page still renders (degraded, never empty).
+    // Admissible fragments. With no brief (the promptless Auto page) there is
+    // no semantic field to match, so fragment QUALITY stands in for relevance:
+    // rel = the fragment's strongest association. Vercel itself needs no brief
+    // — verify+excel is simply two strong syllables.
     let no_brief = field.is_empty();
     let mut heads: Vec<(&Fragment, f64, Vec<String>)> = Vec::new();
     let mut tails: Vec<(&Fragment, f64, Vec<String>)> = Vec::new();
@@ -298,7 +300,7 @@ pub fn generate_submorph_explained(cfg: &Config, seed: u64) -> (Vec<NameResult>,
         if f.head && !f.quality {
             let (rel, hits) = if no_brief {
                 let top = f.assocs.first().map(|(_, s)| *s).unwrap_or(0.0);
-                ((top >= 0.75) as u8 as f64 * 0.3, Vec::new())
+                (if top >= 0.6 { top } else { 0.0 }, Vec::new())
             } else {
                 relevance(f, &field)
             };
@@ -311,7 +313,8 @@ pub fn generate_submorph_explained(cfg: &Config, seed: u64) -> (Vec<NameResult>,
                 tails.push((f, 0.0, Vec::new()));
             } else {
                 let (rel, hits) = if no_brief {
-                    (0.3, Vec::new())
+                    let top = f.assocs.first().map(|(_, s)| *s).unwrap_or(0.0);
+                    (if top >= 0.6 { top } else { 0.0 }, Vec::new())
                 } else {
                     relevance(f, &field)
                 };
@@ -323,6 +326,19 @@ pub fn generate_submorph_explained(cfg: &Config, seed: u64) -> (Vec<NameResult>,
     }
     heads.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap().then(a.0.letters.cmp(&b.0.letters)));
     tails.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap().then(a.0.letters.cmp(&b.0.letters)));
+    if no_brief {
+        // Promptless pages rotate the admission window with the seed so every
+        // Generate explores a different neighborhood of the inventory instead
+        // of always fusing the same alphabetical-top fragments.
+        let rot_h = if heads.is_empty() { 0 } else { (seed as usize) % heads.len() };
+        heads.rotate_left(rot_h);
+        let quality_split = tails.iter().filter(|(f, _, _)| !f.quality).count();
+        if quality_split > 1 {
+            let (meaning_tails, _) = tails.split_at_mut(quality_split);
+            let rot_t = (seed as usize / 7) % meaning_tails.len();
+            meaning_tails.rotate_left(rot_t);
+        }
+    }
     heads.truncate(40);
     tails.truncate(60);
 
@@ -496,6 +512,25 @@ mod tests {
             let n = syllabify(&ph).len();
             assert!(n == 2 || n == 3, "{} has {} syllables", r.name, n);
         }
+    }
+
+    #[test]
+    fn promptless_pages_render_and_vary_by_seed() {
+        let base = Config {
+            style: Style::BigTech,
+            variant: Some("submorph".to_string()),
+            seed: Some(11),
+            ..Config::default()
+        };
+        let (a, da) = generate_submorph_explained(&base, 11);
+        assert!(a.len() >= 6, "promptless page too thin: {}", a.len());
+        assert_eq!(a.len(), da.len());
+        let mut c2 = base.clone();
+        c2.seed = Some(12);
+        let (b, _) = generate_submorph_explained(&c2, 12);
+        let an: Vec<&String> = a.iter().map(|r| &r.name).collect();
+        let bn: Vec<&String> = b.iter().map(|r| &r.name).collect();
+        assert_ne!(an, bn, "different seeds must explore different fragments");
     }
 
     #[test]

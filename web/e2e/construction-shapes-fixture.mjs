@@ -11,6 +11,8 @@ const FIXTURE = [
   [{ name: 'SwiftForge', sourceMode: 'compound' }, 'compound'],
   [{ name: 'Shipulse', sourceMode: 'seamblend' }, 'seamblend'],
   [{ name: 'Aqualum', sourceMode: 'morpheme' }, 'morpheme'],
+  [{ name: 'Vernect', sourceMode: 'submorph' }, 'submorph'],
+  [{ name: 'Sectain', sourceMode: 'submorph', concept_coverage: 2 }, 'submorph'],
   // sourceMode wins over construction/coverage.
   [{ name: 'Keyflow', sourceMode: 'respell', construction: 'guided_metaphor' }, 'respell'],
   [{ name: 'Pinlens', sourceMode: 'seamblend', concept_coverage: 2 }, 'seamblend'],
