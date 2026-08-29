@@ -10376,4 +10376,16 @@ documented metric-gaming mistake. The genuine next step is taste-data
 collection: use the two Lab modes on real briefs to accumulate >=10 liked and
 >=10 passed names (via `core/examples/taste_audit.rs`), which gates both the
 rank refinements and the Phase 5 promotion of these families into Auto.
+Phase 142 second step: promptless Auto is now led by the submorph engine. With
+no brief there is no semantic field, so fragment QUALITY stands in for
+relevance (rel = strongest association, floor 0.6) and the admission window
+rotates with the seed so every Generate explores a different inventory
+neighborhood (Zendant, Synthos, Storcel, Sympuls, Capweav...). The web change
+is confined to generateBatch's empty-brief branch — the submorph page becomes
+the primary stream and the classic four-mode sampler stays as accents through
+the existing mergeAutoBatches seam; brief-driven Auto is untouched and the
+held-out and auto audits stay green (exit 0). A "Dense coinage" Lab pill
+exposes the family directly. Inventory quality remains the lever: the denylist
+prune (foo/wel/tal-class heads, chopped tails) preceded this, and every future
+pass verdict maps to a specific TSV row.
 See `README.md` for the research bibliography and `~/.claude/plans/` for the full build history.
