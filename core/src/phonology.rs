@@ -338,6 +338,21 @@ pub fn pronounce(word: &str) -> Option<Vec<Phoneme>> {
     pronounce_spanned(word).map(|v| v.into_iter().map(|(p, _)| p).collect())
 }
 
+/// Pronounce `letters` as they would sound at the START of a longer word —
+/// word-final rules (final "er" → ER, magic/silent e, final "ow"/"y") must not
+/// fire on a fragment that will be fused mid-word. Implemented by appending a
+/// neutral stop+vowel syllable and stripping its two phonemes; the appended
+/// consonant is chosen to avoid doubled-letter collapse with the fragment's
+/// last letter.
+pub fn pronounce_as_prefix(letters: &str) -> Option<Vec<Phoneme>> {
+    let appender = if letters.ends_with('t') { "ka" } else { "ta" };
+    let mut ph = pronounce(&format!("{letters}{appender}"))?;
+    // The appender always contributes exactly stop + AA.
+    ph.pop()?;
+    ph.pop()?;
+    (!ph.is_empty()).then_some(ph)
+}
+
 /// Best available spanned pronunciation: the CMUdict subset entry when the
 /// word has one (its phonemes are the real pronunciation; spans are recovered
 /// by aligning against the rule G2P output), else the rule output as-is.

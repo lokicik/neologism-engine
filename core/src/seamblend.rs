@@ -126,7 +126,7 @@ fn splice_fusions(
 /// shift when spellings are cut and rejoined (magic-e context changes), but a
 /// changed consonant means the seam created a new reading: bus+harbor →
 /// "busharbor" turns S,HH into SH ("bush arbor") and is rejected here.
-fn consonant_skeleton(phonemes: &[Phoneme]) -> Vec<Phoneme> {
+pub(crate) fn consonant_skeleton(phonemes: &[Phoneme]) -> Vec<Phoneme> {
     phonemes.iter().copied().filter(|p| !p.is_vowel()).collect()
 }
 

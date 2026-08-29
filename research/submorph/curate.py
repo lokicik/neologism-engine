@@ -74,6 +74,30 @@ HAND_ROWS = [
 ]
 
 
+LEGAL_2C = {
+    "bl", "br", "ch", "cl", "cr", "dr", "dw", "fl", "fr", "gl", "gr", "kn",
+    "ph", "pl", "pr", "sc", "sh", "sk", "sl", "sm", "sn", "sp", "st", "sw",
+    "th", "tr", "tw", "wh", "wr",
+}
+
+
+def legal_opening(frag: str) -> bool:
+    vowels = set("aeiou")
+    if frag[0] in vowels:
+        return True
+    if len(frag) == 1 or frag[1] in vowels or frag[1] == "y":
+        return True
+    if frag[0] == frag[1]:
+        return False
+    head2 = frag[:2]
+    if head2 not in LEGAL_2C:
+        return False
+    # 3-consonant openings: only s+stop+liquid classics.
+    if len(frag) >= 3 and frag[2] not in vowels and frag[2] != "y":
+        return frag[:3] in {"str", "spr", "scr", "spl", "shr", "thr", "sch"}
+    return True
+
+
 def load_common():
     path = os.path.join(ROOT, "core", "data", "common_words.txt")
     with open(path, encoding="utf-8") as f:
@@ -95,6 +119,11 @@ def main():
             frag, pos, _cls, _w, assocs, gloss = cols[:6]
             if not (3 <= len(frag) <= 5):
                 continue
+            # Orthographic shard gate: a fragment must open the way an English
+            # word can. Interior-syllable mining otherwise yields "ccess",
+            # "cking", "tter", "nnect" — phonetic syllables, unwritable openings.
+            if not legal_opening(frag):
+                continue
             pairs = [a.split(":") for a in assocs.split(",") if ":" in a]
             words = [p[0] for p in pairs]
             # degenerate: fragment's only/top association is itself
@@ -107,11 +136,24 @@ def main():
             seen.add(frag)
             out_rows.append((frag, pos, "meaning", "0.00", assocs, gloss))
 
+    # Hand rows MERGE with mined rows (hand associations first, positions
+    # unioned) — a mined "ver ← river/over" must never shadow "ver = verify".
+    by_frag = {r[0]: i for i, r in enumerate(out_rows)}
     for frag, pos, assocs, gloss in HAND_ROWS:
-        if pos == "X" or frag in seen:
+        if pos == "X":
             continue
-        seen.add(frag)
-        out_rows.append((frag, pos, "meaning", "0.00", assocs, gloss))
+        if frag in by_frag:
+            i = by_frag[frag]
+            old = out_rows[i]
+            pos_set = {pos, old[1]}
+            merged_pos = "B" if pos_set == {"H", "T"} or "B" in pos_set else pos
+            hand_words = {a.split(":")[0] for a in assocs.split(",")}
+            mined_keep = [a for a in old[4].split(",") if a.split(":")[0] not in hand_words]
+            merged_assocs = ",".join([assocs] + mined_keep[: max(0, 6 - len(assocs.split(",")))])
+            out_rows[i] = (frag, merged_pos, "meaning", "0.00", merged_assocs, gloss)
+        else:
+            seen.add(frag)
+            out_rows.append((frag, pos, "meaning", "0.00", assocs, gloss))
 
     for frag, w in QUALITY_TAILS:
         if frag in seen:

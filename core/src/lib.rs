@@ -14,6 +14,7 @@ pub mod score;
 pub mod seamblend;
 pub mod semfield;
 pub mod style;
+pub mod submorph;
 
 use rand::SeedableRng;
 use rand_chacha::ChaCha8Rng;
@@ -362,6 +363,7 @@ pub fn generate_with_tuning(cfg: &Config, tuning: &BigTechTuning) -> Vec<NameRes
         match cfg.variant.as_deref().map(str::to_lowercase).as_deref() {
             Some("seamblend") => return seamblend::generate_seamblend(cfg, dict, seed),
             Some("morpheme") => return morphemes::generate_morpheme(cfg, dict, seed),
+            Some("submorph") => return submorph::generate_submorph(cfg, dict, seed),
             _ => {}
         }
     }
