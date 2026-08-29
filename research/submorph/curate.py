@@ -71,6 +71,8 @@ HAND_ROWS = [
     ("vig", "H", "vigilant:0.80,vigor:0.70", "vigilant · vigor"),
     ("vol", "H", "volume:0.75,evolve:0.60", "volume · evolve"),
     ("zen", "H", "zen:0.85,zenith:0.75", "calm · zenith"),
+    # The reader hears MAGNET in mag-, not the mined magpie.
+    ("mag", "H", "magnet:0.85,magnify:0.70,magic:0.60", "magnet · magnify"),
     # Wild-register bouncy tails (Tabalong class): two-syllable phrase-words.
     # In normal mode the seamlessness rules reject them (they are common
     # words); the engine's wild mode relaxes those rules, so these only ever
@@ -119,6 +121,23 @@ DENYLIST = {
     "foo", "wel", "tal", "nee", "ster", "dow", "sha", "sui",
     "tists", "ducts", "shing", "ning", "blic", "blish", "rance",
     "lop", "tee", "quat", "quate", "cking", "sess",
+    # 2026-08-29 owner-side taste pass over 30-seed bulk output: fragments that
+    # systematically produce duds or hostile connotations.
+    "hous",   # chopped "house" (Houstor, Zenhous)
+    "bane", "ban",  # bane = poison/curse; urban chop reads the same
+    "mal",    # mal = bad (Latin/Romance) — Breemal, Stormal
+    "aine",   # moraine chop, random-French feel
+    "weav",   # unwritable v-final tail, rv-w clusters (Verweav)
+    "pic",    # cheap "pick/photo" read
+    "lize",   # reads "-lies"
+    "low",    # low-quality connotation as a tail
+    "leav",   # "leave" = churn
+    "tel",    # dated telecom read
+    "cal",    # weak filler
+    "sker",   # esker — too obscure to half-hear
+    "con",    # fraud connotation, junk associations (condor)
+    "fet",    # fetid-adjacent
+    "mum",    # Creamum
 }
 
 

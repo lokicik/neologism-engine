@@ -6,7 +6,6 @@ afloat	T	meaning	0.00	afloat:0.75	buoyant
 aglow	T	meaning	0.00	aglow:0.80	glowing
 ahead	T	meaning	0.00	ahead:0.80	out in front
 ain	T	meaning	0.00	moraine:0.69	moraine
-aine	T	meaning	0.00	moraine:0.69	moraine
 aloft	T	meaning	0.00	aloft:0.75	held high
 along	T	meaning	0.00	along:0.80	tag along
 amigo	T	meaning	0.00	amigo:0.70	friend
@@ -19,8 +18,6 @@ awake	T	meaning	0.00	awake:0.80	wide awake
 away	T	meaning	0.00	away:0.80	up and away
 bal	T	meaning	0.00	global:0.69,football:0.69	global · football
 balt	T	meaning	0.00	cobalt:0.77	cobalt
-ban	T	meaning	0.00	urban:0.81	urban
-bane	T	meaning	0.00	urbane:0.81	urbane
 bea	H	meaning	0.00	beacon:0.60	beacon
 ber	T	meaning	0.00	ember:0.69,amber:0.69,limber:0.64,remember:0.58,number:0.54	ember · amber
 bex	T	meaning	0.00	ibex:0.84	ibex
@@ -30,7 +27,6 @@ brant	T	meaning	0.00	vibrant:0.80	vibrant
 bree	H	meaning	0.00	breezy:0.80	breezy
 breez	B	meaning	0.00	breeze:1.00	breeze
 bric	T	meaning	0.00	fabric:0.67	fabric
-cal	B	meaning	0.00	call:1.00,medical:0.65,recall:0.64,vocal:0.64,optical:0.55	call · medical
 can	H	meaning	0.00	canyon:0.75,candid:0.75	canyon · candid
 cap	H	meaning	0.00	capstone:0.71	capstone
 car	H	meaning	0.00	cardinal:0.69	cardinal
@@ -50,7 +46,6 @@ cli	H	meaning	0.00	clicking:0.75	clicking
 coa	H	meaning	0.00	coastal:0.67	coastal
 cog	H	meaning	0.00	cognition:0.75,cog:0.60	thinking · gear
 com	H	meaning	0.00	complex:0.59,community:0.57	complex · community
-con	B	meaning	0.00	condor:0.80,confirm:0.75,concert:0.75,icon:0.71,concept:0.71,contrast:0.69	condor · confirm
 cor	B	meaning	0.00	core:0.90,cordial:0.75,recording:0.57	core · cordial
 craf	H	meaning	0.00	crafty:0.83	crafty
 crea	H	meaning	0.00	create:0.80	create
@@ -76,7 +71,6 @@ fea	H	meaning	0.00	featured:0.70	featured
 fee	T	meaning	0.00	coffee:0.69	coffee
 fel	B	meaning	0.00	fell:1.00	fell
 fer	B	meaning	0.00	fervent:0.67,reference:0.52	fervent · reference
-fet	B	meaning	0.00	fete:1.00	fete
 fin	H	meaning	0.00	final:0.75,finish:0.70,refine:0.60	finish · refine
 flui	H	meaning	0.00	fluid:0.80	fluid
 for	H	meaning	0.00	forces:0.75,forward:0.75	forces · forward
@@ -100,7 +94,6 @@ gres	T	meaning	0.00	egress:0.84,progress:0.63	egress · progress
 gress	T	meaning	0.00	egress:0.84,progress:0.63	egress · progress
 han	H	meaning	0.00	handy:0.80	handy
 har	H	meaning	0.00	hardy:0.80,harmony:0.61	hardy · harmony
-hous	B	meaning	0.00	house:0.90	house
 hum	H	meaning	0.00	humble:0.75	humble
 ing	T	meaning	0.00	paying:0.69,playing:0.64,flying:0.64	paying · playing
 jaun	H	meaning	0.00	jaunty:0.80	jaunty
@@ -111,7 +104,6 @@ ker	T	meaning	0.00	marker:0.64,bakery:0.58	marker · bakery
 kin	H	meaning	0.00	kindred:0.71	kindred
 lant	T	meaning	0.00	gallant:0.77	gallant
 lax	T	meaning	0.00	parallax:0.69	parallax
-leav	B	meaning	0.00	leave:1.00	leave
 lel	T	meaning	0.00	parallel:0.55	parallel
 ler	T	meaning	0.00	gallery:0.58,accelerate:0.41	gallery · accelerate
 lex	B	meaning	0.00	lexicon:0.85,lexical:0.70	words · language
@@ -122,15 +114,12 @@ lim	H	meaning	0.00	limber:0.80	limber
 lin	T	meaning	0.00	merlin:0.74	merlin
 lit	T	meaning	0.00	elite:0.81	elite
 lith	T	meaning	0.00	monolith:0.65	monolith
-lize	T	meaning	0.00	realize:0.69	realize
 loc	H	meaning	0.00	location:0.75,local:0.75	place
 lof	H	meaning	0.00	lofty:0.80	lofty
 lot	T	meaning	0.00	ocelot:0.69	ocelot
-low	T	meaning	0.00	mellow:0.69,hollow:0.69	mellow · hollow
 loy	H	meaning	0.00	loyal:0.75	loyal
 lum	H	meaning	0.00	luminous:0.80,lumen:0.80,illuminate:0.60	light
-mag	H	meaning	0.00	magpie:0.80	magpie
-mal	B	meaning	0.00	mall:1.00,optimal:0.55	mall · optimal
+mag	H	meaning	0.00	magnet:0.85,magnify:0.70,magic:0.60,magpie:0.80	magnet · magnify
 man	H	meaning	0.00	mantra:0.75	mantra
 mar	H	meaning	0.00	marker:0.80,marble:0.75	marker · marble
 mea	H	meaning	0.00	meaning:0.60	meaning
@@ -146,7 +135,6 @@ mong	T	meaning	0.00	among:0.71	among
 moth	T	meaning	0.00	behemoth:0.65	behemoth
 moun	H	meaning	0.00	mountain:0.75	mountain
 mul	H	meaning	0.00	multi:0.70,multiple:0.59	multi · multiple
-mum	T	meaning	0.00	maximum:0.63	maximum
 nad	T	meaning	0.00	esplanade:0.63	esplanade
 nade	T	meaning	0.00	promenade:0.63	promenade
 nal	T	meaning	0.00	original:0.65,cardinal:0.63,signal:0.59,internal:0.55,external:0.53	original · cardinal
@@ -178,7 +166,6 @@ pex	T	meaning	0.00	apex:0.84	apex
 pher	T	meaning	0.00	cipher:0.59	cipher
 phic	T	meaning	0.00	graphic:0.69	graphic
 phoon	T	meaning	0.00	typhoon:0.74	typhoon
-pic	B	meaning	0.00	epic:0.81,picture:0.80,pictures:0.75	epic · picture
 pla	H	meaning	0.00	plaza:0.80,planning:0.75,plastic:0.61	plaza · planning
 plex	T	meaning	0.00	complex:0.65	complex
 ploy	T	meaning	0.00	deploy:0.64	deploy
@@ -215,7 +202,6 @@ sie	H	meaning	0.00	sienna:0.70	sienna
 sig	B	meaning	0.00	signal:0.85,signature:0.65,insignia:0.57	signal
 sil	H	meaning	0.00	silver:0.80	silver
 sim	H	meaning	0.00	simple:0.75	simple
-sker	T	meaning	0.00	esker:0.81	esker
 smal	B	meaning	0.00	small:0.90	small
 sna	H	meaning	0.00	snappy:0.80	snappy
 sol	H	meaning	0.00	solar:0.80,solid:0.70,solution:0.60	sun · solid · solution
@@ -245,7 +231,6 @@ tain	T	meaning	0.00	obtain:0.74,ascertain:0.69,maintain:0.69	obtain · ascertain
 tan	T	meaning	0.00	titan:0.74	titan
 tar	T	meaning	0.00	guitar:0.74	guitar
 tect	T	meaning	0.00	protect:0.63,architect:0.59	protect · architect
-tel	B	meaning	0.00	tell:1.00	tell
 tem	H	meaning	0.00	tempo:0.75,template:0.65	tempo · template
 ter	T	meaning	0.00	better:0.69,letter:0.69,outer:0.67,shelter:0.64,meter:0.59,inter:0.59	better · letter
 tex	B	meaning	0.00	text:0.85,texture:0.70,vertex:0.77,textile:0.69	text · texture
@@ -282,7 +267,6 @@ vin	H	meaning	0.00	vintage:0.75	vintage
 ving	T	meaning	0.00	driving:0.69,living:0.64	driving · living
 vol	H	meaning	0.00	volume:0.75,evolve:0.60	volume · evolve
 voy	T	meaning	0.00	envoy:0.69	envoy
-weav	B	meaning	0.00	weave:0.90	weave
 wil	B	meaning	0.00	will:0.90	will
 won	H	meaning	0.00	wondrous:0.71	wondrous
 yon	T	meaning	0.00	canyon:0.69	canyon
