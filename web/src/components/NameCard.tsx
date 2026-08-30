@@ -314,6 +314,12 @@ export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction 
         </p>
       )}
 
+      {result.reasonChain && (
+        <p className="card-ai-reason" title="The engine's reasoning chain for this name">
+          🧭 {result.reasonChain}
+        </p>
+      )}
+
       {showWhy && (
         <div
           id={whyPanelId}

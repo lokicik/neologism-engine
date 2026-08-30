@@ -8,12 +8,13 @@ import init, {
   load_semfield,
   load_pron_lexicon,
   load_collision,
+  generate_reason_page,
 } from '../wasm/neologism_wasm.js'
 import { autoModeCounts, isReadableAutoRespell, mergeAutoBatches } from './auto'
 import { tasteContextForConfig } from './taste-context'
 
 export type Style = 'big_tech' | 'sci_fi' | 'fantasy'
-export type NamingMode = 'brandable' | 'realword' | 'respell' | 'compound' | 'seamblend' | 'morpheme' | 'submorph'
+export type NamingMode = 'brandable' | 'realword' | 'respell' | 'compound' | 'seamblend' | 'morpheme' | 'submorph' | 'reason'
 
 export interface TasteContext {
   id: string
@@ -52,6 +53,9 @@ export interface NameResult {
   concept_coverage?: number
   lexicalHazard?: boolean
   connotations: string[]
+  /// Reason family only: the human-readable chain + gloss shown on the card
+  /// ("password → vault → Donjon — innermost keep of the castle").
+  reasonChain?: string
 }
 
 const GUIDED_METAPHOR_POOL = 8
@@ -310,10 +314,38 @@ async function ensureSeamblendData() {
   await seamblendData
 }
 
+interface ReasonDecode {
+  name: string
+  kind: string
+  origin: string
+  gloss: string
+  chain: string[]
+  taken: boolean
+}
+
 export async function generateNames(cfg: Config): Promise<NameResult[]> {
   await ensureInit()
   if (cfg.variant === 'seamblend' || cfg.variant === 'morpheme' || cfg.variant === 'submorph') {
     await ensureSeamblendData()
+  }
+  if (cfg.variant === 'reason') {
+    // The reasoning family returns its argument with every name; carry the
+    // chain onto the result so the card can show it.
+    await ensureSeamblendData() // collision bloom marks taken entries
+    const page = JSON.parse(generate_reason_page(JSON.stringify(cfg))) as
+      | { results: NameResult[]; decodes: ReasonDecode[] }
+      | { error: string }
+    if ('error' in page) throw new Error(page.error)
+    const byName = new Map(page.decodes.map((d) => [d.name, d]))
+    return page.results.map((result) => {
+      const d = byName.get(result.name)
+      const chain = d && d.chain.length > 0 ? `${d.chain.join(' → ')} → ${d.name}` : d?.name
+      return {
+        ...result,
+        sourceMode: 'reason' as const,
+        reasonChain: d ? `${chain} — ${d.gloss} (${d.origin}${d.taken ? ', taken' : ''})` : undefined,
+      }
+    })
   }
   const json = generate_names(JSON.stringify(cfg))
   const parsed = JSON.parse(json) as NameResult[] | { error: string }

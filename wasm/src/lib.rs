@@ -42,6 +42,23 @@ pub fn collision_risk(names_json: &str) -> String {
     serde_json::to_string(&flags).unwrap_or_else(|_| "[]".to_string())
 }
 
+/// Reasoning-family page WITH decodes: {"results":[...], "decodes":[...]}
+/// where each decode carries the name's origin, gloss, and full reasoning
+/// chain (Phase 143). The web layer renders the chain on the card.
+#[wasm_bindgen]
+pub fn generate_reason_page(config_json: &str) -> String {
+    let cfg: Config = match serde_json::from_str(config_json) {
+        Ok(c) => c,
+        Err(e) => return format!("{{\"error\":\"{}\"}}", e),
+    };
+    // The seed only jitters near-ties in this family; a fixed fallback keeps
+    // the wasm crate free of a rand dependency.
+    let seed = cfg.seed.unwrap_or(0x5EED);
+    let (results, decodes) = neologism_core::reason::generate_reason_explained(&cfg, seed);
+    serde_json::to_string(&serde_json::json!({ "results": results, "decodes": decodes }))
+        .unwrap_or_else(|_| "{}".to_string())
+}
+
 /// Takes a JSON-encoded Config, returns a JSON-encoded Vec<NameResult>.
 #[wasm_bindgen]
 pub fn generate_names(config_json: &str) -> String {

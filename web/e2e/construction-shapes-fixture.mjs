@@ -13,6 +13,8 @@ const FIXTURE = [
   [{ name: 'Aqualum', sourceMode: 'morpheme' }, 'morpheme'],
   [{ name: 'Vernect', sourceMode: 'submorph' }, 'submorph'],
   [{ name: 'Sectain', sourceMode: 'submorph', concept_coverage: 2 }, 'submorph'],
+  [{ name: 'Kilit', sourceMode: 'reason' }, 'reason'],
+  [{ name: 'Fylgja', sourceMode: 'reason', concept_coverage: 2 }, 'reason'],
   // sourceMode wins over construction/coverage.
   [{ name: 'Keyflow', sourceMode: 'respell', construction: 'guided_metaphor' }, 'respell'],
   [{ name: 'Pinlens', sourceMode: 'seamblend', concept_coverage: 2 }, 'seamblend'],
