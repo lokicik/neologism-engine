@@ -200,3 +200,15 @@ Pulsar	astro	English	the star that keeps perfect time	pulse,regular,signal,timin
 Nebula	astro	Latin	the cloud where stars are born	cloud,birth,create,form,cosmic	0.2
 Comet	astro	Greek	the long-haired wanderer	fast,visitor,trail,bright,rare	0.2
 Borealis	astro	Latin	of the north wind's light	north,light,display,cold,aurora	0.4
+Gambit	craft	chess	the bold opening sacrifice	chess,gambit,strategy,bold,opening,risk	0.4
+Zugzwang	foreign	German	when any move changes the game	chess,strategy,pressure,move,decision	1.0
+Tandem	craft	English	two riding as one	pair,tandem,together,duo,partner,match	0.3
+Kismet	foreign	Turkish	fate that brings people together	fate,match,luck,destiny,love	0.4
+Trellis	nature	English	frame that guides things as they grow	plant,grow,trellis,support,frame,structure	0.4
+Sofra	foreign	Turkish	the shared table set for everyone	table,meal,share,food,gather,kitchen	0.9
+Abacus	craft	Latin	the first calculator, beads on rails	abacus,count,calculate,money,grid,budget	0.3
+Mancala	craft	Arabic	the ancient game of counting and sowing	count,game,sow,collect,strategy	0.8
+Rudder	nautical	English	the small blade that steers the whole ship	steer,control,direction,adjust,optimize	0.3
+Gauge	craft	English	the dial that tells you the true state	gauge,measure,monitor,dashboard,level	0.3
+Helm	nautical	English	where the ship is steered	helm,steer,control,command,fleet	0.2
+Observatory	craft	Latin	where the sky is watched all night	observatory,watch,sky,measure,weather	0.5

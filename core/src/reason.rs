@@ -25,8 +25,10 @@ const STORY_KB: &str = include_str!("../data/story_kb.tsv");
 const BRIDGES: &str = include_str!("../data/concept_bridges.tsv");
 
 /// Dedicated ChaCha-free jitter salt space; the family needs no RNG stream —
-/// selection jitter comes from `rank_jitter(name, seed)` directly.
-const JITTER_W: f64 = 0.08;
+/// selection jitter comes from `rank_jitter(name, seed)` directly. Strong
+/// enough that different seeds genuinely reshuffle near-tier entries (the
+/// stress harness showed 0.08 froze every page identical across seeds).
+const JITTER_W: f64 = 0.22;
 
 #[derive(Debug, Clone)]
 struct KbEntry {
@@ -79,12 +81,31 @@ fn bridges() -> &'static HashMap<String, Vec<(String, String, f64)>> {
             }
             let to_raw = c[1].trim().to_string();
             let w: f64 = c[2].trim().parse().unwrap_or(0.5);
-            map.entry(norm(c[0].trim()))
-                .or_default()
-                .push((norm(&to_raw), to_raw, w));
+            let from = norm(c[0].trim());
+            let edge = (norm(&to_raw), to_raw, w);
+            // e-elision alias: "optimizer" norms to "optimiz", which must still
+            // find the "optimize" edges — index e-final keys under both forms.
+            if let Some(stripped) = from.strip_suffix('e') {
+                map.entry(stripped.to_string()).or_default().push(edge.clone());
+            }
+            map.entry(from).or_default().push(edge);
         }
         map
     })
+}
+
+/// Activation lookup tolerant of e-elision on either side ("optimize" tag vs
+/// "optimiz" activation key and vice versa).
+fn act_get<'a>(act: &'a HashMap<String, Activation>, key: &str) -> Option<&'a Activation> {
+    if let Some(a) = act.get(key) {
+        return Some(a);
+    }
+    if let Some(stripped) = key.strip_suffix('e') {
+        if let Some(a) = act.get(stripped) {
+            return Some(a);
+        }
+    }
+    act.get(&format!("{key}e"))
 }
 
 /// One activated concept: its strength and the reasoning path that lit it.
@@ -179,8 +200,11 @@ pub fn generate_reason_explained(cfg: &Config, seed: u64) -> (Vec<NameResult>, V
             continue;
         }
         let (mut best, mut sum, mut chain): (f64, f64, Vec<String>) = (0.0, 0.0, Vec::new());
-        for tag in &e.tags {
-            if let Some(a) = act.get(tag) {
+        // An entry's own name is an implicit tag: activating the concept
+        // "ledger" must be able to reach the Ledger entry itself.
+        let self_tag = norm(&lower);
+        for tag in e.tags.iter().chain(std::iter::once(&self_tag)) {
+            if let Some(a) = act_get(&act, tag) {
                 sum += a.weight;
                 if a.weight > best {
                     best = a.weight;
