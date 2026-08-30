@@ -10409,4 +10409,18 @@ freshness comes from the exclude-driven continuation, which returns fully
 disjoint second pages. The KB and bridge files are the engine's entire world
 knowledge: auditable, prunable, and permanently improvable line by line.
 202 tests green; not yet wired into the web UI.
+Phase 143 closing round. (1) The reasoning->coining fusion lane completes the
+human pipeline: when the perfect real word is taken, reason hands its top
+activated imagery to submorph and coins an ownable name that inherits the
+reasoning chain (pages mix Kilit-class retrieval with Sonvide-class coinage;
+the kind cap bounds the coined share). (2) The knowledge files are locked
+behind unit tests: a KB/bridge lint plus a frozen 20-brief coverage gate and a
+coined-lane gate - the reason-family equivalent of the held-out discipline;
+first run already caught a short gloss, a dead 2-letter entry, and a
+wallpapering tag. (3) Per-syllable decodes now render on submorph cards
+everywhere (generate_submorph_page export), so promptless Auto shows its
+reasoning too. (4) An instant crates.io availability chip appears on every
+card once the Lab data bundle is loaded ('free' definitive, 'taken' ~0.5% FP)
+- the objective-value wedge surfaced at last. KB stands at 311 entries /
+~440 bridges after the third curation pass. 205 tests; held-out green.
 See `README.md` for the research bibliography and `~/.claude/plans/` for the full build history.
