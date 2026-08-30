@@ -132,12 +132,33 @@ fn activate(cfg: &Config) -> HashMap<String, Activation> {
     }
     seeds.extend(cfg.roots.iter().map(|r| r.trim().to_lowercase()).filter(|r| !r.is_empty()));
 
+    // The keyword extractor stems ("dating" → "dat", "conferencing" →
+    // "conferenc"). Chains are shown to humans, so recover the original brief
+    // word for display: the first brief token the stem prefixes.
+    let brief_words: Vec<String> = cfg
+        .description
+        .as_deref()
+        .unwrap_or("")
+        .to_lowercase()
+        .split(|c: char| !c.is_ascii_alphabetic())
+        .filter(|w| w.len() >= 3)
+        .map(str::to_string)
+        .collect();
+    let display_of = |kw: &str| -> String {
+        brief_words
+            .iter()
+            .find(|w| w.starts_with(kw))
+            .cloned()
+            .unwrap_or_else(|| kw.to_string())
+    };
+
     for kw in &seeds {
         let k = norm(kw);
-        boost(k, 1.0, vec![kw.clone()], &mut act);
+        let disp = display_of(kw);
+        boost(k, 1.0, vec![disp.clone()], &mut act);
         for (rank, nb) in semfield::expand(kw, 10).into_iter().enumerate() {
             let w = 0.55 / (1.0 + rank as f64 / 5.0);
-            boost(norm(nb), w, vec![kw.clone(), nb.to_string()], &mut act);
+            boost(norm(nb), w, vec![disp.clone(), nb.to_string()], &mut act);
         }
     }
     // Two bridge hops: the metaphor jumps. Each hop decays. Keys are

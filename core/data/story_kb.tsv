@@ -212,3 +212,55 @@ Rudder	nautical	English	the small blade that steers the whole ship	steer,control
 Gauge	craft	English	the dial that tells you the true state	gauge,measure,monitor,dashboard,level	0.3
 Helm	nautical	English	where the ship is steered	helm,steer,control,command,fleet	0.2
 Observatory	craft	Latin	where the sky is watched all night	observatory,watch,sky,measure,weather	0.5
+Ulak	craft	Ottoman	the courier who always got through	messenger,message,deliver,courier,fast,notify	0.9
+Menzil	craft	Ottoman	post station where fresh horses wait	relay,stage,queue,waypoint,distance	1.0
+Muvakkit	craft	Ottoman	the mosque's keeper of exact time	time,clock,schedule,cron,precise	1.0
+Imece	foreign	Turkish	the whole village working as one	together,collaborate,community,help,team	1.0
+Lonca	craft	Turkish	the craftsmen's guild	guild,team,craft,trade,union	0.9
+Ahi	craft	Ottoman	brotherhood of honest craftsmen	guild,craft,honest,brotherhood,quality	1.0
+Usta	foreign	Turkish	the master craftsman	master,mentor,teach,craft,expert	0.8
+Rahle	craft	Ottoman	the low desk you read holy books at	learn,read,study,book,desk	1.0
+Defter	craft	Ottoman	the registry book of the empire	note,book,ledger,registry,record	0.8
+Fihrist	foreign	Turkish	the index at the front of the book	index,catalog,list,contents,search	1.0
+Parola	foreign	Turkish	the watchword at the gate	password,word,secret,gate,auth	0.9
+Kalkan	foreign	Turkish	the shield	shield,protect,defense,secure,guard	0.9
+Bekci	foreign	Turkish	the night watchman of the quarter	watch,guard,night,patrol,monitor	1.0
+Terazi	craft	Turkish	the scales that weigh fairly	balance,fair,measure,weigh,compare	0.9
+Akce	craft	Ottoman	the silver coin of the empire	money,coin,payment,currency,small	1.0
+Tally	craft	English	notches on a stick, the first ledger	count,ledger,score,record,track	0.3
+Florin	craft	Italian	the gold coin merchants trusted	money,coin,trust,trade,gold	0.5
+Savak	craft	Turkish	the sluice gate that meters the flow	flow,control,rate,limit,valve,stream	1.0
+Iskele	craft	Turkish	the pier; the scaffold	pier,scaffold,deploy,build,dock,stage	0.9
+Temel	foreign	Turkish	the foundation stone	foundation,base,solid,core,ground	0.8
+Payanda	craft	Turkish	the buttress that keeps walls standing	support,stability,brace,backup	1.0
+Kervansaray	craft	Ottoman	the fortified inn on the trade road	host,shelter,waypoint,travel,rest	0.9
+Mihmandar	craft	Ottoman	the official who welcomes guests	host,welcome,guide,onboard,greet	1.0
+Fener	craft	Turkish	the lantern carried at night	lantern,light,guide,night,beacon	0.8
+Izci	foreign	Turkish	the scout who reads the trail	scout,search,track,trail,find,explore	0.9
+Rota	foreign	Turkish	the course a ship commits to	route,course,plan,direction,journey	0.7
+Takvim	craft	Turkish	the calendar of days	calendar,schedule,plan,day,time	0.8
+Meltem	nature	Turkish	the gentle daily sea breeze	breeze,wind,gentle,daily,fresh	0.9
+Poyraz	nature	Turkish	the sharp north wind	wind,north,cold,strong,weather	0.9
+Lodos	nature	Turkish	the warm storm wind off the sea	wind,storm,warm,weather,south	0.9
+Sifa	foreign	Turkish	healing; the cure that works	heal,health,cure,recover,wellness	0.9
+Derman	foreign	Turkish	remedy; the strength to go on	remedy,health,energy,strength,cure	0.9
+Vuslat	foreign	Turkish	the long-awaited reunion of lovers	love,reunion,meet,date,longing	1.0
+Halka	foreign	Turkish	the ring; the circle of people	ring,circle,community,group,connect	0.9
+Zar	craft	Turkish	the dice	dice,game,random,luck,chance	0.9
+Tabir	foreign	Ottoman	the art of reading dreams	interpret,predict,meaning,dream,analyze	1.0
+Vitrin	craft	Turkish	the shop window that shows the best	display,showcase,gallery,present,front	0.9
+Hattat	craft	Ottoman	the master of beautiful writing	write,beautiful,craft,font,letter	1.0
+Bursa	craft	Ottoman	the silk market city; the bourse	market,exchange,trade,silk,commerce	0.8
+Duet	craft	Italian	two voices made for each other	pair,duo,together,date,harmony,music	0.2
+Serenata	craft	Italian	the evening song under a window	romance,charm,evening,music,court	0.7
+Golem	myth	Hebrew	clay given instructions and life	automation,ai,robot,instructions,animate	0.5
+Augur	craft	Roman	reader of omens in bird flight	predict,forecast,ai,signs,analyze	0.6
+Sibyl	myth	Greek	the prophetess whose answers came true	predict,ai,forecast,answer,oracle	0.6
+Obscura	craft	Latin	the dark chamber that made the first image	photo,image,camera,lens,capture	0.5
+Meeple	craft	English	the little wooden person you play as	game,play,board,piece,fun	0.8
+Vernier	craft	French	the scale that reads between the marks	precision,measure,fine,calibrate,exact	0.6
+Mira	astro	Latin	the wonderful star that brightens and fades	star,cycle,wonder,variable,pulse	0.5
+Panacea	myth	Greek	the cure for everything	heal,cure,all,remedy,fix	0.4
+Salus	myth	Roman	goddess of health and safety	health,safety,wellness,protect	0.7
+Lyceum	craft	Greek	the walking school of Aristotle	learn,teach,school,course,study	0.4
+Semafor	craft	Greek	flags that talk across distance	signal,flag,message,protocol,sync	0.7
