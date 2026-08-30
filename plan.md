@@ -10388,4 +10388,25 @@ held-out and auto audits stay green (exit 0). A "Dense coinage" Lab pill
 exposes the family directly. Inventory quality remains the lever: the denylist
 prune (foo/wel/tal-class heads, chopped tails) preceded this, and every future
 pass verdict maps to a specific TSV row.
+Phase 143 delivers the deterministic reasoning namer the owner asked for
+("human-like reasoning, no LLM"): spreading activation from brief keywords
+through semfield neighbors and ~370 hand-written concept bridges (the metaphor
+jumps: password->lock->gate, memory->well) into a 208-entry curated story
+knowledge base (myth / foreign incl. a Turkish shelf / craft / nautical /
+astronomy / literary, each with origin, gloss, tags, spice). Every name ships
+with its full reasoning chain ("private -> hidden -> shadow -> Fylgja"),
+availability is bloom-checked, kind/origin caps prevent monoculture, and the
+Wild register prefers the exotic shelf. variant=="reason"; files reason.rs,
+story_kb.tsv, concept_bridges.tsv; probes reason_probe.rs / reason_stress.rs.
+The stress harness (20 briefs incl. deliberately off-KB domains) drove the
+fix round: coverage bridges + 12 KB entries took thin briefs from 8/20 to
+2/20 (kubernetes 0->5 with Kaizen/Rudder/Abacus, GPU profiler 0->5 with
+Gauge/Gnomon/Sextant, chess 1->4 with Gambit/Zugzwang), an e-elision
+normalization bug (optimizer/optimize) was fixed with dual-key indexing, and
+entries now match their own name as an implicit tag (invoice->Ledger). Pages
+are intentionally stable per brief (an argument does not change on re-ask);
+freshness comes from the exclude-driven continuation, which returns fully
+disjoint second pages. The KB and bridge files are the engine's entire world
+knowledge: auditable, prunable, and permanently improvable line by line.
+202 tests green; not yet wired into the web UI.
 See `README.md` for the research bibliography and `~/.claude/plans/` for the full build history.
