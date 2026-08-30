@@ -264,3 +264,55 @@ Panacea	myth	Greek	the cure for everything	heal,cure,all,remedy,fix	0.4
 Salus	myth	Roman	goddess of health and safety	health,safety,wellness,protect	0.7
 Lyceum	craft	Greek	the walking school of Aristotle	learn,teach,school,course,study	0.4
 Semafor	craft	Greek	flags that talk across distance	signal,flag,message,protocol,sync	0.7
+Seshat	myth	Egyptian	goddess who records everything written	write,record,archive,library,measure,docs	0.8
+Maat	myth	Egyptian	truth and balance, weighed exactly	truth,balance,fair,verify,order,justice	0.7
+Anansi	myth	Akan	the spider who owns all stories	web,story,clever,network,spider	0.7
+Zorya	myth	Slavic	the dawn stars who guard the sky	dawn,guard,star,morning,watch	0.9
+Veles	myth	Slavic	shapeshifting god of flows and herds	flow,change,stream,shift,wealth	0.9
+Brigid	myth	Celtic	goddess of the forge and of poetry	forge,poetry,craft,fire,create	0.7
+Ogham	craft	Celtic	the alphabet carved on stone edges	write,alphabet,carve,letter,code	0.9
+Taliesin	myth	Welsh	the shining-browed master poet	poetry,write,wisdom,shine	0.9
+Simurgh	myth	Persian	the wise bird who has seen everything	wise,bird,knowledge,watch,ancient	0.9
+Nowruz	foreign	Persian	the new day that starts the year	new,start,fresh,begin,renewal	0.8
+Kubaba	myth	Anatolian	the Anatolian mother goddess	ancient,mother,protect,anatolia	1.0
+Kiln	craft	English	the oven that hardens clay into ware	build,bake,harden,deploy,finish	0.5
+Crucible	craft	English	where metal is tested by fire	test,transform,pressure,pure,forge	0.4
+Whetstone	craft	English	the stone that keeps the edge sharp	sharpen,optimize,edge,maintain,tool	0.5
+Bellows	craft	English	the lungs that feed the fire	boost,air,fire,amplify,power	0.6
+Keel	nautical	English	the spine the whole ship is built on	foundation,spine,base,structure,ship	0.4
+Halyard	nautical	English	the line that raises the sail	raise,deploy,hoist,launch,lift	0.8
+Spinnaker	nautical	English	the big sail flown for pure speed	speed,sail,fast,race,wind	0.6
+Tiller	nautical	English	the handle that steers the boat	steer,control,direct,handle	0.4
+Capstan	nautical	English	the winch that multiplies your pull	leverage,pull,power,lift,mechanical	0.8
+Quay	nautical	French	where ships load and unload	dock,load,deploy,port,transfer	0.6
+Kern	craft	English	the space that makes letters sit right	font,typography,spacing,letter,fine	0.6
+Folio	craft	Latin	the leaf of a book, numbered	page,document,book,sheet,docs	0.4
+Quire	craft	English	sheets gathered ready for binding	batch,gather,collection,sheets,bundle	0.9
+Exlibris	craft	Latin	the mark that says whose book this is	ownership,mark,library,book,identity	0.9
+Segue	craft	Italian	the seamless move to the next thing	transition,migrate,smooth,move,flow	0.4
+Ostinato	craft	Italian	the pattern that repeats underneath	loop,repeat,pattern,rhythm,constant	0.8
+Cadenza	craft	Italian	the soloist's moment to shine	showcase,solo,skill,moment,display	0.7
+Encore	craft	French	the crowd asks for it again	again,retry,repeat,return,demand	0.3
+Refrain	craft	French	the line the song returns to	repeat,loop,return,chorus,cycle	0.4
+Vesper	craft	Latin	the evening star; the day winding down	evening,calm,end,star,quiet	0.5
+Matins	craft	Latin	the prayers said at first light	morning,dawn,daily,ritual,early	0.8
+Isobar	craft	Greek	the line joining equal pressures	weather,map,line,equal,pressure	0.7
+Alidade	craft	Arabic	the sighting rule of the surveyor	measure,sight,survey,precision,aim	1.0
+Harita	foreign	Turkish	the map	map,chart,navigate,geography	0.9
+Anahtar	foreign	Turkish	the key	key,unlock,access,password,open	0.9
+Kilim	craft	Turkish	the flat-woven rug of patterns	pattern,weave,design,craft,textile	0.7
+Ferman	craft	Ottoman	the imperial decree that must be obeyed	command,decree,config,rule,order	0.9
+Tugra	craft	Ottoman	the sultan's ornate signature	signature,auth,identity,seal,royal	0.9
+Muhur	craft	Ottoman	the seal pressed into wax	seal,auth,sign,verify,stamp	0.9
+Konak	craft	Ottoman	the mansion where travelers stop	host,stage,stop,mansion,rest	0.8
+Heybe	craft	Turkish	the saddlebag that carries both sides	storage,carry,pack,balance,bag	1.0
+Cikrik	craft	Turkish	the spinning wheel turning fiber to thread	thread,spin,transform,craft,wheel	1.0
+Degirmen	craft	Turkish	the mill that grinds grain to flour	process,grind,transform,pipeline,mill	0.9
+Harman	craft	Turkish	the threshing floor where crops blend	merge,blend,mix,combine,harvest	0.9
+Kalem	craft	Turkish	the pen; the office of writing	pen,write,office,draft	0.7
+Sozluk	craft	Turkish	the dictionary	dictionary,word,language,name,lookup	0.8
+Imza	foreign	Turkish	the signature	signature,sign,auth,identity,approve	0.9
+Carsi	craft	Turkish	the covered market streets	market,shop,trade,bazaar,commerce	0.8
+Sarraf	craft	Ottoman	the money changer who spots the fake	money,exchange,verify,detect,finance	1.0
+Nazariye	foreign	Ottoman	theory; the way of seeing	theory,model,view,analyze,idea	1.0
+Usul	foreign	Ottoman	the method; the rhythm cycle	method,rhythm,process,order,way	0.9

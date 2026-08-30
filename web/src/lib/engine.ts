@@ -588,13 +588,15 @@ export async function generateBatch(cfg: Config): Promise<NameResult[]> {
   // Promptless Auto (Phase 142): the submorph dense-coinage engine leads the
   // page — meaning-dense two-syllable coinages (the Vercel construction, e.g.
   // Zendant, Synthos, Storcel) — while the classic four-mode sampler stays in
-  // as accent variety. Brief-driven Auto above is untouched.
+  // as accent variety, plus two reasoning-family cards whose 🧭 chains give the
+  // page a story accent (Phase 143). Brief-driven Auto above is untouched.
   const subs: Config[] = [
     { ...cfg, variant: 'submorph', compound: false, count: total },
     { ...cfg, variant: undefined, compound: false, count: brandable },
     { ...cfg, variant: 'realword', compound: false, count: realword },
     { ...cfg, variant: 'respell', compound: false, count: respell },
     { ...cfg, variant: undefined, compound: true, count: compound },
+    { ...cfg, variant: 'reason', compound: false, count: 2 },
   ]
   const batches = await Promise.all(subs.map((c) => (c.count ? generateNames(c) : Promise.resolve([]))))
   // Round-robin only the accent modes, then place them at even intervals among
