@@ -8,6 +8,7 @@ import init, {
   load_semfield,
   load_pron_lexicon,
   load_collision,
+  collision_risk,
   generate_reason_page,
   generate_submorph_page,
 } from '../wasm/neologism_wasm.js'
@@ -294,6 +295,7 @@ async function ensureInit() {
 // wasm binary so production Auto's first load is unaffected. Fetch them as
 // separate lazy chunks and inject them the first time seam-blend is used.
 let seamblendData: Promise<void> | null = null
+let collisionDataLoaded = false
 async function ensureSeamblendData() {
   if (!seamblendData) {
     seamblendData = (async () => {
@@ -307,12 +309,26 @@ async function ensureSeamblendData() {
       load_pron_lexicon(pron.default)
       const bloom = await fetch(bloomUrl.default)
       load_collision(new Uint8Array(await bloom.arrayBuffer()))
+      collisionDataLoaded = true
     })().catch((error) => {
       seamblendData = null
       throw error
     })
   }
   await seamblendData
+}
+
+/// Instant crates.io/brand-corpus name check (bloom membership, ~0.5% false
+/// positive on "taken"; "free" is definitive). Returns undefined until the
+/// Lab data bundle has loaded — cards simply omit the chip then.
+export function cratesTaken(name: string): boolean | undefined {
+  if (!collisionDataLoaded) return undefined
+  try {
+    const flags = JSON.parse(collision_risk(JSON.stringify([name.toLowerCase()])))
+    return Array.isArray(flags) ? Boolean(flags[0]) : undefined
+  } catch {
+    return undefined
+  }
 }
 
 interface ReasonDecode {

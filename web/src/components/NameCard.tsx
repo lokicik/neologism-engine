@@ -1,5 +1,5 @@
 import { useState, useEffect, useId, useRef, type KeyboardEvent } from 'react'
-import { explainName, type Explanation, type NameResult } from '../lib/engine'
+import { cratesTaken, explainName, type Explanation, type NameResult } from '../lib/engine'
 import {
   checkDomainEvidence,
   idleDomainObservations,
@@ -319,6 +319,19 @@ export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction 
           🧭 {result.reasonChain}
         </p>
       )}
+
+      {metricsAvailable && (() => {
+        const taken = cratesTaken(result.name)
+        if (taken === undefined) return null
+        return (
+          <p
+            className="card-meta-line"
+            title="Instant crates.io + brand-corpus check (offline bloom filter; 'free' is definitive, 'taken' has ~0.5% false positives)"
+          >
+            {taken ? 'crates.io ✗ taken' : 'crates.io ✓ free'}
+          </p>
+        )
+      })()}
 
       {showWhy && (
         <div
