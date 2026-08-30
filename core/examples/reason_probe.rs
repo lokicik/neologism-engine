@@ -3,13 +3,15 @@
 //!
 //! ```powershell
 //! cargo run -p neologism-core --example reason_probe --release
+//! cargo run -p neologism-core --example reason_probe --release -- "your brief here"
 //! ```
 
 use neologism_core::reason::generate_reason_explained;
 use neologism_core::style::{Config, Style};
 
 fn main() {
-    let briefs = [
+    let arg_briefs: Vec<String> = std::env::args().skip(1).collect();
+    let default_briefs = [
         "a self hosted password manager",
         "a note taking app with backlinks",
         "a terminal log viewer for developers",
@@ -19,9 +21,14 @@ fn main() {
         "a package registry for private modules",
         "a habit tracking app",
     ];
+    let briefs: Vec<&str> = if arg_briefs.is_empty() {
+        default_briefs.to_vec()
+    } else {
+        arg_briefs.iter().map(String::as_str).collect()
+    };
     for wild in [false, true] {
         println!("======== {} register ========", if wild { "WILD" } else { "BALANCED" });
-        for brief in briefs {
+        for brief in &briefs {
             let cfg = Config {
                 style: Style::BigTech,
                 variant: Some("reason".to_string()),

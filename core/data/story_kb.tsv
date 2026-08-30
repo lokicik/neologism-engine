@@ -315,3 +315,12 @@ Carsi	craft	Turkish	the covered market streets	market,shop,trade,bazaar,commerce
 Sarraf	craft	Ottoman	the money changer who spots the fake	money,exchange,verify,detect,finance	1.0
 Nazariye	foreign	Ottoman	theory; the way of seeing	theory,model,view,analyze,idea	1.0
 Usul	foreign	Ottoman	the method; the rhythm cycle	method,rhythm,process,order,way	0.9
+Mahlas	literary	Ottoman	the pen name a poet writes under	name,alias,pen,identity,writer,brand	1.0
+Rumuz	foreign	Ottoman	the codename that stands for a person	alias,codename,nickname,secret,symbol	0.9
+Mantik	foreign	Ottoman	logic, the discipline of sound reasoning	logic,reason,inference,think,deduce	0.9
+Kiyas	foreign	Ottoman	reasoning by analogy, case to case	logic,analogy,compare,inference,precedent	1.0
+Burhan	foreign	Ottoman	the decisive proof that settles it	proof,evidence,verify,certain,argument	1.0
+Delil	foreign	Ottoman	the evidence; the guide who shows the way	evidence,proof,guide,trace,clue	0.9
+Mizan	craft	Ottoman	the balance scale that weighs fairly	balance,weigh,measure,fair,ledger	0.9
+Imla	foreign	Ottoman	spelling; getting the letters right	spelling,write,letter,correct,text	0.9
+Hece	foreign	Turkish	the syllable, the beat of a word	syllable,pronounce,sound,word,rhythm	0.9

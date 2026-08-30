@@ -155,9 +155,13 @@ fn activate(cfg: &Config) -> HashMap<String, Activation> {
     for kw in &seeds {
         let k = norm(kw);
         let disp = display_of(kw);
+        // Sense trust: when a keyword has hand-written bridges, a human has
+        // declared its intended sense — embedding neighbors (which blur word
+        // senses: "chains" → retail stores) get discounted for that keyword.
+        let sem_scale = if bridges().contains_key(&k) { 0.6 } else { 1.0 };
         boost(k, 1.0, vec![disp.clone()], &mut act);
         for (rank, nb) in semfield::expand(kw, 10).into_iter().enumerate() {
-            let w = 0.55 / (1.0 + rank as f64 / 5.0);
+            let w = sem_scale * 0.55 / (1.0 + rank as f64 / 5.0);
             boost(norm(nb), w, vec![disp.clone(), nb.to_string()], &mut act);
         }
     }
