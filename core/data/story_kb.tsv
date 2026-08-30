@@ -57,7 +57,7 @@ Codex	craft	Latin	the first bound book	book,record,document,rules,archive	0.2
 Scriba	craft	Latin	the scribe who writes it down	write,record,note,document,log	0.7
 Fabrica	craft	Latin	the workshop where things are made	build,workshop,make,factory,forge	0.5
 Silva	foreign	Latin	the forest	forest,tree,nature,collection,graph	0.5
-Stella	foreign	Latin	star	star,light,guide,shine	0.2
+Stella	foreign	Latin	the star you steer by	star,light,guide,shine	0.2
 Vela	nautical	Latin	the sails	sail,speed,travel,ship,deploy	0.4
 Ancora	nautical	Latin	the anchor	anchor,stable,hold,state,fix	0.6
 Portus	nautical	Latin	safe harbor	harbor,port,safe,deploy,host	0.6
@@ -76,7 +76,6 @@ Anka	myth	Turkish	the phoenix of Anatolia	phoenix,rebirth,restart,resilient,reco
 Kura	foreign	Japanese	storehouse for treasures	store,archive,treasure,package,registry	0.7
 Torii	craft	Japanese	gate between mundane and sacred	gate,entrance,auth,threshold,api	0.5
 Kaizen	foreign	Japanese	continuous small improvement	improve,iterate,optimize,refactor	0.3
-Ma	foreign	Japanese	the meaningful pause between things	space,pause,minimal,silence,gap	1.0
 Kintsugi	craft	Japanese	mending cracks with gold	repair,fix,merge,heal,patch	0.4
 Hikari	foreign	Japanese	light	light,bright,fast,shine	0.6
 Kompas	foreign	Dutch	the compass	compass,navigate,direction,course	0.7
@@ -220,7 +219,7 @@ Lonca	craft	Turkish	the craftsmen's guild	guild,team,craft,trade,union	0.9
 Ahi	craft	Ottoman	brotherhood of honest craftsmen	guild,craft,honest,brotherhood,quality	1.0
 Usta	foreign	Turkish	the master craftsman	master,mentor,teach,craft,expert	0.8
 Rahle	craft	Ottoman	the low desk you read holy books at	learn,read,study,book,desk	1.0
-Defter	craft	Ottoman	the registry book of the empire	note,book,ledger,registry,record	0.8
+Defter	craft	Ottoman	the registry book of the empire	note,book,registry	0.8
 Fihrist	foreign	Turkish	the index at the front of the book	index,catalog,list,contents,search	1.0
 Parola	foreign	Turkish	the watchword at the gate	password,word,secret,gate,auth	0.9
 Kalkan	foreign	Turkish	the shield	shield,protect,defense,secure,guard	0.9

@@ -9,6 +9,7 @@ import init, {
   load_pron_lexicon,
   load_collision,
   generate_reason_page,
+  generate_submorph_page,
 } from '../wasm/neologism_wasm.js'
 import { autoModeCounts, isReadableAutoRespell, mergeAutoBatches } from './auto'
 import { tasteContextForConfig } from './taste-context'
@@ -323,10 +324,37 @@ interface ReasonDecode {
   taken: boolean
 }
 
+interface SubmorphDecode {
+  name: string
+  head: string
+  head_gloss: string
+  tail: string
+  tail_gloss: string
+  tail_quality: boolean
+}
+
 export async function generateNames(cfg: Config): Promise<NameResult[]> {
   await ensureInit()
   if (cfg.variant === 'seamblend' || cfg.variant === 'morpheme' || cfg.variant === 'submorph') {
     await ensureSeamblendData()
+  }
+  if (cfg.variant === 'submorph') {
+    // Dense coinages carry their per-syllable decode onto the card.
+    const page = JSON.parse(generate_submorph_page(JSON.stringify(cfg))) as
+      | { results: NameResult[]; decodes: SubmorphDecode[] }
+      | { error: string }
+    if ('error' in page) throw new Error(page.error)
+    const byName = new Map(page.decodes.map((d) => [d.name, d]))
+    return page.results.map((result) => {
+      const d = byName.get(result.name)
+      return {
+        ...result,
+        sourceMode: 'submorph' as const,
+        reasonChain: d
+          ? `${d.head} = ${d.head_gloss} + ${d.tail} = ${d.tail_quality ? 'canon suffix' : d.tail_gloss}`
+          : undefined,
+      }
+    })
   }
   if (cfg.variant === 'reason') {
     // The reasoning family returns its argument with every name; carry the

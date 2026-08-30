@@ -59,6 +59,20 @@ pub fn generate_reason_page(config_json: &str) -> String {
         .unwrap_or_else(|_| "{}".to_string())
 }
 
+/// Submorph page WITH per-syllable decodes: {"results":[...], "decodes":[...]}
+/// (Phase 143 follow-up — the web card shows "ver = verify + nect = connect").
+#[wasm_bindgen]
+pub fn generate_submorph_page(config_json: &str) -> String {
+    let cfg: Config = match serde_json::from_str(config_json) {
+        Ok(c) => c,
+        Err(e) => return format!("{{\"error\":\"{}\"}}", e),
+    };
+    let seed = cfg.seed.unwrap_or(0x5EED);
+    let (results, decodes) = neologism_core::submorph::generate_submorph_explained(&cfg, seed);
+    serde_json::to_string(&serde_json::json!({ "results": results, "decodes": decodes }))
+        .unwrap_or_else(|_| "{}".to_string())
+}
+
 /// Takes a JSON-encoded Config, returns a JSON-encoded Vec<NameResult>.
 #[wasm_bindgen]
 pub fn generate_names(config_json: &str) -> String {

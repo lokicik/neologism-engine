@@ -1,4 +1,4 @@
-"""Curate research/submorph/draft.tsv into core/data/submorph.tsv (Phase 142).
+﻿"""Curate research/submorph/draft.tsv into core/data/submorph.tsv (Phase 142).
 
 Mechanical rules over the mined draft:
   - meaning fragments only, 3-5 letters
@@ -138,6 +138,7 @@ DENYLIST = {
     "con",    # fraud connotation, junk associations (condor)
     "fet",    # fetid-adjacent
     "mum",    # Creamum
+    "sus",    # reads as slang "suspicious" (pegasus chop)
 }
 
 

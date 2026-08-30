@@ -222,7 +222,6 @@ struc	H	meaning	0.00	structure:0.86	structure
 stu	H	meaning	0.00	study:0.70	study
 stute	T	meaning	0.00	astute:0.84	astute
 sty	T	meaning	0.00	trusty:0.69	trusty
-sus	T	meaning	0.00	pegasus:0.65	pegasus
 sym	H	meaning	0.00	symbol:0.75	symbol
 syn	H	meaning	0.00	sync:0.90,synthesis:0.70	sync · synthesis
 tac	H	meaning	0.00	tactic:0.75	tactic

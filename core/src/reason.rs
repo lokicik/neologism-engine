@@ -199,6 +199,89 @@ pub struct ReasonDecode {
     pub taken: bool,
 }
 
+/// The coining lane: when the perfect real word is taken (Argus, Nexus…), a
+/// human namer coins from the concept instead. Reason hands its strongest
+/// activated imagery to the submorph engine and stitches the reasoning chain
+/// onto each coined result.
+fn coined_candidates(
+    cfg: &Config,
+    seed: u64,
+    act: &HashMap<String, Activation>,
+) -> Vec<(NameResult, ReasonDecode, f64)> {
+    if act.is_empty() {
+        return Vec::new();
+    }
+    let mut concepts: Vec<(&String, &Activation)> = act
+        .iter()
+        .filter(|(c, a)| c.len() >= 3 && a.weight >= 0.25)
+        .collect();
+    concepts.sort_by(|a, b| {
+        b.1.weight
+            .partial_cmp(&a.1.weight)
+            .unwrap_or(std::cmp::Ordering::Equal)
+            .then(a.0.cmp(b.0))
+    });
+    concepts.truncate(8);
+    if concepts.is_empty() {
+        return Vec::new();
+    }
+    // Path lookup for chain stitching, keyed by the concept's display word.
+    let path_of: HashMap<String, Vec<String>> = concepts
+        .iter()
+        .map(|(c, a)| ((*c).clone(), a.path.clone()))
+        .collect();
+    let mut coin_cfg = cfg.clone();
+    coin_cfg.variant = Some("submorph".to_string());
+    coin_cfg.description = Some(
+        concepts
+            .iter()
+            .map(|(c, _)| c.as_str())
+            .collect::<Vec<_>>()
+            .join(" "),
+    );
+    coin_cfg.roots = Vec::new();
+    let (results, decodes) = crate::submorph::generate_submorph_explained(&coin_cfg, seed ^ 0xC01);
+    results
+        .into_iter()
+        .zip(decodes)
+        .enumerate()
+        .map(|(i, (r, d))| {
+            // Chain = the activation path of the fragment's best brief-field
+            // hit, ending in the coinage.
+            let hit = d
+                .head_hits
+                .first()
+                .or_else(|| d.tail_hits.first())
+                .map(|h| norm(h));
+            // Best case: the fragment's hit word IS one of our concepts —
+            // inherit that exact path. Fallback (the hit came via submorph's
+            // own one-hop expansion): inherit the strongest concept's path, so
+            // the chain still shows the reasoning that seeded the coinage.
+            let chain = hit
+                .and_then(|h| {
+                    path_of
+                        .iter()
+                        .find(|(c, _)| norm(c) == h)
+                        .map(|(_, p)| p.clone())
+                })
+                .or_else(|| concepts.first().map(|(_, a)| a.path.clone()))
+                .unwrap_or_default();
+            let gloss = format!("{} + {}", d.head_gloss, d.tail_gloss);
+            let decode = ReasonDecode {
+                name: r.name.clone(),
+                kind: "coined".to_string(),
+                origin: "coined".to_string(),
+                gloss,
+                chain,
+                taken: false,
+            };
+            // Competitive with strong retrievals so the page genuinely mixes.
+            let score = 0.55 + 0.6 * (1.0 - i as f64 / 10.0);
+            (r, decode, score)
+        })
+        .collect()
+}
+
 pub fn generate_reason_explained(cfg: &Config, seed: u64) -> (Vec<NameResult>, Vec<ReasonDecode>) {
     let wild = cfg.temperature >= 1.0;
     let act = activate(cfg);
@@ -255,40 +338,61 @@ pub fn generate_reason_explained(cfg: &Config, seed: u64) -> (Vec<NameResult>, V
         score += rank_jitter(&lower, seed) * JITTER_W;
         scored.push(Scored { e, score, chain, taken });
     }
-    scored.sort_by(|a, b| {
-        b.score
-            .partial_cmp(&a.score)
+    // Merge the retrieval lane with the coining lane into one ranked pool.
+    let mut merged: Vec<(f64, NameResult, ReasonDecode)> = scored
+        .iter()
+        .map(|s| {
+            (
+                s.score,
+                crate::family::to_result(&s.e.name.to_lowercase()),
+                ReasonDecode {
+                    name: s.e.name.clone(),
+                    kind: s.e.kind.clone(),
+                    origin: s.e.origin.clone(),
+                    gloss: s.e.gloss.clone(),
+                    chain: s.chain.clone(),
+                    taken: s.taken,
+                },
+            )
+        })
+        .collect();
+    for (r, d, score) in coined_candidates(cfg, seed, &act) {
+        if excluded.contains(&r.name.to_lowercase()) {
+            continue;
+        }
+        merged.push((score, r, d));
+    }
+    merged.sort_by(|a, b| {
+        b.0.partial_cmp(&a.0)
             .unwrap_or(std::cmp::Ordering::Equal)
-            .then(a.e.name.cmp(&b.e.name))
+            .then(a.2.name.cmp(&b.2.name))
     });
 
-    // Variety caps: no page monoculture of one kind or origin.
+    // Variety caps: no page monoculture of one kind or origin — the coined
+    // lane carries kind/origin "coined", so the same cap bounds its share.
     let cap = ((cfg.count as f64 * 0.34).ceil() as usize).max(1);
-    let mut kind_n: HashMap<&str, usize> = HashMap::new();
-    let mut origin_n: HashMap<&str, usize> = HashMap::new();
+    let mut kind_n: HashMap<String, usize> = HashMap::new();
+    let mut origin_n: HashMap<String, usize> = HashMap::new();
+    let mut seen: std::collections::HashSet<String> = std::collections::HashSet::new();
     let mut out: Vec<NameResult> = Vec::new();
     let mut decodes: Vec<ReasonDecode> = Vec::new();
-    for s in &scored {
+    for (_, r, d) in &merged {
         if out.len() >= cfg.count {
             break;
         }
-        if kind_n.get(s.e.kind.as_str()).copied().unwrap_or(0) >= cap {
+        if !seen.insert(r.name.to_lowercase()) {
             continue;
         }
-        if origin_n.get(s.e.origin.as_str()).copied().unwrap_or(0) >= cap {
+        if kind_n.get(d.kind.as_str()).copied().unwrap_or(0) >= cap {
             continue;
         }
-        *kind_n.entry(s.e.kind.as_str()).or_default() += 1;
-        *origin_n.entry(s.e.origin.as_str()).or_default() += 1;
-        decodes.push(ReasonDecode {
-            name: s.e.name.clone(),
-            kind: s.e.kind.clone(),
-            origin: s.e.origin.clone(),
-            gloss: s.e.gloss.clone(),
-            chain: s.chain.clone(),
-            taken: s.taken,
-        });
-        out.push(crate::family::to_result(&s.e.name.to_lowercase()));
+        if origin_n.get(d.origin.as_str()).copied().unwrap_or(0) >= cap {
+            continue;
+        }
+        *kind_n.entry(d.kind.clone()).or_default() += 1;
+        *origin_n.entry(d.origin.clone()).or_default() += 1;
+        decodes.push(d.clone());
+        out.push(r.clone());
     }
     (out, decodes)
 }
@@ -350,6 +454,112 @@ mod tests {
             a.iter().map(|r| &r.name).collect::<Vec<_>>(),
             b.iter().map(|r| &r.name).collect::<Vec<_>>()
         );
+    }
+
+    /// KB/bridge lint: the knowledge files are the engine's whole world —
+    /// this test keeps them structurally sound as they grow.
+    #[test]
+    fn knowledge_files_pass_lint() {
+        let kinds = ["myth", "foreign", "craft", "nautical", "astro", "nature", "literary"];
+        let mut seen = std::collections::HashSet::new();
+        for e in kb() {
+            let lower = e.name.to_lowercase();
+            assert!(seen.insert(lower.clone()), "duplicate KB name: {}", e.name);
+            assert!(
+                (3..=14).contains(&e.name.len()) && e.name.chars().all(|c| c.is_ascii_alphabetic()),
+                "bad KB name: {}",
+                e.name
+            );
+            assert!(kinds.contains(&e.kind.as_str()), "{}: bad kind {}", e.name, e.kind);
+            assert!(!e.origin.is_empty(), "{}: empty origin", e.name);
+            assert!((0.0..=1.0).contains(&e.spice), "{}: spice {}", e.name, e.spice);
+            assert!(
+                (1..=8).contains(&e.tags.len()),
+                "{}: {} tags",
+                e.name,
+                e.tags.len()
+            );
+            for t in &e.tags {
+                assert!(
+                    !t.is_empty() && t.chars().all(|c| c.is_ascii_lowercase()),
+                    "{}: bad tag {t:?}",
+                    e.name
+                );
+            }
+            assert!(
+                (5..=60).contains(&e.gloss.len()),
+                "{}: gloss length {}",
+                e.name,
+                e.gloss.len()
+            );
+        }
+        let mut edges = std::collections::HashSet::new();
+        for (from, outs) in bridges() {
+            for (to, _, w) in outs {
+                assert!(*w > 0.0 && *w <= 1.0, "bridge {from}->{to}: weight {w}");
+                assert_ne!(from, to, "self-loop bridge: {from}");
+                edges.insert((from.clone(), to.clone()));
+            }
+        }
+        assert!(edges.len() >= 250, "bridge set unexpectedly small: {}", edges.len());
+    }
+
+    /// Coverage gate: the stress-harness expectations, frozen. KB/bridge edits
+    /// must never silently regress breadth (this is the reason-family
+    /// equivalent of the held-out audit discipline).
+    #[test]
+    fn stress_briefs_stay_covered() {
+        let briefs = [
+            "a self hosted password manager",
+            "a terminal log viewer",
+            "a package registry for private modules",
+            "a database migration tool",
+            "a video conferencing app",
+            "an e-commerce checkout library",
+            "a machine learning experiment tracker",
+            "a kubernetes cost optimizer",
+            "an invoice generator for freelancers",
+            "a GPU profiler",
+            "a spreadsheet engine",
+            "a chess training app",
+            "a weather station dashboard",
+            "a dating app",
+            "a podcast editor",
+            "a recipe manager",
+            "a kids drawing app",
+            "an expense splitting app for roommates",
+            "a flight booking search engine",
+            "a plant care reminder app",
+        ];
+        let mut freq: HashMap<String, usize> = HashMap::new();
+        let mut thin = 0usize;
+        for brief in briefs {
+            let (results, decodes) = generate_reason_explained(&cfg(brief), 7);
+            assert!(results.len() >= 4, "{brief}: only {} names", results.len());
+            if results.len() < 5 {
+                thin += 1;
+            }
+            for d in decodes {
+                *freq.entry(d.name).or_default() += 1;
+            }
+        }
+        assert!(thin <= 2, "{thin} thin briefs (<5 names)");
+        for (name, n) in freq {
+            assert!(n <= 7, "wallpaper: {name} appears in {n}/20 pages");
+        }
+    }
+
+    #[test]
+    fn coined_lane_mixes_in_with_chains() {
+        let (_, decodes) = generate_reason_explained(&cfg("a self hosted password manager"), 7);
+        let coined: Vec<&ReasonDecode> = decodes.iter().filter(|d| d.kind == "coined").collect();
+        assert!(!coined.is_empty(), "no coined candidates on a rich brief");
+        for d in &coined {
+            assert!(!d.chain.is_empty(), "coined {} has no chain", d.name);
+            assert!(!d.taken, "coined {} marked taken", d.name);
+        }
+        // Retrieval must still lead the page.
+        assert!(decodes.iter().any(|d| d.kind != "coined"));
     }
 
     #[test]
