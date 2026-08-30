@@ -460,3 +460,14 @@ survey	measure	0.85
 verify	detect	0.6
 fraud	detect	0.85
 detect	sight	0.6
+# Word-sense correction found in real use: "reasoning chains" must not read as
+# retail chains (chains -> store). Strong link/sequence edges outweigh the
+# embedding's shop-sense neighbors.
+chain	link	0.95
+chain	sequence	0.9
+chain	thread	0.8
+inference	logic	0.9
+inference	reason	0.85
+reasoning	logic	0.9
+explain	clarity	0.8
+explainable	clarity	0.8

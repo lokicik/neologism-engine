@@ -353,6 +353,11 @@ export async function generateNames(cfg: Config): Promise<NameResult[]> {
   await ensureInit()
   if (cfg.variant === 'seamblend' || cfg.variant === 'morpheme' || cfg.variant === 'submorph') {
     await ensureSeamblendData()
+  } else {
+    // Warm the Lab bundle in the background so the crates.io chip appears on
+    // every page (it renders only once collision data is loaded). Never block
+    // the classic paths on it, and never let its failure break generation.
+    void ensureSeamblendData().catch(() => {})
   }
   if (cfg.variant === 'submorph') {
     // Dense coinages carry their per-syllable decode onto the card.
