@@ -118,7 +118,7 @@ struct Activation {
 /// Spread activation from the brief. Deterministic; paths record provenance.
 fn activate(cfg: &Config) -> HashMap<String, Activation> {
     let mut act: HashMap<String, Activation> = HashMap::new();
-    let mut boost = |concept: String, weight: f64, path: Vec<String>, act: &mut HashMap<String, Activation>| {
+    let boost = |concept: String, weight: f64, path: Vec<String>, act: &mut HashMap<String, Activation>| {
         let e = act.entry(concept).or_insert(Activation { weight: 0.0, path: Vec::new() });
         if weight > e.weight {
             e.weight = weight;

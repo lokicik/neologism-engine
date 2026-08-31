@@ -180,6 +180,27 @@ fn relevance(frag: &Fragment, field: &HashMap<String, f64>) -> (f64, Vec<String>
     (best, hits)
 }
 
+/// Are two words in one semantic region? Words absent from the table get the
+/// benefit of the doubt so a missing lazy-loaded table changes nothing.
+fn words_cohere(a: &str, b: &str) -> bool {
+    let (a, b) = (a.to_lowercase(), b.to_lowercase());
+    if !semfield::has(&a) || !semfield::has(&b) {
+        return true;
+    }
+    let an = semfield::expand(&a, 25);
+    if an.iter().any(|nb| nb.eq_ignore_ascii_case(&b)) {
+        return true;
+    }
+    let bn = semfield::expand(&b, 25);
+    if bn.iter().any(|nb| nb.eq_ignore_ascii_case(&a)) {
+        return true;
+    }
+    an.iter()
+        .filter(|x| bn.iter().any(|y| x.eq_ignore_ascii_case(y)))
+        .count()
+        >= 2
+}
+
 /// Do a head's and a meaning tail's associations belong to one idea?
 ///
 /// With a brief, the brief itself supplies the common ground: both fragments
@@ -190,28 +211,23 @@ fn relevance(frag: &Fragment, field: &HashMap<String, f64>) -> (f64, Vec<String>
 /// neighbors. Unknown words (absent from the table) are given the benefit of
 /// the doubt so a missing lazy-loaded table cannot empty the page.
 fn associations_cohere(h: &Fragment, t: &Fragment) -> bool {
-    let (Some((ha, _)), Some((ta, _))) = (h.assocs.first(), t.assocs.first()) else {
-        return true;
-    };
-    let (ha, ta) = (ha.to_lowercase(), ta.to_lowercase());
-    if !semfield::has(&ha) || !semfield::has(&ta) {
-        return true;
+    match (h.assocs.first(), t.assocs.first()) {
+        (Some((ha, _)), Some((ta, _))) => {
+            let (ha, ta) = (ha.to_lowercase(), ta.to_lowercase());
+            // Two forms of one word is not a coinage, it is a stutter:
+            // breezy + breeze reads as Breebreez.
+            let shared_prefix = ha
+                .chars()
+                .zip(ta.chars())
+                .take_while(|(a, b)| a == b)
+                .count();
+            if shared_prefix >= 4 {
+                return false;
+            }
+            words_cohere(&ha, &ta)
+        }
+        _ => true,
     }
-    let hn = semfield::expand(&ha, 25);
-    if hn.iter().any(|nb| nb.eq_ignore_ascii_case(&ta)) {
-        return true;
-    }
-    let tn = semfield::expand(&ta, 25);
-    if tn.iter().any(|nb| nb.eq_ignore_ascii_case(&ha)) {
-        return true;
-    }
-    // Neither is the other's neighbor: accept only if they share enough of a
-    // neighborhood to sit in the same semantic region.
-    let shared = hn
-        .iter()
-        .filter(|a| tn.iter().any(|b| a.eq_ignore_ascii_case(b)))
-        .count();
-    shared >= 2
 }
 
 /// Junction of head+tail. Returns (fused lowercase, junction kind, expected
@@ -604,7 +620,10 @@ mod tests {
     #[test]
     fn inventory_loads_with_contract() {
         let inv = inventory();
-        assert!(inv.len() >= 250, "only {} fragments", inv.len());
+        // Phase 143 curation removed ~100 mined fragments whose gloss was only
+        // the word they were chopped out of ("lot" from ocelot). The floor
+        // guards the curated inventory, not the mined one.
+        assert!(inv.len() >= 190, "only {} fragments", inv.len());
         for f in inv {
             if !f.quality {
                 assert!(!f.assocs.is_empty(), "meaning fragment {} has no associations", f.letters);
