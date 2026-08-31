@@ -254,34 +254,51 @@ fn coined_candidates(
     }
     let mut seen_words = HashSet::new();
     coin_words.retain(|w| seen_words.insert(w.clone()));
-    coin_cfg.description = Some(coin_words.join(" "));
-    coin_cfg.roots = Vec::new();
+    // Concepts ride in as roots, not as a synthetic sentence: submorph takes
+    // roots verbatim, while a description would be re-run through keyword
+    // extraction (capped at 6, re-stemmed) and lose the tail of the set.
+    coin_cfg.description = None;
+    coin_cfg.roots = coin_words;
     let (results, decodes) = crate::submorph::generate_submorph_explained(&coin_cfg, seed ^ 0xC01);
     results
         .into_iter()
         .zip(decodes)
         .enumerate()
-        .map(|(i, (r, d))| {
-            // Chain = the activation path of the fragment's best brief-field
-            // hit, ending in the coinage.
-            let hit = d
-                .head_hits
-                .first()
-                .or_else(|| d.tail_hits.first())
-                .map(|h| norm(h));
-            // Best case: the fragment's hit word IS one of our concepts —
-            // inherit that exact path. Fallback (the hit came via submorph's
-            // own one-hop expansion): inherit the strongest concept's path, so
-            // the chain still shows the reasoning that seeded the coinage.
-            let chain = hit
-                .and_then(|h| {
-                    path_of
-                        .iter()
-                        .find(|(c, _)| norm(c) == h)
-                        .map(|(_, p)| p.clone())
-                })
-                .or_else(|| concepts.first().map(|(_, a)| a.path.clone()))
-                .unwrap_or_default();
+        .filter_map(|(i, (r, d))| {
+            // A coinage ships only when the chain shown to the user is true:
+            // the fragment's hit must trace back to a concept, directly or
+            // through one visible embedding step. Fragments whose hit traces to nothing
+            // ("chains" arriving as gravity + arctic, via submorph's own hop
+            // off the field) would need a fabricated chain, so they are
+            // dropped rather than explained away.
+            let mut chain: Option<Vec<String>> = None;
+            for h in d.head_hits.iter().chain(d.tail_hits.iter()) {
+                let h = norm(h);
+                if let Some(p) = path_of.get(&h).cloned() {
+                    chain = Some(p);
+                    break;
+                }
+                if let Some(a) = act_get(act, &h) {
+                    chain = Some(a.path.clone());
+                    break;
+                }
+                // One honest step out: the hit sits in some concept's NEAR
+                // neighborhood, so show that concept and the hit word. Kept
+                // to the nearest few (submorph itself searches 12 deep) —
+                // farther out the embedding drifts to another sense entirely
+                // and the honest chain reads as bad reasoning.
+                if let Some(via) = concepts
+                    .iter()
+                    .filter(|(_, a)| a.weight >= 0.5)
+                    .find(|(c, _)| semfield::expand(c, 5).iter().any(|nb| norm(nb) == h))
+                {
+                    let mut p = via.1.path.clone();
+                    p.push(h);
+                    chain = Some(p);
+                    break;
+                }
+            }
+            let chain = chain?;
             let gloss = format!("{} + {}", d.head_gloss, d.tail_gloss);
             let decode = ReasonDecode {
                 name: r.name.clone(),
@@ -293,7 +310,7 @@ fn coined_candidates(
             };
             // Competitive with strong retrievals so the page genuinely mixes.
             let score = 0.55 + 0.6 * (1.0 - i as f64 / 10.0);
-            (r, decode, score)
+            Some((r, decode, score))
         })
         .collect()
 }
