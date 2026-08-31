@@ -10481,4 +10481,33 @@ sampler's share is halved, because with no brief the Respell and compound
 lanes have nothing to be specific about and were producing the weakest cards
 on the page. Promptless Auto has no audit; it was judged in the browser.
 
+### Phase 144 - the shortlist (2026-08-31)
+
+WP2 of the plan, finally built. Six taste rounds ended with nothing chosen and
+every one of them was a hundred-name gallery scrolled past, so the Create page
+no longer leads with a grid. It leads with two to four finalists: each carries
+the engine's own case for it (a story's chain, a coinage's decode, or - for a
+name with neither - how it was built, from the same explanation the card's Why
+panel shows), its crates.io availability, and the three places the name has to
+survive: `cargo add`, the repo line, the import statement. The full batch is
+one control away and unchanged.
+
+Which names become finalists is the product claim. Advocacy is a tier above
+score rather than a bonus on top of it, because a high composite is not the
+same as a good name - Buttehq scores 93 and says nothing. A half decode
+("breeze + canon suffix") ranks below a full one, score-only names fill in
+only up to a floor of three so the page is still a choice, and no more than
+two finalists may share a construction or an opening.
+
+`web/e2e/shortlist-contract.mjs` pins it with 25 checks across a promptless
+page and two briefs, and records an honest limit while it is there: a
+brief-driven page carries at most one reasoning card and only about 57% of
+them offer it a slot, so on those pages the promise is only that a batch with
+a chain leads the shortlist with it. Widening the slot rule to close that gap
+was tried and reverted - coverage went to nearly every page, but the same
+story then repeated across a brief's seed pages and cost two families their
+cross-seed diversity. The batch tip also stopped naming a second winner; it
+now defers to the shortlist. Held-out, cold, auto and mode-taste audits exit
+0; fixture 26/26; build clean.
+
 See `README.md` for the research bibliography and `~/.claude/plans/` for the full build history.
