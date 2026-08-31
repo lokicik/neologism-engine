@@ -10452,4 +10452,33 @@ embedding neighbours 0.6x, killing the "reasoning chains" -> retail-store
 class of leak, and the KB grew to 321 entries with the real-use gems
 (Mahlas, Mantik, Kiyas, Burhan, Hece). 205 tests; heldout, auto, cold and
 mode-taste audits exit 0; construction fixture 26/26.
+### Phase 143 - Auto can say why (2026-08-31)
+
+The page shape changed on purpose. Brief-driven Auto held a one-accent
+contract - at most one non-Brandable card on the visible page - which is why
+a brief was the only surface where the engine could not explain itself. It
+now carries one guided accent PLUS one reasoning card. The card never
+competes for a slot: it is offered the weakest direct-suffix card below the
+lead, takes it only when it is at least as strong, and refuses a page already
+sitting on a four-name suffix family (that guard came from a real regression
+it caused - a fifth "-lens" name on a legal-research page). The lead is never
+touched, so LexCite, SkyDock, ShipOps and CogLoop still lead their briefs.
+
+The audits were updated where they encoded the old shape and nowhere else:
+accent counting in three audits, the wording-variant comparison (now on the
+page spine, since the story card deliberately reads the words the user wrote),
+two diversity thresholds lowered by the single name the story slot can repeat
+across seeds, and four repair pins re-pinned to what the slot now holds -
+Brigid for a documentation site generator, Muvakkit for a mindfulness timer.
+Every quality floor is untouched and green: average 85.36 (up from 84.85),
+lead 88.22, coverage 1.40, zero sub-75 names, and the Auto audit reports
+59/59 reasoning cards prompt-linked.
+
+Promptless Auto now shows two story cards instead of one - the accent
+round-robin places one card per batch per pass, so the reasoning batch is
+split and its halves sit at either end of the accent order - and the classic
+sampler's share is halved, because with no brief the Respell and compound
+lanes have nothing to be specific about and were producing the weakest cards
+on the page. Promptless Auto has no audit; it was judged in the browser.
+
 See `README.md` for the research bibliography and `~/.claude/plans/` for the full build history.
