@@ -1,4 +1,5 @@
 import type { BatchStats, Config, NameResult } from './engine'
+import { pickShortlist } from './shortlist'
 
 // Pragmatic, transparent if-then tips driven by the batch's aggregate metrics.
 // These are heuristic UX rules — not from any paper (unlike the diversity metric,
@@ -32,8 +33,12 @@ export function recommendations(
   }
 
   if (tips.length === 0) {
-    const best = results[stats.best_index]
-    if (best) tips.push(`Strong batch — top pick: ${best.name}.`)
+    // Phase 144: the page argues for finalists, and a second "top pick" chosen
+    // on score alone contradicted it - the tip named Thundlt while the page
+    // was making its case for Hanse. The shortlist is the page's answer, so
+    // the tip defers to it.
+    const [lead] = pickShortlist(results, () => undefined, 1)
+    if (lead) tips.push(`Strong batch — leading with ${lead.name}.`)
   }
   return tips
 }
