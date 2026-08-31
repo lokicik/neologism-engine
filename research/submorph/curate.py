@@ -60,7 +60,6 @@ HAND_ROWS = [
     ("mod", "H", "module:0.80,modern:0.70,mode:0.65", "module · modern"),
     ("nav", "H", "navigate:0.85,naval:0.60", "navigate"),
     ("ora", "H", "oracle:0.80,orate:0.60", "oracle"),
-    ("pon", "T", "component:0.60,proponent:0.55", "component"),
     ("por", "H", "portal:0.75,port:0.70", "portal"),
     ("sec", "H", "secure:0.85,second:0.60", "secure"),
     ("sen", "H", "sensor:0.75,sense:0.75", "sense"),
@@ -139,7 +138,28 @@ DENYLIST = {
     "fet",    # fetid-adjacent
     "mum",    # Creamum
     "sus",    # reads as slang "suspicious" (pegasus chop)
+    # 2026-08-31 taste pass, reading the decodes the cards actually show: a
+    # meaning fragment must carry its gloss to an English ear. These are
+    # slices of one word they cannot evoke ("lot" never meant ocelot), or
+    # pairs agreeing only in letters ("per": perky, copper). Kept out of the
+    # inventory rather than filtered at runtime — every mechanical version of
+    # the rule either kept "per" or threw out "cel", the family's exemplar.
+    "ain", "ant", "bal", "balt", "ber", "bex", "bol", "bov", "brant", "bric",
+    "cate", "chy", "cus", "dant", "ect", "fee", "fel", "ful", "gal", "gic",
+    "ging", "gon", "gree", "ing", "ker", "lant", "lax", "lel", "ler", "lid",
+    "lin", "lit", "lot", "mic", "mier", "mond", "mong", "moth", "nad", "nade",
+    "nal", "nant", "nec", "ner", "nic", "non", "nox", "nut", "nyx", "ofs",
+    "ond", "ound", "per", "pet", "pher", "phic", "phoon", "pon", "preme",
+    "quoi", "ral", "ran", "rie", "ryx", "sic", "splay", "stal", "stib",
+    "stic", "stin", "stute", "sty", "tact", "tan", "tar", "thic", "thod",
+    "thos", "tiv", "ton", "tra", "tral", "trast", "tric", "tron", "tum",
+    "tun", "tween", "vic", "vil", "ving", "voy", "yon", "zell", "zelle",
 }
+
+# Fragments the same pass kept as heads only: they open their association
+# ("breez" → breeze) but say nothing as a suffix. The curated TSV also trims
+# their association lists to the words they actually open.
+HEAD_ONLY = {"breez", "cer", "fer", "jaz", "mer", "smal"}
 
 
 def load_common():
@@ -179,6 +199,13 @@ def main():
                 continue
             if frag in seen:
                 continue
+            if frag in HEAD_ONLY:
+                pos = "H"
+                kept = [p for p in pairs if p[0].lower().startswith(frag)]
+                if not kept:
+                    continue
+                assocs = ",".join(":".join(p) for p in kept)
+                gloss = " · ".join(p[0] for p in kept[:2])
             seen.add(frag)
             out_rows.append((frag, pos, "meaning", "0.00", assocs, gloss))
 

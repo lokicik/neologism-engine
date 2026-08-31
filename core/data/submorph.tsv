@@ -53,6 +53,7 @@ cry	H	meaning	0.00	crystal:0.71	crystal
 cur	H	meaning	0.00	current:0.75,curate:0.70,secure:0.55	current · curate
 dic	H	meaning	0.00	dictionary:0.57	dictionary
 doc	H	meaning	0.00	document:0.67	document
+dex	T	meaning	0.00	index:0.85,dexterity:0.60	index · dexterity
 dom	T	meaning	0.00	wisdom:0.59	wisdom
 dur	H	meaning	0.00	durable:0.80,endure:0.70	durable
 dwe	H	meaning	0.00	dwelling:0.65	dwelling
