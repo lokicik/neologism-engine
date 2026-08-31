@@ -18,7 +18,7 @@ use crate::style::Config;
 use crate::submorph::norm;
 use crate::{collision, keywords, rank_jitter, semfield, NameResult};
 use serde::Serialize;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::sync::OnceLock;
 
 const STORY_KB: &str = include_str!("../data/story_kb.tsv");
@@ -236,13 +236,25 @@ fn coined_candidates(
         .collect();
     let mut coin_cfg = cfg.clone();
     coin_cfg.variant = Some("submorph".to_string());
-    coin_cfg.description = Some(
-        concepts
-            .iter()
-            .map(|(c, _)| c.as_str())
-            .collect::<Vec<_>>()
-            .join(" "),
-    );
+    // Sense trust for the coined lane: submorph re-expands every seed through
+    // the embedding, sense-blind — a bridged brief keyword ("chains") would
+    // leak its wrong senses (retail stores) back in. Substitute those seeds
+    // with their declared bridge targets; derived concepts (weight < 1.0)
+    // pass through untouched, so bridge targets themselves are never rewritten.
+    let mut coin_words: Vec<String> = Vec::new();
+    for (c, a) in &concepts {
+        match bridges().get(*c).filter(|_| a.weight >= 0.999) {
+            Some(outs) => {
+                let mut outs: Vec<&(String, String, f64)> = outs.iter().collect();
+                outs.sort_by(|x, y| y.2.partial_cmp(&x.2).unwrap_or(std::cmp::Ordering::Equal));
+                coin_words.extend(outs.iter().take(2).map(|(t, _, _)| t.clone()));
+            }
+            None => coin_words.push((*c).clone()),
+        }
+    }
+    let mut seen_words = HashSet::new();
+    coin_words.retain(|w| seen_words.insert(w.clone()));
+    coin_cfg.description = Some(coin_words.join(" "));
     coin_cfg.roots = Vec::new();
     let (results, decodes) = crate::submorph::generate_submorph_explained(&coin_cfg, seed ^ 0xC01);
     results

@@ -478,3 +478,24 @@ prove	proof	0.85
 pronounce	syllable	0.8
 deduce	logic	0.85
 argument	logic	0.75
+# 30-brief sweep (Phase 143): coverage gaps + word-sense declarations.
+publish	press	0.85
+site	page	0.75
+snippet	fragment	0.9
+snippet	clip	0.7
+scrape	harvest	0.85
+scrape	gather	0.75
+workout	training	0.9
+exercise	training	0.85
+meditation	calm	0.8
+icon	symbol	0.9
+icon	glyph	0.8
+token	symbol	0.85
+token	key	0.75
+screenshot	capture	0.9
+screenshot	image	0.8
+annotation	note	0.9
+annotate	note	0.9
+birdwatching	bird	0.9
+birdwatching	watch	0.8
+bird	wing	0.7

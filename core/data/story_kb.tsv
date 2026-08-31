@@ -193,7 +193,7 @@ Meridian	astro	Latin	the line of highest sun	line,peak,noon,reference,map	0.2
 Tropic	astro	Greek	the turning line of the sun	turn,line,boundary,warm	0.4
 Solstice	astro	Latin	the day the sun stands still	moment,extreme,turn,season,still	0.3
 Equinox	astro	Latin	day and night in balance	balance,equal,moment,fair	0.3
-Aphelion	astro	Greek	the orbit's farthest point	far,orbit,extreme,distance	0.8
+Aphelion	astro	Greek	the orbit's farthest point	distant,orbit,extreme,distance	0.8
 Lagrange	astro	French	the point where forces balance	balance,stable,point,orbit,physics	0.5
 Pulsar	astro	English	the star that keeps perfect time	pulse,regular,signal,timing,beacon	0.3
 Nebula	astro	Latin	the cloud where stars are born	cloud,birth,create,form,cosmic	0.2
@@ -252,7 +252,7 @@ Hattat	craft	Ottoman	the master of beautiful writing	write,beautiful,craft,font,
 Bursa	craft	Ottoman	the silk market city; the bourse	market,exchange,trade,silk,commerce	0.8
 Duet	craft	Italian	two voices made for each other	pair,duo,together,date,harmony,music	0.2
 Serenata	craft	Italian	the evening song under a window	romance,charm,evening,music,court	0.7
-Golem	myth	Hebrew	clay given instructions and life	automation,ai,robot,instructions,animate	0.5
+Golem	myth	Hebrew	clay given instructions and life	automation,ai,robot,instructions,animate,imitation	0.5
 Augur	craft	Roman	reader of omens in bird flight	predict,forecast,ai,signs,analyze	0.6
 Sibyl	myth	Greek	the prophetess whose answers came true	predict,ai,forecast,answer,oracle	0.6
 Obscura	craft	Latin	the dark chamber that made the first image	photo,image,camera,lens,capture	0.5
@@ -324,3 +324,11 @@ Delil	foreign	Ottoman	the evidence; the guide who shows the way	evidence,proof,g
 Mizan	craft	Ottoman	the balance scale that weighs fairly	balance,weigh,measure,fair,ledger	0.9
 Imla	foreign	Ottoman	spelling; getting the letters right	spelling,write,letter,correct,text	0.9
 Hece	foreign	Turkish	the syllable, the beat of a word	syllable,pronounce,sound,word,rhythm	0.9
+Matbaa	craft	Ottoman	the printing house of the empire	print,press,publish,page,copy	0.9
+Ayna	foreign	Turkish	the mirror	mirror,reflect,imitation,copy,double	0.8
+Tessera	craft	Latin	one small tile of the mosaic	fragment,piece,tile,mosaic,part	0.7
+Idman	foreign	Turkish	training; the daily practice	training,exercise,practice,fitness,drill	0.8
+Pehlivan	craft	Ottoman	the champion wrestler of the fair	wrestle,strength,champion,athlete,training	1.0
+Nefes	foreign	Turkish	the breath; a Sufi song	breath,air,calm,spirit,song	0.9
+Tamga	craft	Turkic	the clan mark stamped on what you own	mark,symbol,icon,sign,brand,stamp	0.9
+Hudhud	myth	Persian	the wise hoopoe who led the birds	bird,guide,scout,quest,messenger	1.0
