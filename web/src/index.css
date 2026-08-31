@@ -1938,3 +1938,157 @@ body {
   .chips-row .chip-wrap:last-child .menu-form { min-width: 0; }
   .chips-row .chip-wrap:last-child .menu-form input { scroll-margin-block: 8px; }
 }
+
+/* Phase 144: the shortlist. Ten names scrolled past is how six taste rounds
+   ended with nothing chosen; a page now argues for a few finalists — each
+   with the engine's own case for it and the places the name has to survive —
+   and keeps the full batch behind one control. */
+.shortlist {
+  display: flex;
+  flex-direction: column;
+  gap: .9rem;
+  margin-top: .75rem;
+}
+
+.shortlist-head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: .25rem .75rem;
+}
+
+.shortlist-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: -.01em;
+}
+
+.shortlist-note {
+  margin: 0;
+  font-size: .82rem;
+  color: var(--muted);
+}
+
+.finalist-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: .9rem;
+  align-items: start;
+}
+
+.finalist {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.1rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: .8rem;
+  animation: card-in .45s cubic-bezier(.2, .7, .3, 1) both;
+}
+.finalist:hover { border-color: rgba(255, 255, 255, .16); }
+.finalist.passed { opacity: .5; }
+
+.finalist-head {
+  display: flex;
+  align-items: flex-start;
+  gap: .75rem;
+}
+
+.finalist-identity { min-width: 0; flex: 1; }
+
+.finalist-name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -.02em;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+
+.finalist-case {
+  margin: .3rem 0 0;
+  font-size: .84rem;
+  line-height: 1.4;
+  color: var(--accent);
+}
+
+.finalist-marks {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: .3rem;
+  flex-shrink: 0;
+}
+
+.finalist-score {
+  font-size: .82rem;
+  font-weight: 700;
+  color: var(--accent2);
+  white-space: nowrap;
+}
+
+.finalist-avail {
+  font-size: .72rem;
+  color: var(--accent2);
+  white-space: nowrap;
+}
+.finalist-avail.taken { color: var(--danger); }
+
+.finalist-contexts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: .3rem;
+  border-top: 1px solid var(--border);
+  padding-top: .65rem;
+}
+
+.finalist-contexts li {
+  display: flex;
+  align-items: baseline;
+  gap: .6rem;
+  min-width: 0;
+}
+
+.context-label {
+  flex: 0 0 3.6rem;
+  font-size: .68rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--muted);
+}
+
+.finalist-contexts code {
+  font-size: .8rem;
+  color: var(--text);
+  background: var(--surface2);
+  border-radius: 6px;
+  padding: .15rem .45rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.finalist-actions {
+  display: flex;
+  gap: .5rem;
+}
+
+.shortlist-reveal {
+  align-self: flex-start;
+  padding: .4rem .95rem;
+  font-size: .82rem;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: color .15s, border-color .15s;
+}
+.shortlist-reveal:hover { color: var(--text); border-color: rgba(255, 255, 255, .22); }

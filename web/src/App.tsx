@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
-import { generateBatch, generateColdLeadRetry, generateNames, batchMetrics, extractKeywords, type BatchMetrics, type Config, type NameResult } from './lib/engine'
+import { generateBatch, generateColdLeadRetry, generateNames, batchMetrics, cratesTaken, extractKeywords, type BatchMetrics, type Config, type NameResult } from './lib/engine'
 import { recommendations } from './lib/recommend'
 import { buildReferencedProfile, coldQualityPoolCount, compoundTastePoolCount, feedbackForContext, fillColdLeadRetry, MIN_TASTE_SIGNALS, needsColdLeadRetry, needsQualityRepair, preferencePoolCount, prioritizeColdStrongLead, repairWeakShortlist, shortlistByPreference } from './lib/preferences'
 import { tasteContextForConfig } from './lib/taste-context'
@@ -24,10 +24,12 @@ import {
   toggleTasteFeedback,
 } from './lib/storage'
 import { savedNameEntries, tasteIdentity } from './lib/taste-identity'
+import { pickShortlist } from './lib/shortlist'
 import { type JudgeConfig } from './lib/judge'
 import { decodeShareUrl } from './lib/share'
 import { CommandBar } from './components/CommandBar'
 import { NameCard } from './components/NameCard'
+import { Shortlist } from './components/Shortlist'
 import { StatsPanel } from './components/StatsPanel'
 import { Sidebar, type AppView } from './components/Sidebar'
 import { SavedPage } from './components/SavedPage'
@@ -542,6 +544,7 @@ export default function App() {
     }
   }
 
+  const [showAllNames, setShowAllNames] = useState(false)
   const favoriteKeys = new Set(favorites.map(tasteIdentity))
   const rejectedKeys = new Set(rejected.map(tasteIdentity))
   const savedEntries = savedNameEntries(favorites, importedSaved)
@@ -565,6 +568,9 @@ export default function App() {
     tasteFeedback.rejected,
   )
   const displayResults = results
+  // Phase 144: the page argues for a few finalists instead of listing ten.
+  // The full batch stays behind one control (`showAllNames`).
+  const finalists = pickShortlist(displayResults, cratesTaken)
   const positiveSignals = tasteFeedback.favorites.length + activeReferences.length
   const likesNeeded = Math.max(0, MIN_TASTE_SIGNALS - positiveSignals)
   const passesNeeded = Math.max(0, MIN_TASTE_SIGNALS - tasteFeedback.rejected.length)
@@ -696,7 +702,21 @@ export default function App() {
                 </div>
               )}
 
-              {displayResults.length > 0 && (
+              {finalists.length > 0 && (
+                <Shortlist
+                  finalists={finalists}
+                  favoriteKeys={favoriteKeys}
+                  rejectedKeys={rejectedKeys}
+                  identityOf={tasteIdentity}
+                  onToggleFavorite={handleToggleFavorite}
+                  onToggleRejected={handleToggleRejected}
+                  totalCount={displayResults.length}
+                  showingAll={showAllNames}
+                  onToggleAll={() => setShowAllNames((value) => !value)}
+                />
+              )}
+
+              {displayResults.length > 0 && showAllNames && (
                 <>
                   <div className="results-grid">
                     {displayResults.map((r, i) => (

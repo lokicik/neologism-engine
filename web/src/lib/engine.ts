@@ -267,6 +267,13 @@ const offerReasoningSlot = (
     return page
   }
   const quality = structuralQuality(candidate)
+  // Only a direct-suffix form gives up its slot - a name whose whole idea is a
+  // brandable ending. Letting the card also take a stem-wall member was tried
+  // and reverted: it raised story-card coverage from 57% to nearly all pages,
+  // but the same story then repeated across a brief's seed pages and cost the
+  // cross-seed diversity two brief families are held to. A page whose ten
+  // names are all compounds ("a self hosted password manager") therefore keeps
+  // its shape and gets no story card, which is the honest trade.
   const slots = page
     .map((result, index) => ({ result, index, quality: structuralQuality(result) }))
     .filter(({ result, index, quality: replacedQuality }) => (
