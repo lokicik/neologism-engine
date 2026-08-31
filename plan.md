@@ -10423,4 +10423,33 @@ reasoning too. (4) An instant crates.io availability chip appears on every
 card once the Lab data bundle is loaded ('free' definitive, 'taken' ~0.5% FP)
 - the objective-value wedge surfaced at last. KB stands at 311 entries /
 ~440 bridges after the third curation pass. 205 tests; held-out green.
+### Phase 143 - honesty pass and inventory curation (2026-08-31)
+
+Driven by using the app as a reader rather than by a metric. (1) Coined names
+must carry a TRUE chain: a coinage ships only when its fragment hit resolves
+to an activated concept, or sits in one strong concept's nearest-5
+neighborhood, and the chain then shows that real step (chains -> link ->
+connect -> Cognect). The old fallback inherited the strongest concept's path,
+so the card claimed "chains -> Gravtic" for a name that is gravity + arctic;
+untraceable coinages are now dropped instead of explained away (coined share
+~16% of a page, all explainable). (2) Promptless pairs must cohere: with no
+brief there is no common ground, so head and tail associations have to be
+semantic neighbours, and two forms of one word are rejected (no Breebreez).
+(3) Inventory curation, the big one: ~95 mined meaning-fragments removed
+because the gloss was only the word they were chopped out of ("lot" from
+ocelot, "gon" from argon, "per" from perky/copper), six kept as heads only
+with trimmed associations (breez, cer, fer, jaz, mer, smal). submorph.tsv
+298 -> 204 rows, contract floor 250 -> 190, and curate.py learned the same
+rule so a rerun cannot resurrect them. The judgment deliberately lives in the
+data: every runtime version of it either kept "per" or threw out "cel", the
+family's own exemplar. (4) Promptless Auto now carries four reasoning cards
+instead of two - with no brief, a coinage has no domain to point at, and the
+story names are the strongest thing on the page. Same surface before and
+after: Silmoth (silver + behemoth), Prainal, Breebreez -> Mancept, Sernect,
+Nimpuls, Lumtain, plus Refrain / Hanse / Azimut. Sense-trust also landed
+earlier in the day: keywords with hand-written bridges discount their
+embedding neighbours 0.6x, killing the "reasoning chains" -> retail-store
+class of leak, and the KB grew to 321 entries with the real-use gems
+(Mahlas, Mantik, Kiyas, Burhan, Hece). 205 tests; heldout, auto, cold and
+mode-taste audits exit 0; construction fixture 26/26.
 See `README.md` for the research bibliography and `~/.claude/plans/` for the full build history.
