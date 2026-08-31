@@ -714,19 +714,35 @@ export async function generateBatch(cfg: Config): Promise<NameResult[]> {
   // the strongest promptless names are consistently the ones that arrive with
   // a story and a 🧭 chain (Regatta, Bottega, Kura). Brief-driven Auto above
   // is untouched.
+  // Accent order matters: batches are round-robined by index, so whichever
+  // comes first gets the earliest slots. Reasoning leads the accents because
+  // on a promptless page it is the strongest thing the engine has - a coinage
+  // with no brief has no domain to point at, while a story card always does.
+  // The classic sampler keeps a smaller share: with no brief its Respell and
+  // compound lanes have nothing to be specific about, and they produced the
+  // weakest cards on the page (Mimize, Taperba, Micrall).
   const subs: Config[] = [
     { ...cfg, variant: 'submorph', compound: false, count: total },
-    { ...cfg, variant: undefined, compound: false, count: brandable },
-    { ...cfg, variant: 'realword', compound: false, count: realword },
+    { ...cfg, variant: 'reason', compound: false, count: Math.max(3, Math.floor(total * 0.4)) },
+    { ...cfg, variant: undefined, compound: false, count: Math.max(2, Math.floor(brandable / 2)) },
+    { ...cfg, variant: 'realword', compound: false, count: Math.max(1, Math.floor(realword / 2)) },
     { ...cfg, variant: 'respell', compound: false, count: respell },
     { ...cfg, variant: undefined, compound: true, count: compound },
-    { ...cfg, variant: 'reason', compound: false, count: 4 },
   ]
   const batches = await Promise.all(subs.map((c) => (c.count ? generateNames(c) : Promise.resolve([]))))
+  // Split the reasoning batch in two and place the halves at either end of the
+  // accent order. Accents are round-robined by index, so a single batch only
+  // ever lands one card on a ten-name page however many it holds.
+  const [submorphBatch, reasonBatch, ...restBatches] = batches
+  const reasoningLead = reasonBatch.slice(0, 2)
+  const reasoningTail = reasonBatch.slice(2)
   // Round-robin only the accent modes, then place them at even intervals among
   // the primary results. The old one-from-each round robin made three of the
   // first four cards accent modes even though the primary was the quality lead.
-  return mergeAutoBatches(batches, total)
+  return mergeAutoBatches(
+    [submorphBatch, reasoningLead, ...restBatches.slice(0, 2), reasoningTail, ...restBatches.slice(2)],
+    total,
+  )
 }
 
 export interface BatchStats {
