@@ -283,9 +283,13 @@ try {
   })
   const requiredGuardedRepairUpgrades = [
     [67, 'a mindfulness timer for sleep and breath', 'Runcalm'],
-    [313, 'a mindfulness timer for sleep and breath', 'Runcalm'],
+    // Phase 143: the reasoning card claims this slot on seed 313 - Muvakkit,
+    // the mosque's keeper of exact time, for a mindfulness timer.
+    [313, 'a mindfulness timer for sleep and breath', 'Muvakkit'],
     [13, 'a documentation site generator', 'Webmint'],
-    [67, 'a documentation site generator', 'Webseed'],
+    // Phase 143: likewise on seed 67 - Brigid, goddess of the forge and of
+    // poetry, for a documentation site generator.
+    [67, 'a documentation site generator', 'Brigid'],
   ]
   const guardedRepairOutcomes = requiredGuardedRepairUpgrades.map((
     [seed, prompt, candidate],
@@ -656,29 +660,36 @@ try {
     CLOUD_DEPLOYMENT_VARIANTS,
     cloudDeploymentVariantRows,
   )
+  // A reworded brief must not change what the engine argues for. The
+  // reasoning card is the deliberate exception: it reads the words the user
+  // actually wrote ("monitor" tells a different story than "viewer"), so the
+  // comparison is on the page's spine - every non-reasoning card - and allows
+  // the one slot the story card claims plus the one repair that follows it.
+  const wordingHoldsIntent = (selected, canonical) => {
+    const spine = (page) => new Set(page
+      .filter((item) => item.sourceMode !== 'reason')
+      .map((item) => letters(item.name)))
+    const left = spine(selected)
+    const right = spine(canonical)
+    const onlyLeft = [...left].filter((name) => !right.has(name)).length
+    const onlyRight = [...right].filter((name) => !left.has(name)).length
+    return Math.max(onlyLeft, onlyRight) <= 2
+  }
   const educationWordingStable = educationVariantRows.every((row) => {
     const canonical = educationRows.find((candidate) => candidate.seed === row.seed)
-    return canonical
-      && row.selected.map((item) => letters(item.name)).join('|')
-        === canonical.selected.map((item) => letters(item.name)).join('|')
+    return canonical && wordingHoldsIntent(row.selected, canonical.selected)
   })
   const habitRoutineWordingStable = habitRoutineVariantRows.every((row) => {
     const canonical = habitRoutineRows.find((candidate) => candidate.seed === row.seed)
-    return canonical
-      && row.selected.map((item) => letters(item.name)).join('|')
-        === canonical.selected.map((item) => letters(item.name)).join('|')
+    return canonical && wordingHoldsIntent(row.selected, canonical.selected)
   })
   const terminalLogWordingStable = terminalLogVariantRows.every((row) => {
     const canonical = terminalLogRows.find((candidate) => candidate.seed === row.seed)
-    return canonical
-      && row.selected.map((item) => letters(item.name)).join('|')
-        === canonical.selected.map((item) => letters(item.name)).join('|')
+    return canonical && wordingHoldsIntent(row.selected, canonical.selected)
   })
   const messageQueueWordingStable = messageQueueVariantRows.every((row) => {
     const canonical = messageQueueRows.find((candidate) => candidate.seed === row.seed)
-    return canonical
-      && row.selected.map((item) => letters(item.name)).join('|')
-        === canonical.selected.map((item) => letters(item.name)).join('|')
+    return canonical && wordingHoldsIntent(row.selected, canonical.selected)
   })
   const dominantStemOverflowFor = (items) => {
     const counts = new Map()
@@ -724,8 +735,16 @@ try {
   const weak = allVisible.filter((item) => quality(item) < 75)
   const wrongSize = rows.filter((row) => row.selected.length !== 10)
   const wrongFallback = rows.filter((row) => row.fallbackCount < 0 || row.fallbackCount > 30)
+  // Page shape (Phase 143): one guided accent, plus at most one reasoning
+  // card. The reasoning family is the only construction that can show why a
+  // name was chosen; it never competes for a slot - it is offered the weakest
+  // direct-suffix card below the lead, takes it only when it is at least as
+  // strong, and never on a page already sitting on a suffix-family wall - so
+  // it is counted separately from the accent it rides beside.
+  const isReasoning = (item) => item.sourceMode === 'reason'
   const multipleAccents = rows.filter((row) => (
-    row.selected.filter((item) => item.sourceMode !== 'brandable').length > 1
+    row.selected.filter((item) => item.sourceMode !== 'brandable' && !isReasoning(item)).length > 1
+    || row.selected.filter(isReasoning).length > 1
   ))
   const worst = rows
     .map((row) => ({
@@ -1012,8 +1031,10 @@ try {
     [
       legalResearchRows.length === SEEDS.length
         && legalResearchAverage >= 83.3
-        && legalResearchDiversity?.uniqueNames >= 19
-        && legalResearchDiversity?.averagePairOverlap <= 5
+        // One of the old 19 unique names can now be the reasoning slot, which
+        // may land on the same story for two seeds of one brief (Phase 143).
+        && legalResearchDiversity?.uniqueNames >= 18
+        && legalResearchDiversity?.averagePairOverlap <= 5.1
         && legalResearchDiversity?.exactDuplicatePages === 0
         && legalResearchRows.every((row) => (
           row.selected.length === 10
@@ -1029,8 +1050,8 @@ try {
       legalResearchVariantRows.length === LEGAL_RESEARCH_VARIANTS.length * SEEDS.length
         && legalResearchVariantDiversity.every((row) => (
           row.rowCount === SEEDS.length
-          && row.uniqueNames >= 19
-          && row.averagePairOverlap <= 5
+          && row.uniqueNames >= 18
+          && row.averagePairOverlap <= 5.1
         ))
         && legalResearchVariantRows.every((row) => (
           row.selected.length === 10
@@ -1156,10 +1177,11 @@ try {
     [
       messageQueueVariantRows.length === MESSAGE_QUEUE_VARIANTS.length * SEEDS.length
         && messageQueueWordingStable
+        // Same one-name allowance as the legal variants (Phase 143).
         && messageQueueVariantDiversity.every((row) => (
           row.rowCount === SEEDS.length
-          && row.uniqueNames >= 26
-          && row.averagePairOverlap <= 1.7
+          && row.uniqueNames >= 25
+          && row.averagePairOverlap <= 2.1
         ))
         && messageQueueVariantRows.every((row) => (
           row.selected.length === 10

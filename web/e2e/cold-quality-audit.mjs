@@ -37,13 +37,16 @@ const NEAR_TIE_TOLERANCE = 0.005
 const PAIR_SET_QUALITY_FLOOR = 0.84
 const BRANDABLE_SET_QUALITY_FLOOR = 0.85
 const PAIR_SET_GAIN = 0.02
+// Phase 143 re-pinned: a reasoning card now occupies one slot per page, so the
+// weak card the targeted retry finds is a different one on four of these six
+// pages, and the Pulsetrail page no longer has a gap to close. The retry still
+// fires on exactly the same six briefs.
 const EXPECTED_RETRY_CHANGES = [
-  'Shieldora -> Kinloom',
+  'Shieldify -> Kinloom',
   'Poolify -> PayMate',
-  'Surgeora -> Kitwave',
+  'Fluxora -> Kitwave',
   'Bufferia -> Bufferlab',
-  'Vitalix -> RepLoop',
-  'Pulsetrail -> Pulselab',
+  'Vitalia -> RepLoop',
   'Vitalia -> RepLoop',
 ]
 
@@ -178,8 +181,12 @@ try {
   const repairedPages = rows.filter((row) => row.fallbackCount > 0).length
   const wrongSize = rows.filter((row) => row.selected.length !== 10).length
   const wrongFallback = rows.filter((row) => ![0, 30].includes(row.fallbackCount)).length
+  // Phase 143 page shape: one guided accent plus at most one reasoning card,
+  // so the reasoning card is not counted as a second accent.
   const accentCounts = rows.map((row) => (
-    row.selected.filter((item) => item.sourceMode !== 'brandable').length
+    row.selected.filter((item) => (
+      item.sourceMode !== 'brandable' && item.sourceMode !== 'reason'
+    )).length
   ))
   const multipleAccentPages = accentCounts.filter((count) => count > 1).length
   const maxAccents = Math.max(...accentCounts)
@@ -324,7 +331,7 @@ try {
     [wrongSize === 0, 'every repaired cold page contains ten names'],
     [wrongFallback === 0, 'repair uses either no fallback or the bounded 30-name pool'],
     [multipleAccentPages === 0, 'cold repair preserves Auto\'s one-accent visible-page contract'],
-    [retryRows.length === 6 && retrySwapLabels.length === 7 && exactRetryChanges, 'the targeted retry closes exactly six fixed gaps and upgrades one weak set card'],
+    [retryRows.length === 6 && retrySwapLabels.length === 6 && exactRetryChanges, 'the targeted retry closes exactly six fixed gaps'],
     [orderingChangedSet === retryRows.length, 'only targeted retry pages change the repaired name set'],
     [retryContractViolations === 0, 'each change is a bounded lead retry or a diversity-safe two-point semantic/Brandable set upgrade'],
     [unjustifiedWeakenedLeads === 0, 'any first-card quality trade stays inside the semantic/guided near-tie rule'],

@@ -61,6 +61,8 @@ export interface NameResult {
 }
 
 const GUIDED_METAPHOR_POOL = 8
+const REASON_ACCENT_POOL = 4
+const REASON_ACCENT_FAMILY_CAP = 4
 const GUIDED_PAIR_POOL = 12
 const LEGAL_GUIDED_PAIR_POOL = 24
 const AUTO_ACCENT_QUALITY_FLOOR = 75
@@ -222,6 +224,66 @@ const addQualityNeutralGuidedAlternative = (
   const next = page.slice()
   next[replacement.index] = candidate
   return next
+}
+
+// Which reasoning card is offered to a brief-driven page. Plain seed % pool
+// collides on neighbouring seeds (13 and 313 pick the same card), which would
+// pin one story to every seed page and cost cross-seed diversity, so the seed
+// is mixed first.
+const pickReasonCandidate = (
+  pool: NameResult[],
+  seed: number | undefined,
+): NameResult | undefined => {
+  if (pool.length === 0) return undefined
+  const mixed = Math.imul(Math.trunc(seed ?? 0) >>> 0, 2654435761) >>> 0
+  return pool[mixed % pool.length]
+}
+
+// The reasoning card never competes for a slot: it is offered the weakest
+// direct-suffix card on the finished page and takes it only if it is at least
+// as strong — the same quality-neutral swap the second metaphor uses. It also
+// never takes the lead: the lead is the page's argument for itself, and the
+// pinned brief-specific leads (SkyDock, LexCite, ShipOps) depend on it.
+// A page's shape is as much a quality as its names: replacing the one card
+// that breaks a suffix family (four "-lens" names plus one "-ify") would hand
+// the page a five-name wall. The swap is only taken when it does not make the
+// largest family larger.
+const familyTail = (value: string): string => letters(value).slice(-4)
+
+const largestFamily = (page: NameResult[]): number => {
+  const counts = new Map<string, number>()
+  for (const result of page) {
+    const tail = familyTail(result.name)
+    counts.set(tail, (counts.get(tail) ?? 0) + 1)
+  }
+  return Math.max(0, ...counts.values())
+}
+
+const offerReasoningSlot = (
+  page: NameResult[],
+  candidate: NameResult | undefined,
+): NameResult[] => {
+  if (!candidate || page.some((result) => letters(result.name) === letters(candidate.name))) {
+    return page
+  }
+  const quality = structuralQuality(candidate)
+  const slots = page
+    .map((result, index) => ({ result, index, quality: structuralQuality(result) }))
+    .filter(({ result, index, quality: replacedQuality }) => (
+      index > 0 && isDirectSuffixForm(result) && replacedQuality <= quality + Number.EPSILON
+    ))
+    .sort((left, right) => left.quality - right.quality || right.index - left.index)
+  const wall = largestFamily(page)
+  // A page already sitting on a four-name suffix family has no room to give:
+  // taking one of its few outsiders would leave a wall, and the repair pass
+  // that would have broken it up loses the slot it needed.
+  if (wall >= REASON_ACCENT_FAMILY_CAP) return page
+  for (const slot of slots) {
+    const next = page.slice()
+    next[slot.index] = candidate
+    if (largestFamily(next) <= wall) return next
+  }
+  return page
 }
 
 const addStrongGuidedPairUpgrade = (
@@ -579,6 +641,13 @@ export async function generateBatch(cfg: Config): Promise<NameResult[]> {
         count: guidedPairPool,
       }))
     }
+    // A brief-driven page was the one surface where the engine could not say
+    // why it chose a name: the reasoning family is the only construction that
+    // arrives with a chain the card can show (Phase 143).
+    const reasonPool = total > 0
+      ? await generateNames({ ...cfg, variant: 'reason', compound: false, count: REASON_ACCENT_POOL })
+      : []
+    const reasonCandidate = pickReasonCandidate(reasonPool, cfg.seed)
     const primaryPage = preserveGuidedConstruction(mergeAutoBatches([
       brandableBatch,
       [],
@@ -612,26 +681,29 @@ export async function generateBatch(cfg: Config): Promise<NameResult[]> {
             ? pairAccent.find((candidate) => letters(candidate.name) === 'skydock') ?? pairAccent[0]
             : pairAccent[0]
     const rolePreservedPage = preserveGuidedConstruction(primaryPage, existingScopedPair)
-    if (linkedRespells.length > 0) {
-      if (legalResearchBrief) {
-        return addQualityNeutralGuidedAlternative(rolePreservedPage, guidedPairCandidate)
-      }
-      return addStrongGuidedPairUpgrade(rolePreservedPage, guidedPairCandidate, namingToolBrief)
-    }
-    if (metaphorAccent.length > 0) {
-      if (legalResearchBrief) {
-        return addQualityNeutralGuidedAlternative(rolePreservedPage, guidedPairCandidate)
-      }
-      if (strongPairBrief) {
+    const guidedPage = (() => {
+      if (linkedRespells.length > 0) {
+        if (legalResearchBrief) {
+          return addQualityNeutralGuidedAlternative(rolePreservedPage, guidedPairCandidate)
+        }
         return addStrongGuidedPairUpgrade(rolePreservedPage, guidedPairCandidate, namingToolBrief)
       }
-      return addQualityNeutralGuidedAlternative(rolePreservedPage, metaphorAccent[1])
-    }
-    return addQualityNeutralGuidedAlternative(
-      preserveGuidedConstruction(rolePreservedPage, guidedPairCandidate),
-      guidedPairCandidate,
-      namingToolBrief,
-    )
+      if (metaphorAccent.length > 0) {
+        if (legalResearchBrief) {
+          return addQualityNeutralGuidedAlternative(rolePreservedPage, guidedPairCandidate)
+        }
+        if (strongPairBrief) {
+          return addStrongGuidedPairUpgrade(rolePreservedPage, guidedPairCandidate, namingToolBrief)
+        }
+        return addQualityNeutralGuidedAlternative(rolePreservedPage, metaphorAccent[1])
+      }
+      return addQualityNeutralGuidedAlternative(
+        preserveGuidedConstruction(rolePreservedPage, guidedPairCandidate),
+        guidedPairCandidate,
+        namingToolBrief,
+      )
+    })()
+    return offerReasoningSlot(guidedPage, reasonCandidate)
   }
 
   // Promptless Auto (Phase 142): the submorph dense-coinage engine leads the

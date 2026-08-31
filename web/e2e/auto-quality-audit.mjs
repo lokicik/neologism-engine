@@ -128,7 +128,11 @@ try {
   let linked = 0
   const byMode = {}
   for (const row of rows) {
+    // Phase 143 page shape: one guided accent plus at most one reasoning card.
+    // The story card is still held to accent relevance (it must be linked to
+    // the prompt), but it does not count against the single-accent rule.
     const samples = row.results.filter((item) => item.sourceMode !== 'brandable')
+    const accentSamples = samples.filter((item) => item.sourceMode !== 'reason')
     const badAccents = samples.filter((item) => !isPromptLinked(item, row.keywords))
     const unreviewedRespells = samples.filter((item) => (
       item.sourceMode === 'respell'
@@ -164,7 +168,8 @@ try {
     weakContextForms += weakForms.length
     const violations = [
       [row.results.length !== 10, `size ${row.results.length}`],
-      [samples.length > 1, `${samples.length} mode accents`],
+      [accentSamples.length > 1, `${accentSamples.length} mode accents`],
+      [samples.filter((item) => item.sourceMode === 'reason').length > 1, 'two reasoning cards'],
       [badAccents.length > 0, 'unlinked mode accent'],
       [unreviewedRespells.length > 0, `unreviewed Respell ${unreviewedRespells.map((item) => item.name).join('/')}`],
       [lossySeams.length > 0, `lossy seam ${lossySeams.map((item) => item.name).join('/')}`],
