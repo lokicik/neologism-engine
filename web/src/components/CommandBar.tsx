@@ -17,7 +17,7 @@ interface Props {
 // always big_tech here; the engine still supports the creative styles, they
 // are just no longer part of the web product.
 
-type Mode = 'auto' | 'brandable' | 'realword' | 'respell' | 'compound' | 'seamblend' | 'morpheme' | 'submorph' | 'reason' | 'shared_pool' | 'intent_pool'
+type Mode = 'auto' | 'brandable' | 'realword' | 'respell' | 'compound' | 'seamblend' | 'morpheme' | 'submorph' | 'reason' | 'shared_pool' | 'intent_pool' | 'product_names'
 
 const MODES: { value: Mode; label: string; example: string; desc: string }[] = [
   { value: 'auto', label: 'Auto', example: 'best fit', desc: 'Chooses a brief-aware mix — the default' },
@@ -31,6 +31,7 @@ const MODES: { value: Mode; label: string; example: string; desc: string }[] = [
   { value: 'reason', label: 'Reason', example: 'Kubernetes', desc: 'Lab: names found by deterministic reasoning — each card shows its chain (password → vault → Donjon)' },
   { value: 'shared_pool', label: 'Shared pool', example: 'Lab', desc: 'Lab: compare nine naming families and select finalists directly — experimental' },
   { value: 'intent_pool', label: 'Brief intent', example: 'Lab', desc: 'Lab: preserve the operation, object and context before generating names — experimental' },
+  { value: 'product_names', label: 'Product names', example: 'Lab', desc: 'Whole names and meaningful constructions for four developer product types — experimental' },
 ]
 
 const LENGTHS: { label: string; chip: string; min: number; max: number }[] = [
@@ -47,6 +48,7 @@ const CREATIVITY: { label: string; temperature: number; variety: number }[] = [
 ]
 
 function currentMode(config: Config): Mode {
+  if (config.variant === 'product_names') return 'product_names'
   if (config.variant === 'shared_pool') return 'shared_pool'
   if (config.variant === 'intent_pool') return 'intent_pool'
   if (config.variant === 'auto') return 'auto'
@@ -167,7 +169,7 @@ export function CommandBar({
       compound: m === 'compound',
       variant:
         m === 'realword' || m === 'respell' || m === 'auto' || m === 'seamblend' || m === 'morpheme'
-          || m === 'submorph' || m === 'reason' || m === 'shared_pool' || m === 'intent_pool'
+          || m === 'submorph' || m === 'reason' || m === 'shared_pool' || m === 'intent_pool' || m === 'product_names'
           ? m
           : undefined,
     })
@@ -242,7 +244,7 @@ export function CommandBar({
           ))}
         </Chip>
 
-        <Chip
+        {mode !== 'product_names' && <Chip
           label={creativityLabel}
           controlLabel={`Creativity: ${creativityLabel}`}
           panelLabel="Creativity choices"
@@ -259,7 +261,7 @@ export function CommandBar({
               <span className="menu-label">{c.label}</span>
             </button>
           ))}
-        </Chip>
+        </Chip>}
 
         <Chip
           label="Advanced"
@@ -277,6 +279,7 @@ export function CommandBar({
               </span>
               <input
                 className="taste-reference-input"
+                disabled={mode === 'product_names'}
                 type="text"
                 maxLength={240}
                 placeholder="Vercel, Linear, Notion"
@@ -287,7 +290,7 @@ export function CommandBar({
                 }}
               />
               <small id="taste-reference-help" className="menu-help">
-                {referencesNeeded === 0
+                {mode === 'product_names' ? 'Saved taste is not used in Product names.' : referencesNeeded === 0
                   ? 'Guiding the larger local candidate pool.'
                   : `Add ${referencesNeeded} more ${referencesNeeded === 1 ? 'name' : 'names'} to guide local ranking.`}
               </small>

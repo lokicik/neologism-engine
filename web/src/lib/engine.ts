@@ -18,6 +18,7 @@ import init, {
   generate_product_frame_diagnostics,
   generate_product_brief_diagnostics,
   generate_retained_fragment_diagnostics,
+  generate_concept_diagnostics,
 } from '../wasm/neologism_wasm.js'
 import { autoModeCounts, isReadableAutoRespell, mergeAutoBatches } from './auto'
 import { tasteContextForConfig } from './taste-context'
@@ -882,6 +883,14 @@ export async function explainName(name: string): Promise<Explanation> {
   return JSON.parse(explain_name(name)) as Explanation
 }
 
+// The compiled product-name catalog owns its evidence. Do not initialize or
+// query the legacy pronunciation/collision tables on this path.
+export async function conceptDiagnostics(request: import('./concept-naming').NamingRequest): Promise<import('./concept-naming').ConceptRun> {
+  await ensureInit()
+  const value = JSON.parse(generate_concept_diagnostics(JSON.stringify(request)))
+  if ('error' in value) throw new Error(value.error)
+  return value
+}
 
 // The keyword stems the engine extracts from a description (Phase 48) —
 // shown above results so users see exactly what drove their batch.

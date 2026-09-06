@@ -2111,3 +2111,6 @@ body {
 .candidate-lab .finalist-marks { grid-column: 1 / -1; flex-direction: row; align-items: baseline; flex-wrap: wrap; gap: 12px; }
 .candidate-lab .finalist-avail { max-width: none; color: var(--muted); }
 @media (max-width: 700px) { .candidate-lab .finalist-list { grid-template-columns: minmax(0, 1fr); } }
+.concept-directions { display: flex; flex-wrap: wrap; gap: .5rem; margin-block: 1rem; }
+.concept-directions [aria-pressed="true"] { border-color: currentColor; }
+.product-names-lab select { display: block; max-width: 100%; margin-block: .5rem; padding: .55rem; font: inherit; color: inherit; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; }
