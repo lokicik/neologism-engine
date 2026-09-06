@@ -1,0 +1,22 @@
+{
+  "schema": "brief-intent-protocol-v1",
+  "scope": "Exploratory non-LLM intent ablation; no promotion or human preference claim",
+  "seeds": [13, 67, 313],
+  "development": [
+    "a build tool that checks dependency licenses before publishing a package",
+    "a package release assistant that verifies checksums of downloadable binaries",
+    "a command line utility that compares JSON responses across API versions"
+  ],
+  "evaluation": [
+    "a terminal utility that detects duplicate environment variables across deployment files",
+    "a developer tool that verifies database backups before restoring production data",
+    "a build plugin that compares executable sizes between release tags",
+    "a local service that replays database transactions after connection failures",
+    "a command line tool that tracks certificate expiration across internal services",
+    "a browser utility that explains accessibility failures in rendered forms",
+    "a package tool that groups crash reports by matching stack traces",
+    "a local tool that maps configuration references across deployment manifests"
+  ],
+  "checks": ["determinism", "continuation", "role provenance", "fallback", "legacy replay", "browser"],
+  "review": "Assistant editorial only; aesthetics first, semantic fit second. Neither allowed. Cases cease to be unseen after this run. Original human gates unchanged."
+}

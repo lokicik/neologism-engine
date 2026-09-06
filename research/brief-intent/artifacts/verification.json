@@ -1,0 +1,32 @@
+[
+  {
+    "script": "auto-quality-audit.mjs",
+    "exitCode": 0,
+    "durationMs": 4467
+  },
+  {
+    "script": "heldout-cold-quality-audit.mjs",
+    "exitCode": 0,
+    "durationMs": 13106
+  },
+  {
+    "script": "cold-quality-audit.mjs",
+    "exitCode": 0,
+    "durationMs": 6099
+  },
+  {
+    "script": "taste-quality-audit.mjs",
+    "exitCode": 0,
+    "durationMs": 13341
+  },
+  {
+    "script": "mode-taste-audit.mjs",
+    "exitCode": 0,
+    "durationMs": 4865
+  },
+  {
+    "script": "shortlist-contract.mjs",
+    "exitCode": 0,
+    "durationMs": 9957
+  }
+]

@@ -1,0 +1,27 @@
+{
+  "evaluator": "assistant",
+  "evidenceClass": "editorial-only-not-blind",
+  "comparison": "intent pool versus original shared pool",
+  "partition": "evaluation",
+  "seed": 13,
+  "seedPolicy": "First listed protocol seed, no best-of-three selection",
+  "humanGateSatisfied": false,
+  "defaultDecision": "keep-experimental",
+  "rows": [
+    { "index": 0, "choice": "neither", "oldUsable": [], "newUsable": [], "reason": "Vitaforte is opaque for duplicate variables. Fileflow and Cloudsignal are generic; Sarraf has an indirect appraisal association without a clear duplicate-variable link." },
+    { "index": 1, "choice": "old", "oldUsable": ["Verospec", "Mihenk"], "newUsable": ["Verospec"], "reason": "Verospec survives on both sides. Mihenk evokes validation more directly than Koru, which suggests protection. The new reader does not create an advantage here." },
+    { "index": 2, "choice": "neither", "oldUsable": [], "newUsable": [], "reason": "Both lists drift toward generic release/build imagery. PureSiz exposes the inherited sizes-to-siz stemming problem; Multain is too opaque for binary-size comparison." },
+    { "index": 3, "choice": "neither", "oldUsable": [], "newUsable": [], "reason": "Polinter, Liginter, Sevnect and Storter feel constructed; Storeseed and Queryflow describe storage/querying more than recovery by transaction replay." },
+    { "index": 4, "choice": "new", "oldUsable": [], "newUsable": ["Izci"], "provisional": true, "reason": "Izci is short and has a clear tracking association for a Turkish-speaking owner. It still does not communicate certificate expiry. Old candidates primarily describe the terminal wrapper." },
+    { "index": 5, "choice": "neither", "oldUsable": [], "newUsable": [], "reason": "Browsr is shared and generic. Other candidates do not provide a convincing readable accessibility-diagnosis identity. The new keyword budget also loses form behind rendered." },
+    { "index": 6, "choice": "old", "oldUsable": ["Tracepeak"], "newUsable": [], "reason": "Tracepeak is readable and relates to the stack-trace material. Reportloom is another broad report compound; Halka expresses grouping but lacks the crash-trace identity on both sides." },
+    { "index": 7, "choice": "tie", "oldUsable": ["Portolan"], "newUsable": ["Portolan"], "reason": "The same cartographic name remains the strongest option. Changing Routelink to Docsignal offers no clear aesthetic or functional benefit." }
+  ],
+  "limitations": [
+    "The implementing assistant saw arm labels; these are not human or blind responses.",
+    "No repeat-consistency or promotion gate is scored.",
+    "Izci is a provisional choice with Turkish-language associations, not demonstrated international appeal.",
+    "No current availability or trademark checks were performed.",
+    "Do not train or retune thresholds from these choices."
+  ]
+}

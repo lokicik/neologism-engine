@@ -1,0 +1,45 @@
+import assert from 'node:assert/strict'
+import { resolve } from 'node:path'
+import { readFileSync } from 'node:fs'
+import { withBrowser, root } from '../shared-pool/harness.mjs'
+const out = resolve(root, 'research/brief-intent/artifacts')
+await withBrowser(async (page) => {
+  const errors = []
+  page.on('pageerror', (error) => errors.push(String(error)))
+  await page.getByRole('button', { name: /Open app/ }).click()
+  await page.getByRole('button', { name: /Brief intent/ }).click()
+  const brief = 'a package release assistant that verifies checksums of downloadable binaries'
+  await page.getByRole('textbox', { name: 'Project brief' }).fill(brief)
+  const storage = await page.evaluate(() => JSON.stringify(localStorage))
+  await page.getByRole('button', { name: 'Generate', exact: true }).click()
+  await page.locator('.candidate-lab .finalist').first().waitFor({ timeout: 60000 })
+  await page.waitForFunction(() => document.querySelector('.candidate-lab')?.getAttribute('aria-busy') === 'false')
+  assert.match(await page.locator('.candidate-lab').innerText(), /verifies/)
+  const first = await page.locator('.candidate-lab .finalist-name').allTextContents()
+  await page.locator('.candidate-lab').getByRole('button', { name: 'Keep', exact: true }).first().click()
+  assert.equal(await page.evaluate(() => JSON.stringify(localStorage)), storage)
+  await page.screenshot({ path: resolve(out, 'desktop.png'), fullPage: true })
+  await page.getByRole('textbox', { name: 'Project brief' }).fill('a different draft')
+  await page.getByRole('button', { name: 'Next finalists' }).click()
+  await page.waitForFunction((names) => {
+    const current = [...document.querySelectorAll('.candidate-lab .finalist-name')].map((n) => n.textContent)
+    return document.querySelector('.candidate-lab')?.getAttribute('aria-busy') === 'false' && current.length && current.every((n) => !names.includes(n))
+  }, first, { timeout: 60000 })
+  const download = page.waitForEvent('download')
+  await page.getByRole('button', { name: 'Export experiment' }).click()
+  await (await download).saveAs(resolve(out, 'ui-export.json'))
+  const exported = JSON.parse(readFileSync(resolve(out, 'ui-export.json')))
+  assert.equal(exported.run.config.description, brief)
+  assert.equal(exported.run.config.variant, 'intent_pool')
+  assert.equal(exported.run.intent.generation_terms[0], 'verify')
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.screenshot({ path: resolve(out, 'mobile.png'), fullPage: true })
+  assert(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1))
+  await page.getByRole('button', { name: /Shared pool/ }).click()
+  assert.equal(await page.locator('.candidate-lab .finalist').count(), 0)
+  await page.getByRole('button', { name: /^Auto/ }).click()
+  assert.equal(await page.locator('.candidate-lab').count(), 0)
+  assert.equal(await page.evaluate(() => JSON.stringify(localStorage)), storage)
+  assert.deepEqual(errors, [])
+  console.log('PASS intent UI, role explanations, session-only Keep, exported provenance, draft-safe continuation, mobile and mode isolation')
+})

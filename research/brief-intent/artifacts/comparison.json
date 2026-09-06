@@ -1,0 +1,2703 @@
+{
+  "protocolSha256": "a527f42c11c24512bfbc4ad120deef39e306c3715d95d07b310bffcbc5e1f745",
+  "humanEvaluation": "pending",
+  "rows": [
+    {
+      "partition": "development",
+      "brief": "a build tool that checks dependency licenses before publishing a package",
+      "seed": 13,
+      "intent": {
+        "description": "a build tool that checks dependency licenses before publishing a package",
+        "fallback_reason": null,
+        "generation_terms": [
+          "check",
+          "dependency",
+          "license",
+          "publish",
+          "package",
+          "build"
+        ],
+        "schema": "brief-intent-v1",
+        "status": "parsed",
+        "terms": [
+          {
+            "end": 7,
+            "role": "context",
+            "start": 2,
+            "surface": "build",
+            "term": "build"
+          },
+          {
+            "end": 24,
+            "role": "operation",
+            "start": 18,
+            "surface": "checks",
+            "term": "check"
+          },
+          {
+            "end": 35,
+            "role": "object",
+            "start": 25,
+            "surface": "dependency",
+            "term": "dependency"
+          },
+          {
+            "end": 44,
+            "role": "object",
+            "start": 36,
+            "surface": "licenses",
+            "term": "license"
+          },
+          {
+            "end": 62,
+            "role": "condition",
+            "start": 52,
+            "surface": "publishing",
+            "term": "publish"
+          },
+          {
+            "end": 72,
+            "role": "condition",
+            "start": 65,
+            "surface": "package",
+            "term": "package"
+          }
+        ]
+      },
+      "auto": [
+        "Creatic",
+        "DepSeed",
+        "Bumpify"
+      ],
+      "old": [
+        "Plasserv",
+        "Versionloom",
+        "Matbaa",
+        "TopSync"
+      ],
+      "current": [
+        "Plasserv",
+        "Stacklink",
+        "Matbaa",
+        "TopSync"
+      ],
+      "poolCount": 184,
+      "traceFile": "trace-0.json.gz",
+      "traceSha256": "f1f07c381cb02b68e2dd5be1cc73095216f0c2686b5a8725d31a5cb35551abd6"
+    },
+    {
+      "partition": "development",
+      "brief": "a build tool that checks dependency licenses before publishing a package",
+      "seed": 67,
+      "intent": {
+        "description": "a build tool that checks dependency licenses before publishing a package",
+        "fallback_reason": null,
+        "generation_terms": [
+          "check",
+          "dependency",
+          "license",
+          "publish",
+          "package",
+          "build"
+        ],
+        "schema": "brief-intent-v1",
+        "status": "parsed",
+        "terms": [
+          {
+            "end": 7,
+            "role": "context",
+            "start": 2,
+            "surface": "build",
+            "term": "build"
+          },
+          {
+            "end": 24,
+            "role": "operation",
+            "start": 18,
+            "surface": "checks",
+            "term": "check"
+          },
+          {
+            "end": 35,
+            "role": "object",
+            "start": 25,
+            "surface": "dependency",
+            "term": "dependency"
+          },
+          {
+            "end": 44,
+            "role": "object",
+            "start": 36,
+            "surface": "licenses",
+            "term": "license"
+          },
+          {
+            "end": 62,
+            "role": "condition",
+            "start": 52,
+            "surface": "publishing",
+            "term": "publish"
+          },
+          {
+            "end": 72,
+            "role": "condition",
+            "start": 65,
+            "surface": "package",
+            "term": "package"
+          }
+        ]
+      },
+      "auto": [
+        "DepSeed",
+        "Bumpix",
+        "Syncora"
+      ],
+      "old": [
+        "Versionix",
+        "StackSeed",
+        "Graforge",
+        "Craftforge"
+      ],
+      "current": [
+        "Depforge",
+        "BumpForge",
+        "Archeck",
+        "Forgebeam"
+      ],
+      "poolCount": 182,
+      "traceFile": "trace-1.json.gz",
+      "traceSha256": "3d5ecfe5de8c20fa1cd5cc452e52eaf962eb245d8e45b1d8e5a8e948ddf8aebf"
+    },
+    {
+      "partition": "development",
+      "brief": "a build tool that checks dependency licenses before publishing a package",
+      "seed": 313,
+      "intent": {
+        "description": "a build tool that checks dependency licenses before publishing a package",
+        "fallback_reason": null,
+        "generation_terms": [
+          "check",
+          "dependency",
+          "license",
+          "publish",
+          "package",
+          "build"
+        ],
+        "schema": "brief-intent-v1",
+        "status": "parsed",
+        "terms": [
+          {
+            "end": 7,
+            "role": "context",
+            "start": 2,
+            "surface": "build",
+            "term": "build"
+          },
+          {
+            "end": 24,
+            "role": "operation",
+            "start": 18,
+            "surface": "checks",
+            "term": "check"
+          },
+          {
+            "end": 35,
+            "role": "object",
+            "start": 25,
+            "surface": "dependency",
+            "term": "dependency"
+          },
+          {
+            "end": 44,
+            "role": "object",
+            "start": 36,
+            "surface": "licenses",
+            "term": "license"
+          },
+          {
+            "end": 62,
+            "role": "condition",
+            "start": 52,
+            "surface": "publishing",
+            "term": "publish"
+          },
+          {
+            "end": 72,
+            "role": "condition",
+            "start": 65,
+            "surface": "package",
+            "term": "package"
+          }
+        ]
+      },
+      "auto": [
+        "Creatic",
+        "DepSeed",
+        "Bumpify"
+      ],
+      "old": [
+        "Versionseed",
+        "Matbaa",
+        "Graphforge",
+        "Creatic"
+      ],
+      "current": [
+        "Forgeseed",
+        "Matbaa",
+        "Depforge",
+        "Creatic"
+      ],
+      "poolCount": 183,
+      "traceFile": "trace-2.json.gz",
+      "traceSha256": "19d41092a3438f7a11562e2e4c8958e40c3add195f907f1d57b04e18ce602303"
+    },
+    {
+      "partition": "development",
+      "brief": "a package release assistant that verifies checksums of downloadable binaries",
+      "seed": 13,
+      "intent": {
+        "description": "a package release assistant that verifies checksums of downloadable binaries",
+        "fallback_reason": null,
+        "generation_terms": [
+          "verify",
+          "checksum",
+          "downloadable",
+          "binary",
+          "package"
+        ],
+        "schema": "brief-intent-v1",
+        "status": "parsed",
+        "terms": [
+          {
+            "end": 9,
+            "role": "context",
+            "start": 2,
+            "surface": "package",
+            "term": "package"
+          },
+          {
+            "end": 17,
+            "role": "context",
+            "start": 10,
+            "surface": "release",
+            "term": "release"
+          },
+          {
+            "end": 41,
+            "role": "operation",
+            "start": 33,
+            "surface": "verifies",
+            "term": "verify"
+          },
+          {
+            "end": 51,
+            "role": "object",
+            "start": 42,
+            "surface": "checksums",
+            "term": "checksum"
+          },
+          {
+            "end": 67,
+            "role": "object",
+            "start": 55,
+            "surface": "downloadable",
+            "term": "downloadable"
+          },
+          {
+            "end": 76,
+            "role": "object",
+            "start": 68,
+            "surface": "binaries",
+            "term": "binary"
+          }
+        ]
+      },
+      "auto": [
+        "Halyard",
+        "Tagora",
+        "Pushify"
+      ],
+      "old": [
+        "Calcastro",
+        "Forgebeam",
+        "Kura",
+        "RareTag"
+      ],
+      "current": [
+        "Verospec",
+        "Stacklink",
+        "Mihenk",
+        "NewByte"
+      ],
+      "poolCount": 139,
+      "traceFile": "trace-3.json.gz",
+      "traceSha256": "e9047f7cb984e8256b61bac7ffc667b28efa5d06f92f895cda2bf889ecc80553"
+    },
+    {
+      "partition": "development",
+      "brief": "a package release assistant that verifies checksums of downloadable binaries",
+      "seed": 67,
+      "intent": {
+        "description": "a package release assistant that verifies checksums of downloadable binaries",
+        "fallback_reason": null,
+        "generation_terms": [
+          "verify",
+          "checksum",
+          "downloadable",
+          "binary",
+          "package"
+        ],
+        "schema": "brief-intent-v1",
+        "status": "parsed",
+        "terms": [
+          {
+            "end": 9,
+            "role": "context",
+            "start": 2,
+            "surface": "package",
+            "term": "package"
+          },
+          {
+            "end": 17,
+            "role": "context",
+            "start": 10,
+            "surface": "release",
+            "term": "release"
+          },
+          {
+            "end": 41,
+            "role": "operation",
+            "start": 33,
+            "surface": "verifies",
+            "term": "verify"
+          },
+          {
+            "end": 51,
+            "role": "object",
+            "start": 42,
+            "surface": "checksums",
+            "term": "checksum"
+          },
+          {
+            "end": 67,
+            "role": "object",
+            "start": 55,
+            "surface": "downloadable",
+            "term": "downloadable"
+          },
+          {
+            "end": 76,
+            "role": "object",
+            "start": 68,
+            "surface": "binaries",
+            "term": "binary"
+          }
+        ]
+      },
+      "auto": [
+        "Tagwave",
+        "Commitix",
+        "Forgeora"
+      ],
+      "old": [
+        "Pushnode",
+        "ForgeStack",
+        "Costack",
+        "Stacklink"
+      ],
+      "current": [
+        "Verifyia",
+        "Vestack",
+        "Stacklink",
+        "Firmaspec"
+      ],
+      "poolCount": 139,
+      "traceFile": "trace-4.json.gz",
+      "traceSha256": "e9fcccda65661ffd92ca38c41de1595a8aa536f8714a70200148a9a42b7bd447"
+    },
+    {
+      "partition": "development",
+      "brief": "a package release assistant that verifies checksums of downloadable binaries",
+      "seed": 313,
+      "intent": {
+        "description": "a package release assistant that verifies checksums of downloadable binaries",
+        "fallback_reason": null,
+        "generation_terms": [
+          "verify",
+          "checksum",
+          "downloadable",
+          "binary",
+          "package"
+        ],
+        "schema": "brief-intent-v1",
+        "status": "parsed",
+        "terms": [
+          {
+            "end": 9,
+            "role": "context",
+            "start": 2,
+            "surface": "package",
+            "term": "package"
+          },
+          {
+            "end": 17,
+            "role": "context",
+            "start": 10,
+            "surface": "release",
+            "term": "release"
+          },
+          {
+            "end": 41,
+            "role": "operation",
+            "start": 33,
+            "surface": "verifies",
+            "term": "verify"
+          },
+          {
+            "end": 51,
+            "role": "object",
+            "start": 42,
+            "surface": "checksums",
+            "term": "checksum"
+          },
+          {
+            "end": 67,
+            "role": "object",
+            "start": 55,
+            "surface": "downloadable",
+            "term": "downloadable"
+          },
+          {
+            "end": 76,
+            "role": "object",
+            "start": 68,
+            "surface": "binaries",
+            "term": "binary"
+          }
+        ]
+      },
+      "auto": [
+        "Mihmandar",
+        "Tagora",
+        "Pushify"
+      ],
+      "old": [
+        "Forgeseed",
+        "Kura",
+        "Pushbyte",
+        "Outna"
+      ],
+      "current": [
+        "Stackseed",
+        "Mihenk",
+        "Verifyia",
+        "Memtain"
+      ],
+      "poolCount": 139,
+      "traceFile": "trace-5.json.gz",
+      "traceSha256": "7d4bb15f9561e01da2309b5e92de5fd0f9349a92b159cfe86fe392d659b2a4d4"
+    },
+    {
+      "partition": "development",
+      "brief": "a command line utility that compares JSON responses across API versions",
+      "seed": 13,
+      "intent": {
+        "description": "a command line utility that compares JSON responses across API versions",
+        "fallback_reason": null,
+        "generation_terms": [
+          "compare",
+          "json",
+          "response",
+          "api",
+          "version"
+        ],
+        "schema": "brief-intent-v1",
+        "status": "parsed",
+        "terms": [
+          {
+            "end": 36,
+            "role": "operation",
+            "start": 28,
+            "surface": "compares",
+            "term": "compare"
+          },
+          {
+            "end": 41,
+            "role": "object",
+            "start": 37,
+            "surface": "JSON",
+            "term": "json"
+          },
+          {
+            "end": 51,
+            "role": "object",
+            "start": 42,
+            "surface": "responses",
+            "term": "response"
+          },
+          {
+            "end": 62,
+            "role": "condition",
+            "start": 59,
+            "surface": "API",
+            "term": "api"
+          },
+          {
+            "end": 71,
+            "role": "condition",
+            "start": 63,
+            "surface": "versions",
+            "term": "version"
+          }
+        ]
+      },
+      "auto": [
+        "Tropic",
+        "Termia",
+        "Shellio"
+      ],
+      "old": [
+        "Autocalc",
+        "Termatlas",
+        "Falconer",
+        "KeyShell"
+      ],
+      "current": [
+        "Datalum",
+        "Commitflow",
+        "Terazi",
+        "TopTag"
+      ],
+      "poolCount": 157,
+      "traceFile": "trace-6.json.gz",
+      "traceSha256": "40faa61491dd6ea7c1724d567e887c15516bdd7b25ee1b04f6480884a3a75013"
+    },
+    {
+      "partition": "development",
+      "brief": "a command line utility that compares JSON responses across API versions",
+      "seed": 67,
+      "intent": {
+        "description": "a command line utility that compares JSON responses across API versions",
+        "fallback_reason": null,
+        "generation_terms": [
+          "compare",
+          "json",
+          "response",
+          "api",
+          "version"
+        ],
+        "schema": "brief-intent-v1",
+        "status": "parsed",
+        "terms": [
+          {
+            "end": 36,
+            "role": "operation",
+            "start": 28,
+            "surface": "compares",
+            "term": "compare"
+          },
+          {
+            "end": 41,
+            "role": "object",
+            "start": 37,
+            "surface": "JSON",
+            "term": "json"
+          },
+          {
+            "end": 51,
+            "role": "object",
+            "start": 42,
+            "surface": "responses",
+            "term": "response"
+          },
+          {
+            "end": 62,
+            "role": "condition",
+            "start": 59,
+            "surface": "API",
+            "term": "api"
+          },
+          {
+            "end": 71,
+            "role": "condition",
+            "start": 63,
+            "surface": "versions",
+            "term": "version"
+          }
+        ]
+      },
+      "auto": [
+        "Tropic",
+        "Termora",
+        "Shellio"
+      ],
+      "old": [
+        "Shellify",
+        "TermLine",
+        "Comprompt",
+        "Promptatlas"
+      ],
+      "current": [
+        "Compareia",
+        "ByteBranch",
+        "Jsonate",
+        "Stacklink"
+      ],
+      "poolCount": 157,
+      "traceFile": "trace-7.json.gz",
+      "traceSha256": "64560be8a061248e65460bcc375f4e5f7939b2e12ea9a4d7a87c0be573152a1c"
+    },
+    {
+      "partition": "development",
+      "brief": "a command line utility that compares JSON responses across API versions",
+      "seed": 313,
+      "intent": {
+        "description": "a command line utility that compares JSON responses across API versions",
+        "fallback_reason": null,
+        "generation_terms": [
+          "compare",
+          "json",
+          "response",
+          "api",
+          "version"
+        ],
+        "schema": "brief-intent-v1",
+        "status": "parsed",
+        "terms": [
+          {
+            "end": 36,
+            "role": "operation",
+            "start": 28,
+            "surface": "compares",
+            "term": "compare"
+          },
+          {
+            "end": 41,
+            "role": "object",
+            "start": 37,
+            "surface": "JSON",
+            "term": "json"
+          },
+          {
+            "end": 51,
+            "role": "object",
+            "start": 42,
+            "surface": "responses",
+            "term": "response"
+          },
+          {
+            "end": 62,
+            "role": "condition",
+            "start": 59,
+            "surface": "API",
+            "term": "api"
+          },
+          {
+            "end": 71,
+            "role": "condition",
+            "start": 63,
+            "surface": "versions",
+            "term": "version"
+          }
+        ]
+      },
+      "auto": [
+        "Falconer",
+        "Termify",
+        "Shellio"
+      ],
+      "old": [
+        "Termatlas",
+        "Isobar",
+        "Shellio",
+        "Vernect"
+      ],
+      "current": [
+        "Commitflow",
+        "Kiyas",
+        "Bytebranch",
+        "Featic"
+      ],
+      "poolCount": 157,
+      "traceFile": "trace-8.json.gz",
+      "traceSha256": "082bb85a2ca2e8bc050ea6f94910b2a60e8de719db74d6f7829e5c3a05a721a6"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a terminal utility that detects duplicate environment variables across deployment files",
+      "seed": 13,
+      "intent": {
+        "description": "a terminal utility that detects duplicate environment variables across deployment files",
+        "fallback_reason": null,
+        "generation_terms": [
+          "detect",
+          "duplicate",
+          "environment",
+          "variable",
+          "deployment",
+          "file"
+        ],
+        "schema": "brief-intent-v1",
+        "status": "parsed",
+        "terms": [
+          {
+            "end": 10,
+            "role": "context",
+            "start": 2,
+            "surface": "terminal",
+            "term": "terminal"
+          },
+          {
+            "end": 31,
+            "role": "operation",
+            "start": 24,
+            "surface": "detects",
+            "term": "detect"
+          },
+          {
+            "end": 41,
+            "role": "object",
+            "start": 32,
+            "surface": "duplicate",
+            "term": "duplicate"
+          },
+          {
+            "end": 53,
+            "role": "object",
+            "start": 42,
+            "surface": "environment",
+            "term": "environment"
+          },
+          {
+            "end": 63,
+            "role": "object",
+            "start": 54,
+            "surface": "variables",
+            "term": "variable"
+          },
+          {
+            "end": 81,
+            "role": "condition",
+            "start": 71,
+            "surface": "deployment",
+            "term": "deployment"
+          },
+          {
+            "end": 87,
+            "role": "condition",
+            "start": 82,
+            "surface": "files",
+            "term": "file"
+          }
+        ]
+      },
+      "auto": [
+        "Paramia",
+        "Gridfile",
+        "Shippath"
+      ],
+      "old": [
+        "Vitaforte",
+        "Cloudsignal",
+        "Sarraf",
+        "PureEnv"
+      ],
+      "current": [
+        "Vitaforte",
+        "Fileflow",
+        "Sarraf",
+        "BoldEnv"
+      ],
+      "poolCount": 190,
+      "traceFile": "trace-9.json.gz",
+      "traceSha256": "7c607d7aa24f918359e4ab05307bb8b853c9a6783dd4f362ed1c6c2c6cd82091"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a terminal utility that detects duplicate environment variables across deployment files",
+      "seed": 67,
+      "intent": {
+        "description": "a terminal utility that detects duplicate environment variables across deployment files",
+        "fallback_reason": null,
+        "generation_terms": [
+          "detect",
+          "duplicate",
+          "environment",
+          "variable",
+          "deployment",
+          "file"
+        ],
+        "schema": "brief-intent-v1",
+        "status": "parsed",
+        "terms": [
+          {
+            "end": 10,
+            "role": "context",
+            "start": 2,
+            "surface": "terminal",
+            "term": "terminal"
+          },
+          {
+            "end": 31,
+            "role": "operation",
+            "start": 24,
+            "surface": "detects",
+            "term": "detect"
+          },
+          {
+            "end": 41,
+            "role": "object",
+            "start": 32,
+            "surface": "duplicate",
+            "term": "duplicate"
+          },
+          {
+            "end": 53,
+            "role": "object",
+            "start": 42,
+            "surface": "environment",
+            "term": "environment"
+          },
+          {
+            "end": 63,
+            "role": "object",
+            "start": 54,
+            "surface": "variables",
+            "term": "variable"
+          },
+          {
+            "end": 81,
+            "role": "condition",
+            "start": 71,
+            "surface": "deployment",
+            "term": "deployment"
+          },
+          {
+            "end": 87,
+            "role": "condition",
+            "start": 82,
+            "surface": "files",
+            "term": "file"
+          }
+        ]
+      },
+      "auto": [
+        "Doctain",
+        "Paramia",
+        "Dotship"
+      ],
+      "old": [
+        "Parampath",
+        "StackPath",
+        "Shipath",
+        "Gridnova"
+      ],
+      "current": [
+        "Cloudfile",
+        "DockPath",
+        "Nucloud",
+        "Pathwave"
+      ],
+      "poolCount": 191,
+      "traceFile": "trace-10.json.gz",
+      "traceSha256": "646bc39c81923e3571d52f66c546d0e742406f2e5d25c3908e30622e042aa6f2"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a terminal utility that detects duplicate environment variables across deployment files",
+      "seed": 313,
+      "intent": {
+        "description": "a terminal utility that detects duplicate environment variables across deployment files",
+        "fallback_reason": null,
+        "generation_terms": [
+          "detect",
+          "duplicate",
+          "environment",
+          "variable",
+          "deployment",
+          "file"
+        ],
+        "schema": "brief-intent-v1",
+        "status": "parsed",
+        "terms": [
+          {
+            "end": 10,
+            "role": "context",
+            "start": 2,
+            "surface": "terminal",
+            "term": "terminal"
+          },
+          {
+            "end": 31,
+            "role": "operation",
+            "start": 24,
+            "surface": "detects",
+            "term": "detect"
+          },
+          {
+            "end": 41,
+            "role": "object",
+            "start": 32,
+            "surface": "duplicate",
+            "term": "duplicate"
+          },
+          {
+            "end": 53,
+            "role": "object",
+            "start": 42,
+            "surface": "environment",
+            "term": "environment"
+          },
+          {
+            "end": 63,
+            "role": "object",
+            "start": 54,
+            "surface": "variables",
+            "term": "variable"
+          },
+          {
+            "end": 81,
+            "role": "condition",
+            "start": 71,
+            "surface": "deployment",
+            "term": "deployment"
+          },
+          {
+            "end": 87,
+            "role": "condition",
+            "start": 82,
+            "surface": "files",
+            "term": "file"
+          }
+        ]
+      },
+      "auto": [
+        "Paramia",
+        "Varix",
+        "Dotship"
+      ],
+      "old": [
+        "Gridwave",
+        "Seismograph",
+        "Paramia",
+        "Gravtic"
+      ],
+      "current": [
+        "Fileflow",
+        "Seismograph",
+        "Cloudfile",
+        "Gravtic"
+      ],
+      "poolCount": 190,
+      "traceFile": "trace-11.json.gz",
+      "traceSha256": "56d5acb20aa9432d462d16303ed9876db03bec0d5c272fa7624af57307229ccf"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a developer tool that verifies database backups before restoring production data",
+      "seed": 13,
+      "intent": {
+        "description": "a developer tool that verifies database backups before restoring production data",
+        "fallback_reason": null,
+        "generation_terms": [
+          "verify",
+          "database",
+          "backup",
+          "restore",
+          "production"
+        ],
+        "schema": "brief-intent-v1",
+        "status": "parsed",
+        "terms": [
+          {
+            "end": 30,
+            "role": "operation",
+            "start": 22,
+            "surface": "verifies",
+            "term": "verify"
+          },
+          {
+            "end": 39,
+            "role": "object",
+            "start": 31,
+            "surface": "database",
+            "term": "database"
+          },
+          {
+            "end": 47,
+            "role": "object",
+            "start": 40,
+            "surface": "backups",
+            "term": "backup"
+          },
+          {
+            "end": 64,
+            "role": "condition",
+            "start": 55,
+            "surface": "restoring",
+            "term": "restore"
+          },
+          {
+            "end": 75,
+            "role": "condition",
+            "start": 65,
+            "surface": "production",
+            "term": "production"
+          },
+          {
+            "end": 80,
+            "role": "condition",
+            "start": 76,
+            "surface": "data",
+            "term": "data"
+          }
+        ]
+      },
+      "auto": [
+        "Dataseed",
+        "Rowlens",
+        "Storelens"
+      ],
+      "old": [
+        "Verospec",
+        "Queryflow",
+        "Mihenk",
+        "PrimeIndex"
+      ],
+      "current": [
+        "Verospec",
+        "Queryflow",
+        "Koru",
+        "PrimeQuery"
+      ],
+      "poolCount": 162,
+      "traceFile": "trace-12.json.gz",
+      "traceSha256": "b0c26be96418b9493c969ca794c84204b29cfc0a9ff9d97f2b6af0a7d4ea28d8"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a developer tool that verifies database backups before restoring production data",
+      "seed": 67,
+      "intent": {
+        "description": "a developer tool that verifies database backups before restoring production data",
+        "fallback_reason": null,
+        "generation_terms": [
+          "verify",
+          "database",
+          "backup",
+          "restore",
+          "production"
+        ],
+        "schema": "brief-intent-v1",
+        "status": "parsed",
+        "terms": [
+          {
+            "end": 30,
+            "role": "operation",
+            "start": 22,
+            "surface": "verifies",
+            "term": "verify"
+          },
+          {
+            "end": 39,
+            "role": "object",
+            "start": 31,
+            "surface": "database",
+            "term": "database"
+          },
+          {
+            "end": 47,
+            "role": "object",
+            "start": 40,
+            "surface": "backups",
+            "term": "backup"
+          },
+          {
+            "end": 64,
+            "role": "condition",
+            "start": 55,
+            "surface": "restoring",
+            "term": "restore"
+          },
+          {
+            "end": 75,
+            "role": "condition",
+            "start": 65,
+            "surface": "production",
+            "term": "production"
+          },
+          {
+            "end": 80,
+            "role": "condition",
+            "start": 76,
+            "surface": "data",
+            "term": "data"
+          }
+        ]
+      },
+      "auto": [
+        "Datalens",
+        "Storelens",
+        "Rowvector"
+      ],
+      "old": [
+        "Datalens",
+        "RowScope",
+        "Startable",
+        "Queryflow"
+      ],
+      "current": [
+        "Verifyix",
+        "Outputable",
+        "Querylink",
+        "Speccusto"
+      ],
+      "poolCount": 162,
+      "traceFile": "trace-13.json.gz",
+      "traceSha256": "cb9f24814954415e24cab1a490b362c6be7d17aaa989e9999b70cff3a628826c"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a developer tool that verifies database backups before restoring production data",
+      "seed": 313,
+      "intent": {
+        "description": "a developer tool that verifies database backups before restoring production data",
+        "fallback_reason": null,
+        "generation_terms": [
+          "verify",
+          "database",
+          "backup",
+          "restore",
+          "production"
+        ],
+        "schema": "brief-intent-v1",
+        "status": "parsed",
+        "terms": [
+          {
+            "end": 30,
+            "role": "operation",
+            "start": 22,
+            "surface": "verifies",
+            "term": "verify"
+          },
+          {
+            "end": 39,
+            "role": "object",
+            "start": 31,
+            "surface": "database",
+            "term": "database"
+          },
+          {
+            "end": 47,
+            "role": "object",
+            "start": 40,
+            "surface": "backups",
+            "term": "backup"
+          },
+          {
+            "end": 64,
+            "role": "condition",
+            "start": 55,
+            "surface": "restoring",
+            "term": "restore"
+          },
+          {
+            "end": 75,
+            "role": "condition",
+            "start": 65,
+            "surface": "production",
+            "term": "production"
+          },
+          {
+            "end": 80,
+            "role": "condition",
+            "start": 76,
+            "surface": "data",
+            "term": "data"
+          }
+        ]
+      },
+      "auto": [
+        "Dataseed",
+        "Rowlens",
+        "Storelens"
+      ],
+      "old": [
+        "Querylink",
+        "Kaynak",
+        "Datalens",
+        "Vernect"
+      ],
+      "current": [
+        "Querylink",
+        "Koru",
+        "Verifyio",
+        "Creatic"
+      ],
+      "poolCount": 161,
+      "traceFile": "trace-14.json.gz",
+      "traceSha256": "b68b06178fdeee58c5f00cd5d85525aa6a5866d134f4d6a1e0cc04048c446aa2"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a build plugin that compares executable sizes between release tags",
+      "seed": 13,
+      "intent": {
+        "description": "a build plugin that compares executable sizes between release tags",
+        "fallback_reason": null,
+        "generation_terms": [
+          "compare",
+          "executable",
+          "siz",
+          "release",
+          "tag",
+          "build"
+        ],
+        "schema": "brief-intent-v1",
+        "status": "parsed",
+        "terms": [
+          {
+            "end": 7,
+            "role": "context",
+            "start": 2,
+            "surface": "build",
+            "term": "build"
+          },
+          {
+            "end": 14,
+            "role": "context",
+            "start": 8,
+            "surface": "plugin",
+            "term": "plugin"
+          },
+          {
+            "end": 28,
+            "role": "operation",
+            "start": 20,
+            "surface": "compares",
+            "term": "compare"
+          },
+          {
+            "end": 39,
+            "role": "object",
+            "start": 29,
+            "surface": "executable",
+            "term": "executable"
+          },
+          {
+            "end": 45,
+            "role": "object",
+            "start": 40,
+            "surface": "sizes",
+            "term": "siz"
+          },
+          {
+            "end": 61,
+            "role": "condition",
+            "start": 54,
+            "surface": "release",
+            "term": "release"
+          },
+          {
+            "end": 66,
+            "role": "condition",
+            "start": 62,
+            "surface": "tags",
+            "term": "tag"
+          }
+        ]
+      },
+      "auto": [
+        "Multain",
+        "Tagseed",
+        "Pushora"
+      ],
+      "old": [
+        "Creastruct",
+        "Forgebeam",
+        "Multain",
+        "RareTag"
+      ],
+      "current": [
+        "Creagen",
+        "Commitflow",
+        "Multain",
+        "PureSiz"
+      ],
+      "poolCount": 169,
+      "traceFile": "trace-15.json.gz",
+      "traceSha256": "fc704883a7e9f0cb73bf47bc3aedea366cf717aff82c19198fa20afd7b065d9e"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a build plugin that compares executable sizes between release tags",
+      "seed": 67,
+      "intent": {
+        "description": "a build plugin that compares executable sizes between release tags",
+        "fallback_reason": null,
+        "generation_terms": [
+          "compare",
+          "executable",
+          "siz",
+          "release",
+          "tag",
+          "build"
+        ],
+        "schema": "brief-intent-v1",
+        "status": "parsed",
+        "terms": [
+          {
+            "end": 7,
+            "role": "context",
+            "start": 2,
+            "surface": "build",
+            "term": "build"
+          },
+          {
+            "end": 14,
+            "role": "context",
+            "start": 8,
+            "surface": "plugin",
+            "term": "plugin"
+          },
+          {
+            "end": 28,
+            "role": "operation",
+            "start": 20,
+            "surface": "compares",
+            "term": "compare"
+          },
+          {
+            "end": 39,
+            "role": "object",
+            "start": 29,
+            "surface": "executable",
+            "term": "executable"
+          },
+          {
+            "end": 45,
+            "role": "object",
+            "start": 40,
+            "surface": "sizes",
+            "term": "siz"
+          },
+          {
+            "end": 61,
+            "role": "condition",
+            "start": 54,
+            "surface": "release",
+            "term": "release"
+          },
+          {
+            "end": 66,
+            "role": "condition",
+            "start": 62,
+            "surface": "tags",
+            "term": "tag"
+          }
+        ]
+      },
+      "auto": [
+        "TagSeed",
+        "Pushora",
+        "Commitio"
+      ],
+      "old": [
+        "Pushify",
+        "TagForge",
+        "Preforge",
+        "Seedsignal"
+      ],
+      "current": [
+        "Compareia",
+        "TagForge",
+        "Preforge",
+        "Forgeseed"
+      ],
+      "poolCount": 169,
+      "traceFile": "trace-16.json.gz",
+      "traceSha256": "be0d7a63ef7b73526e186ad5aead4069120ef62de933c68a6d0bae67a99a20bc"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a build plugin that compares executable sizes between release tags",
+      "seed": 313,
+      "intent": {
+        "description": "a build plugin that compares executable sizes between release tags",
+        "fallback_reason": null,
+        "generation_terms": [
+          "compare",
+          "executable",
+          "siz",
+          "release",
+          "tag",
+          "build"
+        ],
+        "schema": "brief-intent-v1",
+        "status": "parsed",
+        "terms": [
+          {
+            "end": 7,
+            "role": "context",
+            "start": 2,
+            "surface": "build",
+            "term": "build"
+          },
+          {
+            "end": 14,
+            "role": "context",
+            "start": 8,
+            "surface": "plugin",
+            "term": "plugin"
+          },
+          {
+            "end": 28,
+            "role": "operation",
+            "start": 20,
+            "surface": "compares",
+            "term": "compare"
+          },
+          {
+            "end": 39,
+            "role": "object",
+            "start": 29,
+            "surface": "executable",
+            "term": "executable"
+          },
+          {
+            "end": 45,
+            "role": "object",
+            "start": 40,
+            "surface": "sizes",
+            "term": "siz"
+          },
+          {
+            "end": 61,
+            "role": "condition",
+            "start": 54,
+            "surface": "release",
+            "term": "release"
+          },
+          {
+            "end": 66,
+            "role": "condition",
+            "start": 62,
+            "surface": "tags",
+            "term": "tag"
+          }
+        ]
+      },
+      "auto": [
+        "Daedal",
+        "Tagora",
+        "Sizseed"
+      ],
+      "old": [
+        "Commitflow",
+        "Creatic",
+        "Pushify",
+        "Multain"
+      ],
+      "current": [
+        "Commitflow",
+        "Creatic",
+        "Tagforge",
+        "Multain"
+      ],
+      "poolCount": 169,
+      "traceFile": "trace-17.json.gz",
+      "traceSha256": "60bf37cfa9e94784c8deeec264f0a63938169fd2ece8f81f0fa1e547c95dcfdf"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a local service that replays database transactions after connection failures",
+      "seed": 13,
+      "intent": {
+        "description": "a local service that replays database transactions after connection failures",
+        "fallback_reason": null,
+        "generation_terms": [
+          "replay",
+          "database",
+          "transaction",
+          "connection",
+          "failure"
+        ],
+        "schema": "brief-intent-v1",
+        "status": "parsed",
+        "terms": [
+          {
+            "end": 28,
+            "role": "operation",
+            "start": 21,
+            "surface": "replays",
+            "term": "replay"
+          },
+          {
+            "end": 37,
+            "role": "object",
+            "start": 29,
+            "surface": "database",
+            "term": "database"
+          },
+          {
+            "end": 50,
+            "role": "object",
+            "start": 38,
+            "surface": "transactions",
+            "term": "transaction"
+          },
+          {
+            "end": 67,
+            "role": "condition",
+            "start": 57,
+            "surface": "connection",
+            "term": "connection"
+          },
+          {
+            "end": 76,
+            "role": "condition",
+            "start": 68,
+            "surface": "failures",
+            "term": "failure"
+          }
+        ]
+      },
+      "auto": [
+        "Kura",
+        "Dataify",
+        "Indexia"
+      ],
+      "old": [
+        "Polinter",
+        "Storeseed",
+        "Sevnect",
+        "PureIndex"
+      ],
+      "current": [
+        "Liginter",
+        "Queryflow",
+        "Storter",
+        "PrimeQuery"
+      ],
+      "poolCount": 156,
+      "traceFile": "trace-18.json.gz",
+      "traceSha256": "e621bc993b0f51392b0f15f2b3edec0b571db2e6c31dd2c71dbbab12082c48aa"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a local service that replays database transactions after connection failures",
+      "seed": 67,
+      "intent": {
+        "description": "a local service that replays database transactions after connection failures",
+        "fallback_reason": null,
+        "generation_terms": [
+          "replay",
+          "database",
+          "transaction",
+          "connection",
+          "failure"
+        ],
+        "schema": "brief-intent-v1",
+        "status": "parsed",
+        "terms": [
+          {
+            "end": 28,
+            "role": "operation",
+            "start": 21,
+            "surface": "replays",
+            "term": "replay"
+          },
+          {
+            "end": 37,
+            "role": "object",
+            "start": 29,
+            "surface": "database",
+            "term": "database"
+          },
+          {
+            "end": 50,
+            "role": "object",
+            "start": 38,
+            "surface": "transactions",
+            "term": "transaction"
+          },
+          {
+            "end": 67,
+            "role": "condition",
+            "start": 57,
+            "surface": "connection",
+            "term": "connection"
+          },
+          {
+            "end": 76,
+            "role": "condition",
+            "start": 68,
+            "surface": "failures",
+            "term": "failure"
+          }
+        ]
+      },
+      "auto": [
+        "Cesme",
+        "Dataora",
+        "Indexia"
+      ],
+      "old": [
+        "Indexia",
+        "FieldReplay",
+        "Charment",
+        "Storeflow"
+      ],
+      "current": [
+        "Replayora",
+        "Charment",
+        "Querylink",
+        "Grafinter"
+      ],
+      "poolCount": 156,
+      "traceFile": "trace-19.json.gz",
+      "traceSha256": "a47cca392c8129dba8d9d2d7b01d64a9c5f5c3f273da30c38e2a2c0dcd3d1c02"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a local service that replays database transactions after connection failures",
+      "seed": 313,
+      "intent": {
+        "description": "a local service that replays database transactions after connection failures",
+        "fallback_reason": null,
+        "generation_terms": [
+          "replay",
+          "database",
+          "transaction",
+          "connection",
+          "failure"
+        ],
+        "schema": "brief-intent-v1",
+        "status": "parsed",
+        "terms": [
+          {
+            "end": 28,
+            "role": "operation",
+            "start": 21,
+            "surface": "replays",
+            "term": "replay"
+          },
+          {
+            "end": 37,
+            "role": "object",
+            "start": 29,
+            "surface": "database",
+            "term": "database"
+          },
+          {
+            "end": 50,
+            "role": "object",
+            "start": 38,
+            "surface": "transactions",
+            "term": "transaction"
+          },
+          {
+            "end": 67,
+            "role": "condition",
+            "start": 57,
+            "surface": "connection",
+            "term": "connection"
+          },
+          {
+            "end": 76,
+            "role": "condition",
+            "start": 68,
+            "surface": "failures",
+            "term": "failure"
+          }
+        ]
+      },
+      "auto": [
+        "Mulval",
+        "Dataora",
+        "Indexia"
+      ],
+      "old": [
+        "Storeflow",
+        "Comnect",
+        "Indexia",
+        "Magnect"
+      ],
+      "current": [
+        "Querylink",
+        "Storter",
+        "Replayora",
+        "Magnect"
+      ],
+      "poolCount": 156,
+      "traceFile": "trace-20.json.gz",
+      "traceSha256": "860986011638d5d8fad0bec8fffca203b5f40c00c43f288aa156b2f2a12eaf82"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a command line tool that tracks certificate expiration across internal services",
+      "seed": 13,
+      "intent": {
+        "description": "a command line tool that tracks certificate expiration across internal services",
+        "fallback_reason": null,
+        "generation_terms": [
+          "track",
+          "certificate",
+          "expiration",
+          "internal",
+          "service"
+        ],
+        "schema": "brief-intent-v1",
+        "status": "parsed",
+        "terms": [
+          {
+            "end": 31,
+            "role": "operation",
+            "start": 25,
+            "surface": "tracks",
+            "term": "track"
+          },
+          {
+            "end": 43,
+            "role": "object",
+            "start": 32,
+            "surface": "certificate",
+            "term": "certificate"
+          },
+          {
+            "end": 54,
+            "role": "object",
+            "start": 44,
+            "surface": "expiration",
+            "term": "expiration"
+          },
+          {
+            "end": 70,
+            "role": "condition",
+            "start": 62,
+            "surface": "internal",
+            "term": "internal"
+          },
+          {
+            "end": 79,
+            "role": "condition",
+            "start": 71,
+            "surface": "services",
+            "term": "service"
+          }
+        ]
+      },
+      "auto": [
+        "Termlab",
+        "Trackterm",
+        "Shellline"
+      ],
+      "old": [
+        "Dataforte",
+        "Termatlas",
+        "Falconer",
+        "NewTerm"
+      ],
+      "current": [
+        "Fluendo",
+        "Tracksignal",
+        "Izci",
+        "KeyInternal"
+      ],
+      "poolCount": 149,
+      "traceFile": "trace-21.json.gz",
+      "traceSha256": "cef5274ef07c3e8874d723dfbd0d91ac205dc7346fc292c611924d07d711b0a1"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a command line tool that tracks certificate expiration across internal services",
+      "seed": 67,
+      "intent": {
+        "description": "a command line tool that tracks certificate expiration across internal services",
+        "fallback_reason": null,
+        "generation_terms": [
+          "track",
+          "certificate",
+          "expiration",
+          "internal",
+          "service"
+        ],
+        "schema": "brief-intent-v1",
+        "status": "parsed",
+        "terms": [
+          {
+            "end": 31,
+            "role": "operation",
+            "start": 25,
+            "surface": "tracks",
+            "term": "track"
+          },
+          {
+            "end": 43,
+            "role": "object",
+            "start": 32,
+            "surface": "certificate",
+            "term": "certificate"
+          },
+          {
+            "end": 54,
+            "role": "object",
+            "start": 44,
+            "surface": "expiration",
+            "term": "expiration"
+          },
+          {
+            "end": 70,
+            "role": "condition",
+            "start": 62,
+            "surface": "internal",
+            "term": "internal"
+          },
+          {
+            "end": 79,
+            "role": "condition",
+            "start": 71,
+            "surface": "services",
+            "term": "service"
+          }
+        ]
+      },
+      "auto": [
+        "Termatlas",
+        "Trackterm",
+        "Shellline"
+      ],
+      "old": [
+        "Trackline",
+        "TermLine",
+        "Sheline",
+        "Promptatlas"
+      ],
+      "current": [
+        "Trackia",
+        "Intrack",
+        "Fluendo",
+        "KeyInternal"
+      ],
+      "poolCount": 149,
+      "traceFile": "trace-22.json.gz",
+      "traceSha256": "043124f9372e1ed777de34887cb2ac1cdeb30badd21489cf5cd2273e51fe5aff"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a command line tool that tracks certificate expiration across internal services",
+      "seed": 313,
+      "intent": {
+        "description": "a command line tool that tracks certificate expiration across internal services",
+        "fallback_reason": null,
+        "generation_terms": [
+          "track",
+          "certificate",
+          "expiration",
+          "internal",
+          "service"
+        ],
+        "schema": "brief-intent-v1",
+        "status": "parsed",
+        "terms": [
+          {
+            "end": 31,
+            "role": "operation",
+            "start": 25,
+            "surface": "tracks",
+            "term": "track"
+          },
+          {
+            "end": 43,
+            "role": "object",
+            "start": 32,
+            "surface": "certificate",
+            "term": "certificate"
+          },
+          {
+            "end": 54,
+            "role": "object",
+            "start": 44,
+            "surface": "expiration",
+            "term": "expiration"
+          },
+          {
+            "end": 70,
+            "role": "condition",
+            "start": 62,
+            "surface": "internal",
+            "term": "internal"
+          },
+          {
+            "end": 79,
+            "role": "condition",
+            "start": 71,
+            "surface": "services",
+            "term": "service"
+          }
+        ]
+      },
+      "auto": [
+        "Termatlas",
+        "Trackterm",
+        "Shellline"
+      ],
+      "old": [
+        "Termatlas",
+        "Fylgja",
+        "Trackline",
+        "Curnect"
+      ],
+      "current": [
+        "Tracklink",
+        "Fylgja",
+        "Corcess",
+        "KeyInternal"
+      ],
+      "poolCount": 149,
+      "traceFile": "trace-23.json.gz",
+      "traceSha256": "8297b3fc7b40496da669afa25734c47ff256976aa77a5fd9d14928d066fce846"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a browser utility that explains accessibility failures in rendered forms",
+      "seed": 13,
+      "intent": {
+        "description": "a browser utility that explains accessibility failures in rendered forms",
+        "fallback_reason": null,
+        "generation_terms": [
+          "explain",
+          "accessibility",
+          "failure",
+          "rendered",
+          "browser"
+        ],
+        "schema": "brief-intent-v1",
+        "status": "parsed",
+        "terms": [
+          {
+            "end": 9,
+            "role": "context",
+            "start": 2,
+            "surface": "browser",
+            "term": "browser"
+          },
+          {
+            "end": 31,
+            "role": "operation",
+            "start": 23,
+            "surface": "explains",
+            "term": "explain"
+          },
+          {
+            "end": 45,
+            "role": "object",
+            "start": 32,
+            "surface": "accessibility",
+            "term": "accessibility"
+          },
+          {
+            "end": 54,
+            "role": "object",
+            "start": 46,
+            "surface": "failures",
+            "term": "failure"
+          },
+          {
+            "end": 66,
+            "role": "object",
+            "start": 58,
+            "surface": "rendered",
+            "term": "rendered"
+          },
+          {
+            "end": 72,
+            "role": "object",
+            "start": 67,
+            "surface": "forms",
+            "term": "form"
+          }
+        ]
+      },
+      "auto": [
+        "Browsr",
+        "Pinform",
+        "Tabform"
+      ],
+      "old": [
+        "Formaplas",
+        "Browsr",
+        "Starsignal",
+        "Suiseki"
+      ],
+      "current": [
+        "Logossol",
+        "Browsr",
+        "Clipsignal",
+        "Magnect"
+      ],
+      "poolCount": 123,
+      "traceFile": "trace-24.json.gz",
+      "traceSha256": "eef0a450a2843bb3be2b5da3d371e141755d44179e8d25b11ffc2907ac1b7aca"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a browser utility that explains accessibility failures in rendered forms",
+      "seed": 67,
+      "intent": {
+        "description": "a browser utility that explains accessibility failures in rendered forms",
+        "fallback_reason": null,
+        "generation_terms": [
+          "explain",
+          "accessibility",
+          "failure",
+          "rendered",
+          "browser"
+        ],
+        "schema": "brief-intent-v1",
+        "status": "parsed",
+        "terms": [
+          {
+            "end": 9,
+            "role": "context",
+            "start": 2,
+            "surface": "browser",
+            "term": "browser"
+          },
+          {
+            "end": 31,
+            "role": "operation",
+            "start": 23,
+            "surface": "explains",
+            "term": "explain"
+          },
+          {
+            "end": 45,
+            "role": "object",
+            "start": 32,
+            "surface": "accessibility",
+            "term": "accessibility"
+          },
+          {
+            "end": 54,
+            "role": "object",
+            "start": 46,
+            "surface": "failures",
+            "term": "failure"
+          },
+          {
+            "end": 66,
+            "role": "object",
+            "start": 58,
+            "surface": "rendered",
+            "term": "rendered"
+          },
+          {
+            "end": 72,
+            "role": "object",
+            "start": 67,
+            "surface": "forms",
+            "term": "form"
+          }
+        ]
+      },
+      "auto": [
+        "Browsr",
+        "Pinform",
+        "Tabform"
+      ],
+      "old": [
+        "Pinform",
+        "Browsr",
+        "TabForm",
+        "Suggestar"
+      ],
+      "current": [
+        "Explainix",
+        "Browsr",
+        "Proscribe",
+        "Clipsignal"
+      ],
+      "poolCount": 123,
+      "traceFile": "trace-25.json.gz",
+      "traceSha256": "336d64509f17ead722c341d876b606ee9c811f3986662d525f1b5bd9de387862"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a browser utility that explains accessibility failures in rendered forms",
+      "seed": 313,
+      "intent": {
+        "description": "a browser utility that explains accessibility failures in rendered forms",
+        "fallback_reason": null,
+        "generation_terms": [
+          "explain",
+          "accessibility",
+          "failure",
+          "rendered",
+          "browser"
+        ],
+        "schema": "brief-intent-v1",
+        "status": "parsed",
+        "terms": [
+          {
+            "end": 9,
+            "role": "context",
+            "start": 2,
+            "surface": "browser",
+            "term": "browser"
+          },
+          {
+            "end": 31,
+            "role": "operation",
+            "start": 23,
+            "surface": "explains",
+            "term": "explain"
+          },
+          {
+            "end": 45,
+            "role": "object",
+            "start": 32,
+            "surface": "accessibility",
+            "term": "accessibility"
+          },
+          {
+            "end": 54,
+            "role": "object",
+            "start": 46,
+            "surface": "failures",
+            "term": "failure"
+          },
+          {
+            "end": 66,
+            "role": "object",
+            "start": 58,
+            "surface": "rendered",
+            "term": "rendered"
+          },
+          {
+            "end": 72,
+            "role": "object",
+            "start": 67,
+            "surface": "forms",
+            "term": "form"
+          }
+        ]
+      },
+      "auto": [
+        "Browsr",
+        "Pinform",
+        "Tabform"
+      ],
+      "old": [
+        "Clipbeam",
+        "Suiseki",
+        "Pinform",
+        "Strucder"
+      ],
+      "current": [
+        "Pinsignal",
+        "Magnect",
+        "Explainix",
+        "Cognect"
+      ],
+      "poolCount": 123,
+      "traceFile": "trace-26.json.gz",
+      "traceSha256": "0472f7a046a01414ff98cf6fb937bd2744b3f814b4eabb6fbe682ee931b447dc"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a package tool that groups crash reports by matching stack traces",
+      "seed": 13,
+      "intent": {
+        "description": "a package tool that groups crash reports by matching stack traces",
+        "fallback_reason": null,
+        "generation_terms": [
+          "group",
+          "crash",
+          "report",
+          "match",
+          "stack",
+          "package"
+        ],
+        "schema": "brief-intent-v1",
+        "status": "parsed",
+        "terms": [
+          {
+            "end": 9,
+            "role": "context",
+            "start": 2,
+            "surface": "package",
+            "term": "package"
+          },
+          {
+            "end": 26,
+            "role": "operation",
+            "start": 20,
+            "surface": "groups",
+            "term": "group"
+          },
+          {
+            "end": 32,
+            "role": "object",
+            "start": 27,
+            "surface": "crash",
+            "term": "crash"
+          },
+          {
+            "end": 40,
+            "role": "object",
+            "start": 33,
+            "surface": "reports",
+            "term": "report"
+          },
+          {
+            "end": 52,
+            "role": "condition",
+            "start": 44,
+            "surface": "matching",
+            "term": "match"
+          },
+          {
+            "end": 58,
+            "role": "condition",
+            "start": 53,
+            "surface": "stack",
+            "term": "stack"
+          },
+          {
+            "end": 65,
+            "role": "condition",
+            "start": 59,
+            "surface": "traces",
+            "term": "trace"
+          }
+        ]
+      },
+      "auto": [
+        "Repup",
+        "Martia",
+        "Traceseed"
+      ],
+      "old": [
+        "Orbala",
+        "Tracepeak",
+        "Halka",
+        "KeyStack"
+      ],
+      "current": [
+        "Orbala",
+        "Reportloom",
+        "Halka",
+        "NewByte"
+      ],
+      "poolCount": 167,
+      "traceFile": "trace-27.json.gz",
+      "traceSha256": "83327364fa7bff23d9fa2b8d2a4e09758385b143c7b9cd2c5a634d2f76069fa4"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a package tool that groups crash reports by matching stack traces",
+      "seed": 67,
+      "intent": {
+        "description": "a package tool that groups crash reports by matching stack traces",
+        "fallback_reason": null,
+        "generation_terms": [
+          "group",
+          "crash",
+          "report",
+          "match",
+          "stack",
+          "package"
+        ],
+        "schema": "brief-intent-v1",
+        "status": "parsed",
+        "terms": [
+          {
+            "end": 9,
+            "role": "context",
+            "start": 2,
+            "surface": "package",
+            "term": "package"
+          },
+          {
+            "end": 26,
+            "role": "operation",
+            "start": 20,
+            "surface": "groups",
+            "term": "group"
+          },
+          {
+            "end": 32,
+            "role": "object",
+            "start": 27,
+            "surface": "crash",
+            "term": "crash"
+          },
+          {
+            "end": 40,
+            "role": "object",
+            "start": 33,
+            "surface": "reports",
+            "term": "report"
+          },
+          {
+            "end": 52,
+            "role": "condition",
+            "start": 44,
+            "surface": "matching",
+            "term": "match"
+          },
+          {
+            "end": 58,
+            "role": "condition",
+            "start": 53,
+            "surface": "stack",
+            "term": "stack"
+          },
+          {
+            "end": 65,
+            "role": "condition",
+            "start": 59,
+            "surface": "traces",
+            "term": "trace"
+          }
+        ]
+      },
+      "auto": [
+        "Andon",
+        "Traceai",
+        "Repup"
+      ],
+      "old": [
+        "Traceia",
+        "GroupTrace",
+        "Platest",
+        "Reportloom"
+      ],
+      "current": [
+        "Stackbyte",
+        "GroupByte",
+        "Platest",
+        "Reportloom"
+      ],
+      "poolCount": 167,
+      "traceFile": "trace-28.json.gz",
+      "traceSha256": "576d2d1f81d6ca665b1ae8af30273ccb1c87a92a4994558abf33b3cdb38442c2"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a package tool that groups crash reports by matching stack traces",
+      "seed": 313,
+      "intent": {
+        "description": "a package tool that groups crash reports by matching stack traces",
+        "fallback_reason": null,
+        "generation_terms": [
+          "group",
+          "crash",
+          "report",
+          "match",
+          "stack",
+          "package"
+        ],
+        "schema": "brief-intent-v1",
+        "status": "parsed",
+        "terms": [
+          {
+            "end": 9,
+            "role": "context",
+            "start": 2,
+            "surface": "package",
+            "term": "package"
+          },
+          {
+            "end": 26,
+            "role": "operation",
+            "start": 20,
+            "surface": "groups",
+            "term": "group"
+          },
+          {
+            "end": 32,
+            "role": "object",
+            "start": 27,
+            "surface": "crash",
+            "term": "crash"
+          },
+          {
+            "end": 40,
+            "role": "object",
+            "start": 33,
+            "surface": "reports",
+            "term": "report"
+          },
+          {
+            "end": 52,
+            "role": "condition",
+            "start": 44,
+            "surface": "matching",
+            "term": "match"
+          },
+          {
+            "end": 58,
+            "role": "condition",
+            "start": 53,
+            "surface": "stack",
+            "term": "stack"
+          },
+          {
+            "end": 65,
+            "role": "condition",
+            "start": 59,
+            "surface": "traces",
+            "term": "trace"
+          }
+        ]
+      },
+      "auto": [
+        "Traceia",
+        "Repor",
+        "Stackia"
+      ],
+      "old": [
+        "Tracepeak",
+        "Halka",
+        "Crowl",
+        "Doctain"
+      ],
+      "current": [
+        "Reportloom",
+        "Halka",
+        "Stackbyte",
+        "Doctude"
+      ],
+      "poolCount": 167,
+      "traceFile": "trace-29.json.gz",
+      "traceSha256": "cf14c91a66932757b04704aa30b4f083267fdbb431ef76643e5fb821c14d846c"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a local tool that maps configuration references across deployment manifests",
+      "seed": 13,
+      "intent": {
+        "description": "a local tool that maps configuration references across deployment manifests",
+        "fallback_reason": null,
+        "generation_terms": [
+          "map",
+          "configuration",
+          "reference",
+          "deployment",
+          "manifest"
+        ],
+        "schema": "brief-intent-v1",
+        "status": "parsed",
+        "terms": [
+          {
+            "end": 22,
+            "role": "operation",
+            "start": 18,
+            "surface": "maps",
+            "term": "map"
+          },
+          {
+            "end": 36,
+            "role": "object",
+            "start": 23,
+            "surface": "configuration",
+            "term": "configuration"
+          },
+          {
+            "end": 47,
+            "role": "object",
+            "start": 37,
+            "surface": "references",
+            "term": "reference"
+          },
+          {
+            "end": 65,
+            "role": "condition",
+            "start": 55,
+            "surface": "deployment",
+            "term": "deployment"
+          },
+          {
+            "end": 75,
+            "role": "condition",
+            "start": 66,
+            "surface": "manifests",
+            "term": "manifest"
+          }
+        ]
+      },
+      "auto": [
+        "Harita",
+        "Dotdoc",
+        "Docseed"
+      ],
+      "old": [
+        "Fortelex",
+        "Routelink",
+        "Portolan",
+        "PrimeEnv"
+      ],
+      "current": [
+        "Fortelex",
+        "Docsignal",
+        "Portolan",
+        "PrimeShip"
+      ],
+      "poolCount": 189,
+      "traceFile": "trace-30.json.gz",
+      "traceSha256": "21fd05c311061ac5c73378c50d8391eb30cea39fdb64106400985754e011d7bd"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a local tool that maps configuration references across deployment manifests",
+      "seed": 67,
+      "intent": {
+        "description": "a local tool that maps configuration references across deployment manifests",
+        "fallback_reason": null,
+        "generation_terms": [
+          "map",
+          "configuration",
+          "reference",
+          "deployment",
+          "manifest"
+        ],
+        "schema": "brief-intent-v1",
+        "status": "parsed",
+        "terms": [
+          {
+            "end": 22,
+            "role": "operation",
+            "start": 18,
+            "surface": "maps",
+            "term": "map"
+          },
+          {
+            "end": 36,
+            "role": "object",
+            "start": 23,
+            "surface": "configuration",
+            "term": "configuration"
+          },
+          {
+            "end": 47,
+            "role": "object",
+            "start": 37,
+            "surface": "references",
+            "term": "reference"
+          },
+          {
+            "end": 65,
+            "role": "condition",
+            "start": 55,
+            "surface": "deployment",
+            "term": "deployment"
+          },
+          {
+            "end": 75,
+            "role": "condition",
+            "start": 66,
+            "surface": "manifests",
+            "term": "manifest"
+          }
+        ]
+      },
+      "auto": [
+        "Diapason",
+        "Dotdoc",
+        "Paramio"
+      ],
+      "old": [
+        "Dotsite",
+        "VarRoute",
+        "Atlasite",
+        "Paramlab"
+      ],
+      "current": [
+        "Atlascloud",
+        "RouteDoc",
+        "Nucloud",
+        "Cloudatlas"
+      ],
+      "poolCount": 190,
+      "traceFile": "trace-31.json.gz",
+      "traceSha256": "99a370b78fe550b0d96746ada86f4cc22b0ac6b37b332f0d9ae91a87c76131c7"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a local tool that maps configuration references across deployment manifests",
+      "seed": 313,
+      "intent": {
+        "description": "a local tool that maps configuration references across deployment manifests",
+        "fallback_reason": null,
+        "generation_terms": [
+          "map",
+          "configuration",
+          "reference",
+          "deployment",
+          "manifest"
+        ],
+        "schema": "brief-intent-v1",
+        "status": "parsed",
+        "terms": [
+          {
+            "end": 22,
+            "role": "operation",
+            "start": 18,
+            "surface": "maps",
+            "term": "map"
+          },
+          {
+            "end": 36,
+            "role": "object",
+            "start": 23,
+            "surface": "configuration",
+            "term": "configuration"
+          },
+          {
+            "end": 47,
+            "role": "object",
+            "start": 37,
+            "surface": "references",
+            "term": "reference"
+          },
+          {
+            "end": 65,
+            "role": "condition",
+            "start": 55,
+            "surface": "deployment",
+            "term": "deployment"
+          },
+          {
+            "end": 75,
+            "role": "condition",
+            "start": 66,
+            "surface": "manifests",
+            "term": "manifest"
+          }
+        ]
+      },
+      "auto": [
+        "Harita",
+        "Dotdoc",
+        "Docroam"
+      ],
+      "old": [
+        "Atlasseed",
+        "Portolan",
+        "Paramia",
+        "Dictic"
+      ],
+      "current": [
+        "Shipsignal",
+        "Portolan",
+        "Routedoc",
+        "Dictic"
+      ],
+      "poolCount": 190,
+      "traceFile": "trace-32.json.gz",
+      "traceSha256": "5879894db619252bd3f05f31b811f392d687f2491475826517894b29976a8cff"
+    }
+  ]
+}
