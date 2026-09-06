@@ -94,6 +94,29 @@ fn bridges() -> &'static HashMap<String, Vec<(String, String, f64)>> {
     })
 }
 
+/// The vocabulary the engine has actually declared: every knowledge-base tag
+/// and both ends of every bridge. A reasoning chain may only pass through it.
+fn known_concept(word: &str) -> bool {
+    static VOCAB: OnceLock<std::collections::HashSet<String>> = OnceLock::new();
+    let vocab = VOCAB.get_or_init(|| {
+        let mut set: std::collections::HashSet<String> = std::collections::HashSet::new();
+        for entry in kb() {
+            set.insert(norm(&entry.name.to_lowercase()));
+            for tag in &entry.tags {
+                set.insert(tag.clone());
+            }
+        }
+        for (from, outs) in bridges() {
+            set.insert(from.clone());
+            for (to, _, _) in outs {
+                set.insert(to.clone());
+            }
+        }
+        set
+    });
+    vocab.contains(word)
+}
+
 /// Activation lookup tolerant of e-elision on either side ("optimize" tag vs
 /// "optimiz" activation key and vice versa).
 fn act_get<'a>(act: &'a HashMap<String, Activation>, key: &str) -> Option<&'a Activation> {
@@ -286,7 +309,14 @@ fn coined_candidates(
                 // neighborhood, so show that concept and the hit word. Kept
                 // to the nearest few (submorph itself searches 12 deep) —
                 // farther out the embedding drifts to another sense entirely
-                // and the honest chain reads as bad reasoning.
+                // and the honest chain reads as bad reasoning. The step must
+                // also land on a word the engine actually knows: the embedding
+                // will happily offer "really" as a neighbour of "sort", and
+                // "triage → sort → really" is a true sentence about the
+                // embedding, not a reason for a name.
+                if !known_concept(&h) {
+                    continue;
+                }
                 if let Some(via) = concepts
                     .iter()
                     .filter(|(_, a)| a.weight >= 0.5)
