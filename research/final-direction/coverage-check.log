@@ -1,0 +1,49 @@
+1/35 ready; no frame; Izci, Fylgja, Retrack, Trackter
+2/35 unresolved; no frame; 
+3/35 unresolved; no frame; 
+4/35 unresolved; no frame; 
+5/35 unresolved; no frame; 
+6/35 unresolved; no frame; 
+7/35 unresolved; no frame; 
+8/35 unresolved; no frame; 
+9/35 unresolved; no frame; 
+10/35 unresolved; no frame; 
+11/35 unresolved; no frame; 
+12/35 unresolved; no frame; 
+13/35 unresolved; no frame; 
+14/35 unresolved; no frame; 
+15/35 unresolved; no frame; 
+16/35 unresolved; no frame; 
+17/35 ready; no frame; Izci, Fylgja, Logitrack, Lotrack
+18/35 unresolved; no frame; 
+19/35 unresolved; no frame; 
+20/35 unresolved; no frame; 
+21/35 unresolved; no frame; 
+22/35 unresolved; no frame; 
+23/35 unresolved; no frame; 
+24/35 unresolved; no frame; 
+25/35 unresolved; no frame; 
+26/35 unresolved; no frame; 
+27/35 unresolved; no frame; 
+28/35 unresolved; no frame; 
+29/35 unresolved; no frame; 
+30/35 unresolved; no frame; 
+31/35 unresolved; no frame; 
+32/35 unresolved; no frame; 
+33/35 unresolved; no frame; 
+34/35 unresolved; no frame; 
+35/35 unresolved; no frame; 
+{
+  "all": {
+    "briefs": 35,
+    "ready": 2,
+    "benefitFrame": 0,
+    "nonempty": 2
+  },
+  "developer": {
+    "briefs": 14,
+    "ready": 0,
+    "benefitFrame": 0,
+    "nonempty": 0
+  }
+}

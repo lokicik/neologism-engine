@@ -1,0 +1,62 @@
+{
+  "passed": true,
+  "scope": "Research evidence verification; no new runtime release or human quality pass",
+  "runtimeSourceHashesMatched": 132,
+  "coverage": {
+    "all": {
+      "briefs": 35,
+      "ready": 2,
+      "benefitFrame": 0,
+      "nonempty": 2
+    },
+    "developer": {
+      "briefs": 14,
+      "ready": 0,
+      "benefitFrame": 0,
+      "nonempty": 0
+    }
+  },
+  "coverageReplayMatched": true,
+  "anchors": {
+    "wholeAnchors": 24,
+    "inCrateSnapshot": 23,
+    "inBrandCorpus": 12,
+    "firstCollisionRejection": 22,
+    "firstPhonotacticRejection": 1,
+    "emitted": 1,
+    "framesWithoutWholeAnchor": 7
+  },
+  "humanEvidence": {
+    "reportedDecisions": 174,
+    "primaryNeither": 77,
+    "decisive": 73,
+    "repeatAgreement": "13/24",
+    "derivedLabels": 201,
+    "rawCollectionReplayed": false
+  },
+  "runtimeChanged": false,
+  "proposedArchitectureImplemented": false,
+  "qualityImprovementEstablished": false,
+  "sourceHashes": {
+    "research/final-direction/anchor-check.mjs": "694832cf8313389068d761ff6bd7da5a3d58908e60fdfabb6a55333bafa7d1c4",
+    "research/final-direction/architecture-note.md": "5e7e8cb47d05188c3e54998c371729c959bc8121b7544e612b4021a95fc5affe",
+    "research/final-direction/coverage-check.mjs": "5f100ff2a87d4961672c358c0681086bf141514588aec34d8f5651b5e68e2362",
+    "research/final-direction/DECISION.md": "22d2a029144fdb50cf9ee3547ee07e126260e6cb658a4d2f9f616a091929f2ef",
+    "research/final-direction/preference-note.md": "c239a5af221c6564af4c4b1cc1251969313006f8553ff73e088eca47ded1ee43",
+    "research/final-direction/research-note.md": "e9fc9a7298ac102123e94cceddd9c4ace3d0733835bfc15283b8339fa082d032",
+    "research/final-direction/verify.mjs": "ab72efaf30115d99f1db20e01faa57b0c3d21467542dde457bb57328e2710a5f",
+    "research/final-direction/artifacts/anchors.json": "1cd3350fe4ee42defad2e9c443e75c37e6b77c7367a9e422674c95275508cd76",
+    "research/final-direction/artifacts/coverage-protocol.json": "de4f13fe7d620205929f685d3317b191ed4a8940f1ea7a6b194cd5eaaf85acd0",
+    "research/final-direction/artifacts/coverage-replay.json": "f2af0f58add9b6c081eee7df07b8f802e8f1cf401b92e131897aca519b70cd3d",
+    "research/final-direction/artifacts/coverage.json": "f8373d93e98a2a800ec599218670684176eec8ea975a936df5485de97fc627e2",
+    "research/preference-learning/work/real-descriptive-a/report.json": "7bb7d432f5d4ba1ef05c6043205dff4a2bae9d5b0cbc759940a3a1abaef041fa",
+    "research/personal-acceptability/work/run-a/labels.json": "38b96bad9d84855c5b4affb6a6179eae282f485e421ec744a488494d3e3115b8",
+    "research/personal-acceptability/work/run-a/report.json": "671ee91d03039cd5673edbecc469e9854674deae171303d369e314fa2dac57c9",
+    "research/preference-learning/COLLECTION-NEGATIVE-CHECKPOINT.md": "9f7d1f071775ea0482a1560eae616351fb66240a86290d1c358887d09f098a1a",
+    "research/preference-learning/README.md": "06768e31b1e37f4321720a6d6d47fdd86a34dcf5637e122a63aee5356c5e2115",
+    "research/personal-acceptability/NEGATIVE-CHECKPOINT.md": "2e983c77c60ff0d72ad9267654bd05a2956dbf1052fcf2767c7ea1ab88749af2",
+    "research/personal-prototype/anchors.json": "4372a0fe5d707feb2c0f787aa5ddc1ab96941950aed719f05c52612aba62f9d2",
+    "research/shared-pool/harness.mjs": "7f8c336fee4574a8dcc55b85bc9407442ab265f7a70985aa27db32f3788a843e",
+    "research/retained-fragments/artifacts/delivery.json": "cff2dc239ffa59670b3667f2013f5e28b4f27a7c31c8cffe6627c786457c4447"
+  }
+}

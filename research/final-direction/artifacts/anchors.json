@@ -1,0 +1,201 @@
+{
+  "scope": "24 unique editorial anchors across 12 retained Product-brief first pages; not a quality or availability verdict",
+  "summary": {
+    "wholeAnchors": 24,
+    "inCrateSnapshot": 23,
+    "inBrandCorpus": 12,
+    "firstCollisionRejection": 22,
+    "firstPhonotacticRejection": 1,
+    "emitted": 1,
+    "framesWithoutWholeAnchor": 7
+  },
+  "rows": [
+    {
+      "word": "anchor",
+      "frame": "recovery",
+      "inCrateSnapshot": true,
+      "inBrandCorpus": true,
+      "outcome": "frame.filter:collision_snapshot"
+    },
+    {
+      "word": "atlas",
+      "frame": "topology",
+      "inCrateSnapshot": true,
+      "inBrandCorpus": true,
+      "outcome": "frame.filter:collision_snapshot"
+    },
+    {
+      "word": "balance",
+      "frame": "measurement",
+      "inCrateSnapshot": true,
+      "inBrandCorpus": true,
+      "outcome": "frame.filter:collision_snapshot"
+    },
+    {
+      "word": "beacon",
+      "frame": "observation",
+      "inCrateSnapshot": true,
+      "inBrandCorpus": false,
+      "outcome": "frame.filter:collision_snapshot"
+    },
+    {
+      "word": "caliper",
+      "frame": "measurement",
+      "inCrateSnapshot": true,
+      "inBrandCorpus": false,
+      "outcome": "frame.filter:collision_snapshot"
+    },
+    {
+      "word": "chart",
+      "frame": "topology",
+      "inCrateSnapshot": true,
+      "inBrandCorpus": true,
+      "outcome": "frame.filter:collision_snapshot"
+    },
+    {
+      "word": "folio",
+      "frame": "organization",
+      "inCrateSnapshot": true,
+      "inBrandCorpus": false,
+      "outcome": "frame.filter:collision_snapshot"
+    },
+    {
+      "word": "gauge",
+      "frame": "measurement",
+      "inCrateSnapshot": true,
+      "inBrandCorpus": true,
+      "outcome": "frame.filter:collision_snapshot"
+    },
+    {
+      "word": "lantern",
+      "frame": "exposure",
+      "inCrateSnapshot": true,
+      "inBrandCorpus": true,
+      "outcome": "frame.filter:collision_snapshot"
+    },
+    {
+      "word": "ledger",
+      "frame": "observation",
+      "inCrateSnapshot": true,
+      "inBrandCorpus": true,
+      "outcome": "frame.filter:collision_snapshot"
+    },
+    {
+      "word": "mend",
+      "frame": "recovery",
+      "inCrateSnapshot": true,
+      "inBrandCorpus": false,
+      "outcome": "frame.filter:collision_snapshot"
+    },
+    {
+      "word": "mesh",
+      "frame": "selection",
+      "inCrateSnapshot": true,
+      "inBrandCorpus": true,
+      "outcome": "frame.filter:collision_snapshot"
+    },
+    {
+      "word": "prism",
+      "frame": "selection",
+      "inCrateSnapshot": true,
+      "inBrandCorpus": true,
+      "outcome": "frame.filter:collision_snapshot"
+    },
+    {
+      "word": "proof",
+      "frame": "integrity",
+      "inCrateSnapshot": true,
+      "inBrandCorpus": false,
+      "outcome": "frame.filter:collision_snapshot"
+    },
+    {
+      "word": "reprise",
+      "frame": "recovery",
+      "inCrateSnapshot": false,
+      "inBrandCorpus": false,
+      "outcome": "emitted"
+    },
+    {
+      "word": "seal",
+      "frame": "integrity",
+      "inCrateSnapshot": true,
+      "inBrandCorpus": false,
+      "outcome": "frame.filter:collision_snapshot"
+    },
+    {
+      "word": "sentinel",
+      "frame": "exposure",
+      "inCrateSnapshot": true,
+      "inBrandCorpus": false,
+      "outcome": "frame.filter:collision_snapshot"
+    },
+    {
+      "word": "shelf",
+      "frame": "organization",
+      "inCrateSnapshot": true,
+      "inBrandCorpus": false,
+      "outcome": "frame.filter:collision_snapshot"
+    },
+    {
+      "word": "sieve",
+      "frame": "selection",
+      "inCrateSnapshot": true,
+      "inBrandCorpus": true,
+      "outcome": "frame.filter:collision_snapshot"
+    },
+    {
+      "word": "thread",
+      "frame": "organization",
+      "inCrateSnapshot": true,
+      "inBrandCorpus": true,
+      "outcome": "frame.filter:collision_snapshot"
+    },
+    {
+      "word": "touchstone",
+      "frame": "integrity",
+      "inCrateSnapshot": true,
+      "inBrandCorpus": false,
+      "outcome": "frame.filter:phonotactics"
+    },
+    {
+      "word": "tripwire",
+      "frame": "exposure",
+      "inCrateSnapshot": true,
+      "inBrandCorpus": false,
+      "outcome": "frame.filter:collision_snapshot"
+    },
+    {
+      "word": "watch",
+      "frame": "observation",
+      "inCrateSnapshot": true,
+      "inBrandCorpus": false,
+      "outcome": "frame.filter:collision_snapshot"
+    },
+    {
+      "word": "weave",
+      "frame": "topology",
+      "inCrateSnapshot": true,
+      "inBrandCorpus": true,
+      "outcome": "frame.filter:collision_snapshot"
+    }
+  ],
+  "traces": {
+    "trace-32.json.gz": "f9623d898ee93e38a4915314bccd87792b95b9fe0eddc4adffba786e8f6173c6",
+    "trace-33.json.gz": "5c492c8fe707078c51f3daefe87755fe31953daaa5aee84a9998c8598407ac74",
+    "trace-34.json.gz": "0caf6c1fdf5f06ded7ac6eb05612c0f97d6fca4a24e48abd4afaa4647c96f77e",
+    "trace-35.json.gz": "14efc3612c7aaff9b8ec82d33c3b6e821aac16312f3a24c63e11c213aa32c6a6",
+    "trace-36.json.gz": "53015d2c6d346b430ace487ced4a30efd79782cfd3ef379f5b4984a0758d0feb",
+    "trace-37.json.gz": "34185c6bbe97b843c3f46a91bb994e6828ef55fa0902453b05f8a0a4deac8ea6",
+    "trace-38.json.gz": "af37bf5efc71d5852c2a1123c5a9e274de67aa1fe5f75db7d68f5fbc406cf158",
+    "trace-39.json.gz": "77a58c89a0a0265a88f0ea13f1e5ec0c43c53ddb97105b431f711377c8f8f513",
+    "trace-40.json.gz": "192db35b42979e948aebeb746000c63dedcacc1f8722a79ec18e57f3d979633d",
+    "trace-41.json.gz": "a0e1a789ea72fefd6d4d22c610fe38d72aa65a80de7b6892e4f9a4a0a369e248",
+    "trace-42.json.gz": "58437fe69c7a5f8beae0de8b542c31a36a13bf498aaf3a9a50566cd65d8093af",
+    "trace-43.json.gz": "21838ed027e202e3149e12f1b114704003b1ae267981677a8110e9daee144643"
+  },
+  "dataHashes": {
+    "core/data/product_frames.tsv": "c0ac486edfb4209afde3f1ebeb89ec281ce9f07b5bb8965edf09b7c1824f1c1c",
+    "research/collision/crate-names.txt": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+    "core/data/bigtech.txt": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c"
+  }
+}

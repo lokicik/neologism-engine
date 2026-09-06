@@ -1,0 +1,423 @@
+{
+  "protocolSha256": "de4f13fe7d620205929f685d3317b191ed4a8940f1ea7a6b194cd5eaaf85acd0",
+  "runtimeUnchanged": 132,
+  "wasmSha256": "c28012566a5652de6acf17ff47c96023074d1c5b1b3fbe004aa6d0350d27165e",
+  "summary": {
+    "all": {
+      "briefs": 35,
+      "ready": 2,
+      "benefitFrame": 0,
+      "nonempty": 2
+    },
+    "developer": {
+      "briefs": 14,
+      "ready": 0,
+      "benefitFrame": 0,
+      "nonempty": 0
+    }
+  },
+  "rows": [
+    {
+      "brief": "candidate tracking software for recruiters",
+      "status": "ready",
+      "reason": null,
+      "terms": [
+        "track",
+        "recruiter"
+      ],
+      "frame": null,
+      "proposals": 130,
+      "eligible": 6,
+      "finalists": [
+        "Izci",
+        "Fylgja",
+        "Retrack",
+        "Trackter"
+      ],
+      "developerSubset": false
+    },
+    {
+      "brief": "a weekly menu and grocery organizer",
+      "status": "unresolved",
+      "reason": "no_explicit_operation",
+      "terms": [],
+      "frame": null,
+      "proposals": 0,
+      "eligible": 0,
+      "finalists": [],
+      "developerSubset": false
+    },
+    {
+      "brief": "a catalog for household belongings",
+      "status": "unresolved",
+      "reason": "no_explicit_operation",
+      "terms": [],
+      "frame": null,
+      "proposals": 0,
+      "eligible": 0,
+      "finalists": [],
+      "developerSubset": false
+    },
+    {
+      "brief": "property discovery for home buyers",
+      "status": "unresolved",
+      "reason": "no_explicit_operation",
+      "terms": [],
+      "frame": null,
+      "proposals": 0,
+      "eligible": 0,
+      "finalists": [],
+      "developerSubset": false
+    },
+    {
+      "brief": "conference booking and attendee check-in",
+      "status": "unresolved",
+      "reason": "no_explicit_operation",
+      "terms": [],
+      "frame": null,
+      "proposals": 0,
+      "eligible": 0,
+      "finalists": [],
+      "developerSubset": false
+    },
+    {
+      "brief": "local rain and temperature alerts",
+      "status": "unresolved",
+      "reason": "no_explicit_operation",
+      "terms": [],
+      "frame": null,
+      "proposals": 0,
+      "eligible": 0,
+      "finalists": [],
+      "developerSubset": false
+    },
+    {
+      "brief": "routine and streak coaching",
+      "status": "unresolved",
+      "reason": "no_explicit_operation",
+      "terms": [],
+      "frame": null,
+      "proposals": 0,
+      "eligible": 0,
+      "finalists": [],
+      "developerSubset": false
+    },
+    {
+      "brief": "a customer relationship pipeline for sales representatives",
+      "status": "unresolved",
+      "reason": "no_explicit_operation",
+      "terms": [],
+      "frame": null,
+      "proposals": 0,
+      "eligible": 0,
+      "finalists": [],
+      "developerSubset": false
+    },
+    {
+      "brief": "a mindfulness timer for sleep and breath",
+      "status": "unresolved",
+      "reason": "no_explicit_operation",
+      "terms": [],
+      "frame": null,
+      "proposals": 0,
+      "eligible": 0,
+      "finalists": [],
+      "developerSubset": false
+    },
+    {
+      "brief": "a veterinary appointment and pet wellness tracker",
+      "status": "unresolved",
+      "reason": "no_explicit_operation",
+      "terms": [],
+      "frame": null,
+      "proposals": 0,
+      "eligible": 0,
+      "finalists": [],
+      "developerSubset": false
+    },
+    {
+      "brief": "a personal budget and expense tracker",
+      "status": "unresolved",
+      "reason": "no_explicit_operation",
+      "terms": [],
+      "frame": null,
+      "proposals": 0,
+      "eligible": 0,
+      "finalists": [],
+      "developerSubset": false
+    },
+    {
+      "brief": "a private mood journal",
+      "status": "unresolved",
+      "reason": "no_explicit_operation",
+      "terms": [],
+      "frame": null,
+      "proposals": 0,
+      "eligible": 0,
+      "finalists": [],
+      "developerSubset": false
+    },
+    {
+      "brief": "a community chat app",
+      "status": "unresolved",
+      "reason": "no_explicit_operation",
+      "terms": [],
+      "frame": null,
+      "proposals": 0,
+      "eligible": 0,
+      "finalists": [],
+      "developerSubset": false
+    },
+    {
+      "brief": "a color palette and visual design tool",
+      "status": "unresolved",
+      "reason": "no_explicit_operation",
+      "terms": [],
+      "frame": null,
+      "proposals": 0,
+      "eligible": 0,
+      "finalists": [],
+      "developerSubset": false
+    },
+    {
+      "brief": "a task and calendar planner",
+      "status": "unresolved",
+      "reason": "no_explicit_operation",
+      "terms": [],
+      "frame": null,
+      "proposals": 0,
+      "eligible": 0,
+      "finalists": [],
+      "developerSubset": false
+    },
+    {
+      "brief": "an online course and study app",
+      "status": "unresolved",
+      "reason": "no_explicit_operation",
+      "terms": [],
+      "frame": null,
+      "proposals": 0,
+      "eligible": 0,
+      "finalists": [],
+      "developerSubset": false
+    },
+    {
+      "brief": "a delivery tracking and logistics app",
+      "status": "ready",
+      "reason": null,
+      "terms": [
+        "track",
+        "logistics"
+      ],
+      "frame": null,
+      "proposals": 129,
+      "eligible": 4,
+      "finalists": [
+        "Izci",
+        "Fylgja",
+        "Logitrack",
+        "Lotrack"
+      ],
+      "developerSubset": false
+    },
+    {
+      "brief": "an AI assistant for workflow automation",
+      "status": "unresolved",
+      "reason": "no_explicit_operation",
+      "terms": [],
+      "frame": null,
+      "proposals": 0,
+      "eligible": 0,
+      "finalists": [],
+      "developerSubset": false
+    },
+    {
+      "brief": "a fast performance monitor",
+      "status": "unresolved",
+      "reason": "no_explicit_operation",
+      "terms": [],
+      "frame": null,
+      "proposals": 0,
+      "eligible": 0,
+      "finalists": [],
+      "developerSubset": false
+    },
+    {
+      "brief": "a naming tool for new products",
+      "status": "unresolved",
+      "reason": "no_explicit_operation",
+      "terms": [],
+      "frame": null,
+      "proposals": 0,
+      "eligible": 0,
+      "finalists": [],
+      "developerSubset": false
+    },
+    {
+      "brief": "a CLI for database migrations",
+      "status": "unresolved",
+      "reason": "no_explicit_operation",
+      "terms": [],
+      "frame": null,
+      "proposals": 0,
+      "eligible": 0,
+      "finalists": [],
+      "developerSubset": true
+    },
+    {
+      "brief": "an API rate limiting library",
+      "status": "unresolved",
+      "reason": "no_explicit_operation",
+      "terms": [],
+      "frame": null,
+      "proposals": 0,
+      "eligible": 0,
+      "finalists": [],
+      "developerSubset": true
+    },
+    {
+      "brief": "a terminal log viewer",
+      "status": "unresolved",
+      "reason": "no_explicit_operation",
+      "terms": [],
+      "frame": null,
+      "proposals": 0,
+      "eligible": 0,
+      "finalists": [],
+      "developerSubset": true
+    },
+    {
+      "brief": "a browser bookmark manager",
+      "status": "unresolved",
+      "reason": "no_explicit_operation",
+      "terms": [],
+      "frame": null,
+      "proposals": 0,
+      "eligible": 0,
+      "finalists": [],
+      "developerSubset": true
+    },
+    {
+      "brief": "an API testing toolkit",
+      "status": "unresolved",
+      "reason": "no_explicit_operation",
+      "terms": [],
+      "frame": null,
+      "proposals": 0,
+      "eligible": 0,
+      "finalists": [],
+      "developerSubset": true
+    },
+    {
+      "brief": "a cloud deployment dashboard",
+      "status": "unresolved",
+      "reason": "no_explicit_operation",
+      "terms": [],
+      "frame": null,
+      "proposals": 0,
+      "eligible": 0,
+      "finalists": [],
+      "developerSubset": true
+    },
+    {
+      "brief": "a message queue client",
+      "status": "unresolved",
+      "reason": "no_explicit_operation",
+      "terms": [],
+      "frame": null,
+      "proposals": 0,
+      "eligible": 0,
+      "finalists": [],
+      "developerSubset": true
+    },
+    {
+      "brief": "a code formatter and linter",
+      "status": "unresolved",
+      "reason": "no_explicit_operation",
+      "terms": [],
+      "frame": null,
+      "proposals": 0,
+      "eligible": 0,
+      "finalists": [],
+      "developerSubset": true
+    },
+    {
+      "brief": "an environment variable manager",
+      "status": "unresolved",
+      "reason": "no_explicit_operation",
+      "terms": [],
+      "frame": null,
+      "proposals": 0,
+      "eligible": 0,
+      "finalists": [],
+      "developerSubset": true
+    },
+    {
+      "brief": "a filesystem search CLI",
+      "status": "unresolved",
+      "reason": "no_explicit_operation",
+      "terms": [],
+      "frame": null,
+      "proposals": 0,
+      "eligible": 0,
+      "finalists": [],
+      "developerSubset": true
+    },
+    {
+      "brief": "a feature flag service",
+      "status": "unresolved",
+      "reason": "no_explicit_operation",
+      "terms": [],
+      "frame": null,
+      "proposals": 0,
+      "eligible": 0,
+      "finalists": [],
+      "developerSubset": true
+    },
+    {
+      "brief": "a background job scheduler",
+      "status": "unresolved",
+      "reason": "no_explicit_operation",
+      "terms": [],
+      "frame": null,
+      "proposals": 0,
+      "eligible": 0,
+      "finalists": [],
+      "developerSubset": true
+    },
+    {
+      "brief": "dependency update automation",
+      "status": "unresolved",
+      "reason": "no_explicit_operation",
+      "terms": [],
+      "frame": null,
+      "proposals": 0,
+      "eligible": 0,
+      "finalists": [],
+      "developerSubset": true
+    },
+    {
+      "brief": "a documentation site generator",
+      "status": "unresolved",
+      "reason": "no_explicit_operation",
+      "terms": [],
+      "frame": null,
+      "proposals": 0,
+      "eligible": 0,
+      "finalists": [],
+      "developerSubset": true
+    },
+    {
+      "brief": "legal research for court cases",
+      "status": "unresolved",
+      "reason": "no_explicit_operation",
+      "terms": [],
+      "frame": null,
+      "proposals": 0,
+      "eligible": 0,
+      "finalists": [],
+      "developerSubset": false
+    }
+  ],
+  "qualityImprovementEstablished": false
+}
