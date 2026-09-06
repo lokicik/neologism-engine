@@ -1,0 +1,22 @@
+{
+  "schema": "operation-object-experiment-v1",
+  "scope": "Material and lexical evidence ablation, not a human preference study",
+  "seeds": [13, 67, 313],
+  "development": [
+    "a build tool that compares executable sizes between release tags",
+    "a browser utility that explains accessibility failures in rendered forms",
+    "a package release assistant that verifies checksums of downloadable binaries",
+    "a build tool that checks dependency licenses before publishing a package"
+  ],
+  "evaluation": [
+    "a local utility that compares database schemas before applying migrations",
+    "a developer tool that verifies configuration files before deployment",
+    "a terminal tool that tracks memory usage during test runs",
+    "a local service that groups log messages by severity",
+    "a browser tool that maps keyboard shortcuts across pages",
+    "a package tool that checks archive sizes before download"
+  ],
+  "controls": ["a tool that does not track users", "a checksum tool", "a tool that checks licenses and certificates"],
+  "fixedRules": "Same nine families, maximum 24 each, unchanged aesthetics and round-robin selector. Require disjoint full edge-anchored action/object roots. No semantic-neighbor proof, no padding, no default switch.",
+  "review": "Assistant editorial only, first listed seed; no best-of-three picking or promotion claim. No tuning from evaluation outputs."
+}

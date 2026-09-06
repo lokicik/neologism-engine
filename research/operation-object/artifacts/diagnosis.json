@@ -1,0 +1,1797 @@
+{
+  "comparisonSha256": "8229dc10b7e32ca795aaae00377b3e4ea9cbd47e8a667fed23d1c055207222eb",
+  "method": "Post-hoc lexical diagnostic using the frozen plan, no changes to selection",
+  "rows": [
+    {
+      "brief": "a build tool that compares executable sizes between release tags",
+      "partition": "development",
+      "finalists": [],
+      "poolCount": 144,
+      "linkedPoolCount": 0,
+      "internal": [
+        {
+          "family": "brandable",
+          "name": "comparesize",
+          "stage": "internal_filter",
+          "events": [
+            {
+              "name": "comparesize",
+              "occurrences": 7237,
+              "reason": "syllables",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "comparesize",
+              "occurrences": 7237,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            }
+          ]
+        },
+        {
+          "family": "guided_pair",
+          "name": "comparesize",
+          "stage": "internal_filter",
+          "events": [
+            {
+              "name": "comparesize",
+              "occurrences": 9600,
+              "reason": "syllables",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "comparesize",
+              "occurrences": 9600,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brief": "a browser utility that explains accessibility failures in rendered forms",
+      "partition": "development",
+      "finalists": [],
+      "poolCount": 132,
+      "linkedPoolCount": 0,
+      "internal": [
+        {
+          "family": "guided_pair",
+          "name": "explainfailure",
+          "stage": "internal_filter",
+          "events": [
+            {
+              "name": "explainfailure",
+              "occurrences": 9600,
+              "reason": "length",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "explainfailure",
+              "occurrences": 9600,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brief": "a package release assistant that verifies checksums of downloadable binaries",
+      "partition": "development",
+      "finalists": [
+        "VerChecksum"
+      ],
+      "poolCount": 131,
+      "linkedPoolCount": 1,
+      "internal": [
+        {
+          "family": "brandable",
+          "name": "verchecksum",
+          "stage": "returned_to_pool",
+          "events": [
+            {
+              "name": "verchecksum",
+              "occurrences": 3595,
+              "reason": "duplicate",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "verchecksum",
+              "occurrences": 3596,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            },
+            {
+              "name": "verchecksum",
+              "occurrences": 1,
+              "reason": "eligible",
+              "stage": "legacy.rank_input"
+            }
+          ]
+        },
+        {
+          "family": "guided_pair",
+          "name": "verchecksum",
+          "stage": "returned_to_pool",
+          "events": [
+            {
+              "name": "verchecksum",
+              "occurrences": 4782,
+              "reason": "duplicate",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "verchecksum",
+              "occurrences": 4783,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            },
+            {
+              "name": "verchecksum",
+              "occurrences": 1,
+              "reason": "eligible",
+              "stage": "legacy.rank_input"
+            }
+          ]
+        },
+        {
+          "family": "guided_pair",
+          "name": "verifychecksum",
+          "stage": "internal_filter",
+          "events": [
+            {
+              "name": "verifychecksum",
+              "occurrences": 4817,
+              "reason": "length",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "verifychecksum",
+              "occurrences": 4817,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            }
+          ]
+        },
+        {
+          "family": "seamblend",
+          "name": "verichecksum",
+          "stage": "internal_filter",
+          "events": [
+            {
+              "name": "verichecksum",
+              "occurrences": 1,
+              "reason": "syllables",
+              "stage": "family.filter"
+            },
+            {
+              "name": "verichecksum",
+              "occurrences": 1,
+              "reason": "materialized",
+              "stage": "seamblend.formed"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brief": "a build tool that checks dependency licenses before publishing a package",
+      "partition": "development",
+      "finalists": [],
+      "poolCount": 128,
+      "linkedPoolCount": 0,
+      "internal": [
+        {
+          "family": "brandable",
+          "name": "checklicense",
+          "stage": "internal_filter",
+          "events": [
+            {
+              "name": "checklicense",
+              "occurrences": 7237,
+              "reason": "syllables",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "checklicense",
+              "occurrences": 7237,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            }
+          ]
+        },
+        {
+          "family": "guided_pair",
+          "name": "checklicense",
+          "stage": "internal_filter",
+          "events": [
+            {
+              "name": "checklicense",
+              "occurrences": 9600,
+              "reason": "syllables",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "checklicense",
+              "occurrences": 9600,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brief": "a local utility that compares database schemas before applying migrations",
+      "partition": "evaluation",
+      "finalists": [],
+      "poolCount": 146,
+      "linkedPoolCount": 0,
+      "internal": [
+        {
+          "family": "brandable",
+          "name": "comparebase",
+          "stage": "internal_filter",
+          "events": [
+            {
+              "name": "comparebase",
+              "occurrences": 903,
+              "reason": "syllables",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "comparebase",
+              "occurrences": 903,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            }
+          ]
+        },
+        {
+          "family": "brandable",
+          "name": "comparedata",
+          "stage": "internal_filter",
+          "events": [
+            {
+              "name": "comparedata",
+              "occurrences": 897,
+              "reason": "syllables",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "comparedata",
+              "occurrences": 897,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            }
+          ]
+        },
+        {
+          "family": "brandable",
+          "name": "comparequery",
+          "stage": "internal_filter",
+          "events": [
+            {
+              "name": "comparequery",
+              "occurrences": 924,
+              "reason": "syllables",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "comparequery",
+              "occurrences": 924,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            }
+          ]
+        },
+        {
+          "family": "brandable",
+          "name": "comparerow",
+          "stage": "internal_filter",
+          "events": [
+            {
+              "name": "comparerow",
+              "occurrences": 865,
+              "reason": "syllables",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "comparerow",
+              "occurrences": 865,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            }
+          ]
+        },
+        {
+          "family": "brandable",
+          "name": "comparestore",
+          "stage": "internal_filter",
+          "events": [
+            {
+              "name": "comparestore",
+              "occurrences": 847,
+              "reason": "syllables",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "comparestore",
+              "occurrences": 847,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            }
+          ]
+        },
+        {
+          "family": "brandable",
+          "name": "comparetable",
+          "stage": "internal_filter",
+          "events": [
+            {
+              "name": "comparetable",
+              "occurrences": 919,
+              "reason": "syllables",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "comparetable",
+              "occurrences": 919,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            }
+          ]
+        },
+        {
+          "family": "guided_pair",
+          "name": "comparebase",
+          "stage": "internal_filter",
+          "events": [
+            {
+              "name": "comparebase",
+              "occurrences": 1181,
+              "reason": "syllables",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "comparebase",
+              "occurrences": 1181,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            }
+          ]
+        },
+        {
+          "family": "guided_pair",
+          "name": "comparedata",
+          "stage": "internal_filter",
+          "events": [
+            {
+              "name": "comparedata",
+              "occurrences": 1190,
+              "reason": "syllables",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "comparedata",
+              "occurrences": 1190,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            }
+          ]
+        },
+        {
+          "family": "guided_pair",
+          "name": "comparequery",
+          "stage": "internal_filter",
+          "events": [
+            {
+              "name": "comparequery",
+              "occurrences": 1249,
+              "reason": "syllables",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "comparequery",
+              "occurrences": 1249,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            }
+          ]
+        },
+        {
+          "family": "guided_pair",
+          "name": "comparerecord",
+          "stage": "internal_filter",
+          "events": [
+            {
+              "name": "comparerecord",
+              "occurrences": 1227,
+              "reason": "length",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "comparerecord",
+              "occurrences": 1227,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            }
+          ]
+        },
+        {
+          "family": "guided_pair",
+          "name": "comparerow",
+          "stage": "internal_filter",
+          "events": [
+            {
+              "name": "comparerow",
+              "occurrences": 1181,
+              "reason": "syllables",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "comparerow",
+              "occurrences": 1181,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            }
+          ]
+        },
+        {
+          "family": "guided_pair",
+          "name": "compareschema",
+          "stage": "internal_filter",
+          "events": [
+            {
+              "name": "compareschema",
+              "occurrences": 1201,
+              "reason": "length",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "compareschema",
+              "occurrences": 1201,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            }
+          ]
+        },
+        {
+          "family": "guided_pair",
+          "name": "comparestore",
+          "stage": "internal_filter",
+          "events": [
+            {
+              "name": "comparestore",
+              "occurrences": 1170,
+              "reason": "syllables",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "comparestore",
+              "occurrences": 1170,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            }
+          ]
+        },
+        {
+          "family": "guided_pair",
+          "name": "comparetable",
+          "stage": "internal_filter",
+          "events": [
+            {
+              "name": "comparetable",
+              "occurrences": 1201,
+              "reason": "syllables",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "comparetable",
+              "occurrences": 1201,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brief": "a developer tool that verifies configuration files before deployment",
+      "partition": "evaluation",
+      "finalists": [
+        "VerSeek"
+      ],
+      "poolCount": 142,
+      "linkedPoolCount": 9,
+      "internal": [
+        {
+          "family": "brandable",
+          "name": "verfile",
+          "stage": "returned_to_pool",
+          "events": [
+            {
+              "name": "verfile",
+              "occurrences": 609,
+              "reason": "duplicate",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "verfile",
+              "occurrences": 610,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            },
+            {
+              "name": "verfile",
+              "occurrences": 1,
+              "reason": "eligible",
+              "stage": "legacy.rank_input"
+            }
+          ]
+        },
+        {
+          "family": "brandable",
+          "name": "verfind",
+          "stage": "returned_to_pool",
+          "events": [
+            {
+              "name": "verfind",
+              "occurrences": 597,
+              "reason": "duplicate",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "verfind",
+              "occurrences": 598,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            },
+            {
+              "name": "verfind",
+              "occurrences": 1,
+              "reason": "eligible",
+              "stage": "legacy.rank_input"
+            }
+          ]
+        },
+        {
+          "family": "brandable",
+          "name": "verifyfile",
+          "stage": "internal_filter",
+          "events": [
+            {
+              "name": "verifyfile",
+              "occurrences": 602,
+              "reason": "syllables",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "verifyfile",
+              "occurrences": 602,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            }
+          ]
+        },
+        {
+          "family": "brandable",
+          "name": "verifyfind",
+          "stage": "internal_filter",
+          "events": [
+            {
+              "name": "verifyfind",
+              "occurrences": 562,
+              "reason": "syllables",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "verifyfind",
+              "occurrences": 562,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            }
+          ]
+        },
+        {
+          "family": "brandable",
+          "name": "verifypath",
+          "stage": "internal_filter",
+          "events": [
+            {
+              "name": "verifypath",
+              "occurrences": 601,
+              "reason": "syllables",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "verifypath",
+              "occurrences": 601,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            }
+          ]
+        },
+        {
+          "family": "brandable",
+          "name": "verifyscan",
+          "stage": "internal_filter",
+          "events": [
+            {
+              "name": "verifyscan",
+              "occurrences": 575,
+              "reason": "syllables",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "verifyscan",
+              "occurrences": 575,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            }
+          ]
+        },
+        {
+          "family": "brandable",
+          "name": "verifyseek",
+          "stage": "internal_filter",
+          "events": [
+            {
+              "name": "verifyseek",
+              "occurrences": 586,
+              "reason": "syllables",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "verifyseek",
+              "occurrences": 586,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            }
+          ]
+        },
+        {
+          "family": "brandable",
+          "name": "verindex",
+          "stage": "returned_to_pool",
+          "events": [
+            {
+              "name": "verindex",
+              "occurrences": 587,
+              "reason": "duplicate",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "verindex",
+              "occurrences": 588,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            },
+            {
+              "name": "verindex",
+              "occurrences": 1,
+              "reason": "eligible",
+              "stage": "legacy.rank_input"
+            }
+          ]
+        },
+        {
+          "family": "brandable",
+          "name": "verpath",
+          "stage": "returned_to_pool",
+          "events": [
+            {
+              "name": "verpath",
+              "occurrences": 633,
+              "reason": "duplicate",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "verpath",
+              "occurrences": 634,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            },
+            {
+              "name": "verpath",
+              "occurrences": 1,
+              "reason": "eligible",
+              "stage": "legacy.rank_input"
+            }
+          ]
+        },
+        {
+          "family": "brandable",
+          "name": "verscan",
+          "stage": "returned_to_pool",
+          "events": [
+            {
+              "name": "verscan",
+              "occurrences": 600,
+              "reason": "duplicate",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "verscan",
+              "occurrences": 601,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            },
+            {
+              "name": "verscan",
+              "occurrences": 1,
+              "reason": "eligible",
+              "stage": "legacy.rank_input"
+            }
+          ]
+        },
+        {
+          "family": "brandable",
+          "name": "verseek",
+          "stage": "returned_to_pool",
+          "events": [
+            {
+              "name": "verseek",
+              "occurrences": 610,
+              "reason": "duplicate",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "verseek",
+              "occurrences": 611,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            },
+            {
+              "name": "verseek",
+              "occurrences": 1,
+              "reason": "eligible",
+              "stage": "legacy.rank_input"
+            }
+          ]
+        },
+        {
+          "family": "guided_pair",
+          "name": "verfile",
+          "stage": "returned_to_pool",
+          "events": [
+            {
+              "name": "verfile",
+              "occurrences": 817,
+              "reason": "duplicate",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "verfile",
+              "occurrences": 818,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            },
+            {
+              "name": "verfile",
+              "occurrences": 1,
+              "reason": "eligible",
+              "stage": "legacy.rank_input"
+            }
+          ]
+        },
+        {
+          "family": "guided_pair",
+          "name": "verfind",
+          "stage": "returned_to_pool",
+          "events": [
+            {
+              "name": "verfind",
+              "occurrences": 752,
+              "reason": "duplicate",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "verfind",
+              "occurrences": 753,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            },
+            {
+              "name": "verfind",
+              "occurrences": 1,
+              "reason": "eligible",
+              "stage": "legacy.rank_input"
+            }
+          ]
+        },
+        {
+          "family": "guided_pair",
+          "name": "verifyfile",
+          "stage": "internal_filter",
+          "events": [
+            {
+              "name": "verifyfile",
+              "occurrences": 820,
+              "reason": "syllables",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "verifyfile",
+              "occurrences": 820,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            }
+          ]
+        },
+        {
+          "family": "guided_pair",
+          "name": "verifyfind",
+          "stage": "internal_filter",
+          "events": [
+            {
+              "name": "verifyfind",
+              "occurrences": 753,
+              "reason": "syllables",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "verifyfind",
+              "occurrences": 753,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            }
+          ]
+        },
+        {
+          "family": "guided_pair",
+          "name": "verifyindex",
+          "stage": "internal_filter",
+          "events": [
+            {
+              "name": "verifyindex",
+              "occurrences": 902,
+              "reason": "syllables",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "verifyindex",
+              "occurrences": 902,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            }
+          ]
+        },
+        {
+          "family": "guided_pair",
+          "name": "verifypath",
+          "stage": "internal_filter",
+          "events": [
+            {
+              "name": "verifypath",
+              "occurrences": 823,
+              "reason": "syllables",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "verifypath",
+              "occurrences": 823,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            }
+          ]
+        },
+        {
+          "family": "guided_pair",
+          "name": "verifyscan",
+          "stage": "internal_filter",
+          "events": [
+            {
+              "name": "verifyscan",
+              "occurrences": 823,
+              "reason": "syllables",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "verifyscan",
+              "occurrences": 823,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            }
+          ]
+        },
+        {
+          "family": "guided_pair",
+          "name": "verifyseek",
+          "stage": "internal_filter",
+          "events": [
+            {
+              "name": "verifyseek",
+              "occurrences": 785,
+              "reason": "syllables",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "verifyseek",
+              "occurrences": 785,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            }
+          ]
+        },
+        {
+          "family": "guided_pair",
+          "name": "verindex",
+          "stage": "returned_to_pool",
+          "events": [
+            {
+              "name": "verindex",
+              "occurrences": 773,
+              "reason": "duplicate",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "verindex",
+              "occurrences": 774,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            },
+            {
+              "name": "verindex",
+              "occurrences": 1,
+              "reason": "eligible",
+              "stage": "legacy.rank_input"
+            }
+          ]
+        },
+        {
+          "family": "guided_pair",
+          "name": "verpath",
+          "stage": "returned_to_pool",
+          "events": [
+            {
+              "name": "verpath",
+              "occurrences": 835,
+              "reason": "duplicate",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "verpath",
+              "occurrences": 836,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            },
+            {
+              "name": "verpath",
+              "occurrences": 1,
+              "reason": "eligible",
+              "stage": "legacy.rank_input"
+            }
+          ]
+        },
+        {
+          "family": "guided_pair",
+          "name": "verscan",
+          "stage": "returned_to_pool",
+          "events": [
+            {
+              "name": "verscan",
+              "occurrences": 789,
+              "reason": "duplicate",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "verscan",
+              "occurrences": 790,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            },
+            {
+              "name": "verscan",
+              "occurrences": 1,
+              "reason": "eligible",
+              "stage": "legacy.rank_input"
+            }
+          ]
+        },
+        {
+          "family": "guided_pair",
+          "name": "verseek",
+          "stage": "returned_to_pool",
+          "events": [
+            {
+              "name": "verseek",
+              "occurrences": 722,
+              "reason": "duplicate",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "verseek",
+              "occurrences": 723,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            },
+            {
+              "name": "verseek",
+              "occurrences": 1,
+              "reason": "eligible",
+              "stage": "legacy.rank_input"
+            }
+          ]
+        },
+        {
+          "family": "seamblend",
+          "name": "verifile",
+          "stage": "internal_filter",
+          "events": [
+            {
+              "name": "verifile",
+              "occurrences": 1,
+              "reason": "brand_mimic",
+              "stage": "family.filter"
+            },
+            {
+              "name": "verifile",
+              "occurrences": 1,
+              "reason": "duplicate",
+              "stage": "seamblend.filter"
+            },
+            {
+              "name": "verifile",
+              "occurrences": 2,
+              "reason": "materialized",
+              "stage": "seamblend.formed"
+            }
+          ]
+        },
+        {
+          "family": "seamblend",
+          "name": "verifind",
+          "stage": "returned_to_pool",
+          "events": [
+            {
+              "name": "verifind",
+              "occurrences": 1,
+              "reason": "eligible",
+              "stage": "family.rank_input"
+            },
+            {
+              "name": "verifind",
+              "occurrences": 1,
+              "reason": "duplicate",
+              "stage": "seamblend.filter"
+            },
+            {
+              "name": "verifind",
+              "occurrences": 2,
+              "reason": "materialized",
+              "stage": "seamblend.formed"
+            }
+          ]
+        },
+        {
+          "family": "seamblend",
+          "name": "veriindex",
+          "stage": "internal_filter",
+          "events": [
+            {
+              "name": "veriindex",
+              "occurrences": 1,
+              "reason": "syllables",
+              "stage": "family.filter"
+            },
+            {
+              "name": "veriindex",
+              "occurrences": 1,
+              "reason": "materialized",
+              "stage": "seamblend.formed"
+            }
+          ]
+        },
+        {
+          "family": "seamblend",
+          "name": "veripath",
+          "stage": "internal_filter",
+          "events": [
+            {
+              "name": "veripath",
+              "occurrences": 1,
+              "reason": "brand_mimic",
+              "stage": "family.filter"
+            },
+            {
+              "name": "veripath",
+              "occurrences": 1,
+              "reason": "materialized",
+              "stage": "seamblend.formed"
+            }
+          ]
+        },
+        {
+          "family": "seamblend",
+          "name": "veriscan",
+          "stage": "returned_to_pool",
+          "events": [
+            {
+              "name": "veriscan",
+              "occurrences": 1,
+              "reason": "eligible",
+              "stage": "family.rank_input"
+            },
+            {
+              "name": "veriscan",
+              "occurrences": 1,
+              "reason": "materialized",
+              "stage": "seamblend.formed"
+            }
+          ]
+        },
+        {
+          "family": "seamblend",
+          "name": "veriseek",
+          "stage": "returned_to_pool",
+          "events": [
+            {
+              "name": "veriseek",
+              "occurrences": 1,
+              "reason": "eligible",
+              "stage": "family.rank_input"
+            },
+            {
+              "name": "veriseek",
+              "occurrences": 1,
+              "reason": "materialized",
+              "stage": "seamblend.formed"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brief": "a terminal tool that tracks memory usage during test runs",
+      "partition": "evaluation",
+      "finalists": [],
+      "poolCount": 152,
+      "linkedPoolCount": 0,
+      "internal": [
+        {
+          "family": "brandable",
+          "name": "trackusage",
+          "stage": "internal_filter",
+          "events": [
+            {
+              "name": "trackusage",
+              "occurrences": 7237,
+              "reason": "syllables",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "trackusage",
+              "occurrences": 7237,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            }
+          ]
+        },
+        {
+          "family": "guided_pair",
+          "name": "trackusage",
+          "stage": "internal_filter",
+          "events": [
+            {
+              "name": "trackusage",
+              "occurrences": 9600,
+              "reason": "syllables",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "trackusage",
+              "occurrences": 9600,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brief": "a local service that groups log messages by severity",
+      "partition": "evaluation",
+      "finalists": [
+        "GroupLink"
+      ],
+      "poolCount": 140,
+      "linkedPoolCount": 5,
+      "internal": [
+        {
+          "family": "brandable",
+          "name": "groupbond",
+          "stage": "returned_to_pool",
+          "events": [
+            {
+              "name": "groupbond",
+              "occurrences": 1221,
+              "reason": "duplicate",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "groupbond",
+              "occurrences": 1222,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            },
+            {
+              "name": "groupbond",
+              "occurrences": 1,
+              "reason": "eligible",
+              "stage": "legacy.rank_input"
+            }
+          ]
+        },
+        {
+          "family": "brandable",
+          "name": "groupcircle",
+          "stage": "returned_to_pool",
+          "events": [
+            {
+              "name": "groupcircle",
+              "occurrences": 1140,
+              "reason": "duplicate",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "groupcircle",
+              "occurrences": 1141,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            },
+            {
+              "name": "groupcircle",
+              "occurrences": 1,
+              "reason": "eligible",
+              "stage": "legacy.rank_input"
+            }
+          ]
+        },
+        {
+          "family": "brandable",
+          "name": "groupkin",
+          "stage": "returned_to_pool",
+          "events": [
+            {
+              "name": "groupkin",
+              "occurrences": 1262,
+              "reason": "duplicate",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "groupkin",
+              "occurrences": 1263,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            },
+            {
+              "name": "groupkin",
+              "occurrences": 1,
+              "reason": "eligible",
+              "stage": "legacy.rank_input"
+            }
+          ]
+        },
+        {
+          "family": "brandable",
+          "name": "grouplink",
+          "stage": "returned_to_pool",
+          "events": [
+            {
+              "name": "grouplink",
+              "occurrences": 1216,
+              "reason": "duplicate",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "grouplink",
+              "occurrences": 1217,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            },
+            {
+              "name": "grouplink",
+              "occurrences": 1,
+              "reason": "eligible",
+              "stage": "legacy.rank_input"
+            }
+          ]
+        },
+        {
+          "family": "brandable",
+          "name": "groupmessage",
+          "stage": "internal_filter",
+          "events": [
+            {
+              "name": "groupmessage",
+              "occurrences": 1244,
+              "reason": "syllables",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "groupmessage",
+              "occurrences": 1244,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            }
+          ]
+        },
+        {
+          "family": "brandable",
+          "name": "grouptribe",
+          "stage": "returned_to_pool",
+          "events": [
+            {
+              "name": "grouptribe",
+              "occurrences": 1130,
+              "reason": "duplicate",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "grouptribe",
+              "occurrences": 1131,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            },
+            {
+              "name": "grouptribe",
+              "occurrences": 1,
+              "reason": "eligible",
+              "stage": "legacy.rank_input"
+            }
+          ]
+        },
+        {
+          "family": "guided_pair",
+          "name": "groupbond",
+          "stage": "returned_to_pool",
+          "events": [
+            {
+              "name": "groupbond",
+              "occurrences": 1612,
+              "reason": "duplicate",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "groupbond",
+              "occurrences": 1613,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            },
+            {
+              "name": "groupbond",
+              "occurrences": 1,
+              "reason": "eligible",
+              "stage": "legacy.rank_input"
+            }
+          ]
+        },
+        {
+          "family": "guided_pair",
+          "name": "groupcircle",
+          "stage": "returned_to_pool",
+          "events": [
+            {
+              "name": "groupcircle",
+              "occurrences": 1573,
+              "reason": "duplicate",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "groupcircle",
+              "occurrences": 1574,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            },
+            {
+              "name": "groupcircle",
+              "occurrences": 1,
+              "reason": "eligible",
+              "stage": "legacy.rank_input"
+            }
+          ]
+        },
+        {
+          "family": "guided_pair",
+          "name": "groupkin",
+          "stage": "returned_to_pool",
+          "events": [
+            {
+              "name": "groupkin",
+              "occurrences": 1623,
+              "reason": "duplicate",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "groupkin",
+              "occurrences": 1624,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            },
+            {
+              "name": "groupkin",
+              "occurrences": 1,
+              "reason": "eligible",
+              "stage": "legacy.rank_input"
+            }
+          ]
+        },
+        {
+          "family": "guided_pair",
+          "name": "grouplink",
+          "stage": "returned_to_pool",
+          "events": [
+            {
+              "name": "grouplink",
+              "occurrences": 1633,
+              "reason": "duplicate",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "grouplink",
+              "occurrences": 1634,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            },
+            {
+              "name": "grouplink",
+              "occurrences": 1,
+              "reason": "eligible",
+              "stage": "legacy.rank_input"
+            }
+          ]
+        },
+        {
+          "family": "guided_pair",
+          "name": "groupmessage",
+          "stage": "internal_filter",
+          "events": [
+            {
+              "name": "groupmessage",
+              "occurrences": 1602,
+              "reason": "syllables",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "groupmessage",
+              "occurrences": 1602,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            }
+          ]
+        },
+        {
+          "family": "guided_pair",
+          "name": "grouptribe",
+          "stage": "returned_to_pool",
+          "events": [
+            {
+              "name": "grouptribe",
+              "occurrences": 1552,
+              "reason": "duplicate",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "grouptribe",
+              "occurrences": 1553,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            },
+            {
+              "name": "grouptribe",
+              "occurrences": 1,
+              "reason": "eligible",
+              "stage": "legacy.rank_input"
+            }
+          ]
+        },
+        {
+          "family": "guided_metaphor",
+          "name": "grouplink",
+          "stage": "internal_ranked_not_returned",
+          "events": [
+            {
+              "name": "grouplink",
+              "occurrences": 74,
+              "reason": "duplicate",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "grouplink",
+              "occurrences": 75,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            },
+            {
+              "name": "grouplink",
+              "occurrences": 1,
+              "reason": "eligible",
+              "stage": "legacy.rank_input"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brief": "a browser tool that maps keyboard shortcuts across pages",
+      "partition": "evaluation",
+      "finalists": [
+        "MapShortcut",
+        "RoamShortcut"
+      ],
+      "poolCount": 158,
+      "linkedPoolCount": 3,
+      "internal": [
+        {
+          "family": "brandable",
+          "name": "mapshortcut",
+          "stage": "internal_ranked_not_returned",
+          "events": [
+            {
+              "name": "mapshortcut",
+              "occurrences": 1192,
+              "reason": "duplicate",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "mapshortcut",
+              "occurrences": 1193,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            },
+            {
+              "name": "mapshortcut",
+              "occurrences": 1,
+              "reason": "eligible",
+              "stage": "legacy.rank_input"
+            }
+          ]
+        },
+        {
+          "family": "brandable",
+          "name": "roamshortcut",
+          "stage": "internal_ranked_not_returned",
+          "events": [
+            {
+              "name": "roamshortcut",
+              "occurrences": 1241,
+              "reason": "duplicate",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "roamshortcut",
+              "occurrences": 1242,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            },
+            {
+              "name": "roamshortcut",
+              "occurrences": 1,
+              "reason": "eligible",
+              "stage": "legacy.rank_input"
+            }
+          ]
+        },
+        {
+          "family": "brandable",
+          "name": "trekshortcut",
+          "stage": "internal_ranked_not_returned",
+          "events": [
+            {
+              "name": "trekshortcut",
+              "occurrences": 1215,
+              "reason": "duplicate",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "trekshortcut",
+              "occurrences": 1216,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            },
+            {
+              "name": "trekshortcut",
+              "occurrences": 1,
+              "reason": "eligible",
+              "stage": "legacy.rank_input"
+            }
+          ]
+        },
+        {
+          "family": "guided_pair",
+          "name": "atlasshortcut",
+          "stage": "internal_filter",
+          "events": [
+            {
+              "name": "atlasshortcut",
+              "occurrences": 1530,
+              "reason": "length",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "atlasshortcut",
+              "occurrences": 1530,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            }
+          ]
+        },
+        {
+          "family": "guided_pair",
+          "name": "compassshortcut",
+          "stage": "internal_filter",
+          "events": [
+            {
+              "name": "compassshortcut",
+              "occurrences": 1601,
+              "reason": "length",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "compassshortcut",
+              "occurrences": 1601,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            }
+          ]
+        },
+        {
+          "family": "guided_pair",
+          "name": "mapshortcut",
+          "stage": "returned_to_pool",
+          "events": [
+            {
+              "name": "mapshortcut",
+              "occurrences": 1543,
+              "reason": "duplicate",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "mapshortcut",
+              "occurrences": 1544,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            },
+            {
+              "name": "mapshortcut",
+              "occurrences": 1,
+              "reason": "eligible",
+              "stage": "legacy.rank_input"
+            }
+          ]
+        },
+        {
+          "family": "guided_pair",
+          "name": "roamshortcut",
+          "stage": "returned_to_pool",
+          "events": [
+            {
+              "name": "roamshortcut",
+              "occurrences": 1682,
+              "reason": "duplicate",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "roamshortcut",
+              "occurrences": 1683,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            },
+            {
+              "name": "roamshortcut",
+              "occurrences": 1,
+              "reason": "eligible",
+              "stage": "legacy.rank_input"
+            }
+          ]
+        },
+        {
+          "family": "guided_pair",
+          "name": "routeshortcut",
+          "stage": "internal_filter",
+          "events": [
+            {
+              "name": "routeshortcut",
+              "occurrences": 1644,
+              "reason": "length",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "routeshortcut",
+              "occurrences": 1644,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            }
+          ]
+        },
+        {
+          "family": "guided_pair",
+          "name": "trekshortcut",
+          "stage": "returned_to_pool",
+          "events": [
+            {
+              "name": "trekshortcut",
+              "occurrences": 1597,
+              "reason": "duplicate",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "trekshortcut",
+              "occurrences": 1598,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            },
+            {
+              "name": "trekshortcut",
+              "occurrences": 1,
+              "reason": "eligible",
+              "stage": "legacy.rank_input"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "brief": "a package tool that checks archive sizes before download",
+      "partition": "evaluation",
+      "finalists": [],
+      "poolCount": 159,
+      "linkedPoolCount": 1,
+      "internal": [
+        {
+          "family": "brandable",
+          "name": "checksize",
+          "stage": "returned_to_pool",
+          "events": [
+            {
+              "name": "checksize",
+              "occurrences": 7236,
+              "reason": "duplicate",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "checksize",
+              "occurrences": 7237,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            },
+            {
+              "name": "checksize",
+              "occurrences": 1,
+              "reason": "eligible",
+              "stage": "legacy.rank_input"
+            }
+          ]
+        },
+        {
+          "family": "guided_pair",
+          "name": "checksize",
+          "stage": "returned_to_pool",
+          "events": [
+            {
+              "name": "checksize",
+              "occurrences": 9599,
+              "reason": "duplicate",
+              "stage": "legacy.filter"
+            },
+            {
+              "name": "checksize",
+              "occurrences": 9600,
+              "reason": "materialized",
+              "stage": "legacy.formed"
+            },
+            {
+              "name": "checksize",
+              "occurrences": 1,
+              "reason": "eligible",
+              "stage": "legacy.rank_input"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

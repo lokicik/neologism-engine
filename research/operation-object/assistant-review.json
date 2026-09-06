@@ -1,0 +1,19 @@
+{
+  "evaluator": "assistant",
+  "evidenceClass": "editorial-only-not-blind",
+  "comparison": "operation-object option versus previous brief-intent pool",
+  "partition": "evaluation",
+  "seed": 13,
+  "seedPolicy": "First listed seed, no best-of-three selection",
+  "humanGateSatisfied": false,
+  "decision": "diagnostic-only-default-off",
+  "rows": [
+    { "index": 0, "choice": "neither", "selected": [], "reason": "The new side is empty. Flucalc/Multain are opaque, Bridgebeam/PureQuery do not establish a strong schema-comparison identity." },
+    { "index": 1, "choice": "old", "selected": ["Verospec", "Mihenk"], "reason": "VerSeek is readable but sounds closer to finding than validating configuration. The recorded file-to-seek palette is too broad to prove the intended meaning." },
+    { "index": 2, "choice": "neither", "selected": [], "reason": "The new side is empty. The previous side still drifts toward tests/runs, without an appealing memory-usage identity." },
+    { "index": 3, "choice": "old", "selected": ["Halka"], "reason": "Halka is compact and has a grouping association for a Turkish-speaking owner. GroupLink is a generic compound and does not retain the log/severity distinction." },
+    { "index": 4, "choice": "old", "selected": ["Portolan"], "reason": "Portolan is a more coherent cartographic metaphor. MapShortcut reads as an API function; RoamShortcut is long and awkward as a brand." },
+    { "index": 5, "choice": "neither", "selected": [], "reason": "The new side is empty; the previous candidates are opaque or generic. A local snapshot hit on CheckSize is not bypassed." }
+  ],
+  "limitations": ["Assistant saw labels and implemented the experiment; not blind or human evidence.", "Lexical proof is not aesthetic quality or compositional semantics.", "No current domain/package/trademark availability checks.", "Original promotion gates and saved training data remain unchanged."]
+}

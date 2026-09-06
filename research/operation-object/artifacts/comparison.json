@@ -1,0 +1,3564 @@
+{
+  "protocolSha256": "aeb26b0baeb274f195d5a296393b28b20cb758fced3588de8d605d869ca48632",
+  "humanEvaluation": "pending",
+  "rows": [
+    {
+      "partition": "development",
+      "brief": "a build tool that compares executable sizes between release tags",
+      "seed": 13,
+      "relation": {
+        "intent": {
+          "description": "a build tool that compares executable sizes between release tags",
+          "fallback_reason": null,
+          "generation_terms": [
+            "compare",
+            "size",
+            "executable"
+          ],
+          "schema": "brief-intent-v1",
+          "status": "parsed",
+          "terms": [
+            {
+              "end": 7,
+              "role": "context",
+              "start": 2,
+              "surface": "build",
+              "term": "build"
+            },
+            {
+              "end": 26,
+              "role": "operation",
+              "start": 18,
+              "surface": "compares",
+              "term": "compare"
+            },
+            {
+              "end": 37,
+              "role": "object",
+              "start": 27,
+              "surface": "executable",
+              "term": "executable"
+            },
+            {
+              "end": 43,
+              "role": "object",
+              "start": 38,
+              "surface": "sizes",
+              "term": "size"
+            },
+            {
+              "end": 59,
+              "role": "condition",
+              "start": 52,
+              "surface": "release",
+              "term": "release"
+            },
+            {
+              "end": 64,
+              "role": "condition",
+              "start": 60,
+              "surface": "tags",
+              "term": "tag"
+            }
+          ]
+        },
+        "object_head": {
+          "end": 43,
+          "role": "object",
+          "start": 38,
+          "surface": "sizes",
+          "term": "size"
+        },
+        "object_roots": [
+          {
+            "root": "size",
+            "source": "brief_literal",
+            "term": "size"
+          }
+        ],
+        "operation": {
+          "end": 26,
+          "role": "operation",
+          "start": 18,
+          "surface": "compares",
+          "term": "compare"
+        },
+        "operation_roots": [
+          {
+            "root": "compare",
+            "source": "brief_literal",
+            "term": "compare"
+          }
+        ],
+        "reason": null,
+        "schema": "operation-object-plan-v1",
+        "status": "ready"
+      },
+      "old": [
+        "Creagen",
+        "Commitflow",
+        "Multain",
+        "PureSiz"
+      ],
+      "current": [],
+      "poolCount": 144,
+      "linkedCount": 0,
+      "rejectionCounts": {
+        "missing_object_link": 19,
+        "missing_operation_link": 99,
+        "unlinked_or_unreadable_respell": 23,
+        "collision_snapshot": 9
+      },
+      "filename": "trace-0.json.gz",
+      "sha256": "8890857e4f7dbfc9860c1eda837245360d0d7225df9098b67fdf86defd3635bf"
+    },
+    {
+      "partition": "development",
+      "brief": "a build tool that compares executable sizes between release tags",
+      "seed": 67,
+      "relation": {
+        "intent": {
+          "description": "a build tool that compares executable sizes between release tags",
+          "fallback_reason": null,
+          "generation_terms": [
+            "compare",
+            "size",
+            "executable"
+          ],
+          "schema": "brief-intent-v1",
+          "status": "parsed",
+          "terms": [
+            {
+              "end": 7,
+              "role": "context",
+              "start": 2,
+              "surface": "build",
+              "term": "build"
+            },
+            {
+              "end": 26,
+              "role": "operation",
+              "start": 18,
+              "surface": "compares",
+              "term": "compare"
+            },
+            {
+              "end": 37,
+              "role": "object",
+              "start": 27,
+              "surface": "executable",
+              "term": "executable"
+            },
+            {
+              "end": 43,
+              "role": "object",
+              "start": 38,
+              "surface": "sizes",
+              "term": "size"
+            },
+            {
+              "end": 59,
+              "role": "condition",
+              "start": 52,
+              "surface": "release",
+              "term": "release"
+            },
+            {
+              "end": 64,
+              "role": "condition",
+              "start": 60,
+              "surface": "tags",
+              "term": "tag"
+            }
+          ]
+        },
+        "object_head": {
+          "end": 43,
+          "role": "object",
+          "start": 38,
+          "surface": "sizes",
+          "term": "size"
+        },
+        "object_roots": [
+          {
+            "root": "size",
+            "source": "brief_literal",
+            "term": "size"
+          }
+        ],
+        "operation": {
+          "end": 26,
+          "role": "operation",
+          "start": 18,
+          "surface": "compares",
+          "term": "compare"
+        },
+        "operation_roots": [
+          {
+            "root": "compare",
+            "source": "brief_literal",
+            "term": "compare"
+          }
+        ],
+        "reason": null,
+        "schema": "operation-object-plan-v1",
+        "status": "ready"
+      },
+      "old": [
+        "Compareia",
+        "TagForge",
+        "Preforge",
+        "Forgeseed"
+      ],
+      "current": [],
+      "poolCount": 144,
+      "linkedCount": 0,
+      "rejectionCounts": {
+        "missing_object_link": 20,
+        "missing_operation_link": 99,
+        "unlinked_or_unreadable_respell": 22,
+        "collision_snapshot": 9
+      },
+      "filename": "trace-1.json.gz",
+      "sha256": "3e19fbda6544c682bb34626087d5b02e96ebc999d1d91ca485fba5eeaa335264"
+    },
+    {
+      "partition": "development",
+      "brief": "a build tool that compares executable sizes between release tags",
+      "seed": 313,
+      "relation": {
+        "intent": {
+          "description": "a build tool that compares executable sizes between release tags",
+          "fallback_reason": null,
+          "generation_terms": [
+            "compare",
+            "size",
+            "executable"
+          ],
+          "schema": "brief-intent-v1",
+          "status": "parsed",
+          "terms": [
+            {
+              "end": 7,
+              "role": "context",
+              "start": 2,
+              "surface": "build",
+              "term": "build"
+            },
+            {
+              "end": 26,
+              "role": "operation",
+              "start": 18,
+              "surface": "compares",
+              "term": "compare"
+            },
+            {
+              "end": 37,
+              "role": "object",
+              "start": 27,
+              "surface": "executable",
+              "term": "executable"
+            },
+            {
+              "end": 43,
+              "role": "object",
+              "start": 38,
+              "surface": "sizes",
+              "term": "size"
+            },
+            {
+              "end": 59,
+              "role": "condition",
+              "start": 52,
+              "surface": "release",
+              "term": "release"
+            },
+            {
+              "end": 64,
+              "role": "condition",
+              "start": 60,
+              "surface": "tags",
+              "term": "tag"
+            }
+          ]
+        },
+        "object_head": {
+          "end": 43,
+          "role": "object",
+          "start": 38,
+          "surface": "sizes",
+          "term": "size"
+        },
+        "object_roots": [
+          {
+            "root": "size",
+            "source": "brief_literal",
+            "term": "size"
+          }
+        ],
+        "operation": {
+          "end": 26,
+          "role": "operation",
+          "start": 18,
+          "surface": "compares",
+          "term": "compare"
+        },
+        "operation_roots": [
+          {
+            "root": "compare",
+            "source": "brief_literal",
+            "term": "compare"
+          }
+        ],
+        "reason": null,
+        "schema": "operation-object-plan-v1",
+        "status": "ready"
+      },
+      "old": [
+        "Commitflow",
+        "Creatic",
+        "Tagforge",
+        "Multain"
+      ],
+      "current": [],
+      "poolCount": 144,
+      "linkedCount": 0,
+      "rejectionCounts": {
+        "missing_object_link": 21,
+        "missing_operation_link": 97,
+        "unlinked_or_unreadable_respell": 22,
+        "collision_snapshot": 10
+      },
+      "filename": "trace-2.json.gz",
+      "sha256": "f9e726b3647616b38c4bfed8f5af122d99c5366b204ea924798105ce72f12075"
+    },
+    {
+      "partition": "development",
+      "brief": "a browser utility that explains accessibility failures in rendered forms",
+      "seed": 13,
+      "relation": {
+        "intent": {
+          "description": "a browser utility that explains accessibility failures in rendered forms",
+          "fallback_reason": null,
+          "generation_terms": [
+            "explain",
+            "failure",
+            "accessibility",
+            "render",
+            "form"
+          ],
+          "schema": "brief-intent-v1",
+          "status": "parsed",
+          "terms": [
+            {
+              "end": 9,
+              "role": "context",
+              "start": 2,
+              "surface": "browser",
+              "term": "browser"
+            },
+            {
+              "end": 31,
+              "role": "operation",
+              "start": 23,
+              "surface": "explains",
+              "term": "explain"
+            },
+            {
+              "end": 45,
+              "role": "object",
+              "start": 32,
+              "surface": "accessibility",
+              "term": "accessibility"
+            },
+            {
+              "end": 54,
+              "role": "object",
+              "start": 46,
+              "surface": "failures",
+              "term": "failure"
+            },
+            {
+              "end": 66,
+              "role": "object",
+              "start": 58,
+              "surface": "rendered",
+              "term": "render"
+            },
+            {
+              "end": 72,
+              "role": "object",
+              "start": 67,
+              "surface": "forms",
+              "term": "form"
+            }
+          ]
+        },
+        "object_head": {
+          "end": 54,
+          "role": "object",
+          "start": 46,
+          "surface": "failures",
+          "term": "failure"
+        },
+        "object_roots": [
+          {
+            "root": "failure",
+            "source": "brief_literal",
+            "term": "failure"
+          }
+        ],
+        "operation": {
+          "end": 31,
+          "role": "operation",
+          "start": 23,
+          "surface": "explains",
+          "term": "explain"
+        },
+        "operation_roots": [
+          {
+            "root": "explain",
+            "source": "brief_literal",
+            "term": "explain"
+          }
+        ],
+        "reason": null,
+        "schema": "operation-object-plan-v1",
+        "status": "ready"
+      },
+      "old": [
+        "Logossol",
+        "Browsr",
+        "Clipsignal",
+        "Magnect"
+      ],
+      "current": [],
+      "poolCount": 132,
+      "linkedCount": 0,
+      "rejectionCounts": {
+        "missing_object_link": 31,
+        "missing_operation_link": 76,
+        "unlinked_or_unreadable_respell": 21,
+        "collision_snapshot": 7
+      },
+      "filename": "trace-3.json.gz",
+      "sha256": "7a6881935399caf9e5caf41ff5621d8c48fdf979c551a27f4547991c59350733"
+    },
+    {
+      "partition": "development",
+      "brief": "a browser utility that explains accessibility failures in rendered forms",
+      "seed": 67,
+      "relation": {
+        "intent": {
+          "description": "a browser utility that explains accessibility failures in rendered forms",
+          "fallback_reason": null,
+          "generation_terms": [
+            "explain",
+            "failure",
+            "accessibility",
+            "render",
+            "form"
+          ],
+          "schema": "brief-intent-v1",
+          "status": "parsed",
+          "terms": [
+            {
+              "end": 9,
+              "role": "context",
+              "start": 2,
+              "surface": "browser",
+              "term": "browser"
+            },
+            {
+              "end": 31,
+              "role": "operation",
+              "start": 23,
+              "surface": "explains",
+              "term": "explain"
+            },
+            {
+              "end": 45,
+              "role": "object",
+              "start": 32,
+              "surface": "accessibility",
+              "term": "accessibility"
+            },
+            {
+              "end": 54,
+              "role": "object",
+              "start": 46,
+              "surface": "failures",
+              "term": "failure"
+            },
+            {
+              "end": 66,
+              "role": "object",
+              "start": 58,
+              "surface": "rendered",
+              "term": "render"
+            },
+            {
+              "end": 72,
+              "role": "object",
+              "start": 67,
+              "surface": "forms",
+              "term": "form"
+            }
+          ]
+        },
+        "object_head": {
+          "end": 54,
+          "role": "object",
+          "start": 46,
+          "surface": "failures",
+          "term": "failure"
+        },
+        "object_roots": [
+          {
+            "root": "failure",
+            "source": "brief_literal",
+            "term": "failure"
+          }
+        ],
+        "operation": {
+          "end": 31,
+          "role": "operation",
+          "start": 23,
+          "surface": "explains",
+          "term": "explain"
+        },
+        "operation_roots": [
+          {
+            "root": "explain",
+            "source": "brief_literal",
+            "term": "explain"
+          }
+        ],
+        "reason": null,
+        "schema": "operation-object-plan-v1",
+        "status": "ready"
+      },
+      "old": [
+        "Explainix",
+        "Browsr",
+        "Proscribe",
+        "Clipsignal"
+      ],
+      "current": [],
+      "poolCount": 132,
+      "linkedCount": 0,
+      "rejectionCounts": {
+        "missing_object_link": 31,
+        "missing_operation_link": 76,
+        "unlinked_or_unreadable_respell": 21,
+        "collision_snapshot": 7
+      },
+      "filename": "trace-4.json.gz",
+      "sha256": "f4fe935a90ad36f364b1b074c2dd29a5692e0fca0e3d8d14441d854e0de09868"
+    },
+    {
+      "partition": "development",
+      "brief": "a browser utility that explains accessibility failures in rendered forms",
+      "seed": 313,
+      "relation": {
+        "intent": {
+          "description": "a browser utility that explains accessibility failures in rendered forms",
+          "fallback_reason": null,
+          "generation_terms": [
+            "explain",
+            "failure",
+            "accessibility",
+            "render",
+            "form"
+          ],
+          "schema": "brief-intent-v1",
+          "status": "parsed",
+          "terms": [
+            {
+              "end": 9,
+              "role": "context",
+              "start": 2,
+              "surface": "browser",
+              "term": "browser"
+            },
+            {
+              "end": 31,
+              "role": "operation",
+              "start": 23,
+              "surface": "explains",
+              "term": "explain"
+            },
+            {
+              "end": 45,
+              "role": "object",
+              "start": 32,
+              "surface": "accessibility",
+              "term": "accessibility"
+            },
+            {
+              "end": 54,
+              "role": "object",
+              "start": 46,
+              "surface": "failures",
+              "term": "failure"
+            },
+            {
+              "end": 66,
+              "role": "object",
+              "start": 58,
+              "surface": "rendered",
+              "term": "render"
+            },
+            {
+              "end": 72,
+              "role": "object",
+              "start": 67,
+              "surface": "forms",
+              "term": "form"
+            }
+          ]
+        },
+        "object_head": {
+          "end": 54,
+          "role": "object",
+          "start": 46,
+          "surface": "failures",
+          "term": "failure"
+        },
+        "object_roots": [
+          {
+            "root": "failure",
+            "source": "brief_literal",
+            "term": "failure"
+          }
+        ],
+        "operation": {
+          "end": 31,
+          "role": "operation",
+          "start": 23,
+          "surface": "explains",
+          "term": "explain"
+        },
+        "operation_roots": [
+          {
+            "root": "explain",
+            "source": "brief_literal",
+            "term": "explain"
+          }
+        ],
+        "reason": null,
+        "schema": "operation-object-plan-v1",
+        "status": "ready"
+      },
+      "old": [
+        "Pinsignal",
+        "Magnect",
+        "Explainix",
+        "Cognect"
+      ],
+      "current": [],
+      "poolCount": 132,
+      "linkedCount": 0,
+      "rejectionCounts": {
+        "missing_object_link": 31,
+        "missing_operation_link": 76,
+        "unlinked_or_unreadable_respell": 21,
+        "collision_snapshot": 7
+      },
+      "filename": "trace-5.json.gz",
+      "sha256": "ae155f099d6d1f4550b9079ba99632c01c1e7b9bb3dc67b7705063b77aee71fe"
+    },
+    {
+      "partition": "development",
+      "brief": "a package release assistant that verifies checksums of downloadable binaries",
+      "seed": 13,
+      "relation": {
+        "intent": {
+          "description": "a package release assistant that verifies checksums of downloadable binaries",
+          "fallback_reason": null,
+          "generation_terms": [
+            "verify",
+            "checksum",
+            "downloadable",
+            "binary"
+          ],
+          "schema": "brief-intent-v1",
+          "status": "parsed",
+          "terms": [
+            {
+              "end": 9,
+              "role": "context",
+              "start": 2,
+              "surface": "package",
+              "term": "package"
+            },
+            {
+              "end": 17,
+              "role": "context",
+              "start": 10,
+              "surface": "release",
+              "term": "release"
+            },
+            {
+              "end": 41,
+              "role": "operation",
+              "start": 33,
+              "surface": "verifies",
+              "term": "verify"
+            },
+            {
+              "end": 51,
+              "role": "object",
+              "start": 42,
+              "surface": "checksums",
+              "term": "checksum"
+            },
+            {
+              "end": 67,
+              "role": "object",
+              "start": 55,
+              "surface": "downloadable",
+              "term": "downloadable"
+            },
+            {
+              "end": 76,
+              "role": "object",
+              "start": 68,
+              "surface": "binaries",
+              "term": "binary"
+            }
+          ]
+        },
+        "object_head": {
+          "end": 51,
+          "role": "object",
+          "start": 42,
+          "surface": "checksums",
+          "term": "checksum"
+        },
+        "object_roots": [
+          {
+            "root": "checksum",
+            "source": "brief_literal",
+            "term": "checksum"
+          }
+        ],
+        "operation": {
+          "end": 41,
+          "role": "operation",
+          "start": 33,
+          "surface": "verifies",
+          "term": "verify"
+        },
+        "operation_roots": [
+          {
+            "root": "verify",
+            "source": "brief_literal",
+            "term": "verify"
+          },
+          {
+            "root": "ver",
+            "source": "existing_fragment_association",
+            "term": "verify"
+          }
+        ],
+        "reason": null,
+        "schema": "operation-object-plan-v1",
+        "status": "ready"
+      },
+      "old": [
+        "Verospec",
+        "Stacklink",
+        "Mihenk",
+        "NewByte"
+      ],
+      "current": [
+        "VerChecksum"
+      ],
+      "poolCount": 131,
+      "linkedCount": 1,
+      "rejectionCounts": {
+        "missing_object_link": 56,
+        "collision_snapshot": 15,
+        "unlinked_or_unreadable_respell": 22,
+        "missing_operation_link": 37
+      },
+      "filename": "trace-6.json.gz",
+      "sha256": "d17c8320ecce761f2f0ecf5dcca2dd3f95bec48fd10029075cc0a3ed6e42e3e2"
+    },
+    {
+      "partition": "development",
+      "brief": "a package release assistant that verifies checksums of downloadable binaries",
+      "seed": 67,
+      "relation": {
+        "intent": {
+          "description": "a package release assistant that verifies checksums of downloadable binaries",
+          "fallback_reason": null,
+          "generation_terms": [
+            "verify",
+            "checksum",
+            "downloadable",
+            "binary"
+          ],
+          "schema": "brief-intent-v1",
+          "status": "parsed",
+          "terms": [
+            {
+              "end": 9,
+              "role": "context",
+              "start": 2,
+              "surface": "package",
+              "term": "package"
+            },
+            {
+              "end": 17,
+              "role": "context",
+              "start": 10,
+              "surface": "release",
+              "term": "release"
+            },
+            {
+              "end": 41,
+              "role": "operation",
+              "start": 33,
+              "surface": "verifies",
+              "term": "verify"
+            },
+            {
+              "end": 51,
+              "role": "object",
+              "start": 42,
+              "surface": "checksums",
+              "term": "checksum"
+            },
+            {
+              "end": 67,
+              "role": "object",
+              "start": 55,
+              "surface": "downloadable",
+              "term": "downloadable"
+            },
+            {
+              "end": 76,
+              "role": "object",
+              "start": 68,
+              "surface": "binaries",
+              "term": "binary"
+            }
+          ]
+        },
+        "object_head": {
+          "end": 51,
+          "role": "object",
+          "start": 42,
+          "surface": "checksums",
+          "term": "checksum"
+        },
+        "object_roots": [
+          {
+            "root": "checksum",
+            "source": "brief_literal",
+            "term": "checksum"
+          }
+        ],
+        "operation": {
+          "end": 41,
+          "role": "operation",
+          "start": 33,
+          "surface": "verifies",
+          "term": "verify"
+        },
+        "operation_roots": [
+          {
+            "root": "verify",
+            "source": "brief_literal",
+            "term": "verify"
+          },
+          {
+            "root": "ver",
+            "source": "existing_fragment_association",
+            "term": "verify"
+          }
+        ],
+        "reason": null,
+        "schema": "operation-object-plan-v1",
+        "status": "ready"
+      },
+      "old": [
+        "Verifyia",
+        "Vestack",
+        "Stacklink",
+        "Firmaspec"
+      ],
+      "current": [
+        "Verchecksum"
+      ],
+      "poolCount": 131,
+      "linkedCount": 1,
+      "rejectionCounts": {
+        "missing_object_link": 56,
+        "collision_snapshot": 15,
+        "unlinked_or_unreadable_respell": 22,
+        "missing_operation_link": 37
+      },
+      "filename": "trace-7.json.gz",
+      "sha256": "6b8e03a0c3713ffd39742b48139233f35c927fdbb7eb13f4312d4389939b573b"
+    },
+    {
+      "partition": "development",
+      "brief": "a package release assistant that verifies checksums of downloadable binaries",
+      "seed": 313,
+      "relation": {
+        "intent": {
+          "description": "a package release assistant that verifies checksums of downloadable binaries",
+          "fallback_reason": null,
+          "generation_terms": [
+            "verify",
+            "checksum",
+            "downloadable",
+            "binary"
+          ],
+          "schema": "brief-intent-v1",
+          "status": "parsed",
+          "terms": [
+            {
+              "end": 9,
+              "role": "context",
+              "start": 2,
+              "surface": "package",
+              "term": "package"
+            },
+            {
+              "end": 17,
+              "role": "context",
+              "start": 10,
+              "surface": "release",
+              "term": "release"
+            },
+            {
+              "end": 41,
+              "role": "operation",
+              "start": 33,
+              "surface": "verifies",
+              "term": "verify"
+            },
+            {
+              "end": 51,
+              "role": "object",
+              "start": 42,
+              "surface": "checksums",
+              "term": "checksum"
+            },
+            {
+              "end": 67,
+              "role": "object",
+              "start": 55,
+              "surface": "downloadable",
+              "term": "downloadable"
+            },
+            {
+              "end": 76,
+              "role": "object",
+              "start": 68,
+              "surface": "binaries",
+              "term": "binary"
+            }
+          ]
+        },
+        "object_head": {
+          "end": 51,
+          "role": "object",
+          "start": 42,
+          "surface": "checksums",
+          "term": "checksum"
+        },
+        "object_roots": [
+          {
+            "root": "checksum",
+            "source": "brief_literal",
+            "term": "checksum"
+          }
+        ],
+        "operation": {
+          "end": 41,
+          "role": "operation",
+          "start": 33,
+          "surface": "verifies",
+          "term": "verify"
+        },
+        "operation_roots": [
+          {
+            "root": "verify",
+            "source": "brief_literal",
+            "term": "verify"
+          },
+          {
+            "root": "ver",
+            "source": "existing_fragment_association",
+            "term": "verify"
+          }
+        ],
+        "reason": null,
+        "schema": "operation-object-plan-v1",
+        "status": "ready"
+      },
+      "old": [
+        "Stackseed",
+        "Mihenk",
+        "Verifyia",
+        "Memtain"
+      ],
+      "current": [
+        "Verchecksum"
+      ],
+      "poolCount": 131,
+      "linkedCount": 1,
+      "rejectionCounts": {
+        "missing_object_link": 57,
+        "unlinked_or_unreadable_respell": 22,
+        "collision_snapshot": 14,
+        "missing_operation_link": 37
+      },
+      "filename": "trace-8.json.gz",
+      "sha256": "56b3c8513ca6ea4faa045b5b720284a4b2ce2d62223af431e4451413a90bb2df"
+    },
+    {
+      "partition": "development",
+      "brief": "a build tool that checks dependency licenses before publishing a package",
+      "seed": 13,
+      "relation": {
+        "intent": {
+          "description": "a build tool that checks dependency licenses before publishing a package",
+          "fallback_reason": null,
+          "generation_terms": [
+            "check",
+            "license",
+            "dependency"
+          ],
+          "schema": "brief-intent-v1",
+          "status": "parsed",
+          "terms": [
+            {
+              "end": 7,
+              "role": "context",
+              "start": 2,
+              "surface": "build",
+              "term": "build"
+            },
+            {
+              "end": 24,
+              "role": "operation",
+              "start": 18,
+              "surface": "checks",
+              "term": "check"
+            },
+            {
+              "end": 35,
+              "role": "object",
+              "start": 25,
+              "surface": "dependency",
+              "term": "dependency"
+            },
+            {
+              "end": 44,
+              "role": "object",
+              "start": 36,
+              "surface": "licenses",
+              "term": "license"
+            },
+            {
+              "end": 62,
+              "role": "condition",
+              "start": 52,
+              "surface": "publishing",
+              "term": "publish"
+            },
+            {
+              "end": 72,
+              "role": "condition",
+              "start": 65,
+              "surface": "package",
+              "term": "package"
+            }
+          ]
+        },
+        "object_head": {
+          "end": 44,
+          "role": "object",
+          "start": 36,
+          "surface": "licenses",
+          "term": "license"
+        },
+        "object_roots": [
+          {
+            "root": "license",
+            "source": "brief_literal",
+            "term": "license"
+          }
+        ],
+        "operation": {
+          "end": 24,
+          "role": "operation",
+          "start": 18,
+          "surface": "checks",
+          "term": "check"
+        },
+        "operation_roots": [
+          {
+            "root": "check",
+            "source": "brief_literal",
+            "term": "check"
+          }
+        ],
+        "reason": null,
+        "schema": "operation-object-plan-v1",
+        "status": "ready"
+      },
+      "old": [
+        "Plasserv",
+        "Stacklink",
+        "Matbaa",
+        "TopSync"
+      ],
+      "current": [],
+      "poolCount": 128,
+      "linkedCount": 0,
+      "rejectionCounts": {
+        "missing_object_link": 32,
+        "missing_operation_link": 63,
+        "collision_snapshot": 10,
+        "unlinked_or_unreadable_respell": 23
+      },
+      "filename": "trace-9.json.gz",
+      "sha256": "dd02e442421ad4aae8576730beb28a8f5bee608c4a19a336acf2d318e72a5640"
+    },
+    {
+      "partition": "development",
+      "brief": "a build tool that checks dependency licenses before publishing a package",
+      "seed": 67,
+      "relation": {
+        "intent": {
+          "description": "a build tool that checks dependency licenses before publishing a package",
+          "fallback_reason": null,
+          "generation_terms": [
+            "check",
+            "license",
+            "dependency"
+          ],
+          "schema": "brief-intent-v1",
+          "status": "parsed",
+          "terms": [
+            {
+              "end": 7,
+              "role": "context",
+              "start": 2,
+              "surface": "build",
+              "term": "build"
+            },
+            {
+              "end": 24,
+              "role": "operation",
+              "start": 18,
+              "surface": "checks",
+              "term": "check"
+            },
+            {
+              "end": 35,
+              "role": "object",
+              "start": 25,
+              "surface": "dependency",
+              "term": "dependency"
+            },
+            {
+              "end": 44,
+              "role": "object",
+              "start": 36,
+              "surface": "licenses",
+              "term": "license"
+            },
+            {
+              "end": 62,
+              "role": "condition",
+              "start": 52,
+              "surface": "publishing",
+              "term": "publish"
+            },
+            {
+              "end": 72,
+              "role": "condition",
+              "start": 65,
+              "surface": "package",
+              "term": "package"
+            }
+          ]
+        },
+        "object_head": {
+          "end": 44,
+          "role": "object",
+          "start": 36,
+          "surface": "licenses",
+          "term": "license"
+        },
+        "object_roots": [
+          {
+            "root": "license",
+            "source": "brief_literal",
+            "term": "license"
+          }
+        ],
+        "operation": {
+          "end": 24,
+          "role": "operation",
+          "start": 18,
+          "surface": "checks",
+          "term": "check"
+        },
+        "operation_roots": [
+          {
+            "root": "check",
+            "source": "brief_literal",
+            "term": "check"
+          }
+        ],
+        "reason": null,
+        "schema": "operation-object-plan-v1",
+        "status": "ready"
+      },
+      "old": [
+        "Depforge",
+        "BumpForge",
+        "Archeck",
+        "Forgebeam"
+      ],
+      "current": [],
+      "poolCount": 128,
+      "linkedCount": 0,
+      "rejectionCounts": {
+        "missing_object_link": 32,
+        "missing_operation_link": 63,
+        "collision_snapshot": 11,
+        "unlinked_or_unreadable_respell": 22
+      },
+      "filename": "trace-10.json.gz",
+      "sha256": "10d661077710620caed675dc179a0afe96f1e28fbb6d63af2a7f6a36b606cbb7"
+    },
+    {
+      "partition": "development",
+      "brief": "a build tool that checks dependency licenses before publishing a package",
+      "seed": 313,
+      "relation": {
+        "intent": {
+          "description": "a build tool that checks dependency licenses before publishing a package",
+          "fallback_reason": null,
+          "generation_terms": [
+            "check",
+            "license",
+            "dependency"
+          ],
+          "schema": "brief-intent-v1",
+          "status": "parsed",
+          "terms": [
+            {
+              "end": 7,
+              "role": "context",
+              "start": 2,
+              "surface": "build",
+              "term": "build"
+            },
+            {
+              "end": 24,
+              "role": "operation",
+              "start": 18,
+              "surface": "checks",
+              "term": "check"
+            },
+            {
+              "end": 35,
+              "role": "object",
+              "start": 25,
+              "surface": "dependency",
+              "term": "dependency"
+            },
+            {
+              "end": 44,
+              "role": "object",
+              "start": 36,
+              "surface": "licenses",
+              "term": "license"
+            },
+            {
+              "end": 62,
+              "role": "condition",
+              "start": 52,
+              "surface": "publishing",
+              "term": "publish"
+            },
+            {
+              "end": 72,
+              "role": "condition",
+              "start": 65,
+              "surface": "package",
+              "term": "package"
+            }
+          ]
+        },
+        "object_head": {
+          "end": 44,
+          "role": "object",
+          "start": 36,
+          "surface": "licenses",
+          "term": "license"
+        },
+        "object_roots": [
+          {
+            "root": "license",
+            "source": "brief_literal",
+            "term": "license"
+          }
+        ],
+        "operation": {
+          "end": 24,
+          "role": "operation",
+          "start": 18,
+          "surface": "checks",
+          "term": "check"
+        },
+        "operation_roots": [
+          {
+            "root": "check",
+            "source": "brief_literal",
+            "term": "check"
+          }
+        ],
+        "reason": null,
+        "schema": "operation-object-plan-v1",
+        "status": "ready"
+      },
+      "old": [
+        "Forgeseed",
+        "Matbaa",
+        "Depforge",
+        "Creatic"
+      ],
+      "current": [],
+      "poolCount": 128,
+      "linkedCount": 0,
+      "rejectionCounts": {
+        "missing_object_link": 32,
+        "missing_operation_link": 63,
+        "collision_snapshot": 11,
+        "unlinked_or_unreadable_respell": 22
+      },
+      "filename": "trace-11.json.gz",
+      "sha256": "7013dca1c76f7e23d142e5f2b7f643ea0e1607108b1c5f2c16019de34783aeca"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a local utility that compares database schemas before applying migrations",
+      "seed": 13,
+      "relation": {
+        "intent": {
+          "description": "a local utility that compares database schemas before applying migrations",
+          "fallback_reason": null,
+          "generation_terms": [
+            "compare",
+            "schema",
+            "database"
+          ],
+          "schema": "brief-intent-v1",
+          "status": "parsed",
+          "terms": [
+            {
+              "end": 29,
+              "role": "operation",
+              "start": 21,
+              "surface": "compares",
+              "term": "compare"
+            },
+            {
+              "end": 38,
+              "role": "object",
+              "start": 30,
+              "surface": "database",
+              "term": "database"
+            },
+            {
+              "end": 46,
+              "role": "object",
+              "start": 39,
+              "surface": "schemas",
+              "term": "schema"
+            },
+            {
+              "end": 62,
+              "role": "condition",
+              "start": 54,
+              "surface": "applying",
+              "term": "apply"
+            },
+            {
+              "end": 73,
+              "role": "condition",
+              "start": 63,
+              "surface": "migrations",
+              "term": "migration"
+            }
+          ]
+        },
+        "object_head": {
+          "end": 46,
+          "role": "object",
+          "start": 39,
+          "surface": "schemas",
+          "term": "schema"
+        },
+        "object_roots": [
+          {
+            "root": "schema",
+            "source": "brief_literal",
+            "term": "schema"
+          },
+          {
+            "root": "query",
+            "source": "existing_concept_palette",
+            "term": "schema"
+          },
+          {
+            "root": "table",
+            "source": "existing_concept_palette",
+            "term": "schema"
+          },
+          {
+            "root": "store",
+            "source": "existing_concept_palette",
+            "term": "schema"
+          },
+          {
+            "root": "base",
+            "source": "existing_concept_palette",
+            "term": "schema"
+          },
+          {
+            "root": "data",
+            "source": "existing_concept_palette",
+            "term": "schema"
+          },
+          {
+            "root": "record",
+            "source": "existing_concept_palette",
+            "term": "schema"
+          },
+          {
+            "root": "row",
+            "source": "existing_concept_palette",
+            "term": "schema"
+          }
+        ],
+        "operation": {
+          "end": 29,
+          "role": "operation",
+          "start": 21,
+          "surface": "compares",
+          "term": "compare"
+        },
+        "operation_roots": [
+          {
+            "root": "compare",
+            "source": "brief_literal",
+            "term": "compare"
+          }
+        ],
+        "reason": null,
+        "schema": "operation-object-plan-v1",
+        "status": "ready"
+      },
+      "old": [
+        "Flucalc",
+        "Bridgebeam",
+        "Multain",
+        "PureQuery"
+      ],
+      "current": [],
+      "poolCount": 146,
+      "linkedCount": 0,
+      "rejectionCounts": {
+        "missing_object_link": 4,
+        "missing_operation_link": 108,
+        "unlinked_or_unreadable_respell": 23,
+        "collision_snapshot": 11
+      },
+      "filename": "trace-12.json.gz",
+      "sha256": "ff3afc79eaad27d11bb6d41192f4597f0c408e72a41ad2c3e7cf5a21bf98fcd7"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a local utility that compares database schemas before applying migrations",
+      "seed": 67,
+      "relation": {
+        "intent": {
+          "description": "a local utility that compares database schemas before applying migrations",
+          "fallback_reason": null,
+          "generation_terms": [
+            "compare",
+            "schema",
+            "database"
+          ],
+          "schema": "brief-intent-v1",
+          "status": "parsed",
+          "terms": [
+            {
+              "end": 29,
+              "role": "operation",
+              "start": 21,
+              "surface": "compares",
+              "term": "compare"
+            },
+            {
+              "end": 38,
+              "role": "object",
+              "start": 30,
+              "surface": "database",
+              "term": "database"
+            },
+            {
+              "end": 46,
+              "role": "object",
+              "start": 39,
+              "surface": "schemas",
+              "term": "schema"
+            },
+            {
+              "end": 62,
+              "role": "condition",
+              "start": 54,
+              "surface": "applying",
+              "term": "apply"
+            },
+            {
+              "end": 73,
+              "role": "condition",
+              "start": 63,
+              "surface": "migrations",
+              "term": "migration"
+            }
+          ]
+        },
+        "object_head": {
+          "end": 46,
+          "role": "object",
+          "start": 39,
+          "surface": "schemas",
+          "term": "schema"
+        },
+        "object_roots": [
+          {
+            "root": "schema",
+            "source": "brief_literal",
+            "term": "schema"
+          },
+          {
+            "root": "query",
+            "source": "existing_concept_palette",
+            "term": "schema"
+          },
+          {
+            "root": "table",
+            "source": "existing_concept_palette",
+            "term": "schema"
+          },
+          {
+            "root": "store",
+            "source": "existing_concept_palette",
+            "term": "schema"
+          },
+          {
+            "root": "base",
+            "source": "existing_concept_palette",
+            "term": "schema"
+          },
+          {
+            "root": "data",
+            "source": "existing_concept_palette",
+            "term": "schema"
+          },
+          {
+            "root": "record",
+            "source": "existing_concept_palette",
+            "term": "schema"
+          },
+          {
+            "root": "row",
+            "source": "existing_concept_palette",
+            "term": "schema"
+          }
+        ],
+        "operation": {
+          "end": 29,
+          "role": "operation",
+          "start": 21,
+          "surface": "compares",
+          "term": "compare"
+        },
+        "operation_roots": [
+          {
+            "root": "compare",
+            "source": "brief_literal",
+            "term": "compare"
+          }
+        ],
+        "reason": null,
+        "schema": "operation-object-plan-v1",
+        "status": "ready"
+      },
+      "old": [
+        "Datashift",
+        "QueryApply",
+        "Shiftable",
+        "Relayflow"
+      ],
+      "current": [],
+      "poolCount": 146,
+      "linkedCount": 0,
+      "rejectionCounts": {
+        "missing_object_link": 5,
+        "missing_operation_link": 106,
+        "collision_snapshot": 12,
+        "unlinked_or_unreadable_respell": 23
+      },
+      "filename": "trace-13.json.gz",
+      "sha256": "c88569e1cfc1f301961326e115780884a35069e66e6a3cd888d8c2c8536285ec"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a local utility that compares database schemas before applying migrations",
+      "seed": 313,
+      "relation": {
+        "intent": {
+          "description": "a local utility that compares database schemas before applying migrations",
+          "fallback_reason": null,
+          "generation_terms": [
+            "compare",
+            "schema",
+            "database"
+          ],
+          "schema": "brief-intent-v1",
+          "status": "parsed",
+          "terms": [
+            {
+              "end": 29,
+              "role": "operation",
+              "start": 21,
+              "surface": "compares",
+              "term": "compare"
+            },
+            {
+              "end": 38,
+              "role": "object",
+              "start": 30,
+              "surface": "database",
+              "term": "database"
+            },
+            {
+              "end": 46,
+              "role": "object",
+              "start": 39,
+              "surface": "schemas",
+              "term": "schema"
+            },
+            {
+              "end": 62,
+              "role": "condition",
+              "start": 54,
+              "surface": "applying",
+              "term": "apply"
+            },
+            {
+              "end": 73,
+              "role": "condition",
+              "start": 63,
+              "surface": "migrations",
+              "term": "migration"
+            }
+          ]
+        },
+        "object_head": {
+          "end": 46,
+          "role": "object",
+          "start": 39,
+          "surface": "schemas",
+          "term": "schema"
+        },
+        "object_roots": [
+          {
+            "root": "schema",
+            "source": "brief_literal",
+            "term": "schema"
+          },
+          {
+            "root": "query",
+            "source": "existing_concept_palette",
+            "term": "schema"
+          },
+          {
+            "root": "table",
+            "source": "existing_concept_palette",
+            "term": "schema"
+          },
+          {
+            "root": "store",
+            "source": "existing_concept_palette",
+            "term": "schema"
+          },
+          {
+            "root": "base",
+            "source": "existing_concept_palette",
+            "term": "schema"
+          },
+          {
+            "root": "data",
+            "source": "existing_concept_palette",
+            "term": "schema"
+          },
+          {
+            "root": "record",
+            "source": "existing_concept_palette",
+            "term": "schema"
+          },
+          {
+            "root": "row",
+            "source": "existing_concept_palette",
+            "term": "schema"
+          }
+        ],
+        "operation": {
+          "end": 29,
+          "role": "operation",
+          "start": 21,
+          "surface": "compares",
+          "term": "compare"
+        },
+        "operation_roots": [
+          {
+            "root": "compare",
+            "source": "brief_literal",
+            "term": "compare"
+          }
+        ],
+        "reason": null,
+        "schema": "operation-object-plan-v1",
+        "status": "ready"
+      },
+      "old": [
+        "Storeseed",
+        "Multain",
+        "Datashift",
+        "Portain"
+      ],
+      "current": [],
+      "poolCount": 146,
+      "linkedCount": 0,
+      "rejectionCounts": {
+        "missing_object_link": 8,
+        "missing_operation_link": 105,
+        "unlinked_or_unreadable_respell": 23,
+        "collision_snapshot": 10
+      },
+      "filename": "trace-14.json.gz",
+      "sha256": "9bca60c172b3360ba826d9273c4c984e27aa45fe9768151ef3490df97c79f327"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a developer tool that verifies configuration files before deployment",
+      "seed": 13,
+      "relation": {
+        "intent": {
+          "description": "a developer tool that verifies configuration files before deployment",
+          "fallback_reason": null,
+          "generation_terms": [
+            "verify",
+            "file",
+            "configuration"
+          ],
+          "schema": "brief-intent-v1",
+          "status": "parsed",
+          "terms": [
+            {
+              "end": 30,
+              "role": "operation",
+              "start": 22,
+              "surface": "verifies",
+              "term": "verify"
+            },
+            {
+              "end": 44,
+              "role": "object",
+              "start": 31,
+              "surface": "configuration",
+              "term": "configuration"
+            },
+            {
+              "end": 50,
+              "role": "object",
+              "start": 45,
+              "surface": "files",
+              "term": "file"
+            },
+            {
+              "end": 68,
+              "role": "condition",
+              "start": 58,
+              "surface": "deployment",
+              "term": "deployment"
+            }
+          ]
+        },
+        "object_head": {
+          "end": 50,
+          "role": "object",
+          "start": 45,
+          "surface": "files",
+          "term": "file"
+        },
+        "object_roots": [
+          {
+            "root": "file",
+            "source": "brief_literal",
+            "term": "file"
+          },
+          {
+            "root": "path",
+            "source": "existing_concept_palette",
+            "term": "file"
+          },
+          {
+            "root": "find",
+            "source": "existing_concept_palette",
+            "term": "file"
+          },
+          {
+            "root": "scan",
+            "source": "existing_concept_palette",
+            "term": "file"
+          },
+          {
+            "root": "index",
+            "source": "existing_concept_palette",
+            "term": "file"
+          },
+          {
+            "root": "seek",
+            "source": "existing_concept_palette",
+            "term": "file"
+          }
+        ],
+        "operation": {
+          "end": 30,
+          "role": "operation",
+          "start": 22,
+          "surface": "verifies",
+          "term": "verify"
+        },
+        "operation_roots": [
+          {
+            "root": "verify",
+            "source": "brief_literal",
+            "term": "verify"
+          },
+          {
+            "root": "ver",
+            "source": "existing_fragment_association",
+            "term": "verify"
+          }
+        ],
+        "reason": null,
+        "schema": "operation-object-plan-v1",
+        "status": "ready"
+      },
+      "old": [
+        "Verospec",
+        "Shipsignal",
+        "Mihenk",
+        "PureEnv"
+      ],
+      "current": [
+        "VerSeek"
+      ],
+      "poolCount": 142,
+      "linkedCount": 9,
+      "rejectionCounts": {
+        "missing_object_link": 19,
+        "missing_operation_link": 91,
+        "unlinked_or_unreadable_respell": 23,
+        "collision_snapshot": 4
+      },
+      "filename": "trace-15.json.gz",
+      "sha256": "0018cf21841716f81ed2a4f9c30759332af485686b5354c53004709b2fcf3d43"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a developer tool that verifies configuration files before deployment",
+      "seed": 67,
+      "relation": {
+        "intent": {
+          "description": "a developer tool that verifies configuration files before deployment",
+          "fallback_reason": null,
+          "generation_terms": [
+            "verify",
+            "file",
+            "configuration"
+          ],
+          "schema": "brief-intent-v1",
+          "status": "parsed",
+          "terms": [
+            {
+              "end": 30,
+              "role": "operation",
+              "start": 22,
+              "surface": "verifies",
+              "term": "verify"
+            },
+            {
+              "end": 44,
+              "role": "object",
+              "start": 31,
+              "surface": "configuration",
+              "term": "configuration"
+            },
+            {
+              "end": 50,
+              "role": "object",
+              "start": 45,
+              "surface": "files",
+              "term": "file"
+            },
+            {
+              "end": 68,
+              "role": "condition",
+              "start": 58,
+              "surface": "deployment",
+              "term": "deployment"
+            }
+          ]
+        },
+        "object_head": {
+          "end": 50,
+          "role": "object",
+          "start": 45,
+          "surface": "files",
+          "term": "file"
+        },
+        "object_roots": [
+          {
+            "root": "file",
+            "source": "brief_literal",
+            "term": "file"
+          },
+          {
+            "root": "path",
+            "source": "existing_concept_palette",
+            "term": "file"
+          },
+          {
+            "root": "find",
+            "source": "existing_concept_palette",
+            "term": "file"
+          },
+          {
+            "root": "scan",
+            "source": "existing_concept_palette",
+            "term": "file"
+          },
+          {
+            "root": "index",
+            "source": "existing_concept_palette",
+            "term": "file"
+          },
+          {
+            "root": "seek",
+            "source": "existing_concept_palette",
+            "term": "file"
+          }
+        ],
+        "operation": {
+          "end": 30,
+          "role": "operation",
+          "start": 22,
+          "surface": "verifies",
+          "term": "verify"
+        },
+        "operation_roots": [
+          {
+            "root": "verify",
+            "source": "brief_literal",
+            "term": "verify"
+          },
+          {
+            "root": "ver",
+            "source": "existing_fragment_association",
+            "term": "verify"
+          }
+        ],
+        "reason": null,
+        "schema": "operation-object-plan-v1",
+        "status": "ready"
+      },
+      "old": [
+        "Fileship",
+        "DotPath",
+        "Nucloud",
+        "Cloudsignal"
+      ],
+      "current": [
+        "Verseek"
+      ],
+      "poolCount": 142,
+      "linkedCount": 9,
+      "rejectionCounts": {
+        "missing_object_link": 17,
+        "missing_operation_link": 93,
+        "unlinked_or_unreadable_respell": 23,
+        "collision_snapshot": 4
+      },
+      "filename": "trace-16.json.gz",
+      "sha256": "a8769756609f5ea6ddc766a161fe63156f5549b1789744a19c169527f14669b9"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a developer tool that verifies configuration files before deployment",
+      "seed": 313,
+      "relation": {
+        "intent": {
+          "description": "a developer tool that verifies configuration files before deployment",
+          "fallback_reason": null,
+          "generation_terms": [
+            "verify",
+            "file",
+            "configuration"
+          ],
+          "schema": "brief-intent-v1",
+          "status": "parsed",
+          "terms": [
+            {
+              "end": 30,
+              "role": "operation",
+              "start": 22,
+              "surface": "verifies",
+              "term": "verify"
+            },
+            {
+              "end": 44,
+              "role": "object",
+              "start": 31,
+              "surface": "configuration",
+              "term": "configuration"
+            },
+            {
+              "end": 50,
+              "role": "object",
+              "start": 45,
+              "surface": "files",
+              "term": "file"
+            },
+            {
+              "end": 68,
+              "role": "condition",
+              "start": 58,
+              "surface": "deployment",
+              "term": "deployment"
+            }
+          ]
+        },
+        "object_head": {
+          "end": 50,
+          "role": "object",
+          "start": 45,
+          "surface": "files",
+          "term": "file"
+        },
+        "object_roots": [
+          {
+            "root": "file",
+            "source": "brief_literal",
+            "term": "file"
+          },
+          {
+            "root": "path",
+            "source": "existing_concept_palette",
+            "term": "file"
+          },
+          {
+            "root": "find",
+            "source": "existing_concept_palette",
+            "term": "file"
+          },
+          {
+            "root": "scan",
+            "source": "existing_concept_palette",
+            "term": "file"
+          },
+          {
+            "root": "index",
+            "source": "existing_concept_palette",
+            "term": "file"
+          },
+          {
+            "root": "seek",
+            "source": "existing_concept_palette",
+            "term": "file"
+          }
+        ],
+        "operation": {
+          "end": 30,
+          "role": "operation",
+          "start": 22,
+          "surface": "verifies",
+          "term": "verify"
+        },
+        "operation_roots": [
+          {
+            "root": "verify",
+            "source": "brief_literal",
+            "term": "verify"
+          },
+          {
+            "root": "ver",
+            "source": "existing_fragment_association",
+            "term": "verify"
+          }
+        ],
+        "reason": null,
+        "schema": "operation-object-plan-v1",
+        "status": "ready"
+      },
+      "old": [
+        "Shipsignal",
+        "Fornect",
+        "Fileship",
+        "Doctain"
+      ],
+      "current": [
+        "Verseek"
+      ],
+      "poolCount": 142,
+      "linkedCount": 9,
+      "rejectionCounts": {
+        "missing_object_link": 19,
+        "missing_operation_link": 88,
+        "collision_snapshot": 8,
+        "unlinked_or_unreadable_respell": 22
+      },
+      "filename": "trace-17.json.gz",
+      "sha256": "6943d7461bec2ec0e7453ac26e7d0e925142dccc15cda2c0c2b4dedabeba2b1f"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a terminal tool that tracks memory usage during test runs",
+      "seed": 13,
+      "relation": {
+        "intent": {
+          "description": "a terminal tool that tracks memory usage during test runs",
+          "fallback_reason": null,
+          "generation_terms": [
+            "track",
+            "usage",
+            "memory"
+          ],
+          "schema": "brief-intent-v1",
+          "status": "parsed",
+          "terms": [
+            {
+              "end": 10,
+              "role": "context",
+              "start": 2,
+              "surface": "terminal",
+              "term": "terminal"
+            },
+            {
+              "end": 27,
+              "role": "operation",
+              "start": 21,
+              "surface": "tracks",
+              "term": "track"
+            },
+            {
+              "end": 34,
+              "role": "object",
+              "start": 28,
+              "surface": "memory",
+              "term": "memory"
+            },
+            {
+              "end": 40,
+              "role": "object",
+              "start": 35,
+              "surface": "usage",
+              "term": "usage"
+            },
+            {
+              "end": 52,
+              "role": "condition",
+              "start": 48,
+              "surface": "test",
+              "term": "test"
+            },
+            {
+              "end": 57,
+              "role": "condition",
+              "start": 53,
+              "surface": "runs",
+              "term": "run"
+            }
+          ]
+        },
+        "object_head": {
+          "end": 40,
+          "role": "object",
+          "start": 35,
+          "surface": "usage",
+          "term": "usage"
+        },
+        "object_roots": [
+          {
+            "root": "usage",
+            "source": "brief_literal",
+            "term": "usage"
+          }
+        ],
+        "operation": {
+          "end": 27,
+          "role": "operation",
+          "start": 21,
+          "surface": "tracks",
+          "term": "track"
+        },
+        "operation_roots": [
+          {
+            "root": "track",
+            "source": "brief_literal",
+            "term": "track"
+          }
+        ],
+        "reason": null,
+        "schema": "operation-object-plan-v1",
+        "status": "ready"
+      },
+      "old": [
+        "Codexport",
+        "Runsignal",
+        "Mihenk",
+        "BoldRun"
+      ],
+      "current": [],
+      "poolCount": 152,
+      "linkedCount": 0,
+      "rejectionCounts": {
+        "missing_object_link": 24,
+        "missing_operation_link": 97,
+        "unlinked_or_unreadable_respell": 22,
+        "collision_snapshot": 9,
+        "length": 1
+      },
+      "filename": "trace-18.json.gz",
+      "sha256": "7e3c8ecf38b58fbcebd034a1542b6e72a89532a461405beaa0164e83813a5273"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a terminal tool that tracks memory usage during test runs",
+      "seed": 67,
+      "relation": {
+        "intent": {
+          "description": "a terminal tool that tracks memory usage during test runs",
+          "fallback_reason": null,
+          "generation_terms": [
+            "track",
+            "usage",
+            "memory"
+          ],
+          "schema": "brief-intent-v1",
+          "status": "parsed",
+          "terms": [
+            {
+              "end": 10,
+              "role": "context",
+              "start": 2,
+              "surface": "terminal",
+              "term": "terminal"
+            },
+            {
+              "end": 27,
+              "role": "operation",
+              "start": 21,
+              "surface": "tracks",
+              "term": "track"
+            },
+            {
+              "end": 34,
+              "role": "object",
+              "start": 28,
+              "surface": "memory",
+              "term": "memory"
+            },
+            {
+              "end": 40,
+              "role": "object",
+              "start": 35,
+              "surface": "usage",
+              "term": "usage"
+            },
+            {
+              "end": 52,
+              "role": "condition",
+              "start": 48,
+              "surface": "test",
+              "term": "test"
+            },
+            {
+              "end": 57,
+              "role": "condition",
+              "start": 53,
+              "surface": "runs",
+              "term": "run"
+            }
+          ]
+        },
+        "object_head": {
+          "end": 40,
+          "role": "object",
+          "start": 35,
+          "surface": "usage",
+          "term": "usage"
+        },
+        "object_roots": [
+          {
+            "root": "usage",
+            "source": "brief_literal",
+            "term": "usage"
+          }
+        ],
+        "operation": {
+          "end": 27,
+          "role": "operation",
+          "start": 21,
+          "surface": "tracks",
+          "term": "track"
+        },
+        "operation_roots": [
+          {
+            "root": "track",
+            "source": "brief_literal",
+            "term": "track"
+          }
+        ],
+        "reason": null,
+        "schema": "operation-object-plan-v1",
+        "status": "ready"
+      },
+      "old": [
+        "Runterm",
+        "SpecRun",
+        "Altrack",
+        "Termatlas"
+      ],
+      "current": [],
+      "poolCount": 153,
+      "linkedCount": 0,
+      "rejectionCounts": {
+        "missing_object_link": 24,
+        "missing_operation_link": 97,
+        "unlinked_or_unreadable_respell": 22,
+        "collision_snapshot": 9,
+        "length": 1
+      },
+      "filename": "trace-19.json.gz",
+      "sha256": "0358893e8302f9add9fb417cd6baf7dca4863104b9ed0b72182caacac5c7ea2b"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a terminal tool that tracks memory usage during test runs",
+      "seed": 313,
+      "relation": {
+        "intent": {
+          "description": "a terminal tool that tracks memory usage during test runs",
+          "fallback_reason": null,
+          "generation_terms": [
+            "track",
+            "usage",
+            "memory"
+          ],
+          "schema": "brief-intent-v1",
+          "status": "parsed",
+          "terms": [
+            {
+              "end": 10,
+              "role": "context",
+              "start": 2,
+              "surface": "terminal",
+              "term": "terminal"
+            },
+            {
+              "end": 27,
+              "role": "operation",
+              "start": 21,
+              "surface": "tracks",
+              "term": "track"
+            },
+            {
+              "end": 34,
+              "role": "object",
+              "start": 28,
+              "surface": "memory",
+              "term": "memory"
+            },
+            {
+              "end": 40,
+              "role": "object",
+              "start": 35,
+              "surface": "usage",
+              "term": "usage"
+            },
+            {
+              "end": 52,
+              "role": "condition",
+              "start": 48,
+              "surface": "test",
+              "term": "test"
+            },
+            {
+              "end": 57,
+              "role": "condition",
+              "start": 53,
+              "surface": "runs",
+              "term": "run"
+            }
+          ]
+        },
+        "object_head": {
+          "end": 40,
+          "role": "object",
+          "start": 35,
+          "surface": "usage",
+          "term": "usage"
+        },
+        "object_roots": [
+          {
+            "root": "usage",
+            "source": "brief_literal",
+            "term": "usage"
+          }
+        ],
+        "operation": {
+          "end": 27,
+          "role": "operation",
+          "start": 21,
+          "surface": "tracks",
+          "term": "track"
+        },
+        "operation_roots": [
+          {
+            "root": "track",
+            "source": "brief_literal",
+            "term": "track"
+          }
+        ],
+        "reason": null,
+        "schema": "operation-object-plan-v1",
+        "status": "ready"
+      },
+      "old": [
+        "Runsignal",
+        "Sankofa",
+        "Specrun",
+        "Dictic"
+      ],
+      "current": [],
+      "poolCount": 152,
+      "linkedCount": 0,
+      "rejectionCounts": {
+        "missing_object_link": 25,
+        "missing_operation_link": 98,
+        "unlinked_or_unreadable_respell": 22,
+        "collision_snapshot": 7,
+        "length": 1
+      },
+      "filename": "trace-20.json.gz",
+      "sha256": "3a74645df9653b8e12681db2b4cec9321c8d2c5201f91771e53a9f8344890833"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a local service that groups log messages by severity",
+      "seed": 13,
+      "relation": {
+        "intent": {
+          "description": "a local service that groups log messages by severity",
+          "fallback_reason": null,
+          "generation_terms": [
+            "group",
+            "message",
+            "log"
+          ],
+          "schema": "brief-intent-v1",
+          "status": "parsed",
+          "terms": [
+            {
+              "end": 27,
+              "role": "operation",
+              "start": 21,
+              "surface": "groups",
+              "term": "group"
+            },
+            {
+              "end": 31,
+              "role": "object",
+              "start": 28,
+              "surface": "log",
+              "term": "log"
+            },
+            {
+              "end": 40,
+              "role": "object",
+              "start": 32,
+              "surface": "messages",
+              "term": "message"
+            },
+            {
+              "end": 52,
+              "role": "condition",
+              "start": 44,
+              "surface": "severity",
+              "term": "severity"
+            }
+          ]
+        },
+        "object_head": {
+          "end": 40,
+          "role": "object",
+          "start": 32,
+          "surface": "messages",
+          "term": "message"
+        },
+        "object_roots": [
+          {
+            "root": "message",
+            "source": "brief_literal",
+            "term": "message"
+          },
+          {
+            "root": "kin",
+            "source": "existing_concept_palette",
+            "term": "message"
+          },
+          {
+            "root": "circle",
+            "source": "existing_concept_palette",
+            "term": "message"
+          },
+          {
+            "root": "bond",
+            "source": "existing_concept_palette",
+            "term": "message"
+          },
+          {
+            "root": "link",
+            "source": "existing_concept_palette",
+            "term": "message"
+          },
+          {
+            "root": "tribe",
+            "source": "existing_concept_palette",
+            "term": "message"
+          }
+        ],
+        "operation": {
+          "end": 27,
+          "role": "operation",
+          "start": 21,
+          "surface": "groups",
+          "term": "group"
+        },
+        "operation_roots": [
+          {
+            "root": "group",
+            "source": "brief_literal",
+            "term": "group"
+          }
+        ],
+        "reason": null,
+        "schema": "operation-object-plan-v1",
+        "status": "ready"
+      },
+      "old": [
+        "Vocalex",
+        "Scopelink",
+        "Halka",
+        "BoldBond"
+      ],
+      "current": [
+        "GroupLink"
+      ],
+      "poolCount": 140,
+      "linkedCount": 5,
+      "rejectionCounts": {
+        "missing_object_link": 8,
+        "missing_operation_link": 94,
+        "unlinked_or_unreadable_respell": 23,
+        "collision_snapshot": 10
+      },
+      "filename": "trace-21.json.gz",
+      "sha256": "668b810ee5839cc6031597a3afe0d59a99359a94a389ee84387cb0b243cb8b54"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a local service that groups log messages by severity",
+      "seed": 67,
+      "relation": {
+        "intent": {
+          "description": "a local service that groups log messages by severity",
+          "fallback_reason": null,
+          "generation_terms": [
+            "group",
+            "message",
+            "log"
+          ],
+          "schema": "brief-intent-v1",
+          "status": "parsed",
+          "terms": [
+            {
+              "end": 27,
+              "role": "operation",
+              "start": 21,
+              "surface": "groups",
+              "term": "group"
+            },
+            {
+              "end": 31,
+              "role": "object",
+              "start": 28,
+              "surface": "log",
+              "term": "log"
+            },
+            {
+              "end": 40,
+              "role": "object",
+              "start": 32,
+              "surface": "messages",
+              "term": "message"
+            },
+            {
+              "end": 52,
+              "role": "condition",
+              "start": 44,
+              "surface": "severity",
+              "term": "severity"
+            }
+          ]
+        },
+        "object_head": {
+          "end": 40,
+          "role": "object",
+          "start": 32,
+          "surface": "messages",
+          "term": "message"
+        },
+        "object_roots": [
+          {
+            "root": "message",
+            "source": "brief_literal",
+            "term": "message"
+          },
+          {
+            "root": "kin",
+            "source": "existing_concept_palette",
+            "term": "message"
+          },
+          {
+            "root": "circle",
+            "source": "existing_concept_palette",
+            "term": "message"
+          },
+          {
+            "root": "bond",
+            "source": "existing_concept_palette",
+            "term": "message"
+          },
+          {
+            "root": "link",
+            "source": "existing_concept_palette",
+            "term": "message"
+          },
+          {
+            "root": "tribe",
+            "source": "existing_concept_palette",
+            "term": "message"
+          }
+        ],
+        "operation": {
+          "end": 27,
+          "role": "operation",
+          "start": 21,
+          "surface": "groups",
+          "term": "group"
+        },
+        "operation_roots": [
+          {
+            "root": "group",
+            "source": "brief_literal",
+            "term": "group"
+          }
+        ],
+        "reason": null,
+        "schema": "operation-object-plan-v1",
+        "status": "ready"
+      },
+      "old": [
+        "Tracelink",
+        "ScopeLink",
+        "Mempulse",
+        "Kinsignal"
+      ],
+      "current": [
+        "Grouplink"
+      ],
+      "poolCount": 140,
+      "linkedCount": 5,
+      "rejectionCounts": {
+        "missing_object_link": 8,
+        "missing_operation_link": 93,
+        "collision_snapshot": 11,
+        "unlinked_or_unreadable_respell": 23
+      },
+      "filename": "trace-22.json.gz",
+      "sha256": "f00d3913e41a34a15156e6d7b3163305ba4a8816462f95e54356048ca7964194"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a local service that groups log messages by severity",
+      "seed": 313,
+      "relation": {
+        "intent": {
+          "description": "a local service that groups log messages by severity",
+          "fallback_reason": null,
+          "generation_terms": [
+            "group",
+            "message",
+            "log"
+          ],
+          "schema": "brief-intent-v1",
+          "status": "parsed",
+          "terms": [
+            {
+              "end": 27,
+              "role": "operation",
+              "start": 21,
+              "surface": "groups",
+              "term": "group"
+            },
+            {
+              "end": 31,
+              "role": "object",
+              "start": 28,
+              "surface": "log",
+              "term": "log"
+            },
+            {
+              "end": 40,
+              "role": "object",
+              "start": 32,
+              "surface": "messages",
+              "term": "message"
+            },
+            {
+              "end": 52,
+              "role": "condition",
+              "start": 44,
+              "surface": "severity",
+              "term": "severity"
+            }
+          ]
+        },
+        "object_head": {
+          "end": 40,
+          "role": "object",
+          "start": 32,
+          "surface": "messages",
+          "term": "message"
+        },
+        "object_roots": [
+          {
+            "root": "message",
+            "source": "brief_literal",
+            "term": "message"
+          },
+          {
+            "root": "kin",
+            "source": "existing_concept_palette",
+            "term": "message"
+          },
+          {
+            "root": "circle",
+            "source": "existing_concept_palette",
+            "term": "message"
+          },
+          {
+            "root": "bond",
+            "source": "existing_concept_palette",
+            "term": "message"
+          },
+          {
+            "root": "link",
+            "source": "existing_concept_palette",
+            "term": "message"
+          },
+          {
+            "root": "tribe",
+            "source": "existing_concept_palette",
+            "term": "message"
+          }
+        ],
+        "operation": {
+          "end": 27,
+          "role": "operation",
+          "start": 21,
+          "surface": "groups",
+          "term": "group"
+        },
+        "operation_roots": [
+          {
+            "root": "group",
+            "source": "brief_literal",
+            "term": "group"
+          }
+        ],
+        "reason": null,
+        "schema": "operation-object-plan-v1",
+        "status": "ready"
+      },
+      "old": [
+        "Circleflow",
+        "Halka",
+        "Pulselink",
+        "Strucder"
+      ],
+      "current": [
+        "Grouplink"
+      ],
+      "poolCount": 140,
+      "linkedCount": 5,
+      "rejectionCounts": {
+        "missing_object_link": 7,
+        "missing_operation_link": 94,
+        "collision_snapshot": 11,
+        "unlinked_or_unreadable_respell": 23
+      },
+      "filename": "trace-23.json.gz",
+      "sha256": "4a6a7f4bbe4793e9257799680bb83b73ff0b5578e00fa4790f449024c7c77604"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a browser tool that maps keyboard shortcuts across pages",
+      "seed": 13,
+      "relation": {
+        "intent": {
+          "description": "a browser tool that maps keyboard shortcuts across pages",
+          "fallback_reason": null,
+          "generation_terms": [
+            "map",
+            "shortcut",
+            "keyboard"
+          ],
+          "schema": "brief-intent-v1",
+          "status": "parsed",
+          "terms": [
+            {
+              "end": 9,
+              "role": "context",
+              "start": 2,
+              "surface": "browser",
+              "term": "browser"
+            },
+            {
+              "end": 24,
+              "role": "operation",
+              "start": 20,
+              "surface": "maps",
+              "term": "map"
+            },
+            {
+              "end": 33,
+              "role": "object",
+              "start": 25,
+              "surface": "keyboard",
+              "term": "keyboard"
+            },
+            {
+              "end": 43,
+              "role": "object",
+              "start": 34,
+              "surface": "shortcuts",
+              "term": "shortcut"
+            },
+            {
+              "end": 56,
+              "role": "condition",
+              "start": 51,
+              "surface": "pages",
+              "term": "page"
+            }
+          ]
+        },
+        "object_head": {
+          "end": 43,
+          "role": "object",
+          "start": 34,
+          "surface": "shortcuts",
+          "term": "shortcut"
+        },
+        "object_roots": [
+          {
+            "root": "shortcut",
+            "source": "brief_literal",
+            "term": "shortcut"
+          }
+        ],
+        "operation": {
+          "end": 24,
+          "role": "operation",
+          "start": 20,
+          "surface": "maps",
+          "term": "map"
+        },
+        "operation_roots": [
+          {
+            "root": "map",
+            "source": "brief_literal",
+            "term": "map"
+          },
+          {
+            "root": "roam",
+            "source": "existing_concept_palette",
+            "term": "map"
+          },
+          {
+            "root": "atlas",
+            "source": "existing_concept_palette",
+            "term": "map"
+          },
+          {
+            "root": "route",
+            "source": "existing_concept_palette",
+            "term": "map"
+          },
+          {
+            "root": "compass",
+            "source": "existing_concept_palette",
+            "term": "map"
+          },
+          {
+            "root": "trek",
+            "source": "existing_concept_palette",
+            "term": "map"
+          }
+        ],
+        "reason": null,
+        "schema": "operation-object-plan-v1",
+        "status": "ready"
+      },
+      "old": [
+        "Nautiverb",
+        "Browsr",
+        "Atlasseed",
+        "Portolan"
+      ],
+      "current": [
+        "MapShortcut",
+        "RoamShortcut"
+      ],
+      "poolCount": 158,
+      "linkedCount": 3,
+      "rejectionCounts": {
+        "missing_object_link": 81,
+        "collision_snapshot": 4,
+        "unlinked_or_unreadable_respell": 23,
+        "missing_operation_link": 45,
+        "length": 1,
+        "overlapping_role_links": 1
+      },
+      "filename": "trace-24.json.gz",
+      "sha256": "3336c34511d022f14630b59e32da1cddd57e1741650827a2850a444eb2e551d3"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a browser tool that maps keyboard shortcuts across pages",
+      "seed": 67,
+      "relation": {
+        "intent": {
+          "description": "a browser tool that maps keyboard shortcuts across pages",
+          "fallback_reason": null,
+          "generation_terms": [
+            "map",
+            "shortcut",
+            "keyboard"
+          ],
+          "schema": "brief-intent-v1",
+          "status": "parsed",
+          "terms": [
+            {
+              "end": 9,
+              "role": "context",
+              "start": 2,
+              "surface": "browser",
+              "term": "browser"
+            },
+            {
+              "end": 24,
+              "role": "operation",
+              "start": 20,
+              "surface": "maps",
+              "term": "map"
+            },
+            {
+              "end": 33,
+              "role": "object",
+              "start": 25,
+              "surface": "keyboard",
+              "term": "keyboard"
+            },
+            {
+              "end": 43,
+              "role": "object",
+              "start": 34,
+              "surface": "shortcuts",
+              "term": "shortcut"
+            },
+            {
+              "end": 56,
+              "role": "condition",
+              "start": 51,
+              "surface": "pages",
+              "term": "page"
+            }
+          ]
+        },
+        "object_head": {
+          "end": 43,
+          "role": "object",
+          "start": 34,
+          "surface": "shortcuts",
+          "term": "shortcut"
+        },
+        "object_roots": [
+          {
+            "root": "shortcut",
+            "source": "brief_literal",
+            "term": "shortcut"
+          }
+        ],
+        "operation": {
+          "end": 24,
+          "role": "operation",
+          "start": 20,
+          "surface": "maps",
+          "term": "map"
+        },
+        "operation_roots": [
+          {
+            "root": "map",
+            "source": "brief_literal",
+            "term": "map"
+          },
+          {
+            "root": "roam",
+            "source": "existing_concept_palette",
+            "term": "map"
+          },
+          {
+            "root": "atlas",
+            "source": "existing_concept_palette",
+            "term": "map"
+          },
+          {
+            "root": "route",
+            "source": "existing_concept_palette",
+            "term": "map"
+          },
+          {
+            "root": "compass",
+            "source": "existing_concept_palette",
+            "term": "map"
+          },
+          {
+            "root": "trek",
+            "source": "existing_concept_palette",
+            "term": "map"
+          }
+        ],
+        "reason": null,
+        "schema": "operation-object-plan-v1",
+        "status": "ready"
+      },
+      "old": [
+        "Atlaskey",
+        "Browsr",
+        "TypeTab",
+        "Arclick"
+      ],
+      "current": [
+        "MapShortcut",
+        "TrekShortcut"
+      ],
+      "poolCount": 158,
+      "linkedCount": 3,
+      "rejectionCounts": {
+        "missing_object_link": 82,
+        "collision_snapshot": 4,
+        "unlinked_or_unreadable_respell": 23,
+        "missing_operation_link": 44,
+        "length": 1,
+        "overlapping_role_links": 1
+      },
+      "filename": "trace-25.json.gz",
+      "sha256": "20c84855cd2284345d48e44aaadbcf1d8b38cdbda9f5fda0de2f1f633654877e"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a browser tool that maps keyboard shortcuts across pages",
+      "seed": 313,
+      "relation": {
+        "intent": {
+          "description": "a browser tool that maps keyboard shortcuts across pages",
+          "fallback_reason": null,
+          "generation_terms": [
+            "map",
+            "shortcut",
+            "keyboard"
+          ],
+          "schema": "brief-intent-v1",
+          "status": "parsed",
+          "terms": [
+            {
+              "end": 9,
+              "role": "context",
+              "start": 2,
+              "surface": "browser",
+              "term": "browser"
+            },
+            {
+              "end": 24,
+              "role": "operation",
+              "start": 20,
+              "surface": "maps",
+              "term": "map"
+            },
+            {
+              "end": 33,
+              "role": "object",
+              "start": 25,
+              "surface": "keyboard",
+              "term": "keyboard"
+            },
+            {
+              "end": 43,
+              "role": "object",
+              "start": 34,
+              "surface": "shortcuts",
+              "term": "shortcut"
+            },
+            {
+              "end": 56,
+              "role": "condition",
+              "start": 51,
+              "surface": "pages",
+              "term": "page"
+            }
+          ]
+        },
+        "object_head": {
+          "end": 43,
+          "role": "object",
+          "start": 34,
+          "surface": "shortcuts",
+          "term": "shortcut"
+        },
+        "object_roots": [
+          {
+            "root": "shortcut",
+            "source": "brief_literal",
+            "term": "shortcut"
+          }
+        ],
+        "operation": {
+          "end": 24,
+          "role": "operation",
+          "start": 20,
+          "surface": "maps",
+          "term": "map"
+        },
+        "operation_roots": [
+          {
+            "root": "map",
+            "source": "brief_literal",
+            "term": "map"
+          },
+          {
+            "root": "roam",
+            "source": "existing_concept_palette",
+            "term": "map"
+          },
+          {
+            "root": "atlas",
+            "source": "existing_concept_palette",
+            "term": "map"
+          },
+          {
+            "root": "route",
+            "source": "existing_concept_palette",
+            "term": "map"
+          },
+          {
+            "root": "compass",
+            "source": "existing_concept_palette",
+            "term": "map"
+          },
+          {
+            "root": "trek",
+            "source": "existing_concept_palette",
+            "term": "map"
+          }
+        ],
+        "reason": null,
+        "schema": "operation-object-plan-v1",
+        "status": "ready"
+      },
+      "old": [
+        "Clipsignal",
+        "Portolan",
+        "Atlaskey",
+        "Dictic"
+      ],
+      "current": [
+        "MapShortcut",
+        "RoamShortcut"
+      ],
+      "poolCount": 158,
+      "linkedCount": 3,
+      "rejectionCounts": {
+        "missing_object_link": 82,
+        "collision_snapshot": 3,
+        "unlinked_or_unreadable_respell": 23,
+        "missing_operation_link": 45,
+        "length": 1,
+        "overlapping_role_links": 1
+      },
+      "filename": "trace-26.json.gz",
+      "sha256": "41f10d26fe1cb7f7e860a156fd64ebf53d0798abc62af6fedea79725ad658c71"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a package tool that checks archive sizes before download",
+      "seed": 13,
+      "relation": {
+        "intent": {
+          "description": "a package tool that checks archive sizes before download",
+          "fallback_reason": null,
+          "generation_terms": [
+            "check",
+            "size",
+            "archive"
+          ],
+          "schema": "brief-intent-v1",
+          "status": "parsed",
+          "terms": [
+            {
+              "end": 9,
+              "role": "context",
+              "start": 2,
+              "surface": "package",
+              "term": "package"
+            },
+            {
+              "end": 26,
+              "role": "operation",
+              "start": 20,
+              "surface": "checks",
+              "term": "check"
+            },
+            {
+              "end": 34,
+              "role": "object",
+              "start": 27,
+              "surface": "archive",
+              "term": "archive"
+            },
+            {
+              "end": 40,
+              "role": "object",
+              "start": 35,
+              "surface": "sizes",
+              "term": "size"
+            },
+            {
+              "end": 56,
+              "role": "condition",
+              "start": 48,
+              "surface": "download",
+              "term": "download"
+            }
+          ]
+        },
+        "object_head": {
+          "end": 40,
+          "role": "object",
+          "start": 35,
+          "surface": "sizes",
+          "term": "size"
+        },
+        "object_roots": [
+          {
+            "root": "size",
+            "source": "brief_literal",
+            "term": "size"
+          }
+        ],
+        "operation": {
+          "end": 26,
+          "role": "operation",
+          "start": 20,
+          "surface": "checks",
+          "term": "check"
+        },
+        "operation_roots": [
+          {
+            "root": "check",
+            "source": "brief_literal",
+            "term": "check"
+          }
+        ],
+        "reason": null,
+        "schema": "operation-object-plan-v1",
+        "status": "ready"
+      },
+      "old": [
+        "Notasec",
+        "Stacklink",
+        "Kura",
+        "TopSiz"
+      ],
+      "current": [],
+      "poolCount": 159,
+      "linkedCount": 1,
+      "rejectionCounts": {
+        "missing_object_link": 35,
+        "collision_snapshot": 11,
+        "missing_operation_link": 96,
+        "unlinked_or_unreadable_respell": 22
+      },
+      "filename": "trace-27.json.gz",
+      "sha256": "1439db99ed46257297b43cd9e1cbc7c5056f8353208cb4d7907e1405256d8f07"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a package tool that checks archive sizes before download",
+      "seed": 67,
+      "relation": {
+        "intent": {
+          "description": "a package tool that checks archive sizes before download",
+          "fallback_reason": null,
+          "generation_terms": [
+            "check",
+            "size",
+            "archive"
+          ],
+          "schema": "brief-intent-v1",
+          "status": "parsed",
+          "terms": [
+            {
+              "end": 9,
+              "role": "context",
+              "start": 2,
+              "surface": "package",
+              "term": "package"
+            },
+            {
+              "end": 26,
+              "role": "operation",
+              "start": 20,
+              "surface": "checks",
+              "term": "check"
+            },
+            {
+              "end": 34,
+              "role": "object",
+              "start": 27,
+              "surface": "archive",
+              "term": "archive"
+            },
+            {
+              "end": 40,
+              "role": "object",
+              "start": 35,
+              "surface": "sizes",
+              "term": "size"
+            },
+            {
+              "end": 56,
+              "role": "condition",
+              "start": 48,
+              "surface": "download",
+              "term": "download"
+            }
+          ]
+        },
+        "object_head": {
+          "end": 40,
+          "role": "object",
+          "start": 35,
+          "surface": "sizes",
+          "term": "size"
+        },
+        "object_roots": [
+          {
+            "root": "size",
+            "source": "brief_literal",
+            "term": "size"
+          }
+        ],
+        "operation": {
+          "end": 26,
+          "role": "operation",
+          "start": 20,
+          "surface": "checks",
+          "term": "check"
+        },
+        "operation_roots": [
+          {
+            "root": "check",
+            "source": "brief_literal",
+            "term": "check"
+          }
+        ],
+        "reason": null,
+        "schema": "operation-object-plan-v1",
+        "status": "ready"
+      },
+      "old": [
+        "Sizbyte",
+        "CheckByte",
+        "Archeck",
+        "Stacklink"
+      ],
+      "current": [],
+      "poolCount": 159,
+      "linkedCount": 1,
+      "rejectionCounts": {
+        "missing_object_link": 36,
+        "collision_snapshot": 11,
+        "missing_operation_link": 95,
+        "unlinked_or_unreadable_respell": 22
+      },
+      "filename": "trace-28.json.gz",
+      "sha256": "8aa86bae2713ae02a6739c000a1b730b2ae525cbe6a358c4b05ebf3ffe88c241"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a package tool that checks archive sizes before download",
+      "seed": 313,
+      "relation": {
+        "intent": {
+          "description": "a package tool that checks archive sizes before download",
+          "fallback_reason": null,
+          "generation_terms": [
+            "check",
+            "size",
+            "archive"
+          ],
+          "schema": "brief-intent-v1",
+          "status": "parsed",
+          "terms": [
+            {
+              "end": 9,
+              "role": "context",
+              "start": 2,
+              "surface": "package",
+              "term": "package"
+            },
+            {
+              "end": 26,
+              "role": "operation",
+              "start": 20,
+              "surface": "checks",
+              "term": "check"
+            },
+            {
+              "end": 34,
+              "role": "object",
+              "start": 27,
+              "surface": "archive",
+              "term": "archive"
+            },
+            {
+              "end": 40,
+              "role": "object",
+              "start": 35,
+              "surface": "sizes",
+              "term": "size"
+            },
+            {
+              "end": 56,
+              "role": "condition",
+              "start": 48,
+              "surface": "download",
+              "term": "download"
+            }
+          ]
+        },
+        "object_head": {
+          "end": 40,
+          "role": "object",
+          "start": 35,
+          "surface": "sizes",
+          "term": "size"
+        },
+        "object_roots": [
+          {
+            "root": "size",
+            "source": "brief_literal",
+            "term": "size"
+          }
+        ],
+        "operation": {
+          "end": 26,
+          "role": "operation",
+          "start": 20,
+          "surface": "checks",
+          "term": "check"
+        },
+        "operation_roots": [
+          {
+            "root": "check",
+            "source": "brief_literal",
+            "term": "check"
+          }
+        ],
+        "reason": null,
+        "schema": "operation-object-plan-v1",
+        "status": "ready"
+      },
+      "old": [
+        "Stackseed",
+        "Kura",
+        "Sizbyte",
+        "Reatain"
+      ],
+      "current": [],
+      "poolCount": 159,
+      "linkedCount": 1,
+      "rejectionCounts": {
+        "missing_object_link": 35,
+        "collision_snapshot": 13,
+        "missing_operation_link": 94,
+        "unlinked_or_unreadable_respell": 22
+      },
+      "filename": "trace-29.json.gz",
+      "sha256": "1f1b8fbd15d016bb5751d9d0caf7f34ac189204b91d44eff3dfc58eeccac0973"
+    }
+  ]
+}
