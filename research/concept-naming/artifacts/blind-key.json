@@ -1,0 +1,128 @@
+{
+  "schema": "concept-naming-blind-key-v1",
+  "studySha256": "836b6c3be1d04a48448bd887ed316c2270c519fe5aa8a3f9a8944c2847e61e04",
+  "protocolSha256": "64d871cb4b556ab484f2372950ebb3e2b357bb9a9220e19dcb2f8b97b7fc3006",
+  "comparisonSha256": "24ce2289b473a1740c82ddb511c7b66be1e964836ee30e3000ac5a9d4acb358e",
+  "humanGate": {
+    "primaryPages": 12,
+    "repeatPages": 4,
+    "minimumWins": 8,
+    "minimumUsableBriefs": 6,
+    "minimumUsableBriefUplift": 3,
+    "minimumConsistentRepeats": 3
+  },
+  "pages": [
+    {
+      "id": "p01",
+      "caseId": "migration-1",
+      "kind": "primary",
+      "parentId": null,
+      "experimentalSide": "left"
+    },
+    {
+      "id": "p02",
+      "caseId": "migration-2",
+      "kind": "primary",
+      "parentId": null,
+      "experimentalSide": "right"
+    },
+    {
+      "id": "p03",
+      "caseId": "migration-3",
+      "kind": "primary",
+      "parentId": null,
+      "experimentalSide": "left"
+    },
+    {
+      "id": "p04",
+      "caseId": "jobs-1",
+      "kind": "primary",
+      "parentId": null,
+      "experimentalSide": "right"
+    },
+    {
+      "id": "p05",
+      "caseId": "jobs-2",
+      "kind": "primary",
+      "parentId": null,
+      "experimentalSide": "left"
+    },
+    {
+      "id": "p06",
+      "caseId": "migration-1",
+      "kind": "repeat",
+      "parentId": "p01",
+      "experimentalSide": "right"
+    },
+    {
+      "id": "p07",
+      "caseId": "jobs-3",
+      "kind": "primary",
+      "parentId": null,
+      "experimentalSide": "right"
+    },
+    {
+      "id": "p08",
+      "caseId": "observation-1",
+      "kind": "primary",
+      "parentId": null,
+      "experimentalSide": "left"
+    },
+    {
+      "id": "p09",
+      "caseId": "observation-2",
+      "kind": "primary",
+      "parentId": null,
+      "experimentalSide": "right"
+    },
+    {
+      "id": "p10",
+      "caseId": "migration-3",
+      "kind": "repeat",
+      "parentId": "p03",
+      "experimentalSide": "right"
+    },
+    {
+      "id": "p11",
+      "caseId": "observation-3",
+      "kind": "primary",
+      "parentId": null,
+      "experimentalSide": "left"
+    },
+    {
+      "id": "p12",
+      "caseId": "verification-1",
+      "kind": "primary",
+      "parentId": null,
+      "experimentalSide": "right"
+    },
+    {
+      "id": "p13",
+      "caseId": "verification-2",
+      "kind": "primary",
+      "parentId": null,
+      "experimentalSide": "left"
+    },
+    {
+      "id": "p14",
+      "caseId": "jobs-2",
+      "kind": "repeat",
+      "parentId": "p05",
+      "experimentalSide": "right"
+    },
+    {
+      "id": "p15",
+      "caseId": "verification-3",
+      "kind": "primary",
+      "parentId": null,
+      "experimentalSide": "right"
+    },
+    {
+      "id": "p16",
+      "caseId": "observation-1",
+      "kind": "repeat",
+      "parentId": "p08",
+      "experimentalSide": "right"
+    }
+  ]
+}

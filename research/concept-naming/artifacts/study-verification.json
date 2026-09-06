@@ -1,0 +1,19 @@
+{
+  "passed": true,
+  "pages": 16,
+  "primary": 12,
+  "repeats": 4,
+  "syntheticOnly": true,
+  "checks": [
+    "unselected answers",
+    "required fields",
+    "16-page navigation",
+    "resume",
+    "export identity",
+    "reversed repeats",
+    "all unchanged gate boundaries",
+    "incomplete/duplicate/wrong-study rejection",
+    "synthetic cannot qualify",
+    "examples/mobile"
+  ]
+}

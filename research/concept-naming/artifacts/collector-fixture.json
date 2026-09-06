@@ -1,0 +1,135 @@
+{
+  "schema": "concept-naming-human-v1",
+  "evidence_kind": "synthetic",
+  "study_sha256": "836b6c3be1d04a48448bd887ed316c2270c519fe5aa8a3f9a8944c2847e61e04",
+  "answers": [
+    {
+      "id": "p01",
+      "winner": "left",
+      "usable_left": "yes",
+      "usable_right": "no",
+      "details_opened": false,
+      "answered_at": "2026-09-06T19:02:53.754Z"
+    },
+    {
+      "id": "p02",
+      "winner": "left",
+      "usable_left": "yes",
+      "usable_right": "no",
+      "details_opened": false,
+      "answered_at": "2026-09-06T19:02:53.884Z"
+    },
+    {
+      "id": "p03",
+      "winner": "left",
+      "usable_left": "yes",
+      "usable_right": "no",
+      "details_opened": false,
+      "answered_at": "2026-09-06T19:02:54.019Z"
+    },
+    {
+      "id": "p04",
+      "winner": "left",
+      "usable_left": "yes",
+      "usable_right": "no",
+      "details_opened": false,
+      "answered_at": "2026-09-06T19:02:54.152Z"
+    },
+    {
+      "id": "p05",
+      "winner": "left",
+      "usable_left": "yes",
+      "usable_right": "no",
+      "details_opened": false,
+      "answered_at": "2026-09-06T19:02:54.284Z"
+    },
+    {
+      "id": "p06",
+      "winner": "left",
+      "usable_left": "yes",
+      "usable_right": "no",
+      "details_opened": false,
+      "answered_at": "2026-09-06T19:02:54.417Z"
+    },
+    {
+      "id": "p07",
+      "winner": "left",
+      "usable_left": "yes",
+      "usable_right": "no",
+      "details_opened": false,
+      "answered_at": "2026-09-06T19:02:54.550Z"
+    },
+    {
+      "id": "p08",
+      "winner": "left",
+      "usable_left": "yes",
+      "usable_right": "no",
+      "details_opened": false,
+      "answered_at": "2026-09-06T19:02:54.685Z"
+    },
+    {
+      "id": "p09",
+      "winner": "left",
+      "usable_left": "yes",
+      "usable_right": "no",
+      "details_opened": false,
+      "answered_at": "2026-09-06T19:02:54.817Z"
+    },
+    {
+      "id": "p10",
+      "winner": "left",
+      "usable_left": "yes",
+      "usable_right": "no",
+      "details_opened": false,
+      "answered_at": "2026-09-06T19:02:54.951Z"
+    },
+    {
+      "id": "p11",
+      "winner": "left",
+      "usable_left": "yes",
+      "usable_right": "no",
+      "details_opened": false,
+      "answered_at": "2026-09-06T19:02:55.085Z"
+    },
+    {
+      "id": "p12",
+      "winner": "left",
+      "usable_left": "yes",
+      "usable_right": "no",
+      "details_opened": false,
+      "answered_at": "2026-09-06T19:02:55.218Z"
+    },
+    {
+      "id": "p13",
+      "winner": "left",
+      "usable_left": "yes",
+      "usable_right": "no",
+      "details_opened": false,
+      "answered_at": "2026-09-06T19:02:55.351Z"
+    },
+    {
+      "id": "p14",
+      "winner": "left",
+      "usable_left": "yes",
+      "usable_right": "no",
+      "details_opened": false,
+      "answered_at": "2026-09-06T19:02:55.483Z"
+    },
+    {
+      "id": "p15",
+      "winner": "left",
+      "usable_left": "yes",
+      "usable_right": "no",
+      "details_opened": false,
+      "answered_at": "2026-09-06T19:02:55.618Z"
+    },
+    {
+      "id": "p16",
+      "winner": "left",
+      "usable_left": "yes",
+      "usable_right": "no",
+      "details_opened": false,
+      "answered_at": "2026-09-06T19:02:55.750Z"
+    }
+  ]
+}

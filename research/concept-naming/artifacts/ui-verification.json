@@ -1,0 +1,20 @@
+{
+  "passed": true,
+  "checks": [
+    "new mode",
+    "no inactive creativity control",
+    "real finalist cards",
+    "product usage examples",
+    "scoped snapshot labels",
+    "session choices/export",
+    "immutable continuation",
+    "explicit interpretation correction",
+    "direction focus",
+    "exhaustion",
+    "mobile overflow",
+    "unsupported brief",
+    "saved preferences unchanged",
+    "return to Auto",
+    "page errors"
+  ]
+}

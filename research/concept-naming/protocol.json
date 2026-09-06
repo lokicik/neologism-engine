@@ -1,0 +1,113 @@
+{
+  "schema": "concept-naming-study-v1",
+  "target": "product_name",
+  "catalogFreezeSha256": "18a4e71d378e592f2810a86631b4bd0729829264683af786ebe5a6a45390402c",
+  "scope": "12 new briefs authored after code/catalog freeze, three in each supported domain. These are a bounded prospective comparison, not evidence of general naming quality.",
+  "seeds": [
+    13
+  ],
+  "development": [],
+  "evaluation": [
+    "Rehearse database upgrades against scrubbed production copies.",
+    "A recovery utility for restoring configuration snapshots after a failed release.",
+    "Move customer data between PostgreSQL stores while retaining an audit trail.",
+    "A worker pool for scheduled image conversion tasks.",
+    "Replay undelivered webhook messages after a remote endpoint returns.",
+    "Coordinate queue workers with deadlines and backpressure.",
+    "A trace viewer that groups exceptions from command line tools.",
+    "Compare CPU throughput across two versions of a service.",
+    "Inspect connection counts during an overnight soak test.",
+    "A command line utility to check signed release manifests before installation.",
+    "Validate settings files against rules shared by several services.",
+    "A signature verifier for archived build outputs from remote runners."
+  ],
+  "cases": [
+    {
+      "id": "migration-1",
+      "domain": "migration",
+      "brief": "Rehearse database upgrades against scrubbed production copies."
+    },
+    {
+      "id": "migration-2",
+      "domain": "migration",
+      "brief": "A recovery utility for restoring configuration snapshots after a failed release."
+    },
+    {
+      "id": "migration-3",
+      "domain": "migration",
+      "brief": "Move customer data between PostgreSQL stores while retaining an audit trail."
+    },
+    {
+      "id": "jobs-1",
+      "domain": "jobs",
+      "brief": "A worker pool for scheduled image conversion tasks."
+    },
+    {
+      "id": "jobs-2",
+      "domain": "jobs",
+      "brief": "Replay undelivered webhook messages after a remote endpoint returns."
+    },
+    {
+      "id": "jobs-3",
+      "domain": "jobs",
+      "brief": "Coordinate queue workers with deadlines and backpressure."
+    },
+    {
+      "id": "observation-1",
+      "domain": "observation",
+      "brief": "A trace viewer that groups exceptions from command line tools."
+    },
+    {
+      "id": "observation-2",
+      "domain": "observation",
+      "brief": "Compare CPU throughput across two versions of a service."
+    },
+    {
+      "id": "observation-3",
+      "domain": "observation",
+      "brief": "Inspect connection counts during an overnight soak test."
+    },
+    {
+      "id": "verification-1",
+      "domain": "verification",
+      "brief": "A command line utility to check signed release manifests before installation."
+    },
+    {
+      "id": "verification-2",
+      "domain": "verification",
+      "brief": "Validate settings files against rules shared by several services."
+    },
+    {
+      "id": "verification-3",
+      "domain": "verification",
+      "brief": "A signature verifier for archived build outputs from remote runners."
+    }
+  ],
+  "humanGate": {
+    "primaryPages": 12,
+    "repeatPages": 4,
+    "minimumWins": 8,
+    "minimumUsableBriefs": 6,
+    "minimumUsableBriefUplift": 3,
+    "minimumConsistentRepeats": 3
+  },
+  "pageOrder": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    "repeat:0",
+    5,
+    6,
+    7,
+    "repeat:2",
+    8,
+    9,
+    10,
+    "repeat:4",
+    11,
+    "repeat:6"
+  ],
+  "evaluationRules": "Names are shown before optional explanations. Choose A, B or neither; record absolute usability for both sets. Four concealed repeats reverse the sides. Only complete human answers may establish the gate."
+}

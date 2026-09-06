@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "builtWasmMatchesFreeze": true,
+  "firstLoad": true,
+  "offlineGenerationAfterLoad": true,
+  "externalRequests": 0,
+  "pageErrors": 0,
+  "origin": "http://127.0.0.1:4247"
+}

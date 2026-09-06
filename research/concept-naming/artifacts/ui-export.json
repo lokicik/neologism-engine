@@ -1,0 +1,2317 @@
+{
+  "schema": "concept-naming-session-v1",
+  "runs": [
+    {
+      "schema": "concept-naming-run-v1",
+      "request": {
+        "config": {
+          "style": "big_tech",
+          "count": 10,
+          "min_len": 4,
+          "max_len": 12,
+          "temperature": 0.85,
+          "variety": 0.3,
+          "seed": 3402549879,
+          "roots": [],
+          "variant": "product_names",
+          "description": "a terminal log viewer",
+          "compound": false,
+          "starts_with": null,
+          "contains": null,
+          "exclude": []
+        },
+        "target": "product_name",
+        "interpretation_override": null,
+        "direction": null,
+        "data_identity": null
+      },
+      "data_identity": "f7bf89f6fd8a5f093f21eea69257dc06b2e8be17d627abd0d717fc2f80da74e2",
+      "data_sources": {
+        "core/data/bigtech.txt": {
+          "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+          "snapshot_date": null
+        },
+        "core/data/pron_lexicon.tsv": {
+          "sha256": "3a0348f7d9e87ec53e8b600c8ba8f5e28153ea35e1b87c43e2672d71f8da53e1",
+          "snapshot_date": null
+        },
+        "research/cmudict/cmudict.dict": {
+          "sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22",
+          "snapshot_date": null
+        },
+        "research/collision/crate-names.txt": {
+          "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+          "snapshot_date": null
+        },
+        "research/concept-naming/catalog-source.mjs": {
+          "sha256": "d31118c789844658c273edb07a5e8443794d0452c0ea10161372eec93624105c",
+          "snapshot_date": null
+        }
+      },
+      "meaning": {
+        "status": "ready",
+        "reason": null,
+        "description": "a terminal log viewer",
+        "job": {
+          "id": "inspect_signals",
+          "domain": "observation",
+          "label": "Inspect and organize system signals",
+          "object": "system evidence",
+          "operation": "inspect",
+          "directions": [
+            "visibility",
+            "evidence"
+          ],
+          "phrases": [
+            "log viewer",
+            "log inspector",
+            "log explorer",
+            "log analysis",
+            "log aggregation",
+            "trace viewer",
+            "telemetry dashboard"
+          ],
+          "actions": [
+            "view",
+            "inspect",
+            "group",
+            "filter",
+            "sort",
+            "record",
+            "search",
+            "trace",
+            "analyze"
+          ],
+          "objects": [
+            "log",
+            "logs",
+            "trace",
+            "traces",
+            "telemetry",
+            "diagnostic",
+            "diagnostics",
+            "stacktrace",
+            "stacktraces"
+          ],
+          "incompatible": [
+            "football",
+            "weather",
+            "sports",
+            "medical"
+          ]
+        },
+        "options": [
+          {
+            "id": "migrate_data",
+            "domain": "migration",
+            "label": "Move data between versions or stores",
+            "object": "database state",
+            "operation": "migrate",
+            "directions": [
+              "passage",
+              "continuity"
+            ],
+            "phrases": [
+              "database migration",
+              "database migrations",
+              "schema migration",
+              "schema migrations",
+              "schema changes",
+              "data migration"
+            ],
+            "actions": [
+              "migrate",
+              "rehearse",
+              "upgrade",
+              "move"
+            ],
+            "objects": [
+              "database",
+              "databases",
+              "schema",
+              "schemas",
+              "sqlite",
+              "postgresql",
+              "data"
+            ],
+            "incompatible": [
+              "furniture",
+              "bird",
+              "birds"
+            ]
+          },
+          {
+            "id": "recover_state",
+            "domain": "migration",
+            "label": "Recover an earlier usable state",
+            "object": "stored state",
+            "operation": "restore",
+            "directions": [
+              "recovery",
+              "continuity"
+            ],
+            "phrases": [
+              "database recovery",
+              "file recovery",
+              "archive recovery",
+              "state recovery",
+              "database rollback",
+              "backup restoration"
+            ],
+            "actions": [
+              "restore",
+              "recover",
+              "rollback",
+              "revert"
+            ],
+            "objects": [
+              "database",
+              "databases",
+              "archive",
+              "archives",
+              "file",
+              "files",
+              "configuration",
+              "session",
+              "state",
+              "snapshot",
+              "snapshots",
+              "replica"
+            ],
+            "incompatible": [
+              "furniture",
+              "antique",
+              "health"
+            ]
+          },
+          {
+            "id": "schedule_jobs",
+            "domain": "jobs",
+            "label": "Coordinate queued or scheduled work",
+            "object": "background work",
+            "operation": "schedule",
+            "directions": [
+              "cadence",
+              "handoff"
+            ],
+            "phrases": [
+              "job scheduler",
+              "job scheduling",
+              "background jobs",
+              "background job",
+              "message queue client",
+              "queue client",
+              "task queue",
+              "worker pool"
+            ],
+            "actions": [
+              "schedule",
+              "dispatch",
+              "enqueue",
+              "coordinate",
+              "execute",
+              "process"
+            ],
+            "objects": [
+              "job",
+              "jobs",
+              "queue",
+              "queues",
+              "worker",
+              "workers",
+              "task",
+              "tasks",
+              "message",
+              "messages"
+            ],
+            "incompatible": [
+              "recruiter",
+              "recruiters",
+              "career",
+              "careers",
+              "appointment",
+              "appointments"
+            ]
+          },
+          {
+            "id": "retry_delivery",
+            "domain": "jobs",
+            "label": "Retry or replay interrupted deliveries",
+            "object": "work delivery",
+            "operation": "retry",
+            "directions": [
+              "retry",
+              "handoff"
+            ],
+            "phrases": [
+              "webhook replay",
+              "webhook retries",
+              "delivery retries",
+              "job retries",
+              "retry queue"
+            ],
+            "actions": [
+              "retry",
+              "replay",
+              "redeliver",
+              "resume"
+            ],
+            "objects": [
+              "webhook",
+              "webhooks",
+              "delivery",
+              "deliveries",
+              "job",
+              "jobs",
+              "task",
+              "tasks",
+              "message",
+              "messages",
+              "queue"
+            ],
+            "incompatible": [
+              "meal",
+              "meals",
+              "parcel",
+              "parcels"
+            ]
+          },
+          {
+            "id": "inspect_signals",
+            "domain": "observation",
+            "label": "Inspect and organize system signals",
+            "object": "system evidence",
+            "operation": "inspect",
+            "directions": [
+              "visibility",
+              "evidence"
+            ],
+            "phrases": [
+              "log viewer",
+              "log inspector",
+              "log explorer",
+              "log analysis",
+              "log aggregation",
+              "trace viewer",
+              "telemetry dashboard"
+            ],
+            "actions": [
+              "view",
+              "inspect",
+              "group",
+              "filter",
+              "sort",
+              "record",
+              "search",
+              "trace",
+              "analyze"
+            ],
+            "objects": [
+              "log",
+              "logs",
+              "trace",
+              "traces",
+              "telemetry",
+              "diagnostic",
+              "diagnostics",
+              "stacktrace",
+              "stacktraces"
+            ],
+            "incompatible": [
+              "football",
+              "weather",
+              "sports",
+              "medical"
+            ]
+          },
+          {
+            "id": "measure_behavior",
+            "domain": "observation",
+            "label": "Observe and compare system behavior",
+            "object": "system behavior",
+            "operation": "measure",
+            "directions": [
+              "measurement",
+              "evidence",
+              "visibility"
+            ],
+            "phrases": [
+              "performance monitor",
+              "latency monitor",
+              "memory profiler",
+              "metrics dashboard",
+              "queue depth monitor",
+              "allocation profiler"
+            ],
+            "actions": [
+              "monitor",
+              "track",
+              "measure",
+              "compare",
+              "profile",
+              "inspect"
+            ],
+            "objects": [
+              "latency",
+              "memory",
+              "allocation",
+              "allocations",
+              "metrics",
+              "cpu",
+              "throughput",
+              "queue depth",
+              "performance",
+              "socket",
+              "sockets",
+              "connection",
+              "connections"
+            ],
+            "incompatible": [
+              "football",
+              "weather",
+              "sports",
+              "health"
+            ]
+          },
+          {
+            "id": "verify_artifacts",
+            "domain": "verification",
+            "label": "Verify the integrity of an artifact",
+            "object": "artifact integrity",
+            "operation": "verify",
+            "directions": [
+              "integrity",
+              "attestation"
+            ],
+            "phrases": [
+              "checksum checker",
+              "signature verifier",
+              "artifact verification",
+              "checksum verification",
+              "signature verification",
+              "integrity checker"
+            ],
+            "actions": [
+              "verify",
+              "check",
+              "validate",
+              "compare"
+            ],
+            "objects": [
+              "checksum",
+              "checksums",
+              "signature",
+              "signatures",
+              "artifact",
+              "artifacts",
+              "hash",
+              "hashes",
+              "binary",
+              "binaries",
+              "manifest",
+              "manifests"
+            ],
+            "incompatible": [
+              "autograph",
+              "autographs",
+              "museum"
+            ]
+          },
+          {
+            "id": "validate_config",
+            "domain": "verification",
+            "label": "Validate configuration against expectations",
+            "object": "configuration",
+            "operation": "validate",
+            "directions": [
+              "agreement",
+              "integrity"
+            ],
+            "phrases": [
+              "configuration validator",
+              "config validator",
+              "configuration validation",
+              "config validation",
+              "configuration checker",
+              "config checker"
+            ],
+            "actions": [
+              "validate",
+              "verify",
+              "check",
+              "lint"
+            ],
+            "objects": [
+              "configuration",
+              "configurations",
+              "config",
+              "configs",
+              "settings"
+            ],
+            "incompatible": [
+              "furniture",
+              "medical"
+            ]
+          }
+        ],
+        "evidence_spans": [
+          {
+            "surface": "log viewer",
+            "start": 11,
+            "end": 21,
+            "role": "product_phrase"
+          },
+          {
+            "surface": "log",
+            "start": 11,
+            "end": 14,
+            "role": "object"
+          }
+        ],
+        "interpretation_rule": "product_noun_phrase"
+      },
+      "directions": [
+        {
+          "id": "visibility",
+          "benefit": "Make hidden behavior visible"
+        },
+        {
+          "id": "evidence",
+          "benefit": "Keep a readable record"
+        }
+      ],
+      "direction_order": [
+        "visibility",
+        "evidence"
+      ],
+      "candidates": [
+        {
+          "id": "sightline",
+          "result": {
+            "name": "Sightline",
+            "style": "big_tech",
+            "syllables": 2,
+            "score_pronounce": 75,
+            "score_novelty": 40,
+            "score_memorability": 46,
+            "connotations": [
+              "small",
+              "light",
+              "bold"
+            ]
+          },
+          "sources": [
+            {
+              "concept_id": "observation-sightline",
+              "direction": "visibility",
+              "rank": 25,
+              "sense": "an unobstructed line along which something is visible",
+              "benefit": "Make hidden behavior visible",
+              "provenance": "original-editorial-concept-naming-v1; not preference-validated",
+              "construction": "whole_lexeme",
+              "components": [
+                "sight",
+                "line"
+              ],
+              "rejection": null
+            }
+          ],
+          "pronunciation": {
+            "source": "dictionary_components",
+            "components": [
+              {
+                "phones": "S AY T",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22",
+                "word": "sight"
+              },
+              {
+                "phones": "L AY N",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22",
+                "word": "line"
+              }
+            ],
+            "syllables": 2
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ],
+          "rejection": null
+        },
+        {
+          "id": "lookout",
+          "result": {
+            "name": "Lookout",
+            "style": "big_tech",
+            "syllables": 2,
+            "score_pronounce": 91,
+            "score_novelty": 40,
+            "score_memorability": 82,
+            "connotations": [
+              "large",
+              "heavy",
+              "bold"
+            ]
+          },
+          "sources": [
+            {
+              "concept_id": "observation-lookout",
+              "direction": "visibility",
+              "rank": 26,
+              "sense": "a place or person from which to observe",
+              "benefit": "Make hidden behavior visible",
+              "provenance": "original-editorial-concept-naming-v1; not preference-validated",
+              "construction": "whole_lexeme",
+              "components": [
+                "lookout"
+              ],
+              "rejection": null
+            }
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "phones": "L UH K AW T",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22",
+                "word": "lookout"
+              }
+            ],
+            "syllables": 2
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ],
+          "rejection": null
+        },
+        {
+          "id": "fieldglass",
+          "result": {
+            "name": "Fieldglass",
+            "style": "big_tech",
+            "syllables": 2,
+            "score_pronounce": 72,
+            "score_novelty": 40,
+            "score_memorability": 55,
+            "connotations": [
+              "small",
+              "light",
+              "sleek"
+            ]
+          },
+          "sources": [
+            {
+              "concept_id": "observation-fieldglass",
+              "direction": "visibility",
+              "rank": 27,
+              "sense": "an optical instrument for seeing distant details",
+              "benefit": "Make hidden behavior visible",
+              "provenance": "original-editorial-concept-naming-v1; not preference-validated",
+              "construction": "whole_lexeme",
+              "components": [
+                "field",
+                "glass"
+              ],
+              "rejection": null
+            }
+          ],
+          "pronunciation": {
+            "source": "dictionary_components",
+            "components": [
+              {
+                "phones": "F IY L D",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22",
+                "word": "field"
+              },
+              {
+                "phones": "G L AE S",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22",
+                "word": "glass"
+              }
+            ],
+            "syllables": 2
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": false
+            }
+          ],
+          "rejection": null
+        },
+        {
+          "id": "aperture",
+          "result": {
+            "name": "Aperture",
+            "style": "big_tech",
+            "syllables": 3,
+            "score_pronounce": 95,
+            "score_novelty": 95,
+            "score_memorability": 45,
+            "connotations": [
+              "small",
+              "bold"
+            ]
+          },
+          "sources": [
+            {
+              "concept_id": "observation-aperture",
+              "direction": "visibility",
+              "rank": 28,
+              "sense": "an opening through which a view becomes possible",
+              "benefit": "Make hidden behavior visible",
+              "provenance": "original-editorial-concept-naming-v1; not preference-validated",
+              "construction": "whole_lexeme",
+              "components": [
+                "aperture"
+              ],
+              "rejection": null
+            }
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "phones": "AE P ER CH ER",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22",
+                "word": "aperture"
+              }
+            ],
+            "syllables": 3
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ],
+          "rejection": null
+        },
+        {
+          "id": "logbook",
+          "result": {
+            "name": "Logbook",
+            "style": "big_tech",
+            "syllables": 2,
+            "score_pronounce": 91,
+            "score_novelty": 40,
+            "score_memorability": 82,
+            "connotations": [
+              "large",
+              "heavy",
+              "bold"
+            ]
+          },
+          "sources": [
+            {
+              "concept_id": "observation-logbook",
+              "direction": "evidence",
+              "rank": 29,
+              "sense": "an ordered record of observations and events",
+              "benefit": "Keep a readable record",
+              "provenance": "original-editorial-concept-naming-v1; not preference-validated",
+              "construction": "whole_lexeme",
+              "components": [
+                "logbook"
+              ],
+              "rejection": null
+            }
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "phones": "L AO G B UH K",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22",
+                "word": "logbook"
+              }
+            ],
+            "syllables": 2
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ],
+          "rejection": null
+        },
+        {
+          "id": "daybook",
+          "result": {
+            "name": "Daybook",
+            "style": "big_tech",
+            "syllables": 2,
+            "score_pronounce": 91,
+            "score_novelty": 40,
+            "score_memorability": 92,
+            "connotations": [
+              "large",
+              "bold"
+            ]
+          },
+          "sources": [
+            {
+              "concept_id": "observation-daybook",
+              "direction": "evidence",
+              "rank": 30,
+              "sense": "a chronological record of daily events",
+              "benefit": "Keep a readable record",
+              "provenance": "original-editorial-concept-naming-v1; not preference-validated",
+              "construction": "whole_lexeme",
+              "components": [
+                "day",
+                "book"
+              ],
+              "rejection": null
+            }
+          ],
+          "pronunciation": {
+            "source": "dictionary_components",
+            "components": [
+              {
+                "phones": "D EY",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22",
+                "word": "day"
+              },
+              {
+                "phones": "B UH K",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22",
+                "word": "book"
+              }
+            ],
+            "syllables": 2
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ],
+          "rejection": null
+        },
+        {
+          "id": "witness",
+          "result": {
+            "name": "Witness",
+            "style": "big_tech",
+            "syllables": 2,
+            "score_pronounce": 91,
+            "score_novelty": 95,
+            "score_memorability": 77,
+            "connotations": [
+              "small",
+              "light",
+              "sleek"
+            ]
+          },
+          "sources": [
+            {
+              "concept_id": "observation-witness",
+              "direction": "evidence",
+              "rank": 31,
+              "sense": "an observer whose account supplies evidence",
+              "benefit": "Keep a readable record",
+              "provenance": "original-editorial-concept-naming-v1; not preference-validated",
+              "construction": "whole_lexeme",
+              "components": [
+                "witness"
+              ],
+              "rejection": null
+            }
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "phones": "W IH T N AH S",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22",
+                "word": "witness"
+              }
+            ],
+            "syllables": 2
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ],
+          "rejection": null
+        },
+        {
+          "id": "telltale",
+          "result": {
+            "name": "Telltale",
+            "style": "big_tech",
+            "syllables": 2,
+            "score_pronounce": 84,
+            "score_novelty": 40,
+            "score_memorability": 70,
+            "connotations": [
+              "small",
+              "light",
+              "smooth"
+            ]
+          },
+          "sources": [
+            {
+              "concept_id": "observation-telltale",
+              "direction": "evidence",
+              "rank": 32,
+              "sense": "a sign that reveals something otherwise hidden",
+              "benefit": "Keep a readable record",
+              "provenance": "original-editorial-concept-naming-v1; not preference-validated",
+              "construction": "whole_lexeme",
+              "components": [
+                "telltale"
+              ],
+              "rejection": null
+            }
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "phones": "T EH L T EY L",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22",
+                "word": "telltale"
+              }
+            ],
+            "syllables": 2
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ],
+          "rejection": null
+        }
+      ],
+      "finalists": [
+        {
+          "id": "sightline",
+          "concept_id": "observation-sightline",
+          "direction": "visibility"
+        },
+        {
+          "id": "logbook",
+          "concept_id": "observation-logbook",
+          "direction": "evidence"
+        },
+        {
+          "id": "lookout",
+          "concept_id": "observation-lookout",
+          "direction": "visibility"
+        },
+        {
+          "id": "daybook",
+          "concept_id": "observation-daybook",
+          "direction": "evidence"
+        }
+      ],
+      "trace": [
+        {
+          "name": "Sightline",
+          "stage": "generator",
+          "decision": "catalog_form",
+          "detail": "observation-sightline",
+          "occurrences": 1
+        },
+        {
+          "name": "Sightline",
+          "stage": "pool",
+          "decision": "eligible",
+          "detail": "observation-sightline",
+          "occurrences": 1
+        },
+        {
+          "name": "Lookout",
+          "stage": "generator",
+          "decision": "catalog_form",
+          "detail": "observation-lookout",
+          "occurrences": 1
+        },
+        {
+          "name": "Lookout",
+          "stage": "pool",
+          "decision": "eligible",
+          "detail": "observation-lookout",
+          "occurrences": 1
+        },
+        {
+          "name": "Fieldglass",
+          "stage": "generator",
+          "decision": "catalog_form",
+          "detail": "observation-fieldglass",
+          "occurrences": 1
+        },
+        {
+          "name": "Fieldglass",
+          "stage": "pool",
+          "decision": "eligible",
+          "detail": "observation-fieldglass",
+          "occurrences": 1
+        },
+        {
+          "name": "Aperture",
+          "stage": "generator",
+          "decision": "catalog_form",
+          "detail": "observation-aperture",
+          "occurrences": 1
+        },
+        {
+          "name": "Aperture",
+          "stage": "pool",
+          "decision": "eligible",
+          "detail": "observation-aperture",
+          "occurrences": 1
+        },
+        {
+          "name": "Logbook",
+          "stage": "generator",
+          "decision": "catalog_form",
+          "detail": "observation-logbook",
+          "occurrences": 1
+        },
+        {
+          "name": "Logbook",
+          "stage": "pool",
+          "decision": "eligible",
+          "detail": "observation-logbook",
+          "occurrences": 1
+        },
+        {
+          "name": "Daybook",
+          "stage": "generator",
+          "decision": "catalog_form",
+          "detail": "observation-daybook",
+          "occurrences": 1
+        },
+        {
+          "name": "Daybook",
+          "stage": "pool",
+          "decision": "eligible",
+          "detail": "observation-daybook",
+          "occurrences": 1
+        },
+        {
+          "name": "Witness",
+          "stage": "generator",
+          "decision": "catalog_form",
+          "detail": "observation-witness",
+          "occurrences": 1
+        },
+        {
+          "name": "Witness",
+          "stage": "pool",
+          "decision": "eligible",
+          "detail": "observation-witness",
+          "occurrences": 1
+        },
+        {
+          "name": "Telltale",
+          "stage": "generator",
+          "decision": "catalog_form",
+          "detail": "observation-telltale",
+          "occurrences": 1
+        },
+        {
+          "name": "Telltale",
+          "stage": "pool",
+          "decision": "eligible",
+          "detail": "observation-telltale",
+          "occurrences": 1
+        },
+        {
+          "name": "Sightline",
+          "stage": "selection",
+          "decision": "selected",
+          "detail": null,
+          "occurrences": 1
+        },
+        {
+          "name": "Lookout",
+          "stage": "selection",
+          "decision": "selected",
+          "detail": null,
+          "occurrences": 1
+        },
+        {
+          "name": "Fieldglass",
+          "stage": "selection",
+          "decision": "finalist_limit",
+          "detail": null,
+          "occurrences": 1
+        },
+        {
+          "name": "Aperture",
+          "stage": "selection",
+          "decision": "finalist_limit",
+          "detail": null,
+          "occurrences": 1
+        },
+        {
+          "name": "Logbook",
+          "stage": "selection",
+          "decision": "selected",
+          "detail": null,
+          "occurrences": 1
+        },
+        {
+          "name": "Daybook",
+          "stage": "selection",
+          "decision": "selected",
+          "detail": null,
+          "occurrences": 1
+        },
+        {
+          "name": "Witness",
+          "stage": "selection",
+          "decision": "finalist_limit",
+          "detail": null,
+          "occurrences": 1
+        },
+        {
+          "name": "Telltale",
+          "stage": "selection",
+          "decision": "finalist_limit",
+          "detail": null,
+          "occurrences": 1
+        }
+      ],
+      "exhausted": false,
+      "durationMs": 4.799999998882413
+    },
+    {
+      "schema": "concept-naming-run-v1",
+      "request": {
+        "config": {
+          "style": "big_tech",
+          "count": 10,
+          "min_len": 4,
+          "max_len": 12,
+          "temperature": 0.85,
+          "variety": 0.3,
+          "seed": 3402549879,
+          "roots": [],
+          "variant": "product_names",
+          "description": "a terminal log viewer",
+          "compound": false,
+          "starts_with": null,
+          "contains": null,
+          "exclude": [
+            "sightline",
+            "logbook",
+            "lookout",
+            "daybook"
+          ]
+        },
+        "target": "product_name",
+        "interpretation_override": null,
+        "direction": null,
+        "data_identity": "f7bf89f6fd8a5f093f21eea69257dc06b2e8be17d627abd0d717fc2f80da74e2"
+      },
+      "data_identity": "f7bf89f6fd8a5f093f21eea69257dc06b2e8be17d627abd0d717fc2f80da74e2",
+      "data_sources": {
+        "core/data/bigtech.txt": {
+          "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+          "snapshot_date": null
+        },
+        "core/data/pron_lexicon.tsv": {
+          "sha256": "3a0348f7d9e87ec53e8b600c8ba8f5e28153ea35e1b87c43e2672d71f8da53e1",
+          "snapshot_date": null
+        },
+        "research/cmudict/cmudict.dict": {
+          "sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22",
+          "snapshot_date": null
+        },
+        "research/collision/crate-names.txt": {
+          "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+          "snapshot_date": null
+        },
+        "research/concept-naming/catalog-source.mjs": {
+          "sha256": "d31118c789844658c273edb07a5e8443794d0452c0ea10161372eec93624105c",
+          "snapshot_date": null
+        }
+      },
+      "meaning": {
+        "status": "ready",
+        "reason": null,
+        "description": "a terminal log viewer",
+        "job": {
+          "id": "inspect_signals",
+          "domain": "observation",
+          "label": "Inspect and organize system signals",
+          "object": "system evidence",
+          "operation": "inspect",
+          "directions": [
+            "visibility",
+            "evidence"
+          ],
+          "phrases": [
+            "log viewer",
+            "log inspector",
+            "log explorer",
+            "log analysis",
+            "log aggregation",
+            "trace viewer",
+            "telemetry dashboard"
+          ],
+          "actions": [
+            "view",
+            "inspect",
+            "group",
+            "filter",
+            "sort",
+            "record",
+            "search",
+            "trace",
+            "analyze"
+          ],
+          "objects": [
+            "log",
+            "logs",
+            "trace",
+            "traces",
+            "telemetry",
+            "diagnostic",
+            "diagnostics",
+            "stacktrace",
+            "stacktraces"
+          ],
+          "incompatible": [
+            "football",
+            "weather",
+            "sports",
+            "medical"
+          ]
+        },
+        "options": [
+          {
+            "id": "migrate_data",
+            "domain": "migration",
+            "label": "Move data between versions or stores",
+            "object": "database state",
+            "operation": "migrate",
+            "directions": [
+              "passage",
+              "continuity"
+            ],
+            "phrases": [
+              "database migration",
+              "database migrations",
+              "schema migration",
+              "schema migrations",
+              "schema changes",
+              "data migration"
+            ],
+            "actions": [
+              "migrate",
+              "rehearse",
+              "upgrade",
+              "move"
+            ],
+            "objects": [
+              "database",
+              "databases",
+              "schema",
+              "schemas",
+              "sqlite",
+              "postgresql",
+              "data"
+            ],
+            "incompatible": [
+              "furniture",
+              "bird",
+              "birds"
+            ]
+          },
+          {
+            "id": "recover_state",
+            "domain": "migration",
+            "label": "Recover an earlier usable state",
+            "object": "stored state",
+            "operation": "restore",
+            "directions": [
+              "recovery",
+              "continuity"
+            ],
+            "phrases": [
+              "database recovery",
+              "file recovery",
+              "archive recovery",
+              "state recovery",
+              "database rollback",
+              "backup restoration"
+            ],
+            "actions": [
+              "restore",
+              "recover",
+              "rollback",
+              "revert"
+            ],
+            "objects": [
+              "database",
+              "databases",
+              "archive",
+              "archives",
+              "file",
+              "files",
+              "configuration",
+              "session",
+              "state",
+              "snapshot",
+              "snapshots",
+              "replica"
+            ],
+            "incompatible": [
+              "furniture",
+              "antique",
+              "health"
+            ]
+          },
+          {
+            "id": "schedule_jobs",
+            "domain": "jobs",
+            "label": "Coordinate queued or scheduled work",
+            "object": "background work",
+            "operation": "schedule",
+            "directions": [
+              "cadence",
+              "handoff"
+            ],
+            "phrases": [
+              "job scheduler",
+              "job scheduling",
+              "background jobs",
+              "background job",
+              "message queue client",
+              "queue client",
+              "task queue",
+              "worker pool"
+            ],
+            "actions": [
+              "schedule",
+              "dispatch",
+              "enqueue",
+              "coordinate",
+              "execute",
+              "process"
+            ],
+            "objects": [
+              "job",
+              "jobs",
+              "queue",
+              "queues",
+              "worker",
+              "workers",
+              "task",
+              "tasks",
+              "message",
+              "messages"
+            ],
+            "incompatible": [
+              "recruiter",
+              "recruiters",
+              "career",
+              "careers",
+              "appointment",
+              "appointments"
+            ]
+          },
+          {
+            "id": "retry_delivery",
+            "domain": "jobs",
+            "label": "Retry or replay interrupted deliveries",
+            "object": "work delivery",
+            "operation": "retry",
+            "directions": [
+              "retry",
+              "handoff"
+            ],
+            "phrases": [
+              "webhook replay",
+              "webhook retries",
+              "delivery retries",
+              "job retries",
+              "retry queue"
+            ],
+            "actions": [
+              "retry",
+              "replay",
+              "redeliver",
+              "resume"
+            ],
+            "objects": [
+              "webhook",
+              "webhooks",
+              "delivery",
+              "deliveries",
+              "job",
+              "jobs",
+              "task",
+              "tasks",
+              "message",
+              "messages",
+              "queue"
+            ],
+            "incompatible": [
+              "meal",
+              "meals",
+              "parcel",
+              "parcels"
+            ]
+          },
+          {
+            "id": "inspect_signals",
+            "domain": "observation",
+            "label": "Inspect and organize system signals",
+            "object": "system evidence",
+            "operation": "inspect",
+            "directions": [
+              "visibility",
+              "evidence"
+            ],
+            "phrases": [
+              "log viewer",
+              "log inspector",
+              "log explorer",
+              "log analysis",
+              "log aggregation",
+              "trace viewer",
+              "telemetry dashboard"
+            ],
+            "actions": [
+              "view",
+              "inspect",
+              "group",
+              "filter",
+              "sort",
+              "record",
+              "search",
+              "trace",
+              "analyze"
+            ],
+            "objects": [
+              "log",
+              "logs",
+              "trace",
+              "traces",
+              "telemetry",
+              "diagnostic",
+              "diagnostics",
+              "stacktrace",
+              "stacktraces"
+            ],
+            "incompatible": [
+              "football",
+              "weather",
+              "sports",
+              "medical"
+            ]
+          },
+          {
+            "id": "measure_behavior",
+            "domain": "observation",
+            "label": "Observe and compare system behavior",
+            "object": "system behavior",
+            "operation": "measure",
+            "directions": [
+              "measurement",
+              "evidence",
+              "visibility"
+            ],
+            "phrases": [
+              "performance monitor",
+              "latency monitor",
+              "memory profiler",
+              "metrics dashboard",
+              "queue depth monitor",
+              "allocation profiler"
+            ],
+            "actions": [
+              "monitor",
+              "track",
+              "measure",
+              "compare",
+              "profile",
+              "inspect"
+            ],
+            "objects": [
+              "latency",
+              "memory",
+              "allocation",
+              "allocations",
+              "metrics",
+              "cpu",
+              "throughput",
+              "queue depth",
+              "performance",
+              "socket",
+              "sockets",
+              "connection",
+              "connections"
+            ],
+            "incompatible": [
+              "football",
+              "weather",
+              "sports",
+              "health"
+            ]
+          },
+          {
+            "id": "verify_artifacts",
+            "domain": "verification",
+            "label": "Verify the integrity of an artifact",
+            "object": "artifact integrity",
+            "operation": "verify",
+            "directions": [
+              "integrity",
+              "attestation"
+            ],
+            "phrases": [
+              "checksum checker",
+              "signature verifier",
+              "artifact verification",
+              "checksum verification",
+              "signature verification",
+              "integrity checker"
+            ],
+            "actions": [
+              "verify",
+              "check",
+              "validate",
+              "compare"
+            ],
+            "objects": [
+              "checksum",
+              "checksums",
+              "signature",
+              "signatures",
+              "artifact",
+              "artifacts",
+              "hash",
+              "hashes",
+              "binary",
+              "binaries",
+              "manifest",
+              "manifests"
+            ],
+            "incompatible": [
+              "autograph",
+              "autographs",
+              "museum"
+            ]
+          },
+          {
+            "id": "validate_config",
+            "domain": "verification",
+            "label": "Validate configuration against expectations",
+            "object": "configuration",
+            "operation": "validate",
+            "directions": [
+              "agreement",
+              "integrity"
+            ],
+            "phrases": [
+              "configuration validator",
+              "config validator",
+              "configuration validation",
+              "config validation",
+              "configuration checker",
+              "config checker"
+            ],
+            "actions": [
+              "validate",
+              "verify",
+              "check",
+              "lint"
+            ],
+            "objects": [
+              "configuration",
+              "configurations",
+              "config",
+              "configs",
+              "settings"
+            ],
+            "incompatible": [
+              "furniture",
+              "medical"
+            ]
+          }
+        ],
+        "evidence_spans": [
+          {
+            "surface": "log viewer",
+            "start": 11,
+            "end": 21,
+            "role": "product_phrase"
+          },
+          {
+            "surface": "log",
+            "start": 11,
+            "end": 14,
+            "role": "object"
+          }
+        ],
+        "interpretation_rule": "product_noun_phrase"
+      },
+      "directions": [
+        {
+          "id": "visibility",
+          "benefit": "Make hidden behavior visible"
+        },
+        {
+          "id": "evidence",
+          "benefit": "Keep a readable record"
+        }
+      ],
+      "direction_order": [
+        "visibility",
+        "evidence"
+      ],
+      "candidates": [
+        {
+          "id": "sightline",
+          "result": {
+            "name": "Sightline",
+            "style": "big_tech",
+            "syllables": 2,
+            "score_pronounce": 75,
+            "score_novelty": 40,
+            "score_memorability": 46,
+            "connotations": [
+              "small",
+              "light",
+              "bold"
+            ]
+          },
+          "sources": [
+            {
+              "concept_id": "observation-sightline",
+              "direction": "visibility",
+              "rank": 25,
+              "sense": "an unobstructed line along which something is visible",
+              "benefit": "Make hidden behavior visible",
+              "provenance": "original-editorial-concept-naming-v1; not preference-validated",
+              "construction": "whole_lexeme",
+              "components": [
+                "sight",
+                "line"
+              ],
+              "rejection": null
+            }
+          ],
+          "pronunciation": {
+            "source": "dictionary_components",
+            "components": [
+              {
+                "phones": "S AY T",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22",
+                "word": "sight"
+              },
+              {
+                "phones": "L AY N",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22",
+                "word": "line"
+              }
+            ],
+            "syllables": 2
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ],
+          "rejection": "excluded"
+        },
+        {
+          "id": "lookout",
+          "result": {
+            "name": "Lookout",
+            "style": "big_tech",
+            "syllables": 2,
+            "score_pronounce": 91,
+            "score_novelty": 40,
+            "score_memorability": 82,
+            "connotations": [
+              "large",
+              "heavy",
+              "bold"
+            ]
+          },
+          "sources": [
+            {
+              "concept_id": "observation-lookout",
+              "direction": "visibility",
+              "rank": 26,
+              "sense": "a place or person from which to observe",
+              "benefit": "Make hidden behavior visible",
+              "provenance": "original-editorial-concept-naming-v1; not preference-validated",
+              "construction": "whole_lexeme",
+              "components": [
+                "lookout"
+              ],
+              "rejection": null
+            }
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "phones": "L UH K AW T",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22",
+                "word": "lookout"
+              }
+            ],
+            "syllables": 2
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ],
+          "rejection": "excluded"
+        },
+        {
+          "id": "fieldglass",
+          "result": {
+            "name": "Fieldglass",
+            "style": "big_tech",
+            "syllables": 2,
+            "score_pronounce": 72,
+            "score_novelty": 40,
+            "score_memorability": 55,
+            "connotations": [
+              "small",
+              "light",
+              "sleek"
+            ]
+          },
+          "sources": [
+            {
+              "concept_id": "observation-fieldglass",
+              "direction": "visibility",
+              "rank": 27,
+              "sense": "an optical instrument for seeing distant details",
+              "benefit": "Make hidden behavior visible",
+              "provenance": "original-editorial-concept-naming-v1; not preference-validated",
+              "construction": "whole_lexeme",
+              "components": [
+                "field",
+                "glass"
+              ],
+              "rejection": null
+            }
+          ],
+          "pronunciation": {
+            "source": "dictionary_components",
+            "components": [
+              {
+                "phones": "F IY L D",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22",
+                "word": "field"
+              },
+              {
+                "phones": "G L AE S",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22",
+                "word": "glass"
+              }
+            ],
+            "syllables": 2
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": false
+            }
+          ],
+          "rejection": null
+        },
+        {
+          "id": "aperture",
+          "result": {
+            "name": "Aperture",
+            "style": "big_tech",
+            "syllables": 3,
+            "score_pronounce": 95,
+            "score_novelty": 95,
+            "score_memorability": 45,
+            "connotations": [
+              "small",
+              "bold"
+            ]
+          },
+          "sources": [
+            {
+              "concept_id": "observation-aperture",
+              "direction": "visibility",
+              "rank": 28,
+              "sense": "an opening through which a view becomes possible",
+              "benefit": "Make hidden behavior visible",
+              "provenance": "original-editorial-concept-naming-v1; not preference-validated",
+              "construction": "whole_lexeme",
+              "components": [
+                "aperture"
+              ],
+              "rejection": null
+            }
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "phones": "AE P ER CH ER",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22",
+                "word": "aperture"
+              }
+            ],
+            "syllables": 3
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ],
+          "rejection": null
+        },
+        {
+          "id": "logbook",
+          "result": {
+            "name": "Logbook",
+            "style": "big_tech",
+            "syllables": 2,
+            "score_pronounce": 91,
+            "score_novelty": 40,
+            "score_memorability": 82,
+            "connotations": [
+              "large",
+              "heavy",
+              "bold"
+            ]
+          },
+          "sources": [
+            {
+              "concept_id": "observation-logbook",
+              "direction": "evidence",
+              "rank": 29,
+              "sense": "an ordered record of observations and events",
+              "benefit": "Keep a readable record",
+              "provenance": "original-editorial-concept-naming-v1; not preference-validated",
+              "construction": "whole_lexeme",
+              "components": [
+                "logbook"
+              ],
+              "rejection": null
+            }
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "phones": "L AO G B UH K",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22",
+                "word": "logbook"
+              }
+            ],
+            "syllables": 2
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ],
+          "rejection": "excluded"
+        },
+        {
+          "id": "daybook",
+          "result": {
+            "name": "Daybook",
+            "style": "big_tech",
+            "syllables": 2,
+            "score_pronounce": 91,
+            "score_novelty": 40,
+            "score_memorability": 92,
+            "connotations": [
+              "large",
+              "bold"
+            ]
+          },
+          "sources": [
+            {
+              "concept_id": "observation-daybook",
+              "direction": "evidence",
+              "rank": 30,
+              "sense": "a chronological record of daily events",
+              "benefit": "Keep a readable record",
+              "provenance": "original-editorial-concept-naming-v1; not preference-validated",
+              "construction": "whole_lexeme",
+              "components": [
+                "day",
+                "book"
+              ],
+              "rejection": null
+            }
+          ],
+          "pronunciation": {
+            "source": "dictionary_components",
+            "components": [
+              {
+                "phones": "D EY",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22",
+                "word": "day"
+              },
+              {
+                "phones": "B UH K",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22",
+                "word": "book"
+              }
+            ],
+            "syllables": 2
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ],
+          "rejection": "excluded"
+        },
+        {
+          "id": "witness",
+          "result": {
+            "name": "Witness",
+            "style": "big_tech",
+            "syllables": 2,
+            "score_pronounce": 91,
+            "score_novelty": 95,
+            "score_memorability": 77,
+            "connotations": [
+              "small",
+              "light",
+              "sleek"
+            ]
+          },
+          "sources": [
+            {
+              "concept_id": "observation-witness",
+              "direction": "evidence",
+              "rank": 31,
+              "sense": "an observer whose account supplies evidence",
+              "benefit": "Keep a readable record",
+              "provenance": "original-editorial-concept-naming-v1; not preference-validated",
+              "construction": "whole_lexeme",
+              "components": [
+                "witness"
+              ],
+              "rejection": null
+            }
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "phones": "W IH T N AH S",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22",
+                "word": "witness"
+              }
+            ],
+            "syllables": 2
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ],
+          "rejection": null
+        },
+        {
+          "id": "telltale",
+          "result": {
+            "name": "Telltale",
+            "style": "big_tech",
+            "syllables": 2,
+            "score_pronounce": 84,
+            "score_novelty": 40,
+            "score_memorability": 70,
+            "connotations": [
+              "small",
+              "light",
+              "smooth"
+            ]
+          },
+          "sources": [
+            {
+              "concept_id": "observation-telltale",
+              "direction": "evidence",
+              "rank": 32,
+              "sense": "a sign that reveals something otherwise hidden",
+              "benefit": "Keep a readable record",
+              "provenance": "original-editorial-concept-naming-v1; not preference-validated",
+              "construction": "whole_lexeme",
+              "components": [
+                "telltale"
+              ],
+              "rejection": null
+            }
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "phones": "T EH L T EY L",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22",
+                "word": "telltale"
+              }
+            ],
+            "syllables": 2
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ],
+          "rejection": null
+        }
+      ],
+      "finalists": [
+        {
+          "id": "fieldglass",
+          "concept_id": "observation-fieldglass",
+          "direction": "visibility"
+        },
+        {
+          "id": "witness",
+          "concept_id": "observation-witness",
+          "direction": "evidence"
+        },
+        {
+          "id": "aperture",
+          "concept_id": "observation-aperture",
+          "direction": "visibility"
+        },
+        {
+          "id": "telltale",
+          "concept_id": "observation-telltale",
+          "direction": "evidence"
+        }
+      ],
+      "trace": [
+        {
+          "name": "Sightline",
+          "stage": "generator",
+          "decision": "catalog_form",
+          "detail": "observation-sightline",
+          "occurrences": 1
+        },
+        {
+          "name": "Sightline",
+          "stage": "pool",
+          "decision": "excluded",
+          "detail": "observation-sightline",
+          "occurrences": 1
+        },
+        {
+          "name": "Lookout",
+          "stage": "generator",
+          "decision": "catalog_form",
+          "detail": "observation-lookout",
+          "occurrences": 1
+        },
+        {
+          "name": "Lookout",
+          "stage": "pool",
+          "decision": "excluded",
+          "detail": "observation-lookout",
+          "occurrences": 1
+        },
+        {
+          "name": "Fieldglass",
+          "stage": "generator",
+          "decision": "catalog_form",
+          "detail": "observation-fieldglass",
+          "occurrences": 1
+        },
+        {
+          "name": "Fieldglass",
+          "stage": "pool",
+          "decision": "eligible",
+          "detail": "observation-fieldglass",
+          "occurrences": 1
+        },
+        {
+          "name": "Aperture",
+          "stage": "generator",
+          "decision": "catalog_form",
+          "detail": "observation-aperture",
+          "occurrences": 1
+        },
+        {
+          "name": "Aperture",
+          "stage": "pool",
+          "decision": "eligible",
+          "detail": "observation-aperture",
+          "occurrences": 1
+        },
+        {
+          "name": "Logbook",
+          "stage": "generator",
+          "decision": "catalog_form",
+          "detail": "observation-logbook",
+          "occurrences": 1
+        },
+        {
+          "name": "Logbook",
+          "stage": "pool",
+          "decision": "excluded",
+          "detail": "observation-logbook",
+          "occurrences": 1
+        },
+        {
+          "name": "Daybook",
+          "stage": "generator",
+          "decision": "catalog_form",
+          "detail": "observation-daybook",
+          "occurrences": 1
+        },
+        {
+          "name": "Daybook",
+          "stage": "pool",
+          "decision": "excluded",
+          "detail": "observation-daybook",
+          "occurrences": 1
+        },
+        {
+          "name": "Witness",
+          "stage": "generator",
+          "decision": "catalog_form",
+          "detail": "observation-witness",
+          "occurrences": 1
+        },
+        {
+          "name": "Witness",
+          "stage": "pool",
+          "decision": "eligible",
+          "detail": "observation-witness",
+          "occurrences": 1
+        },
+        {
+          "name": "Telltale",
+          "stage": "generator",
+          "decision": "catalog_form",
+          "detail": "observation-telltale",
+          "occurrences": 1
+        },
+        {
+          "name": "Telltale",
+          "stage": "pool",
+          "decision": "eligible",
+          "detail": "observation-telltale",
+          "occurrences": 1
+        },
+        {
+          "name": "Sightline",
+          "stage": "selection",
+          "decision": "no_eligible_source",
+          "detail": null,
+          "occurrences": 1
+        },
+        {
+          "name": "Lookout",
+          "stage": "selection",
+          "decision": "no_eligible_source",
+          "detail": null,
+          "occurrences": 1
+        },
+        {
+          "name": "Fieldglass",
+          "stage": "selection",
+          "decision": "selected",
+          "detail": null,
+          "occurrences": 1
+        },
+        {
+          "name": "Aperture",
+          "stage": "selection",
+          "decision": "selected",
+          "detail": null,
+          "occurrences": 1
+        },
+        {
+          "name": "Logbook",
+          "stage": "selection",
+          "decision": "no_eligible_source",
+          "detail": null,
+          "occurrences": 1
+        },
+        {
+          "name": "Daybook",
+          "stage": "selection",
+          "decision": "no_eligible_source",
+          "detail": null,
+          "occurrences": 1
+        },
+        {
+          "name": "Witness",
+          "stage": "selection",
+          "decision": "selected",
+          "detail": null,
+          "occurrences": 1
+        },
+        {
+          "name": "Telltale",
+          "stage": "selection",
+          "decision": "selected",
+          "detail": null,
+          "occurrences": 1
+        }
+      ],
+      "exhausted": false,
+      "durationMs": 0.599999999627471
+    }
+  ],
+  "sessionChoices": {
+    "sightline": "keep"
+  }
+}

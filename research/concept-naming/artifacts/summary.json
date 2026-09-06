@@ -1,0 +1,43 @@
+{
+  "scope": "Mechanics and bounded output comparison; not human naming quality",
+  "auto": {
+    "briefs": 12,
+    "nonempty": 12,
+    "finalistCards": 36,
+    "distinctFinalistNames": 36,
+    "meanStructural": 87.44444444444446,
+    "medianWarmGenerationMs": 39.90000000037253,
+    "eligibleMean": null
+  },
+  "concept": {
+    "briefs": 12,
+    "nonempty": 12,
+    "finalistCards": 48,
+    "distinctFinalistNames": 23,
+    "meanStructural": 74.39583333333333,
+    "medianWarmGenerationMs": 0.900000000372529,
+    "eligibleMean": 8
+  },
+  "canonical": {
+    "total": 35,
+    "ready": 5,
+    "nonempty": 5
+  },
+  "canonicalDeveloper": {
+    "briefs": 14,
+    "nonempty": 4
+  },
+  "humanEvaluation": {
+    "status": "pending",
+    "actualResponses": 0,
+    "qualityImprovementEstablished": false,
+    "gates": {
+      "primaryPages": 12,
+      "repeatPages": 4,
+      "minimumWins": 8,
+      "minimumUsableBriefs": 6,
+      "minimumUsableBriefUplift": 3,
+      "minimumConsistentRepeats": 3
+    }
+  }
+}

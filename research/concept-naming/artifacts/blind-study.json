@@ -1,0 +1,693 @@
+{
+  "schema": "concept-naming-blind-v1",
+  "pages": [
+    {
+      "id": "p01",
+      "brief": "Rehearse database upgrades against scrubbed production copies.",
+      "left": [
+        {
+          "name": "Foothold",
+          "explanation": "a secure place from which to make progress. Preserve what matters through change.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        },
+        {
+          "name": "Waymark",
+          "explanation": "a mark that guides a route. Move safely between states.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        },
+        {
+          "name": "Lifeline",
+          "explanation": "a connection that preserves continuity in difficulty. Preserve what matters through change.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        },
+        {
+          "name": "Causeway",
+          "explanation": "a raised passage across difficult ground. Move safely between states.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        }
+      ],
+      "right": [
+        {
+          "name": "Ayna",
+          "explanation": "copy → Ayna — the mirror (Turkish)",
+          "collision": "No local snapshot match; availability unverified."
+        },
+        {
+          "name": "Copyrow",
+          "explanation": "opens with “copy” · 3 syllables · large, smooth",
+          "collision": "No local snapshot match; availability unverified."
+        },
+        {
+          "name": "Datalab",
+          "explanation": "opens with “data” · “data” + brandable “-lab” · 3 syllables · bold",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        }
+      ]
+    },
+    {
+      "id": "p02",
+      "brief": "A recovery utility for restoring configuration snapshots after a failed release.",
+      "left": [
+        {
+          "name": "Dugnad",
+          "explanation": "failed → effort → Dugnad — the shared job the whole street turns up for (Norwegian)",
+          "collision": "No local snapshot match; availability unverified."
+        },
+        {
+          "name": "Paramix",
+          "explanation": "opens with “param” · 3 syllables · small, smooth",
+          "collision": "No local snapshot match; availability unverified."
+        },
+        {
+          "name": "Varbeam",
+          "explanation": "opens with “var” · 2 syllables · small, smooth",
+          "collision": "No local snapshot match; availability unverified."
+        }
+      ],
+      "right": [
+        {
+          "name": "Foothold",
+          "explanation": "a secure place from which to make progress. Preserve what matters through change.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        },
+        {
+          "name": "Reprise",
+          "explanation": "a return to an earlier passage. Return to a usable state.",
+          "collision": "No local snapshot match; availability unverified."
+        },
+        {
+          "name": "Lifeline",
+          "explanation": "a connection that preserves continuity in difficulty. Preserve what matters through change.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        },
+        {
+          "name": "Retrace",
+          "explanation": "to follow a prior path back. Return to a usable state.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        }
+      ]
+    },
+    {
+      "id": "p03",
+      "brief": "Move customer data between PostgreSQL stores while retaining an audit trail.",
+      "left": [
+        {
+          "name": "Foothold",
+          "explanation": "a secure place from which to make progress. Preserve what matters through change.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        },
+        {
+          "name": "Waymark",
+          "explanation": "a mark that guides a route. Move safely between states.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        },
+        {
+          "name": "Lifeline",
+          "explanation": "a connection that preserves continuity in difficulty. Preserve what matters through change.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        },
+        {
+          "name": "Causeway",
+          "explanation": "a raised passage across difficult ground. Move safely between states.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        }
+      ],
+      "right": [
+        {
+          "name": "Rowlens",
+          "explanation": "opens with “row” · 2 syllables · smooth",
+          "collision": "No local snapshot match; availability unverified."
+        },
+        {
+          "name": "Datalens",
+          "explanation": "opens with “data” · 3 syllables · small, bold",
+          "collision": "No local snapshot match; availability unverified."
+        },
+        {
+          "name": "Storelens",
+          "explanation": "opens with “store” · 3 syllables · small, smooth",
+          "collision": "No local snapshot match; availability unverified."
+        }
+      ]
+    },
+    {
+      "id": "p04",
+      "brief": "A worker pool for scheduled image conversion tasks.",
+      "left": [
+        {
+          "name": "Takvim",
+          "explanation": "scheduled → Takvim — the calendar of days (Turkish)",
+          "collision": "No local snapshot match; availability unverified."
+        },
+        {
+          "name": "Plannova",
+          "explanation": "opens with “plan” · 3 syllables · large, smooth",
+          "collision": "No local snapshot match; availability unverified."
+        },
+        {
+          "name": "Tuneflow",
+          "explanation": "opens with “tune” · “tune” + brandable “-flow” · 3 syllables · large, smooth",
+          "collision": "No local snapshot match; availability unverified."
+        }
+      ],
+      "right": [
+        {
+          "name": "Baton",
+          "explanation": "an object passed between successive participants. Pass work between workers.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        },
+        {
+          "name": "Downbeat",
+          "explanation": "the first beat that begins a measure. Coordinate work in time.",
+          "collision": "No local snapshot match; availability unverified."
+        },
+        {
+          "name": "Turnstile",
+          "explanation": "a mechanism that admits participants in sequence. Pass work between workers.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        },
+        {
+          "name": "Roundabout",
+          "explanation": "a circulating arrangement that coordinates passage. Coordinate work in time.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        }
+      ]
+    },
+    {
+      "id": "p05",
+      "brief": "Replay undelivered webhook messages after a remote endpoint returns.",
+      "left": [
+        {
+          "name": "Encore",
+          "explanation": "an additional performance after the first. Give interrupted work another chance.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        },
+        {
+          "name": "Baton",
+          "explanation": "an object passed between successive participants. Pass work between workers.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        },
+        {
+          "name": "Reprise",
+          "explanation": "a return to an earlier passage. Give interrupted work another chance.",
+          "collision": "No local snapshot match; availability unverified."
+        },
+        {
+          "name": "Turnstile",
+          "explanation": "a mechanism that admits participants in sequence. Pass work between workers.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        }
+      ],
+      "right": [
+        {
+          "name": "Magnex",
+          "explanation": "endpoint → nexus → Magnex — magnet · magnify + nexus · connect (coined)",
+          "collision": "No local snapshot match; availability unverified."
+        },
+        {
+          "name": "Kinnova",
+          "explanation": "opens with “kin” · 3 syllables · smooth",
+          "collision": "No local snapshot match; availability unverified."
+        },
+        {
+          "name": "Webhookkin",
+          "explanation": "opens with “web” · 3 syllables · bold",
+          "collision": "No local snapshot match; availability unverified."
+        }
+      ]
+    },
+    {
+      "id": "p06",
+      "brief": "Rehearse database upgrades against scrubbed production copies.",
+      "left": [
+        {
+          "name": "Ayna",
+          "explanation": "copy → Ayna — the mirror (Turkish)",
+          "collision": "No local snapshot match; availability unverified."
+        },
+        {
+          "name": "Copyrow",
+          "explanation": "opens with “copy” · 3 syllables · large, smooth",
+          "collision": "No local snapshot match; availability unverified."
+        },
+        {
+          "name": "Datalab",
+          "explanation": "opens with “data” · “data” + brandable “-lab” · 3 syllables · bold",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        }
+      ],
+      "right": [
+        {
+          "name": "Foothold",
+          "explanation": "a secure place from which to make progress. Preserve what matters through change.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        },
+        {
+          "name": "Waymark",
+          "explanation": "a mark that guides a route. Move safely between states.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        },
+        {
+          "name": "Lifeline",
+          "explanation": "a connection that preserves continuity in difficulty. Preserve what matters through change.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        },
+        {
+          "name": "Causeway",
+          "explanation": "a raised passage across difficult ground. Move safely between states.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        }
+      ]
+    },
+    {
+      "id": "p07",
+      "brief": "Coordinate queue workers with deadlines and backpressure.",
+      "left": [
+        {
+          "name": "Menzil",
+          "explanation": "queue → Menzil — post station where fresh horses wait (Ottoman)",
+          "collision": "No local snapshot match; availability unverified."
+        },
+        {
+          "name": "Pipejob",
+          "explanation": "opens with “pipe” · 3 syllables · small, bold",
+          "collision": "No local snapshot match; availability unverified."
+        },
+        {
+          "name": "Jobloom",
+          "explanation": "opens with “job” · 2 syllables · large, heavy",
+          "collision": "No local snapshot match; availability unverified."
+        }
+      ],
+      "right": [
+        {
+          "name": "Baton",
+          "explanation": "an object passed between successive participants. Pass work between workers.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        },
+        {
+          "name": "Downbeat",
+          "explanation": "the first beat that begins a measure. Coordinate work in time.",
+          "collision": "No local snapshot match; availability unverified."
+        },
+        {
+          "name": "Turnstile",
+          "explanation": "a mechanism that admits participants in sequence. Pass work between workers.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        },
+        {
+          "name": "Roundabout",
+          "explanation": "a circulating arrangement that coordinates passage. Coordinate work in time.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        }
+      ]
+    },
+    {
+      "id": "p08",
+      "brief": "A trace viewer that groups exceptions from command line tools.",
+      "left": [
+        {
+          "name": "Logbook",
+          "explanation": "an ordered record of observations and events. Keep a readable record.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        },
+        {
+          "name": "Sightline",
+          "explanation": "an unobstructed line along which something is visible. Make hidden behavior visible.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        },
+        {
+          "name": "Daybook",
+          "explanation": "a chronological record of daily events. Keep a readable record.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        },
+        {
+          "name": "Lookout",
+          "explanation": "a place or person from which to observe. Make hidden behavior visible.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        }
+      ],
+      "right": [
+        {
+          "name": "Falconer",
+          "explanation": "command → Falconer — one who flies the swift hunter (English)",
+          "collision": "No local snapshot match; availability unverified."
+        },
+        {
+          "name": "Termia",
+          "explanation": "opens with “term” · “term” + brandable “-ia” · 2 syllables · small, light",
+          "collision": "No local snapshot match; availability unverified."
+        },
+        {
+          "name": "Toollink",
+          "explanation": "opens with “tool” · “tool” + brandable “-link” · 2 syllables · large, smooth",
+          "collision": "No local snapshot match; availability unverified."
+        }
+      ]
+    },
+    {
+      "id": "p09",
+      "brief": "Compare CPU throughput across two versions of a service.",
+      "left": [
+        {
+          "name": "Twotag",
+          "explanation": "opens with “two” · 2 syllables · large, bold",
+          "collision": "No local snapshot match; availability unverified."
+        },
+        {
+          "name": "Compareio",
+          "explanation": "opens with “compare” · “compare” + brandable “-io” · 3 syllables · smooth",
+          "collision": "No local snapshot match; availability unverified."
+        },
+        {
+          "name": "Twolab",
+          "explanation": "opens with “two” · 2 syllables · large, bold",
+          "collision": "No local snapshot match; availability unverified."
+        }
+      ],
+      "right": [
+        {
+          "name": "Yardstick",
+          "explanation": "a standard used to compare or measure. Put behavior in perspective.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        },
+        {
+          "name": "Logbook",
+          "explanation": "an ordered record of observations and events. Keep a readable record.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        },
+        {
+          "name": "Sightline",
+          "explanation": "an unobstructed line along which something is visible. Make hidden behavior visible.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        },
+        {
+          "name": "Caliper",
+          "explanation": "an instrument for comparing dimensions. Put behavior in perspective.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        }
+      ]
+    },
+    {
+      "id": "p10",
+      "brief": "Move customer data between PostgreSQL stores while retaining an audit trail.",
+      "left": [
+        {
+          "name": "Rowlens",
+          "explanation": "opens with “row” · 2 syllables · smooth",
+          "collision": "No local snapshot match; availability unverified."
+        },
+        {
+          "name": "Datalens",
+          "explanation": "opens with “data” · 3 syllables · small, bold",
+          "collision": "No local snapshot match; availability unverified."
+        },
+        {
+          "name": "Storelens",
+          "explanation": "opens with “store” · 3 syllables · small, smooth",
+          "collision": "No local snapshot match; availability unverified."
+        }
+      ],
+      "right": [
+        {
+          "name": "Foothold",
+          "explanation": "a secure place from which to make progress. Preserve what matters through change.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        },
+        {
+          "name": "Waymark",
+          "explanation": "a mark that guides a route. Move safely between states.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        },
+        {
+          "name": "Lifeline",
+          "explanation": "a connection that preserves continuity in difficulty. Preserve what matters through change.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        },
+        {
+          "name": "Causeway",
+          "explanation": "a raised passage across difficult ground. Move safely between states.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        }
+      ]
+    },
+    {
+      "id": "p11",
+      "brief": "Inspect connection counts during an overnight soak test.",
+      "left": [
+        {
+          "name": "Yardstick",
+          "explanation": "a standard used to compare or measure. Put behavior in perspective.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        },
+        {
+          "name": "Logbook",
+          "explanation": "an ordered record of observations and events. Keep a readable record.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        },
+        {
+          "name": "Sightline",
+          "explanation": "an unobstructed line along which something is visible. Make hidden behavior visible.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        },
+        {
+          "name": "Caliper",
+          "explanation": "an instrument for comparing dimensions. Put behavior in perspective.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        }
+      ],
+      "right": [
+        {
+          "name": "Vernect",
+          "explanation": "inspect → verify → Vernect — verify · versatile + connect (coined)",
+          "collision": "No local snapshot match; availability unverified."
+        },
+        {
+          "name": "Traceio",
+          "explanation": "opens with “trace” · “trace” + brandable “-io” · 2 syllables · small, bold",
+          "collision": "No local snapshot match; availability unverified."
+        },
+        {
+          "name": "Specio",
+          "explanation": "opens with “spec” · “spec” + brandable “-io” · 2 syllables · small, bold",
+          "collision": "No local snapshot match; availability unverified."
+        }
+      ]
+    },
+    {
+      "id": "p12",
+      "brief": "A command line utility to check signed release manifests before installation.",
+      "left": [
+        {
+          "name": "Tagora",
+          "explanation": "opens with “tag” · 3 syllables · large, bold",
+          "collision": "No local snapshot match; availability unverified."
+        },
+        {
+          "name": "Pushify",
+          "explanation": "opens with “push” · “push” + brandable “-ify” · 3 syllables · small, sleek",
+          "collision": "No local snapshot match; availability unverified."
+        },
+        {
+          "name": "Commitia",
+          "explanation": "opens with “commit” · “commit” + brandable “-ia” · 3 syllables · small, smooth",
+          "collision": "No local snapshot match; availability unverified."
+        }
+      ],
+      "right": [
+        {
+          "name": "Signet",
+          "explanation": "a seal whose impression carries identity. Carry evidence of authenticity.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        },
+        {
+          "name": "Touchstone",
+          "explanation": "a reference used to test quality or authenticity. Establish that something is intact.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        },
+        {
+          "name": "Watermark",
+          "explanation": "an identifying mark carried within an artifact. Carry evidence of authenticity.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        },
+        {
+          "name": "Assay",
+          "explanation": "an examination used to determine composition or quality. Establish that something is intact.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        }
+      ]
+    },
+    {
+      "id": "p13",
+      "brief": "Validate settings files against rules shared by several services.",
+      "left": [
+        {
+          "name": "Criterion",
+          "explanation": "a standard by which something is judged. Check against an expected standard.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        },
+        {
+          "name": "Touchstone",
+          "explanation": "a reference used to test quality or authenticity. Establish that something is intact.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        },
+        {
+          "name": "Stipulate",
+          "explanation": "to state a condition that must be satisfied. Check against an expected standard.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        },
+        {
+          "name": "Assay",
+          "explanation": "an examination used to determine composition or quality. Establish that something is intact.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        }
+      ],
+      "right": [
+        {
+          "name": "Karez",
+          "explanation": "shared → Karez — the shared water tunnel of a village (Persian)",
+          "collision": "No local snapshot match; availability unverified."
+        },
+        {
+          "name": "Dotrule",
+          "explanation": "opens with “dot” · 3 syllables · large, bold",
+          "collision": "No local snapshot match; availability unverified."
+        },
+        {
+          "name": "Pathlab",
+          "explanation": "opens with “path” · “path” + brandable “-lab” · 2 syllables · bold",
+          "collision": "No local snapshot match; availability unverified."
+        }
+      ]
+    },
+    {
+      "id": "p14",
+      "brief": "Replay undelivered webhook messages after a remote endpoint returns.",
+      "left": [
+        {
+          "name": "Magnex",
+          "explanation": "endpoint → nexus → Magnex — magnet · magnify + nexus · connect (coined)",
+          "collision": "No local snapshot match; availability unverified."
+        },
+        {
+          "name": "Kinnova",
+          "explanation": "opens with “kin” · 3 syllables · smooth",
+          "collision": "No local snapshot match; availability unverified."
+        },
+        {
+          "name": "Webhookkin",
+          "explanation": "opens with “web” · 3 syllables · bold",
+          "collision": "No local snapshot match; availability unverified."
+        }
+      ],
+      "right": [
+        {
+          "name": "Encore",
+          "explanation": "an additional performance after the first. Give interrupted work another chance.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        },
+        {
+          "name": "Baton",
+          "explanation": "an object passed between successive participants. Pass work between workers.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        },
+        {
+          "name": "Reprise",
+          "explanation": "a return to an earlier passage. Give interrupted work another chance.",
+          "collision": "No local snapshot match; availability unverified."
+        },
+        {
+          "name": "Turnstile",
+          "explanation": "a mechanism that admits participants in sequence. Pass work between workers.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        }
+      ]
+    },
+    {
+      "id": "p15",
+      "brief": "A signature verifier for archived build outputs from remote runners.",
+      "left": [
+        {
+          "name": "Outputseed",
+          "explanation": "opens with “outputs” · 3 syllables · large, bold",
+          "collision": "No local snapshot match; availability unverified."
+        },
+        {
+          "name": "Runnerseed",
+          "explanation": "opens with “runners” · 3 syllables · small, light",
+          "collision": "No local snapshot match; availability unverified."
+        },
+        {
+          "name": "Runnermint",
+          "explanation": "opens with “runner” · 3 syllables · small, smooth",
+          "collision": "No local snapshot match; availability unverified."
+        }
+      ],
+      "right": [
+        {
+          "name": "Signet",
+          "explanation": "a seal whose impression carries identity. Carry evidence of authenticity.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        },
+        {
+          "name": "Touchstone",
+          "explanation": "a reference used to test quality or authenticity. Establish that something is intact.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        },
+        {
+          "name": "Watermark",
+          "explanation": "an identifying mark carried within an artifact. Carry evidence of authenticity.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        },
+        {
+          "name": "Assay",
+          "explanation": "an examination used to determine composition or quality. Establish that something is intact.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        }
+      ]
+    },
+    {
+      "id": "p16",
+      "brief": "A trace viewer that groups exceptions from command line tools.",
+      "left": [
+        {
+          "name": "Falconer",
+          "explanation": "command → Falconer — one who flies the swift hunter (English)",
+          "collision": "No local snapshot match; availability unverified."
+        },
+        {
+          "name": "Termia",
+          "explanation": "opens with “term” · “term” + brandable “-ia” · 2 syllables · small, light",
+          "collision": "No local snapshot match; availability unverified."
+        },
+        {
+          "name": "Toollink",
+          "explanation": "opens with “tool” · “tool” + brandable “-link” · 2 syllables · large, smooth",
+          "collision": "No local snapshot match; availability unverified."
+        }
+      ],
+      "right": [
+        {
+          "name": "Logbook",
+          "explanation": "an ordered record of observations and events. Keep a readable record.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        },
+        {
+          "name": "Sightline",
+          "explanation": "an unobstructed line along which something is visible. Make hidden behavior visible.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        },
+        {
+          "name": "Daybook",
+          "explanation": "a chronological record of daily events. Keep a readable record.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        },
+        {
+          "name": "Lookout",
+          "explanation": "a place or person from which to observe. Make hidden behavior visible.",
+          "collision": "Crate snapshot match; product-name availability unverified."
+        }
+      ]
+    }
+  ]
+}
