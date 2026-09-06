@@ -32,6 +32,43 @@ parity passed, but its sealed conditioning gates did not; a later two-stage
 contrastive scorer was also near random and weaker than lexical overlap. No
 model was shipped or connected to Auto.
 
+The isolated **Shared pool · Lab** mode compares nine existing naming families
+before the Auto page is assembled. It keeps up to four finalists and exposes
+structured candidate provenance and rejection traces. It is LLM-free and does
+not change Auto or saved taste data. See the [experiment and verification guide](research/shared-pool/README.md)
+and [retained comparison](research/shared-pool/REPORT.md). Human preference
+evaluation is still pending; larger pools are not a better-name claim.
+
+The follow-up **Brief intent · Lab** preserves operation/object/context terms
+with a deterministic Rust grammar before filling the same pool. It remains
+experimental: see the [implementation and replay guide](research/brief-intent/README.md)
+and [comparison with editorial findings](research/brief-intent/REPORT.md).
+
+Within Brief intent Lab, the optional **operation–object links** check tests
+separate lexical evidence for both roles. It defaults off; its
+[retained diagnosis](research/operation-object/REPORT.md) did not establish a
+preference advantage. See the [implementation and replay guide](research/operation-object/README.md).
+
+The subsequent [quality-cause investigation](research/quality-cause/REPORT.md)
+isolates semantic role dilution, selection losses over fixed candidate pools,
+and pronunciation-filter false rejections. It changes no production behavior;
+the controlled results diagnose causes rather than establish a preference win.
+
+The [meaning-first implementation](research/meaning-first/README.md) and its
+[retained comparison](research/meaning-first/REPORT.md) remain reproducible as
+`semantic_pool`. Its successor is available inside **Brief intent · Lab** as
+**Use product benefits on next Generate**. It adds sense-constrained benefit
+associations and complete-word constructions, then selects eligible names
+without literal-coverage priority. See the [paper comparison](research/product-frame/RESEARCH.md)
+and [implementation results and examples](research/product-frame/REPORT.md).
+The option defaults off; human preference gates remain pending.
+
+The latest [product-relation revision](research/product-brief/README.md) recognizes
+equivalent action/noun phrases, retains support words separately, and carries
+the explicit benefit-root budget into blend producers without untyped neighbor
+padding. The same opt-in checkbox runs `brief_pool`; prior experimental exports
+remain available for frozen replay. See [current comparisons](research/product-brief/REPORT.md).
+
 ## Prerequisites
 
 | Tool | Version | Install |
@@ -262,7 +299,7 @@ Every candidate passes a phonotactic filter, is scored on three axes, deduped, a
 
 This engine is built from published techniques rather than ad-hoc heuristics:
 
-- **Brand-name blending & appeal** — Gangal et al., *Generating Appealing Brand Names*, [arXiv:1706.09335](https://arxiv.org/abs/1706.09335). Basis for syllable blending, vowel-dropping, and scoring candidates for readability/pronounceability.
+- **Brand-name blending & appeal** — Hiranandani, Maneriker and Jhamtani, *Generating Appealing Brand Names*, [arXiv:1706.09335](https://arxiv.org/abs/1706.09335). Basis for syllable blending, vowel-dropping, and scoring candidates for readability/pronounceability; not evidence that our hand-tuned scores predict brand preference.
 - **Markov / n-gram name generation** — the classic character-Markov approach to culture-specific names ([Markov name generation](https://luetkemj.github.io/170102/2016-markov-name-generation/)). Basis for the Sci-Fi/Fantasy generator.
 - **Sound symbolism (bouba/kiki)** — Köhler (1929); Klink, *Creating Brand Names with Meaning* / "Sounds good: phonetic patterns in top brand names"; Pathak et al. (2020), *Harsh voices, sound branding*, [Psychology & Marketing](https://onlinelibrary.wiley.com/doi/abs/10.1002/mar.21346). Basis for the memorability score (initial plosives) and the sub-style phoneme profiles (soft liquids vs. spiky plosives).
 - **Phonetic connotation** — Sapir (1929), *A Study in Phonetic Symbolism* (front vowel = small, back = large); Klink (2000) and Lowrey & Shrum (2007), *Phonetic Symbolism and Brand Name Preference* ([J. Consumer Research](https://coehuman.uodiyala.edu.iq/uploads/Coehuman%20library%20pdf/English%20library%D9%83%D8%AA%D8%A8%20%D8%A7%D9%84%D8%A7%D9%86%D9%83%D9%84%D9%8A%D8%B2%D9%8A/linguistics/LowreyBookChapter2006.Final.pdf)). Basis for the connotation tags (small/large, bold/sleek/smooth, sharp/round).
