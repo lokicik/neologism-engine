@@ -332,3 +332,66 @@ Pehlivan	craft	Ottoman	the champion wrestler of the fair	wrestle,strength,champi
 Nefes	foreign	Turkish	the breath; a Sufi song	breath,air,calm,spirit,song	0.9
 Tamga	craft	Turkic	the clan mark stamped on what you own	mark,symbol,icon,sign,brand,stamp	0.9
 Hudhud	myth	Persian	the wise hoopoe who led the birds	bird,guide,scout,quest,messenger	1.0
+# Phase 145 growth pass: the knowledge base is the reason family's ceiling,
+# and probes found whole domains thin (an observability brief returned one
+# name). This wave adds instruments and measurement, printing and music
+# craft, and widens the origins beyond the Turkish/Ottoman shelf that had
+# grown to a quarter of the file - Quechua, Akan, Persian, Japanese,
+# Nordic, Nahuatl.
+Plumbline	craft	English	the weighted line that finds true vertical	measure,true,straight,check,reference	0.6
+Theodolite	craft	Greek	the surveyor's angle-measuring telescope	measure,survey,angle,precision,observe	0.9
+Caliper	craft	English	the jaws that measure what a rule cannot	measure,precision,gauge,size,fine	0.5
+Assay	craft	English	the test that proves the metal	test,verify,measure,proof,purity	0.6
+Errata	craft	Latin	the page that lists what went wrong	error,fix,list,correction,record	0.6
+Incunabula	craft	Latin	books from printing's first years	early,print,origin,archive,rare	1.0
+Watchbell	nautical	English	the bell that marks each turn of watch	alert,time,shift,signal,watch	0.7
+Sounding	nautical	English	the drop of the lead to read the depth	measure,depth,probe,check,survey	0.5
+Fathom	nautical	English	the depth a spread of arms can measure	depth,measure,understand,probe	0.4
+Astrolabe	astro	Greek	the disc that maps the turning sky	navigate,measure,star,instrument,compute	0.6
+Parallax	astro	Greek	the shift that gives you distance	distance,measure,perspective,shift,depth	0.7
+Ephemeris	astro	Greek	the table of where each body will be	table,predict,schedule,position,forecast	0.9
+Apogee	astro	Greek	the farthest point of an orbit	distant,peak,orbit,extreme,limit	0.5
+Perigee	astro	Greek	the closest an orbit comes	near,close,orbit,approach,proximity	0.7
+Rosetta	craft	French	the stone that unlocked a lost script	translate,decode,key,language,unlock	0.4
+Barometer	craft	Greek	the glass that reads the weather's mood	measure,pressure,weather,forecast,gauge	0.4
+Anemometer	craft	Greek	the cups that count the wind	measure,wind,speed,count,weather	0.8
+Seismograph	craft	Greek	the needle that writes the earth's tremor	measure,detect,record,alert,signal	0.6
+Metronome	craft	Greek	the beat that will not drift	rhythm,time,steady,pace,practice	0.4
+Diapason	craft	Greek	the tuning pitch everything agrees on	tune,standard,reference,pitch,align	0.9
+Fermata	craft	Italian	the hold that stops the clock	pause,hold,wait,stop,rest	0.6
+Rubato	craft	Italian	time borrowed from one bar and repaid	time,flexible,adjust,balance,tempo	0.8
+Coda	craft	Italian	the passage that ends the piece	end,final,close,tail,finish	0.3
+Sostenuto	craft	Italian	held, and held on	sustain,hold,keep,steady,persist	1.0
+Kanban	craft	Japanese	the signboard that tells the shop what to do	board,signal,queue,workflow,task	0.4
+Andon	craft	Japanese	the lamp that stops the line when work goes wrong	alert,stop,signal,error,monitor	0.7
+Genchi	foreign	Japanese	go and see the real place yourself	observe,inspect,source,truth,visit	0.9
+Tsuba	craft	Japanese	the guard between hand and blade	guard,protect,shield,boundary,safety	1.0
+Sashiko	craft	Japanese	little stitches that mend and strengthen	repair,stitch,pattern,reinforce,craft	0.9
+Bonsai	craft	Japanese	the tree kept small on purpose	small,prune,grow,shape,patience	0.3
+Origami	craft	Japanese	flat paper folded into a form	fold,form,paper,transform,shape	0.2
+Suiseki	craft	Japanese	the stone kept for the landscape it shows	stone,view,collect,form,nature	1.0
+Qanat	craft	Persian	the underground channel that carries water	channel,water,pipe,transport,tunnel	1.0
+Divan	craft	Persian	the council; the collected poems	council,collection,archive,assembly,verse	0.7
+Karez	craft	Persian	the shared water tunnel of a village	water,share,channel,commons,supply	1.0
+Ubuntu	foreign	Nguni	I am because we are	together,community,unity,shared,human	0.4
+Harambee	foreign	Swahili	all pull together	together,effort,team,collective,lift	0.8
+Sankofa	myth	Akan	go back and fetch what you forgot	recall,return,history,memory,learn	0.9
+Adinkra	craft	Akan	the stamped symbols that speak proverbs	symbol,stamp,pattern,meaning,print	0.9
+Quipu	craft	Quechua	knotted cords that keep the accounts	record,ledger,knot,count,archive	0.9
+Tambo	craft	Quechua	the way station on the royal road	station,rest,relay,supply,route	1.0
+Chasqui	craft	Quechua	the relay runner of the mountain roads	relay,messenger,fast,deliver,route	1.0
+Amauta	craft	Quechua	the teacher who keeps the knowledge	teach,knowledge,wisdom,mentor,school	1.0
+Milpa	craft	Nahuatl	the field where crops grow together	grow,field,together,cycle,farm	0.9
+Talkoot	foreign	Finnish	the neighbours' work done together for free	together,volunteer,community,work,help	1.0
+Hygge	foreign	Danish	warmth that makes a room worth staying in	warm,comfort,home,calm,welcome	0.5
+Dugnad	foreign	Norwegian	the shared job the whole street turns up for	together,volunteer,community,effort,help	0.9
+Wheelwright	craft	English	the maker of wheels that carry loads	build,wheel,craft,repair,carry	0.6
+Fletcher	craft	English	the one who feathers arrows to fly straight	craft,aim,precision,arrow,finish	0.5
+Cooper	craft	English	the barrel-maker whose seams must not leak	build,seal,container,craft,tight	0.4
+Chandler	craft	English	the maker and seller of candles and stores	light,supply,make,store,trade	0.6
+Ostler	craft	English	the one who keeps the horses ready	ready,maintain,care,stable,relay	0.9
+Wayfinder	nautical	English	one who reads sea and sky for the route	navigate,route,guide,find,path	0.4
+Beeline	nature	English	the straight flight home	direct,fast,route,straight,home	0.4
+Springhead	nature	English	where the water first comes up	source,origin,spring,start,water	0.6
+Windrow	craft	English	the long row raked up to dry	row,gather,batch,order,collect	0.9
+Coppice	craft	English	woodland cut so it grows back stronger	renew,cycle,grow,harvest,sustain	0.8

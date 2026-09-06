@@ -499,3 +499,50 @@ annotate	note	0.9
 birdwatching	bird	0.9
 birdwatching	watch	0.8
 bird	wing	0.7
+# Phase 145: thin briefs failed at activation, not at the knowledge base - a
+# whole observability brief returned one name because "metrics" and
+# "observability" reached no imagery at all. These edges connect the mundane
+# vocabulary of those domains to tags the shelf actually carries.
+metrics	measure	0.95
+metric	measure	0.9
+observability	observe	0.9
+observability	watch	0.85
+telemetry	signal	0.9
+telemetry	measure	0.85
+latency	speed	0.9
+throughput	flow	0.85
+uptime	constant	0.85
+incident	alert	0.9
+oncall	watch	0.8
+tracing	trace	0.9
+instrument	measure	0.9
+benchmark	measure	0.9
+benchmark	standard	0.8
+triage	sort	0.9
+triage	priority	0.85
+triage	choose	0.8
+priority	order	0.85
+sort	order	0.85
+bug	error	0.95
+bug	defect	0.85
+defect	error	0.9
+crash	error	0.85
+patch	repair	0.9
+bounty	reward	0.85
+reward	treasure	0.8
+garden	grow	0.9
+garden	field	0.8
+garden	harvest	0.7
+seed	grow	0.8
+prune	shape	0.8
+peer	exchange	0.8
+peer	relay	0.75
+exchange	trade	0.85
+replicate	copy	0.9
+copy	print	0.7
+type	form	0.85
+type	shape	0.75
+schema	form	0.8
+lint	check	0.9
+format	pattern	0.75
+refactor	improve	0.9
