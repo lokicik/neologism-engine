@@ -41,7 +41,7 @@ pub(crate) fn passes_name_filters(
         crate::diagnostics::record(lower, "family.filter", "pronunciation");
         return false;
     };
-    let syllables = syllabify(&ph).len();
+    let syllables = crate::semantic::known_syllables(lower).unwrap_or_else(|| syllabify(&ph).len());
     if syllables == 0 || syllables > SYLLABLE_CAP {
         crate::diagnostics::record(lower, "family.filter", "syllables");
         return false;
@@ -144,7 +144,7 @@ pub(crate) fn rank_select_scaled(
         .zip(lls.iter())
         .map(|((lower, bonus), ll)| {
             let z = ((ll - mean) / std).clamp(-2.0, 2.0) / 2.0;
-            let syllables = syllabify(&pronounce(lower).unwrap_or_default()).len();
+            let syllables = crate::semantic::known_syllables(lower).unwrap_or_else(|| syllabify(&pronounce(lower).unwrap_or_default()).len());
             let syl_score = match syllables {
                 2 => 0.6,
                 3 => 0.3,

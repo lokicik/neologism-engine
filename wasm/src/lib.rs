@@ -163,6 +163,63 @@ pub fn generate_relation_candidate_diagnostics(config_json: &str) -> String {
     })
 }
 
+/// Additive meaning-first Lab. The synchronous scope also keeps pronunciation
+/// evidence and explanations consistent with the generator's corrected counts.
+#[wasm_bindgen]
+pub fn generate_semantic_candidate_diagnostics(config_json: &str) -> String {
+    semantic_candidate_diagnostics(config_json, false, neologism_core::semantic::compile)
+}
+
+#[wasm_bindgen]
+pub fn generate_product_frame_diagnostics(config_json: &str) -> String {
+    semantic_candidate_diagnostics(config_json, true, neologism_core::semantic::compile_product)
+}
+
+#[wasm_bindgen]
+pub fn generate_product_brief_diagnostics(config_json: &str) -> String {
+    semantic_candidate_diagnostics(config_json, true, neologism_core::product_brief::compile)
+}
+
+#[wasm_bindgen]
+pub fn generate_retained_fragment_diagnostics(config_json: &str) -> String {
+    semantic_candidate_diagnostics(config_json, true, neologism_core::retained::compile)
+}
+
+fn semantic_candidate_diagnostics(config_json: &str, product_frame: bool, compile: fn(&str) -> neologism_core::semantic::SemanticPlan) -> String {
+    let cfg: Config = match serde_json::from_str(config_json) {
+        Ok(cfg) => cfg,
+        Err(error) => return serde_json::json!({"error": error.to_string()}).to_string(),
+    };
+    if product_frame && (cfg.style != neologism_core::style::Style::BigTech || cfg.seed.is_none()) {
+        return serde_json::json!({"error": "product frame diagnostics require big_tech and a seed"}).to_string();
+    }
+    let plan = compile(cfg.description.as_deref().unwrap_or(""));
+    neologism_core::semantic::with_plan(&plan, || {
+        let mut page: serde_json::Value = if product_frame && cfg.variant.as_deref() == Some("metaphor") {
+            let (results, trace) = neologism_core::diagnostics::capture(|| neologism_core::product_frame::generate(&plan, &cfg));
+            serde_json::json!({"results": results, "evidence": [], "trace": trace})
+        } else if plan.status == "ready" {
+            serde_json::from_str(&generate_candidate_diagnostics(config_json)).unwrap()
+        } else { serde_json::json!({"results": [], "evidence": [], "trace": []}) };
+        if page.get("error").is_some() { return page.to_string(); }
+        let names: Vec<String> = page["results"].as_array().unwrap().iter()
+            .map(|r| r["name"].as_str().unwrap().to_string()).collect();
+        let reasons: Vec<neologism_core::reason::ReasonDecode> = if cfg.variant.as_deref() == Some("reason") {
+            serde_json::from_value(page["evidence"].clone()).unwrap_or_default()
+        } else { vec![] };
+        page["intent"] = serde_json::to_value(&plan.intent).unwrap();
+        page["semantic"] = serde_json::to_value(&plan).unwrap();
+        page["semanticEvidence"] = serde_json::to_value(names.iter().map(|name|
+            neologism_core::semantic::evidence(&plan, name, reasons.iter().find(|r| r.name.eq_ignore_ascii_case(name))))
+            .collect::<Vec<_>>()).unwrap();
+        page["explanations"] = serde_json::to_value(names.iter().map(|name| neologism_core::explain(name)).collect::<Vec<_>>()).unwrap();
+        let description = cfg.description.as_deref().unwrap_or("");
+        page["coverages"] = serde_json::to_value(neologism_core::description_concept_coverages(description, &names)).unwrap();
+        page["hazards"] = serde_json::to_value(neologism_core::description_lexical_hazards(description, &names)).unwrap();
+        page.to_string()
+    })
+}
+
 /// Structural breakdown of a single name (Phase 36 "Why this name"): suffix,
 /// stem, real-word prefix, syllables, connotations, scores — as JSON.
 #[wasm_bindgen]

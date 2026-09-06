@@ -143,6 +143,10 @@ pub fn respects_sonority(name: &str) -> bool {
 
 /// Split a word into rough CV syllables; returns syllable count.
 pub fn syllable_count(name: &str) -> usize {
+    crate::semantic::known_syllables(name).unwrap_or_else(|| letter_syllable_count(name))
+}
+
+pub(crate) fn letter_syllable_count(name: &str) -> usize {
     let mut count = 0usize;
     let mut prev_vowel = false;
     for c in name.chars() {

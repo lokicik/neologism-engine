@@ -25,6 +25,8 @@ const SEAMBLEND_STREAM: u64 = 0x5EA6_B1E4;
 /// One enumerated fusion candidate (pre-filter).
 #[derive(Debug, Clone)]
 struct Fusion {
+    left_end: usize,
+    right_start: usize,
     /// Lowercase fused spelling.
     lower: String,
     /// Shared-phoneme run length at the seam (0 for a syllable splice).
@@ -57,6 +59,8 @@ fn overlap_fusion(a: &str, pa: &[SpannedPhoneme], b: &str, pb: &[SpannedPhoneme]
                 .map(|(p, _)| *p)
                 .collect();
             return Some(Fusion {
+                left_end: cut,
+                right_start: 0,
                 lower,
                 overlap: k,
                 expected,
@@ -113,6 +117,8 @@ fn splice_fusions(
             let lower = format!("{a_letters}{b_letters}");
             let expected: Vec<Phoneme> = a_ph[..ac].iter().chain(b_ph[bc..].iter()).copied().collect();
             out.push(Fusion {
+                left_end: a_letters.len(),
+                right_start: pb[bc].1.start,
                 lower,
                 overlap: 0,
                 expected,
@@ -180,6 +186,7 @@ fn ingredient_groups(cfg: &Config) -> Vec<Vec<String>> {
     let mut groups: Vec<Vec<String>> = Vec::new();
     if let Some(desc) = cfg.description.as_deref().filter(|d| !d.trim().is_empty()) {
         let kws = keywords::extract_keywords(desc, 6);
+        if let Some(groups) = crate::semantic::benefit_root_groups(&kws, 16) { return groups; }
         groups = keywords::brand_root_groups(&kws, 16);
         augment_thin_groups(&mut groups, &kws);
     }
@@ -269,6 +276,8 @@ pub fn generate_seamblend(cfg: &Config, dict: &HashSet<String>, seed: u64) -> Ve
                             continue;
                         }
                         let bonus = taste_bonus(a, b, &f, &st.common_words);
+                        crate::semantic::record_construction(&f.lower, &[a, b]);
+                        crate::semantic::record_cuts(&f.lower, a, b, f.left_end, f.right_start, f.overlap);
                         pool.push((f.lower, bonus));
                     }
                 }
@@ -306,6 +315,16 @@ fn taste_bonus(_a: &str, _b: &str, f: &Fusion, _common: &HashSet<String>) -> f64
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn explicit_benefit_material_is_not_augmented() {
+        let description = "a tool that checks manifest hashes";
+        let plan = crate::product_brief::compile(description);
+        let cfg = crate::style::Config { description: Some(description.into()), ..crate::style::Config::default() };
+        crate::semantic::with_plan(&plan, || {
+            assert_eq!(super::ingredient_groups(&cfg), crate::semantic::root_groups(&plan.intent.generation_terms, 16).unwrap());
+        });
+        assert!(crate::semantic::benefit_root_groups(&plan.intent.generation_terms, 16).is_none());
+    }
     use super::*;
     use crate::style::Style;
 
@@ -318,6 +337,10 @@ mod tests {
         let f = overlap_fusion("pin", &spanned("pin"), "interest", &spanned("interest")).unwrap();
         assert_eq!(f.lower, "pinterest");
         assert_eq!(f.overlap, 2);
+        assert_eq!(format!("{}{}", &"pin"[..f.left_end], &"interest"[f.right_start..]), f.lower);
+        let c = crate::retained::construction("pin", "interest", f.left_end, f.right_start, f.overlap);
+        assert_eq!(c.method, "phoneme_overlap");
+        assert_eq!(c.shared_phonemes, 2);
     }
 
     #[test]
@@ -328,6 +351,7 @@ mod tests {
         let pb = spanned("harbor");
         let expected: Vec<Phoneme> = pa.iter().chain(pb.iter()).map(|(p, _)| *p).collect();
         let f = Fusion {
+            left_end: 3, right_start: 0,
             lower: "busharbor".to_string(),
             overlap: 0,
             expected,
@@ -338,6 +362,7 @@ mod tests {
         let pb2 = spanned("scope");
         let expected2: Vec<Phoneme> = pa2.iter().chain(pb2.iter()).map(|(p, _)| *p).collect();
         let f2 = Fusion {
+            left_end: 3, right_start: 0,
             lower: "logscope".to_string(),
             overlap: 0,
             expected: expected2,
@@ -348,6 +373,9 @@ mod tests {
     #[test]
     fn splice_fusions_hide_at_least_one_seam() {
         let out = splice_fusions("harbor", &spanned("harbor"), "lumen", &spanned("lumen"));
+        for f in &out {
+            assert_eq!(format!("{}{}", &"harbor"[..f.left_end], &"lumen"[f.right_start..]), f.lower);
+        }
         assert!(!out.is_empty());
         for f in &out {
             assert_ne!(f.lower, "harborlumen", "whole+whole must be skipped");

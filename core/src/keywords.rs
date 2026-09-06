@@ -1203,6 +1203,7 @@ pub fn respell_source_keywords(keywords: &[String]) -> Vec<String> {
 }
 
 pub fn brand_root_groups(keywords: &[String], limit: usize) -> Vec<Vec<String>> {
+    if let Some(groups) = crate::semantic::root_groups(keywords, limit) { return groups; }
     if let Some(groups) = crate::relation::root_groups(keywords, limit) { return groups; }
     if let Some(groups) = crate::brief_intent::root_groups(keywords, limit) { return groups; }
     const DEV_NAMING_ROOTS: &[&str] = &["key", "tag", "alias", "slug"];
@@ -1318,6 +1319,7 @@ fn bounded_guided_groups(groups: &[&[&str]], limit: usize) -> Vec<Vec<String>> {
 }
 
 pub fn guided_pair_root_groups(keywords: &[String], limit: usize) -> Vec<Vec<String>> {
+    if let Some(groups) = crate::semantic::benefit_root_groups(keywords, limit) { return groups; }
     if let Some(groups) = crate::relation::root_groups(keywords, limit) { return groups; }
     if let Some(groups) = crate::brief_intent::root_groups(keywords, limit) { return groups; }
     if is_naming_tool_brief(keywords) {

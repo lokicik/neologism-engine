@@ -1,0 +1,10 @@
+# Original editorial associations for this experiment; not human preference labels or licensed external norms.
+# id | operations | object cues | benefit | anchor:sense (semicolon separated)
+integrity	verify,check,validate	checksum,hash,signature,artifact,archive,manifest,configuration,file,license,key	confidence that an artifact matches its expected state	seal:mark of attestation;proof:evidence of correctness;touchstone:reference for checking quality
+measurement	compare,measure	size,cost,latency,loss,permission,duration,timing	make differences and quantities legible	gauge:instrument for measurement;caliper:instrument for comparing dimensions;balance:comparison of two sides
+observation	track,record,monitor	memory,usage,socket,connection,queue,depth,process,activity,timing	make changing system behavior visible	beacon:signal that reveals a position;ledger:record of observations;watch:continued observation
+recovery	restore,recover	configuration,section,session,archive,entry,file,state	recover a prior usable state	anchor:stable point to return to;reprise:return to an earlier passage;mend:restore something damaged
+organization	group,sort	log,message,warning,failure,report,diagnostic	turn scattered diagnostic evidence into understandable groups	thread:connection through separate items;folio:collection of related leaves;shelf:place for organized material
+selection	filter	message,alert,diagnostic,report,warning	separate useful evidence from repeated noise	sieve:separate wanted material;prism:separate a mixed signal;mesh:selective passage through a screen
+topology	map	dependency,service,module,repository	make relationships between components visible	atlas:collection of maps;weave:interconnected strands;chart:representation of relationships
+exposure	detect,find	credential,token,secret,leak	bring accidental exposure to attention	lantern:light that reveals what is hidden;sentinel:watcher that notices danger;tripwire:signal triggered by a breach

@@ -1,0 +1,23 @@
+# Original editorial domain/property relationships, not examples of preferred names.
+# frame | subject | property
+integrity	archive	signature
+integrity	manifest	hash
+integrity	file	checksum
+measurement	query	latency
+measurement	storage	cost
+measurement	executable	size
+measurement	image	loss
+observation	queue	depth
+observation	memory	usage
+observation	process	activity
+observation	socket	connection
+recovery	configuration	section
+recovery	archive	entry
+recovery	editor	session
+organization	compiler	warning
+organization	test	failure
+organization	log	message
+selection	alert	message
+topology	module	dependency
+topology	service	dependency
+exposure	access	token

@@ -1,0 +1,17 @@
+{
+  "schema": "product-brief-protocol-v1",
+  "status": "grammar pairs fixed before new outputs; existing product-frame cases remain regression examples",
+  "seeds": [13, 67],
+  "paraphrases": [
+    ["a tool that restores configuration sections", "a utility for recovering configuration sections"],
+    ["a tool that verifies archive signatures", "a utility for validating signatures of archives"],
+    ["a tool that measures query latency", "a utility for measuring latency of queries"],
+    ["a tool that tracks queue depth", "a utility for monitoring depth of queues"],
+    ["a tool that compares storage costs", "a utility for comparing costs of storage"],
+    ["a tool that filters alert messages", "a utility for filtering messages of alerts"],
+    ["a tool that maps module dependencies", "a utility for mapping dependencies of modules"],
+    ["a tool that groups compiler warnings", "a utility for grouping warnings of compilers"]
+  ],
+  "negative": ["a tool that recovers antique furniture", "a tool that monitors football scores", "a tool that does not recover files", "a tool that recovers files and deletes archives", "a tool that measures query latency without tracking users", "a tool that measures query latency and storage costs"],
+  "qualityGate": "unchanged original human gate; no new training or promotion"
+}

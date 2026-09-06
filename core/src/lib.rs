@@ -1,9 +1,8 @@
 pub mod blend;
-pub mod collision;
-pub mod diagnostics;
 pub mod brief_intent;
-pub mod relation;
+pub mod collision;
 pub mod connotation;
+pub mod diagnostics;
 pub mod exclude;
 pub mod family;
 pub mod keywords;
@@ -12,11 +11,16 @@ pub mod metrics;
 pub mod morphemes;
 pub mod phonemes;
 pub mod phonology;
+pub mod product_frame;
+pub mod product_brief;
 pub mod reason;
+pub mod relation;
+pub mod retained;
 pub mod phonotactics;
 pub mod score;
 pub mod seamblend;
 pub mod semfield;
+pub mod semantic;
 pub mod style;
 pub mod submorph;
 

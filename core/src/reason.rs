@@ -214,7 +214,7 @@ fn activate(cfg: &Config) -> HashMap<String, Activation> {
 }
 
 /// The reasoning behind one proposed name.
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, serde::Deserialize)]
 pub struct ReasonDecode {
     pub name: String,
     pub kind: String,
@@ -432,8 +432,9 @@ pub fn generate_reason_explained(cfg: &Config, seed: u64) -> (Vec<NameResult>, V
     }
     for (_, r, _) in &merged { crate::diagnostics::record(&r.name, "reason.rank_input", "eligible"); }
     merged.sort_by(|a, b| {
-        b.0.partial_cmp(&a.0)
-            .unwrap_or(std::cmp::Ordering::Equal)
+        crate::semantic::reason_priority(cfg.description.as_deref(), &a.2.chain)
+            .cmp(&crate::semantic::reason_priority(cfg.description.as_deref(), &b.2.chain))
+            .then_with(|| b.0.partial_cmp(&a.0).unwrap_or(std::cmp::Ordering::Equal))
             .then(a.2.name.cmp(&b.2.name))
     });
 
