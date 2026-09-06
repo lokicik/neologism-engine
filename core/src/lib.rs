@@ -1,5 +1,6 @@
 pub mod blend;
 pub mod collision;
+pub mod diagnostics;
 pub mod connotation;
 pub mod exclude;
 pub mod family;
@@ -863,6 +864,7 @@ fn generate_bigtech(
                 st.roots[rand::Rng::gen_range(rng, 0..st.roots.len())]
             };
             if keywords::compound_pair_has_lexical_echo(adj, noun) {
+                diagnostics::record(&compound(adj, noun), "compound.filter", "lexical_echo");
                 continue;
             }
             if !keywords::compound_pair_is_coherent(
@@ -871,6 +873,7 @@ fn generate_bigtech(
                 &raw_desc_keywords,
                 compound_continuation,
             ) {
+                diagnostics::record(&compound(adj, noun), "compound.filter", "incoherent_pair");
                 continue;
             }
             compound(adj, noun)
@@ -1004,7 +1007,9 @@ fn generate_bigtech(
         };
 
         let name = capitalize(&name);
+        diagnostics::record(&name, "legacy.formed", "materialized");
         if name.len() < cfg.min_len || name.len() > cfg.max_len {
+            diagnostics::record(&name, "legacy.filter", "length");
             continue;
         }
         let lower = name.to_lowercase();
@@ -1013,23 +1018,28 @@ fn generate_bigtech(
         // like the harsh Sci-Fi variants do.
         if respell_mode {
             if !is_valid_clustered(&lower, Style::BigTech, 4) {
+                diagnostics::record(&name, "legacy.filter", "cluster");
                 continue;
             }
         } else if !is_valid(&lower, Style::BigTech) {
+            diagnostics::record(&name, "legacy.filter", "phonotactics");
             continue;
         }
         // Big-tech names should read naturally → enforce sonority sequencing.
         // Compounds join two real words, so skip the single-word sonority check.
         if !cfg.compound && !respell_mode && !respects_sonority(&lower) {
+            diagnostics::record(&name, "legacy.filter", "sonority");
             continue;
         }
         // Brand-shape: 1–3 syllables (research sweet spot); reject long mashups.
         if !cfg.compound && syllable_count(&lower) > tuning.syllable_cap {
+            diagnostics::record(&name, "legacy.filter", "syllables");
             continue;
         }
         // Phonotactic-probability gate: reject candidates less brand-like than
         // the low tail of real brands (no-op when apply_gate is false).
         if st.model.log_likelihood(&name) < ll_floor {
+            diagnostics::record(&name, "legacy.filter", "brand_likelihood");
             continue;
         }
         // Don't emit names that read as a truncated/typo'd real brand. Also
@@ -1038,23 +1048,28 @@ fn generate_bigtech(
         if (apply_gate || respell_mode || realword_mode)
             && mimics_real_brand_indexed(&lower, &st.corpus_by_len)
         {
+            diagnostics::record(&name, "legacy.filter", "brand_mimic");
             continue;
         }
         // Never emit a real brand / root / dictionary word verbatim — except in
         // real-word mode, where curated real words (incl. roots) are the point;
         // there only the brand-mimic check above guards against brands.
         if !realword_mode && (st.corpus_set.contains(&lower) || dict.contains(&lower)) {
+            diagnostics::record(&name, "legacy.filter", "brand_or_dictionary");
             continue;
         }
         // Reject plain real words (Guard, Telegraph) — big-tech only.
         if !realword_mode && st.common_words.contains(&lower) {
+            diagnostics::record(&name, "legacy.filter", "common_word");
             continue;
         }
         // Reject bad/offensive connotations (Bitdefect) — big-tech only.
         if BAD_SUBSTRINGS.iter().any(|b| lower.contains(b)) {
+            diagnostics::record(&name, "legacy.filter", "bad_substring");
             continue;
         }
         if !passes_constraints(&lower, cfg) {
+            diagnostics::record(&name, "legacy.filter", "constraints");
             continue;
         }
         // Phase 33: fuzzy + stem exclusion (most expensive filter — runs on
@@ -1069,12 +1084,15 @@ fn generate_bigtech(
             tuning.fuzzy_exclude && !constrained,
             tuning.stem_exclude && !constrained,
         ) {
+            diagnostics::record(&name, "legacy.filter", "excluded");
             continue;
         }
         if seen.contains(&name) {
+            diagnostics::record(&name, "legacy.filter", "duplicate");
             continue;
         }
 
+        diagnostics::record(&name, "legacy.rank_input", "eligible");
         seen.insert(name.clone());
         let sp = score_pronounceability(&lower);
         let sn = score_novelty(&lower, dict);

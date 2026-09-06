@@ -168,7 +168,9 @@ pub fn generate_morpheme(cfg: &Config, dict: &HashSet<String>, seed: u64) -> Vec
             let distinct = a.gloss != b.gloss;
             let bonus = if both_matched && distinct { 0.4 } else { 0.2 };
             for name in compositions(&a.form, &b.form) {
+                crate::diagnostics::record(&name, "morpheme.formed", "materialized");
                 if !seen.insert(name.clone()) {
+                    crate::diagnostics::record(&name, "morpheme.filter", "duplicate");
                     continue;
                 }
                 if !family::passes_name_filters(&name, cfg, dict, st, &exclude) {

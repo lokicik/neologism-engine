@@ -254,12 +254,15 @@ pub fn generate_seamblend(cfg: &Config, dict: &HashSet<String>, seed: u64) -> Ve
                     }
                     fusions.extend(splice_fusions(a, pa, b, pb));
                     for f in fusions {
+                        crate::diagnostics::record(&f.lower, "seamblend.formed", "materialized");
                         if !seen.insert(f.lower.clone()) {
+                            crate::diagnostics::record(&f.lower, "seamblend.filter", "duplicate");
                             continue;
                         }
                         // Seam-specific guard (Busharbor class), then the shared
                         // name-filter chain.
                         if !seam_preserves_consonants(&f) {
+                            crate::diagnostics::record(&f.lower, "seamblend.filter", "phonetic_reparse");
                             continue;
                         }
                         if !family::passes_name_filters(&f.lower, cfg, dict, st, &exclude) {

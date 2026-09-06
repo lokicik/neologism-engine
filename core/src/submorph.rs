@@ -467,19 +467,23 @@ pub fn generate_submorph_explained(cfg: &Config, seed: u64) -> (Vec<NameResult>,
             let Some((fused, junction, expected_skel)) = fuse(h, t) else {
                 continue;
             };
+            crate::diagnostics::record(&fused, "submorph.formed", "materialized");
             if !seen.insert(fused.clone()) {
+                crate::diagnostics::record(&fused, "submorph.filter", "duplicate");
                 continue;
             }
             // The seam sits at the end of the head's letters (overlap keeps
             // one shared copy inside the head's span).
             let seam = h.letters.len().min(fused.len());
             if !passes_structure(&fused, t, &expected_skel, wild) {
+                crate::diagnostics::record(&fused, "submorph.filter", "structure");
                 continue;
             }
             // Wild mode keeps only the phoneme-level reparse guard (S4, inside
             // passes_structure): the visible-word rules are exactly what a
             // Tabalong-class pun needs to break. Default mode keeps them all.
             if !wild && !is_seamless(&fused, &h.letters, &t.letters, seam, &st.common_words) {
+                crate::diagnostics::record(&fused, "submorph.filter", "visible_seam");
                 continue;
             }
             if !family::passes_name_filters(&fused, cfg, dict, st, &exclude) {
@@ -566,18 +570,23 @@ pub fn generate_submorph_explained(cfg: &Config, seed: u64) -> (Vec<NameResult>,
             let last = lower.chars().last().unwrap_or('x');
             let trisyl = TRISYL_TAILS.contains(&d.tail.as_str()) && d.tail_quality;
             if head_n.get(&d.head).copied().unwrap_or(0) >= cap_head {
+                crate::diagnostics::record(&r.name, "submorph.selection", "head_cap");
                 continue;
             }
             if tail_n.get(&d.tail).copied().unwrap_or(0) >= cap_tail {
+                crate::diagnostics::record(&r.name, "submorph.selection", "tail_cap");
                 continue;
             }
             if class_n.get(&last).copied().unwrap_or(0) >= cap_class {
+                crate::diagnostics::record(&r.name, "submorph.selection", "ending_cap");
                 continue;
             }
             if trisyl && tri_n >= cap_tri {
+                crate::diagnostics::record(&r.name, "submorph.selection", "syllable_cap");
                 continue;
             }
             if d.tail_quality && qual_n >= cap_quality {
+                crate::diagnostics::record(&r.name, "submorph.selection", "canon_tail_cap");
                 continue;
             }
             taken.insert(lower);

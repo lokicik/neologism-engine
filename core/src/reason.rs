@@ -328,6 +328,7 @@ fn coined_candidates(
                     break;
                 }
             }
+            if chain.is_none() { crate::diagnostics::record(&r.name, "reason.filter", "untraceable_coinage"); }
             let chain = chain?;
             let gloss = format!("{} + {}", d.head_gloss, d.tail_gloss);
             let decode = ReasonDecode {
@@ -360,10 +361,13 @@ pub fn generate_reason_explained(cfg: &Config, seed: u64) -> (Vec<NameResult>, V
     let mut scored: Vec<Scored> = Vec::new();
     for e in kb() {
         let lower = e.name.to_lowercase();
+        crate::diagnostics::record(&lower, "reason.retrieval", "inventory_entry");
         if excluded.contains(&lower) {
+            crate::diagnostics::record(&lower, "reason.filter", "excluded");
             continue;
         }
         if lower.len() < cfg.min_len.min(3) || lower.len() > cfg.max_len.max(10) {
+            crate::diagnostics::record(&lower, "reason.filter", "length");
             continue;
         }
         let (mut best, mut sum, mut chain): (f64, f64, Vec<String>) = (0.0, 0.0, Vec::new());
@@ -380,6 +384,7 @@ pub fn generate_reason_explained(cfg: &Config, seed: u64) -> (Vec<NameResult>, V
             }
         }
         if best <= 0.0 && !act.is_empty() {
+            crate::diagnostics::record(&lower, "reason.filter", "no_activation");
             continue;
         }
         let mut score = best + 0.35 * (sum - best);
@@ -425,6 +430,7 @@ pub fn generate_reason_explained(cfg: &Config, seed: u64) -> (Vec<NameResult>, V
         }
         merged.push((score, r, d));
     }
+    for (_, r, _) in &merged { crate::diagnostics::record(&r.name, "reason.rank_input", "eligible"); }
     merged.sort_by(|a, b| {
         b.0.partial_cmp(&a.0)
             .unwrap_or(std::cmp::Ordering::Equal)
@@ -444,12 +450,15 @@ pub fn generate_reason_explained(cfg: &Config, seed: u64) -> (Vec<NameResult>, V
             break;
         }
         if !seen.insert(r.name.to_lowercase()) {
+            crate::diagnostics::record(&r.name, "reason.selection", "duplicate");
             continue;
         }
         if kind_n.get(d.kind.as_str()).copied().unwrap_or(0) >= cap {
+            crate::diagnostics::record(&r.name, "reason.selection", "kind_cap");
             continue;
         }
         if origin_n.get(d.origin.as_str()).copied().unwrap_or(0) >= cap {
+            crate::diagnostics::record(&r.name, "reason.selection", "origin_cap");
             continue;
         }
         *kind_n.entry(d.kind.clone()).or_default() += 1;

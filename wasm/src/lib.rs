@@ -84,6 +84,40 @@ pub fn generate_names(config_json: &str) -> String {
     serde_json::to_string(&results).unwrap_or_else(|_| "[]".to_string())
 }
 
+/// Experimental diagnostic entry point. Existing generation exports are unchanged.
+/// Returns the bounded family page, structured evidence and observed internal events.
+#[wasm_bindgen]
+pub fn generate_candidate_diagnostics(config_json: &str) -> String {
+    let run = || -> Result<serde_json::Value, String> {
+        let mut cfg: Config = serde_json::from_str(config_json).map_err(|e| e.to_string())?;
+        if cfg.style != neologism_core::style::Style::BigTech {
+            return Err("candidate diagnostics require big_tech".into());
+        }
+        if cfg.seed.is_none() { return Err("candidate diagnostics require a seed".into()); }
+        cfg.count = cfg.count.min(24);
+        if cfg.count == 0 { return Ok(serde_json::json!({"results": [], "evidence": [], "trace": []})); }
+        let seed = cfg.seed.unwrap();
+        let ((results, evidence), trace) = neologism_core::diagnostics::capture(|| {
+            match cfg.variant.as_deref() {
+                Some("reason") => {
+                    let (r, d) = neologism_core::reason::generate_reason_explained(&cfg, seed);
+                    (r, serde_json::to_value(d).unwrap())
+                }
+                Some("submorph") => {
+                    let (r, d) = neologism_core::submorph::generate_submorph_explained(&cfg, seed);
+                    (r, serde_json::to_value(d).unwrap())
+                }
+                _ => (generate(&cfg), serde_json::json!([])),
+            }
+        });
+        Ok(serde_json::json!({"results": results, "evidence": evidence, "trace": trace}))
+    };
+    match run() {
+        Ok(value) => value.to_string(),
+        Err(error) => serde_json::json!({"error": error}).to_string(),
+    }
+}
+
 /// Structural breakdown of a single name (Phase 36 "Why this name"): suffix,
 /// stem, real-word prefix, syllables, connotations, scores — as JSON.
 #[wasm_bindgen]

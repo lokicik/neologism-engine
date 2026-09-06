@@ -34,22 +34,28 @@ pub(crate) fn passes_name_filters(
     exclude: &ExcludeSet,
 ) -> bool {
     if lower.len() < cfg.min_len || lower.len() > cfg.max_len {
+        crate::diagnostics::record(lower, "family.filter", "length");
         return false;
     }
     let Some(ph) = pronounce(lower) else {
+        crate::diagnostics::record(lower, "family.filter", "pronunciation");
         return false;
     };
     let syllables = syllabify(&ph).len();
     if syllables == 0 || syllables > SYLLABLE_CAP {
+        crate::diagnostics::record(lower, "family.filter", "syllables");
         return false;
     }
     if BAD_SUBSTRINGS.iter().any(|b| lower.contains(b)) {
+        crate::diagnostics::record(lower, "family.filter", "bad_substring");
         return false;
     }
     if st.corpus_set.contains(lower) || dict.contains(lower) || st.common_words.contains(lower) {
+        crate::diagnostics::record(lower, "family.filter", "dictionary_or_brand");
         return false;
     }
     if mimics_real_brand_indexed(lower, &st.corpus_by_len) {
+        crate::diagnostics::record(lower, "family.filter", "brand_mimic");
         return false;
     }
     if GENERIC_PAIR_TAILS.iter().any(|tail| {
@@ -57,19 +63,23 @@ pub(crate) fn passes_name_filters(
             .strip_suffix(tail)
             .is_some_and(|stem| stem.len() >= 3 && st.common_words.contains(stem))
     }) {
+        crate::diagnostics::record(lower, "family.filter", "generic_pair");
         return false;
     }
     if !passes_constraints(lower, cfg) {
+        crate::diagnostics::record(lower, "family.filter", "constraints");
         return false;
     }
     // Existing package/brand name (bloom membership; no-op until the bloom is
     // loaded, so native tests and un-injected wasm degrade gracefully).
     if crate::collision::likely_taken(lower) {
+        crate::diagnostics::record(lower, "family.filter", "collision_snapshot");
         return false;
     }
     // Exact-only exclusion: the reachable space is brief-constrained, and the
     // fuzzy/stem layers are documented to starve constrained modes.
     if exclude.rejects(lower, false, false) {
+        crate::diagnostics::record(lower, "family.filter", "excluded");
         return false;
     }
     true
@@ -114,6 +124,7 @@ pub(crate) fn rank_select_scaled(
     ll_scale: f64,
 ) -> Vec<NameResult> {
     use rand::SeedableRng;
+    for (name, _) in pool { crate::diagnostics::record(name, "family.rank_input", "eligible"); }
     if pool.is_empty() {
         return Vec::new();
     }
