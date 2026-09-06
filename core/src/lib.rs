@@ -1,6 +1,8 @@
 pub mod blend;
 pub mod collision;
 pub mod diagnostics;
+pub mod brief_intent;
+pub mod relation;
 pub mod connotation;
 pub mod exclude;
 pub mod family;

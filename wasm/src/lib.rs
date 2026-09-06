@@ -118,6 +118,51 @@ pub fn generate_candidate_diagnostics(config_json: &str) -> String {
     }
 }
 
+/// Additive intent experiment. Coverage and hazards use the same scoped brief
+/// representation as generation. No scope survives this synchronous call.
+#[wasm_bindgen]
+pub fn generate_intent_candidate_diagnostics(config_json: &str) -> String {
+    let cfg: Config = match serde_json::from_str(config_json) {
+        Ok(cfg) => cfg,
+        Err(error) => return serde_json::json!({"error": error.to_string()}).to_string(),
+    };
+    let intent = neologism_core::brief_intent::compile(cfg.description.as_deref().unwrap_or(""));
+    neologism_core::brief_intent::with_intent(&intent, || {
+        let mut page: serde_json::Value = serde_json::from_str(&generate_candidate_diagnostics(config_json)).unwrap();
+        if page.get("error").is_some() { return page.to_string(); }
+        let names: Vec<String> = page["results"].as_array().unwrap().iter()
+            .map(|r| r["name"].as_str().unwrap().to_string()).collect();
+        let description = cfg.description.as_deref().unwrap_or("");
+        page["intent"] = serde_json::to_value(&intent).unwrap();
+        page["coverages"] = serde_json::to_value(neologism_core::description_concept_coverages(description, &names)).unwrap();
+        page["hazards"] = serde_json::to_value(neologism_core::description_lexical_hazards(description, &names)).unwrap();
+        page.to_string()
+    })
+}
+
+/// Operation/object experiment; the original intent export remains unchanged.
+#[wasm_bindgen]
+pub fn generate_relation_candidate_diagnostics(config_json: &str) -> String {
+    let cfg: Config = match serde_json::from_str(config_json) {
+        Ok(cfg) => cfg,
+        Err(error) => return serde_json::json!({"error": error.to_string()}).to_string(),
+    };
+    let plan = neologism_core::relation::compile(cfg.description.as_deref().unwrap_or(""));
+    neologism_core::relation::with_plan(&plan, || {
+        let mut page: serde_json::Value = serde_json::from_str(&generate_candidate_diagnostics(config_json)).unwrap();
+        if page.get("error").is_some() { return page.to_string(); }
+        let names: Vec<String> = page["results"].as_array().unwrap().iter()
+            .map(|r| r["name"].as_str().unwrap().to_string()).collect();
+        let description = cfg.description.as_deref().unwrap_or("");
+        page["intent"] = serde_json::to_value(&plan.intent).unwrap();
+        page["relation"] = serde_json::to_value(&plan).unwrap();
+        page["relationEvidence"] = serde_json::to_value(names.iter().map(|name| neologism_core::relation::evidence(&plan, name)).collect::<Vec<_>>()).unwrap();
+        page["coverages"] = serde_json::to_value(neologism_core::description_concept_coverages(description, &names)).unwrap();
+        page["hazards"] = serde_json::to_value(neologism_core::description_lexical_hazards(description, &names)).unwrap();
+        page.to_string()
+    })
+}
+
 /// Structural breakdown of a single name (Phase 36 "Why this name"): suffix,
 /// stem, real-word prefix, syllables, connotations, scores — as JSON.
 #[wasm_bindgen]

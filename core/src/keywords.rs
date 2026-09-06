@@ -138,13 +138,13 @@ const STOPWORDS: &[&str] = &[
     "per",
 ];
 
-fn is_stopword(w: &str) -> bool {
+pub(crate) fn is_stopword(w: &str) -> bool {
     STOPWORDS.contains(&w)
 }
 
 /// Short evocative roots for common product concepts. This is deliberately a
 /// small, transparent offline lexicon rather than semantic inference.
-fn concept_roots(word: &str) -> &'static [&'static str] {
+pub(crate) fn concept_roots(word: &str) -> &'static [&'static str] {
     match word {
         "name" | "naming" | "brand" | "title" | "word" | "identity" => {
             &["lex", "nym", "nom", "mark", "mint"]
@@ -1073,7 +1073,7 @@ pub fn compound_roots(keywords: &[String], limit: usize) -> Vec<String> {
 
 /// Artifact words are informative in a brief but weak literal naming roots.
 /// Their concept expansions remain, avoiding Dev-/Gen-/Pack- stem walls.
-fn suppress_literal_root(word: &str) -> bool {
+pub(crate) fn suppress_literal_root(word: &str) -> bool {
     !concept_roots(word).is_empty()
         || matches!(
             word,
@@ -1203,6 +1203,8 @@ pub fn respell_source_keywords(keywords: &[String]) -> Vec<String> {
 }
 
 pub fn brand_root_groups(keywords: &[String], limit: usize) -> Vec<Vec<String>> {
+    if let Some(groups) = crate::relation::root_groups(keywords, limit) { return groups; }
+    if let Some(groups) = crate::brief_intent::root_groups(keywords, limit) { return groups; }
     const DEV_NAMING_ROOTS: &[&str] = &["key", "tag", "alias", "slug"];
     let has_naming_domain = is_naming_brief(keywords);
     let terminal_log = is_terminal_log_brief(keywords);
@@ -1316,6 +1318,8 @@ fn bounded_guided_groups(groups: &[&[&str]], limit: usize) -> Vec<Vec<String>> {
 }
 
 pub fn guided_pair_root_groups(keywords: &[String], limit: usize) -> Vec<Vec<String>> {
+    if let Some(groups) = crate::relation::root_groups(keywords, limit) { return groups; }
+    if let Some(groups) = crate::brief_intent::root_groups(keywords, limit) { return groups; }
     if is_naming_tool_brief(keywords) {
         // `LexLoom` gives naming tools one deliberate word-making role without
         // adding another suffix family to ordinary Brandable output.
@@ -1505,7 +1509,7 @@ const SHORT_KEEP: &[&str] = &["ai", "ml", "ar", "vr"];
 /// Light inflection stripper — just enough that "journaling"/"keyboards" feed
 /// the blender as "journal"/"keyboard". Deliberately not a Porter stemmer:
 /// each rule is pinned by a test and nothing else is touched.
-fn stem(word: &str) -> String {
+pub(crate) fn stem(word: &str) -> String {
     if let Some(base) = match word {
         "hiring" => Some("hire"),
         "coding" => Some("code"),
@@ -1555,6 +1559,11 @@ fn stem(word: &str) -> String {
 
 /// Extract up to `limit` keyword stems from `text`, ranked by RAKE word score.
 pub fn extract_keywords(text: &str, limit: usize) -> Vec<String> {
+    if let Some(terms) = crate::brief_intent::generation_keywords(text, limit) { return terms; }
+    extract_keywords_legacy(text, limit)
+}
+
+pub(crate) fn extract_keywords_legacy(text: &str, limit: usize) -> Vec<String> {
     let lower = text.to_lowercase();
 
     // Tokenize, then split into candidate phrases at stopwords / non-alpha breaks.
