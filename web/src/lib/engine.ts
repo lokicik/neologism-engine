@@ -11,6 +11,13 @@ import init, {
   collision_risk,
   generate_reason_page,
   generate_submorph_page,
+  generate_candidate_diagnostics,
+  generate_intent_candidate_diagnostics,
+  generate_relation_candidate_diagnostics,
+  generate_semantic_candidate_diagnostics,
+  generate_product_frame_diagnostics,
+  generate_product_brief_diagnostics,
+  generate_retained_fragment_diagnostics,
 } from '../wasm/neologism_wasm.js'
 import { autoModeCounts, isReadableAutoRespell, mergeAutoBatches } from './auto'
 import { tasteContextForConfig } from './taste-context'
@@ -400,7 +407,7 @@ export function cratesTaken(name: string): boolean | undefined {
   }
 }
 
-interface ReasonDecode {
+export interface ReasonDecode {
   name: string
   kind: string
   origin: string
@@ -409,13 +416,100 @@ interface ReasonDecode {
   taken: boolean
 }
 
-interface SubmorphDecode {
+export interface SubmorphDecode {
   name: string
   head: string
   head_gloss: string
   tail: string
   tail_gloss: string
   tail_quality: boolean
+  head_hits: string[]
+  tail_hits: string[]
+  junction: string
+}
+
+export interface GeneratorTrace {
+  name: string
+  stage: string
+  reason: string
+  occurrences: number
+}
+
+export interface BriefIntent {
+  schema: 'brief-intent-v1'
+  description: string
+  status: 'parsed' | 'fallback'
+  fallback_reason: string | null
+  terms: { term: string; surface: string; start: number; end: number; role: 'operation' | 'object' | 'condition' | 'context' }[]
+  generation_terms: string[]
+}
+
+export interface DiagnosticFamilyPage {
+  results: NameResult[]
+  evidence: (ReasonDecode | SubmorphDecode)[]
+  trace: GeneratorTrace[]
+  intent?: BriefIntent
+  coverages?: number[]
+  hazards?: boolean[]
+  relation?: RelationPlan
+  relationEvidence?: RelationEvidence[]
+  semantic?: SemanticPlan
+  semanticEvidence?: SemanticEvidence[]
+  explanations?: Explanation[]
+}
+
+export interface SemanticPlan {
+  check_retained_fragments?: boolean
+  schema: 'meaning-first-plan-v1'
+  intent: BriefIntent
+  status: 'ready' | 'unresolved'
+  reason: string | null
+  object_phrase: { surface: string; start: number; end: number; terms: BriefIntent['terms'] } | null
+  material: MaterialRoot[]
+  product_frame?: { id: string; operation: string; matched_objects: string[]; benefit: string; anchors: { word: string; sense: string }[]; provenance: string }
+  object_relation?: { subject: BriefIntent['terms'][number]; property: BriefIntent['terms'][number]; supporting_terms: BriefIntent['terms']; provenance: string }
+}
+export interface SemanticEvidence {
+  retained_construction?: { method: string; shared_phonemes: number; parts: { parent: string; fragment: string; source_start: number; source_end: number; start: number; end: number; status: string; associations: string[] }[] }
+  name: string
+  links: { term: string; role: string; method: string; material: string }[]
+  object_terms: string[]
+  covered_object_terms: string[]
+  tier: number | null
+  decision: string
+  pronunciation: { count: number; source: string; components: string[] }
+  product_frame?: { frame_id: string; benefit: string; anchor: { word: string; sense: string }; object_term: string | null; construction: 'complete_words' | 'whole_metaphor'; provenance: string }
+}
+
+export interface MaterialRoot { root: string; term: string; source: string }
+export interface RelationPlan {
+  schema: 'operation-object-plan-v1'
+  intent: BriefIntent
+  status: 'ready' | 'unresolved'
+  reason: string | null
+  operation: BriefIntent['terms'][number] | null
+  object_head: BriefIntent['terms'][number] | null
+  operation_roots: MaterialRoot[]
+  object_roots: MaterialRoot[]
+}
+export interface RelationEvidence {
+  name: string
+  operation: { material: MaterialRoot; start: number; end: number }[]
+  object: { material: MaterialRoot; start: number; end: number }[]
+  decision: string
+}
+
+// This additive entry point is used only by the shared-pool Lab and its audit.
+export async function generateDiagnosticFamily(cfg: Config, useIntent: boolean | 'relation' | 'semantic' | 'product_frame' | 'product_brief' | 'retained_fragments' = false): Promise<DiagnosticFamilyPage> {
+  await ensureSeamblendData()
+  const generate = useIntent === 'retained_fragments' ? generate_retained_fragment_diagnostics : useIntent === 'product_brief' ? generate_product_brief_diagnostics : useIntent === 'product_frame' ? generate_product_frame_diagnostics : useIntent === 'semantic' ? generate_semantic_candidate_diagnostics : useIntent === 'relation' ? generate_relation_candidate_diagnostics : useIntent ? generate_intent_candidate_diagnostics : generate_candidate_diagnostics
+  const page = JSON.parse(generate(JSON.stringify(cfg))) as DiagnosticFamilyPage | { error: string }
+  if ('error' in page) throw new Error(page.error)
+  const names = JSON.stringify(page.results.map((r) => r.name))
+  const coverage = page.coverages ?? JSON.parse(concept_coverages(cfg.description ?? '', names)) as number[]
+  const hazards = page.hazards ?? JSON.parse(lexical_hazards(cfg.description ?? '', names)) as boolean[]
+  page.results = page.results.map((r, index) => ({ ...r, concept_coverage: coverage[index] ?? 0, lexicalHazard: hazards[index] || undefined }))
+  return page
 }
 
 export async function generateNames(cfg: Config): Promise<NameResult[]> {
@@ -787,6 +881,7 @@ export async function explainName(name: string): Promise<Explanation> {
   await ensureInit()
   return JSON.parse(explain_name(name)) as Explanation
 }
+
 
 // The keyword stems the engine extracts from a description (Phase 48) —
 // shown above results so users see exactly what drove their batch.

@@ -16,6 +16,14 @@ interface Props {
   totalCount: number
   showingAll: boolean
   onToggleAll: () => void
+  availabilityLabel?: (result: NameResult) => string
+  note?: string
+  evidenceLabel?: (result: NameResult) => string
+  caseLabel?: (result: NameResult) => string
+  suppliedExplanations?: Record<string, Explanation>
+  showStructuralScore?: boolean
+  useLegacyCollision?: boolean
+  nameContexts?: (name: string) => {label: string; text: string}[]
 }
 
 /// The finalists panel.
@@ -35,12 +43,20 @@ export function Shortlist({
   totalCount,
   showingAll,
   onToggleAll,
+  availabilityLabel,
+  note,
+  evidenceLabel,
+  caseLabel,
+  suppliedExplanations,
+  showStructuralScore = true,
+  useLegacyCollision = true,
+  nameContexts = contextsFor,
 }: Props) {
   // Names without a chain still deserve a real case, so the engine's own
   // explanation is fetched for them (the same call behind the card's Why).
   const [explanations, setExplanations] = useState<Record<string, Explanation>>({})
   const unexplained = finalists
-    .filter((result) => !result.reasonChain && !explanations[result.name])
+    .filter((result) => !result.reasonChain && !explanations[result.name] && !suppliedExplanations?.[result.name])
     .map((result) => result.name)
     .join('|')
   useEffect(() => {
@@ -63,14 +79,14 @@ export function Shortlist({
           {finalists.length === 1 ? 'One finalist' : `${finalists.length} finalists`}
         </h2>
         <p className="shortlist-note">
-          Live with one for a week — that is the test, not how many you liked.
+          {note ?? 'Live with one for a week — that is the test, not how many you liked.'}
         </p>
       </div>
 
       <div className="finalist-list">
         {finalists.map((result, index) => {
           const identity = identityOf(result)
-          const taken = cratesTaken(result.name)
+          const taken = useLegacyCollision ? cratesTaken(result.name) : undefined
           const isFavorite = favoriteKeys.has(identity)
           const isRejected = rejectedKeys.has(identity)
           return (
@@ -83,20 +99,21 @@ export function Shortlist({
                 <Monogram name={result.name} size={44} />
                 <div className="finalist-identity">
                   <h3 className="finalist-name">{result.name}</h3>
-                  <p className="finalist-case">{advocacyFor(result, explanations[result.name])}</p>
+                  <p className="finalist-case">{caseLabel ? caseLabel(result) : advocacyFor(result, suppliedExplanations?.[result.name] ?? explanations[result.name])}</p>
+                  {evidenceLabel && <p className="finalist-case">{evidenceLabel(result)}</p>}
                 </div>
                 <div className="finalist-marks">
-                  <span className="finalist-score">★ {composite(result)}</span>
-                  {taken !== undefined && (
+                  {showStructuralScore && <span className="finalist-score" title="Structural score; not a measured preference or name-quality rating">★ {composite(result)}</span>}
+                  {(availabilityLabel || taken !== undefined) && (
                     <span className={`finalist-avail${taken ? ' taken' : ''}`}>
-                      {taken ? 'crates.io ✗ taken' : 'crates.io ✓ free'}
+                      {availabilityLabel ? availabilityLabel(result) : taken ? 'crates.io ✗ taken' : 'crates.io ✓ free'}
                     </span>
                   )}
                 </div>
               </div>
 
               <ul className="finalist-contexts">
-                {contextsFor(result.name).map((context) => (
+                {nameContexts(result.name).map((context) => (
                   <li key={context.label}>
                     <span className="context-label">{context.label}</span>
                     <code>{context.text}</code>

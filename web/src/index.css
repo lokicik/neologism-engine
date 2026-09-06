@@ -2092,3 +2092,22 @@ body {
   transition: color .15s, border-color .15s;
 }
 .shortlist-reveal:hover { color: var(--text); border-color: rgba(255, 255, 255, .22); }
+/* Shared-pool diagnostics reuse the existing finalist layout. */
+.candidate-lab > p { max-width: 78ch; line-height: 1.6; }
+.candidate-lab details { margin-top: 24px; }
+.candidate-lab summary { cursor: pointer; padding: 12px 0; }
+.candidate-intent dl { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin: 16px 0; }
+.candidate-intent dt { color: var(--muted); font-size: .75rem; margin-bottom: 6px; }
+.candidate-intent dd { margin: 0; line-height: 1.5; overflow-wrap: anywhere; }
+.candidate-relation-toggle { display: flex; align-items: center; gap: 10px; line-height: 1.5; margin: 16px 0; }
+.candidate-relation-toggle input { flex: none; accent-color: var(--accent); }
+@media (max-width: 700px) { .candidate-intent dl { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.candidate-lab-table { overflow-x: auto; margin: 24px 0; }
+.candidate-lab table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.candidate-lab th, .candidate-lab td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border); }
+.candidate-lab .finalist-avail { white-space: normal; max-width: 24ch; }
+.candidate-lab .finalist-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.candidate-lab .finalist-head { display: grid; grid-template-columns: 44px minmax(0, 1fr); }
+.candidate-lab .finalist-marks { grid-column: 1 / -1; flex-direction: row; align-items: baseline; flex-wrap: wrap; gap: 12px; }
+.candidate-lab .finalist-avail { max-width: none; color: var(--muted); }
+@media (max-width: 700px) { .candidate-lab .finalist-list { grid-template-columns: minmax(0, 1fr); } }

@@ -30,6 +30,7 @@ import { decodeShareUrl } from './lib/share'
 import { CommandBar } from './components/CommandBar'
 import { NameCard } from './components/NameCard'
 import { Shortlist } from './components/Shortlist'
+import { CandidateLab, type LabRequest } from './components/CandidateLab'
 import { StatsPanel } from './components/StatsPanel'
 import { Sidebar, type AppView } from './components/Sidebar'
 import { SavedPage } from './components/SavedPage'
@@ -97,6 +98,8 @@ export default function App() {
   const [rejected, setRejected] = useState<NameResult[]>(loadRejected)
   const [tasteReferences, setTasteReferences] = useState(loadTasteReferences)
   const [loading, setLoading] = useState(false)
+  const [labLoading, setLabLoading] = useState(false)
+  const [labRequest, setLabRequest] = useState<LabRequest | null>(null)
   // True when a generate/append produced zero names — the prompt's reachable
   // space is exhausted against the seen-names history.
   const [exhausted, setExhausted] = useState(false)
@@ -651,14 +654,18 @@ export default function App() {
             <CommandBar
               config={config}
               onChange={setConfig}
-              onGenerate={() => handleGenerate(false)}
-              loading={loading}
+              onGenerate={() => {
+                if (config.variant === 'shared_pool' || config.variant === 'intent_pool') {
+                  if (!labLoading) setLabRequest((previous) => ({ id: (previous?.id ?? 0) + 1, config: { ...config, seed: config.seed ?? randomSelectionSalt() } }))
+                } else void handleGenerate(false)
+              }}
+              loading={config.variant === 'shared_pool' || config.variant === 'intent_pool' ? labLoading : loading}
               tasteReferences={tasteReferences}
               tasteReferenceError={tasteReferenceError}
               onTasteReferencesChange={handleTasteReferencesChange}
             />
 
-            <section className="canvas">
+            {config.variant === 'shared_pool' || config.variant === 'intent_pool' ? <CandidateLab key={config.variant} intentMode={config.variant === 'intent_pool'} request={labRequest?.config.variant === config.variant ? labRequest : null} onBusy={setLabLoading} /> : <section className="canvas">
               <div
                 className="visually-hidden create-results-status"
                 role="status"
@@ -778,7 +785,7 @@ export default function App() {
                   </div>
                 </div>
               )}
-            </section>
+            </section>}
           </>
         )}
       </main>
