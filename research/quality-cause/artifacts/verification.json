@@ -1,0 +1,17 @@
+{
+  "nativeRuns": 234,
+  "byteIdenticalRepeat": true,
+  "originalInterventionsReplayed": 162,
+  "frozenPoolsReplayed": 6,
+  "fixedPoolSelections": 1536,
+  "reasonTermOrderUnchanged": "18/18",
+  "runtimeAndDataFilesUnchanged": 83,
+  "wasmUnchanged": true,
+  "scope": "Research diagnostics only. Prior full-product verification is recorded separately in operation-object; not re-claimed as a fresh test run here.",
+  "hashes": {
+    "configs.json": "c40d1bd9a47a7328e44ab82b1e6c2013124508f1005bd154fa22c07c6622b478",
+    "interventions-v2.json": "6db5e36d520d0f012fa8e4fb7a4e9c32e2851fc6a85774d32b70eec8a2ae6f20",
+    "interventions-repeat.json": "6db5e36d520d0f012fa8e4fb7a4e9c32e2851fc6a85774d32b70eec8a2ae6f20",
+    "analysis.json": "2cf0a35d69794fb66ee87ad4c0fbff0040712b93e55a2d1c1bee3abcb8b4dbdb"
+  }
+}
