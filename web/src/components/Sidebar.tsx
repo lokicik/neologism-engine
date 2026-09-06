@@ -1,58 +1,32 @@
-import { IconSparkle, IconStar } from './icons'
+import { useEffect, useRef } from 'react'
 
-export type AppView = 'create' | 'studio' | 'saved'
+export type AppView = 'create' | 'studio' | 'saved' | 'lab'
+interface Props { view: AppView | 'landing'; savedCount: number; onNavigate: (view: AppView) => void; onAbout: (keyboard: boolean) => void; onSettings: () => void }
 
-interface Props {
-  view: AppView
-  savedCount: number
-  onNavigate: (view: AppView) => void
-  onAbout: (keyboard: boolean) => void
-  onSettings: () => void
-}
-
-// Phase 47 app shell: slim fixed sidebar (the Midjourney-web pattern — saved
-// work is a first-class page, not a drawer). Collapses to a horizontal top
-// bar below 900px (CSS).
 export function Sidebar({ view, savedCount, onNavigate, onAbout, onSettings }: Props) {
-  return (
-    <nav className="sidebar" aria-label="Application navigation">
-      <button className="wordmark sidebar-logo" onClick={(event) => onAbout(event.detail === 0)} title="About — back to the landing page">
-        ◈ neologism
-      </button>
-
-      <div className="sidebar-nav">
-        <button
-          className={`sidebar-item${view === 'create' ? ' active' : ''}`}
-          aria-current={view === 'create' ? 'page' : undefined}
-          onClick={() => onNavigate('create')}
-        >
-          <IconSparkle /> Create
-        </button>
-        <button
-          className={`sidebar-item${view === 'studio' ? ' active' : ''}`}
-          aria-current={view === 'studio' ? 'page' : undefined}
-          onClick={() => onNavigate('studio')}
-        >
-          <span className="studio-glyph" aria-hidden>✨</span> AI Studio
-        </button>
-        <button
-          className={`sidebar-item${view === 'saved' ? ' active' : ''}`}
-          aria-current={view === 'saved' ? 'page' : undefined}
-          onClick={() => onNavigate('saved')}
-        >
-          <IconStar filled={savedCount > 0} /> Saved
-          {savedCount > 0 && <span className="count-pill">{savedCount}</span>}
-        </button>
-      </div>
-
-      <div className="sidebar-foot">
-        <button className="sidebar-item sidebar-settings" onClick={onSettings} title="AI model and local taste settings">
-          ⚙ Settings
-        </button>
-        <button className="sidebar-about" onClick={(event) => onAbout(event.detail === 0)}>
-          About
-        </button>
-      </div>
-    </nav>
-  )
+  const tools = useRef<HTMLDetailsElement>(null)
+  const close = () => { if (tools.current) tools.current.open = false }
+  useEffect(() => {
+    const outside = (event: PointerEvent) => { if (!tools.current?.contains(event.target as Node)) close() }
+    document.addEventListener('pointerdown', outside)
+    return () => document.removeEventListener('pointerdown', outside)
+  }, [])
+  return <header className="app-header"><nav className="app-nav" aria-label="Application navigation">
+    <button className="app-wordmark" onClick={() => onNavigate('create')} aria-label="Neologism — Create">
+      <svg width="23" height="23" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m12 2 10 10-10 10L2 12 12 2Z" stroke="currentColor" strokeWidth="1.5"/><path d="m8 15 3-7 5 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg><span>neologism</span>
+    </button>
+    <div className="app-nav-items">
+      <button onClick={() => onNavigate('create')} aria-current={view === 'create' ? 'page' : undefined}>Create</button>
+      <button onClick={() => onNavigate('saved')} aria-current={view === 'saved' ? 'page' : undefined}>Saved{savedCount > 0 && <span className="saved-count">{savedCount}</span>}</button>
+      <details className="tools-menu" ref={tools} onKeyDown={event => { if (event.key === 'Escape') { close(); tools.current?.querySelector('summary')?.focus() } }}>
+        <summary className={view === 'lab' || view === 'studio' || view === 'landing' ? 'current-tool' : ''}>Tools<svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="m3 4.5 3 3 3-3" stroke="currentColor" strokeWidth="1.5"/></svg></summary>
+        <div className="tools-popover">
+          <button onClick={() => { close(); onNavigate('lab') }} aria-current={view === 'lab' ? 'page' : undefined}>Lab<span>Explore individual methods</span></button>
+          <button onClick={() => { close(); onNavigate('studio') }} aria-current={view === 'studio' ? 'page' : undefined}>AI Studio<span>Optional AI-assisted review</span></button>
+          <button onClick={() => { close(); onSettings() }}>Settings</button>
+          <button onClick={event => { close(); onAbout(event.detail === 0) }}>About</button>
+        </div>
+      </details>
+    </div>
+  </nav></header>
 }

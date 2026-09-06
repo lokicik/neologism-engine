@@ -6,7 +6,6 @@ import { tasteContextForConfig } from './lib/taste-context'
 import { tasteEvidenceProgress } from './lib/taste-data'
 import {
   addImportedSaved,
-  hasVisited,
   loadFavorites,
   loadImportedSaved,
   loadJudgeConfig,
@@ -27,6 +26,7 @@ import { savedNameEntries, tasteIdentity } from './lib/taste-identity'
 import { pickShortlist } from './lib/shortlist'
 import { type JudgeConfig } from './lib/judge'
 import { decodeShareUrl } from './lib/share'
+import { LabPage } from './components/LabPage'
 import { CommandBar } from './components/CommandBar'
 import { NameCard } from './components/NameCard'
 import { Shortlist } from './components/Shortlist'
@@ -65,14 +65,21 @@ const VIEW_TITLES: Record<View, string> = {
   create: 'Create — Neologism Engine',
   studio: 'AI Studio — Neologism Engine',
   saved: 'Saved — Neologism Engine',
+  lab: 'Lab — Neologism Engine',
 }
 
 function viewFromHistoryState(state: unknown): View | null {
   if (state === null || typeof state !== 'object' || Array.isArray(state)) return null
   const view = (state as Record<string, unknown>).neologismView
-  return view === 'landing' || view === 'create' || view === 'studio' || view === 'saved'
+  return view === 'landing' || view === 'create' || view === 'studio' || view === 'saved' || view === 'lab'
     ? view
     : null
+}
+
+function viewFromLocation(): View | null {
+  const view = new URLSearchParams(location.search).get('view')
+  if (view === 'about') return 'landing'
+  return view === 'create' || view === 'saved' || view === 'lab' || view === 'studio' ? view : null
 }
 
 function historyStateFor(view: View): Record<string, unknown> {
@@ -88,7 +95,7 @@ export default function App() {
   // Saved page (they came for shared favorites). Entering is remembered.
   const [view, setView] = useState<View>(() => {
     if (decodeShareUrl().length > 0) return 'saved'
-    return viewFromHistoryState(history.state) ?? (hasVisited() ? 'create' : 'landing')
+    return viewFromLocation() ?? viewFromHistoryState(history.state) ?? 'create'
   })
   const [config, setConfig] = useState<Config>(DEFAULT_CONFIG)
   const [generationConfig, setGenerationConfig] = useState<Config>(DEFAULT_CONFIG)
@@ -132,7 +139,9 @@ export default function App() {
 
   const navigateView = useCallback((next: View) => {
     if (viewRef.current === next) return
-    history.pushState(historyStateFor(next), '', location.href)
+    const url = new URL(location.href)
+    url.searchParams.set('view', next === 'landing' ? 'about' : next)
+    history.pushState(historyStateFor(next), '', url)
     viewRef.current = next
     setView(next)
   }, [])
@@ -144,7 +153,7 @@ export default function App() {
   useEffect(() => {
     history.replaceState(historyStateFor(viewRef.current), '', location.href)
     const restoreView = (event: PopStateEvent) => {
-      const next = viewFromHistoryState(event.state)
+      const next = viewFromLocation() ?? viewFromHistoryState(event.state) ?? 'create'
       if (!next || next === viewRef.current) return
       pendingViewFocusRef.current = null
       pendingHistoryFocusRef.current = true
@@ -642,6 +651,8 @@ export default function App() {
               navigateView('create')
             }}
           />
+        ) : view === 'lab' ? (
+          <LabPage favorites={favorites} rejected={rejected} references={tasteReferences} referenceError={tasteReferenceError} onReferencesChange={handleTasteReferencesChange} onFavorite={handleToggleFavorite} onRejected={handleToggleRejected} />
         ) : view === 'studio' ? (
           <AiStudio
             judgeConfig={judgeConfig}
