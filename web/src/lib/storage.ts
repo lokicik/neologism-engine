@@ -42,6 +42,10 @@ function isValidSourceMode(value: unknown): boolean {
     || value === 'realword'
     || value === 'respell'
     || value === 'compound'
+    || value === 'seamblend'
+    || value === 'morpheme'
+    || value === 'submorph'
+    || value === 'reason'
 }
 
 function isStoredNameResult(value: unknown): value is NameResult {

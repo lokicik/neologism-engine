@@ -1,244 +1,108 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { NameResult } from '../lib/engine'
 import { exportText, exportJson, encodeShareUrl } from '../lib/share'
-import type { SavedNameEntry } from '../lib/taste-identity'
-import { NameCard } from './NameCard'
-import { IconCopy, IconCheck, IconDownload, IconLink } from './icons'
+import { normalizedName, type SavedNameEntry } from '../lib/taste-identity'
+import { DiscoveryCard } from './DiscoveryCard'
+import { NameDetails } from './NameDetails'
+import { NameComparison } from './NameComparison'
 
 interface Props {
   entries: SavedNameEntry[]
-  onRemoveSaved: (r: NameResult) => boolean
+  onRemoveSaved: (result: NameResult) => boolean
   onGoCreate: (keyboard: boolean) => void
+  undoName: string | null
+  onUndo: () => string
+  onDismissUndo: () => void
 }
 
-// Phase 47: Saved is a first-class page — large header, real icon toolbar,
-// and the full NameCard experience for every saved name (Why, Availability,
-// copy; unstarring removes it from the collection).
-export function SavedPage({ entries, onRemoveSaved, onGoCreate }: Props) {
-  const [copiedAll, setCopiedAll] = useState(false)
-  const [copiedUrl, setCopiedUrl] = useState(false)
-  const [copyStatus, setCopyStatus] = useState('')
-  const [copyError, setCopyError] = useState<string | null>(null)
-  const [removalStatus, setRemovalStatus] = useState('')
-  const [removalError, setRemovalError] = useState<string | null>(null)
-  const rootRef = useRef<HTMLDivElement>(null)
-  const goCreateRef = useRef<HTMLButtonElement>(null)
-  const pendingRemovalFocusRef = useRef<number | null>(null)
-  const copyStatusTimer = useRef<number | undefined>(undefined)
-  const copiedAllTimer = useRef<number | undefined>(undefined)
-  const copiedUrlTimer = useRef<number | undefined>(undefined)
-  const savedActionRun = useRef(0)
-  const favorites = entries.map((entry) => entry.result)
+export function SavedPage({ entries, onRemoveSaved, onGoCreate, undoName, onUndo, onDismissUndo }: Props) {
+  const [query, setQuery] = useState('')
+  const [selected, setSelected] = useState<string[]>([])
+  const [comparing, setComparing] = useState(false)
+  const [detail, setDetail] = useState<SavedNameEntry | null>(null)
+  const [status, setStatus] = useState('')
+  const [error, setError] = useState<string | null>(null)
+  const root = useRef<HTMLDivElement>(null)
+  const search = useRef<HTMLInputElement>(null)
+  const goCreate = useRef<HTMLButtonElement>(null)
+  const exports = useRef<HTMLDetailsElement>(null)
+  const actionRun = useRef(0)
+  const removalFocus = useRef<number | null>(null)
+  const names = entries.map(entry => entry.result)
+  const visible = entries.filter(entry => normalizedName(entry.result).includes(query.trim().toLowerCase().normalize('NFC')))
+  const chosen = entries.filter(entry => selected.includes(normalizedName(entry.result)))
 
+  useEffect(() => () => { actionRun.current++ }, [])
+  useEffect(() => { setSelected(current => current.filter(name => entries.some(entry => normalizedName(entry.result) === name))) }, [entries])
   useLayoutEffect(() => {
-    const index = pendingRemovalFocusRef.current
-    if (index === null) return
-    pendingRemovalFocusRef.current = null
-    const removeButtons = rootRef.current?.querySelectorAll<HTMLButtonElement>('.star-btn') ?? []
-    const target = removeButtons.length > 0
-      ? removeButtons[Math.min(index, removeButtons.length - 1)]
-      : goCreateRef.current
-    target?.focus()
+    if (removalFocus.current === null) return
+    const buttons = root.current?.querySelectorAll<HTMLButtonElement>('.saved-grid .save-name')
+    const target = buttons?.length ? buttons[Math.min(removalFocus.current, buttons.length - 1)] : search.current ?? goCreate.current
+    removalFocus.current = null
+    target?.focus({ preventScroll: true })
   }, [entries])
 
-  useEffect(() => () => {
-    savedActionRun.current++
-    if (copyStatusTimer.current !== undefined) clearTimeout(copyStatusTimer.current)
-    if (copiedAllTimer.current !== undefined) clearTimeout(copiedAllTimer.current)
-    if (copiedUrlTimer.current !== undefined) clearTimeout(copiedUrlTimer.current)
-  }, [])
-
-  function announceSavedAction(message: string) {
-    if (copyStatusTimer.current !== undefined) clearTimeout(copyStatusTimer.current)
-    setCopyStatus(message)
-    copyStatusTimer.current = window.setTimeout(() => setCopyStatus(''), 3000)
+  function remove(entry: SavedNameEntry) {
+    setError(null)
+    if (!onRemoveSaved(entry.result)) { setError(`Could not remove ${entry.result.name} completely. Saved was refreshed to match stored data. Try again.`); return }
+    removalFocus.current = Math.max(0, visible.indexOf(entry))
+    setDetail(null)
+    setStatus(`${entry.result.name} removed from Saved.`)
   }
-
-  function downloadSaved(format: 'TXT' | 'JSON') {
-    savedActionRun.current++
-    if (copyStatusTimer.current !== undefined) clearTimeout(copyStatusTimer.current)
-    setCopyStatus('')
-    setCopyError(null)
+  function select(entry: SavedNameEntry) {
+    const name = normalizedName(entry.result)
+    if (selected.includes(name)) setSelected(selected.filter(value => value !== name))
+    else if (selected.length < 4) setSelected([...selected, name])
+    setStatus('')
+  }
+  async function copy(kind: 'names' | 'link') {
+    const run = ++actionRun.current
+    setError(null); setStatus('')
     try {
-      if (format === 'TXT') exportText(favorites)
-      else exportJson(favorites)
-      announceSavedAction(`${format} download started.`)
-    } catch {
-      setCopyStatus('')
-      setCopyError(`Could not start the ${format} download.`)
-    }
-  }
-
-  function provenance(entry: SavedNameEntry): string {
-    if (entry.explicitLikes === 0) return 'Saved from a shared link · not taste evidence'
-    const sources: string[] = []
-    if (entry.scopedProjects > 0) {
-      sources.push(`liked in ${entry.scopedProjects} project${entry.scopedProjects === 1 ? '' : 's'}`)
-    }
-    if (entry.legacyLiked) sources.push('legacy unscoped like')
-    const liked = sources.join(' · ')
-    return entry.imported ? `${liked} · also received by share` : liked
-  }
-
-  function remove(entry: SavedNameEntry, keyboard = false) {
-    const sourceCount = entry.explicitLikes + Number(entry.imported)
-    if (sourceCount > 1) {
-      const liked = entry.explicitLikes === 0
-        ? ''
-        : `${entry.explicitLikes} explicit like${entry.explicitLikes === 1 ? '' : 's'}`
-      const shared = entry.imported ? `${liked ? ' and ' : ''}its shared copy` : ''
-      if (!window.confirm(
-        `Remove ${entry.result.name} from Saved everywhere? This removes ${liked}${shared}. Passes are kept.`,
-      )) return
-    }
-    const index = entries.indexOf(entry)
-    setRemovalStatus('')
-    setRemovalError(null)
-    if (!onRemoveSaved(entry.result)) {
-      setRemovalError(
-        `Could not remove ${entry.result.name} completely. Browser storage rejected part of the change; Saved was refreshed to match durable data. Try again.`,
-      )
-      return
-    }
-    if (keyboard) pendingRemovalFocusRef.current = index
-    const remaining = entries.length - 1
-    setRemovalStatus(
-      `${entry.result.name} removed from Saved. ${remaining} saved name${remaining === 1 ? '' : 's'} remain${remaining === 1 ? 's' : ''}.`,
-    )
-  }
-
-  const removalStatusRegion = (
-    <div
-      className="visually-hidden saved-removal-status"
-      role="status"
-      aria-live="polite"
-      aria-atomic="true"
-    >
-      {removalStatus}
-    </div>
-  )
-
-  async function copyAll() {
-    const run = ++savedActionRun.current
-    const text = favorites.map((f) => f.name).join('\n')
-    if (copyStatusTimer.current !== undefined) clearTimeout(copyStatusTimer.current)
-    setCopyStatus('')
-    setCopyError(null)
-    try {
+      const text = kind === 'link' ? encodeShareUrl(names) : names.map(item => item.name).join('\n')
       await navigator.clipboard.writeText(text)
-      if (savedActionRun.current !== run) return
-      if (copiedAllTimer.current !== undefined) clearTimeout(copiedAllTimer.current)
-      setCopiedAll(true)
-      announceSavedAction('Saved names copied to clipboard.')
-      copiedAllTimer.current = window.setTimeout(() => setCopiedAll(false), 1500)
-    } catch {
-      if (savedActionRun.current !== run) return
-      if (copiedAllTimer.current !== undefined) clearTimeout(copiedAllTimer.current)
-      setCopiedAll(false)
-      setCopyStatus('')
-      setCopyError('Could not copy the Saved names. Browser clipboard access was denied.')
+      if (run !== actionRun.current) return
+      setStatus(kind === 'link' ? 'Share link copied.' : 'All saved names copied.')
+      if (exports.current) exports.current.open = false
+    } catch (cause) {
+      if (run === actionRun.current) setError(cause instanceof Error ? cause.message : 'Could not copy. Browser clipboard access may be disabled.')
     }
   }
-
-  async function shareLink() {
-    const run = ++savedActionRun.current
-    if (copyStatusTimer.current !== undefined) clearTimeout(copyStatusTimer.current)
-    setCopyStatus('')
-    setCopyError(null)
-    let url: string
+  function download(format: 'TXT' | 'JSON') {
+    actionRun.current++; setError(null)
     try {
-      url = encodeShareUrl(favorites)
-    } catch (error) {
-      if (savedActionRun.current !== run) return
-      if (copiedUrlTimer.current !== undefined) clearTimeout(copiedUrlTimer.current)
-      setCopiedUrl(false)
-      setCopyError(error instanceof Error ? error.message : 'Could not create the share link.')
-      return
-    }
-    try {
-      await navigator.clipboard.writeText(url)
-      if (savedActionRun.current !== run) return
-      if (copiedUrlTimer.current !== undefined) clearTimeout(copiedUrlTimer.current)
-      setCopiedUrl(true)
-      announceSavedAction('Share link copied to clipboard.')
-      copiedUrlTimer.current = window.setTimeout(() => setCopiedUrl(false), 1500)
-    } catch {
-      if (savedActionRun.current !== run) return
-      if (copiedUrlTimer.current !== undefined) clearTimeout(copiedUrlTimer.current)
-      setCopiedUrl(false)
-      setCopyStatus('')
-      setCopyError('Could not copy the share link. Browser clipboard access was denied.')
-    }
+      if (format === 'TXT') exportText(names); else exportJson(names)
+      setStatus(`${format} download started.`)
+      if (exports.current) exports.current.open = false
+    } catch { setError(`Could not start the ${format} download.`) }
+  }
+  function provenance(entry: SavedNameEntry) {
+    if (!entry.explicitLikes) return 'From a shared link'
+    if (entry.explicitLikes > 1) return `Saved in ${entry.explicitLikes} contexts${entry.imported ? ' · also shared' : ''}`
+    return entry.imported ? 'Saved here · also shared' : null
   }
 
-  if (favorites.length === 0) {
-    return (
-      <div className="saved-page" ref={rootRef}>
-        {removalStatusRegion}
-        <header className="page-header">
-          <h1 className="page-title">Saved names</h1>
-        </header>
-        <div className="empty-state">
-          <p>Nothing saved yet — star names you like while generating.</p>
-          <div className="example-chips">
-            <button ref={goCreateRef} className="example-chip" onClick={(event) => onGoCreate(event.detail === 0)}>
-              ✦ Go create
-            </button>
-          </div>
-        </div>
+  return <section className="saved-page" ref={root} aria-labelledby="saved-title">
+    <div className="page-intro"><h1 id="saved-title">Saved names</h1><p>Keep your favourites close. Compare two to four when you’re ready.</p></div>
+    {undoName && <div className="saved-undo"><span>{undoName} removed.</span><button className="quiet-button" onClick={() => setStatus(onUndo())}>Undo</button><button className="undo-dismiss" aria-label="Dismiss undo" onClick={onDismissUndo}>Dismiss</button></div>}
+    {status && <p className="saved-action-status" role="status">{status}</p>}
+    {error && <p className="error-banner" role="alert">{error}</p>}
+    {entries.length > 0 ? <>
+      <div className="saved-toolbar">
+        <label className="saved-search"><span className="visually-hidden">Search saved names</span><input ref={search} type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Search saved names" /></label>
+        <button className="compare-button" disabled={chosen.length < 2} aria-haspopup="dialog" onClick={() => setComparing(true)}>Compare{chosen.length > 0 ? ` (${chosen.length})` : ''}</button>
+        <details className="saved-export" ref={exports} onKeyDown={event => { if (event.key === 'Escape') { event.currentTarget.open = false; event.currentTarget.querySelector('summary')?.focus() } }}>
+          <summary>Export</summary><div className="export-menu"><button onClick={() => void copy('names')}>Copy all names</button><button onClick={() => download('TXT')}>Download TXT</button><button onClick={() => download('JSON')}>Download JSON</button><button onClick={() => void copy('link')}>Copy share link</button></div>
+        </details>
       </div>
-    )
-  }
-
-  return (
-    <div className="saved-page" ref={rootRef}>
-      {removalStatusRegion}
-      <header className="page-header">
-        <h1 className="page-title">
-          Saved names <span className="count-pill">{favorites.length}</span>
-        </h1>
-        <div className="page-toolbar">
-          <button className="toolbar-btn" onClick={() => void copyAll()}>
-            {copiedAll ? <IconCheck /> : <IconCopy />} Copy all
-          </button>
-          <button className="toolbar-btn" onClick={() => downloadSaved('TXT')}>
-            <IconDownload /> TXT
-          </button>
-          <button className="toolbar-btn" onClick={() => downloadSaved('JSON')}>
-            <IconDownload /> JSON
-          </button>
-          <button className="toolbar-btn" onClick={() => void shareLink()}>
-            {copiedUrl ? <IconCheck /> : <IconLink />} Share link
-          </button>
-        </div>
-      </header>
-
-      {copyError && <p className="saved-copy-error" role="alert">{copyError}</p>}
-      {removalError && (
-        <p className="saved-copy-error saved-removal-error" role="alert">{removalError}</p>
-      )}
-      <p
-        className="visually-hidden saved-copy-status"
-        role="status"
-        aria-live="polite"
-        aria-atomic="true"
-      >
-        {copyStatus}
-      </p>
-
-      <section className="results-grid">
-        {entries.map((entry) => (
-          <NameCard
-            key={entry.result.name.toLowerCase()}
-            result={entry.result}
-            isFavorite
-            onToggleFavorite={(_result, keyboard) => remove(entry, keyboard)}
-            favoriteAction="saved"
-            collectionNote={provenance(entry)}
-            metricsAvailable={entry.explicitLikes > 0}
-          />
-        ))}
-      </section>
-    </div>
-  )
+      <div className="saved-selection-note"><span>{visible.length} of {entries.length} saved names</span><span id="comparison-limit">{chosen.length === 4 ? 'Four selected. Deselect one to choose another.' : 'Select 2–4 names to compare.'}</span>{chosen.length > 0 && <button onClick={() => setSelected([])}>Clear selection</button>}</div>
+      {visible.length ? <div className="discovery-grid saved-grid">{visible.map(entry => <div className="saved-item" key={normalizedName(entry.result)}>
+        <label className="compare-select"><input type="checkbox" checked={selected.includes(normalizedName(entry.result))} disabled={chosen.length === 4 && !selected.includes(normalizedName(entry.result))} onChange={() => select(entry)} aria-label={`Compare ${entry.result.name}`} aria-describedby="comparison-limit" /><span>Compare</span></label>
+        <DiscoveryCard result={entry.result} saved remove onSave={() => remove(entry)} onDetails={() => setDetail(entry)} />
+        {provenance(entry) && <p className="saved-provenance">{provenance(entry)}</p>}
+      </div>)}</div> : <div className="saved-empty"><p>No saved names match “{query}”.</p><button className="quiet-button" onClick={() => { setQuery(''); search.current?.focus() }}>Clear search</button></div>}
+    </> : <div className="saved-empty"><p>Save a name while exploring. It will be here when you come back.</p><button ref={goCreate} className="quiet-button" onClick={event => onGoCreate(event.detail === 0)}>Explore names</button></div>}
+    {detail && <NameDetails result={detail.result} saved imported={!detail.explicitLikes} onSave={() => remove(detail)} onClose={() => setDetail(null)} />}
+    {comparing && chosen.length >= 2 && <NameComparison entries={chosen} onClose={() => setComparing(false)} />}
+  </section>
 }

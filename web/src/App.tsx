@@ -1,8 +1,9 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import type { NameResult } from './lib/engine'
-import { addImportedSaved, loadFavorites, loadImportedSaved, loadJudgeConfig, loadRejected, loadTasteReferences, markVisited, removeFavorite, removeRejected, removeSavedEverywhere, saveJudgeConfig, saveTasteReferences, toggleTasteFeedback } from './lib/storage'
-import { savedNameEntries } from './lib/taste-identity'
+import { addImportedSaved, loadFavorites, loadImportedSaved, loadJudgeConfig, loadRejected, loadTasteReferences, markVisited, removeFavorite, removeRejected, removeSavedEverywhere, saveJudgeConfig, saveFavorites, saveImportedSaved, saveTasteReferences, toggleTasteFeedback } from './lib/storage'
+import { normalizedName, savedNameEntries } from './lib/taste-identity'
 import type { JudgeConfig } from './lib/judge'
+import { captureSavedRemoval, restoreSavedRemoval, type SavedRemoval } from './lib/saved-undo'
 import { decodeShareUrl } from './lib/share'
 import { Sidebar, type AppView } from './components/Sidebar'
 import { CreatePage, type CreatePageHandle } from './components/CreatePage'
@@ -36,6 +37,8 @@ export default function App() {
   const [feedbackError, setFeedbackError] = useState<string | null>(null)
   const [judgeConfig, setJudgeConfig] = useState<JudgeConfig>(loadJudgeConfig)
   const [showSettings, setShowSettings] = useState(false)
+  const [savedRemoval, setSavedRemoval] = useState<SavedRemoval | null>(null)
+  const changedNames = useRef(new Set<string>())
   const favoritesRef = useRef(favorites); favoritesRef.current = favorites
   const importedSavedRef = useRef(importedSaved); importedSavedRef.current = importedSaved
   const rejectedRef = useRef(rejected); rejectedRef.current = rejected
@@ -122,6 +125,7 @@ export default function App() {
   }, [])
 
   const handleToggleFavorite = useCallback((item: NameResult) => {
+    changedNames.current.add(normalizedName(item))
     const result = toggleTasteFeedback(
       favoritesRef.current,
       rejectedRef.current,
@@ -140,6 +144,7 @@ export default function App() {
   }, [])
 
   const handleToggleRejected = useCallback((item: NameResult) => {
+    changedNames.current.add(normalizedName(item))
     const result = toggleTasteFeedback(
       favoritesRef.current,
       rejectedRef.current,
@@ -158,6 +163,7 @@ export default function App() {
   }, [])
 
   const handleUndoRejected = useCallback((item: NameResult): number | null => {
+    changedNames.current.add(normalizedName(item))
     const current = rejectedRef.current
     try {
       const nextRejected = removeRejected(current, item)
@@ -171,6 +177,7 @@ export default function App() {
   }, [])
 
   const handleUndoFavorite = useCallback((item: NameResult): number | null => {
+    changedNames.current.add(normalizedName(item))
     const current = favoritesRef.current
     try {
       const nextFavorites = removeFavorite(current, item)
@@ -184,6 +191,7 @@ export default function App() {
   }, [])
 
   const handleRemoveSaved = useCallback((item: NameResult) => {
+    const receipt = captureSavedRemoval(item, favoritesRef.current, importedSavedRef.current, rejectedRef.current)
     const removal = removeSavedEverywhere(
       favoritesRef.current,
       importedSavedRef.current,
@@ -193,8 +201,35 @@ export default function App() {
     importedSavedRef.current = removal.importedSaved
     setFavorites(removal.favorites)
     setImportedSaved(removal.importedSaved)
+    if (removal.removed) { setSavedRemoval(receipt); changedNames.current.delete(normalizedName(item)) }
     return removal.removed
   }, [])
+
+  const undoSavedRemoval = useCallback(() => {
+    if (!savedRemoval) return 'There is no removal to undo.'
+    // Read durable collections so Undo cannot roll back changes in other tabs.
+    const currentFavorites = loadFavorites()
+    const currentImported = loadImportedSaved()
+    const currentRejected = loadRejected()
+    const key = savedRemoval.name.trim().toLowerCase().normalize('NFC')
+    const restored = changedNames.current.has(key) ? null : restoreSavedRemoval(savedRemoval, currentFavorites, currentImported, currentRejected)
+    const refresh = () => {
+      favoritesRef.current = loadFavorites(); importedSavedRef.current = loadImportedSaved(); rejectedRef.current = loadRejected()
+      setFavorites(favoritesRef.current); setImportedSaved(importedSavedRef.current); setRejected(rejectedRef.current)
+    }
+    if (!restored) { setSavedRemoval(null); refresh(); return `Your later choice for ${savedRemoval.name} has been kept.` }
+    const importsChanged = savedRemoval.imported.length > 0
+    if (importsChanged && !saveImportedSaved(restored.imported)) return 'Could not undo. Browser storage rejected the change. Try again.'
+    try {
+      if (savedRemoval.favorites.length) saveFavorites(restored.favorites)
+    } catch {
+      if (importsChanged) saveImportedSaved(currentImported)
+      refresh()
+      return 'Could not fully undo. Saved was refreshed to match stored data. Try again.'
+    }
+    refresh(); setSavedRemoval(null)
+    return `${savedRemoval.name} restored to Saved.`
+  }, [savedRemoval])
 
   const saveSettings = useCallback((cfg: JudgeConfig) => {
     if (!saveJudgeConfig(cfg)) return false
@@ -210,7 +245,7 @@ export default function App() {
     <main id="main-content" className="page" tabIndex={-1}>
       {feedbackError && <div className="feedback-alert" role="alert">{feedbackError}</div>}
       <CreatePage active={view === 'create'} paused={showSettings} sessionRef={createSession} favorites={favorites} rejected={rejected} references={tasteReferences} referenceError={tasteReferenceError} onReferencesChange={handleTasteReferencesChange} onFavorite={handleToggleFavorite} onRejected={handleToggleRejected} />
-      {view === 'saved' && <SavedPage entries={savedEntries} onRemoveSaved={handleRemoveSaved} onGoCreate={() => navigateView('create')} />}
+      {view === 'saved' && <SavedPage entries={savedEntries} undoName={savedRemoval?.name ?? null} onUndo={undoSavedRemoval} onDismissUndo={() => setSavedRemoval(null)} onRemoveSaved={handleRemoveSaved} onGoCreate={() => navigateView('create')} />}
       {view === 'lab' && <LabPage favorites={favorites} rejected={rejected} references={tasteReferences} referenceError={tasteReferenceError} onReferencesChange={handleTasteReferencesChange} onFavorite={handleToggleFavorite} onRejected={handleToggleRejected} />}
       {view === 'studio' && <AiStudio judgeConfig={judgeConfig} favorites={favorites} onToggleFavorite={handleToggleFavorite} onOpenSettings={() => setShowSettings(true)} />}
       {view === 'landing' && <Landing onEnter={() => navigateView('create')} />}
