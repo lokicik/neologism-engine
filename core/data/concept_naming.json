@@ -1,0 +1,2861 @@
+{
+  "schema": "concept-catalog-v1",
+  "target": "product_name",
+  "sources": {
+    "research/concept-naming/catalog-source.mjs": {
+      "sha256": "d31118c789844658c273edb07a5e8443794d0452c0ea10161372eec93624105c",
+      "snapshot_date": null
+    },
+    "core/data/pron_lexicon.tsv": {
+      "sha256": "3a0348f7d9e87ec53e8b600c8ba8f5e28153ea35e1b87c43e2672d71f8da53e1",
+      "snapshot_date": null
+    },
+    "core/data/bigtech.txt": {
+      "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+      "snapshot_date": null
+    },
+    "research/collision/crate-names.txt": {
+      "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+      "snapshot_date": null
+    },
+    "research/cmudict/cmudict.dict": {
+      "sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22",
+      "snapshot_date": null
+    }
+  },
+  "domains": [
+    {
+      "id": "migration",
+      "label": "Data migration and recovery",
+      "directions": [
+        {
+          "id": "passage",
+          "benefit": "Move safely between states"
+        },
+        {
+          "id": "recovery",
+          "benefit": "Return to a usable state"
+        },
+        {
+          "id": "continuity",
+          "benefit": "Preserve what matters through change"
+        }
+      ]
+    },
+    {
+      "id": "jobs",
+      "label": "Background jobs and queues",
+      "directions": [
+        {
+          "id": "cadence",
+          "benefit": "Coordinate work in time"
+        },
+        {
+          "id": "handoff",
+          "benefit": "Pass work between workers"
+        },
+        {
+          "id": "retry",
+          "benefit": "Give interrupted work another chance"
+        }
+      ]
+    },
+    {
+      "id": "observation",
+      "label": "Observability",
+      "directions": [
+        {
+          "id": "visibility",
+          "benefit": "Make hidden behavior visible"
+        },
+        {
+          "id": "evidence",
+          "benefit": "Keep a readable record"
+        },
+        {
+          "id": "measurement",
+          "benefit": "Put behavior in perspective"
+        }
+      ]
+    },
+    {
+      "id": "verification",
+      "label": "Configuration and artifact verification",
+      "directions": [
+        {
+          "id": "integrity",
+          "benefit": "Establish that something is intact"
+        },
+        {
+          "id": "attestation",
+          "benefit": "Carry evidence of authenticity"
+        },
+        {
+          "id": "agreement",
+          "benefit": "Check against an expected standard"
+        }
+      ]
+    }
+  ],
+  "jobs": [
+    {
+      "id": "migrate_data",
+      "domain": "migration",
+      "label": "Move data between versions or stores",
+      "object": "database state",
+      "operation": "migrate",
+      "directions": [
+        "passage",
+        "continuity"
+      ],
+      "phrases": [
+        "database migration",
+        "database migrations",
+        "schema migration",
+        "schema migrations",
+        "schema changes",
+        "data migration"
+      ],
+      "actions": [
+        "migrate",
+        "rehearse",
+        "upgrade",
+        "move"
+      ],
+      "objects": [
+        "database",
+        "databases",
+        "schema",
+        "schemas",
+        "sqlite",
+        "postgresql",
+        "data"
+      ],
+      "incompatible": [
+        "furniture",
+        "bird",
+        "birds"
+      ]
+    },
+    {
+      "id": "recover_state",
+      "domain": "migration",
+      "label": "Recover an earlier usable state",
+      "object": "stored state",
+      "operation": "restore",
+      "directions": [
+        "recovery",
+        "continuity"
+      ],
+      "phrases": [
+        "database recovery",
+        "file recovery",
+        "archive recovery",
+        "state recovery",
+        "database rollback",
+        "backup restoration"
+      ],
+      "actions": [
+        "restore",
+        "recover",
+        "rollback",
+        "revert"
+      ],
+      "objects": [
+        "database",
+        "databases",
+        "archive",
+        "archives",
+        "file",
+        "files",
+        "configuration",
+        "session",
+        "state",
+        "snapshot",
+        "snapshots",
+        "replica"
+      ],
+      "incompatible": [
+        "furniture",
+        "antique",
+        "health"
+      ]
+    },
+    {
+      "id": "schedule_jobs",
+      "domain": "jobs",
+      "label": "Coordinate queued or scheduled work",
+      "object": "background work",
+      "operation": "schedule",
+      "directions": [
+        "cadence",
+        "handoff"
+      ],
+      "phrases": [
+        "job scheduler",
+        "job scheduling",
+        "background jobs",
+        "background job",
+        "message queue client",
+        "queue client",
+        "task queue",
+        "worker pool"
+      ],
+      "actions": [
+        "schedule",
+        "dispatch",
+        "enqueue",
+        "coordinate",
+        "execute",
+        "process"
+      ],
+      "objects": [
+        "job",
+        "jobs",
+        "queue",
+        "queues",
+        "worker",
+        "workers",
+        "task",
+        "tasks",
+        "message",
+        "messages"
+      ],
+      "incompatible": [
+        "recruiter",
+        "recruiters",
+        "career",
+        "careers",
+        "appointment",
+        "appointments"
+      ]
+    },
+    {
+      "id": "retry_delivery",
+      "domain": "jobs",
+      "label": "Retry or replay interrupted deliveries",
+      "object": "work delivery",
+      "operation": "retry",
+      "directions": [
+        "retry",
+        "handoff"
+      ],
+      "phrases": [
+        "webhook replay",
+        "webhook retries",
+        "delivery retries",
+        "job retries",
+        "retry queue"
+      ],
+      "actions": [
+        "retry",
+        "replay",
+        "redeliver",
+        "resume"
+      ],
+      "objects": [
+        "webhook",
+        "webhooks",
+        "delivery",
+        "deliveries",
+        "job",
+        "jobs",
+        "task",
+        "tasks",
+        "message",
+        "messages",
+        "queue"
+      ],
+      "incompatible": [
+        "meal",
+        "meals",
+        "parcel",
+        "parcels"
+      ]
+    },
+    {
+      "id": "inspect_signals",
+      "domain": "observation",
+      "label": "Inspect and organize system signals",
+      "object": "system evidence",
+      "operation": "inspect",
+      "directions": [
+        "visibility",
+        "evidence"
+      ],
+      "phrases": [
+        "log viewer",
+        "log inspector",
+        "log explorer",
+        "log analysis",
+        "log aggregation",
+        "trace viewer",
+        "telemetry dashboard"
+      ],
+      "actions": [
+        "view",
+        "inspect",
+        "group",
+        "filter",
+        "sort",
+        "record",
+        "search",
+        "trace",
+        "analyze"
+      ],
+      "objects": [
+        "log",
+        "logs",
+        "trace",
+        "traces",
+        "telemetry",
+        "diagnostic",
+        "diagnostics",
+        "stacktrace",
+        "stacktraces"
+      ],
+      "incompatible": [
+        "football",
+        "weather",
+        "sports",
+        "medical"
+      ]
+    },
+    {
+      "id": "measure_behavior",
+      "domain": "observation",
+      "label": "Observe and compare system behavior",
+      "object": "system behavior",
+      "operation": "measure",
+      "directions": [
+        "measurement",
+        "evidence",
+        "visibility"
+      ],
+      "phrases": [
+        "performance monitor",
+        "latency monitor",
+        "memory profiler",
+        "metrics dashboard",
+        "queue depth monitor",
+        "allocation profiler"
+      ],
+      "actions": [
+        "monitor",
+        "track",
+        "measure",
+        "compare",
+        "profile",
+        "inspect"
+      ],
+      "objects": [
+        "latency",
+        "memory",
+        "allocation",
+        "allocations",
+        "metrics",
+        "cpu",
+        "throughput",
+        "queue depth",
+        "performance",
+        "socket",
+        "sockets",
+        "connection",
+        "connections"
+      ],
+      "incompatible": [
+        "football",
+        "weather",
+        "sports",
+        "health"
+      ]
+    },
+    {
+      "id": "verify_artifacts",
+      "domain": "verification",
+      "label": "Verify the integrity of an artifact",
+      "object": "artifact integrity",
+      "operation": "verify",
+      "directions": [
+        "integrity",
+        "attestation"
+      ],
+      "phrases": [
+        "checksum checker",
+        "signature verifier",
+        "artifact verification",
+        "checksum verification",
+        "signature verification",
+        "integrity checker"
+      ],
+      "actions": [
+        "verify",
+        "check",
+        "validate",
+        "compare"
+      ],
+      "objects": [
+        "checksum",
+        "checksums",
+        "signature",
+        "signatures",
+        "artifact",
+        "artifacts",
+        "hash",
+        "hashes",
+        "binary",
+        "binaries",
+        "manifest",
+        "manifests"
+      ],
+      "incompatible": [
+        "autograph",
+        "autographs",
+        "museum"
+      ]
+    },
+    {
+      "id": "validate_config",
+      "domain": "verification",
+      "label": "Validate configuration against expectations",
+      "object": "configuration",
+      "operation": "validate",
+      "directions": [
+        "agreement",
+        "integrity"
+      ],
+      "phrases": [
+        "configuration validator",
+        "config validator",
+        "configuration validation",
+        "config validation",
+        "configuration checker",
+        "config checker"
+      ],
+      "actions": [
+        "validate",
+        "verify",
+        "check",
+        "lint"
+      ],
+      "objects": [
+        "configuration",
+        "configurations",
+        "config",
+        "configs",
+        "settings"
+      ],
+      "incompatible": [
+        "furniture",
+        "medical"
+      ]
+    }
+  ],
+  "entries": [
+    {
+      "id": "migration-waymark",
+      "domain": "migration",
+      "direction": "passage",
+      "rank": 1,
+      "sense": "a mark that guides a route",
+      "suitable": [
+        "Move data between versions or stores"
+      ],
+      "incompatible": [
+        "navigation hardware"
+      ],
+      "source": "original-editorial-concept-naming-v1; not preference-validated",
+      "forms": [
+        {
+          "name": "Waymark",
+          "kind": "whole_lexeme",
+          "components": [
+            "way",
+            "mark"
+          ],
+          "pronunciation": {
+            "source": "dictionary_components",
+            "components": [
+              {
+                "word": "way",
+                "phones": "W EY",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              },
+              {
+                "word": "mark",
+                "phones": "M AA R K",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              }
+            ],
+            "syllables": 2
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "migration-causeway",
+      "domain": "migration",
+      "direction": "passage",
+      "rank": 2,
+      "sense": "a raised passage across difficult ground",
+      "suitable": [
+        "Move data between versions or stores"
+      ],
+      "incompatible": [
+        "road construction"
+      ],
+      "source": "original-editorial-concept-naming-v1; not preference-validated",
+      "forms": [
+        {
+          "name": "Causeway",
+          "kind": "whole_lexeme",
+          "components": [
+            "causeway"
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "word": "causeway",
+                "phones": "K AA Z W EY",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              }
+            ],
+            "syllables": 2
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "migration-crossing",
+      "domain": "migration",
+      "direction": "passage",
+      "rank": 3,
+      "sense": "a passage from one side to another",
+      "suitable": [
+        "Move data between versions or stores"
+      ],
+      "incompatible": [
+        "border administration"
+      ],
+      "source": "original-editorial-concept-naming-v1; not preference-validated",
+      "forms": [
+        {
+          "name": "Crossing",
+          "kind": "whole_lexeme",
+          "components": [
+            "crossing"
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "word": "crossing",
+                "phones": "K R AO S IH NG",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              }
+            ],
+            "syllables": 2
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "migration-passage",
+      "domain": "migration",
+      "direction": "passage",
+      "rank": 4,
+      "sense": "a route from one place or state to another",
+      "suitable": [
+        "Move data between versions or stores"
+      ],
+      "incompatible": [
+        "travel booking"
+      ],
+      "source": "original-editorial-concept-naming-v1; not preference-validated",
+      "forms": [
+        {
+          "name": "Passage",
+          "kind": "whole_lexeme",
+          "components": [
+            "passage"
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "word": "passage",
+                "phones": "P AE S AH JH",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              }
+            ],
+            "syllables": 2
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "migration-reprise",
+      "domain": "migration",
+      "direction": "recovery",
+      "rank": 5,
+      "sense": "a return to an earlier passage",
+      "suitable": [
+        "Recover an earlier usable state"
+      ],
+      "incompatible": [
+        "music playback"
+      ],
+      "source": "original-editorial-concept-naming-v1; not preference-validated",
+      "forms": [
+        {
+          "name": "Reprise",
+          "kind": "whole_lexeme",
+          "components": [
+            "reprise"
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "word": "reprise",
+                "phones": "R IH P R AY Z",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              }
+            ],
+            "syllables": 2
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "migration-retrace",
+      "domain": "migration",
+      "direction": "recovery",
+      "rank": 6,
+      "sense": "to follow a prior path back",
+      "suitable": [
+        "Recover an earlier usable state"
+      ],
+      "incompatible": [
+        "route navigation"
+      ],
+      "source": "original-editorial-concept-naming-v1; not preference-validated",
+      "forms": [
+        {
+          "name": "Retrace",
+          "kind": "whole_lexeme",
+          "components": [
+            "retrace"
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "word": "retrace",
+                "phones": "R IY T R EY S",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              }
+            ],
+            "syllables": 2
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "migration-keepsake",
+      "domain": "migration",
+      "direction": "recovery",
+      "rank": 7,
+      "sense": "something retained to preserve a connection to the past",
+      "suitable": [
+        "Recover an earlier usable state"
+      ],
+      "incompatible": [
+        "gift retail"
+      ],
+      "source": "original-editorial-concept-naming-v1; not preference-validated",
+      "forms": [
+        {
+          "name": "Keepsake",
+          "kind": "whole_lexeme",
+          "components": [
+            "keepsake"
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "word": "keepsake",
+                "phones": "K IY P S EY K",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              }
+            ],
+            "syllables": 2
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "migration-backtrack",
+      "domain": "migration",
+      "direction": "recovery",
+      "rank": 8,
+      "sense": "to return along an earlier path",
+      "suitable": [
+        "Recover an earlier usable state"
+      ],
+      "incompatible": [
+        "hiking navigation"
+      ],
+      "source": "original-editorial-concept-naming-v1; not preference-validated",
+      "forms": [
+        {
+          "name": "Backtrack",
+          "kind": "whole_lexeme",
+          "components": [
+            "backtrack"
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "word": "backtrack",
+                "phones": "B AE K T R AE K",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              }
+            ],
+            "syllables": 2
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "migration-foothold",
+      "domain": "migration",
+      "direction": "continuity",
+      "rank": 9,
+      "sense": "a secure place from which to make progress",
+      "suitable": [
+        "Move data between versions or stores; Recover an earlier usable state"
+      ],
+      "incompatible": [
+        "climbing equipment"
+      ],
+      "source": "original-editorial-concept-naming-v1; not preference-validated",
+      "forms": [
+        {
+          "name": "Foothold",
+          "kind": "whole_lexeme",
+          "components": [
+            "foothold"
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "word": "foothold",
+                "phones": "F UH T HH OW L D",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              }
+            ],
+            "syllables": 2
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "migration-lifeline",
+      "domain": "migration",
+      "direction": "continuity",
+      "rank": 10,
+      "sense": "a connection that preserves continuity in difficulty",
+      "suitable": [
+        "Move data between versions or stores; Recover an earlier usable state"
+      ],
+      "incompatible": [
+        "emergency response"
+      ],
+      "source": "original-editorial-concept-naming-v1; not preference-validated",
+      "forms": [
+        {
+          "name": "Lifeline",
+          "kind": "whole_lexeme",
+          "components": [
+            "lifeline"
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "word": "lifeline",
+                "phones": "L AY F L AY N",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              }
+            ],
+            "syllables": 2
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "migration-mainstay",
+      "domain": "migration",
+      "direction": "continuity",
+      "rank": 11,
+      "sense": "a dependable source of support",
+      "suitable": [
+        "Move data between versions or stores; Recover an earlier usable state"
+      ],
+      "incompatible": [
+        "sailing equipment"
+      ],
+      "source": "original-editorial-concept-naming-v1; not preference-validated",
+      "forms": [
+        {
+          "name": "Mainstay",
+          "kind": "whole_lexeme",
+          "components": [
+            "mainstay"
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "word": "mainstay",
+                "phones": "M EY N S T EY",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              }
+            ],
+            "syllables": 2
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "migration-continuum",
+      "domain": "migration",
+      "direction": "continuity",
+      "rank": 12,
+      "sense": "a continuous sequence through changing states",
+      "suitable": [
+        "Move data between versions or stores; Recover an earlier usable state"
+      ],
+      "incompatible": [
+        "physics simulation"
+      ],
+      "source": "original-editorial-concept-naming-v1; not preference-validated",
+      "forms": [
+        {
+          "name": "Continuum",
+          "kind": "whole_lexeme",
+          "components": [
+            "continuum"
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "word": "continuum",
+                "phones": "K AH N T IH N Y UW AH M",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              }
+            ],
+            "syllables": 4
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "jobs-cadence",
+      "domain": "jobs",
+      "direction": "cadence",
+      "rank": 13,
+      "sense": "a regular rhythm that coordinates activity",
+      "suitable": [
+        "Coordinate queued or scheduled work"
+      ],
+      "incompatible": [
+        "music notation"
+      ],
+      "source": "original-editorial-concept-naming-v1; not preference-validated",
+      "forms": [
+        {
+          "name": "Cadence",
+          "kind": "whole_lexeme",
+          "components": [
+            "cadence"
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "word": "cadence",
+                "phones": "K EY D AH N S",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              }
+            ],
+            "syllables": 2
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": true
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "jobs-metronome",
+      "domain": "jobs",
+      "direction": "cadence",
+      "rank": 14,
+      "sense": "a device that keeps a regular beat",
+      "suitable": [
+        "Coordinate queued or scheduled work"
+      ],
+      "incompatible": [
+        "music practice"
+      ],
+      "source": "original-editorial-concept-naming-v1; not preference-validated",
+      "forms": [
+        {
+          "name": "Metronome",
+          "kind": "whole_lexeme",
+          "components": [
+            "metronome"
+          ],
+          "pronunciation": {
+            "source": "missing",
+            "components": [
+              {
+                "word": "metronome",
+                "phones": null,
+                "source_sha256": "3a0348f7d9e87ec53e8b600c8ba8f5e28153ea35e1b87c43e2672d71f8da53e1"
+              }
+            ],
+            "syllables": null
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "jobs-downbeat",
+      "domain": "jobs",
+      "direction": "cadence",
+      "rank": 15,
+      "sense": "the first beat that begins a measure",
+      "suitable": [
+        "Coordinate queued or scheduled work"
+      ],
+      "incompatible": [
+        "music criticism"
+      ],
+      "source": "original-editorial-concept-naming-v1; not preference-validated",
+      "forms": [
+        {
+          "name": "Downbeat",
+          "kind": "whole_lexeme",
+          "components": [
+            "downbeat"
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "word": "downbeat",
+                "phones": "D AW N B IY T",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              }
+            ],
+            "syllables": 2
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "jobs-roundabout",
+      "domain": "jobs",
+      "direction": "cadence",
+      "rank": 16,
+      "sense": "a circulating arrangement that coordinates passage",
+      "suitable": [
+        "Coordinate queued or scheduled work"
+      ],
+      "incompatible": [
+        "traffic planning"
+      ],
+      "source": "original-editorial-concept-naming-v1; not preference-validated",
+      "forms": [
+        {
+          "name": "Roundabout",
+          "kind": "whole_lexeme",
+          "components": [
+            "roundabout"
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "word": "roundabout",
+                "phones": "R AW N D AH B AW T",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              }
+            ],
+            "syllables": 3
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "jobs-baton",
+      "domain": "jobs",
+      "direction": "handoff",
+      "rank": 17,
+      "sense": "an object passed between successive participants",
+      "suitable": [
+        "Coordinate queued or scheduled work; Retry or replay interrupted deliveries"
+      ],
+      "incompatible": [
+        "sports equipment"
+      ],
+      "source": "original-editorial-concept-naming-v1; not preference-validated",
+      "forms": [
+        {
+          "name": "Baton",
+          "kind": "whole_lexeme",
+          "components": [
+            "baton"
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "word": "baton",
+                "phones": "B AH T AA N",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              }
+            ],
+            "syllables": 2
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "jobs-relay",
+      "domain": "jobs",
+      "direction": "handoff",
+      "rank": 18,
+      "sense": "the passing of work from one participant to another",
+      "suitable": [
+        "Coordinate queued or scheduled work; Retry or replay interrupted deliveries"
+      ],
+      "incompatible": [
+        "electrical hardware"
+      ],
+      "source": "original-editorial-concept-naming-v1; not preference-validated",
+      "forms": [
+        {
+          "name": "Relay",
+          "kind": "whole_lexeme",
+          "components": [
+            "relay"
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "word": "relay",
+                "phones": "R IY L EY",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              }
+            ],
+            "syllables": 2
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": true
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "jobs-tandem",
+      "domain": "jobs",
+      "direction": "handoff",
+      "rank": 19,
+      "sense": "participants arranged to work together",
+      "suitable": [
+        "Coordinate queued or scheduled work; Retry or replay interrupted deliveries"
+      ],
+      "incompatible": [
+        "bicycle retail"
+      ],
+      "source": "original-editorial-concept-naming-v1; not preference-validated",
+      "forms": [
+        {
+          "name": "Tandem",
+          "kind": "whole_lexeme",
+          "components": [
+            "tandem"
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "word": "tandem",
+                "phones": "T AE N D AH M",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              }
+            ],
+            "syllables": 2
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": true
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "jobs-turnstile",
+      "domain": "jobs",
+      "direction": "handoff",
+      "rank": 20,
+      "sense": "a mechanism that admits participants in sequence",
+      "suitable": [
+        "Coordinate queued or scheduled work; Retry or replay interrupted deliveries"
+      ],
+      "incompatible": [
+        "access hardware"
+      ],
+      "source": "original-editorial-concept-naming-v1; not preference-validated",
+      "forms": [
+        {
+          "name": "Turnstile",
+          "kind": "whole_lexeme",
+          "components": [
+            "turnstile"
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "word": "turnstile",
+                "phones": "T ER N S T AY L",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              }
+            ],
+            "syllables": 2
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "jobs-encore",
+      "domain": "jobs",
+      "direction": "retry",
+      "rank": 21,
+      "sense": "an additional performance after the first",
+      "suitable": [
+        "Retry or replay interrupted deliveries"
+      ],
+      "incompatible": [
+        "concert booking"
+      ],
+      "source": "original-editorial-concept-naming-v1; not preference-validated",
+      "forms": [
+        {
+          "name": "Encore",
+          "kind": "whole_lexeme",
+          "components": [
+            "encore"
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "word": "encore",
+                "phones": "AA N K AO R",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              }
+            ],
+            "syllables": 2
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "jobs-reprise",
+      "domain": "jobs",
+      "direction": "retry",
+      "rank": 22,
+      "sense": "a return to an earlier passage",
+      "suitable": [
+        "Retry or replay interrupted deliveries"
+      ],
+      "incompatible": [
+        "music playback"
+      ],
+      "source": "original-editorial-concept-naming-v1; not preference-validated",
+      "forms": [
+        {
+          "name": "Reprise",
+          "kind": "whole_lexeme",
+          "components": [
+            "reprise"
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "word": "reprise",
+                "phones": "R IH P R AY Z",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              }
+            ],
+            "syllables": 2
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "jobs-understudy",
+      "domain": "jobs",
+      "direction": "retry",
+      "rank": 23,
+      "sense": "a prepared substitute that can take over a role",
+      "suitable": [
+        "Retry or replay interrupted deliveries"
+      ],
+      "incompatible": [
+        "theater casting"
+      ],
+      "source": "original-editorial-concept-naming-v1; not preference-validated",
+      "forms": [
+        {
+          "name": "Understudy",
+          "kind": "whole_lexeme",
+          "components": [
+            "understudy"
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "word": "understudy",
+                "phones": "AH N D ER S T AH D IY",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              }
+            ],
+            "syllables": 4
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "jobs-rebound",
+      "domain": "jobs",
+      "direction": "retry",
+      "rank": 24,
+      "sense": "a return after an interruption or setback",
+      "suitable": [
+        "Retry or replay interrupted deliveries"
+      ],
+      "incompatible": [
+        "sports coaching"
+      ],
+      "source": "original-editorial-concept-naming-v1; not preference-validated",
+      "forms": [
+        {
+          "name": "Rebound",
+          "kind": "whole_lexeme",
+          "components": [
+            "rebound"
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "word": "rebound",
+                "phones": "R IY B AW N D",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              }
+            ],
+            "syllables": 2
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "observation-sightline",
+      "domain": "observation",
+      "direction": "visibility",
+      "rank": 25,
+      "sense": "an unobstructed line along which something is visible",
+      "suitable": [
+        "Inspect and organize system signals; Observe and compare system behavior"
+      ],
+      "incompatible": [
+        "architectural planning"
+      ],
+      "source": "original-editorial-concept-naming-v1; not preference-validated",
+      "forms": [
+        {
+          "name": "Sightline",
+          "kind": "whole_lexeme",
+          "components": [
+            "sight",
+            "line"
+          ],
+          "pronunciation": {
+            "source": "dictionary_components",
+            "components": [
+              {
+                "word": "sight",
+                "phones": "S AY T",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              },
+              {
+                "word": "line",
+                "phones": "L AY N",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              }
+            ],
+            "syllables": 2
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "observation-lookout",
+      "domain": "observation",
+      "direction": "visibility",
+      "rank": 26,
+      "sense": "a place or person from which to observe",
+      "suitable": [
+        "Inspect and organize system signals; Observe and compare system behavior"
+      ],
+      "incompatible": [
+        "security patrol"
+      ],
+      "source": "original-editorial-concept-naming-v1; not preference-validated",
+      "forms": [
+        {
+          "name": "Lookout",
+          "kind": "whole_lexeme",
+          "components": [
+            "lookout"
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "word": "lookout",
+                "phones": "L UH K AW T",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              }
+            ],
+            "syllables": 2
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "observation-fieldglass",
+      "domain": "observation",
+      "direction": "visibility",
+      "rank": 27,
+      "sense": "an optical instrument for seeing distant details",
+      "suitable": [
+        "Inspect and organize system signals; Observe and compare system behavior"
+      ],
+      "incompatible": [
+        "optical retail"
+      ],
+      "source": "original-editorial-concept-naming-v1; not preference-validated",
+      "forms": [
+        {
+          "name": "Fieldglass",
+          "kind": "whole_lexeme",
+          "components": [
+            "field",
+            "glass"
+          ],
+          "pronunciation": {
+            "source": "dictionary_components",
+            "components": [
+              {
+                "word": "field",
+                "phones": "F IY L D",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              },
+              {
+                "word": "glass",
+                "phones": "G L AE S",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              }
+            ],
+            "syllables": 2
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "observation-aperture",
+      "domain": "observation",
+      "direction": "visibility",
+      "rank": 28,
+      "sense": "an opening through which a view becomes possible",
+      "suitable": [
+        "Inspect and organize system signals; Observe and compare system behavior"
+      ],
+      "incompatible": [
+        "camera equipment"
+      ],
+      "source": "original-editorial-concept-naming-v1; not preference-validated",
+      "forms": [
+        {
+          "name": "Aperture",
+          "kind": "whole_lexeme",
+          "components": [
+            "aperture"
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "word": "aperture",
+                "phones": "AE P ER CH ER",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              }
+            ],
+            "syllables": 3
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "observation-logbook",
+      "domain": "observation",
+      "direction": "evidence",
+      "rank": 29,
+      "sense": "an ordered record of observations and events",
+      "suitable": [
+        "Inspect and organize system signals; Observe and compare system behavior"
+      ],
+      "incompatible": [
+        "travel diary"
+      ],
+      "source": "original-editorial-concept-naming-v1; not preference-validated",
+      "forms": [
+        {
+          "name": "Logbook",
+          "kind": "whole_lexeme",
+          "components": [
+            "logbook"
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "word": "logbook",
+                "phones": "L AO G B UH K",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              }
+            ],
+            "syllables": 2
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "observation-daybook",
+      "domain": "observation",
+      "direction": "evidence",
+      "rank": 30,
+      "sense": "a chronological record of daily events",
+      "suitable": [
+        "Inspect and organize system signals; Observe and compare system behavior"
+      ],
+      "incompatible": [
+        "personal journaling"
+      ],
+      "source": "original-editorial-concept-naming-v1; not preference-validated",
+      "forms": [
+        {
+          "name": "Daybook",
+          "kind": "whole_lexeme",
+          "components": [
+            "day",
+            "book"
+          ],
+          "pronunciation": {
+            "source": "dictionary_components",
+            "components": [
+              {
+                "word": "day",
+                "phones": "D EY",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              },
+              {
+                "word": "book",
+                "phones": "B UH K",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              }
+            ],
+            "syllables": 2
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "observation-witness",
+      "domain": "observation",
+      "direction": "evidence",
+      "rank": 31,
+      "sense": "an observer whose account supplies evidence",
+      "suitable": [
+        "Inspect and organize system signals; Observe and compare system behavior"
+      ],
+      "incompatible": [
+        "legal testimony"
+      ],
+      "source": "original-editorial-concept-naming-v1; not preference-validated",
+      "forms": [
+        {
+          "name": "Witness",
+          "kind": "whole_lexeme",
+          "components": [
+            "witness"
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "word": "witness",
+                "phones": "W IH T N AH S",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              }
+            ],
+            "syllables": 2
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "observation-telltale",
+      "domain": "observation",
+      "direction": "evidence",
+      "rank": 32,
+      "sense": "a sign that reveals something otherwise hidden",
+      "suitable": [
+        "Inspect and organize system signals; Observe and compare system behavior"
+      ],
+      "incompatible": [
+        "storytelling"
+      ],
+      "source": "original-editorial-concept-naming-v1; not preference-validated",
+      "forms": [
+        {
+          "name": "Telltale",
+          "kind": "whole_lexeme",
+          "components": [
+            "telltale"
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "word": "telltale",
+                "phones": "T EH L T EY L",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              }
+            ],
+            "syllables": 2
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "observation-yardstick",
+      "domain": "observation",
+      "direction": "measurement",
+      "rank": 33,
+      "sense": "a standard used to compare or measure",
+      "suitable": [
+        "Observe and compare system behavior"
+      ],
+      "incompatible": [
+        "carpentry tools"
+      ],
+      "source": "original-editorial-concept-naming-v1; not preference-validated",
+      "forms": [
+        {
+          "name": "Yardstick",
+          "kind": "whole_lexeme",
+          "components": [
+            "yardstick"
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "word": "yardstick",
+                "phones": "Y AA R D S T IH K",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              }
+            ],
+            "syllables": 2
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "observation-caliper",
+      "domain": "observation",
+      "direction": "measurement",
+      "rank": 34,
+      "sense": "an instrument for comparing dimensions",
+      "suitable": [
+        "Observe and compare system behavior"
+      ],
+      "incompatible": [
+        "manufacturing hardware"
+      ],
+      "source": "original-editorial-concept-naming-v1; not preference-validated",
+      "forms": [
+        {
+          "name": "Caliper",
+          "kind": "whole_lexeme",
+          "components": [
+            "caliper"
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "word": "caliper",
+                "phones": "K AE L AH P ER",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              }
+            ],
+            "syllables": 3
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "observation-parallax",
+      "domain": "observation",
+      "direction": "measurement",
+      "rank": 35,
+      "sense": "a change in viewpoint that reveals relative position",
+      "suitable": [
+        "Observe and compare system behavior"
+      ],
+      "incompatible": [
+        "astronomy education"
+      ],
+      "source": "original-editorial-concept-naming-v1; not preference-validated",
+      "forms": [
+        {
+          "name": "Parallax",
+          "kind": "whole_lexeme",
+          "components": [
+            "parallax"
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "word": "parallax",
+                "phones": "P EH R AH L AE K S",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              }
+            ],
+            "syllables": 3
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "observation-gauge",
+      "domain": "observation",
+      "direction": "measurement",
+      "rank": 36,
+      "sense": "an instrument that makes a quantity legible",
+      "suitable": [
+        "Observe and compare system behavior"
+      ],
+      "incompatible": [
+        "industrial hardware"
+      ],
+      "source": "original-editorial-concept-naming-v1; not preference-validated",
+      "forms": [
+        {
+          "name": "Gauge",
+          "kind": "whole_lexeme",
+          "components": [
+            "gauge"
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "word": "gauge",
+                "phones": "G EY JH",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              }
+            ],
+            "syllables": 1
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": true
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "verification-touchstone",
+      "domain": "verification",
+      "direction": "integrity",
+      "rank": 37,
+      "sense": "a reference used to test quality or authenticity",
+      "suitable": [
+        "Verify the integrity of an artifact; Validate configuration against expectations"
+      ],
+      "incompatible": [
+        "jewelry testing"
+      ],
+      "source": "original-editorial-concept-naming-v1; not preference-validated",
+      "forms": [
+        {
+          "name": "Touchstone",
+          "kind": "whole_lexeme",
+          "components": [
+            "touchstone"
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "word": "touchstone",
+                "phones": "T AH CH S T OW N",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              }
+            ],
+            "syllables": 2
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "verification-assay",
+      "domain": "verification",
+      "direction": "integrity",
+      "rank": 38,
+      "sense": "an examination used to determine composition or quality",
+      "suitable": [
+        "Verify the integrity of an artifact; Validate configuration against expectations"
+      ],
+      "incompatible": [
+        "medical diagnostics"
+      ],
+      "source": "original-editorial-concept-naming-v1; not preference-validated",
+      "forms": [
+        {
+          "name": "Assay",
+          "kind": "whole_lexeme",
+          "components": [
+            "assay"
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "word": "assay",
+                "phones": "AE S IY",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              }
+            ],
+            "syllables": 2
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "verification-surety",
+      "domain": "verification",
+      "direction": "integrity",
+      "rank": 39,
+      "sense": "a pledge that supports confidence in an obligation",
+      "suitable": [
+        "Verify the integrity of an artifact; Validate configuration against expectations"
+      ],
+      "incompatible": [
+        "insurance"
+      ],
+      "source": "original-editorial-concept-naming-v1; not preference-validated",
+      "forms": [
+        {
+          "name": "Surety",
+          "kind": "whole_lexeme",
+          "components": [
+            "surety"
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "word": "surety",
+                "phones": "SH UH R AH T IY",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              }
+            ],
+            "syllables": 3
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "verification-proof",
+      "domain": "verification",
+      "direction": "integrity",
+      "rank": 40,
+      "sense": "evidence that establishes a claim",
+      "suitable": [
+        "Verify the integrity of an artifact; Validate configuration against expectations"
+      ],
+      "incompatible": [
+        "printing services"
+      ],
+      "source": "original-editorial-concept-naming-v1; not preference-validated",
+      "forms": [
+        {
+          "name": "Proof",
+          "kind": "whole_lexeme",
+          "components": [
+            "proof"
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "word": "proof",
+                "phones": "P R UW F",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              }
+            ],
+            "syllables": 1
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ]
+        },
+        {
+          "name": "Proofmark",
+          "kind": "complete_compound",
+          "components": [
+            "proof",
+            "mark"
+          ],
+          "pronunciation": {
+            "source": "dictionary_components",
+            "components": [
+              {
+                "word": "proof",
+                "phones": "P R UW F",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              },
+              {
+                "word": "mark",
+                "phones": "M AA R K",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              }
+            ],
+            "syllables": 2
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "verification-signet",
+      "domain": "verification",
+      "direction": "attestation",
+      "rank": 41,
+      "sense": "a seal whose impression carries identity",
+      "suitable": [
+        "Verify the integrity of an artifact"
+      ],
+      "incompatible": [
+        "jewelry retail"
+      ],
+      "source": "original-editorial-concept-naming-v1; not preference-validated",
+      "forms": [
+        {
+          "name": "Signet",
+          "kind": "whole_lexeme",
+          "components": [
+            "signet"
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "word": "signet",
+                "phones": "S IH G N IH T",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              }
+            ],
+            "syllables": 2
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "verification-watermark",
+      "domain": "verification",
+      "direction": "attestation",
+      "rank": 42,
+      "sense": "an identifying mark carried within an artifact",
+      "suitable": [
+        "Verify the integrity of an artifact"
+      ],
+      "incompatible": [
+        "image editing"
+      ],
+      "source": "original-editorial-concept-naming-v1; not preference-validated",
+      "forms": [
+        {
+          "name": "Watermark",
+          "kind": "whole_lexeme",
+          "components": [
+            "watermark"
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "word": "watermark",
+                "phones": "W AO T ER M AA R K",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              }
+            ],
+            "syllables": 3
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "verification-imprint",
+      "domain": "verification",
+      "direction": "attestation",
+      "rank": 43,
+      "sense": "an impression left as evidence of an origin",
+      "suitable": [
+        "Verify the integrity of an artifact"
+      ],
+      "incompatible": [
+        "publishing"
+      ],
+      "source": "original-editorial-concept-naming-v1; not preference-validated",
+      "forms": [
+        {
+          "name": "Imprint",
+          "kind": "whole_lexeme",
+          "components": [
+            "imprint"
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "word": "imprint",
+                "phones": "IH M P R IH N T",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              }
+            ],
+            "syllables": 2
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "verification-seal",
+      "domain": "verification",
+      "direction": "attestation",
+      "rank": 44,
+      "sense": "a mark that attests to a state or origin",
+      "suitable": [
+        "Verify the integrity of an artifact"
+      ],
+      "incompatible": [
+        "marine biology"
+      ],
+      "source": "original-editorial-concept-naming-v1; not preference-validated",
+      "forms": [
+        {
+          "name": "Seal",
+          "kind": "whole_lexeme",
+          "components": [
+            "seal"
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "word": "seal",
+                "phones": "S IY L",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              }
+            ],
+            "syllables": 1
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ]
+        },
+        {
+          "name": "Sealscript",
+          "kind": "complete_compound",
+          "components": [
+            "seal",
+            "script"
+          ],
+          "pronunciation": {
+            "source": "dictionary_components",
+            "components": [
+              {
+                "word": "seal",
+                "phones": "S IY L",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              },
+              {
+                "word": "script",
+                "phones": "S K R IH P T",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              }
+            ],
+            "syllables": 2
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "verification-accord",
+      "domain": "verification",
+      "direction": "agreement",
+      "rank": 45,
+      "sense": "agreement between things expected to correspond",
+      "suitable": [
+        "Validate configuration against expectations"
+      ],
+      "incompatible": [
+        "automotive sales"
+      ],
+      "source": "original-editorial-concept-naming-v1; not preference-validated",
+      "forms": [
+        {
+          "name": "Accord",
+          "kind": "whole_lexeme",
+          "components": [
+            "accord"
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "word": "accord",
+                "phones": "AH K AO R D",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              }
+            ],
+            "syllables": 2
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": true
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "verification-criterion",
+      "domain": "verification",
+      "direction": "agreement",
+      "rank": 46,
+      "sense": "a standard by which something is judged",
+      "suitable": [
+        "Validate configuration against expectations"
+      ],
+      "incompatible": [
+        "film distribution"
+      ],
+      "source": "original-editorial-concept-naming-v1; not preference-validated",
+      "forms": [
+        {
+          "name": "Criterion",
+          "kind": "whole_lexeme",
+          "components": [
+            "criterion"
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "word": "criterion",
+                "phones": "K R AY T IH R IY AH N",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              }
+            ],
+            "syllables": 4
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "verification-stipulate",
+      "domain": "verification",
+      "direction": "agreement",
+      "rank": 47,
+      "sense": "to state a condition that must be satisfied",
+      "suitable": [
+        "Validate configuration against expectations"
+      ],
+      "incompatible": [
+        "contract drafting"
+      ],
+      "source": "original-editorial-concept-naming-v1; not preference-validated",
+      "forms": [
+        {
+          "name": "Stipulate",
+          "kind": "whole_lexeme",
+          "components": [
+            "stipulate"
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "word": "stipulate",
+                "phones": "S T IH P Y AH L EY T",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              }
+            ],
+            "syllables": 3
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "verification-concord",
+      "domain": "verification",
+      "direction": "agreement",
+      "rank": 48,
+      "sense": "a state of agreement or correspondence",
+      "suitable": [
+        "Validate configuration against expectations"
+      ],
+      "incompatible": [
+        "travel booking"
+      ],
+      "source": "original-editorial-concept-naming-v1; not preference-validated",
+      "forms": [
+        {
+          "name": "Concord",
+          "kind": "whole_lexeme",
+          "components": [
+            "concord"
+          ],
+          "pronunciation": {
+            "source": "dictionary",
+            "components": [
+              {
+                "word": "concord",
+                "phones": "K AA N K AO R D",
+                "source_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+              }
+            ],
+            "syllables": 2
+          },
+          "collisions": [
+            {
+              "source": "brand_corpus",
+              "sha256": "bd2871db2af486a0915db0a7c983e80006c5335c38fc2227307fd08442ecd16c",
+              "snapshot_date": null,
+              "match": false
+            },
+            {
+              "source": "crate_snapshot",
+              "sha256": "93bd5b2af7b878daccdda8c302858cd6100d42906e4b0a651e383c19814f3583",
+              "snapshot_date": null,
+              "match": true
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "identity": "f7bf89f6fd8a5f093f21eea69257dc06b2e8be17d627abd0d717fc2f80da74e2"
+}

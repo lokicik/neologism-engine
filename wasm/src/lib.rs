@@ -84,6 +84,17 @@ pub fn generate_names(config_json: &str) -> String {
     serde_json::to_string(&results).unwrap_or_else(|_| "[]".to_string())
 }
 
+/// Isolated product-name catalog; existing generation and data loaders are untouched.
+#[wasm_bindgen]
+pub fn generate_concept_diagnostics(request_json: &str) -> String {
+    let run = serde_json::from_str::<neologism_core::concept_naming::NamingRequest>(request_json)
+        .map_err(|e| e.to_string()).and_then(neologism_core::concept_naming::generate);
+    match run {
+        Ok(value) => serde_json::to_string(&value).unwrap(),
+        Err(error) => serde_json::json!({"error": error}).to_string(),
+    }
+}
+
 /// Experimental diagnostic entry point. Existing generation exports are unchanged.
 /// Returns the bounded family page, structured evidence and observed internal events.
 #[wasm_bindgen]

@@ -1,6 +1,7 @@
 pub mod blend;
 pub mod brief_intent;
 pub mod collision;
+pub mod concept_naming;
 pub mod connotation;
 pub mod diagnostics;
 pub mod exclude;
