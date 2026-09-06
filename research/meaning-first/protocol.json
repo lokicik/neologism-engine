@@ -1,0 +1,30 @@
+{
+  "schema": "meaning-first-protocol-v1",
+  "status": "fixed before implementation outputs; no thresholds tuned from these results",
+  "development": [
+    "a build tool that compares executable sizes between release tags",
+    "a package release assistant that verifies checksums of downloadable binaries",
+    "a build tool that checks dependency licenses before publishing a package",
+    "a terminal tool that tracks memory usage during test runs",
+    "a local service that groups log messages by severity",
+    "a developer tool that verifies configuration files before deployment"
+  ],
+  "evaluation": [
+    "a command line tool that detects leaked credentials in commit patches",
+    "a desktop utility that records database migration timings during rehearsals",
+    "a developer tool that compares container permissions across environments",
+    "a local tool that verifies cached artifacts before offline installation",
+    "a terminal utility that tracks socket connections during integration tests",
+    "a service that groups compiler warnings by source module",
+    "a developer utility that maps service dependencies across repositories",
+    "a command line tool that checks translation keys before application releases",
+    "a local tool that measures image compression losses across formats",
+    "a developer utility that restores deleted configuration sections from snapshots",
+    "a terminal tool that filters duplicate build diagnostics during compilation",
+    "a desktop tool that sorts crash reports by affected component"
+  ],
+  "seeds": [13, 67, 313],
+  "controls": ["", "a checksum utility", "a tool that does not track users", "a tool that compares rows and deletes tables", "isim üreten araç"],
+  "humanGate": { "minimumWins": 8, "comparisons": 12, "minimumUsableBriefs": 6, "minimumUsableBriefUplift": 3, "minimumConsistentRepeats": 3, "repeats": 4, "status": "pending" },
+  "noPromotionWithoutHumanEvaluation": true
+}

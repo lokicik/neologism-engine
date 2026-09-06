@@ -1,0 +1,30 @@
+{
+  "runtimeIdentity": "delivery-identity.json",
+  "comparisonConditions": 54,
+  "oldReplaysPassed": {
+    "auto": 48,
+    "sharedPool": 48,
+    "briefIntent": 33,
+    "operationObject": 30
+  },
+  "rustTests": 219,
+  "wasmRebuilt": true,
+  "typescript": "pass",
+  "webBuild": "pass",
+  "oldWebAudits": 6,
+  "finalShortlistContract": "25/25",
+  "changesAfterComparison": [
+    "web/src/components/CandidateLab.tsx",
+    "web/src/components/Shortlist.tsx"
+  ],
+  "note": "Only finalist UI copy changed after comparison capture; final UI, TypeScript, build and original shortlist contract were rerun. Generation/data/WASM hashes match the comparison.",
+  "humanPreferenceGate": "pending",
+  "assistantReview": {
+    "newWins": 5,
+    "autoWins": 0,
+    "ties": 3,
+    "neither": 4,
+    "usableNewBriefs": 8,
+    "usableAutoBriefs": 4
+  }
+}

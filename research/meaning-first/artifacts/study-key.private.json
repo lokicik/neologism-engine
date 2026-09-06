@@ -1,0 +1,92 @@
+{
+  "schema": "shared-pool-study-key-v1",
+  "studySha256": "cb1f526f89d617fc8b3dd54518809d088b85101dccc605309f094a05807e5614",
+  "protocolSha256": "69e5ce75d68284f82bfa70c91e9659416e52060c86d80c999ccd755c3fc9920a",
+  "comparisonSha256": "37a5e32352d073252adcf45a7442ae07f63be8c543ae71a2448d4999d149008a",
+  "pages": [
+    {
+      "id": "m1",
+      "experimentalSide": "left",
+      "seed": 67
+    },
+    {
+      "id": "m2",
+      "experimentalSide": "left",
+      "seed": 13
+    },
+    {
+      "id": "m3",
+      "experimentalSide": "right",
+      "seed": 67
+    },
+    {
+      "id": "m4",
+      "experimentalSide": "right",
+      "seed": 13
+    },
+    {
+      "id": "m5",
+      "experimentalSide": "left",
+      "seed": 67
+    },
+    {
+      "id": "m6",
+      "experimentalSide": "right",
+      "seed": 67
+    },
+    {
+      "id": "m7",
+      "experimentalSide": "right",
+      "seed": 13,
+      "repeatOf": "m2"
+    },
+    {
+      "id": "m8",
+      "experimentalSide": "left",
+      "seed": 13
+    },
+    {
+      "id": "m9",
+      "experimentalSide": "right",
+      "seed": 313
+    },
+    {
+      "id": "m10",
+      "experimentalSide": "left",
+      "seed": 13,
+      "repeatOf": "m4"
+    },
+    {
+      "id": "m11",
+      "experimentalSide": "left",
+      "seed": 313
+    },
+    {
+      "id": "m12",
+      "experimentalSide": "right",
+      "seed": 13
+    },
+    {
+      "id": "m13",
+      "experimentalSide": "right",
+      "seed": 313
+    },
+    {
+      "id": "m14",
+      "experimentalSide": "right",
+      "seed": 13,
+      "repeatOf": "m8"
+    },
+    {
+      "id": "m15",
+      "experimentalSide": "left",
+      "seed": 313
+    },
+    {
+      "id": "m16",
+      "experimentalSide": "left",
+      "seed": 13,
+      "repeatOf": "m12"
+    }
+  ]
+}

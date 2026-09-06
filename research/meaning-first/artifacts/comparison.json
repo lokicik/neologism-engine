@@ -1,0 +1,1451 @@
+{
+  "protocolSha256": "1db442055277395f120c857bbda3744f0df290378ff39cd3caac186df7e475f0",
+  "humanEvaluation": "pending",
+  "rows": [
+    {
+      "partition": "development",
+      "brief": "a build tool that compares executable sizes between release tags",
+      "seed": 13,
+      "auto": [
+        "Multain",
+        "Tagora",
+        "Pushify"
+      ],
+      "previous": [
+        "Creagen",
+        "Commitflow",
+        "Multain",
+        "PureSiz"
+      ],
+      "current": [
+        "CompareSize",
+        "Terazi",
+        "Kiyas"
+      ],
+      "count": 165,
+      "qualified": 4,
+      "durationMs": 270.59999999962747,
+      "autoDurationMs": 39.60000000055879,
+      "traceFile": "trace-0.json.gz",
+      "sha256": "c4f315f19d0e4a89da0818d2e8772c8183c37e51f90a659202c9d382d14e9b96"
+    },
+    {
+      "partition": "development",
+      "brief": "a build tool that compares executable sizes between release tags",
+      "seed": 67,
+      "auto": [
+        "Tagora",
+        "Pushify",
+        "Commitia"
+      ],
+      "previous": [
+        "Compareia",
+        "TagForge",
+        "Preforge",
+        "Forgeseed"
+      ],
+      "current": [
+        "CompareSize",
+        "Terazi",
+        "Kiyas"
+      ],
+      "count": 165,
+      "qualified": 4,
+      "durationMs": 252.30000000074506,
+      "autoDurationMs": 63.39999999944121,
+      "traceFile": "trace-1.json.gz",
+      "sha256": "b1e29d501cb9edf98420e3afda4a7ddaaee35f4bb89efa3d6ecf35208b9dc486"
+    },
+    {
+      "partition": "development",
+      "brief": "a build tool that compares executable sizes between release tags",
+      "seed": 313,
+      "auto": [
+        "Daedal",
+        "TagSeed",
+        "Pushora"
+      ],
+      "previous": [
+        "Commitflow",
+        "Creatic",
+        "Tagforge",
+        "Multain"
+      ],
+      "current": [
+        "CompareSize",
+        "Kiyas",
+        "Terazi"
+      ],
+      "count": 165,
+      "qualified": 4,
+      "durationMs": 271.19999999925494,
+      "autoDurationMs": 40.90000000037253,
+      "traceFile": "trace-2.json.gz",
+      "sha256": "3eb69b64ebd13319598224e7f8b8f33310ded42b7794a8e775a588887378d919"
+    },
+    {
+      "partition": "development",
+      "brief": "a package release assistant that verifies checksums of downloadable binaries",
+      "seed": 13,
+      "auto": [
+        "Halyard",
+        "Tagora",
+        "Pushify"
+      ],
+      "previous": [
+        "Verospec",
+        "Stacklink",
+        "Mihenk",
+        "NewByte"
+      ],
+      "current": [
+        "Verchecksum",
+        "Downver",
+        "Mihenk",
+        "Sarraf"
+      ],
+      "count": 140,
+      "qualified": 6,
+      "durationMs": 246.90000000037253,
+      "autoDurationMs": 25.799999999813735,
+      "traceFile": "trace-3.json.gz",
+      "sha256": "f9db6740f63abcc27c192648bcd410ff27334366510423b03b2cd7662e5c6c7b"
+    },
+    {
+      "partition": "development",
+      "brief": "a package release assistant that verifies checksums of downloadable binaries",
+      "seed": 67,
+      "auto": [
+        "Tagwave",
+        "Commitix",
+        "Forgeora"
+      ],
+      "previous": [
+        "Verifyia",
+        "Vestack",
+        "Stacklink",
+        "Firmaspec"
+      ],
+      "current": [
+        "Verchecksum",
+        "Checkver",
+        "Mihenk",
+        "Sarraf"
+      ],
+      "count": 140,
+      "qualified": 6,
+      "durationMs": 241,
+      "autoDurationMs": 25.200000000186265,
+      "traceFile": "trace-4.json.gz",
+      "sha256": "3587898fae50759e9b62a03f181d18c198dbdeae337069deeea04f76a18e1d03"
+    },
+    {
+      "partition": "development",
+      "brief": "a package release assistant that verifies checksums of downloadable binaries",
+      "seed": 313,
+      "auto": [
+        "Mihmandar",
+        "Tagora",
+        "Pushify"
+      ],
+      "previous": [
+        "Stackseed",
+        "Mihenk",
+        "Verifyia",
+        "Memtain"
+      ],
+      "current": [
+        "Verchecksum",
+        "Mihenk",
+        "Sarraf"
+      ],
+      "count": 140,
+      "qualified": 5,
+      "durationMs": 253.20000000018626,
+      "autoDurationMs": 26,
+      "traceFile": "trace-5.json.gz",
+      "sha256": "ed4cfb9b264e40268a003977b11e276a09480be030749e6e39d3ca89b2291b86"
+    },
+    {
+      "partition": "development",
+      "brief": "a build tool that checks dependency licenses before publishing a package",
+      "seed": 13,
+      "auto": [
+        "Creatic",
+        "DepSeed",
+        "Bumpify"
+      ],
+      "previous": [
+        "Plasserv",
+        "Stacklink",
+        "Matbaa",
+        "TopSync"
+      ],
+      "current": [
+        "Decheck",
+        "CheckLicense",
+        "Licheck",
+        "Plumbline"
+      ],
+      "count": 154,
+      "qualified": 4,
+      "durationMs": 471.8999999994412,
+      "autoDurationMs": 44.09999999962747,
+      "traceFile": "trace-6.json.gz",
+      "sha256": "940233e2da774d03008cd89c8e773a486c3a37e0eb908ba377626c30fbfa7463"
+    },
+    {
+      "partition": "development",
+      "brief": "a build tool that checks dependency licenses before publishing a package",
+      "seed": 67,
+      "auto": [
+        "DepSeed",
+        "Bumpix",
+        "Syncora"
+      ],
+      "previous": [
+        "Depforge",
+        "BumpForge",
+        "Archeck",
+        "Forgebeam"
+      ],
+      "current": [
+        "Checklicense",
+        "Decheck",
+        "Licheck",
+        "Plumbline"
+      ],
+      "count": 154,
+      "qualified": 5,
+      "durationMs": 438.40000000037253,
+      "autoDurationMs": 72.70000000018626,
+      "traceFile": "trace-7.json.gz",
+      "sha256": "4fb761e8072e3f50f996ec4eb47d8f89aa8b3816cce869577f2a1ef7e3dd896a"
+    },
+    {
+      "partition": "development",
+      "brief": "a build tool that checks dependency licenses before publishing a package",
+      "seed": 313,
+      "auto": [
+        "Creatic",
+        "DepSeed",
+        "Bumpify"
+      ],
+      "previous": [
+        "Forgeseed",
+        "Matbaa",
+        "Depforge",
+        "Creatic"
+      ],
+      "current": [
+        "Checklicense",
+        "Decheck",
+        "Licheck",
+        "Plumbline"
+      ],
+      "count": 154,
+      "qualified": 4,
+      "durationMs": 455.70000000018626,
+      "autoDurationMs": 42.5,
+      "traceFile": "trace-8.json.gz",
+      "sha256": "a09dd80ea8024045ea35551bdffea08ffc916f67979b4f46eafbffdf7d41b5f7"
+    },
+    {
+      "partition": "development",
+      "brief": "a terminal tool that tracks memory usage during test runs",
+      "seed": 13,
+      "auto": [
+        "Sankofa",
+        "Specrun",
+        "Tracerun"
+      ],
+      "previous": [
+        "Codexport",
+        "Runsignal",
+        "Mihenk",
+        "BoldRun"
+      ],
+      "current": [
+        "TrackUsage",
+        "Metrack",
+        "Izci",
+        "Fylgja"
+      ],
+      "count": 174,
+      "qualified": 6,
+      "durationMs": 335,
+      "autoDurationMs": 90.79999999981374,
+      "traceFile": "trace-9.json.gz",
+      "sha256": "5ee26684cf5b67bfb39d4950e850b587b88891f6e7f8fadc2632d75a0e9e0042"
+    },
+    {
+      "partition": "development",
+      "brief": "a terminal tool that tracks memory usage during test runs",
+      "seed": 67,
+      "auto": [
+        "Izci",
+        "Proberun",
+        "Tracerun"
+      ],
+      "previous": [
+        "Runterm",
+        "SpecRun",
+        "Altrack",
+        "Termatlas"
+      ],
+      "current": [
+        "TrackUsage",
+        "Metrack",
+        "Fylgja",
+        "Izci"
+      ],
+      "count": 174,
+      "qualified": 6,
+      "durationMs": 321,
+      "autoDurationMs": 90,
+      "traceFile": "trace-10.json.gz",
+      "sha256": "86ce7e2ec2f6bb97dcf50604de0fef75001a4a80c87669df38a135f5cfc3690f"
+    },
+    {
+      "partition": "development",
+      "brief": "a terminal tool that tracks memory usage during test runs",
+      "seed": 313,
+      "auto": [
+        "Fylgja",
+        "Speclab",
+        "Tracerun"
+      ],
+      "previous": [
+        "Runsignal",
+        "Sankofa",
+        "Specrun",
+        "Dictic"
+      ],
+      "current": [
+        "Metrack",
+        "TrackUsage",
+        "Fylgja",
+        "Izci"
+      ],
+      "count": 174,
+      "qualified": 6,
+      "durationMs": 327.20000000018626,
+      "autoDurationMs": 88.5,
+      "traceFile": "trace-11.json.gz",
+      "sha256": "193bb0002aad3f31653c7b0d35bbb7dd6f79eab13b78fbf3b638be21ac0f230d"
+    },
+    {
+      "partition": "development",
+      "brief": "a local service that groups log messages by severity",
+      "seed": 13,
+      "auto": [
+        "Tracebeam",
+        "Kinsignal",
+        "Pulsekin"
+      ],
+      "previous": [
+        "Vocalex",
+        "Scopelink",
+        "Halka",
+        "BoldBond"
+      ],
+      "current": [
+        "Logroup",
+        "Megroup",
+        "Halka"
+      ],
+      "count": 164,
+      "qualified": 3,
+      "durationMs": 228.8999999994412,
+      "autoDurationMs": 52.60000000055879,
+      "traceFile": "trace-12.json.gz",
+      "sha256": "cc56c23f031e4a0b3c847ae13df2ebc82beefd9f355abb597f8b40c531e20c65"
+    },
+    {
+      "partition": "development",
+      "brief": "a local service that groups log messages by severity",
+      "seed": 67,
+      "auto": [
+        "Traceseed",
+        "Kinsignal",
+        "Pulselink"
+      ],
+      "previous": [
+        "Tracelink",
+        "ScopeLink",
+        "Mempulse",
+        "Kinsignal"
+      ],
+      "current": [
+        "Logroup",
+        "Megroup",
+        "Grouplog",
+        "Halka"
+      ],
+      "count": 167,
+      "qualified": 4,
+      "durationMs": 213.40000000037253,
+      "autoDurationMs": 51.299999999813735,
+      "traceFile": "trace-13.json.gz",
+      "sha256": "7f72514d1969315427f271dcaafe801599a5e810943791d416baa6b17a7e7b76"
+    },
+    {
+      "partition": "development",
+      "brief": "a local service that groups log messages by severity",
+      "seed": 313,
+      "auto": [
+        "Kinsignal",
+        "Pulseseed",
+        "Beaconbond"
+      ],
+      "previous": [
+        "Circleflow",
+        "Halka",
+        "Pulselink",
+        "Strucder"
+      ],
+      "current": [
+        "Logroup",
+        "Megroup",
+        "Halka"
+      ],
+      "count": 164,
+      "qualified": 3,
+      "durationMs": 231.20000000018626,
+      "autoDurationMs": 55.59999999962747,
+      "traceFile": "trace-14.json.gz",
+      "sha256": "cf90d4b8ab09672e066a4e1496fdb15f5da79f413ce2739f87d0e03e624ddcf5"
+    },
+    {
+      "partition": "development",
+      "brief": "a developer tool that verifies configuration files before deployment",
+      "seed": 13,
+      "auto": [
+        "Paramia",
+        "Dotpath",
+        "Pathlab"
+      ],
+      "previous": [
+        "Verospec",
+        "Shipsignal",
+        "Mihenk",
+        "PureEnv"
+      ],
+      "current": [
+        "Confiver",
+        "Verfile",
+        "Mihenk",
+        "Sarraf"
+      ],
+      "count": 159,
+      "qualified": 6,
+      "durationMs": 218.79999999981374,
+      "autoDurationMs": 38.10000000055879,
+      "traceFile": "trace-15.json.gz",
+      "sha256": "112c856ca1722cb0d56f45864813374064daa02ac613c3fcc78c467e9b1ad2e5"
+    },
+    {
+      "partition": "development",
+      "brief": "a developer tool that verifies configuration files before deployment",
+      "seed": 67,
+      "auto": [
+        "Burhan",
+        "Dotship",
+        "Envix"
+      ],
+      "previous": [
+        "Fileship",
+        "DotPath",
+        "Nucloud",
+        "Cloudsignal"
+      ],
+      "current": [
+        "Confiver",
+        "Verfile",
+        "Mihenk",
+        "Sarraf"
+      ],
+      "count": 159,
+      "qualified": 6,
+      "durationMs": 218.5,
+      "autoDurationMs": 41,
+      "traceFile": "trace-16.json.gz",
+      "sha256": "4970f91a2a201f1f9cbb6e0d8912dcbc6abcd411cf325856f44c6c254c6438c1"
+    },
+    {
+      "partition": "development",
+      "brief": "a developer tool that verifies configuration files before deployment",
+      "seed": 313,
+      "auto": [
+        "Mihenk",
+        "Paramia",
+        "Varloom"
+      ],
+      "previous": [
+        "Shipsignal",
+        "Fornect",
+        "Fileship",
+        "Doctain"
+      ],
+      "current": [
+        "Confiver",
+        "Verfile",
+        "Mihenk",
+        "Sarraf"
+      ],
+      "count": 159,
+      "qualified": 6,
+      "durationMs": 218.70000000018626,
+      "autoDurationMs": 41.19999999925494,
+      "traceFile": "trace-17.json.gz",
+      "sha256": "3a59c8ad345c024a0208a7c9433d8e2ff55852ccfbd2b2e2f50be20fc9596716"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a command line tool that detects leaked credentials in commit patches",
+      "seed": 13,
+      "auto": [
+        "Termatlas",
+        "Detectterm",
+        "Leakedterm"
+      ],
+      "previous": [
+        "Novalum",
+        "Commyt",
+        "Detectlab",
+        "Seismograph"
+      ],
+      "current": [
+        "DetectLeak",
+        "Seismograph",
+        "Sarraf"
+      ],
+      "count": 177,
+      "qualified": 4,
+      "durationMs": 409.90000000037253,
+      "autoDurationMs": 33.60000000055879,
+      "traceFile": "trace-18.json.gz",
+      "sha256": "1562dcb7f3d8f295a06ba8c08a5bb61bdaf170e57035f65860c566bdd494a56e"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a command line tool that detects leaked credentials in commit patches",
+      "seed": 67,
+      "auto": [
+        "Termatlas",
+        "Detectterm",
+        "Leakedterm"
+      ],
+      "previous": [
+        "Detto",
+        "Commyt",
+        "Creintent",
+        "Leakedloom"
+      ],
+      "current": [
+        "DetectLeak",
+        "Deleak",
+        "Seismograph",
+        "Sarraf"
+      ],
+      "count": 178,
+      "qualified": 5,
+      "durationMs": 379.1000000005588,
+      "autoDurationMs": 32.799999999813735,
+      "traceFile": "trace-19.json.gz",
+      "sha256": "37dda8cdb2abc565460465fe5c0c3daef26bdb86ec1c656f1cd25dedfb05e05c"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a command line tool that detects leaked credentials in commit patches",
+      "seed": 313,
+      "auto": [
+        "Termatlas",
+        "Detectterm",
+        "Leakedterm"
+      ],
+      "previous": [
+        "Detectlab",
+        "Seismograph",
+        "Commox",
+        "TopDetect"
+      ],
+      "current": [
+        "DetectLeak",
+        "Deleak",
+        "Seismograph",
+        "Sarraf"
+      ],
+      "count": 178,
+      "qualified": 5,
+      "durationMs": 369.1000000005588,
+      "autoDurationMs": 33.200000000186265,
+      "traceFile": "trace-20.json.gz",
+      "sha256": "60850e2b42b97cb2030b61c545e3fdc2d842171751c00d2007e134fe0175dd4f"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a desktop utility that records database migration timings during rehearsals",
+      "seed": 13,
+      "auto": [
+        "Dataseed",
+        "Shiftia",
+        "Bridgerow"
+      ],
+      "previous": [
+        "Scribdata",
+        "Bridgebeam",
+        "Fincise",
+        "PureShift"
+      ],
+      "current": [
+        "Seismograph",
+        "Ostraka"
+      ],
+      "count": 177,
+      "qualified": 3,
+      "durationMs": 394.8999999994412,
+      "autoDurationMs": 25.700000000186265,
+      "traceFile": "trace-21.json.gz",
+      "sha256": "fdc7e03ffb36dd7265ec4811080efb57719b37fdc3473bddd9fc6100ae640bfe"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a desktop utility that records database migration timings during rehearsals",
+      "seed": 67,
+      "auto": [
+        "Skald",
+        "Portio",
+        "Shiftix"
+      ],
+      "previous": [
+        "Queryshift",
+        "ShiftDesktop",
+        "Reshift",
+        "Bridgebeam"
+      ],
+      "current": [
+        "Ostraka",
+        "Seismograph"
+      ],
+      "count": 177,
+      "qualified": 3,
+      "durationMs": 391.19999999925494,
+      "autoDurationMs": 26.399999999441206,
+      "traceFile": "trace-22.json.gz",
+      "sha256": "b44edcea80184eec7ac4b24ef1a2b4b422e82e0fb39a7cc2ee132570970f9f4e"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a desktop utility that records database migration timings during rehearsals",
+      "seed": 313,
+      "auto": [
+        "Fincise",
+        "Datatlas",
+        "Shiftio"
+      ],
+      "previous": [
+        "Bridgeseed",
+        "Fincise",
+        "Queryshift",
+        "Curnect"
+      ],
+      "current": [
+        "Seismograph",
+        "Skald"
+      ],
+      "count": 177,
+      "qualified": 3,
+      "durationMs": 385.5,
+      "autoDurationMs": 27.100000000558794,
+      "traceFile": "trace-23.json.gz",
+      "sha256": "465de75d4ed4414e234d23ed83f196e00e76b11f2befe50d30ddb50dd78822ed"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a developer tool that compares container permissions across environments",
+      "seed": 13,
+      "auto": [
+        "Creatic",
+        "Dotnode",
+        "Paramia"
+      ],
+      "previous": [
+        "Calckine",
+        "Configloom",
+        "Insula",
+        "BoldEnv"
+      ],
+      "current": [
+        "Terazi",
+        "Kiyas"
+      ],
+      "count": 144,
+      "qualified": 2,
+      "durationMs": 376,
+      "autoDurationMs": 56.89999999944121,
+      "traceFile": "trace-24.json.gz",
+      "sha256": "797adbc28f54682eccf5841e7c23661002ff4506a28c6a25933b7c30c88d47da"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a developer tool that compares container permissions across environments",
+      "seed": 67,
+      "auto": [
+        "Terazi",
+        "Dotnode",
+        "Paramio"
+      ],
+      "previous": [
+        "Compareia",
+        "Carquest",
+        "Configlink",
+        "Calckine"
+      ],
+      "current": [
+        "Terazi",
+        "Kiyas"
+      ],
+      "count": 145,
+      "qualified": 2,
+      "durationMs": 331.20000000018626,
+      "autoDurationMs": 51.90000000037253,
+      "traceFile": "trace-25.json.gz",
+      "sha256": "a3cf853f50b5764545dcaeb5db60fae7205eba84610856012e1bb618f62753fe"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a developer tool that compares container permissions across environments",
+      "seed": 313,
+      "auto": [
+        "Creatic",
+        "Paramia",
+        "Dotbyte"
+      ],
+      "previous": [
+        "Configloom",
+        "Insula",
+        "Compareio",
+        "Portain"
+      ],
+      "current": [
+        "Kiyas",
+        "Terazi"
+      ],
+      "count": 144,
+      "qualified": 2,
+      "durationMs": 364.79999999981374,
+      "autoDurationMs": 34.700000000186265,
+      "traceFile": "trace-26.json.gz",
+      "sha256": "17471ee258f23691a639a78662651a3a244501e87fdb1ef6ef6f65d9a3f131b7"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a local tool that verifies cached artifacts before offline installation",
+      "seed": 13,
+      "auto": [
+        "Sarraf",
+        "Locil",
+        "Verme"
+      ],
+      "previous": [
+        "Verospec",
+        "Cachedbeam",
+        "Mihenk",
+        "KeyCached"
+      ],
+      "current": [
+        "Artiver",
+        "Vercache",
+        "Vefacts",
+        "Mihenk"
+      ],
+      "count": 152,
+      "qualified": 8,
+      "durationMs": 208,
+      "autoDurationMs": 56.799999999813735,
+      "traceFile": "trace-27.json.gz",
+      "sha256": "92374f4ac7083fb42579f5e089c7f43b03f7bbe68832a2120cd16c424f5644e0"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a local tool that verifies cached artifacts before offline installation",
+      "seed": 67,
+      "auto": [
+        "Sankofa",
+        "Verif",
+        "Localit"
+      ],
+      "previous": [
+        "Cachank",
+        "Browspect",
+        "Verospec",
+        "KeyCached"
+      ],
+      "current": [
+        "Verifacts",
+        "Artiver",
+        "Mihenk",
+        "Sarraf"
+      ],
+      "count": 152,
+      "qualified": 9,
+      "durationMs": 194,
+      "autoDurationMs": 38.59999999962747,
+      "traceFile": "trace-28.json.gz",
+      "sha256": "cab6293e66d225fa5de3a875fb4d691b7581162e8c7dd5232e0772467151b857"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a local tool that verifies cached artifacts before offline installation",
+      "seed": 313,
+      "auto": [
+        "Sarraf",
+        "Veron",
+        "Artall"
+      ],
+      "previous": [
+        "Cachedbeam",
+        "Mihenk",
+        "Veror",
+        "Portain"
+      ],
+      "current": [
+        "Verifacts",
+        "Artiver",
+        "Mihenk",
+        "Sarraf"
+      ],
+      "count": 152,
+      "qualified": 9,
+      "durationMs": 210.59999999962747,
+      "autoDurationMs": 68.29999999981374,
+      "traceFile": "trace-29.json.gz",
+      "sha256": "26ee4ab657cd3d2ef70428cef293a36dcf3a7d000397d253b79994ff6a79101a"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a terminal utility that tracks socket connections during integration tests",
+      "seed": 13,
+      "auto": [
+        "Izci",
+        "Termify",
+        "Shellio"
+      ],
+      "previous": [
+        "Datainter",
+        "Socketlink",
+        "Mihenk",
+        "PureTerm"
+      ],
+      "current": [
+        "TrackSocket",
+        "Socketrack",
+        "Sotrack",
+        "Izci"
+      ],
+      "count": 169,
+      "qualified": 7,
+      "durationMs": 288.3999999994412,
+      "autoDurationMs": 47.200000000186265,
+      "traceFile": "trace-30.json.gz",
+      "sha256": "19dcf5dea58fb603752e9c0cbcbb8fff35733acd03c63502dd80a6b2476be9ed"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a terminal utility that tracks socket connections during integration tests",
+      "seed": 67,
+      "auto": [
+        "Delil",
+        "Termora",
+        "Tracelab"
+      ],
+      "previous": [
+        "Socketspec",
+        "SpecTerm",
+        "Altrack",
+        "Termatlas"
+      ],
+      "current": [
+        "TrackSocket",
+        "Socketrack",
+        "Cotrack",
+        "Fylgja"
+      ],
+      "count": 168,
+      "qualified": 7,
+      "durationMs": 267.09999999962747,
+      "autoDurationMs": 35.299999999813735,
+      "traceFile": "trace-31.json.gz",
+      "sha256": "11fd7e04a2bccc6b2b4faf061758cdb710d4e1ed420bfffb1b8d37ed8ee7a159"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a terminal utility that tracks socket connections during integration tests",
+      "seed": 313,
+      "auto": [
+        "Izci",
+        "Termora",
+        "Tracebeam"
+      ],
+      "previous": [
+        "Socketflow",
+        "Fylgja",
+        "Specterm",
+        "Portain"
+      ],
+      "current": [
+        "TrackSocket",
+        "Socketrack",
+        "Cotrack",
+        "Fylgja"
+      ],
+      "count": 169,
+      "qualified": 7,
+      "durationMs": 295.20000000018626,
+      "autoDurationMs": 37.59999999962747,
+      "traceFile": "trace-32.json.gz",
+      "sha256": "f23922f78e8816f13e5a85b4871c98c27d64d2ac9932c8c6651d16775a603017"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a service that groups compiler warnings by source module",
+      "seed": 13,
+      "auto": [
+        "Insula",
+        "Moded",
+        "Warnad"
+      ],
+      "previous": [
+        "Cosmocrypt",
+        "Sourceseed",
+        "Halka",
+        "TopWarning"
+      ],
+      "current": [
+        "GroupWarning",
+        "Halka"
+      ],
+      "count": 172,
+      "qualified": 3,
+      "durationMs": 481.79999999981374,
+      "autoDurationMs": 57.60000000055879,
+      "traceFile": "trace-33.json.gz",
+      "sha256": "dca627c9f00ad25a8c2d42420981be17fbd021b540d2da05c264a0eda982258a"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a service that groups compiler warnings by source module",
+      "seed": 67,
+      "auto": [
+        "Grank",
+        "Modup",
+        "Compow"
+      ],
+      "previous": [
+        "Sourc",
+        "GroupSource",
+        "Inthreat",
+        "Warninglab"
+      ],
+      "current": [
+        "GroupWarning",
+        "Halka"
+      ],
+      "count": 171,
+      "qualified": 3,
+      "durationMs": 422.80000000074506,
+      "autoDurationMs": 57.299999999813735,
+      "traceFile": "trace-34.json.gz",
+      "sha256": "daeb9777226450c562d9226a18bb3d4e5547d68efe60e71fddc2348114276b74"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a service that groups compiler warnings by source module",
+      "seed": 313,
+      "auto": [
+        "Insula",
+        "Grocore",
+        "Compor"
+      ],
+      "previous": [
+        "Sourceseed",
+        "Halka",
+        "Gramp",
+        "Dictic"
+      ],
+      "current": [
+        "GroupWarning",
+        "Halka"
+      ],
+      "count": 171,
+      "qualified": 3,
+      "durationMs": 467.6000000005588,
+      "autoDurationMs": 57,
+      "traceFile": "trace-35.json.gz",
+      "sha256": "4702e10ba021ac50be9829bec0de7bd416250f5738e3d895b7f5af801b0c8c9a"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a developer utility that maps service dependencies across repositories",
+      "seed": 13,
+      "auto": [
+        "Harita",
+        "Byteseed",
+        "Graphora"
+      ],
+      "previous": [
+        "Geoverb",
+        "Atlasseed",
+        "Portolan",
+        "PrimeDep"
+      ],
+      "current": [
+        "Portolan",
+        "Harita"
+      ],
+      "count": 157,
+      "qualified": 3,
+      "durationMs": 352.79999999981374,
+      "autoDurationMs": 33.5,
+      "traceFile": "trace-36.json.gz",
+      "sha256": "657e28bb945651a8e52020ab5fdc32d6bd79edd3afad083e302f8bf8e0e66b55"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a developer utility that maps service dependencies across repositories",
+      "seed": 67,
+      "auto": [
+        "Isobar",
+        "DepNode",
+        "Kitroute"
+      ],
+      "previous": [
+        "Compassia",
+        "RouteSync",
+        "Deplas",
+        "Forgeatlas"
+      ],
+      "current": [
+        "Portolan",
+        "Harita"
+      ],
+      "count": 158,
+      "qualified": 3,
+      "durationMs": 352.19999999925494,
+      "autoDurationMs": 40.90000000037253,
+      "traceFile": "trace-37.json.gz",
+      "sha256": "0e30a40872291ebf8962868ec75ba155ae8b11b8dfedbcec5a8f76e2c3ef6fb9"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a developer utility that maps service dependencies across repositories",
+      "seed": 313,
+      "auto": [
+        "Harita",
+        "Depora",
+        "Byteloom"
+      ],
+      "previous": [
+        "Commitflow",
+        "Portolan",
+        "Roamforge",
+        "Dictic"
+      ],
+      "current": [
+        "Portolan",
+        "Harita"
+      ],
+      "count": 157,
+      "qualified": 3,
+      "durationMs": 353.1000000005588,
+      "autoDurationMs": 32.299999999813735,
+      "traceFile": "trace-38.json.gz",
+      "sha256": "360548efcdfaf3e5456204553db7e5e79e6bcefa01a1a5e2659872894b8f135f"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a command line tool that checks translation keys before application releases",
+      "seed": 13,
+      "auto": [
+        "Aurver",
+        "Tagora",
+        "Pushify"
+      ],
+      "previous": [
+        "Seclingu",
+        "Forgebeam",
+        "Plumbline",
+        "PureTag"
+      ],
+      "current": [
+        "CheckKey",
+        "Plumbline"
+      ],
+      "count": 183,
+      "qualified": 2,
+      "durationMs": 281.40000000037253,
+      "autoDurationMs": 53,
+      "traceFile": "trace-39.json.gz",
+      "sha256": "10f90413d7c0c4038ecbcee52862bd894da2c76cbe58ed595e5997ea642ca76a"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a command line tool that checks translation keys before application releases",
+      "seed": 67,
+      "auto": [
+        "Vernect",
+        "Tagora",
+        "Pushify"
+      ],
+      "previous": [
+        "Keyforge",
+        "CheckForge",
+        "Brancheck",
+        "Commitflow"
+      ],
+      "current": [
+        "CheckKey",
+        "Plumbline"
+      ],
+      "count": 183,
+      "qualified": 2,
+      "durationMs": 279.09999999962747,
+      "autoDurationMs": 54.40000000037253,
+      "traceFile": "trace-40.json.gz",
+      "sha256": "ad0fbf12a5f7a84e4c23cc50e060fd1e0c96e14051c163fd3ba9a00ab79b44b1"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a command line tool that checks translation keys before application releases",
+      "seed": 313,
+      "auto": [
+        "Isobar",
+        "Keylink",
+        "Pushify"
+      ],
+      "previous": [
+        "Forgeflow",
+        "Kilit",
+        "Keyforge",
+        "Dictic"
+      ],
+      "current": [
+        "CheckKey",
+        "Plumbline"
+      ],
+      "count": 182,
+      "qualified": 2,
+      "durationMs": 307.29999999981374,
+      "autoDurationMs": 52.299999999813735,
+      "traceFile": "trace-41.json.gz",
+      "sha256": "359f69fbab602cafb65f995c9ecc7a39b381c904d88f3b2be53ca24ecccea2af"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a local tool that measures image compression losses across formats",
+      "seed": 13,
+      "auto": [
+        "Mizan",
+        "Alignix",
+        "Ruleora"
+      ],
+      "previous": [
+        "Plassema",
+        "Framelink",
+        "Seismograph",
+        "PrimeReel"
+      ],
+      "current": [
+        "Measureloss",
+        "Seismograph",
+        "Mizan"
+      ],
+      "count": 176,
+      "qualified": 8,
+      "durationMs": 384.70000000018626,
+      "autoDurationMs": 46,
+      "traceFile": "trace-42.json.gz",
+      "sha256": "d481c4ddb5beb4065b2f1abfbce2d6da35188cda62cc1efc5a5b70e0928b32b8"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a local tool that measures image compression losses across formats",
+      "seed": 67,
+      "auto": [
+        "Tropic",
+        "Lintify",
+        "Ruleora"
+      ],
+      "previous": [
+        "Frameloss",
+        "WaveLoss",
+        "Forwave",
+        "Stylebeam"
+      ],
+      "current": [
+        "Measureloss",
+        "Barometer",
+        "Terazi"
+      ],
+      "count": 176,
+      "qualified": 8,
+      "durationMs": 394.79999999981374,
+      "autoDurationMs": 39.299999999813735,
+      "traceFile": "trace-43.json.gz",
+      "sha256": "135a5e765a307a10dfa76be0ad333cfdb3836c8632f3fd9c69d07398a46877a0"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a local tool that measures image compression losses across formats",
+      "seed": 313,
+      "auto": [
+        "Alignix",
+        "Ruleora",
+        "Lintify"
+      ],
+      "previous": [
+        "Frameflow",
+        "Mizan",
+        "Waveloss",
+        "Featic"
+      ],
+      "current": [
+        "MeasureLoss",
+        "Mizan",
+        "Seismograph"
+      ],
+      "count": 176,
+      "qualified": 8,
+      "durationMs": 381.20000000018626,
+      "autoDurationMs": 73.90000000037253,
+      "traceFile": "trace-44.json.gz",
+      "sha256": "da2c4a7feca8b125f221658cabef9e78b3b72d58c039a7f016a66617c6a555a9"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a developer utility that restores deleted configuration sections from snapshots",
+      "seed": 13,
+      "auto": [
+        "Multain",
+        "Paramia",
+        "Byteseed"
+      ],
+      "previous": [
+        "Servisol",
+        "Secretlink",
+        "Multain",
+        "BoldEnv"
+      ],
+      "current": [
+        "Destore",
+        "Constore"
+      ],
+      "count": 153,
+      "qualified": 2,
+      "durationMs": 269.90000000037253,
+      "autoDurationMs": 41,
+      "traceFile": "trace-45.json.gz",
+      "sha256": "5479290fdecb7f216c3edb64e75a099c73fd878d71b1fc5f4ce36c9f99913418"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a developer utility that restores deleted configuration sections from snapshots",
+      "seed": 67,
+      "auto": [
+        "Paramia",
+        "Varwave",
+        "Bytebeam"
+      ],
+      "previous": [
+        "Restoreia",
+        "DotSection",
+        "Conbuild",
+        "Secretlink"
+      ],
+      "current": [],
+      "count": 153,
+      "qualified": 0,
+      "durationMs": 278.40000000037253,
+      "autoDurationMs": 36.299999999813735,
+      "traceFile": "trace-46.json.gz",
+      "sha256": "7ca7e4b133b8f7ed43e6260e368463b0973b499338393a11082b24622758d993"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a developer utility that restores deleted configuration sections from snapshots",
+      "seed": 313,
+      "auto": [
+        "Multain",
+        "Paramia",
+        "Dotbyte"
+      ],
+      "previous": [
+        "Configloom",
+        "Multain",
+        "Restoreio",
+        "Creatic"
+      ],
+      "current": [],
+      "count": 153,
+      "qualified": 0,
+      "durationMs": 272.3999999994412,
+      "autoDurationMs": 38.700000000186265,
+      "traceFile": "trace-47.json.gz",
+      "sha256": "9f96935139be3db29175ec3faaacb2ee836b2b48f701024d4e0fa6b9623bf7fc"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a terminal tool that filters duplicate build diagnostics during compilation",
+      "seed": 13,
+      "auto": [
+        "Multain",
+        "Termora",
+        "Promptora"
+      ],
+      "previous": [
+        "Genport",
+        "Filterflow",
+        "Creatic",
+        "TopMint"
+      ],
+      "current": [
+        "Filterbuild",
+        "Valka"
+      ],
+      "count": 167,
+      "qualified": 2,
+      "durationMs": 362.20000000018626,
+      "autoDurationMs": 43,
+      "traceFile": "trace-48.json.gz",
+      "sha256": "f77f4dccf6c93807806ba9b29a4c1fe4267f01bdfb84050943a3b35e1ed336fd"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a terminal tool that filters duplicate build diagnostics during compilation",
+      "seed": 67,
+      "auto": [
+        "Termia",
+        "Shellify",
+        "Filterseed"
+      ],
+      "previous": [
+        "Filteria",
+        "ForgeShell",
+        "Comforge",
+        "Mintwave"
+      ],
+      "current": [
+        "Filterbuild",
+        "Valka"
+      ],
+      "count": 167,
+      "qualified": 2,
+      "durationMs": 368,
+      "autoDurationMs": 56.90000000037253,
+      "traceFile": "trace-49.json.gz",
+      "sha256": "e59d5c9f144bc24d9ec308a3d13e3d1c38486a9c572c18e611a82eb0cdc7d50f"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a terminal tool that filters duplicate build diagnostics during compilation",
+      "seed": 313,
+      "auto": [
+        "Daedal",
+        "Termora",
+        "Promptora"
+      ],
+      "previous": [
+        "Filterflow",
+        "Creatic",
+        "Forgeshell",
+        "Multain"
+      ],
+      "current": [
+        "Filterbuild",
+        "Valka"
+      ],
+      "count": 166,
+      "qualified": 2,
+      "durationMs": 361.90000000037253,
+      "autoDurationMs": 58.799999999813735,
+      "traceFile": "trace-50.json.gz",
+      "sha256": "31cdd15bb394abe243b5d32be9720e59d47f09208cd789e47a03dd4228a71d92"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a desktop tool that sorts crash reports by affected component",
+      "seed": 13,
+      "auto": [
+        "Ferman",
+        "Compamp",
+        "Sodio"
+      ],
+      "previous": [
+        "Genfund",
+        "Crashatlas",
+        "Corvide",
+        "PureCrash"
+      ],
+      "current": [
+        "SortReport"
+      ],
+      "count": 147,
+      "qualified": 2,
+      "durationMs": 219,
+      "autoDurationMs": 43.59999999962747,
+      "traceFile": "trace-51.json.gz",
+      "sha256": "0b107fddfe39c38efb354f8a1a78b32dc3dcba699658b9cd84edc80161bbc81f"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a desktop tool that sorts crash reports by affected component",
+      "seed": 67,
+      "auto": [
+        "Anahtar",
+        "Reprops",
+        "Affit"
+      ],
+      "previous": [
+        "Composs",
+        "CrashDesktop",
+        "Browding",
+        "Desktoploom"
+      ],
+      "current": [
+        "SortReport"
+      ],
+      "count": 149,
+      "qualified": 2,
+      "durationMs": 201.90000000037253,
+      "autoDurationMs": 45.299999999813735,
+      "traceFile": "trace-52.json.gz",
+      "sha256": "0134c9b21f9cc1e1a015f9daae2b2f952ca4c0d4457fb0159e1d48f870e33284"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a desktop tool that sorts crash reports by affected component",
+      "seed": 313,
+      "auto": [
+        "Andon",
+        "Repuff",
+        "Compox"
+      ],
+      "previous": [
+        "Crashatlas",
+        "Corvide",
+        "Affy",
+        "Sentude"
+      ],
+      "current": [
+        "SortReport"
+      ],
+      "count": 149,
+      "qualified": 2,
+      "durationMs": 215.5,
+      "autoDurationMs": 42.30000000074506,
+      "traceFile": "trace-53.json.gz",
+      "sha256": "ccfc5f164589d6275b80659a33c9d3fe7d083323345d604cc1515189bc7de8dd"
+    }
+  ]
+}

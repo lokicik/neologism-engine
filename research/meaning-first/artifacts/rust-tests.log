@@ -1,0 +1,22 @@
+warning: variable does not need to be mutable
+   --> core\examples\build_submorph_inventory.rs:155:9
+    |
+155 |     let mut register = |letters: &str, head: bool, parent: &str, pos_weight: f64,
+    |         ----^^^^^^^^
+    |         |
+    |         help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` on by default
+
+
+running 219 tests
+....................................................................................... 87/219
+....................................................................................... 174/219
+.............................................
+test result: ok. 219 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 29.64s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

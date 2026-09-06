@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "syntheticChoices": true,
+  "checks": [
+    "exclusive next-request options",
+    "phrase display",
+    "pronunciation provenance",
+    "no aesthetic rating",
+    "continuation snapshot",
+    "export",
+    "pool inspection",
+    "mobile overflow",
+    "unresolved brief",
+    "saved data unchanged",
+    "return to Auto"
+  ]
+}

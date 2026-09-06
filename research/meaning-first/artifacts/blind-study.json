@@ -1,0 +1,221 @@
+{
+  "schema": "shared-pool-blind-study-v1",
+  "pages": [
+    {
+      "id": "m1",
+      "brief": "a terminal utility that tracks socket connections during integration tests",
+      "left": [
+        "TrackSocket",
+        "Socketrack",
+        "Cotrack",
+        "Fylgja"
+      ],
+      "right": [
+        "Delil",
+        "Termora",
+        "Tracelab"
+      ]
+    },
+    {
+      "id": "m2",
+      "brief": "a command line tool that detects leaked credentials in commit patches",
+      "left": [
+        "DetectLeak",
+        "Seismograph",
+        "Sarraf"
+      ],
+      "right": [
+        "Termatlas",
+        "Detectterm",
+        "Leakedterm"
+      ]
+    },
+    {
+      "id": "m3",
+      "brief": "a command line tool that checks translation keys before application releases",
+      "left": [
+        "Vernect",
+        "Tagora",
+        "Pushify"
+      ],
+      "right": [
+        "CheckKey",
+        "Plumbline"
+      ]
+    },
+    {
+      "id": "m4",
+      "brief": "a local tool that verifies cached artifacts before offline installation",
+      "left": [
+        "Sarraf",
+        "Locil",
+        "Verme"
+      ],
+      "right": [
+        "Artiver",
+        "Vercache",
+        "Vefacts",
+        "Mihenk"
+      ]
+    },
+    {
+      "id": "m5",
+      "brief": "a terminal tool that filters duplicate build diagnostics during compilation",
+      "left": [
+        "Filterbuild",
+        "Valka"
+      ],
+      "right": [
+        "Termia",
+        "Shellify",
+        "Filterseed"
+      ]
+    },
+    {
+      "id": "m6",
+      "brief": "a desktop utility that records database migration timings during rehearsals",
+      "left": [
+        "Skald",
+        "Portio",
+        "Shiftix"
+      ],
+      "right": [
+        "Ostraka",
+        "Seismograph"
+      ]
+    },
+    {
+      "id": "m7",
+      "brief": "a command line tool that detects leaked credentials in commit patches",
+      "left": [
+        "Termatlas",
+        "Detectterm",
+        "Leakedterm"
+      ],
+      "right": [
+        "DetectLeak",
+        "Seismograph",
+        "Sarraf"
+      ]
+    },
+    {
+      "id": "m8",
+      "brief": "a developer utility that maps service dependencies across repositories",
+      "left": [
+        "Portolan",
+        "Harita"
+      ],
+      "right": [
+        "Harita",
+        "Byteseed",
+        "Graphora"
+      ]
+    },
+    {
+      "id": "m9",
+      "brief": "a desktop tool that sorts crash reports by affected component",
+      "left": [
+        "Andon",
+        "Repuff",
+        "Compox"
+      ],
+      "right": [
+        "SortReport"
+      ]
+    },
+    {
+      "id": "m10",
+      "brief": "a local tool that verifies cached artifacts before offline installation",
+      "left": [
+        "Artiver",
+        "Vercache",
+        "Vefacts",
+        "Mihenk"
+      ],
+      "right": [
+        "Sarraf",
+        "Locil",
+        "Verme"
+      ]
+    },
+    {
+      "id": "m11",
+      "brief": "a developer tool that compares container permissions across environments",
+      "left": [
+        "Kiyas",
+        "Terazi"
+      ],
+      "right": [
+        "Creatic",
+        "Paramia",
+        "Dotbyte"
+      ]
+    },
+    {
+      "id": "m12",
+      "brief": "a developer utility that restores deleted configuration sections from snapshots",
+      "left": [
+        "Multain",
+        "Paramia",
+        "Byteseed"
+      ],
+      "right": [
+        "Destore",
+        "Constore"
+      ]
+    },
+    {
+      "id": "m13",
+      "brief": "a service that groups compiler warnings by source module",
+      "left": [
+        "Insula",
+        "Grocore",
+        "Compor"
+      ],
+      "right": [
+        "GroupWarning",
+        "Halka"
+      ]
+    },
+    {
+      "id": "m14",
+      "brief": "a developer utility that maps service dependencies across repositories",
+      "left": [
+        "Harita",
+        "Byteseed",
+        "Graphora"
+      ],
+      "right": [
+        "Portolan",
+        "Harita"
+      ]
+    },
+    {
+      "id": "m15",
+      "brief": "a local tool that measures image compression losses across formats",
+      "left": [
+        "MeasureLoss",
+        "Mizan",
+        "Seismograph"
+      ],
+      "right": [
+        "Alignix",
+        "Ruleora",
+        "Lintify"
+      ]
+    },
+    {
+      "id": "m16",
+      "brief": "a developer utility that restores deleted configuration sections from snapshots",
+      "left": [
+        "Destore",
+        "Constore"
+      ],
+      "right": [
+        "Multain",
+        "Paramia",
+        "Byteseed"
+      ]
+    }
+  ]
+}

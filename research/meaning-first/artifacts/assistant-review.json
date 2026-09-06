@@ -1,0 +1,252 @@
+{
+  "evaluator": "assistant",
+  "sourceVisible": true,
+  "humanEvidence": false,
+  "generationInput": false,
+  "summary": {
+    "newWins": 5,
+    "autoWins": 0,
+    "ties": 3,
+    "neither": 4,
+    "usableNewBriefs": 8,
+    "usableAutoBriefs": 4
+  },
+  "rows": [
+    {
+      "brief": "a command line tool that detects leaked credentials in commit patches",
+      "seed": 13,
+      "auto": [
+        "Termatlas",
+        "Detectterm",
+        "Leakedterm"
+      ],
+      "current": [
+        "DetectLeak",
+        "Seismograph",
+        "Sarraf"
+      ],
+      "preference": "neither",
+      "usableNew": [],
+      "usableAuto": [],
+      "rationale": "DetectLeak reads as a function; the metaphors are broad for leaked credentials. The Auto list is also weak."
+    },
+    {
+      "brief": "a desktop utility that records database migration timings during rehearsals",
+      "seed": 13,
+      "auto": [
+        "Dataseed",
+        "Shiftia",
+        "Bridgerow"
+      ],
+      "current": [
+        "Seismograph",
+        "Ostraka"
+      ],
+      "preference": "new",
+      "usableNew": [
+        "Ostraka"
+      ],
+      "usableAuto": [],
+      "rationale": "A record-keeping metaphor is a plausible brand for recording migration timings, though the timing aspect remains indirect."
+    },
+    {
+      "brief": "a developer tool that compares container permissions across environments",
+      "seed": 13,
+      "auto": [
+        "Creatic",
+        "Dotnode",
+        "Paramia"
+      ],
+      "current": [
+        "Terazi",
+        "Kiyas"
+      ],
+      "preference": "new",
+      "usableNew": [
+        "Terazi",
+        "Kiyas"
+      ],
+      "usableAuto": [],
+      "rationale": "Comparison is represented clearly through weighing or analogy; the old names mostly describe unrelated technical context."
+    },
+    {
+      "brief": "a local tool that verifies cached artifacts before offline installation",
+      "seed": 13,
+      "auto": [
+        "Sarraf",
+        "Locil",
+        "Verme"
+      ],
+      "current": [
+        "Artiver",
+        "Vercache",
+        "Vefacts",
+        "Mihenk"
+      ],
+      "preference": "new",
+      "usableNew": [
+        "Vercache",
+        "Mihenk"
+      ],
+      "usableAuto": [
+        "Sarraf"
+      ],
+      "rationale": "Vercache gives a more specific cache-verification construction; both arms also have a usable verification metaphor."
+    },
+    {
+      "brief": "a terminal utility that tracks socket connections during integration tests",
+      "seed": 13,
+      "auto": [
+        "Izci",
+        "Termify",
+        "Shellio"
+      ],
+      "current": [
+        "TrackSocket",
+        "Socketrack",
+        "Sotrack",
+        "Izci"
+      ],
+      "preference": "tie",
+      "usableNew": [
+        "Izci"
+      ],
+      "usableAuto": [
+        "Izci"
+      ],
+      "rationale": "Both surface the same tracking metaphor. Literal socket blends add no clear aesthetic advantage."
+    },
+    {
+      "brief": "a service that groups compiler warnings by source module",
+      "seed": 13,
+      "auto": [
+        "Insula",
+        "Moded",
+        "Warnad"
+      ],
+      "current": [
+        "GroupWarning",
+        "Halka"
+      ],
+      "preference": "new",
+      "usableNew": [
+        "Halka"
+      ],
+      "usableAuto": [],
+      "rationale": "Halka provides a grouping metaphor. GroupWarning is descriptive, not an additional brand choice for me."
+    },
+    {
+      "brief": "a developer utility that maps service dependencies across repositories",
+      "seed": 13,
+      "auto": [
+        "Harita",
+        "Byteseed",
+        "Graphora"
+      ],
+      "current": [
+        "Portolan",
+        "Harita"
+      ],
+      "preference": "tie",
+      "usableNew": [
+        "Portolan",
+        "Harita"
+      ],
+      "usableAuto": [
+        "Harita"
+      ],
+      "rationale": "Both have a usable mapping name. Portolan is an alternative, not sufficient evidence of an overall preference win."
+    },
+    {
+      "brief": "a command line tool that checks translation keys before application releases",
+      "seed": 13,
+      "auto": [
+        "Aurver",
+        "Tagora",
+        "Pushify"
+      ],
+      "current": [
+        "CheckKey",
+        "Plumbline"
+      ],
+      "preference": "neither",
+      "usableNew": [],
+      "usableAuto": [],
+      "rationale": "CheckKey is a function label; Plumbline is too broad for translation keys. The old candidates are also weak."
+    },
+    {
+      "brief": "a local tool that measures image compression losses across formats",
+      "seed": 13,
+      "auto": [
+        "Mizan",
+        "Alignix",
+        "Ruleora"
+      ],
+      "current": [
+        "Measureloss",
+        "Seismograph",
+        "Mizan"
+      ],
+      "preference": "tie",
+      "usableNew": [
+        "Mizan"
+      ],
+      "usableAuto": [
+        "Mizan"
+      ],
+      "rationale": "Both retain the balance/measurement metaphor; Measureloss is not a stronger brand."
+    },
+    {
+      "brief": "a developer utility that restores deleted configuration sections from snapshots",
+      "seed": 13,
+      "auto": [
+        "Multain",
+        "Paramia",
+        "Byteseed"
+      ],
+      "current": [
+        "Destore",
+        "Constore"
+      ],
+      "preference": "neither",
+      "usableNew": [],
+      "usableAuto": [],
+      "rationale": "Destore can suggest destruction, and Constore suggests generic storage. Literal ancestry has not guaranteed the intended restore meaning."
+    },
+    {
+      "brief": "a terminal tool that filters duplicate build diagnostics during compilation",
+      "seed": 13,
+      "auto": [
+        "Multain",
+        "Termora",
+        "Promptora"
+      ],
+      "current": [
+        "Filterbuild",
+        "Valka"
+      ],
+      "preference": "new",
+      "usableNew": [
+        "Valka"
+      ],
+      "usableAuto": [],
+      "rationale": "The recorded chooser/select/filter metaphor is a plausible concise name. Filterbuild remains a literal label."
+    },
+    {
+      "brief": "a desktop tool that sorts crash reports by affected component",
+      "seed": 13,
+      "auto": [
+        "Ferman",
+        "Compamp",
+        "Sodio"
+      ],
+      "current": [
+        "SortReport"
+      ],
+      "preference": "neither",
+      "usableNew": [],
+      "usableAuto": [],
+      "rationale": "SortReport is a function label; the old names do not offer a convincing crash-report sorting brand either."
+    }
+  ]
+}
