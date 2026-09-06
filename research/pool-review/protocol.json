@@ -1,0 +1,13 @@
+{
+  "source": "../product-brief/artifacts-v3",
+  "status": "retrospective diagnostic; all original briefs already seen during development",
+  "review": "review.json is fixed before running the counterfactuals; assistant judgments are not human labels or training data",
+  "experiments": [
+    {"id": "three_letters", "rule": "For an eligible source with recorded generator parents, require an exact prefix+suffix spelling reconstruction with at least three letters from each parent. Keep other sources unchanged."},
+    {"id": "one_whole_parent", "rule": "Same as three_letters, and require at least one whole parent in the reconstruction."}
+  ],
+  "limits": "Reconstruction from frozen parent words is a spelling-based counterfactual, not the original phonetic cut, not measured recognizability. Missing ancestry abstains. No reranking, weights, candidate blacklist, threshold search or changed generator budget.",
+  "retentionGate": "Do not adopt a rule that removes any of the pre-recorded assistant shortlist sources without another eligible source, or that fails to surface any of the buried choices. Passing this is necessary only, never a human quality pass.",
+  "originalHumanGate": {"wins":8,"comparisons":12,"usableBriefs":6,"usableBriefUpliftOverAuto":3,"repeatConsistency":3,"repeats":4},
+  "humanEvaluation": "pending"
+}

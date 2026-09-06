@@ -1,0 +1,130 @@
+{
+  "method": "Assistant source-visible editorial review of all 170 eligible proposal spellings across 12 frozen regression briefs at seed 13. Not blind, not human preference labels, not training data. Same spelling in different briefs counts separately.",
+  "rubric": "Read the whole name first: would I keep it on a small developer-product shortlist? Then check its recorded meaning. At most two choices per brief; abstain when none is compelling. A descriptive fallback is not automatically a strong brand. Snapshot absence is not availability.",
+  "categories": {
+    "shortlist": "Benim kısa listem; insan onayı değil",
+    "descriptive_reserve": "Anlaşılır ama daha çok açıklama/komut gibi; ilk iki tercihim değil",
+    "opaque_clipping": "Kaynak kelime fazla kırpılmış; bağlantı açıklamaya bağımlı",
+    "weak_metaphor": "Metafor çok genel, uzak veya bu ürün için hantal",
+    "awkward_form": "Bir bütün olarak yapay veya söylenişi/yazımı ağır",
+    "misleading_reading": "İlk okuma ürünün yaptığı işten başka yöne götürüyor"
+  },
+  "rows": [
+    {
+      "picks": ["ArchiveProof", "Mihenk"],
+      "reason": "ArchiveProof işi açıkça anlatıyor. Mihenk kısa ve doğrulama çağrışımı taşıyor; Türkçe bilmeyen kullanıcı için açıklama gerekir. İkisi de zaten finalist.",
+      "categories": {
+        "descriptive_reserve": ["Proofarchive", "Verarchive", "Versig", "Proofsig", "Sealsig", "Sealarchive", "ArchiveSeal", "Verisig", "Sigseal", "Sigproof"],
+        "weak_metaphor": ["Sarraf", "Burhan", "Muhur"],
+        "opaque_clipping": ["Arstone", "Arproof", "Sigrify"],
+        "awkward_form": ["Touchsig", "Sigstone", "Artouchstone"]
+      }
+    },
+    {
+      "picks": ["HashSeal", "Maniseal"],
+      "reason": "HashSeal güçlü açıklayıcı seçenek. Maniseal akıcı bir taslak; mani parçası manifest'i tek başına kanıtlamıyor. Macheck'e göre daha bütünlüklü buluyorum, fakat kör test gerektirir.",
+      "categories": {
+        "descriptive_reserve": ["Proofhash", "Sealhash", "Checkhash", "Hashstone"],
+        "weak_metaphor": ["Plumbline"],
+        "opaque_clipping": ["Macheck", "Maseal", "Matouchstone", "Maproof"],
+        "awkward_form": ["Manicheck", "Manistone", "Checknifest", "Touchhash", "Proofnifest", "Touchnifest", "Sealnifest", "Maniproof"],
+        "misleading_reading": ["Checkfest", "Sealfest", "Touchfest"]
+      }
+    },
+    {
+      "picks": ["QueryGauge", "Mizan"],
+      "reason": "QueryGauge sorgu ölçümünü doğrudan taşıyor. Mizan mevcut veri içindeki terazi metaforuyla kısa bir alternatif; gecikmeye özel değil. Anemometer/Seismograph bu bağlamda daha ağır ve uzak.",
+      "categories": {
+        "descriptive_reserve": ["Gaugequery"],
+        "weak_metaphor": ["Anemometer", "Seismograph", "Plumbline", "Barometer", "Theodolite", "Terazi"],
+        "opaque_clipping": ["Quelance", "Queryper", "Quegauge", "Batency"],
+        "awkward_form": ["Querylance", "Quebalance", "Latenlance"]
+      }
+    },
+    {
+      "picks": ["Kiyas", "CostBalance"],
+      "reason": "Kiyas kısa bir karşılaştırma adı. CostBalance maliyet karşılaştırmasını StorageGauge'dan daha doğrudan anlatıyor. Havuzdaki kırpmalar bu ikisini geçmiyor.",
+      "categories": {
+        "descriptive_reserve": ["Gaugestorage", "Comparecost", "Balancecost", "Gaugecost", "StorageGauge", "CostGauge"],
+        "weak_metaphor": ["Terazi"],
+        "opaque_clipping": ["Stolance", "Costlance", "Gaugerage", "Castorage", "Bastorage"],
+        "awkward_form": ["Comstorage", "Stobalance"],
+        "misleading_reading": ["Comrage"]
+      }
+    },
+    {
+      "picks": ["QueueWatch", "Izci"],
+      "reason": "QueueWatch kuyruk izlemeyi açıkça taşıyor. Izci kısa izleme metaforu. Ledger kayıt tutmaya kayıyor; alttaki birleşimler iyileşme sunmuyor.",
+      "categories": {
+        "descriptive_reserve": ["Ledgerqueue", "Beaconqueue", "Beacondepth", "Trackqueue", "LedgerDepth", "TrackDepth", "QueueLedger", "QueueBeacon"],
+        "weak_metaphor": ["Fylgja"],
+        "opaque_clipping": ["Depthcon", "Ledepth", "Beadepth"]
+      }
+    },
+    {
+      "picks": ["Acticord", "Skald"],
+      "reason": "Acticord iki tarafı da kırpılmış olsa da activity/record ilişkisiyle bütün bir ad gibi okunuyor; cord çağrışımı riski var. Skald kısa kayıt/anlatıcı metaforu. Bu iki seçimi insan değerlendirmesi olmadan doğrulanmış saymıyorum.",
+      "categories": {
+        "descriptive_reserve": ["ProcessWatch", "Prorecord", "Actiwatch"],
+        "weak_metaphor": ["Seismograph", "Ostraka"],
+        "opaque_clipping": ["Beavity", "Beaconcess", "Acrecord", "Watchcess", "Leprocess", "Acwatch", "Watchvity", "Recordcess", "Beaprocess", "Acbeacon", "Processcon"],
+        "awkward_form": ["Probeacon", "Processcord"],
+        "misleading_reading": ["Reprocess"]
+      }
+    },
+    {
+      "picks": ["Reprise"],
+      "reason": "Reprise dönüşü bütün bir sözcükle taşıyor. Diğerleri daha zayıf; ikinci bir ismi zorla seçmiyorum.",
+      "categories": {
+        "descriptive_reserve": ["Mendsession", "SessionMend"],
+        "opaque_clipping": ["Sereprise"],
+        "awkward_form": ["Ediprise", "Edimend"]
+      }
+    },
+    {
+      "picks": ["Entryprise", "Reprise"],
+      "reason": "Entryprise, entry + reprise bağlantısıyla denenebilir. Enterprise'a benzeme riski açık. Reprise daha sade seçenek; ikisi de zaten finalist.",
+      "categories": {
+        "descriptive_reserve": ["Mendentry", "EntryMend"],
+        "opaque_clipping": ["Mendtry", "Arstore", "Enreprise"]
+      }
+    },
+    {
+      "picks": ["Halka", "Failthread"],
+      "reason": "Halka kısa gruplama metaforu. Failthread aynı nedene bağlı hataları bir ipte toplama fikrini ShelfTest'ten daha iyi taşıyor; yazılı ürün anlatısıyla denenmeli.",
+      "categories": {
+        "descriptive_reserve": ["GroupFailure", "GroupTest", "ShelfFailure", "ThreadTest", "ShelfTest", "FailureShelf", "Failgroup", "Failshelf"],
+        "awkward_form": ["Folitest"]
+      }
+    },
+    {
+      "picks": ["Primessage", "AlertMesh"],
+      "reason": "Primessage akıcı bir taslak; prism bağlantısı açık değil ve prime-message diye okunabilir. AlertMesh daha açıklayıcı. İkisi de finalistlerde.",
+      "categories": {
+        "descriptive_reserve": ["MeshAlert", "SieveAlert", "MeshMessage", "MessageMesh"],
+        "weak_metaphor": ["Valka"],
+        "opaque_clipping": ["Mefilter"],
+        "misleading_reading": ["Filmessage"]
+      }
+    },
+    {
+      "picks": ["Portolan", "Harita"],
+      "reason": "İki bütün haritalama metaforu da zaten finalist. Portolan Auto'da da vardı; yeni kazanım değil. Depen-/dency birleşimleri bunları geçmiyor.",
+      "categories": {
+        "descriptive_reserve": ["Weavemodule", "MapModule", "ModuleChart", "ModuleWeave", "ChartModule"],
+        "weak_metaphor": ["Isobar"],
+        "opaque_clipping": ["Atdency", "Chartdency", "Depenweave", "Depenchart", "Depenmap", "Mapdency"]
+      }
+    },
+    {
+      "picks": [],
+      "reason": "Güçlü bir seçimim yok. Önceki Lantoken önerisini geri çekiyorum: lan hem LAN diye okunabilir hem lantern bağlantısını zayıf taşır. Triptoken da aranan güvenlik faydasından çok bir eylem gibi. Bu brief'te sıralama yeterli değil.",
+      "categories": {
+        "weak_metaphor": ["Seismograph", "Sarraf"],
+        "opaque_clipping": ["Tripken", "Totinel", "Totect", "Todetect", "Tripwiken", "Detectken"],
+        "awkward_form": ["Tokentect"],
+        "misleading_reading": ["Triptoken", "Lantoken", "Detoken"]
+      }
+    }
+  ]
+}

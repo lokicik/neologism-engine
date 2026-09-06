@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "briefs": 12,
+  "classifiedCandidates": 170,
+  "shortlistChoices": 21,
+  "buriedChoices": 4,
+  "checks": [
+    "search",
+    "category filter",
+    "source details",
+    "inferred cuts",
+    "empty search",
+    "mobile overflow",
+    "page errors"
+  ]
+}

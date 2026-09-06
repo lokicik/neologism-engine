@@ -1,0 +1,26 @@
+{
+  "passed": true,
+  "repeatedArtifactHashes": {
+    "analysis.json": "96c7eaa8501ccbdcacd4566c0ba8db6242e95793f28f29b138cbbc5063458cea",
+    "identity.json": "101523a28d5d31819f54a56bc6874d900cf470a0fb6d6efa24d2a110eb5f0fef",
+    "index.html": "41e0d7740717b2aabfe0b912dd640dcfd9c69ec5fa93b3bee68ae3d9e28f8c04"
+  },
+  "browser": {
+    "passed": true,
+    "briefs": 12,
+    "classifiedCandidates": 170,
+    "shortlistChoices": 21,
+    "buriedChoices": 4,
+    "checks": [
+      "search",
+      "category filter",
+      "source details",
+      "inferred cuts",
+      "empty search",
+      "mobile overflow",
+      "page errors"
+    ]
+  },
+  "engineChanged": false,
+  "qualityImprovementEstablished": false
+}
