@@ -1,0 +1,1114 @@
+{
+  "protocolSha256": "00c4ad81d08c005a52b648632ea3a0a7824cf9ad9085c34d8820ef0b022c32de",
+  "humanEvaluation": "pending",
+  "rows": [
+    {
+      "partition": "development",
+      "brief": "a build tool that compares executable sizes between release tags",
+      "seed": 13,
+      "auto": [
+        "Multain",
+        "Tagora",
+        "Pushify"
+      ],
+      "old": [
+        "CompareSize",
+        "Terazi",
+        "Kiyas"
+      ],
+      "selectionOnly": [
+        "CompareSize",
+        "Terazi",
+        "Kiyas"
+      ],
+      "inventoryOnly": [
+        "SizeBalance",
+        "CompareSize",
+        "BalanceSize",
+        "Terazi"
+      ],
+      "current": [
+        "SizeBalance",
+        "CompareSize",
+        "Terazi",
+        "Kiyas"
+      ],
+      "frame": "measurement",
+      "status": "ready",
+      "reason": null,
+      "count": 157,
+      "qualified": 8,
+      "durationMs": 270.70000000018626,
+      "traceFile": "trace-0.json.gz",
+      "sha256": "fac132a51ce227681b334fb9641c67d76798f06a9d9130323cbc1c6687a289e9"
+    },
+    {
+      "partition": "development",
+      "brief": "a build tool that compares executable sizes between release tags",
+      "seed": 67,
+      "auto": [
+        "Tagora",
+        "Pushify",
+        "Commitia"
+      ],
+      "old": [
+        "CompareSize",
+        "Terazi",
+        "Kiyas"
+      ],
+      "selectionOnly": [
+        "CompareSize",
+        "Terazi",
+        "Kiyas"
+      ],
+      "inventoryOnly": [
+        "CompareSize",
+        "SizeGauge",
+        "GaugeSize",
+        "Terazi"
+      ],
+      "current": [
+        "CompareSize",
+        "SizeGauge",
+        "Terazi",
+        "Kiyas"
+      ],
+      "frame": "measurement",
+      "status": "ready",
+      "reason": null,
+      "count": 157,
+      "qualified": 8,
+      "durationMs": 263.40000000037253,
+      "traceFile": "trace-1.json.gz",
+      "sha256": "bac00d9d2a361e4003615cdddec3c39fc6bb5b2575375a2234f0e8b1d5c43b56"
+    },
+    {
+      "partition": "development",
+      "brief": "a terminal tool that tracks memory usage during test runs",
+      "seed": 13,
+      "auto": [
+        "Sankofa",
+        "Specrun",
+        "Tracerun"
+      ],
+      "old": [
+        "TrackUsage",
+        "Metrack",
+        "Izci",
+        "Fylgja"
+      ],
+      "selectionOnly": [
+        "Izci",
+        "TrackUsage",
+        "Metrack",
+        "Fylgja"
+      ],
+      "inventoryOnly": [
+        "UsageWatch",
+        "TrackUsage",
+        "Metrack",
+        "WatchUsage"
+      ],
+      "current": [
+        "UsageWatch",
+        "Izci",
+        "TrackUsage",
+        "Metrack"
+      ],
+      "frame": "observation",
+      "status": "ready",
+      "reason": null,
+      "count": 152,
+      "qualified": 8,
+      "durationMs": 341.70000000018626,
+      "traceFile": "trace-2.json.gz",
+      "sha256": "352ae9b115e4e65b1b602fe863fa818c84f2c586b90c8061414f5dbcab1a49ec"
+    },
+    {
+      "partition": "development",
+      "brief": "a terminal tool that tracks memory usage during test runs",
+      "seed": 67,
+      "auto": [
+        "Izci",
+        "Proberun",
+        "Tracerun"
+      ],
+      "old": [
+        "TrackUsage",
+        "Metrack",
+        "Fylgja",
+        "Izci"
+      ],
+      "selectionOnly": [
+        "TrackUsage",
+        "Metrack",
+        "Fylgja",
+        "Izci"
+      ],
+      "inventoryOnly": [
+        "TrackUsage",
+        "Metrack",
+        "UsageWatch",
+        "WatchUsage"
+      ],
+      "current": [
+        "TrackUsage",
+        "Metrack",
+        "UsageWatch",
+        "Fylgja"
+      ],
+      "frame": "observation",
+      "status": "ready",
+      "reason": null,
+      "count": 152,
+      "qualified": 8,
+      "durationMs": 330.80000000074506,
+      "traceFile": "trace-3.json.gz",
+      "sha256": "ed83e1ddc32472207f8d38587e0ee32e0370873575f085a93ed6699afb445376"
+    },
+    {
+      "partition": "development",
+      "brief": "a developer utility that restores deleted configuration sections from snapshots",
+      "seed": 13,
+      "auto": [
+        "Multain",
+        "Paramia",
+        "Byteseed"
+      ],
+      "old": [
+        "Destore",
+        "Constore"
+      ],
+      "selectionOnly": [
+        "Destore",
+        "Constore"
+      ],
+      "inventoryOnly": [
+        "SectionMend",
+        "MendSection",
+        "Destore",
+        "Constore"
+      ],
+      "current": [
+        "Reprise",
+        "SectionMend",
+        "Destore",
+        "Constore"
+      ],
+      "frame": "recovery",
+      "status": "ready",
+      "reason": null,
+      "count": 132,
+      "qualified": 5,
+      "durationMs": 272.90000000037253,
+      "traceFile": "trace-4.json.gz",
+      "sha256": "49c61dbc90c5373a22be7d3c302a576806e36b290c45607d992dd571dabc1a4b"
+    },
+    {
+      "partition": "development",
+      "brief": "a developer utility that restores deleted configuration sections from snapshots",
+      "seed": 67,
+      "auto": [
+        "Paramia",
+        "Varwave",
+        "Bytebeam"
+      ],
+      "old": [],
+      "selectionOnly": [],
+      "inventoryOnly": [
+        "SectionMend",
+        "MendSection"
+      ],
+      "current": [
+        "Reprise",
+        "SectionMend"
+      ],
+      "frame": "recovery",
+      "status": "ready",
+      "reason": null,
+      "count": 132,
+      "qualified": 3,
+      "durationMs": 272.20000000018626,
+      "traceFile": "trace-5.json.gz",
+      "sha256": "8c3ae12e9499ef57cc87ba7b8281dc1d6a42ab962486014ec87c94f28618edd9"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a tool that verifies archive signatures before extraction",
+      "seed": 13,
+      "auto": [
+        "Verre",
+        "Signill",
+        "Archond"
+      ],
+      "old": [
+        "Verarchive",
+        "Sigrify",
+        "Mihenk",
+        "Sarraf"
+      ],
+      "selectionOnly": [
+        "Mihenk",
+        "Verarchive",
+        "Sarraf",
+        "Sigrify"
+      ],
+      "inventoryOnly": [
+        "ArchiveProof",
+        "Verarchive",
+        "ProofArchive",
+        "Sigrify"
+      ],
+      "current": [
+        "ArchiveProof",
+        "Mihenk",
+        "Verarchive",
+        "Sarraf"
+      ],
+      "frame": "integrity",
+      "status": "ready",
+      "reason": null,
+      "count": 131,
+      "qualified": 12,
+      "durationMs": 359.8999999994412,
+      "traceFile": "trace-6.json.gz",
+      "sha256": "a9e1530556a8ee2d8ab9754b8e1c216a30aac40160f621cb87e930dbc77e1499"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a tool that verifies archive signatures before extraction",
+      "seed": 67,
+      "auto": [
+        "Measig",
+        "Verreai",
+        "Signow"
+      ],
+      "old": [
+        "Verarchive",
+        "Sigrify",
+        "Mihenk",
+        "Sarraf"
+      ],
+      "selectionOnly": [
+        "Mihenk",
+        "Verarchive",
+        "Sarraf",
+        "Sigrify"
+      ],
+      "inventoryOnly": [
+        "ArchiveSeal",
+        "Verarchive",
+        "SealArchive",
+        "Sigrify"
+      ],
+      "current": [
+        "ArchiveSeal",
+        "Mihenk",
+        "Verarchive",
+        "Sarraf"
+      ],
+      "frame": "integrity",
+      "status": "ready",
+      "reason": null,
+      "count": 131,
+      "qualified": 12,
+      "durationMs": 376.29999999981374,
+      "traceFile": "trace-7.json.gz",
+      "sha256": "2df47b6585dd216fda4783102a07c2a6551cc52b35559fa303dc36f44b1610eb"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a utility that checks manifest hashes before installation",
+      "seed": 13,
+      "auto": [
+        "Kilim",
+        "Hashapp",
+        "Utilit"
+      ],
+      "old": [
+        "CheckHash",
+        "Macheck",
+        "Plumbline"
+      ],
+      "selectionOnly": [
+        "Plumbline",
+        "CheckHash",
+        "Macheck"
+      ],
+      "inventoryOnly": [
+        "HashSeal",
+        "CheckHash",
+        "ProofHash",
+        "Macheck"
+      ],
+      "current": [
+        "HashSeal",
+        "Plumbline",
+        "CheckHash",
+        "ProofHash"
+      ],
+      "frame": "integrity",
+      "status": "ready",
+      "reason": null,
+      "count": 152,
+      "qualified": 6,
+      "durationMs": 314.3999999994412,
+      "traceFile": "trace-8.json.gz",
+      "sha256": "c339733b8fe018080df3d6f53de87617a47b9d9a1287f9a0283d6334b71c9c33"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a utility that checks manifest hashes before installation",
+      "seed": 67,
+      "auto": [
+        "Coracle",
+        "Manamit",
+        "Hashia"
+      ],
+      "old": [
+        "CheckHash",
+        "Macheck",
+        "Plumbline"
+      ],
+      "selectionOnly": [
+        "CheckHash",
+        "Plumbline",
+        "Macheck"
+      ],
+      "inventoryOnly": [
+        "CheckHash",
+        "HashSeal",
+        "SealHash",
+        "Macheck"
+      ],
+      "current": [
+        "CheckHash",
+        "HashSeal",
+        "Plumbline",
+        "ProofHash"
+      ],
+      "frame": "integrity",
+      "status": "ready",
+      "reason": null,
+      "count": 152,
+      "qualified": 6,
+      "durationMs": 315.3999999994412,
+      "traceFile": "trace-9.json.gz",
+      "sha256": "28c8f9ca25240ff37cf0225937e673c4cd1d80b313e5a23c8d84d4fdadf875f9"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a tool that measures query latency during load tests",
+      "seed": 13,
+      "auto": [
+        "Probeix",
+        "Rowload",
+        "Specindex"
+      ],
+      "old": [
+        "Anemometer",
+        "Seismograph"
+      ],
+      "selectionOnly": [
+        "Anemometer",
+        "Seismograph"
+      ],
+      "inventoryOnly": [
+        "Anemometer",
+        "Seismograph"
+      ],
+      "current": [
+        "Anemometer",
+        "Seismograph"
+      ],
+      "frame": "measurement",
+      "status": "ready",
+      "reason": null,
+      "count": 140,
+      "qualified": 7,
+      "durationMs": 228.20000000018626,
+      "traceFile": "trace-10.json.gz",
+      "sha256": "f751830ec1156756bb70a71accf507165a351e2257f74feda6fe0b6e1991fcd8"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a tool that measures query latency during load tests",
+      "seed": 67,
+      "auto": [
+        "Probeix",
+        "Rowload",
+        "Specindex"
+      ],
+      "old": [
+        "Anemometer",
+        "Barometer"
+      ],
+      "selectionOnly": [
+        "Anemometer",
+        "Barometer"
+      ],
+      "inventoryOnly": [
+        "Anemometer",
+        "Barometer"
+      ],
+      "current": [
+        "Anemometer",
+        "Barometer"
+      ],
+      "frame": "measurement",
+      "status": "ready",
+      "reason": null,
+      "count": 140,
+      "qualified": 7,
+      "durationMs": 216.40000000037253,
+      "traceFile": "trace-11.json.gz",
+      "sha256": "7418565df8dd95e0038a1986cc84d4d866383645a3ce3b3b98a93f3ca96739a4"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a utility that compares storage costs across regions",
+      "seed": 13,
+      "auto": [
+        "Kiyas",
+        "Datapeak",
+        "Costrow"
+      ],
+      "old": [
+        "CompareCost",
+        "Terazi",
+        "Kiyas"
+      ],
+      "selectionOnly": [
+        "Terazi",
+        "CompareCost",
+        "Kiyas"
+      ],
+      "inventoryOnly": [
+        "CostBalance",
+        "CompareCost",
+        "BalanceCost",
+        "Terazi"
+      ],
+      "current": [
+        "CostBalance",
+        "Terazi",
+        "CompareCost",
+        "Kiyas"
+      ],
+      "frame": "measurement",
+      "status": "ready",
+      "reason": null,
+      "count": 125,
+      "qualified": 8,
+      "durationMs": 246.1000000005588,
+      "traceFile": "trace-12.json.gz",
+      "sha256": "1f2b5cf2b39aa78c33de1417b8a08a709bfb3527f0ace5657cc309b8d51f1261"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a utility that compares storage costs across regions",
+      "seed": 67,
+      "auto": [
+        "Insula",
+        "Datatlas",
+        "Costrow"
+      ],
+      "old": [
+        "Comparecost",
+        "Terazi",
+        "Kiyas"
+      ],
+      "selectionOnly": [
+        "Comparecost",
+        "Terazi",
+        "Kiyas"
+      ],
+      "inventoryOnly": [
+        "Comparecost",
+        "CostGauge",
+        "GaugeCost",
+        "Terazi"
+      ],
+      "current": [
+        "Comparecost",
+        "CostGauge",
+        "Terazi",
+        "Kiyas"
+      ],
+      "frame": "measurement",
+      "status": "ready",
+      "reason": null,
+      "count": 125,
+      "qualified": 8,
+      "durationMs": 232.09999999962747,
+      "traceFile": "trace-13.json.gz",
+      "sha256": "62969dedd05e2ab96acc96577703054a086acb07723dd757da4b93b437a91c34"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a tool that tracks queue depth during traffic spikes",
+      "seed": 13,
+      "auto": [
+        "Menzil",
+        "Pipelab",
+        "Publoom"
+      ],
+      "old": [
+        "TrackQueue",
+        "Izci",
+        "Fylgja"
+      ],
+      "selectionOnly": [
+        "Izci",
+        "Fylgja",
+        "TrackQueue"
+      ],
+      "inventoryOnly": [
+        "QueueWatch",
+        "LedgerQueue",
+        "TrackQueue",
+        "Izci"
+      ],
+      "current": [
+        "QueueWatch",
+        "Izci",
+        "Fylgja",
+        "LedgerQueue"
+      ],
+      "frame": "observation",
+      "status": "ready",
+      "reason": null,
+      "count": 160,
+      "qualified": 11,
+      "durationMs": 306.5,
+      "traceFile": "trace-14.json.gz",
+      "sha256": "7e9b443692dc9bc34a53fe0f791231c39b8909656bf1743061022645ebd8b5fc"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a tool that tracks queue depth during traffic spikes",
+      "seed": 67,
+      "auto": [
+        "Menzil",
+        "Pipeora",
+        "Brokerio"
+      ],
+      "old": [
+        "TrackQueue",
+        "Fylgja",
+        "Izci"
+      ],
+      "selectionOnly": [
+        "Fylgja",
+        "Izci",
+        "TrackQueue"
+      ],
+      "inventoryOnly": [
+        "QueueBeacon",
+        "TrackQueue",
+        "BeaconQueue",
+        "Fylgja"
+      ],
+      "current": [
+        "QueueBeacon",
+        "Fylgja",
+        "Izci",
+        "TrackQueue"
+      ],
+      "frame": "observation",
+      "status": "ready",
+      "reason": null,
+      "count": 160,
+      "qualified": 11,
+      "durationMs": 282.90000000037253,
+      "traceFile": "trace-15.json.gz",
+      "sha256": "14ebae0482efb60f80093e546b1a8f533f4fd57c540cd4daee257800e99c4197"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a utility that records process activity during debugging",
+      "seed": 13,
+      "auto": [
+        "Specix",
+        "Probeora",
+        "Traceora"
+      ],
+      "old": [
+        "Acticord",
+        "Seismograph",
+        "Ostraka"
+      ],
+      "selectionOnly": [
+        "Seismograph",
+        "Ostraka",
+        "Acticord"
+      ],
+      "inventoryOnly": [
+        "ProcessWatch",
+        "Acticord",
+        "Seismograph",
+        "Ostraka"
+      ],
+      "current": [
+        "ProcessWatch",
+        "Seismograph",
+        "Ostraka",
+        "Acticord"
+      ],
+      "frame": "observation",
+      "status": "ready",
+      "reason": null,
+      "count": 160,
+      "qualified": 5,
+      "durationMs": 230.5,
+      "traceFile": "trace-16.json.gz",
+      "sha256": "15e8456b079af6daa1fd17dc06a4bac37eddde81ce2cae7c002d7b911ba313d8"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a utility that records process activity during debugging",
+      "seed": 67,
+      "auto": [
+        "Daedal",
+        "Probeio",
+        "Specix"
+      ],
+      "old": [
+        "Acticord",
+        "Ostraka",
+        "Seismograph"
+      ],
+      "selectionOnly": [
+        "Ostraka",
+        "Seismograph",
+        "Acticord"
+      ],
+      "inventoryOnly": [
+        "ProcessWatch",
+        "Acticord",
+        "Ostraka",
+        "Seismograph"
+      ],
+      "current": [
+        "ProcessWatch",
+        "Ostraka",
+        "Seismograph",
+        "Acticord"
+      ],
+      "frame": "observation",
+      "status": "ready",
+      "reason": null,
+      "count": 160,
+      "qualified": 5,
+      "durationMs": 219.19999999925494,
+      "traceFile": "trace-17.json.gz",
+      "sha256": "17112ae300e43119b22bb18c11558cb40edfeefb8d558fae39967bd7a335bda1"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a tool that restores saved editor sessions after crashes",
+      "seed": 13,
+      "auto": [
+        "Curtect",
+        "Draftio",
+        "Quillio"
+      ],
+      "old": [
+        "Restoresave"
+      ],
+      "selectionOnly": [
+        "Restoresave"
+      ],
+      "inventoryOnly": [
+        "SessionMend",
+        "MendSession",
+        "Restoresave"
+      ],
+      "current": [
+        "Reprise",
+        "SessionMend",
+        "Restoresave"
+      ],
+      "frame": "recovery",
+      "status": "ready",
+      "reason": null,
+      "count": 152,
+      "qualified": 4,
+      "durationMs": 701.7999999998137,
+      "traceFile": "trace-18.json.gz",
+      "sha256": "2650e0ce1e74214b5c45576786be85cff70360c8d5e00ee0b550eb8f7933a941"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a tool that restores saved editor sessions after crashes",
+      "seed": 67,
+      "auto": [
+        "Taliesin",
+        "Draftix",
+        "Quillio"
+      ],
+      "old": [
+        "Restoresave"
+      ],
+      "selectionOnly": [
+        "Restoresave"
+      ],
+      "inventoryOnly": [
+        "SessionMend",
+        "MendSession",
+        "Restoresave"
+      ],
+      "current": [
+        "Reprise",
+        "SessionMend",
+        "Restoresave"
+      ],
+      "frame": "recovery",
+      "status": "ready",
+      "reason": null,
+      "count": 152,
+      "qualified": 4,
+      "durationMs": 650,
+      "traceFile": "trace-19.json.gz",
+      "sha256": "0ed2d91998c52b5d820888320e23a1e27ed5d19f6c2741260825eae38c29c0af"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a utility that recovers damaged archive entries from replicas",
+      "seed": 13,
+      "auto": [
+        "Recenet",
+        "Utilit",
+        "Replank"
+      ],
+      "old": [],
+      "selectionOnly": [],
+      "inventoryOnly": [],
+      "current": [],
+      "frame": null,
+      "status": "unresolved",
+      "reason": "no_explicit_operation",
+      "count": 0,
+      "qualified": 0,
+      "durationMs": 0.5,
+      "traceFile": "trace-20.json.gz",
+      "sha256": "ea27a51c27205837d9894dc3f1f6e5c9bcfedd694ca8c1e220798772dca28c3e"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a utility that recovers damaged archive entries from replicas",
+      "seed": 67,
+      "auto": [
+        "Sifa",
+        "Damull",
+        "Recelm"
+      ],
+      "old": [],
+      "selectionOnly": [],
+      "inventoryOnly": [],
+      "current": [],
+      "frame": null,
+      "status": "unresolved",
+      "reason": "no_explicit_operation",
+      "count": 0,
+      "qualified": 0,
+      "durationMs": 0.5,
+      "traceFile": "trace-21.json.gz",
+      "sha256": "4fb56267b60550802823d7c821d32d006c3acaa6a4b91c85f0130bad455d4c47"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a tool that groups test failures by probable cause",
+      "seed": 13,
+      "auto": [
+        "Mihenk",
+        "Specix",
+        "Probeora"
+      ],
+      "old": [
+        "GroupFailure",
+        "Failgroup",
+        "Halka"
+      ],
+      "selectionOnly": [
+        "Halka",
+        "GroupFailure",
+        "Failgroup"
+      ],
+      "inventoryOnly": [
+        "FailureShelf",
+        "ShelfFailure",
+        "GroupFailure",
+        "Halka"
+      ],
+      "current": [
+        "FailureShelf",
+        "Halka",
+        "GroupFailure"
+      ],
+      "frame": "organization",
+      "status": "ready",
+      "reason": null,
+      "count": 124,
+      "qualified": 6,
+      "durationMs": 207.40000000037253,
+      "traceFile": "trace-22.json.gz",
+      "sha256": "55abf9a34e8b01996847bb39fb6d8c61f738a6556b01e1a674b1ebdf9c7e8161"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a tool that groups test failures by probable cause",
+      "seed": 67,
+      "auto": [
+        "Assay",
+        "Probeio",
+        "Specix"
+      ],
+      "old": [
+        "GroupFailure",
+        "Failgroup",
+        "Halka"
+      ],
+      "selectionOnly": [
+        "Halka",
+        "GroupFailure",
+        "Failgroup"
+      ],
+      "inventoryOnly": [
+        "FailureShelf",
+        "ShelfFailure",
+        "GroupFailure",
+        "Halka"
+      ],
+      "current": [
+        "FailureShelf",
+        "Halka",
+        "GroupFailure"
+      ],
+      "frame": "organization",
+      "status": "ready",
+      "reason": null,
+      "count": 124,
+      "qualified": 6,
+      "durationMs": 194.09999999962747,
+      "traceFile": "trace-23.json.gz",
+      "sha256": "93f24e18ec4da191c0f0e96ae0fb644540c8561ad37ea58e994a9c229fd4a34e"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a utility that filters repeated alert messages during incidents",
+      "seed": 13,
+      "auto": [
+        "Kinsignal",
+        "Alertia",
+        "Filterkin"
+      ],
+      "old": [
+        "Refilter",
+        "Valka"
+      ],
+      "selectionOnly": [
+        "Valka",
+        "Refilter"
+      ],
+      "inventoryOnly": [
+        "AlertMesh",
+        "MeshAlert",
+        "Refilter",
+        "Valka"
+      ],
+      "current": [
+        "AlertMesh",
+        "Valka",
+        "SieveAlert",
+        "Refilter"
+      ],
+      "frame": "selection",
+      "status": "ready",
+      "reason": null,
+      "count": 144,
+      "qualified": 7,
+      "durationMs": 254.5,
+      "traceFile": "trace-24.json.gz",
+      "sha256": "8510cf0f62e4715751f5e05027c49da3281f66f827f0284916f5a62c10131b41"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a utility that filters repeated alert messages during incidents",
+      "seed": 67,
+      "auto": [
+        "Iris",
+        "Alertia",
+        "Filterkin"
+      ],
+      "old": [
+        "Valka"
+      ],
+      "selectionOnly": [
+        "Valka"
+      ],
+      "inventoryOnly": [
+        "AlertMesh",
+        "SieveAlert",
+        "Valka"
+      ],
+      "current": [
+        "AlertMesh",
+        "Valka",
+        "SieveAlert"
+      ],
+      "frame": "selection",
+      "status": "ready",
+      "reason": null,
+      "count": 144,
+      "qualified": 6,
+      "durationMs": 236.09999999962747,
+      "traceFile": "trace-25.json.gz",
+      "sha256": "b9404d85d6760c85e82fd7e2236264e73ed2e26af2ca907dbd075bcea9bd8244"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a tool that maps module dependencies across packages",
+      "seed": 13,
+      "auto": [
+        "Portolan",
+        "DepNode",
+        "Bumpify"
+      ],
+      "old": [
+        "Portolan",
+        "Harita"
+      ],
+      "selectionOnly": [
+        "Portolan",
+        "Harita"
+      ],
+      "inventoryOnly": [
+        "ModuleChart",
+        "ChartModule",
+        "Portolan",
+        "Harita"
+      ],
+      "current": [
+        "ModuleChart",
+        "Portolan",
+        "Harita",
+        "WeaveModule"
+      ],
+      "frame": "topology",
+      "status": "ready",
+      "reason": null,
+      "count": 151,
+      "qualified": 7,
+      "durationMs": 371,
+      "traceFile": "trace-26.json.gz",
+      "sha256": "eab7075e1f61a163e25455067c3feb34ee76bdabad8869c17b829debcb588580"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a tool that maps module dependencies across packages",
+      "seed": 67,
+      "auto": [
+        "Isobar",
+        "Depnode",
+        "Byteatlas"
+      ],
+      "old": [
+        "Portolan",
+        "Harita"
+      ],
+      "selectionOnly": [
+        "Portolan",
+        "Harita"
+      ],
+      "inventoryOnly": [
+        "ModuleChart",
+        "ChartModule",
+        "Portolan",
+        "Harita"
+      ],
+      "current": [
+        "ModuleChart",
+        "Portolan",
+        "Harita",
+        "WeaveModule"
+      ],
+      "frame": "topology",
+      "status": "ready",
+      "reason": null,
+      "count": 153,
+      "qualified": 7,
+      "durationMs": 365.6000000005588,
+      "traceFile": "trace-27.json.gz",
+      "sha256": "fa1fe66e1af897ab5b2bf276bbd786b5cf19c2c34ecebfd9e236bab6910704ac"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a utility that detects exposed access tokens before uploads",
+      "seed": 13,
+      "auto": [
+        "Tokok",
+        "Detnit",
+        "Accoll"
+      ],
+      "old": [
+        "Seismograph",
+        "Sarraf"
+      ],
+      "selectionOnly": [
+        "Seismograph",
+        "Sarraf"
+      ],
+      "inventoryOnly": [
+        "Seismograph",
+        "Sarraf"
+      ],
+      "current": [
+        "Seismograph",
+        "Sarraf"
+      ],
+      "frame": "exposure",
+      "status": "ready",
+      "reason": null,
+      "count": 163,
+      "qualified": 2,
+      "durationMs": 304.70000000018626,
+      "traceFile": "trace-28.json.gz",
+      "sha256": "df2eb4967034b57606c73b5ec561241b498dbaab7b55830f5ea3efa41d3949c9"
+    },
+    {
+      "partition": "evaluation",
+      "brief": "a utility that detects exposed access tokens before uploads",
+      "seed": 67,
+      "auto": [
+        "Tokon",
+        "Dete",
+        "Utilit"
+      ],
+      "old": [
+        "Seismograph",
+        "Sarraf"
+      ],
+      "selectionOnly": [
+        "Seismograph",
+        "Sarraf"
+      ],
+      "inventoryOnly": [
+        "Seismograph",
+        "Sarraf"
+      ],
+      "current": [
+        "Seismograph",
+        "Sarraf"
+      ],
+      "frame": "exposure",
+      "status": "ready",
+      "reason": null,
+      "count": 163,
+      "qualified": 2,
+      "durationMs": 308.40000000037253,
+      "traceFile": "trace-29.json.gz",
+      "sha256": "d7a766ea0b32c6deee7bc117998034fad248c7c5472e4af73592ca40dcf327fe"
+    }
+  ]
+}

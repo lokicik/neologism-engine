@@ -1,0 +1,28 @@
+{
+  "schema": "product-frame-protocol-v1",
+  "status": "fixed before implementation outputs; previous examples are development only",
+  "development": [
+    "a build tool that compares executable sizes between release tags",
+    "a terminal tool that tracks memory usage during test runs",
+    "a developer utility that restores deleted configuration sections from snapshots"
+  ],
+  "evaluation": [
+    "a tool that verifies archive signatures before extraction",
+    "a utility that checks manifest hashes before installation",
+    "a tool that measures query latency during load tests",
+    "a utility that compares storage costs across regions",
+    "a tool that tracks queue depth during traffic spikes",
+    "a utility that records process activity during debugging",
+    "a tool that restores saved editor sessions after crashes",
+    "a utility that recovers damaged archive entries from replicas",
+    "a tool that groups test failures by probable cause",
+    "a utility that filters repeated alert messages during incidents",
+    "a tool that maps module dependencies across packages",
+    "a utility that detects exposed access tokens before uploads"
+  ],
+  "seeds": [13, 67],
+  "controls": ["", "a tool that does not track users", "a tool that tracks football scores", "a tool that restores antique furniture"],
+  "ablations": ["old semantic pool", "same pool without coverage priority", "product frames with old selector", "product frames without coverage priority"],
+  "humanGate": { "minimumWins": 8, "comparisons": 12, "minimumUsableBriefs": 6, "minimumUsableBriefUplift": 3, "minimumConsistentRepeats": 3, "repeats": 4, "status": "pending" },
+  "noPromotionWithoutHumanEvaluation": true
+}

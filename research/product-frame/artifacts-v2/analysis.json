@@ -1,0 +1,1513 @@
+{
+  "summary": {
+    "conditions": 24,
+    "framesMatched": 22,
+    "nonemptyLists": 22,
+    "selectionOnlyChangedOrder": 12,
+    "selectionOnlyChangedSet": 0,
+    "inventoryOnlyChangedSet": 18,
+    "combinedChangedSet": 18,
+    "frameFamilyReachedFinalists": 18,
+    "readyDurationMs": {
+      "median": 293.8000000002794,
+      "min": 194.09999999962747,
+      "max": 701.7999999998137
+    },
+    "humanResponses": 0,
+    "qualityImprovementEstablished": false,
+    "limitation": "Revision 2 follows two general bug fixes after inspecting revision 1; these are regression examples, not untouched held-out evidence."
+  },
+  "frameContributions": [
+    {
+      "brief": "a tool that verifies archive signatures before extraction",
+      "seed": 13,
+      "returned": 4,
+      "selected": 1,
+      "rejectionEvents": [
+        {
+          "name": "archivetouchstone",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "proof",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "proofsignature",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "seal",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "sealsignature",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "signatureproof",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "signatureseal",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "signaturetouchstone",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "touchstone",
+          "occurrences": 1,
+          "reason": "phonotactics",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "touchstonearchive",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "touchstonesignature",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        }
+      ]
+    },
+    {
+      "brief": "a tool that verifies archive signatures before extraction",
+      "seed": 67,
+      "returned": 4,
+      "selected": 1,
+      "rejectionEvents": [
+        {
+          "name": "archivetouchstone",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "proof",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "proofsignature",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "seal",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "sealsignature",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "signatureproof",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "signatureseal",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "signaturetouchstone",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "touchstone",
+          "occurrences": 1,
+          "reason": "phonotactics",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "touchstonearchive",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "touchstonesignature",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        }
+      ]
+    },
+    {
+      "brief": "a utility that checks manifest hashes before installation",
+      "seed": 13,
+      "returned": 3,
+      "selected": 2,
+      "rejectionEvents": [
+        {
+          "name": "hashproof",
+          "occurrences": 1,
+          "reason": "phonotactics",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "hashtouchstone",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "manifestproof",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "manifestseal",
+          "occurrences": 1,
+          "reason": "syllable_cap",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "manifesttouchstone",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "proof",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "proofmanifest",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "seal",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "sealmanifest",
+          "occurrences": 1,
+          "reason": "syllable_cap",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "touchstone",
+          "occurrences": 1,
+          "reason": "phonotactics",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "touchstonehash",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "touchstonemanifest",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        }
+      ]
+    },
+    {
+      "brief": "a utility that checks manifest hashes before installation",
+      "seed": 67,
+      "returned": 3,
+      "selected": 2,
+      "rejectionEvents": [
+        {
+          "name": "hashproof",
+          "occurrences": 1,
+          "reason": "phonotactics",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "hashtouchstone",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "manifestproof",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "manifestseal",
+          "occurrences": 1,
+          "reason": "syllable_cap",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "manifesttouchstone",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "proof",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "proofmanifest",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "seal",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "sealmanifest",
+          "occurrences": 1,
+          "reason": "syllable_cap",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "touchstone",
+          "occurrences": 1,
+          "reason": "phonotactics",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "touchstonehash",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "touchstonemanifest",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        }
+      ]
+    },
+    {
+      "brief": "a tool that measures query latency during load tests",
+      "seed": 13,
+      "returned": 0,
+      "selected": 0,
+      "rejectionEvents": [
+        {
+          "name": "balance",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "balancelatency",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "caliper",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "caliperlatency",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "gauge",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "gaugelatency",
+          "occurrences": 1,
+          "reason": "syllable_cap",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "latencybalance",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "latencycaliper",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "latencygauge",
+          "occurrences": 1,
+          "reason": "syllable_cap",
+          "stage": "frame.filter"
+        }
+      ]
+    },
+    {
+      "brief": "a tool that measures query latency during load tests",
+      "seed": 67,
+      "returned": 0,
+      "selected": 0,
+      "rejectionEvents": [
+        {
+          "name": "balance",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "balancelatency",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "caliper",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "caliperlatency",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "gauge",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "gaugelatency",
+          "occurrences": 1,
+          "reason": "syllable_cap",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "latencybalance",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "latencycaliper",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "latencygauge",
+          "occurrences": 1,
+          "reason": "syllable_cap",
+          "stage": "frame.filter"
+        }
+      ]
+    },
+    {
+      "brief": "a utility that compares storage costs across regions",
+      "seed": 13,
+      "returned": 4,
+      "selected": 1,
+      "rejectionEvents": [
+        {
+          "name": "balance",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "caliper",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "calipercost",
+          "occurrences": 1,
+          "reason": "syllable_cap",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "costcaliper",
+          "occurrences": 1,
+          "reason": "syllable_cap",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "gauge",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        }
+      ]
+    },
+    {
+      "brief": "a utility that compares storage costs across regions",
+      "seed": 67,
+      "returned": 4,
+      "selected": 1,
+      "rejectionEvents": [
+        {
+          "name": "balance",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "caliper",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "calipercost",
+          "occurrences": 1,
+          "reason": "syllable_cap",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "costcaliper",
+          "occurrences": 1,
+          "reason": "syllable_cap",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "gauge",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        }
+      ]
+    },
+    {
+      "brief": "a tool that tracks queue depth during traffic spikes",
+      "seed": 13,
+      "returned": 7,
+      "selected": 2,
+      "rejectionEvents": [
+        {
+          "name": "beacon",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "depthbeacon",
+          "occurrences": 1,
+          "reason": "phonotactics",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "depthledger",
+          "occurrences": 1,
+          "reason": "phonotactics",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "depthwatch",
+          "occurrences": 1,
+          "reason": "phonotactics",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "ledger",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "watch",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "watchdepth",
+          "occurrences": 1,
+          "reason": "phonotactics",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "watchqueue",
+          "occurrences": 1,
+          "reason": "phonotactics",
+          "stage": "frame.filter"
+        }
+      ]
+    },
+    {
+      "brief": "a tool that tracks queue depth during traffic spikes",
+      "seed": 67,
+      "returned": 7,
+      "selected": 1,
+      "rejectionEvents": [
+        {
+          "name": "beacon",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "depthbeacon",
+          "occurrences": 1,
+          "reason": "phonotactics",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "depthledger",
+          "occurrences": 1,
+          "reason": "phonotactics",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "depthwatch",
+          "occurrences": 1,
+          "reason": "phonotactics",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "ledger",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "watch",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "watchdepth",
+          "occurrences": 1,
+          "reason": "phonotactics",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "watchqueue",
+          "occurrences": 1,
+          "reason": "phonotactics",
+          "stage": "frame.filter"
+        }
+      ]
+    },
+    {
+      "brief": "a utility that records process activity during debugging",
+      "seed": 13,
+      "returned": 1,
+      "selected": 1,
+      "rejectionEvents": [
+        {
+          "name": "activitybeacon",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "activityledger",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "activitywatch",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "beacon",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "beaconactivity",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "beaconprocess",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "ledger",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "ledgeractivity",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "ledgerprocess",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "processbeacon",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "processledger",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "watch",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "watchactivity",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "watchprocess",
+          "occurrences": 1,
+          "reason": "phonotactics",
+          "stage": "frame.filter"
+        }
+      ]
+    },
+    {
+      "brief": "a utility that records process activity during debugging",
+      "seed": 67,
+      "returned": 1,
+      "selected": 1,
+      "rejectionEvents": [
+        {
+          "name": "activitybeacon",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "activityledger",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "activitywatch",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "beacon",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "beaconactivity",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "beaconprocess",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "ledger",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "ledgeractivity",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "ledgerprocess",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "processbeacon",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "processledger",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "watch",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "watchactivity",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "watchprocess",
+          "occurrences": 1,
+          "reason": "phonotactics",
+          "stage": "frame.filter"
+        }
+      ]
+    },
+    {
+      "brief": "a tool that restores saved editor sessions after crashes",
+      "seed": 13,
+      "returned": 3,
+      "selected": 2,
+      "rejectionEvents": [
+        {
+          "name": "anchor",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "anchorsession",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "mend",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "reprisesession",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "sessionanchor",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "sessionreprise",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        }
+      ]
+    },
+    {
+      "brief": "a tool that restores saved editor sessions after crashes",
+      "seed": 67,
+      "returned": 3,
+      "selected": 2,
+      "rejectionEvents": [
+        {
+          "name": "anchor",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "anchorsession",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "mend",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "reprisesession",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "sessionanchor",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "sessionreprise",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        }
+      ]
+    },
+    {
+      "brief": "a utility that recovers damaged archive entries from replicas",
+      "seed": 13,
+      "returned": 0,
+      "selected": 0,
+      "rejectionEvents": []
+    },
+    {
+      "brief": "a utility that recovers damaged archive entries from replicas",
+      "seed": 67,
+      "returned": 0,
+      "selected": 0,
+      "rejectionEvents": []
+    },
+    {
+      "brief": "a tool that groups test failures by probable cause",
+      "seed": 13,
+      "returned": 2,
+      "selected": 1,
+      "rejectionEvents": [
+        {
+          "name": "failurefolio",
+          "occurrences": 1,
+          "reason": "syllable_cap",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "failurethread",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "folio",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "foliofailure",
+          "occurrences": 1,
+          "reason": "syllable_cap",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "shelf",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "thread",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "threadfailure",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        }
+      ]
+    },
+    {
+      "brief": "a tool that groups test failures by probable cause",
+      "seed": 67,
+      "returned": 2,
+      "selected": 1,
+      "rejectionEvents": [
+        {
+          "name": "failurefolio",
+          "occurrences": 1,
+          "reason": "syllable_cap",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "failurethread",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "folio",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "foliofailure",
+          "occurrences": 1,
+          "reason": "syllable_cap",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "shelf",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "thread",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "threadfailure",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        }
+      ]
+    },
+    {
+      "brief": "a utility that filters repeated alert messages during incidents",
+      "seed": 13,
+      "returned": 5,
+      "selected": 2,
+      "rejectionEvents": [
+        {
+          "name": "alertprism",
+          "occurrences": 1,
+          "reason": "syllable_cap",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "alertsieve",
+          "occurrences": 1,
+          "reason": "syllable_cap",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "mesh",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "messageprism",
+          "occurrences": 1,
+          "reason": "syllable_cap",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "messagesieve",
+          "occurrences": 1,
+          "reason": "syllable_cap",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "prism",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "prismalert",
+          "occurrences": 1,
+          "reason": "syllable_cap",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "prismmessage",
+          "occurrences": 1,
+          "reason": "syllable_cap",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "sieve",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "sievemessage",
+          "occurrences": 1,
+          "reason": "syllable_cap",
+          "stage": "frame.filter"
+        }
+      ]
+    },
+    {
+      "brief": "a utility that filters repeated alert messages during incidents",
+      "seed": 67,
+      "returned": 5,
+      "selected": 2,
+      "rejectionEvents": [
+        {
+          "name": "alertprism",
+          "occurrences": 1,
+          "reason": "syllable_cap",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "alertsieve",
+          "occurrences": 1,
+          "reason": "syllable_cap",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "mesh",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "messageprism",
+          "occurrences": 1,
+          "reason": "syllable_cap",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "messagesieve",
+          "occurrences": 1,
+          "reason": "syllable_cap",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "prism",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "prismalert",
+          "occurrences": 1,
+          "reason": "syllable_cap",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "prismmessage",
+          "occurrences": 1,
+          "reason": "syllable_cap",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "sieve",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "sievemessage",
+          "occurrences": 1,
+          "reason": "syllable_cap",
+          "stage": "frame.filter"
+        }
+      ]
+    },
+    {
+      "brief": "a tool that maps module dependencies across packages",
+      "seed": 13,
+      "returned": 4,
+      "selected": 2,
+      "rejectionEvents": [
+        {
+          "name": "atlas",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "atlasdependency",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "atlasmodule",
+          "occurrences": 1,
+          "reason": "syllable_cap",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "chart",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "chartdependency",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "dependencyatlas",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "dependencychart",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "dependencyweave",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "moduleatlas",
+          "occurrences": 1,
+          "reason": "syllable_cap",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "weave",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "weavedependency",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        }
+      ]
+    },
+    {
+      "brief": "a tool that maps module dependencies across packages",
+      "seed": 67,
+      "returned": 4,
+      "selected": 2,
+      "rejectionEvents": [
+        {
+          "name": "atlas",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "atlasdependency",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "atlasmodule",
+          "occurrences": 1,
+          "reason": "syllable_cap",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "chart",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "chartdependency",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "dependencyatlas",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "dependencychart",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "dependencyweave",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "moduleatlas",
+          "occurrences": 1,
+          "reason": "syllable_cap",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "weave",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "weavedependency",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        }
+      ]
+    },
+    {
+      "brief": "a utility that detects exposed access tokens before uploads",
+      "seed": 13,
+      "returned": 0,
+      "selected": 0,
+      "rejectionEvents": [
+        {
+          "name": "lantern",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "lanterntoken",
+          "occurrences": 1,
+          "reason": "syllable_cap",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "sentinel",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "sentineltoken",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "tokenlantern",
+          "occurrences": 1,
+          "reason": "syllable_cap",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "tokensentinel",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "tokentripwire",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "tripwire",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "tripwiretoken",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        }
+      ]
+    },
+    {
+      "brief": "a utility that detects exposed access tokens before uploads",
+      "seed": 67,
+      "returned": 0,
+      "selected": 0,
+      "rejectionEvents": [
+        {
+          "name": "lantern",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "lanterntoken",
+          "occurrences": 1,
+          "reason": "syllable_cap",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "sentinel",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "sentineltoken",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "tokenlantern",
+          "occurrences": 1,
+          "reason": "syllable_cap",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "tokensentinel",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "tokentripwire",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "tripwire",
+          "occurrences": 1,
+          "reason": "collision_snapshot",
+          "stage": "frame.filter"
+        },
+        {
+          "name": "tripwiretoken",
+          "occurrences": 1,
+          "reason": "length",
+          "stage": "frame.filter"
+        }
+      ]
+    }
+  ],
+  "assistantReview": {
+    "method": "source-visible, seed 13, not training or human evaluation",
+    "rows": [
+      {
+        "brief": "a tool that verifies archive signatures before extraction",
+        "seed": 13,
+        "suggestion": "ArchiveProof",
+        "rationale": "The archive and evidence connection is readable without decoding fragments."
+      },
+      {
+        "brief": "a utility that checks manifest hashes before installation",
+        "seed": 13,
+        "suggestion": "HashSeal",
+        "rationale": "A seal suggests attestation; the hash keeps the product association specific."
+      },
+      {
+        "brief": "a tool that measures query latency during load tests",
+        "seed": 13,
+        "suggestion": null,
+        "rationale": "The retained instrument metaphors do not convey query latency clearly enough for my preference."
+      },
+      {
+        "brief": "a utility that compares storage costs across regions",
+        "seed": 13,
+        "suggestion": "Kiyas",
+        "rationale": "The comparison metaphor remains my preference; Auto already offered it."
+      },
+      {
+        "brief": "a tool that tracks queue depth during traffic spikes",
+        "seed": 13,
+        "suggestion": "QueueWatch",
+        "rationale": "A direct but readable product name for observing queues."
+      },
+      {
+        "brief": "a utility that records process activity during debugging",
+        "seed": 13,
+        "suggestion": "ProcessWatch",
+        "rationale": "A direct but readable product name for observing processes."
+      },
+      {
+        "brief": "a tool that restores saved editor sessions after crashes",
+        "seed": 13,
+        "suggestion": "Reprise",
+        "rationale": "Returning to an earlier passage is a useful recovery metaphor."
+      },
+      {
+        "brief": "a utility that recovers damaged archive entries from replicas",
+        "seed": 13,
+        "suggestion": null,
+        "rationale": "No experimental finalist: the shallow parser does not recognize recovers."
+      },
+      {
+        "brief": "a tool that groups test failures by probable cause",
+        "seed": 13,
+        "suggestion": "Halka",
+        "rationale": "The circle/group metaphor is preferable to the command-like alternatives for me."
+      },
+      {
+        "brief": "a utility that filters repeated alert messages during incidents",
+        "seed": 13,
+        "suggestion": "AlertMesh",
+        "rationale": "A selective mesh fits filtering alert traffic while keeping the whole words legible."
+      },
+      {
+        "brief": "a tool that maps module dependencies across packages",
+        "seed": 13,
+        "suggestion": "Portolan",
+        "rationale": "The mapping metaphor remains my preference; Auto already offered it."
+      },
+      {
+        "brief": "a utility that detects exposed access tokens before uploads",
+        "seed": 13,
+        "suggestion": null,
+        "rationale": "The exposure frame supplies no eligible new finalist; the remaining metaphors are too broad for my preference."
+      }
+    ]
+  }
+}

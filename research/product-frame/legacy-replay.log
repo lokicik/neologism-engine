@@ -1,0 +1,6 @@
+PASS 48 original Auto pages
+PASS 48 retained shared-pool pools, traces and finalists
+PASS 33 retained brief-intent pools, traces and finalists
+PASS 12 development conditions: repeatability, continuation, independent role evidence
+PASS 18 evaluation conditions: repeatability, continuation, independent role evidence
+PASS unresolved and impossible constraints stay empty; no fallback promotion

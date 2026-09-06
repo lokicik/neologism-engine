@@ -1,0 +1,15 @@
+{
+  "studySha256": "eccc65b890ab30dbbf6fd331f0ccb86a56830fb52f1d2c4ba88c6f58eaa2366c",
+  "collectorSha256": "519ed2272a68d61923fa56787939eee7e795af86736c7491d0cd7f7ac62e6f15",
+  "keySha256": "241fd9e27b938d99338a2ea24acd345d176189a1f5486c9c51cdb9d9d274dc11",
+  "status": "awaiting-human-evaluation",
+  "gates": {
+    "minimumWins": 8,
+    "comparisons": 12,
+    "minimumUsableBriefs": 6,
+    "minimumUsableBriefUplift": 3,
+    "minimumConsistentRepeats": 3,
+    "repeats": 4,
+    "status": "pending"
+  }
+}

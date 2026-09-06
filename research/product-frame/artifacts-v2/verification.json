@@ -1,0 +1,16 @@
+{
+  "selectorContracts": [
+    "coverage priority removed",
+    "coverage and prose invariant",
+    "rejection and empty",
+    "duplicate and prefix cap",
+    "family and finalist cap",
+    "trace completeness",
+    "mirrored composition deduplicated"
+  ],
+  "legacyMeaningReplays": 54,
+  "conditions": 30,
+  "repeats": 30,
+  "continuations": 30,
+  "controls": 5
+}

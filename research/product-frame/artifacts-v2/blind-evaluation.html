@@ -1,0 +1,95 @@
+<!doctype html><html lang="tr"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'none'; img-src 'none'; base-uri 'none'; form-action 'none'"><title>İsim karşılaştırması</title><style>
+*{box-sizing:border-box}body{margin:0;background:#111216;color:#ececf2;font:17px/1.6 system-ui,sans-serif}main{max-width:1040px;margin:auto;padding:32px 24px}h1{font-size:30px;letter-spacing:-.03em}p{max-width:78ch}#brief{font-size:21px;color:#c4b5fd}.columns{display:grid;grid-template-columns:1fr 1fr;gap:20px}fieldset{border:1px solid #454550;border-radius:12px;padding:18px;margin:16px 0}legend{padding:0 8px}label{display:flex;align-items:center;gap:12px;padding:10px 0;cursor:pointer}input{width:20px;height:20px;accent-color:#a999ff}button{font:inherit;background:#2b2546;color:#fff;border:1px solid #76659c;border-radius:8px;padding:10px 16px;cursor:pointer}button:disabled{opacity:.4;cursor:default}.controls{display:flex;gap:12px;flex-wrap:wrap;margin:24px 0}#status{min-height:28px;color:#c4b5fd}#resume{width:auto;height:auto;max-width:100%}small{color:#b1b1bd}button:focus-visible,input:focus-visible{outline:3px solid #c4b5fd;outline-offset:4px}@media(max-width:650px){.columns{grid-template-columns:1fr}main{padding:20px 16px}}
+</style><main><h1>Hangi isimleri kullanırdın?</h1><p>Her brief için iki kısa liste göreceksin. Her listede, bu proje için gerçekten kullanmayı düşüneceğin isimleri işaretle. Yoksa “hiçbirini kullanmam” seç. Sonra tercih ettiğin listeyi belirt. İsimlerin müsaitliği doğrulanmış değildir.</p><p><small>Bu sayfa çevrimdışı çalışır. Yanıtların tarayıcıya kaydedilmez; ara vermeden veya kapatmadan önce yanıtları indir. Devam etmek için indirdiğin dosyayı yükleyebilirsin.</small></p><p id="progress" aria-live="polite"></p><h2 id="brief"></h2><form id="form" onsubmit="return false"></form><p id="status" role="status"></p><div class="controls"><button id="previous">Önceki</button><button id="next">Kaydet ve devam et</button><button id="export">Kaydedilen yanıtları indir</button></div><label>Yanıt dosyasından devam et <input id="resume" type="file" accept=".json,application/json"></label></main><script id="study" type="application/json">{"study":{"schema":"shared-pool-blind-study-v1","pages":[{"id":"m1","brief":"a tool that tracks queue depth during traffic spikes","left":["QueueWatch","Izci","Fylgja","LedgerQueue"],"right":["Menzil","Pipelab","Publoom"]},{"id":"m2","brief":"a tool that verifies archive signatures before extraction","left":["ArchiveProof","Mihenk","Verarchive","Sarraf"],"right":["Verre","Signill","Archond"]},{"id":"m3","brief":"a utility that recovers damaged archive entries from replicas","left":["Sifa","Damull","Recelm"],"right":[]},{"id":"m4","brief":"a utility that compares storage costs across regions","left":["Insula","Datatlas","Costrow"],"right":["Comparecost","CostGauge","Terazi","Kiyas"]},{"id":"m5","brief":"a tool that maps module dependencies across packages","left":["ModuleChart","Portolan","Harita","WeaveModule"],"right":["Portolan","DepNode","Bumpify"]},{"id":"m6","brief":"a utility that checks manifest hashes before installation","left":["Coracle","Manamit","Hashia"],"right":["CheckHash","HashSeal","Plumbline","ProofHash"]},{"id":"m7","brief":"a tool that verifies archive signatures before extraction","left":["Verre","Signill","Archond"],"right":["ArchiveProof","Mihenk","Verarchive","Sarraf"]},{"id":"m8","brief":"a tool that restores saved editor sessions after crashes","left":["Reprise","SessionMend","Restoresave"],"right":["Curtect","Draftio","Quillio"]},{"id":"m9","brief":"a utility that detects exposed access tokens before uploads","left":["Tokon","Dete","Utilit"],"right":["Seismograph","Sarraf"]},{"id":"m10","brief":"a utility that compares storage costs across regions","left":["Comparecost","CostGauge","Terazi","Kiyas"],"right":["Insula","Datatlas","Costrow"]},{"id":"m11","brief":"a tool that measures query latency during load tests","left":["Anemometer","Seismograph"],"right":["Probeix","Rowload","Specindex"]},{"id":"m12","brief":"a utility that filters repeated alert messages during incidents","left":["Iris","Alertia","Filterkin"],"right":["AlertMesh","Valka","SieveAlert"]},{"id":"m13","brief":"a utility that records process activity during debugging","left":["Daedal","Probeio","Specix"],"right":["ProcessWatch","Ostraka","Seismograph","Acticord"]},{"id":"m14","brief":"a tool that restores saved editor sessions after crashes","left":["Curtect","Draftio","Quillio"],"right":["Reprise","SessionMend","Restoresave"]},{"id":"m15","brief":"a tool that groups test failures by probable cause","left":["FailureShelf","Halka","GroupFailure"],"right":["Mihenk","Specix","Probeora"]},{"id":"m16","brief":"a utility that filters repeated alert messages during incidents","left":["AlertMesh","Valka","SieveAlert"],"right":["Iris","Alertia","Filterkin"]}]},"studySha256":"eccc65b890ab30dbbf6fd331f0ccb86a56830fb52f1d2c4ba88c6f58eaa2366c"}</script><script>/* Embedded into one offline HTML. No key, source labels, network or storage. */
+const envelope = JSON.parse(document.getElementById('study').textContent)
+const study = envelope.study
+let index = 0
+const answers = new Map()
+const form = document.getElementById('form')
+const status = document.getElementById('status')
+const h = (tag, text) => { const node = document.createElement(tag); node.textContent = text; return node }
+
+function render() {
+  const page = study.pages[index]
+  document.getElementById('progress').textContent = `${index + 1} / ${study.pages.length} · ${answers.size} yanıt kaydedildi`
+  document.getElementById('brief').textContent = page.brief
+  form.replaceChildren()
+  const saved = answers.get(page.id)
+  const columns = h('div', '')
+  columns.className = 'columns'
+  for (const side of ['left', 'right']) {
+    const field = h('fieldset', '')
+    field.append(h('legend', side === 'left' ? 'A listesi' : 'B listesi'))
+    for (const name of page[side]) {
+      const label = h('label', '')
+      const box = document.createElement('input')
+      box.type = 'checkbox'; box.name = side; box.value = name; box.checked = saved?.[side]?.includes(name) ?? false
+      label.append(box, h('span', name)); field.append(label)
+    }
+    const noneLabel = h('label', '')
+    const none = document.createElement('input')
+    none.type = 'checkbox'; none.name = `${side}-none`; none.checked = Boolean(saved && saved[side].length === 0)
+    noneLabel.append(none, h('span', 'Bu listeden hiçbirini kullanmam')); field.append(noneLabel)
+    field.addEventListener('change', (event) => {
+      if (event.target === none && none.checked) field.querySelectorAll(`input[name="${side}"]`).forEach((box) => { box.checked = false })
+      else if (event.target !== none && event.target.checked) none.checked = false
+    })
+    columns.append(field)
+  }
+  form.append(columns)
+  const preference = h('fieldset', '')
+  preference.append(h('legend', 'Hangi listeyi tercih ediyorsun?'))
+  for (const [value, title] of [['left', 'A listesi'], ['right', 'B listesi'], ['neither', 'İkisi de değil']]) {
+    const label = h('label', '')
+    const radio = document.createElement('input')
+    radio.type = 'radio'; radio.name = 'preference'; radio.value = value; radio.checked = saved?.preference === value
+    label.append(radio, h('span', title)); preference.append(label)
+  }
+  form.append(preference)
+  document.getElementById('previous').disabled = index === 0
+  document.getElementById('next').textContent = index === study.pages.length - 1 ? 'Yanıtı kaydet ve bitir' : 'Kaydet ve devam et'
+  status.textContent = ''
+}
+function save() {
+  const page = study.pages[index]
+  const preference = form.querySelector('input[name="preference"]:checked')?.value
+  const answer = { id: page.id, preference }
+  for (const side of ['left', 'right']) {
+    answer[side] = [...form.querySelectorAll(`input[name="${side}"]:checked`)].map((input) => input.value)
+    if (!answer[side].length && !form.querySelector(`input[name="${side}-none"]`).checked) {
+      status.textContent = 'Her liste için kullanabileceğin isimleri veya hiçbirini kullanmayacağını belirt.'; return false
+    }
+  }
+  if (!preference) { status.textContent = 'Tercihini veya “İkisi de değil” seçeneğini belirt.'; return false }
+  answers.set(page.id, answer)
+  return true
+}
+document.getElementById('next').onclick = () => {
+  if (!save()) return
+  if (index < study.pages.length - 1) { index++; render() }
+  else { document.getElementById('progress').textContent = `16 / 16 · ${answers.size} yanıt kaydedildi`; status.textContent = 'Tamamlandı. Yanıtları indir ve değerlendirmeyi yapan kişiye ilet.' }
+}
+document.getElementById('previous').onclick = () => { if (index > 0) { index--; render() } }
+document.getElementById('export').onclick = () => {
+  const content = { schema: 'shared-pool-choices-v1', studySha256: envelope.studySha256, answers: [...answers.values()] }
+  const url = URL.createObjectURL(new Blob([JSON.stringify(content, null, 2)], { type: 'application/json' }))
+  const link = document.createElement('a'); link.href = url; link.download = 'shared-pool-choices.json'; link.click()
+  setTimeout(() => URL.revokeObjectURL(url), 1000)
+}
+document.getElementById('resume').onchange = async (event) => {
+  try {
+    const input = JSON.parse(await event.target.files[0].text())
+    if (input.schema !== 'shared-pool-choices-v1' || input.studySha256 !== envelope.studySha256 || !Array.isArray(input.answers)) throw Error('Bu dosya bu çalışmaya ait değil.')
+    const seen = new Set()
+    for (const answer of input.answers) {
+      const page = study.pages.find((p) => p.id === answer.id)
+      if (!page || seen.has(answer.id) || !['left', 'right', 'neither'].includes(answer.preference)) throw Error('Geçersiz yanıt.')
+      seen.add(answer.id)
+      for (const side of ['left', 'right']) if (!Array.isArray(answer[side]) || new Set(answer[side]).size !== answer[side].length || !answer[side].every((name) => page[side].includes(name))) throw Error('Geçersiz isim seçimi.')
+    }
+    answers.clear(); input.answers.forEach((answer) => answers.set(answer.id, answer))
+    const next = study.pages.findIndex((p) => !answers.has(p.id)); index = next < 0 ? 0 : next; render()
+  } catch (error) { status.textContent = error.message }
+}
+render()
+</script></html>

@@ -1,0 +1,44 @@
+{
+  "passed": true,
+  "sourceFilesChecked": 129,
+  "wasmSha256": "eae427425920bc51a2c4f0c18794f5f58f8a23dfa547e004aefa877b8e3817b0",
+  "preExistingUserDataPreserved": true,
+  "rustTests": 221,
+  "legacyReplays": {
+    "auto": 48,
+    "shared": 48,
+    "intent": 33,
+    "operationObject": 30,
+    "meaningFirst": 54
+  },
+  "auditScope": "six unchanged checks passed on revision 1; legacy replay, TypeScript/build and UI validated revision 2",
+  "summary": {
+    "conditions": 24,
+    "framesMatched": 22,
+    "nonemptyLists": 22,
+    "selectionOnlyChangedOrder": 12,
+    "selectionOnlyChangedSet": 0,
+    "inventoryOnlyChangedSet": 18,
+    "combinedChangedSet": 18,
+    "frameFamilyReachedFinalists": 18,
+    "readyDurationMs": {
+      "median": 293.8000000002794,
+      "min": 194.09999999962747,
+      "max": 701.7999999998137
+    },
+    "humanResponses": 0,
+    "qualityImprovementEstablished": false,
+    "limitation": "Revision 2 follows two general bug fixes after inspecting revision 1; these are regression examples, not untouched held-out evidence."
+  },
+  "artifacts": {
+    "comparison.json": "88dac58028f797fdc4229bf5a2052329e400c4a549179ab8389fd2b030f7121b",
+    "analysis.json": "a7767d3f0f6eb1ff063760c91f1ef218cc8e39e61a199c2bec3a8ddc577a48cc",
+    "examples.html": "8896410f02676a1208bba9ebe0299b3a6662f0519252c240b8c4c870face8ed0",
+    "blind-evaluation.html": "519ed2272a68d61923fa56787939eee7e795af86736c7491d0cd7f7ac62e6f15",
+    "ui-verification.json": "a368a7ee8d239ad977332fe90d2c74f868b343af892e7c8f924ce2b30ec94f8f",
+    "verification.json": "694fe25c3e9999fc313a040f6ed53fa3a8a4c887214aabdbd9f86a33e3ae762d",
+    "study-verification.json": "e82508a817db002dfbbb0673d7fc8f2715253b8d9df2dc19468590606c125b52",
+    "finalists.png": "1eb5b34777f102c9caf72a574a19815a604212a7432f317fe008395608398ba5",
+    "mobile-finalist.png": "a17f54926231efa065bbe1a8d21e8d7bc3a09619727f6a5189a7df86e6dcffe0"
+  }
+}

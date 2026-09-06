@@ -1,0 +1,231 @@
+{
+  "schema": "shared-pool-blind-study-v1",
+  "pages": [
+    {
+      "id": "m1",
+      "brief": "a tool that tracks queue depth during traffic spikes",
+      "left": [
+        "QueueWatch",
+        "Izci",
+        "Fylgja",
+        "LedgerQueue"
+      ],
+      "right": [
+        "Menzil",
+        "Pipelab",
+        "Publoom"
+      ]
+    },
+    {
+      "id": "m2",
+      "brief": "a tool that verifies archive signatures before extraction",
+      "left": [
+        "ArchiveProof",
+        "Mihenk",
+        "Verarchive",
+        "Sarraf"
+      ],
+      "right": [
+        "Verre",
+        "Signill",
+        "Archond"
+      ]
+    },
+    {
+      "id": "m3",
+      "brief": "a utility that recovers damaged archive entries from replicas",
+      "left": [
+        "Sifa",
+        "Damull",
+        "Recelm"
+      ],
+      "right": []
+    },
+    {
+      "id": "m4",
+      "brief": "a utility that compares storage costs across regions",
+      "left": [
+        "Insula",
+        "Datatlas",
+        "Costrow"
+      ],
+      "right": [
+        "Comparecost",
+        "CostGauge",
+        "Terazi",
+        "Kiyas"
+      ]
+    },
+    {
+      "id": "m5",
+      "brief": "a tool that maps module dependencies across packages",
+      "left": [
+        "ModuleChart",
+        "Portolan",
+        "Harita",
+        "WeaveModule"
+      ],
+      "right": [
+        "Portolan",
+        "DepNode",
+        "Bumpify"
+      ]
+    },
+    {
+      "id": "m6",
+      "brief": "a utility that checks manifest hashes before installation",
+      "left": [
+        "Coracle",
+        "Manamit",
+        "Hashia"
+      ],
+      "right": [
+        "CheckHash",
+        "HashSeal",
+        "Plumbline",
+        "ProofHash"
+      ]
+    },
+    {
+      "id": "m7",
+      "brief": "a tool that verifies archive signatures before extraction",
+      "left": [
+        "Verre",
+        "Signill",
+        "Archond"
+      ],
+      "right": [
+        "ArchiveProof",
+        "Mihenk",
+        "Verarchive",
+        "Sarraf"
+      ]
+    },
+    {
+      "id": "m8",
+      "brief": "a tool that restores saved editor sessions after crashes",
+      "left": [
+        "Reprise",
+        "SessionMend",
+        "Restoresave"
+      ],
+      "right": [
+        "Curtect",
+        "Draftio",
+        "Quillio"
+      ]
+    },
+    {
+      "id": "m9",
+      "brief": "a utility that detects exposed access tokens before uploads",
+      "left": [
+        "Tokon",
+        "Dete",
+        "Utilit"
+      ],
+      "right": [
+        "Seismograph",
+        "Sarraf"
+      ]
+    },
+    {
+      "id": "m10",
+      "brief": "a utility that compares storage costs across regions",
+      "left": [
+        "Comparecost",
+        "CostGauge",
+        "Terazi",
+        "Kiyas"
+      ],
+      "right": [
+        "Insula",
+        "Datatlas",
+        "Costrow"
+      ]
+    },
+    {
+      "id": "m11",
+      "brief": "a tool that measures query latency during load tests",
+      "left": [
+        "Anemometer",
+        "Seismograph"
+      ],
+      "right": [
+        "Probeix",
+        "Rowload",
+        "Specindex"
+      ]
+    },
+    {
+      "id": "m12",
+      "brief": "a utility that filters repeated alert messages during incidents",
+      "left": [
+        "Iris",
+        "Alertia",
+        "Filterkin"
+      ],
+      "right": [
+        "AlertMesh",
+        "Valka",
+        "SieveAlert"
+      ]
+    },
+    {
+      "id": "m13",
+      "brief": "a utility that records process activity during debugging",
+      "left": [
+        "Daedal",
+        "Probeio",
+        "Specix"
+      ],
+      "right": [
+        "ProcessWatch",
+        "Ostraka",
+        "Seismograph",
+        "Acticord"
+      ]
+    },
+    {
+      "id": "m14",
+      "brief": "a tool that restores saved editor sessions after crashes",
+      "left": [
+        "Curtect",
+        "Draftio",
+        "Quillio"
+      ],
+      "right": [
+        "Reprise",
+        "SessionMend",
+        "Restoresave"
+      ]
+    },
+    {
+      "id": "m15",
+      "brief": "a tool that groups test failures by probable cause",
+      "left": [
+        "FailureShelf",
+        "Halka",
+        "GroupFailure"
+      ],
+      "right": [
+        "Mihenk",
+        "Specix",
+        "Probeora"
+      ]
+    },
+    {
+      "id": "m16",
+      "brief": "a utility that filters repeated alert messages during incidents",
+      "left": [
+        "AlertMesh",
+        "Valka",
+        "SieveAlert"
+      ],
+      "right": [
+        "Iris",
+        "Alertia",
+        "Filterkin"
+      ]
+    }
+  ]
+}
