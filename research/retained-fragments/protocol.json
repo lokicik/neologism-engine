@@ -1,0 +1,8 @@
+{
+  "mode": "retained_pool; additive, opt-in Lab check, not a default replacement",
+  "rule": "Record exact accepted Seamblend prefix/suffix source and output byte ranges. Keep shared-phoneme count separately without inventing retained letters. A clipped parent contributes semantic evidence only through an exact positive meaning association from the existing submorph.tsv inventory, respecting H/T/B position; quality tails and distributional links do not count. Whole parents remain eligible meaning material under the previous role rules.",
+  "scope": "Existing generators, budgets, aesthetic weights, frame anchors and datasets unchanged. No minimum-fragment-length heuristic. Non-Seamblend families keep their existing evidence. Unsupported means missing inventory proof, not bad name.",
+  "validation": "Replay 44 previous product-brief pools and earlier retained modes; compare same 44 conditions and 44 continuations with repeatability, exact ranges and all existing constraints. Report lost pre-recorded assistant choices explicitly. New inventory entries and threshold adjustments are out of this slice.",
+  "humanGate": {"wins":8,"comparisons":12,"usableBriefs":6,"usableBriefUpliftOverAuto":3,"repeatConsistency":3,"repeats":4},
+  "humanEvaluation": "pending; assistant pool-review labels are diagnostic only, never training data"
+}

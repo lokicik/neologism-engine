@@ -1,0 +1,6 @@
+PASS 48 Auto pages
+PASS 48 shared-pool pools, evidence and traces
+PASS 33 brief-intent pools, evidence and traces
+PASS 30 operation-object pools, evidence and traces
+PASS 54 meaning-first pools, evidence and traces
+PASS 30 product-frame pools, evidence and traces

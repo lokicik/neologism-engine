@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "counts": {
+    "auto": 48,
+    "shared-pool": 48,
+    "brief-intent": 33,
+    "operation-object": 30,
+    "meaning-first": 54,
+    "product-frame": 30
+  }
+}

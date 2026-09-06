@@ -1,0 +1,1064 @@
+{
+  "summary": {
+    "conditions": 44,
+    "legacyReplays": 44,
+    "repeats": 44,
+    "continuations": 44,
+    "paraphrasePairs": 16,
+    "controls": 4,
+    "recordedConstructions": 1657,
+    "partCounts": {
+      "unknown": 1818,
+      "attested": 93,
+      "whole": 1403
+    },
+    "finalistsChecked": 261,
+    "regressionOldEligible": 170,
+    "regressionCurrentEligible": 84,
+    "lostAssistantChoices": [
+      {
+        "brief": "a utility that checks manifest hashes before installation",
+        "name": "Maniseal"
+      },
+      {
+        "brief": "a utility that records process activity during debugging",
+        "name": "Acticord"
+      },
+      {
+        "brief": "a utility that recovers damaged archive entries from replicas",
+        "name": "Entryprise"
+      },
+      {
+        "brief": "a tool that groups test failures by probable cause",
+        "name": "Failthread"
+      },
+      {
+        "brief": "a utility that filters repeated alert messages during incidents",
+        "name": "Primessage"
+      }
+    ],
+    "qualityImprovementEstablished": false,
+    "humanEvaluation": "pending"
+  },
+  "rows": [
+    {
+      "partition": "paraphrase",
+      "pair": 0,
+      "side": 0,
+      "brief": "a tool that restores configuration sections",
+      "seed": 13,
+      "old": [
+        "Reprise",
+        "Constore",
+        "SectionMend",
+        "Mendtion"
+      ],
+      "current": [
+        "Reprise",
+        "SectionMend"
+      ],
+      "oldEligible": 13,
+      "currentEligible": 3,
+      "lostChoices": [],
+      "traceFile": "trace-0.json.gz",
+      "sha256": "ba2f9c1a5a017296bca30f198b5e414efce03428bdee6f3343415cb0749da0ea"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 0,
+      "side": 1,
+      "brief": "a utility for recovering configuration sections",
+      "seed": 13,
+      "old": [
+        "Reprise",
+        "Constore",
+        "SectionMend",
+        "Mendtion"
+      ],
+      "current": [
+        "Reprise",
+        "SectionMend"
+      ],
+      "oldEligible": 13,
+      "currentEligible": 3,
+      "lostChoices": [],
+      "traceFile": "trace-1.json.gz",
+      "sha256": "ff65f01dca2c1af5d2eb99d5b7cb7b42766c1b467d5a55d4f843da7c04006d67"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 0,
+      "side": 0,
+      "brief": "a tool that restores configuration sections",
+      "seed": 67,
+      "old": [
+        "Constore",
+        "Reprise",
+        "SectionMend",
+        "Mendtion"
+      ],
+      "current": [
+        "Reprise",
+        "SectionMend"
+      ],
+      "oldEligible": 13,
+      "currentEligible": 3,
+      "lostChoices": [],
+      "traceFile": "trace-2.json.gz",
+      "sha256": "aa9b74ecbb99d08b2c0400a50f334af1db1073dc10c4862f4666dc7a0f8d7b00"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 0,
+      "side": 1,
+      "brief": "a utility for recovering configuration sections",
+      "seed": 67,
+      "old": [
+        "Constore",
+        "Reprise",
+        "SectionMend",
+        "Mendtion"
+      ],
+      "current": [
+        "Reprise",
+        "SectionMend"
+      ],
+      "oldEligible": 13,
+      "currentEligible": 3,
+      "lostChoices": [],
+      "traceFile": "trace-3.json.gz",
+      "sha256": "ed74aca587100d4951743c3e20deb6c9c73a9014653ca670dd1dba485629514b"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 1,
+      "side": 0,
+      "brief": "a tool that verifies archive signatures",
+      "seed": 13,
+      "old": [
+        "ArchiveProof",
+        "Mihenk",
+        "VerArchive",
+        "Touchsig"
+      ],
+      "current": [
+        "ArchiveProof",
+        "Mihenk",
+        "VerArchive",
+        "Sarraf"
+      ],
+      "oldEligible": 21,
+      "currentEligible": 15,
+      "lostChoices": [],
+      "traceFile": "trace-4.json.gz",
+      "sha256": "b2c2e9613c57c5ddd495beb474c6ad273fe2cf41e461b0e0cbc12ea479aec8f1"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 1,
+      "side": 1,
+      "brief": "a utility for validating signatures of archives",
+      "seed": 13,
+      "old": [
+        "ArchiveProof",
+        "Mihenk",
+        "VerArchive",
+        "Touchsig"
+      ],
+      "current": [
+        "ArchiveProof",
+        "Mihenk",
+        "VerArchive",
+        "Sarraf"
+      ],
+      "oldEligible": 21,
+      "currentEligible": 15,
+      "lostChoices": [],
+      "traceFile": "trace-5.json.gz",
+      "sha256": "9a1c1e3bafccaf71368a479d0eb70b7244ce63e812fc96a86188fca663de072c"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 1,
+      "side": 0,
+      "brief": "a tool that verifies archive signatures",
+      "seed": 67,
+      "old": [
+        "VerSig",
+        "Touchsig",
+        "ArchiveSeal",
+        "Mihenk"
+      ],
+      "current": [
+        "VerSig",
+        "ArchiveSeal",
+        "Mihenk",
+        "ProofArchive"
+      ],
+      "oldEligible": 21,
+      "currentEligible": 15,
+      "lostChoices": [],
+      "traceFile": "trace-6.json.gz",
+      "sha256": "6bc0477e78152c98756cc9ec5270b43528c640182ac2c87463370df0603f768b"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 1,
+      "side": 1,
+      "brief": "a utility for validating signatures of archives",
+      "seed": 67,
+      "old": [
+        "VerSig",
+        "Touchsig",
+        "ArchiveSeal",
+        "Mihenk"
+      ],
+      "current": [
+        "VerSig",
+        "ArchiveSeal",
+        "Mihenk",
+        "ProofArchive"
+      ],
+      "oldEligible": 21,
+      "currentEligible": 15,
+      "lostChoices": [],
+      "traceFile": "trace-7.json.gz",
+      "sha256": "43a9fade6467019560a9d659b43111357f305f53e2eb53d2c1124e85dedd2045"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 2,
+      "side": 0,
+      "brief": "a tool that measures query latency",
+      "seed": 13,
+      "old": [
+        "QueryGauge",
+        "Anemometer",
+        "Seismograph",
+        "Latenlance"
+      ],
+      "current": [
+        "QueryGauge",
+        "Anemometer",
+        "Seismograph"
+      ],
+      "oldEligible": 16,
+      "currentEligible": 9,
+      "lostChoices": [],
+      "traceFile": "trace-8.json.gz",
+      "sha256": "65e28de531a800da5ed3ea08856bf05d866859b68912d827bf72929bb5dab884"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 2,
+      "side": 1,
+      "brief": "a utility for measuring latency of queries",
+      "seed": 13,
+      "old": [
+        "QueryGauge",
+        "Anemometer",
+        "Seismograph",
+        "Latenlance"
+      ],
+      "current": [
+        "QueryGauge",
+        "Anemometer",
+        "Seismograph"
+      ],
+      "oldEligible": 16,
+      "currentEligible": 9,
+      "lostChoices": [],
+      "traceFile": "trace-9.json.gz",
+      "sha256": "45c8f2f0b1bd0f321370fa0382d9b1c34b5ace14cf3bb7735deb921e03a199dc"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 2,
+      "side": 0,
+      "brief": "a tool that measures query latency",
+      "seed": 67,
+      "old": [
+        "QueryGauge",
+        "Anemometer",
+        "Barometer",
+        "Latenlance"
+      ],
+      "current": [
+        "QueryGauge",
+        "Anemometer",
+        "Barometer"
+      ],
+      "oldEligible": 16,
+      "currentEligible": 9,
+      "lostChoices": [],
+      "traceFile": "trace-10.json.gz",
+      "sha256": "38af66341cf27eae05aa1b7c13b96e623d61a31c428082a18b1f46d47cb77f07"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 2,
+      "side": 1,
+      "brief": "a utility for measuring latency of queries",
+      "seed": 67,
+      "old": [
+        "QueryGauge",
+        "Anemometer",
+        "Barometer",
+        "Latenlance"
+      ],
+      "current": [
+        "QueryGauge",
+        "Anemometer",
+        "Barometer"
+      ],
+      "oldEligible": 16,
+      "currentEligible": 9,
+      "lostChoices": [],
+      "traceFile": "trace-11.json.gz",
+      "sha256": "5403285faca1e04d17abb840f3f9e37e7608e3d21fee590d4d800c9c768e1c61"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 3,
+      "side": 0,
+      "brief": "a tool that tracks queue depth",
+      "seed": 13,
+      "old": [
+        "QueueWatch",
+        "Izci",
+        "LedgerQueue",
+        "Fylgja"
+      ],
+      "current": [
+        "QueueWatch",
+        "Izci",
+        "LedgerQueue",
+        "Fylgja"
+      ],
+      "oldEligible": 14,
+      "currentEligible": 12,
+      "lostChoices": [],
+      "traceFile": "trace-12.json.gz",
+      "sha256": "7bc6be38422ffddb1b1fffa33c87fa44627fc19e8bcdd4b3a9293697240122d7"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 3,
+      "side": 1,
+      "brief": "a utility for monitoring depth of queues",
+      "seed": 13,
+      "old": [
+        "QueueWatch",
+        "Izci",
+        "LedgerQueue",
+        "Fylgja"
+      ],
+      "current": [
+        "QueueWatch",
+        "Izci",
+        "LedgerQueue",
+        "Fylgja"
+      ],
+      "oldEligible": 14,
+      "currentEligible": 12,
+      "lostChoices": [],
+      "traceFile": "trace-13.json.gz",
+      "sha256": "e3de31a4090e3aa0df80edd47a22ba5798516cd57e08c3f1cdc4048e988b7e33"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 3,
+      "side": 0,
+      "brief": "a tool that tracks queue depth",
+      "seed": 67,
+      "old": [
+        "LedgerQueue",
+        "QueueBeacon",
+        "Fylgja",
+        "Izci"
+      ],
+      "current": [
+        "LedgerQueue",
+        "QueueBeacon",
+        "Fylgja",
+        "Izci"
+      ],
+      "oldEligible": 14,
+      "currentEligible": 12,
+      "lostChoices": [],
+      "traceFile": "trace-14.json.gz",
+      "sha256": "2e37e489c11ac39bd75f24baa2fe98f6de9648baa0309f612fc04a4c8b73df7d"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 3,
+      "side": 1,
+      "brief": "a utility for monitoring depth of queues",
+      "seed": 67,
+      "old": [
+        "LedgerQueue",
+        "QueueBeacon",
+        "Fylgja",
+        "Izci"
+      ],
+      "current": [
+        "LedgerQueue",
+        "QueueBeacon",
+        "Fylgja",
+        "Izci"
+      ],
+      "oldEligible": 14,
+      "currentEligible": 12,
+      "lostChoices": [],
+      "traceFile": "trace-15.json.gz",
+      "sha256": "1184512703015e79162e353b5a80826f6855c98eb804b42fb451c7bf40b413d2"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 4,
+      "side": 0,
+      "brief": "a tool that compares storage costs",
+      "seed": 13,
+      "old": [
+        "StorageGauge",
+        "Terazi",
+        "Kiyas",
+        "CostBalance"
+      ],
+      "current": [
+        "StorageGauge",
+        "Terazi",
+        "Kiyas",
+        "CostBalance"
+      ],
+      "oldEligible": 17,
+      "currentEligible": 9,
+      "lostChoices": [],
+      "traceFile": "trace-16.json.gz",
+      "sha256": "524aad72050267e5af0424195519cced91fa20ea955d489150d66a4c8fcd375c"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 4,
+      "side": 1,
+      "brief": "a utility for comparing costs of storage",
+      "seed": 13,
+      "old": [
+        "StorageGauge",
+        "Terazi",
+        "Kiyas",
+        "CostBalance"
+      ],
+      "current": [
+        "StorageGauge",
+        "Terazi",
+        "Kiyas",
+        "CostBalance"
+      ],
+      "oldEligible": 17,
+      "currentEligible": 9,
+      "lostChoices": [],
+      "traceFile": "trace-17.json.gz",
+      "sha256": "25cb3e92683afb053cc3d00c3d8a2ecb221a0375d3c78e6c9ee7c6649a4223c0"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 4,
+      "side": 0,
+      "brief": "a tool that compares storage costs",
+      "seed": 67,
+      "old": [
+        "StorageGauge",
+        "Terazi",
+        "Kiyas",
+        "CostGauge"
+      ],
+      "current": [
+        "StorageGauge",
+        "Terazi",
+        "Kiyas",
+        "CostGauge"
+      ],
+      "oldEligible": 16,
+      "currentEligible": 9,
+      "lostChoices": [],
+      "traceFile": "trace-18.json.gz",
+      "sha256": "23e609c8e36c73c1ec997f700bf8e1e708caeea45f9fbf9df15bfc867821cc4c"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 4,
+      "side": 1,
+      "brief": "a utility for comparing costs of storage",
+      "seed": 67,
+      "old": [
+        "StorageGauge",
+        "Terazi",
+        "Kiyas",
+        "CostGauge"
+      ],
+      "current": [
+        "StorageGauge",
+        "Terazi",
+        "Kiyas",
+        "CostGauge"
+      ],
+      "oldEligible": 16,
+      "currentEligible": 9,
+      "lostChoices": [],
+      "traceFile": "trace-19.json.gz",
+      "sha256": "178f254a644ec132fd33065ff8efafe35081ebce29bb4d228672cf4a387addfd"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 5,
+      "side": 0,
+      "brief": "a tool that filters alert messages",
+      "seed": 13,
+      "old": [
+        "AlertMesh",
+        "Valka",
+        "Primessage",
+        "SieveAlert"
+      ],
+      "current": [
+        "AlertMesh",
+        "Valka",
+        "SieveAlert",
+        "MeshMessage"
+      ],
+      "oldEligible": 9,
+      "currentEligible": 6,
+      "lostChoices": [],
+      "traceFile": "trace-20.json.gz",
+      "sha256": "a6d402a79269f94192c42455865b90b91dadf5c39f504498bb15dffcae33d1e3"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 5,
+      "side": 1,
+      "brief": "a utility for filtering messages of alerts",
+      "seed": 13,
+      "old": [
+        "AlertMesh",
+        "Valka",
+        "Primessage",
+        "SieveAlert"
+      ],
+      "current": [
+        "AlertMesh",
+        "Valka",
+        "SieveAlert",
+        "MeshMessage"
+      ],
+      "oldEligible": 9,
+      "currentEligible": 6,
+      "lostChoices": [],
+      "traceFile": "trace-21.json.gz",
+      "sha256": "6bdecd05847b63d9d5526b7ecedc041a3597ef7634fa412cf825bdbee28abcb7"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 5,
+      "side": 0,
+      "brief": "a tool that filters alert messages",
+      "seed": 67,
+      "old": [
+        "Primessage",
+        "AlertMesh",
+        "Valka",
+        "SieveAlert"
+      ],
+      "current": [
+        "AlertMesh",
+        "Valka",
+        "SieveAlert",
+        "MeshMessage"
+      ],
+      "oldEligible": 9,
+      "currentEligible": 6,
+      "lostChoices": [],
+      "traceFile": "trace-22.json.gz",
+      "sha256": "d000a2cf741aed189d05d733798e462a0debcee9326012c854c5efdc36af3b3b"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 5,
+      "side": 1,
+      "brief": "a utility for filtering messages of alerts",
+      "seed": 67,
+      "old": [
+        "Primessage",
+        "AlertMesh",
+        "Valka",
+        "SieveAlert"
+      ],
+      "current": [
+        "AlertMesh",
+        "Valka",
+        "SieveAlert",
+        "MeshMessage"
+      ],
+      "oldEligible": 9,
+      "currentEligible": 6,
+      "lostChoices": [],
+      "traceFile": "trace-23.json.gz",
+      "sha256": "d94995a57e5081cb0212c2b3a8a54f286448d1ec98791d79dbb2de435f97c973"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 6,
+      "side": 0,
+      "brief": "a tool that maps module dependencies",
+      "seed": 13,
+      "old": [
+        "ModuleChart",
+        "Portolan",
+        "WeaveModule",
+        "Harita"
+      ],
+      "current": [
+        "ModuleChart",
+        "Portolan",
+        "WeaveModule",
+        "Harita"
+      ],
+      "oldEligible": 14,
+      "currentEligible": 8,
+      "lostChoices": [],
+      "traceFile": "trace-24.json.gz",
+      "sha256": "e1cd0491115b6f179605b6c6e5fc0d085e5076bdc357990909facfde6d58c577"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 6,
+      "side": 1,
+      "brief": "a utility for mapping dependencies of modules",
+      "seed": 13,
+      "old": [
+        "ModuleChart",
+        "Portolan",
+        "WeaveModule",
+        "Harita"
+      ],
+      "current": [
+        "ModuleChart",
+        "Portolan",
+        "WeaveModule",
+        "Harita"
+      ],
+      "oldEligible": 14,
+      "currentEligible": 8,
+      "lostChoices": [],
+      "traceFile": "trace-25.json.gz",
+      "sha256": "35fac5b6ff6d258c3b8ae6d7e1f55bd3653c7188a538799f7abff7f76faf56bd"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 6,
+      "side": 0,
+      "brief": "a tool that maps module dependencies",
+      "seed": 67,
+      "old": [
+        "ModuleChart",
+        "Portolan",
+        "Harita",
+        "WeaveModule"
+      ],
+      "current": [
+        "ModuleChart",
+        "Portolan",
+        "Harita",
+        "WeaveModule"
+      ],
+      "oldEligible": 14,
+      "currentEligible": 8,
+      "lostChoices": [],
+      "traceFile": "trace-26.json.gz",
+      "sha256": "37c4aa36c7b8dad9383546d98132846ff2fbd6eb4fcba5dfc1069dd936c82658"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 6,
+      "side": 1,
+      "brief": "a utility for mapping dependencies of modules",
+      "seed": 67,
+      "old": [
+        "ModuleChart",
+        "Portolan",
+        "Harita",
+        "WeaveModule"
+      ],
+      "current": [
+        "ModuleChart",
+        "Portolan",
+        "Harita",
+        "WeaveModule"
+      ],
+      "oldEligible": 14,
+      "currentEligible": 8,
+      "lostChoices": [],
+      "traceFile": "trace-27.json.gz",
+      "sha256": "5f2b8a57db7697a8ac0fdb2581856b7da533a2a9d77d8111b597637878ca07ed"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 7,
+      "side": 0,
+      "brief": "a tool that groups compiler warnings",
+      "seed": 13,
+      "old": [
+        "ShelfWarning",
+        "Halka",
+        "GroupWarning",
+        "Threadler"
+      ],
+      "current": [
+        "ShelfWarning",
+        "Halka",
+        "GroupWarning"
+      ],
+      "oldEligible": 22,
+      "currentEligible": 3,
+      "lostChoices": [],
+      "traceFile": "trace-28.json.gz",
+      "sha256": "aa31ee626e4b5069c347952c0157c0029855fa5f5508dd3bd8e35f70bcf11759"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 7,
+      "side": 1,
+      "brief": "a utility for grouping warnings of compilers",
+      "seed": 13,
+      "old": [
+        "ShelfWarning",
+        "Halka",
+        "GroupWarning",
+        "Threadler"
+      ],
+      "current": [
+        "ShelfWarning",
+        "Halka",
+        "GroupWarning"
+      ],
+      "oldEligible": 22,
+      "currentEligible": 3,
+      "lostChoices": [],
+      "traceFile": "trace-29.json.gz",
+      "sha256": "46ff3bfb450ccf424fa89818b0f692aad3122649dd71e226c7b7937d212314fd"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 7,
+      "side": 0,
+      "brief": "a tool that groups compiler warnings",
+      "seed": 67,
+      "old": [
+        "GroupWarning",
+        "ShelfWarning",
+        "Halka",
+        "Threadler"
+      ],
+      "current": [
+        "GroupWarning",
+        "ShelfWarning",
+        "Halka"
+      ],
+      "oldEligible": 22,
+      "currentEligible": 3,
+      "lostChoices": [],
+      "traceFile": "trace-30.json.gz",
+      "sha256": "108085eeaba131a39530fb0424d5ffe2914c6c0f3a4a3dc76e31cc3049978f41"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 7,
+      "side": 1,
+      "brief": "a utility for grouping warnings of compilers",
+      "seed": 67,
+      "old": [
+        "GroupWarning",
+        "ShelfWarning",
+        "Halka",
+        "Threadler"
+      ],
+      "current": [
+        "GroupWarning",
+        "ShelfWarning",
+        "Halka"
+      ],
+      "oldEligible": 22,
+      "currentEligible": 3,
+      "lostChoices": [],
+      "traceFile": "trace-31.json.gz",
+      "sha256": "a6d218b0c483bd0559c16c246a5dde2e5d431b33f511869b3f034db9a1ad8918"
+    },
+    {
+      "partition": "regression",
+      "brief": "a tool that verifies archive signatures before extraction",
+      "seed": 13,
+      "old": [
+        "ArchiveProof",
+        "Mihenk",
+        "VerArchive",
+        "Touchsig"
+      ],
+      "current": [
+        "ArchiveProof",
+        "Mihenk",
+        "VerArchive",
+        "Sarraf"
+      ],
+      "oldEligible": 21,
+      "currentEligible": 15,
+      "lostChoices": [],
+      "traceFile": "trace-32.json.gz",
+      "sha256": "6392ba92fd3733ddc3c13df124760d44d779f3386cefa2922e6942d69d5bac13"
+    },
+    {
+      "partition": "regression",
+      "brief": "a utility that checks manifest hashes before installation",
+      "seed": 13,
+      "old": [
+        "HashSeal",
+        "Plumbline",
+        "Macheck",
+        "ProofHash"
+      ],
+      "current": [
+        "HashSeal",
+        "Plumbline",
+        "ProofHash",
+        "CheckHash"
+      ],
+      "oldEligible": 22,
+      "currentEligible": 5,
+      "lostChoices": [
+        "Maniseal"
+      ],
+      "traceFile": "trace-33.json.gz",
+      "sha256": "908874c451aca8c65f6f364844b95672ab2703e0c5d4746104ce6ae61cd96fbe"
+    },
+    {
+      "partition": "regression",
+      "brief": "a tool that measures query latency during load tests",
+      "seed": 13,
+      "old": [
+        "QueryGauge",
+        "Anemometer",
+        "Seismograph",
+        "Latenlance"
+      ],
+      "current": [
+        "QueryGauge",
+        "Anemometer",
+        "Seismograph"
+      ],
+      "oldEligible": 16,
+      "currentEligible": 9,
+      "lostChoices": [],
+      "traceFile": "trace-34.json.gz",
+      "sha256": "ef2eec60b19f92eb3ec0019afa425c71629ea65bf7bebb59c466610ce47c78f6"
+    },
+    {
+      "partition": "regression",
+      "brief": "a utility that compares storage costs across regions",
+      "seed": 13,
+      "old": [
+        "StorageGauge",
+        "Terazi",
+        "Kiyas",
+        "CostBalance"
+      ],
+      "current": [
+        "StorageGauge",
+        "Terazi",
+        "Kiyas",
+        "CostBalance"
+      ],
+      "oldEligible": 17,
+      "currentEligible": 9,
+      "lostChoices": [],
+      "traceFile": "trace-35.json.gz",
+      "sha256": "f951452e47fcb348ac12aa88f4500f1a93c58efe3b1167f6b36ef83c85e4c0a9"
+    },
+    {
+      "partition": "regression",
+      "brief": "a tool that tracks queue depth during traffic spikes",
+      "seed": 13,
+      "old": [
+        "QueueWatch",
+        "Izci",
+        "LedgerQueue",
+        "Fylgja"
+      ],
+      "current": [
+        "QueueWatch",
+        "Izci",
+        "LedgerQueue",
+        "Fylgja"
+      ],
+      "oldEligible": 14,
+      "currentEligible": 12,
+      "lostChoices": [],
+      "traceFile": "trace-36.json.gz",
+      "sha256": "1afc2daf057e104369e3984fd913acb6c2b066addaf8697f0d40d6b98f488183"
+    },
+    {
+      "partition": "regression",
+      "brief": "a utility that records process activity during debugging",
+      "seed": 13,
+      "old": [
+        "ProcessWatch",
+        "Seismograph",
+        "Ostraka",
+        "Acticord"
+      ],
+      "current": [
+        "ProcessWatch",
+        "Seismograph",
+        "Ostraka",
+        "Beaprocess"
+      ],
+      "oldEligible": 21,
+      "currentEligible": 5,
+      "lostChoices": [
+        "Acticord"
+      ],
+      "traceFile": "trace-37.json.gz",
+      "sha256": "dc769535373fe307e1056cccc1250374e6406cd058221910ae5a9598d26fe4f0"
+    },
+    {
+      "partition": "regression",
+      "brief": "a tool that restores saved editor sessions after crashes",
+      "seed": 13,
+      "old": [
+        "Reprise",
+        "SessionMend",
+        "Sereprise",
+        "Ediprise"
+      ],
+      "current": [
+        "Reprise",
+        "SessionMend"
+      ],
+      "oldEligible": 6,
+      "currentEligible": 3,
+      "lostChoices": [],
+      "traceFile": "trace-38.json.gz",
+      "sha256": "2e8c111c100acaf8de9c6db59de2f993bb608c5f0dc3313031c21795f432d952"
+    },
+    {
+      "partition": "regression",
+      "brief": "a utility that recovers damaged archive entries from replicas",
+      "seed": 13,
+      "old": [
+        "Reprise",
+        "MendEntry",
+        "Entryprise",
+        "Arstore"
+      ],
+      "current": [
+        "Reprise",
+        "MendEntry"
+      ],
+      "oldEligible": 7,
+      "currentEligible": 3,
+      "lostChoices": [
+        "Entryprise"
+      ],
+      "traceFile": "trace-39.json.gz",
+      "sha256": "eb1cde71e2c6a7ce7cdfb2eafa5d36b1d5748e88f9884af3da49f79ad8f26a94"
+    },
+    {
+      "partition": "regression",
+      "brief": "a tool that groups test failures by probable cause",
+      "seed": 13,
+      "old": [
+        "ShelfTest",
+        "Halka",
+        "ThreadTest",
+        "GroupFailure"
+      ],
+      "current": [
+        "ShelfTest",
+        "Halka",
+        "ThreadTest",
+        "GroupFailure"
+      ],
+      "oldEligible": 11,
+      "currentEligible": 7,
+      "lostChoices": [
+        "Failthread"
+      ],
+      "traceFile": "trace-40.json.gz",
+      "sha256": "200dba92cccd4b831094d2f3fefe370c984e35e5ceb2d6eeb5b0d455a13634ed"
+    },
+    {
+      "partition": "regression",
+      "brief": "a utility that filters repeated alert messages during incidents",
+      "seed": 13,
+      "old": [
+        "AlertMesh",
+        "Valka",
+        "Primessage",
+        "SieveAlert"
+      ],
+      "current": [
+        "AlertMesh",
+        "Valka",
+        "SieveAlert",
+        "MeshMessage"
+      ],
+      "oldEligible": 9,
+      "currentEligible": 6,
+      "lostChoices": [
+        "Primessage"
+      ],
+      "traceFile": "trace-41.json.gz",
+      "sha256": "2e893431d15f17cf2719fa419d331b84043e4294e920d9c69901ed7ec6ce0cea"
+    },
+    {
+      "partition": "regression",
+      "brief": "a tool that maps module dependencies across packages",
+      "seed": 13,
+      "old": [
+        "ModuleChart",
+        "Portolan",
+        "WeaveModule",
+        "Harita"
+      ],
+      "current": [
+        "ModuleChart",
+        "Portolan",
+        "WeaveModule",
+        "Harita"
+      ],
+      "oldEligible": 14,
+      "currentEligible": 8,
+      "lostChoices": [],
+      "traceFile": "trace-42.json.gz",
+      "sha256": "4b3fb0b048b3a6087cf1f907c408ce1cf9513490355eb243ed2a082853696ff3"
+    },
+    {
+      "partition": "regression",
+      "brief": "a utility that detects exposed access tokens before uploads",
+      "seed": 13,
+      "old": [
+        "Seismograph",
+        "Triptoken",
+        "Sarraf",
+        "Lantoken"
+      ],
+      "current": [
+        "Seismograph",
+        "Sarraf"
+      ],
+      "oldEligible": 12,
+      "currentEligible": 2,
+      "lostChoices": [],
+      "traceFile": "trace-43.json.gz",
+      "sha256": "85648de587916eaae2ba9c420e3a1747ebfc1f0ab36fc756b334251b739a3642"
+    }
+  ]
+}

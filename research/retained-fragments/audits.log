@@ -1,0 +1,6 @@
+{"script":"auto-quality-audit.mjs","exitCode":0,"durationMs":5062}
+{"script":"heldout-cold-quality-audit.mjs","exitCode":0,"durationMs":14305}
+{"script":"cold-quality-audit.mjs","exitCode":0,"durationMs":7314}
+{"script":"taste-quality-audit.mjs","exitCode":0,"durationMs":14682}
+{"script":"mode-taste-audit.mjs","exitCode":0,"durationMs":5642}
+{"script":"shortlist-contract.mjs","exitCode":0,"durationMs":10306}

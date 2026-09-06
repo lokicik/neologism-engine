@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "checks": [
+    "default off",
+    "exact cut display",
+    "attested and unattested evidence",
+    "export",
+    "continuation snapshot",
+    "return to previous mode",
+    "unresolved brief",
+    "mobile overflow",
+    "saved preferences unchanged",
+    "return to Auto",
+    "page errors"
+  ]
+}

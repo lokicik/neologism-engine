@@ -1,0 +1,102 @@
+warning: in the working copy of 'DATA-LICENSES.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'README.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'core/data/concept_bridges.tsv', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'core/data/story_kb.tsv', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'core/src/family.rs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'core/src/keywords.rs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'core/src/lib.rs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'core/src/morphemes.rs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'core/src/phonotactics.rs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'core/src/reason.rs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'core/src/seamblend.rs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'wasm/src/lib.rs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'web/src/App.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'web/src/components/CommandBar.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'web/src/components/Shortlist.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'web/src/index.css', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'web/src/lib/engine.ts', LF will be replaced by CRLF the next time Git touches it
+PASS 1/44: Reprise, SectionMend
+PASS 2/44: Reprise, SectionMend
+PASS 3/44: Reprise, SectionMend
+PASS 4/44: Reprise, SectionMend
+PASS 5/44: ArchiveProof, Mihenk, VerArchive, Sarraf
+PASS 6/44: ArchiveProof, Mihenk, VerArchive, Sarraf
+PASS 7/44: VerSig, ArchiveSeal, Mihenk, ProofArchive
+PASS 8/44: VerSig, ArchiveSeal, Mihenk, ProofArchive
+PASS 9/44: QueryGauge, Anemometer, Seismograph
+PASS 10/44: QueryGauge, Anemometer, Seismograph
+PASS 11/44: QueryGauge, Anemometer, Barometer
+PASS 12/44: QueryGauge, Anemometer, Barometer
+PASS 13/44: QueueWatch, Izci, LedgerQueue, Fylgja
+PASS 14/44: QueueWatch, Izci, LedgerQueue, Fylgja
+PASS 15/44: LedgerQueue, QueueBeacon, Fylgja, Izci
+PASS 16/44: LedgerQueue, QueueBeacon, Fylgja, Izci
+PASS 17/44: StorageGauge, Terazi, Kiyas, CostBalance
+PASS 18/44: StorageGauge, Terazi, Kiyas, CostBalance
+PASS 19/44: StorageGauge, Terazi, Kiyas, CostGauge
+PASS 20/44: StorageGauge, Terazi, Kiyas, CostGauge
+PASS 21/44: AlertMesh, Valka, SieveAlert, MeshMessage
+PASS 22/44: AlertMesh, Valka, SieveAlert, MeshMessage
+PASS 23/44: AlertMesh, Valka, SieveAlert, MeshMessage
+PASS 24/44: AlertMesh, Valka, SieveAlert, MeshMessage
+PASS 25/44: ModuleChart, Portolan, WeaveModule, Harita
+PASS 26/44: ModuleChart, Portolan, WeaveModule, Harita
+PASS 27/44: ModuleChart, Portolan, Harita, WeaveModule
+PASS 28/44: ModuleChart, Portolan, Harita, WeaveModule
+PASS 29/44: ShelfWarning, Halka, GroupWarning
+PASS 30/44: ShelfWarning, Halka, GroupWarning
+PASS 31/44: GroupWarning, ShelfWarning, Halka
+PASS 32/44: GroupWarning, ShelfWarning, Halka
+PASS 33/44: ArchiveProof, Mihenk, VerArchive, Sarraf
+PASS 34/44: HashSeal, Plumbline, ProofHash, CheckHash | lost assistant choices: Maniseal
+PASS 35/44: QueryGauge, Anemometer, Seismograph
+PASS 36/44: StorageGauge, Terazi, Kiyas, CostBalance
+PASS 37/44: QueueWatch, Izci, LedgerQueue, Fylgja
+PASS 38/44: ProcessWatch, Seismograph, Ostraka, Beaprocess | lost assistant choices: Acticord
+PASS 39/44: Reprise, SessionMend
+PASS 40/44: Reprise, MendEntry | lost assistant choices: Entryprise
+PASS 41/44: ShelfTest, Halka, ThreadTest, GroupFailure | lost assistant choices: Failthread
+PASS 42/44: AlertMesh, Valka, SieveAlert, MeshMessage | lost assistant choices: Primessage
+PASS 43/44: ModuleChart, Portolan, WeaveModule, Harita
+PASS 44/44: Seismograph, Sarraf
+{
+  "conditions": 44,
+  "legacyReplays": 44,
+  "repeats": 44,
+  "continuations": 44,
+  "paraphrasePairs": 16,
+  "controls": 4,
+  "recordedConstructions": 1657,
+  "partCounts": {
+    "unknown": 1818,
+    "attested": 93,
+    "whole": 1403
+  },
+  "finalistsChecked": 261,
+  "regressionOldEligible": 170,
+  "regressionCurrentEligible": 84,
+  "lostAssistantChoices": [
+    {
+      "brief": "a utility that checks manifest hashes before installation",
+      "name": "Maniseal"
+    },
+    {
+      "brief": "a utility that records process activity during debugging",
+      "name": "Acticord"
+    },
+    {
+      "brief": "a utility that recovers damaged archive entries from replicas",
+      "name": "Entryprise"
+    },
+    {
+      "brief": "a tool that groups test failures by probable cause",
+      "name": "Failthread"
+    },
+    {
+      "brief": "a utility that filters repeated alert messages during incidents",
+      "name": "Primessage"
+    }
+  ],
+  "qualityImprovementEstablished": false,
+  "humanEvaluation": "pending"
+}

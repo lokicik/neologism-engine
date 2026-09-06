@@ -1,0 +1,41 @@
+{
+  "conditions": 44,
+  "legacyReplays": 44,
+  "repeats": 44,
+  "continuations": 44,
+  "paraphrasePairs": 16,
+  "controls": 4,
+  "recordedConstructions": 1657,
+  "partCounts": {
+    "unknown": 1818,
+    "attested": 93,
+    "whole": 1403
+  },
+  "finalistsChecked": 261,
+  "regressionOldEligible": 170,
+  "regressionCurrentEligible": 84,
+  "lostAssistantChoices": [
+    {
+      "brief": "a utility that checks manifest hashes before installation",
+      "name": "Maniseal"
+    },
+    {
+      "brief": "a utility that records process activity during debugging",
+      "name": "Acticord"
+    },
+    {
+      "brief": "a utility that recovers damaged archive entries from replicas",
+      "name": "Entryprise"
+    },
+    {
+      "brief": "a tool that groups test failures by probable cause",
+      "name": "Failthread"
+    },
+    {
+      "brief": "a utility that filters repeated alert messages during incidents",
+      "name": "Primessage"
+    }
+  ],
+  "qualityImprovementEstablished": false,
+  "humanEvaluation": "pending"
+}

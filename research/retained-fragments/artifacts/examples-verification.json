@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "comparisons": 12,
+  "cutExamples": 5,
+  "disclosedLostChoices": 5,
+  "search": true,
+  "mobile": true
+}
