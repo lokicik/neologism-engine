@@ -106,7 +106,7 @@ export function Shortlist({
                   {showStructuralScore && <span className="finalist-score" title="Structural score; not a measured preference or name-quality rating">★ {composite(result)}</span>}
                   {(availabilityLabel || taken !== undefined) && (
                     <span className={`finalist-avail${taken ? ' taken' : ''}`}>
-                      {availabilityLabel ? availabilityLabel(result) : taken ? 'crates.io ✗ taken' : 'crates.io ✓ free'}
+                      {availabilityLabel ? availabilityLabel(result) : taken ? 'Potential match in local snapshot' : 'No match in local snapshot'}
                     </span>
                   )}
                 </div>

@@ -73,3 +73,46 @@ a { text-underline-offset: .2em; }
 .skeleton-card { min-height: 200px; border-radius: 12px; background: var(--surface); animation: none; }
 @media (max-width: 1099px) { .discovery-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 699px) { .discovery-grid { grid-template-columns: minmax(0, 1fr); } .discovery-meta { font-size: 12px; } }
+.create-page > .command-area { position: sticky; top: 72px; z-index: 20; background: var(--bg); padding: 10px 0 2px; margin-top: -10px; }
+.discovery-item { scroll-margin-top: 210px; }
+.discovery-card { display: flex; flex-direction: column; min-width: 0; min-height: 212px; height: 100%; padding: 24px 22px 16px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); transition: border-color 160ms ease-out; }
+.discovery-card:hover { border-color: #52505f; }
+.discovery-card.is-saved { border-color: #756596; }
+.discovery-name { margin: 0 0 12px; color: var(--text); font: 500 34px/1.2 'Space Grotesk', sans-serif; letter-spacing: -.025em; overflow-wrap: anywhere; user-select: text; }
+.discovery-hint { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 1; overflow: hidden; min-height: 22px; margin: 0 0 24px; color: var(--muted); font-size: 14px; line-height: 22px; }
+.discovery-actions { display: flex; align-items: center; justify-content: space-between; gap: 4px; margin: auto -6px 0; }
+.discovery-actions button { display: inline-flex; min-height: 44px; padding: 8px 7px; align-items: center; justify-content: center; gap: 6px; background: none; border: 0; border-radius: 6px; color: var(--muted); font-size: 14px; cursor: pointer; }
+.discovery-actions button:hover { background: var(--surface-2); color: var(--text); }
+.discovery-actions .save-name { color: var(--text); }
+.discovery-actions .save-name[aria-pressed='true'] { color: #c8baff; }
+.discovery-actions svg { width: 16px; height: 16px; flex-shrink: 0; }
+.name-dialog { position: fixed; inset: 0 0 0 auto; width: min(520px, 100%); max-width: 100%; height: 100dvh; max-height: 100dvh; margin: 0; padding: 0; overflow: auto; border: 0; border-radius: 0; background: var(--surface); color: var(--text); box-shadow: -12px 0 40px #0005; }
+.name-dialog::backdrop { background: #0009; }
+.name-dialog-header { position: sticky; top: 0; z-index: 1; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 28px 28px 20px; background: var(--surface); border-bottom: 1px solid var(--border); }
+.name-dialog-header h2 { min-width: 0; margin: 4px 0 0; font: 500 32px/1.2 'Space Grotesk', sans-serif; letter-spacing: -.025em; overflow-wrap: anywhere; }
+.dialog-close { display: inline-flex; align-items: center; justify-content: center; width: 44px; min-width: 44px; height: 44px; padding: 0; border: 1px solid var(--border); border-radius: 8px; background: none; color: var(--text); cursor: pointer; }
+.dialog-close:hover { background: var(--surface-2); }
+.name-dialog-body { padding: 24px 28px 40px; }
+.name-dialog .name-card { padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; animation: none; }
+.name-dialog .card-meta-line, .name-dialog .card-ai-reason { font-size: 14px; line-height: 1.6; }
+.name-dialog .card-expansion { margin: 18px 0; padding: 16px 0; background: none; border-top: 1px solid var(--border); font-size: 14px; line-height: 1.7; }
+.name-dialog .card-actions-row { flex-wrap: wrap; }
+.name-dialog .card-icons { margin-left: 0; }
+.name-dialog .card-chip, .name-dialog .icon-btn, .name-dialog .availability-run, .name-dialog .availability-manual-link { min-height: 44px; min-width: 44px; font-size: 14px; }
+.name-dialog .why-scores { display: block; margin-top: 18px; color: var(--muted); line-height: 1.8; }
+.snapshot-note { display: block; color: var(--muted); font-size: 13px; line-height: 1.6; margin-top: 8px; }
+.name-dialog .availability-intro, .name-dialog .availability-disclaimer, .name-dialog .availability-meta { font-size: 13px; line-height: 1.6; }
+.name-dialog .availability-grid { grid-template-columns: minmax(0, 1fr); }
+.finalist-list { grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); }
+.finalist-avail { white-space: normal; }
+@media (max-width: 699px) {
+  .create-page > .command-area { top: 64px; }
+  .discovery-item { scroll-margin-top: 250px; }
+  .discovery-name { font-size: 32px; }
+  .discovery-card { min-height: 198px; padding: 22px 20px 14px; }
+  .name-dialog-header { padding: 20px 20px 16px; }
+  .name-dialog-body { padding: 20px; }
+  .finalist-head { display: grid; grid-template-columns: 44px minmax(0, 1fr); }
+  .finalist-marks { grid-column: 1 / -1; align-items: flex-start; }
+}
+html { scrollbar-gutter: stable; }

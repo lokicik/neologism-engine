@@ -5,7 +5,8 @@ import { configIdentity, readDiscovery, writeDiscovery, type DiscoverySession } 
 import { loadRecent, RECENT_WINDOW, saveRecent } from '../lib/storage'
 import { normalizedName, tasteIdentity } from '../lib/taste-identity'
 import { CommandBar } from './CommandBar'
-import { NameCard } from './NameCard'
+import { DiscoveryCard } from './DiscoveryCard'
+import { NameDetails } from './NameDetails'
 
 export interface CreatePageHandle { leave: () => void }
 interface Props {
@@ -16,7 +17,9 @@ interface Props {
 }
 
 export function CreatePage(props: Props) {
-  const { active, paused, favorites, rejected, references, referenceError, onReferencesChange, onFavorite, onRejected, sessionRef } = props
+  const { active, paused: externalPaused, favorites, rejected, references, referenceError, onReferencesChange, onFavorite, onRejected, sessionRef } = props
+  const [detail, setDetail] = useState<NameResult | null>(null)
+  const paused = externalPaused || detail !== null
   const [initial] = useState(() => {
     try { return readDiscovery(sessionStorage) }
     catch { return { session: null, error: 'Your browser has disabled session storage. Reloading may lose this discovery.' } }
@@ -37,7 +40,7 @@ export function CreatePage(props: Props) {
   const started = useRef(results.length > 0 || exhausted)
   const sentinel = useRef<HTMLDivElement>(null)
   const latest = useRef(props)
-  latest.current = props
+  latest.current = { ...props, paused }
   snapshot.current = { ...snapshot.current, config, generationConfig: committed, results, exhausted }
   const dirty = configIdentity(config) !== configIdentity(committed)
   const dirtyRef = useRef(dirty); dirtyRef.current = dirty
@@ -51,7 +54,7 @@ export function CreatePage(props: Props) {
     ticket.current++; inFlight.current = false; setLoading(false)
     if (!snapshot.current.results.length && !snapshot.current.exhausted) started.current = false
   }, [])
-  const leave = useCallback(() => { snapshot.current.scrollY = window.scrollY; persist(); cancel() }, [persist, cancel])
+  const leave = useCallback(() => { snapshot.current.scrollY = window.scrollY; persist(); cancel(); setDetail(null) }, [persist, cancel])
   useImperativeHandle(sessionRef, () => ({ leave }), [leave])
 
   const generate = useCallback(async (append: boolean, focus = false, override?: Config) => {
@@ -138,10 +141,11 @@ export function CreatePage(props: Props) {
     <div className="discovery-meta"><span>{results.length ? `${results.length} names to explore` : loading ? 'Finding your first names…' : 'Your discovery'}</span><span>Generated on this device</span></div>
     <p className="visually-hidden create-results-status" role="status" aria-live="polite" aria-atomic="true">{status}</p>
     <div className="results-grid discovery-grid" aria-busy={loading}>
-      {results.map((result, index) => <div id={`discovery-name-${index}`} className="discovery-item" tabIndex={-1} aria-label={result.name} key={normalizedName(result)}><NameCard result={result} isFavorite={favorites.some(item => tasteIdentity(item) === tasteIdentity(result))} onToggleFavorite={onFavorite} isRejected={rejected.some(item => tasteIdentity(item) === tasteIdentity(result))} onToggleRejected={onRejected} /></div>)}
+      {results.map((result, index) => <div id={`discovery-name-${index}`} className="discovery-item" tabIndex={-1} aria-label={result.name} key={normalizedName(result)}><DiscoveryCard result={result} saved={favorites.some(item => tasteIdentity(item) === tasteIdentity(result))} onSave={onFavorite} onDetails={result => { cancel(); setDetail(result) }} /></div>)}
       {loading && results.length === 0 && Array.from({ length: 10 }, (_, index) => <div className="skeleton-card" key={index} aria-hidden="true" />)}
     </div>
     <div ref={sentinel} className="scroll-sentinel" aria-hidden="true" />
     {exhausted && !dirty ? <p className="exhausted-notice" role="status">No more names with these options. Try a different brief or a wider length.</p> : results.length > 0 && <button className="load-more" disabled={loading || dirty} aria-busy={loading} onClick={() => void generate(true, true)}>{loading ? 'Finding more names…' : 'Load more'}</button>}
+    {detail && active && <NameDetails result={detail} saved={favorites.some(item => tasteIdentity(item) === tasteIdentity(detail))} rejected={rejected.some(item => tasteIdentity(item) === tasteIdentity(detail))} onSave={onFavorite} onRejected={onRejected} onClose={() => setDetail(null)} />}
   </section>
 }

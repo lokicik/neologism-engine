@@ -34,6 +34,7 @@ interface Props {
   reason?: string
   /// The AI judge's #1 pick of the batch.
   isAiPick?: boolean
+  detailView?: boolean
 }
 
 // Shown only for non-startup names (old sci-fi/fantasy favorites & share URLs).
@@ -48,13 +49,10 @@ function whyParts(e: Explanation): string[] {
   if (e.is_real_word) parts.push('a real English word')
   if (e.prefix_word) parts.push(`opens with “${e.prefix_word}” (real word)`)
   if (e.suffix && e.stem) parts.push(`“${e.stem}” + brandable “-${e.suffix}”`)
-  if (e.score_pronounce >= 85) parts.push('easy to say')
-  if (e.score_memorability >= 80) parts.push('short & punchy')
-  if (e.score_novelty >= 90 && !e.is_real_word) parts.push('clearly coined')
   return parts
 }
 
-export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction = 'favorite', collectionNote, metricsAvailable = true, isRejected = false, onToggleRejected, isBest = false, appearDelay = 0, reason, isAiPick = false }: Props) {
+export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction = 'favorite', collectionNote, metricsAvailable = true, isRejected = false, onToggleRejected, isBest = false, appearDelay = 0, reason, isAiPick = false, detailView = false }: Props) {
   const [copied, setCopied] = useState(false)
   const [copyStatus, setCopyStatus] = useState('')
   const [copyError, setCopyError] = useState<string | null>(null)
@@ -90,14 +88,19 @@ export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction 
     setCopyError(null)
     setWhy(null)
     setWhyError(false)
-    setShowWhy(false)
+    setShowWhy(detailView && metricsAvailable)
+    if (detailView && metricsAvailable) {
+      const run = whyRun.current
+      explainName(result.name).then(value => { if (whyRun.current === run) setWhy(value) }).catch(() => { if (whyRun.current === run) setWhyError(true) })
+    }
     return () => {
       domainAbort.current?.abort()
+      whyRun.current++
       copyRun.current++
       if (copyVisualTimer.current !== undefined) clearTimeout(copyVisualTimer.current)
       if (copyStatusTimer.current !== undefined) clearTimeout(copyStatusTimer.current)
     }
-  }, [result.name])
+  }, [result.name, detailView, metricsAvailable])
 
   useEffect(() => {
     if (showAvail) availabilityPanel.current?.focus()
@@ -281,13 +284,13 @@ export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction 
 
   return (
     <div className={`name-card${isFavorite ? ' favorited' : ''}${isRejected ? ' rejected' : ''}`} style={{ animationDelay: `${appearDelay}ms` }}>
-      <div className="card-top">
+      {!detailView && <div className="card-top">
         <Monogram name={result.name} size={36} />
         <span className="name-text">{result.name}</span>
         <span
           className="card-score"
           title={metricsAvailable
-            ? 'Overall score — pronounceability, memorability and originality blended'
+            ? 'Structural estimates — not a measured preference or name-quality rating'
             : 'Share links carry only the name and style'}
         >
           {metricsAvailable ? (
@@ -298,7 +301,7 @@ export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction 
             </>
           ) : 'Shared'}
         </span>
-      </div>
+      </div>}
 
       {metaParts.length > 0 && (
         <p className="card-meta-line" title="Syllables · the vibe this name evokes (sound symbolism)">
@@ -326,9 +329,10 @@ export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction 
         return (
           <p
             className="card-meta-line"
-            title="Instant crates.io + brand-corpus check (offline bloom filter; 'free' is definitive, 'taken' has ~0.5% false positives)"
+            title="Combined local package and brand snapshot. A potential match may be a false positive; absence is not current availability."
           >
-            {taken ? 'crates.io ✗ taken' : 'crates.io ✓ free'}
+            {taken ? 'Potential match in local snapshot' : 'No match in local snapshot'}
+            {detailView && <span className="snapshot-note">Combined package and brand data; not a live availability check.</span>}
           </p>
         )
       })()}
@@ -344,10 +348,11 @@ export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction 
         >
           {why ? (
             <>
-              {whyParts(why).join(' · ') || 'a pure coinage — no real-word parts'}
+              {whyParts(why).join(' · ') || 'No lexical construction evidence recorded.'}
               <span className="why-scores">
-                say {why.score_pronounce} · stick {why.score_memorability} · new {why.score_novelty}
+                Structural estimates: pronounceability {why.score_pronounce} · memorability {why.score_memorability} · novelty {why.score_novelty}
               </span>
+              <span className="snapshot-note">These estimates do not measure whether people like this name.</span>
             </>
           ) : whyError ? (
             <span>Explanation unavailable — close and reopen Why to retry.</span>
@@ -409,10 +414,10 @@ export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction 
             onClick={(event) => onToggleFavorite(result, event.detail === 0)}
             title={favoriteAction === 'saved'
               ? 'Remove from Saved'
-              : isFavorite ? 'Remove from favorites' : 'Save to favorites'}
+              : isFavorite ? 'Unsave' : 'Save'}
             aria-label={favoriteAction === 'saved'
               ? `Remove ${result.name} from Saved`
-              : isFavorite ? `Remove ${result.name} from favorites` : `Save ${result.name} to favorites`}
+              : isFavorite ? `Unsave ${result.name}` : `Save ${result.name}`}
             aria-pressed={isFavorite}
           >
             <IconStar filled={isFavorite} />
