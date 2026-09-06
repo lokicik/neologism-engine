@@ -1,0 +1,36 @@
+{
+  "schema": "shared-pool-protocol-v1",
+  "familyLimit": 24,
+  "finalistLimit": 4,
+  "familyCap": 2,
+  "openingLength": 3,
+  "seeds": [13, 67, 313],
+  "development": [
+    "a note taking app with backlinks",
+    "a self hosted password manager",
+    "a terminal log viewer for developers",
+    "a deterministic offline engine for naming developer projects"
+  ],
+  "evaluation": [
+    "a tool that rehearses SQLite schema migrations on disposable database copies",
+    "a webhook debugger that replays failed deliveries against a local endpoint",
+    "a build tool that checks dependency licenses before publishing a package",
+    "a command line utility that compares JSON responses across API versions",
+    "a debugger for daylight saving errors in scheduled background jobs",
+    "a local inspector that explains why CSS rules override each other",
+    "a command line recorder for reproducing flaky integration tests",
+    "a tool that tracks breaking changes in GraphQL schemas",
+    "a browser extension that maps redirects between documentation pages",
+    "a local utility that finds secrets accidentally added to git patches",
+    "a developer tool for inspecting memory allocations in WebAssembly modules",
+    "a package release assistant that verifies checksums of downloadable binaries"
+  ],
+  "humanGate": {
+    "primaryPages": 12,
+    "repeatPages": 4,
+    "minimumWins": 8,
+    "minimumUsableBriefs": 6,
+    "minimumUsableBriefUplift": 3,
+    "minimumConsistentRepeats": 3
+  }
+}

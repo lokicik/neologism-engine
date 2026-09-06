@@ -1,0 +1,240 @@
+{
+  "schema": "shared-pool-blind-study-v1",
+  "pages": [
+    {
+      "id": "c01",
+      "brief": "a debugger for daylight saving errors in scheduled background jobs",
+      "left": [
+        "Runify",
+        "CronSav",
+        "Faultick",
+        "Jobsignal"
+      ],
+      "right": [
+        "Chronos",
+        "Tickora",
+        "Jobix"
+      ]
+    },
+    {
+      "id": "c02",
+      "brief": "a tool that rehearses SQLite schema migrations on disposable database copies",
+      "left": [
+        "Verboflu",
+        "Storelink",
+        "Matbaa",
+        "PureRow"
+      ],
+      "right": [
+        "Portora",
+        "Shiftix",
+        "Bridgerow"
+      ]
+    },
+    {
+      "id": "c03",
+      "brief": "a tool that tracks breaking changes in GraphQL schemas",
+      "left": [
+        "Segue",
+        "Breakia",
+        "Dataglow"
+      ],
+      "right": [
+        "Breakify",
+        "TrackIndex",
+        "Startable",
+        "Storeseed"
+      ]
+    },
+    {
+      "id": "c04",
+      "brief": "a command line utility that compares JSON responses across API versions",
+      "left": [
+        "Tropic",
+        "Termia",
+        "Shellio"
+      ],
+      "right": [
+        "Autocalc",
+        "Termatlas",
+        "Falconer",
+        "KeyShell"
+      ]
+    },
+    {
+      "id": "c05",
+      "brief": "a developer tool for inspecting memory allocations in WebAssembly modules",
+      "left": [
+        "Inspectkit",
+        "Stackbly",
+        "Byteseed",
+        "Specastro"
+      ],
+      "right": [
+        "Bytebeam",
+        "Inspectkit"
+      ]
+    },
+    {
+      "id": "c06",
+      "brief": "a webhook debugger that replays failed deliveries against a local endpoint",
+      "left": [
+        "Hudhud",
+        "Dockfailed",
+        "Againstix"
+      ],
+      "right": [
+        "Fleetreplay",
+        "DockReplay",
+        "Drawler",
+        "Relayflow"
+      ]
+    },
+    {
+      "id": "c07",
+      "brief": "a tool that rehearses SQLite schema migrations on disposable database copies",
+      "left": [
+        "Portora",
+        "Shiftix",
+        "Bridgerow"
+      ],
+      "right": [
+        "Verboflu",
+        "Storelink",
+        "Matbaa",
+        "PureRow"
+      ]
+    },
+    {
+      "id": "c08",
+      "brief": "a command line recorder for reproducing flaky integration tests",
+      "left": [
+        "Gradforte",
+        "Traceloom",
+        "Mihenk",
+        "PureCmd"
+      ],
+      "right": [
+        "Probeora",
+        "Specio",
+        "Traceora"
+      ]
+    },
+    {
+      "id": "c09",
+      "brief": "a package release assistant that verifies checksums of downloadable binaries",
+      "left": [
+        "Mihmandar",
+        "Tagora",
+        "Pushify"
+      ],
+      "right": [
+        "Forgeseed",
+        "Kura",
+        "Pushbyte",
+        "Outna"
+      ]
+    },
+    {
+      "id": "c10",
+      "brief": "a command line utility that compares JSON responses across API versions",
+      "left": [
+        "Autocalc",
+        "Termatlas",
+        "Falconer",
+        "KeyShell"
+      ],
+      "right": [
+        "Tropic",
+        "Termia",
+        "Shellio"
+      ]
+    },
+    {
+      "id": "c11",
+      "brief": "a build tool that checks dependency licenses before publishing a package",
+      "left": [
+        "Versionseed",
+        "Matbaa",
+        "Graphforge",
+        "Creatic"
+      ],
+      "right": [
+        "Creatic",
+        "DepSeed",
+        "Bumpify"
+      ]
+    },
+    {
+      "id": "c12",
+      "brief": "a local utility that finds secrets accidentally added to git patches",
+      "left": [
+        "Beatriev",
+        "Pathia",
+        "Paramlab"
+      ],
+      "right": [
+        "Creasec",
+        "Seeksignal",
+        "Krypta",
+        "BoldEnv"
+      ]
+    },
+    {
+      "id": "c13",
+      "brief": "a local inspector that explains why CSS rules override each other",
+      "left": [],
+      "right": [
+        "Rulebeam",
+        "Ferman",
+        "Outna",
+        "NewRule"
+      ]
+    },
+    {
+      "id": "c14",
+      "brief": "a command line recorder for reproducing flaky integration tests",
+      "left": [
+        "Probeora",
+        "Specio",
+        "Traceora"
+      ],
+      "right": [
+        "Gradforte",
+        "Traceloom",
+        "Mihenk",
+        "PureCmd"
+      ]
+    },
+    {
+      "id": "c15",
+      "brief": "a browser extension that maps redirects between documentation pages",
+      "left": [
+        "Siteflow",
+        "Portolan",
+        "Starroute",
+        "Dictic"
+      ],
+      "right": [
+        "Harita",
+        "Tabroam",
+        "Browsr"
+      ]
+    },
+    {
+      "id": "c16",
+      "brief": "a local utility that finds secrets accidentally added to git patches",
+      "left": [
+        "Creasec",
+        "Seeksignal",
+        "Krypta",
+        "BoldEnv"
+      ],
+      "right": [
+        "Beatriev",
+        "Pathia",
+        "Paramlab"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+PASS empty pool stays empty
+PASS single finalist is not padded
+PASS family cap of two
+PASS four-finalist maximum
+PASS distinct openings
+PASS explanation and structural scores do not influence selection
+PASS merged sources cannot select spelling twice
+PASS seed rotates family order
+PASS case-insensitive exclusions
+PASS shared constraints also apply to Reason
+PASS contains constraint
+PASS prefix constraint
+PASS snapshot collision is a pool rejection
+PASS unknown evidence is not an invented collision
+PASS missing meaning evidence does not become a score
+PASS actual WASM trace, pools and finalists reproduce exactly
+PASS nine bounded family pools
+PASS all candidate sources retained
+PASS every pool candidate has a selection outcome
+PASS internal trace distinguishes observed and returned spellings
+PASS continuation excludes visible finalists
+PASS impossible constraint returns no filler
+PASS invalid seed rejected
+PASS Lab interaction, export, continuation, mobile, isolation and return to Auto

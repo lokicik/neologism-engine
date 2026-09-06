@@ -1,0 +1,9 @@
+{
+  "result": "pass",
+  "reproducedRuns": 48,
+  "comparisonSha256": "6d91627c7f8f538a83633fdfa62a852d2d6cbd050cf063c6326512b00cdf06c7",
+  "ignoredFields": [
+    "durationMs",
+    "families[].durationMs"
+  ]
+}

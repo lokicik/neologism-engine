@@ -1,0 +1,14 @@
+{
+  "studySha256": "ff1b55b9a4af9a859a018940ba800d0245afcb0f3ecdacb8a59bb06f61742ac1",
+  "collectorSha256": "e9a0229280153289e20dc65bf2956f5ef9bb3b7af0821cd0fad4c6e64ca4d8dd",
+  "keySha256": "cbe5c8fcc67c378a3970cb20d7c6088cced0850a0c2efa6960e9b4479ad2c649",
+  "gates": {
+    "primaryPages": 12,
+    "repeatPages": 4,
+    "minimumWins": 8,
+    "minimumUsableBriefs": 6,
+    "minimumUsableBriefUplift": 3,
+    "minimumConsistentRepeats": 3
+  },
+  "status": "awaiting-human-evaluation"
+}

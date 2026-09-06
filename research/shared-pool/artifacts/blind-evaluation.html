@@ -1,0 +1,95 @@
+<!doctype html><html lang="tr"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'none'; img-src 'none'; base-uri 'none'; form-action 'none'"><title>İsim karşılaştırması</title><style>
+*{box-sizing:border-box}body{margin:0;background:#111216;color:#ececf2;font:17px/1.6 system-ui,sans-serif}main{max-width:1040px;margin:auto;padding:32px 24px}h1{font-size:30px;letter-spacing:-.03em}p{max-width:78ch}#brief{font-size:21px;color:#c4b5fd}.columns{display:grid;grid-template-columns:1fr 1fr;gap:20px}fieldset{border:1px solid #454550;border-radius:12px;padding:18px;margin:16px 0}legend{padding:0 8px}label{display:flex;align-items:center;gap:12px;padding:10px 0;cursor:pointer}input{width:20px;height:20px;accent-color:#a999ff}button{font:inherit;background:#2b2546;color:#fff;border:1px solid #76659c;border-radius:8px;padding:10px 16px;cursor:pointer}button:disabled{opacity:.4;cursor:default}.controls{display:flex;gap:12px;flex-wrap:wrap;margin:24px 0}#status{min-height:28px;color:#c4b5fd}#resume{width:auto;height:auto;max-width:100%}small{color:#b1b1bd}button:focus-visible,input:focus-visible{outline:3px solid #c4b5fd;outline-offset:4px}@media(max-width:650px){.columns{grid-template-columns:1fr}main{padding:20px 16px}}
+</style><main><h1>Hangi isimleri kullanırdın?</h1><p>Her brief için iki kısa liste göreceksin. Her listede, bu proje için gerçekten kullanmayı düşüneceğin isimleri işaretle. Yoksa “hiçbirini kullanmam” seç. Sonra tercih ettiğin listeyi belirt. İsimlerin müsaitliği doğrulanmış değildir.</p><p><small>Bu sayfa çevrimdışı çalışır. Yanıtların tarayıcıya kaydedilmez; ara vermeden veya kapatmadan önce yanıtları indir. Devam etmek için indirdiğin dosyayı yükleyebilirsin.</small></p><p id="progress" aria-live="polite"></p><h2 id="brief"></h2><form id="form" onsubmit="return false"></form><p id="status" role="status"></p><div class="controls"><button id="previous">Önceki</button><button id="next">Kaydet ve devam et</button><button id="export">Kaydedilen yanıtları indir</button></div><label>Yanıt dosyasından devam et <input id="resume" type="file" accept=".json,application/json"></label></main><script id="study" type="application/json">{"study":{"schema":"shared-pool-blind-study-v1","pages":[{"id":"c01","brief":"a debugger for daylight saving errors in scheduled background jobs","left":["Runify","CronSav","Faultick","Jobsignal"],"right":["Chronos","Tickora","Jobix"]},{"id":"c02","brief":"a tool that rehearses SQLite schema migrations on disposable database copies","left":["Verboflu","Storelink","Matbaa","PureRow"],"right":["Portora","Shiftix","Bridgerow"]},{"id":"c03","brief":"a tool that tracks breaking changes in GraphQL schemas","left":["Segue","Breakia","Dataglow"],"right":["Breakify","TrackIndex","Startable","Storeseed"]},{"id":"c04","brief":"a command line utility that compares JSON responses across API versions","left":["Tropic","Termia","Shellio"],"right":["Autocalc","Termatlas","Falconer","KeyShell"]},{"id":"c05","brief":"a developer tool for inspecting memory allocations in WebAssembly modules","left":["Inspectkit","Stackbly","Byteseed","Specastro"],"right":["Bytebeam","Inspectkit"]},{"id":"c06","brief":"a webhook debugger that replays failed deliveries against a local endpoint","left":["Hudhud","Dockfailed","Againstix"],"right":["Fleetreplay","DockReplay","Drawler","Relayflow"]},{"id":"c07","brief":"a tool that rehearses SQLite schema migrations on disposable database copies","left":["Portora","Shiftix","Bridgerow"],"right":["Verboflu","Storelink","Matbaa","PureRow"]},{"id":"c08","brief":"a command line recorder for reproducing flaky integration tests","left":["Gradforte","Traceloom","Mihenk","PureCmd"],"right":["Probeora","Specio","Traceora"]},{"id":"c09","brief":"a package release assistant that verifies checksums of downloadable binaries","left":["Mihmandar","Tagora","Pushify"],"right":["Forgeseed","Kura","Pushbyte","Outna"]},{"id":"c10","brief":"a command line utility that compares JSON responses across API versions","left":["Autocalc","Termatlas","Falconer","KeyShell"],"right":["Tropic","Termia","Shellio"]},{"id":"c11","brief":"a build tool that checks dependency licenses before publishing a package","left":["Versionseed","Matbaa","Graphforge","Creatic"],"right":["Creatic","DepSeed","Bumpify"]},{"id":"c12","brief":"a local utility that finds secrets accidentally added to git patches","left":["Beatriev","Pathia","Paramlab"],"right":["Creasec","Seeksignal","Krypta","BoldEnv"]},{"id":"c13","brief":"a local inspector that explains why CSS rules override each other","left":[],"right":["Rulebeam","Ferman","Outna","NewRule"]},{"id":"c14","brief":"a command line recorder for reproducing flaky integration tests","left":["Probeora","Specio","Traceora"],"right":["Gradforte","Traceloom","Mihenk","PureCmd"]},{"id":"c15","brief":"a browser extension that maps redirects between documentation pages","left":["Siteflow","Portolan","Starroute","Dictic"],"right":["Harita","Tabroam","Browsr"]},{"id":"c16","brief":"a local utility that finds secrets accidentally added to git patches","left":["Creasec","Seeksignal","Krypta","BoldEnv"],"right":["Beatriev","Pathia","Paramlab"]}]},"studySha256":"ff1b55b9a4af9a859a018940ba800d0245afcb0f3ecdacb8a59bb06f61742ac1"}</script><script>/* Embedded into one offline HTML. No key, source labels, network or storage. */
+const envelope = JSON.parse(document.getElementById('study').textContent)
+const study = envelope.study
+let index = 0
+const answers = new Map()
+const form = document.getElementById('form')
+const status = document.getElementById('status')
+const h = (tag, text) => { const node = document.createElement(tag); node.textContent = text; return node }
+
+function render() {
+  const page = study.pages[index]
+  document.getElementById('progress').textContent = `${index + 1} / ${study.pages.length} · ${answers.size} yanıt kaydedildi`
+  document.getElementById('brief').textContent = page.brief
+  form.replaceChildren()
+  const saved = answers.get(page.id)
+  const columns = h('div', '')
+  columns.className = 'columns'
+  for (const side of ['left', 'right']) {
+    const field = h('fieldset', '')
+    field.append(h('legend', side === 'left' ? 'A listesi' : 'B listesi'))
+    for (const name of page[side]) {
+      const label = h('label', '')
+      const box = document.createElement('input')
+      box.type = 'checkbox'; box.name = side; box.value = name; box.checked = saved?.[side]?.includes(name) ?? false
+      label.append(box, h('span', name)); field.append(label)
+    }
+    const noneLabel = h('label', '')
+    const none = document.createElement('input')
+    none.type = 'checkbox'; none.name = `${side}-none`; none.checked = Boolean(saved && saved[side].length === 0)
+    noneLabel.append(none, h('span', 'Bu listeden hiçbirini kullanmam')); field.append(noneLabel)
+    field.addEventListener('change', (event) => {
+      if (event.target === none && none.checked) field.querySelectorAll(`input[name="${side}"]`).forEach((box) => { box.checked = false })
+      else if (event.target !== none && event.target.checked) none.checked = false
+    })
+    columns.append(field)
+  }
+  form.append(columns)
+  const preference = h('fieldset', '')
+  preference.append(h('legend', 'Hangi listeyi tercih ediyorsun?'))
+  for (const [value, title] of [['left', 'A listesi'], ['right', 'B listesi'], ['neither', 'İkisi de değil']]) {
+    const label = h('label', '')
+    const radio = document.createElement('input')
+    radio.type = 'radio'; radio.name = 'preference'; radio.value = value; radio.checked = saved?.preference === value
+    label.append(radio, h('span', title)); preference.append(label)
+  }
+  form.append(preference)
+  document.getElementById('previous').disabled = index === 0
+  document.getElementById('next').textContent = index === study.pages.length - 1 ? 'Yanıtı kaydet ve bitir' : 'Kaydet ve devam et'
+  status.textContent = ''
+}
+function save() {
+  const page = study.pages[index]
+  const preference = form.querySelector('input[name="preference"]:checked')?.value
+  const answer = { id: page.id, preference }
+  for (const side of ['left', 'right']) {
+    answer[side] = [...form.querySelectorAll(`input[name="${side}"]:checked`)].map((input) => input.value)
+    if (!answer[side].length && !form.querySelector(`input[name="${side}-none"]`).checked) {
+      status.textContent = 'Her liste için kullanabileceğin isimleri veya hiçbirini kullanmayacağını belirt.'; return false
+    }
+  }
+  if (!preference) { status.textContent = 'Tercihini veya “İkisi de değil” seçeneğini belirt.'; return false }
+  answers.set(page.id, answer)
+  return true
+}
+document.getElementById('next').onclick = () => {
+  if (!save()) return
+  if (index < study.pages.length - 1) { index++; render() }
+  else { document.getElementById('progress').textContent = `16 / 16 · ${answers.size} yanıt kaydedildi`; status.textContent = 'Tamamlandı. Yanıtları indir ve değerlendirmeyi yapan kişiye ilet.' }
+}
+document.getElementById('previous').onclick = () => { if (index > 0) { index--; render() } }
+document.getElementById('export').onclick = () => {
+  const content = { schema: 'shared-pool-choices-v1', studySha256: envelope.studySha256, answers: [...answers.values()] }
+  const url = URL.createObjectURL(new Blob([JSON.stringify(content, null, 2)], { type: 'application/json' }))
+  const link = document.createElement('a'); link.href = url; link.download = 'shared-pool-choices.json'; link.click()
+  setTimeout(() => URL.revokeObjectURL(url), 1000)
+}
+document.getElementById('resume').onchange = async (event) => {
+  try {
+    const input = JSON.parse(await event.target.files[0].text())
+    if (input.schema !== 'shared-pool-choices-v1' || input.studySha256 !== envelope.studySha256 || !Array.isArray(input.answers)) throw Error('Bu dosya bu çalışmaya ait değil.')
+    const seen = new Set()
+    for (const answer of input.answers) {
+      const page = study.pages.find((p) => p.id === answer.id)
+      if (!page || seen.has(answer.id) || !['left', 'right', 'neither'].includes(answer.preference)) throw Error('Geçersiz yanıt.')
+      seen.add(answer.id)
+      for (const side of ['left', 'right']) if (!Array.isArray(answer[side]) || new Set(answer[side]).size !== answer[side].length || !answer[side].every((name) => page[side].includes(name))) throw Error('Geçersiz isim seçimi.')
+    }
+    answers.clear(); input.answers.forEach((answer) => answers.set(answer.id, answer))
+    const next = study.pages.findIndex((p) => !answers.has(p.id)); index = next < 0 ? 0 : next; render()
+  } catch (error) { status.textContent = error.message }
+}
+render()
+</script></html>

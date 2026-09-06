@@ -1,0 +1,31 @@
+{
+  "schema": "shared-pool-editorial-review-v1",
+  "evaluator": "assistant",
+  "evidenceClass": "editorial-only-not-human-preference",
+  "blinded": false,
+  "limitations": [
+    "The evaluator implemented the experiment and previously saw some source-labelled outputs.",
+    "Repeated pages were visible together, so repeat consistency is not independent reliability evidence.",
+    "No domain, registry or trademark availability research was performed for these choices.",
+    "These choices must not train a model or satisfy the frozen human promotion gate."
+  ],
+  "criteria": "Would consider using the spelling for the stated developer project: coherent association, readable pronunciation and a distinctive name. A detailed origin story or a high structural score is not sufficient. Usable selections are provisional editorial shortlist choices, not purchasing or registration decisions.",
+  "answers": [
+    {"id":"c01","preference":"left","left":["Faultick"],"right":[],"reason":"Fault + tick ties a short, readable coinage to errors in time-based jobs. Chronos is readable but broad; the remaining suffix forms do not add a distinct idea."},
+    {"id":"c02","preference":"right","left":[],"right":["Bridgerow"],"reason":"Bridge + row gives database migration a coherent relational image. Storelink sounds like storage connectivity; PureRow describes cleanliness; Verboflu and Matbaa do not communicate a persuasive connection to rehearsal."},
+    {"id":"c03","preference":"left","left":["Segue"],"right":[],"reason":"Segue offers a compact transition metaphor for schema evolution. Breakify sounds like causing breakage, TrackIndex suggests indexing, and the others are generic or semantically distant."},
+    {"id":"c04","preference":"neither","left":[],"right":[],"reason":"None captures comparing responses or detecting differences between API versions. Several sound like a shell, calculator or reference atlas. I would continue looking rather than adopt one."},
+    {"id":"c05","preference":"right","left":[],"right":["Bytebeam"],"reason":"Bytebeam gives memory inspection a clear illumination metaphor and reads naturally. Inspectkit is serviceable but too generic for my shortlist; Stackbly is awkward, while Byteseed and Specastro suggest other tasks."},
+    {"id":"c06","preference":"right","left":[],"right":["Relayflow"],"reason":"Relayflow is a plausible, readable name for inspecting event delivery, although it does not express replay particularly well. DockReplay misleadingly suggests a container-specific tool; Fleetreplay adds unrelated fleet imagery."},
+    {"id":"c07","preference":"left","left":["Bridgerow"],"right":[],"reason":"Same editorial choice as c02, with sides reversed; this is not an independently administered repeat."},
+    {"id":"c08","preference":"left","left":["Traceloom","Mihenk"],"right":[],"reason":"Traceloom connects execution traces into a coherent image. Mihenk is short and has an apt testing association for a Turkish-speaking owner. The baseline suffix forms have less character; PureCmd is generic and Gradforte is unrelated."},
+    {"id":"c09","preference":"neither","left":[],"right":[],"reason":"Neither list offers a convincing verification or integrity identity. Pushbyte sounds like distribution, not checking downloads, while the other candidates require too much explanation or are generic suffix constructions."},
+    {"id":"c10","preference":"neither","left":[],"right":[],"reason":"Same rejection as c04. Reversing the lists does not supply a name that expresses comparison."},
+    {"id":"c11","preference":"neither","left":[],"right":[],"reason":"The lists emphasize versions, dependencies, building and publishing but lose the defining license-checking function. I would not adopt a generic build-tool name for this brief."},
+    {"id":"c12","preference":"right","left":[],"right":["Seeksignal"],"reason":"Seeksignal is a readable detection-oriented name and worth considering, though it remains broad. Krypta suggests storing or encrypting secrets; BoldEnv suggests environment configuration; Creasec and Beatriev have weaker spellings."},
+    {"id":"c13","preference":"right","left":[],"right":["Rulebeam","Ferman"],"reason":"Rulebeam clearly suggests illuminating rules. Ferman gives an effective authority/override association for a Turkish-speaking owner. NewRule sounds like rule creation, while Outna has no clear connection. The other list is empty."},
+    {"id":"c14","preference":"right","left":[],"right":["Traceloom","Mihenk"],"reason":"Same shortlist as c08, with sides reversed; no independent repeat-reliability claim."},
+    {"id":"c15","preference":"right","left":["Portolan"],"right":["Harita"],"reason":"Both map/navigation associations are plausible. I prefer Harita for its simple spelling and immediate meaning to a Turkish-speaking owner. Portolan is a more unusual alternative. Siteflow is generic; Tabroam describes browsing rather than mapping redirects."},
+    {"id":"c16","preference":"left","left":["Seeksignal"],"right":[],"reason":"Same provisional detection-oriented shortlist as c12, with sides reversed; no independent repeat-reliability claim."}
+  ]
+}
