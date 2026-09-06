@@ -1,0 +1,2821 @@
+{
+  "protocolSha256": "70fc2082f82bb3d49cb34a5b06d6e122203bf96976cd7a8182222ebf5977f62e",
+  "humanEvaluation": "pending",
+  "rows": [
+    {
+      "partition": "paraphrase",
+      "pair": 0,
+      "side": 0,
+      "brief": "a tool that restores configuration sections",
+      "seed": 13,
+      "old": [
+        "Reprise",
+        "SectionMend",
+        "Constore"
+      ],
+      "current": [
+        "Reprise",
+        "Constore",
+        "SectionMend",
+        "Mendtion"
+      ],
+      "status": "ready",
+      "frame": "recovery",
+      "relation": {
+        "property": {
+          "end": 43,
+          "role": "object",
+          "start": 35,
+          "surface": "sections",
+          "term": "section"
+        },
+        "provenance": "editorial-object-relations-v1",
+        "subject": {
+          "end": 34,
+          "role": "object",
+          "start": 21,
+          "surface": "configuration",
+          "term": "configuration"
+        },
+        "supporting_terms": []
+      },
+      "generationTerms": [
+        "restore",
+        "configuration",
+        "section"
+      ],
+      "benefitBlends": [
+        "Conreprise",
+        "Conprise",
+        "Envprise",
+        "Dotprise",
+        "Confiprise",
+        "Sereprise",
+        "Mendtion",
+        "Mendfig",
+        "Confimend",
+        "Secretprise",
+        "Conmend",
+        "Secreprise",
+        "Secprise",
+        "Mendcret",
+        "Configprise"
+      ],
+      "selectedBenefitBlends": [
+        "Mendtion"
+      ],
+      "durationMs": 239.19999999925494,
+      "traceFile": "trace-0.json.gz",
+      "sha256": "59ad876078d10f0e3979a9a96529b22a251283095b565dc1b007cbb18fc7417b"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 0,
+      "side": 1,
+      "brief": "a utility for recovering configuration sections",
+      "seed": 13,
+      "old": [],
+      "current": [
+        "Reprise",
+        "Constore",
+        "SectionMend",
+        "Mendtion"
+      ],
+      "status": "ready",
+      "frame": "recovery",
+      "relation": {
+        "property": {
+          "end": 47,
+          "role": "object",
+          "start": 39,
+          "surface": "sections",
+          "term": "section"
+        },
+        "provenance": "editorial-object-relations-v1",
+        "subject": {
+          "end": 38,
+          "role": "object",
+          "start": 25,
+          "surface": "configuration",
+          "term": "configuration"
+        },
+        "supporting_terms": []
+      },
+      "generationTerms": [
+        "restore",
+        "configuration",
+        "section"
+      ],
+      "benefitBlends": [
+        "Conreprise",
+        "Conprise",
+        "Envprise",
+        "Dotprise",
+        "Confiprise",
+        "Sereprise",
+        "Mendtion",
+        "Mendfig",
+        "Confimend",
+        "Secretprise",
+        "Conmend",
+        "Secreprise",
+        "Secprise",
+        "Mendcret",
+        "Configprise"
+      ],
+      "selectedBenefitBlends": [
+        "Mendtion"
+      ],
+      "durationMs": 237.80000000074506,
+      "traceFile": "trace-1.json.gz",
+      "sha256": "596807f34470479e414cedb4a425832e9290dd221d9a01ef1f0374391a6e5930"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 0,
+      "side": 0,
+      "brief": "a tool that restores configuration sections",
+      "seed": 67,
+      "old": [
+        "Reprise",
+        "SectionMend",
+        "Constore"
+      ],
+      "current": [
+        "Constore",
+        "Reprise",
+        "SectionMend",
+        "Mendtion"
+      ],
+      "status": "ready",
+      "frame": "recovery",
+      "relation": {
+        "property": {
+          "end": 43,
+          "role": "object",
+          "start": 35,
+          "surface": "sections",
+          "term": "section"
+        },
+        "provenance": "editorial-object-relations-v1",
+        "subject": {
+          "end": 34,
+          "role": "object",
+          "start": 21,
+          "surface": "configuration",
+          "term": "configuration"
+        },
+        "supporting_terms": []
+      },
+      "generationTerms": [
+        "restore",
+        "configuration",
+        "section"
+      ],
+      "benefitBlends": [
+        "Conreprise",
+        "Dotprise",
+        "Conprise",
+        "Confiprise",
+        "Envprise",
+        "Mendtion",
+        "Sereprise",
+        "Mendfig",
+        "Confimend",
+        "Secretprise",
+        "Secreprise",
+        "Conmend",
+        "Configprise",
+        "Mendcret",
+        "Secprise"
+      ],
+      "selectedBenefitBlends": [
+        "Mendtion"
+      ],
+      "durationMs": 244.20000000298023,
+      "traceFile": "trace-2.json.gz",
+      "sha256": "350c81d79348ebdb871dd771f959fd6b0b7992593459d9b8fdc336cece0b22d4"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 0,
+      "side": 1,
+      "brief": "a utility for recovering configuration sections",
+      "seed": 67,
+      "old": [],
+      "current": [
+        "Constore",
+        "Reprise",
+        "SectionMend",
+        "Mendtion"
+      ],
+      "status": "ready",
+      "frame": "recovery",
+      "relation": {
+        "property": {
+          "end": 47,
+          "role": "object",
+          "start": 39,
+          "surface": "sections",
+          "term": "section"
+        },
+        "provenance": "editorial-object-relations-v1",
+        "subject": {
+          "end": 38,
+          "role": "object",
+          "start": 25,
+          "surface": "configuration",
+          "term": "configuration"
+        },
+        "supporting_terms": []
+      },
+      "generationTerms": [
+        "restore",
+        "configuration",
+        "section"
+      ],
+      "benefitBlends": [
+        "Conreprise",
+        "Dotprise",
+        "Conprise",
+        "Confiprise",
+        "Envprise",
+        "Mendtion",
+        "Sereprise",
+        "Mendfig",
+        "Confimend",
+        "Secretprise",
+        "Secreprise",
+        "Conmend",
+        "Configprise",
+        "Mendcret",
+        "Secprise"
+      ],
+      "selectedBenefitBlends": [
+        "Mendtion"
+      ],
+      "durationMs": 240.09999999776483,
+      "traceFile": "trace-3.json.gz",
+      "sha256": "46985ab5216e8e3694c2d8326df7be54d205eb9b2001fc5360cc7155dd743ed7"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 1,
+      "side": 0,
+      "brief": "a tool that verifies archive signatures",
+      "seed": 13,
+      "old": [
+        "ArchiveProof",
+        "Mihenk",
+        "Verarchive",
+        "Sarraf"
+      ],
+      "current": [
+        "ArchiveProof",
+        "Mihenk",
+        "VerArchive",
+        "Touchsig"
+      ],
+      "status": "ready",
+      "frame": "integrity",
+      "relation": {
+        "property": {
+          "end": 39,
+          "role": "object",
+          "start": 29,
+          "surface": "signatures",
+          "term": "signature"
+        },
+        "provenance": "editorial-object-relations-v1",
+        "subject": {
+          "end": 28,
+          "role": "object",
+          "start": 21,
+          "surface": "archive",
+          "term": "archive"
+        },
+        "supporting_terms": []
+      },
+      "generationTerms": [
+        "verify",
+        "archive",
+        "signature"
+      ],
+      "benefitBlends": [
+        "Touchsig",
+        "Sigstone",
+        "Arstone",
+        "Sigseal",
+        "Artouchstone",
+        "Arproof",
+        "Sigproof"
+      ],
+      "selectedBenefitBlends": [
+        "Touchsig"
+      ],
+      "durationMs": 368.3999999985099,
+      "traceFile": "trace-4.json.gz",
+      "sha256": "cbd6e89103fb90dd34d5cdb75a209e13ebeb32a9becdf6ace36710935dc2333c"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 1,
+      "side": 1,
+      "brief": "a utility for validating signatures of archives",
+      "seed": 13,
+      "old": [
+        "ArchiveProof",
+        "SealArchive",
+        "Siglidate",
+        "Valisig"
+      ],
+      "current": [
+        "ArchiveProof",
+        "Mihenk",
+        "VerArchive",
+        "Touchsig"
+      ],
+      "status": "ready",
+      "frame": "integrity",
+      "relation": {
+        "property": {
+          "end": 35,
+          "role": "object",
+          "start": 25,
+          "surface": "signatures",
+          "term": "signature"
+        },
+        "provenance": "editorial-object-relations-v1",
+        "subject": {
+          "end": 47,
+          "role": "object",
+          "start": 39,
+          "surface": "archives",
+          "term": "archive"
+        },
+        "supporting_terms": []
+      },
+      "generationTerms": [
+        "verify",
+        "archive",
+        "signature"
+      ],
+      "benefitBlends": [
+        "Touchsig",
+        "Sigstone",
+        "Arstone",
+        "Sigseal",
+        "Artouchstone",
+        "Arproof",
+        "Sigproof"
+      ],
+      "selectedBenefitBlends": [
+        "Touchsig"
+      ],
+      "durationMs": 368.5,
+      "traceFile": "trace-5.json.gz",
+      "sha256": "0b3ae2ca051fc6f6cd8c9c3853aa392aa69d1d58085f053321de5f739a348f7b"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 1,
+      "side": 0,
+      "brief": "a tool that verifies archive signatures",
+      "seed": 67,
+      "old": [
+        "ArchiveSeal",
+        "Mihenk",
+        "Verarchive",
+        "Sarraf"
+      ],
+      "current": [
+        "VerSig",
+        "Touchsig",
+        "ArchiveSeal",
+        "Mihenk"
+      ],
+      "status": "ready",
+      "frame": "integrity",
+      "relation": {
+        "property": {
+          "end": 39,
+          "role": "object",
+          "start": 29,
+          "surface": "signatures",
+          "term": "signature"
+        },
+        "provenance": "editorial-object-relations-v1",
+        "subject": {
+          "end": 28,
+          "role": "object",
+          "start": 21,
+          "surface": "archive",
+          "term": "archive"
+        },
+        "supporting_terms": []
+      },
+      "generationTerms": [
+        "verify",
+        "archive",
+        "signature"
+      ],
+      "benefitBlends": [
+        "Touchsig",
+        "Sigstone",
+        "Arstone",
+        "Artouchstone",
+        "Sigseal",
+        "Arproof",
+        "Sigproof"
+      ],
+      "selectedBenefitBlends": [
+        "Touchsig"
+      ],
+      "durationMs": 380.6000000014901,
+      "traceFile": "trace-6.json.gz",
+      "sha256": "071058641d4594576c2de0f04f538df90083154c219f3272c9735f3d88d21e92"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 1,
+      "side": 1,
+      "brief": "a utility for validating signatures of archives",
+      "seed": 67,
+      "old": [
+        "ArchiveSeal",
+        "Siglidate",
+        "ProofArchive",
+        "Valisig"
+      ],
+      "current": [
+        "VerSig",
+        "Touchsig",
+        "ArchiveSeal",
+        "Mihenk"
+      ],
+      "status": "ready",
+      "frame": "integrity",
+      "relation": {
+        "property": {
+          "end": 35,
+          "role": "object",
+          "start": 25,
+          "surface": "signatures",
+          "term": "signature"
+        },
+        "provenance": "editorial-object-relations-v1",
+        "subject": {
+          "end": 47,
+          "role": "object",
+          "start": 39,
+          "surface": "archives",
+          "term": "archive"
+        },
+        "supporting_terms": []
+      },
+      "generationTerms": [
+        "verify",
+        "archive",
+        "signature"
+      ],
+      "benefitBlends": [
+        "Touchsig",
+        "Sigstone",
+        "Arstone",
+        "Artouchstone",
+        "Sigseal",
+        "Arproof",
+        "Sigproof"
+      ],
+      "selectedBenefitBlends": [
+        "Touchsig"
+      ],
+      "durationMs": 395.69999999925494,
+      "traceFile": "trace-7.json.gz",
+      "sha256": "00c42d5aabf0b9f82ed4394104c30d8f434c8f9a674749c91076915cca2ae8df"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 2,
+      "side": 0,
+      "brief": "a tool that measures query latency",
+      "seed": 13,
+      "old": [
+        "Anemometer",
+        "Seismograph"
+      ],
+      "current": [
+        "QueryGauge",
+        "Anemometer",
+        "Seismograph",
+        "Latenlance"
+      ],
+      "status": "ready",
+      "frame": "measurement",
+      "relation": {
+        "property": {
+          "end": 34,
+          "role": "object",
+          "start": 27,
+          "surface": "latency",
+          "term": "latency"
+        },
+        "provenance": "editorial-object-relations-v1",
+        "subject": {
+          "end": 26,
+          "role": "object",
+          "start": 21,
+          "surface": "query",
+          "term": "query"
+        },
+        "supporting_terms": []
+      },
+      "generationTerms": [
+        "measure",
+        "query",
+        "latency"
+      ],
+      "benefitBlends": [
+        "Babase",
+        "Quelance",
+        "Queryper",
+        "Querylance",
+        "Gaugeble",
+        "Calibase",
+        "Storelance",
+        "Storeper",
+        "Baselance",
+        "Tableper",
+        "Bastore",
+        "Calitable",
+        "Quebalance",
+        "Balanceble",
+        "Latenlance",
+        "Tablelance",
+        "Quegauge",
+        "Batency"
+      ],
+      "selectedBenefitBlends": [
+        "Latenlance"
+      ],
+      "durationMs": 221.39999999850988,
+      "traceFile": "trace-8.json.gz",
+      "sha256": "34283b9569056810ff46fb461bac0cf0911116731b582538671d2cf833fb0438"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 2,
+      "side": 1,
+      "brief": "a utility for measuring latency of queries",
+      "seed": 13,
+      "old": [
+        "Anemometer",
+        "Seismograph"
+      ],
+      "current": [
+        "QueryGauge",
+        "Anemometer",
+        "Seismograph",
+        "Latenlance"
+      ],
+      "status": "ready",
+      "frame": "measurement",
+      "relation": {
+        "property": {
+          "end": 31,
+          "role": "object",
+          "start": 24,
+          "surface": "latency",
+          "term": "latency"
+        },
+        "provenance": "editorial-object-relations-v1",
+        "subject": {
+          "end": 42,
+          "role": "object",
+          "start": 35,
+          "surface": "queries",
+          "term": "query"
+        },
+        "supporting_terms": []
+      },
+      "generationTerms": [
+        "measure",
+        "query",
+        "latency"
+      ],
+      "benefitBlends": [
+        "Babase",
+        "Quelance",
+        "Queryper",
+        "Querylance",
+        "Gaugeble",
+        "Calibase",
+        "Storelance",
+        "Storeper",
+        "Baselance",
+        "Tableper",
+        "Bastore",
+        "Calitable",
+        "Quebalance",
+        "Balanceble",
+        "Latenlance",
+        "Tablelance",
+        "Quegauge",
+        "Batency"
+      ],
+      "selectedBenefitBlends": [
+        "Latenlance"
+      ],
+      "durationMs": 220.40000000223517,
+      "traceFile": "trace-9.json.gz",
+      "sha256": "c6398706c5be617c2ac9039a12964bbaa5064d3fbcfe05e84418fd4dc7b84dae"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 2,
+      "side": 0,
+      "brief": "a tool that measures query latency",
+      "seed": 67,
+      "old": [
+        "Anemometer",
+        "Barometer"
+      ],
+      "current": [
+        "QueryGauge",
+        "Anemometer",
+        "Barometer",
+        "Latenlance"
+      ],
+      "status": "ready",
+      "frame": "measurement",
+      "relation": {
+        "property": {
+          "end": 34,
+          "role": "object",
+          "start": 27,
+          "surface": "latency",
+          "term": "latency"
+        },
+        "provenance": "editorial-object-relations-v1",
+        "subject": {
+          "end": 26,
+          "role": "object",
+          "start": 21,
+          "surface": "query",
+          "term": "query"
+        },
+        "supporting_terms": []
+      },
+      "generationTerms": [
+        "measure",
+        "query",
+        "latency"
+      ],
+      "benefitBlends": [
+        "Babase",
+        "Quelance",
+        "Queryper",
+        "Gaugeble",
+        "Calibase",
+        "Storelance",
+        "Querylance",
+        "Storeper",
+        "Baselance",
+        "Balanceble",
+        "Bastore",
+        "Calitable",
+        "Latenlance",
+        "Quebalance",
+        "Tableper",
+        "Tablelance",
+        "Quegauge",
+        "Batency"
+      ],
+      "selectedBenefitBlends": [
+        "Latenlance"
+      ],
+      "durationMs": 202.69999999925494,
+      "traceFile": "trace-10.json.gz",
+      "sha256": "52f0ffe04455bf1a35bb3980af262df4bfe1a2e3e2c8330c6583effe6e403b10"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 2,
+      "side": 1,
+      "brief": "a utility for measuring latency of queries",
+      "seed": 67,
+      "old": [
+        "Anemometer",
+        "Barometer"
+      ],
+      "current": [
+        "QueryGauge",
+        "Anemometer",
+        "Barometer",
+        "Latenlance"
+      ],
+      "status": "ready",
+      "frame": "measurement",
+      "relation": {
+        "property": {
+          "end": 31,
+          "role": "object",
+          "start": 24,
+          "surface": "latency",
+          "term": "latency"
+        },
+        "provenance": "editorial-object-relations-v1",
+        "subject": {
+          "end": 42,
+          "role": "object",
+          "start": 35,
+          "surface": "queries",
+          "term": "query"
+        },
+        "supporting_terms": []
+      },
+      "generationTerms": [
+        "measure",
+        "query",
+        "latency"
+      ],
+      "benefitBlends": [
+        "Babase",
+        "Quelance",
+        "Queryper",
+        "Gaugeble",
+        "Calibase",
+        "Storelance",
+        "Querylance",
+        "Storeper",
+        "Baselance",
+        "Balanceble",
+        "Bastore",
+        "Calitable",
+        "Latenlance",
+        "Quebalance",
+        "Tableper",
+        "Tablelance",
+        "Quegauge",
+        "Batency"
+      ],
+      "selectedBenefitBlends": [
+        "Latenlance"
+      ],
+      "durationMs": 206.70000000298023,
+      "traceFile": "trace-11.json.gz",
+      "sha256": "d2dc8e9cc42d76d6e31eca751c59d7ec293415ebda545ffdeb8947c99c5269e5"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 3,
+      "side": 0,
+      "brief": "a tool that tracks queue depth",
+      "seed": 13,
+      "old": [
+        "QueueWatch",
+        "Izci",
+        "Fylgja",
+        "LedgerQueue"
+      ],
+      "current": [
+        "QueueWatch",
+        "Izci",
+        "LedgerQueue",
+        "Fylgja"
+      ],
+      "status": "ready",
+      "frame": "observation",
+      "relation": {
+        "property": {
+          "end": 30,
+          "role": "object",
+          "start": 25,
+          "surface": "depth",
+          "term": "depth"
+        },
+        "provenance": "editorial-object-relations-v1",
+        "subject": {
+          "end": 24,
+          "role": "object",
+          "start": 19,
+          "surface": "queue",
+          "term": "queue"
+        },
+        "supporting_terms": []
+      },
+      "generationTerms": [
+        "track",
+        "queue",
+        "depth"
+      ],
+      "benefitBlends": [
+        "Beastream",
+        "Streamcon",
+        "Watchker",
+        "Beapipe",
+        "Beatopic",
+        "Lebroker",
+        "Lepipe",
+        "Watchpic",
+        "Beaconker",
+        "Beapic",
+        "Brobeacon",
+        "Letopic",
+        "Tobeacon",
+        "Depthcon",
+        "Ledepth",
+        "Beadepth",
+        "Beaconpic"
+      ],
+      "selectedBenefitBlends": [],
+      "durationMs": 293.70000000298023,
+      "traceFile": "trace-12.json.gz",
+      "sha256": "4dc9b1290b7bdceaca1e52c211e06aa212e39f239c6f4b87703bded7bb1bbfa3"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 3,
+      "side": 1,
+      "brief": "a utility for monitoring depth of queues",
+      "seed": 13,
+      "old": [
+        "LedgerDepth",
+        "Kule",
+        "BeaconDepth",
+        "Bekci"
+      ],
+      "current": [
+        "QueueWatch",
+        "Izci",
+        "LedgerQueue",
+        "Fylgja"
+      ],
+      "status": "ready",
+      "frame": "observation",
+      "relation": {
+        "property": {
+          "end": 30,
+          "role": "object",
+          "start": 25,
+          "surface": "depth",
+          "term": "depth"
+        },
+        "provenance": "editorial-object-relations-v1",
+        "subject": {
+          "end": 40,
+          "role": "object",
+          "start": 34,
+          "surface": "queues",
+          "term": "queue"
+        },
+        "supporting_terms": []
+      },
+      "generationTerms": [
+        "track",
+        "queue",
+        "depth"
+      ],
+      "benefitBlends": [
+        "Beastream",
+        "Streamcon",
+        "Watchker",
+        "Beapipe",
+        "Beatopic",
+        "Lebroker",
+        "Lepipe",
+        "Watchpic",
+        "Beaconker",
+        "Beapic",
+        "Brobeacon",
+        "Letopic",
+        "Tobeacon",
+        "Depthcon",
+        "Ledepth",
+        "Beadepth",
+        "Beaconpic"
+      ],
+      "selectedBenefitBlends": [],
+      "durationMs": 297.1000000014901,
+      "traceFile": "trace-13.json.gz",
+      "sha256": "caf0dae9d8e3ee1c76dc8ed0e4851d40f451d72621cbd1e657edce47c0475985"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 3,
+      "side": 0,
+      "brief": "a tool that tracks queue depth",
+      "seed": 67,
+      "old": [
+        "QueueBeacon",
+        "Fylgja",
+        "Izci",
+        "TrackQueue"
+      ],
+      "current": [
+        "LedgerQueue",
+        "QueueBeacon",
+        "Fylgja",
+        "Izci"
+      ],
+      "status": "ready",
+      "frame": "observation",
+      "relation": {
+        "property": {
+          "end": 30,
+          "role": "object",
+          "start": 25,
+          "surface": "depth",
+          "term": "depth"
+        },
+        "provenance": "editorial-object-relations-v1",
+        "subject": {
+          "end": 24,
+          "role": "object",
+          "start": 19,
+          "surface": "queue",
+          "term": "queue"
+        },
+        "supporting_terms": []
+      },
+      "generationTerms": [
+        "track",
+        "queue",
+        "depth"
+      ],
+      "benefitBlends": [
+        "Streamcon",
+        "Beastream",
+        "Beapipe",
+        "Watchker",
+        "Beatopic",
+        "Beaconker",
+        "Lepipe",
+        "Watchpic",
+        "Lebroker",
+        "Beapic",
+        "Brobeacon",
+        "Letopic",
+        "Tobeacon",
+        "Depthcon",
+        "Ledepth",
+        "Beadepth",
+        "Beaconpic"
+      ],
+      "selectedBenefitBlends": [],
+      "durationMs": 277.70000000298023,
+      "traceFile": "trace-14.json.gz",
+      "sha256": "4bd836d0bcd6ea5be75bae7984bffd5b14dbc37554408c995bf2d4981e75cd83"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 3,
+      "side": 1,
+      "brief": "a utility for monitoring depth of queues",
+      "seed": 67,
+      "old": [
+        "BeaconDepth",
+        "Kule",
+        "LedgerDepth",
+        "Bekci"
+      ],
+      "current": [
+        "LedgerQueue",
+        "QueueBeacon",
+        "Fylgja",
+        "Izci"
+      ],
+      "status": "ready",
+      "frame": "observation",
+      "relation": {
+        "property": {
+          "end": 30,
+          "role": "object",
+          "start": 25,
+          "surface": "depth",
+          "term": "depth"
+        },
+        "provenance": "editorial-object-relations-v1",
+        "subject": {
+          "end": 40,
+          "role": "object",
+          "start": 34,
+          "surface": "queues",
+          "term": "queue"
+        },
+        "supporting_terms": []
+      },
+      "generationTerms": [
+        "track",
+        "queue",
+        "depth"
+      ],
+      "benefitBlends": [
+        "Streamcon",
+        "Beastream",
+        "Beapipe",
+        "Watchker",
+        "Beatopic",
+        "Beaconker",
+        "Lepipe",
+        "Watchpic",
+        "Lebroker",
+        "Beapic",
+        "Brobeacon",
+        "Letopic",
+        "Tobeacon",
+        "Depthcon",
+        "Ledepth",
+        "Beadepth",
+        "Beaconpic"
+      ],
+      "selectedBenefitBlends": [],
+      "durationMs": 278.8999999985099,
+      "traceFile": "trace-15.json.gz",
+      "sha256": "53b81a8ec3e010cada492ec185509ca253de132d1bffd5fbf77595ed1166d466"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 4,
+      "side": 0,
+      "brief": "a tool that compares storage costs",
+      "seed": 13,
+      "old": [
+        "CostBalance",
+        "Terazi",
+        "CompareCost",
+        "Kiyas"
+      ],
+      "current": [
+        "StorageGauge",
+        "Terazi",
+        "Kiyas",
+        "CostBalance"
+      ],
+      "status": "ready",
+      "frame": "measurement",
+      "relation": {
+        "property": {
+          "end": 34,
+          "role": "object",
+          "start": 29,
+          "surface": "costs",
+          "term": "cost"
+        },
+        "provenance": "editorial-object-relations-v1",
+        "subject": {
+          "end": 28,
+          "role": "object",
+          "start": 21,
+          "surface": "storage",
+          "term": "storage"
+        },
+        "supporting_terms": []
+      },
+      "generationTerms": [
+        "compare",
+        "storage",
+        "cost"
+      ],
+      "benefitBlends": [
+        "Quelance",
+        "Stolance",
+        "Queryper",
+        "Querylance",
+        "Gaugeble",
+        "Costlance",
+        "Storeper",
+        "Storelance",
+        "Calitable",
+        "Bastore",
+        "Tableper",
+        "Gaugerage",
+        "Castorage",
+        "Quebalance",
+        "Stobalance",
+        "Balanceble",
+        "Tablelance",
+        "Bastorage"
+      ],
+      "selectedBenefitBlends": [],
+      "durationMs": 235,
+      "traceFile": "trace-16.json.gz",
+      "sha256": "d6a11c93c2674eeef8894fc31e67ad8d05f9f2164b33993ef0acd135d9414058"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 4,
+      "side": 1,
+      "brief": "a utility for comparing costs of storage",
+      "seed": 13,
+      "old": [
+        "CostBalance",
+        "Terazi",
+        "CompareCost",
+        "Kiyas"
+      ],
+      "current": [
+        "StorageGauge",
+        "Terazi",
+        "Kiyas",
+        "CostBalance"
+      ],
+      "status": "ready",
+      "frame": "measurement",
+      "relation": {
+        "property": {
+          "end": 29,
+          "role": "object",
+          "start": 24,
+          "surface": "costs",
+          "term": "cost"
+        },
+        "provenance": "editorial-object-relations-v1",
+        "subject": {
+          "end": 40,
+          "role": "object",
+          "start": 33,
+          "surface": "storage",
+          "term": "storage"
+        },
+        "supporting_terms": []
+      },
+      "generationTerms": [
+        "compare",
+        "storage",
+        "cost"
+      ],
+      "benefitBlends": [
+        "Quelance",
+        "Stolance",
+        "Queryper",
+        "Querylance",
+        "Gaugeble",
+        "Costlance",
+        "Storeper",
+        "Storelance",
+        "Calitable",
+        "Bastore",
+        "Tableper",
+        "Gaugerage",
+        "Castorage",
+        "Quebalance",
+        "Stobalance",
+        "Balanceble",
+        "Tablelance",
+        "Bastorage"
+      ],
+      "selectedBenefitBlends": [],
+      "durationMs": 237.5,
+      "traceFile": "trace-17.json.gz",
+      "sha256": "5c245d8b637be9bf7716f86b621bcf8851e9904eafcbaf00354fcbeadbcebeae"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 4,
+      "side": 0,
+      "brief": "a tool that compares storage costs",
+      "seed": 67,
+      "old": [
+        "Comparecost",
+        "CostGauge",
+        "Terazi",
+        "Kiyas"
+      ],
+      "current": [
+        "StorageGauge",
+        "Terazi",
+        "Kiyas",
+        "CostGauge"
+      ],
+      "status": "ready",
+      "frame": "measurement",
+      "relation": {
+        "property": {
+          "end": 34,
+          "role": "object",
+          "start": 29,
+          "surface": "costs",
+          "term": "cost"
+        },
+        "provenance": "editorial-object-relations-v1",
+        "subject": {
+          "end": 28,
+          "role": "object",
+          "start": 21,
+          "surface": "storage",
+          "term": "storage"
+        },
+        "supporting_terms": []
+      },
+      "generationTerms": [
+        "compare",
+        "storage",
+        "cost"
+      ],
+      "benefitBlends": [
+        "Quelance",
+        "Queryper",
+        "Costlance",
+        "Stolance",
+        "Gaugeble",
+        "Querylance",
+        "Storelance",
+        "Storeper",
+        "Calitable",
+        "Gaugerage",
+        "Stobalance",
+        "Bastore",
+        "Balanceble",
+        "Castorage",
+        "Quebalance",
+        "Tableper",
+        "Tablelance"
+      ],
+      "selectedBenefitBlends": [],
+      "durationMs": 218.19999999925494,
+      "traceFile": "trace-18.json.gz",
+      "sha256": "1eb5326f5c470439449aebb5e1856f2860f7d3b2a98c071e75eae8605e33e85a"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 4,
+      "side": 1,
+      "brief": "a utility for comparing costs of storage",
+      "seed": 67,
+      "old": [
+        "CompareCost",
+        "CostGauge",
+        "Terazi",
+        "Kiyas"
+      ],
+      "current": [
+        "StorageGauge",
+        "Terazi",
+        "Kiyas",
+        "CostGauge"
+      ],
+      "status": "ready",
+      "frame": "measurement",
+      "relation": {
+        "property": {
+          "end": 29,
+          "role": "object",
+          "start": 24,
+          "surface": "costs",
+          "term": "cost"
+        },
+        "provenance": "editorial-object-relations-v1",
+        "subject": {
+          "end": 40,
+          "role": "object",
+          "start": 33,
+          "surface": "storage",
+          "term": "storage"
+        },
+        "supporting_terms": []
+      },
+      "generationTerms": [
+        "compare",
+        "storage",
+        "cost"
+      ],
+      "benefitBlends": [
+        "Quelance",
+        "Queryper",
+        "Costlance",
+        "Stolance",
+        "Gaugeble",
+        "Querylance",
+        "Storelance",
+        "Storeper",
+        "Calitable",
+        "Gaugerage",
+        "Stobalance",
+        "Bastore",
+        "Balanceble",
+        "Castorage",
+        "Quebalance",
+        "Tableper",
+        "Tablelance"
+      ],
+      "selectedBenefitBlends": [],
+      "durationMs": 218.89999999850988,
+      "traceFile": "trace-19.json.gz",
+      "sha256": "20f40f79689a8e1b8887f1249812c3a078b7d55d96b20dd21c7837b75449961c"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 5,
+      "side": 0,
+      "brief": "a tool that filters alert messages",
+      "seed": 13,
+      "old": [
+        "AlertMesh",
+        "Valka",
+        "SieveAlert"
+      ],
+      "current": [
+        "AlertMesh",
+        "Valka",
+        "Primessage",
+        "SieveAlert"
+      ],
+      "status": "ready",
+      "frame": "selection",
+      "relation": {
+        "property": {
+          "end": 34,
+          "role": "object",
+          "start": 26,
+          "surface": "messages",
+          "term": "message"
+        },
+        "provenance": "editorial-object-relations-v1",
+        "subject": {
+          "end": 25,
+          "role": "object",
+          "start": 20,
+          "surface": "alert",
+          "term": "alert"
+        },
+        "supporting_terms": []
+      },
+      "generationTerms": [
+        "filter",
+        "alert",
+        "message"
+      ],
+      "benefitBlends": [
+        "Pribond",
+        "Primessage",
+        "Cimesh"
+      ],
+      "selectedBenefitBlends": [
+        "Primessage"
+      ],
+      "durationMs": 217.60000000149012,
+      "traceFile": "trace-20.json.gz",
+      "sha256": "e4fd936e42024fb462cff3275ec6207344a902848cdf5428c886b9da48eef911"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 5,
+      "side": 1,
+      "brief": "a utility for filtering messages of alerts",
+      "seed": 13,
+      "old": [
+        "MessageMesh",
+        "Valka",
+        "AlertMesh"
+      ],
+      "current": [
+        "AlertMesh",
+        "Valka",
+        "Primessage",
+        "SieveAlert"
+      ],
+      "status": "ready",
+      "frame": "selection",
+      "relation": {
+        "property": {
+          "end": 32,
+          "role": "object",
+          "start": 24,
+          "surface": "messages",
+          "term": "message"
+        },
+        "provenance": "editorial-object-relations-v1",
+        "subject": {
+          "end": 42,
+          "role": "object",
+          "start": 36,
+          "surface": "alerts",
+          "term": "alert"
+        },
+        "supporting_terms": []
+      },
+      "generationTerms": [
+        "filter",
+        "alert",
+        "message"
+      ],
+      "benefitBlends": [
+        "Pribond",
+        "Primessage",
+        "Cimesh"
+      ],
+      "selectedBenefitBlends": [
+        "Primessage"
+      ],
+      "durationMs": 218.19999999925494,
+      "traceFile": "trace-21.json.gz",
+      "sha256": "032c95919923225c96d6e0b16f78ff0dcc63fb7608f19a29a4dfa3db3d0e2652"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 5,
+      "side": 0,
+      "brief": "a tool that filters alert messages",
+      "seed": 67,
+      "old": [
+        "AlertMesh",
+        "Valka",
+        "SieveAlert"
+      ],
+      "current": [
+        "Primessage",
+        "AlertMesh",
+        "Valka",
+        "SieveAlert"
+      ],
+      "status": "ready",
+      "frame": "selection",
+      "relation": {
+        "property": {
+          "end": 34,
+          "role": "object",
+          "start": 26,
+          "surface": "messages",
+          "term": "message"
+        },
+        "provenance": "editorial-object-relations-v1",
+        "subject": {
+          "end": 25,
+          "role": "object",
+          "start": 20,
+          "surface": "alert",
+          "term": "alert"
+        },
+        "supporting_terms": []
+      },
+      "generationTerms": [
+        "filter",
+        "alert",
+        "message"
+      ],
+      "benefitBlends": [
+        "Primessage",
+        "Pribond",
+        "Cimesh"
+      ],
+      "selectedBenefitBlends": [
+        "Primessage"
+      ],
+      "durationMs": 202.90000000223517,
+      "traceFile": "trace-22.json.gz",
+      "sha256": "50e323de626adc5d083ec2da90dce6b4d4746484ad6afc7187c5971e4a28e532"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 5,
+      "side": 1,
+      "brief": "a utility for filtering messages of alerts",
+      "seed": 67,
+      "old": [
+        "MessageMesh",
+        "Valka",
+        "AlertMesh"
+      ],
+      "current": [
+        "Primessage",
+        "AlertMesh",
+        "Valka",
+        "SieveAlert"
+      ],
+      "status": "ready",
+      "frame": "selection",
+      "relation": {
+        "property": {
+          "end": 32,
+          "role": "object",
+          "start": 24,
+          "surface": "messages",
+          "term": "message"
+        },
+        "provenance": "editorial-object-relations-v1",
+        "subject": {
+          "end": 42,
+          "role": "object",
+          "start": 36,
+          "surface": "alerts",
+          "term": "alert"
+        },
+        "supporting_terms": []
+      },
+      "generationTerms": [
+        "filter",
+        "alert",
+        "message"
+      ],
+      "benefitBlends": [
+        "Primessage",
+        "Pribond",
+        "Cimesh"
+      ],
+      "selectedBenefitBlends": [
+        "Primessage"
+      ],
+      "durationMs": 205,
+      "traceFile": "trace-23.json.gz",
+      "sha256": "5540e35ad07907f79150da049a4cf25369e84cd30d539c7c7eac0a05d18f2f19"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 6,
+      "side": 0,
+      "brief": "a tool that maps module dependencies",
+      "seed": 13,
+      "old": [
+        "ModuleChart",
+        "Portolan",
+        "Harita",
+        "WeaveModule"
+      ],
+      "current": [
+        "ModuleChart",
+        "Portolan",
+        "WeaveModule",
+        "Harita"
+      ],
+      "status": "ready",
+      "frame": "topology",
+      "relation": {
+        "property": {
+          "end": 36,
+          "role": "object",
+          "start": 24,
+          "surface": "dependencies",
+          "term": "dependency"
+        },
+        "provenance": "editorial-object-relations-v1",
+        "subject": {
+          "end": 23,
+          "role": "object",
+          "start": 17,
+          "surface": "module",
+          "term": "module"
+        },
+        "supporting_terms": []
+      },
+      "generationTerms": [
+        "map",
+        "module",
+        "dependency"
+      ],
+      "benefitBlends": [
+        "Bumplas",
+        "Weavedate",
+        "Deplas",
+        "Chartdate",
+        "Atdency",
+        "Atlasdate",
+        "Chartdency",
+        "Depenweave",
+        "Depenchart",
+        "Atbump",
+        "Atupdate"
+      ],
+      "selectedBenefitBlends": [],
+      "durationMs": 365.8999999985099,
+      "traceFile": "trace-24.json.gz",
+      "sha256": "fd3326b396f569cd9bf2905f36916f42334ff80d2163e7489dd70b51e6f10a26"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 6,
+      "side": 1,
+      "brief": "a utility for mapping dependencies of modules",
+      "seed": 13,
+      "old": [],
+      "current": [
+        "ModuleChart",
+        "Portolan",
+        "WeaveModule",
+        "Harita"
+      ],
+      "status": "ready",
+      "frame": "topology",
+      "relation": {
+        "property": {
+          "end": 34,
+          "role": "object",
+          "start": 22,
+          "surface": "dependencies",
+          "term": "dependency"
+        },
+        "provenance": "editorial-object-relations-v1",
+        "subject": {
+          "end": 45,
+          "role": "object",
+          "start": 38,
+          "surface": "modules",
+          "term": "module"
+        },
+        "supporting_terms": []
+      },
+      "generationTerms": [
+        "map",
+        "module",
+        "dependency"
+      ],
+      "benefitBlends": [
+        "Bumplas",
+        "Weavedate",
+        "Deplas",
+        "Chartdate",
+        "Atdency",
+        "Atlasdate",
+        "Chartdency",
+        "Depenweave",
+        "Depenchart",
+        "Atbump",
+        "Atupdate"
+      ],
+      "selectedBenefitBlends": [],
+      "durationMs": 369.8999999985099,
+      "traceFile": "trace-25.json.gz",
+      "sha256": "97441c5be85aae2a482a99c614f87621e0aeb37180c7186defa7175382a68611"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 6,
+      "side": 0,
+      "brief": "a tool that maps module dependencies",
+      "seed": 67,
+      "old": [
+        "ModuleChart",
+        "Portolan",
+        "Harita",
+        "WeaveModule"
+      ],
+      "current": [
+        "ModuleChart",
+        "Portolan",
+        "Harita",
+        "WeaveModule"
+      ],
+      "status": "ready",
+      "frame": "topology",
+      "relation": {
+        "property": {
+          "end": 36,
+          "role": "object",
+          "start": 24,
+          "surface": "dependencies",
+          "term": "dependency"
+        },
+        "provenance": "editorial-object-relations-v1",
+        "subject": {
+          "end": 23,
+          "role": "object",
+          "start": 17,
+          "surface": "module",
+          "term": "module"
+        },
+        "supporting_terms": []
+      },
+      "generationTerms": [
+        "map",
+        "module",
+        "dependency"
+      ],
+      "benefitBlends": [
+        "Bumplas",
+        "Weavedate",
+        "Deplas",
+        "Chartdate",
+        "Atdency",
+        "Atlasdate",
+        "Atbump",
+        "Depenchart",
+        "Depenweave",
+        "Chartdency",
+        "Atupdate"
+      ],
+      "selectedBenefitBlends": [],
+      "durationMs": 364.80000000074506,
+      "traceFile": "trace-26.json.gz",
+      "sha256": "961e99b400fe73ed34d52e7c7e20b43c4cfe2466fde15cccdc64caaa021a0264"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 6,
+      "side": 1,
+      "brief": "a utility for mapping dependencies of modules",
+      "seed": 67,
+      "old": [],
+      "current": [
+        "ModuleChart",
+        "Portolan",
+        "Harita",
+        "WeaveModule"
+      ],
+      "status": "ready",
+      "frame": "topology",
+      "relation": {
+        "property": {
+          "end": 34,
+          "role": "object",
+          "start": 22,
+          "surface": "dependencies",
+          "term": "dependency"
+        },
+        "provenance": "editorial-object-relations-v1",
+        "subject": {
+          "end": 45,
+          "role": "object",
+          "start": 38,
+          "surface": "modules",
+          "term": "module"
+        },
+        "supporting_terms": []
+      },
+      "generationTerms": [
+        "map",
+        "module",
+        "dependency"
+      ],
+      "benefitBlends": [
+        "Bumplas",
+        "Weavedate",
+        "Deplas",
+        "Chartdate",
+        "Atdency",
+        "Atlasdate",
+        "Atbump",
+        "Depenchart",
+        "Depenweave",
+        "Chartdency",
+        "Atupdate"
+      ],
+      "selectedBenefitBlends": [],
+      "durationMs": 369,
+      "traceFile": "trace-27.json.gz",
+      "sha256": "6c62adbe38c8489493581522b747df1992492c1c7046bfe1a2dcc357409ae301"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 7,
+      "side": 0,
+      "brief": "a tool that groups compiler warnings",
+      "seed": 13,
+      "old": [
+        "ShelfWarning",
+        "Halka",
+        "GroupWarning"
+      ],
+      "current": [
+        "ShelfWarning",
+        "Halka",
+        "GroupWarning",
+        "Threadler"
+      ],
+      "status": "ready",
+      "frame": "organization",
+      "relation": {
+        "property": {
+          "end": 36,
+          "role": "object",
+          "start": 28,
+          "surface": "warnings",
+          "term": "warning"
+        },
+        "provenance": "editorial-object-relations-v1",
+        "subject": {
+          "end": 27,
+          "role": "object",
+          "start": 19,
+          "surface": "compiler",
+          "term": "compiler"
+        },
+        "supporting_terms": []
+      },
+      "generationTerms": [
+        "group",
+        "compiler",
+        "warning"
+      ],
+      "benefitBlends": [
+        "Threadler",
+        "Comthread",
+        "Warthread",
+        "Threadning",
+        "Shelfler",
+        "Compithread",
+        "Warshelf",
+        "Foliler",
+        "Folining",
+        "Comshelf",
+        "Threadpiler",
+        "Shelfning",
+        "Compishelf",
+        "Shelfpiler"
+      ],
+      "selectedBenefitBlends": [
+        "Threadler"
+      ],
+      "durationMs": 460.3999999985099,
+      "traceFile": "trace-28.json.gz",
+      "sha256": "0fb672b08d2a32b47c9e59dd1d8c633ad923e3a78873984071a08e3e3caf6682"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 7,
+      "side": 1,
+      "brief": "a utility for grouping warnings of compilers",
+      "seed": 13,
+      "old": [
+        "ShelfWarning",
+        "Halka",
+        "GroupWarning"
+      ],
+      "current": [
+        "ShelfWarning",
+        "Halka",
+        "GroupWarning",
+        "Threadler"
+      ],
+      "status": "ready",
+      "frame": "organization",
+      "relation": {
+        "property": {
+          "end": 31,
+          "role": "object",
+          "start": 23,
+          "surface": "warnings",
+          "term": "warning"
+        },
+        "provenance": "editorial-object-relations-v1",
+        "subject": {
+          "end": 44,
+          "role": "object",
+          "start": 35,
+          "surface": "compilers",
+          "term": "compiler"
+        },
+        "supporting_terms": []
+      },
+      "generationTerms": [
+        "group",
+        "compiler",
+        "warning"
+      ],
+      "benefitBlends": [
+        "Threadler",
+        "Comthread",
+        "Warthread",
+        "Threadning",
+        "Shelfler",
+        "Compithread",
+        "Warshelf",
+        "Foliler",
+        "Folining",
+        "Comshelf",
+        "Threadpiler",
+        "Shelfning",
+        "Compishelf",
+        "Shelfpiler"
+      ],
+      "selectedBenefitBlends": [
+        "Threadler"
+      ],
+      "durationMs": 460.3999999985099,
+      "traceFile": "trace-29.json.gz",
+      "sha256": "cd3199cf353e7aac3144ae056744655d69c701a157022a26e94b57d861cc41fd"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 7,
+      "side": 0,
+      "brief": "a tool that groups compiler warnings",
+      "seed": 67,
+      "old": [
+        "GroupWarning",
+        "ShelfWarning",
+        "Halka"
+      ],
+      "current": [
+        "GroupWarning",
+        "ShelfWarning",
+        "Halka",
+        "Threadler"
+      ],
+      "status": "ready",
+      "frame": "organization",
+      "relation": {
+        "property": {
+          "end": 36,
+          "role": "object",
+          "start": 28,
+          "surface": "warnings",
+          "term": "warning"
+        },
+        "provenance": "editorial-object-relations-v1",
+        "subject": {
+          "end": 27,
+          "role": "object",
+          "start": 19,
+          "surface": "compiler",
+          "term": "compiler"
+        },
+        "supporting_terms": []
+      },
+      "generationTerms": [
+        "group",
+        "compiler",
+        "warning"
+      ],
+      "benefitBlends": [
+        "Threadler",
+        "Comthread",
+        "Warthread",
+        "Threadning",
+        "Shelfler",
+        "Warshelf",
+        "Compithread",
+        "Folining",
+        "Threadpiler",
+        "Comshelf",
+        "Foliler",
+        "Shelfning",
+        "Compishelf",
+        "Shelfpiler"
+      ],
+      "selectedBenefitBlends": [
+        "Threadler"
+      ],
+      "durationMs": 396.5,
+      "traceFile": "trace-30.json.gz",
+      "sha256": "141c5bf0bf42f1e20fa483e774c93354698d8055e26bcb61bb7194b9d8eb8c9b"
+    },
+    {
+      "partition": "paraphrase",
+      "pair": 7,
+      "side": 1,
+      "brief": "a utility for grouping warnings of compilers",
+      "seed": 67,
+      "old": [
+        "GroupWarning",
+        "ShelfWarning",
+        "Halka"
+      ],
+      "current": [
+        "GroupWarning",
+        "ShelfWarning",
+        "Halka",
+        "Threadler"
+      ],
+      "status": "ready",
+      "frame": "organization",
+      "relation": {
+        "property": {
+          "end": 31,
+          "role": "object",
+          "start": 23,
+          "surface": "warnings",
+          "term": "warning"
+        },
+        "provenance": "editorial-object-relations-v1",
+        "subject": {
+          "end": 44,
+          "role": "object",
+          "start": 35,
+          "surface": "compilers",
+          "term": "compiler"
+        },
+        "supporting_terms": []
+      },
+      "generationTerms": [
+        "group",
+        "compiler",
+        "warning"
+      ],
+      "benefitBlends": [
+        "Threadler",
+        "Comthread",
+        "Warthread",
+        "Threadning",
+        "Shelfler",
+        "Warshelf",
+        "Compithread",
+        "Folining",
+        "Threadpiler",
+        "Comshelf",
+        "Foliler",
+        "Shelfning",
+        "Compishelf",
+        "Shelfpiler"
+      ],
+      "selectedBenefitBlends": [
+        "Threadler"
+      ],
+      "durationMs": 389.1000000014901,
+      "traceFile": "trace-31.json.gz",
+      "sha256": "14e2849b5b017bc9d9146d44fadad0895a1f3aca4ce045bea606afe80f35d322"
+    },
+    {
+      "partition": "regression",
+      "auto": [
+        "Verre",
+        "Signill",
+        "Archond"
+      ],
+      "brief": "a tool that verifies archive signatures before extraction",
+      "seed": 13,
+      "old": [
+        "ArchiveProof",
+        "Mihenk",
+        "Verarchive",
+        "Sarraf"
+      ],
+      "current": [
+        "ArchiveProof",
+        "Mihenk",
+        "VerArchive",
+        "Touchsig"
+      ],
+      "status": "ready",
+      "frame": "integrity",
+      "relation": {
+        "property": {
+          "end": 39,
+          "role": "object",
+          "start": 29,
+          "surface": "signatures",
+          "term": "signature"
+        },
+        "provenance": "editorial-object-relations-v1",
+        "subject": {
+          "end": 28,
+          "role": "object",
+          "start": 21,
+          "surface": "archive",
+          "term": "archive"
+        },
+        "supporting_terms": []
+      },
+      "generationTerms": [
+        "verify",
+        "archive",
+        "signature"
+      ],
+      "benefitBlends": [
+        "Touchsig",
+        "Sigstone",
+        "Arstone",
+        "Sigseal",
+        "Artouchstone",
+        "Arproof",
+        "Sigproof"
+      ],
+      "selectedBenefitBlends": [
+        "Touchsig"
+      ],
+      "durationMs": 364.70000000298023,
+      "traceFile": "trace-32.json.gz",
+      "sha256": "f9623d898ee93e38a4915314bccd87792b95b9fe0eddc4adffba786e8f6173c6"
+    },
+    {
+      "partition": "regression",
+      "auto": [
+        "Kilim",
+        "Hashapp",
+        "Utilit"
+      ],
+      "brief": "a utility that checks manifest hashes before installation",
+      "seed": 13,
+      "old": [
+        "HashSeal",
+        "Plumbline",
+        "CheckHash",
+        "ProofHash"
+      ],
+      "current": [
+        "HashSeal",
+        "Plumbline",
+        "Macheck",
+        "ProofHash"
+      ],
+      "status": "ready",
+      "frame": "integrity",
+      "relation": {
+        "property": {
+          "end": 37,
+          "role": "object",
+          "start": 31,
+          "surface": "hashes",
+          "term": "hash"
+        },
+        "provenance": "editorial-object-relations-v1",
+        "subject": {
+          "end": 30,
+          "role": "object",
+          "start": 22,
+          "surface": "manifest",
+          "term": "manifest"
+        },
+        "supporting_terms": []
+      },
+      "generationTerms": [
+        "check",
+        "manifest",
+        "hash"
+      ],
+      "benefitBlends": [
+        "Maniseal",
+        "Maseal",
+        "Manistone",
+        "Matouchstone",
+        "Hashstone",
+        "Sealfest",
+        "Touchhash",
+        "Touchfest",
+        "Proofnifest",
+        "Touchnifest",
+        "Sealnifest",
+        "Maproof",
+        "Maniproof"
+      ],
+      "selectedBenefitBlends": [],
+      "durationMs": 289.80000000074506,
+      "traceFile": "trace-33.json.gz",
+      "sha256": "5c492c8fe707078c51f3daefe87755fe31953daaa5aee84a9998c8598407ac74"
+    },
+    {
+      "partition": "regression",
+      "auto": [
+        "Probeix",
+        "Rowload",
+        "Specindex"
+      ],
+      "brief": "a tool that measures query latency during load tests",
+      "seed": 13,
+      "old": [
+        "Anemometer",
+        "Seismograph"
+      ],
+      "current": [
+        "QueryGauge",
+        "Anemometer",
+        "Seismograph",
+        "Latenlance"
+      ],
+      "status": "ready",
+      "frame": "measurement",
+      "relation": {
+        "property": {
+          "end": 34,
+          "role": "object",
+          "start": 27,
+          "surface": "latency",
+          "term": "latency"
+        },
+        "provenance": "editorial-object-relations-v1",
+        "subject": {
+          "end": 26,
+          "role": "object",
+          "start": 21,
+          "surface": "query",
+          "term": "query"
+        },
+        "supporting_terms": []
+      },
+      "generationTerms": [
+        "measure",
+        "query",
+        "latency"
+      ],
+      "benefitBlends": [
+        "Babase",
+        "Quelance",
+        "Queryper",
+        "Querylance",
+        "Gaugeble",
+        "Calibase",
+        "Storelance",
+        "Storeper",
+        "Baselance",
+        "Tableper",
+        "Bastore",
+        "Calitable",
+        "Quebalance",
+        "Balanceble",
+        "Latenlance",
+        "Tablelance",
+        "Quegauge",
+        "Batency"
+      ],
+      "selectedBenefitBlends": [
+        "Latenlance"
+      ],
+      "durationMs": 215.39999999850988,
+      "traceFile": "trace-34.json.gz",
+      "sha256": "0caf6c1fdf5f06ded7ac6eb05612c0f97d6fca4a24e48abd4afaa4647c96f77e"
+    },
+    {
+      "partition": "regression",
+      "auto": [
+        "Kiyas",
+        "Datapeak",
+        "Costrow"
+      ],
+      "brief": "a utility that compares storage costs across regions",
+      "seed": 13,
+      "old": [
+        "CostBalance",
+        "Terazi",
+        "CompareCost",
+        "Kiyas"
+      ],
+      "current": [
+        "StorageGauge",
+        "Terazi",
+        "Kiyas",
+        "CostBalance"
+      ],
+      "status": "ready",
+      "frame": "measurement",
+      "relation": {
+        "property": {
+          "end": 37,
+          "role": "object",
+          "start": 32,
+          "surface": "costs",
+          "term": "cost"
+        },
+        "provenance": "editorial-object-relations-v1",
+        "subject": {
+          "end": 31,
+          "role": "object",
+          "start": 24,
+          "surface": "storage",
+          "term": "storage"
+        },
+        "supporting_terms": []
+      },
+      "generationTerms": [
+        "compare",
+        "storage",
+        "cost"
+      ],
+      "benefitBlends": [
+        "Quelance",
+        "Stolance",
+        "Queryper",
+        "Querylance",
+        "Gaugeble",
+        "Costlance",
+        "Storeper",
+        "Storelance",
+        "Calitable",
+        "Bastore",
+        "Tableper",
+        "Gaugerage",
+        "Castorage",
+        "Quebalance",
+        "Stobalance",
+        "Balanceble",
+        "Tablelance",
+        "Bastorage"
+      ],
+      "selectedBenefitBlends": [],
+      "durationMs": 233,
+      "traceFile": "trace-35.json.gz",
+      "sha256": "14efc3612c7aaff9b8ec82d33c3b6e821aac16312f3a24c63e11c213aa32c6a6"
+    },
+    {
+      "partition": "regression",
+      "auto": [
+        "Menzil",
+        "Pipelab",
+        "Publoom"
+      ],
+      "brief": "a tool that tracks queue depth during traffic spikes",
+      "seed": 13,
+      "old": [
+        "QueueWatch",
+        "Izci",
+        "Fylgja",
+        "LedgerQueue"
+      ],
+      "current": [
+        "QueueWatch",
+        "Izci",
+        "LedgerQueue",
+        "Fylgja"
+      ],
+      "status": "ready",
+      "frame": "observation",
+      "relation": {
+        "property": {
+          "end": 30,
+          "role": "object",
+          "start": 25,
+          "surface": "depth",
+          "term": "depth"
+        },
+        "provenance": "editorial-object-relations-v1",
+        "subject": {
+          "end": 24,
+          "role": "object",
+          "start": 19,
+          "surface": "queue",
+          "term": "queue"
+        },
+        "supporting_terms": []
+      },
+      "generationTerms": [
+        "track",
+        "queue",
+        "depth"
+      ],
+      "benefitBlends": [
+        "Beastream",
+        "Streamcon",
+        "Watchker",
+        "Beapipe",
+        "Beatopic",
+        "Lebroker",
+        "Lepipe",
+        "Watchpic",
+        "Beaconker",
+        "Beapic",
+        "Brobeacon",
+        "Letopic",
+        "Tobeacon",
+        "Depthcon",
+        "Ledepth",
+        "Beadepth",
+        "Beaconpic"
+      ],
+      "selectedBenefitBlends": [],
+      "durationMs": 291.19999999925494,
+      "traceFile": "trace-36.json.gz",
+      "sha256": "53015d2c6d346b430ace487ced4a30efd79782cfd3ef379f5b4984a0758d0feb"
+    },
+    {
+      "partition": "regression",
+      "auto": [
+        "Specix",
+        "Probeora",
+        "Traceora"
+      ],
+      "brief": "a utility that records process activity during debugging",
+      "seed": 13,
+      "old": [
+        "ProcessWatch",
+        "Seismograph",
+        "Ostraka",
+        "Acticord"
+      ],
+      "current": [
+        "ProcessWatch",
+        "Seismograph",
+        "Ostraka",
+        "Acticord"
+      ],
+      "status": "ready",
+      "frame": "observation",
+      "relation": {
+        "property": {
+          "end": 39,
+          "role": "object",
+          "start": 31,
+          "surface": "activity",
+          "term": "activity"
+        },
+        "provenance": "editorial-object-relations-v1",
+        "subject": {
+          "end": 30,
+          "role": "object",
+          "start": 23,
+          "surface": "process",
+          "term": "process"
+        },
+        "supporting_terms": []
+      },
+      "generationTerms": [
+        "record",
+        "process",
+        "activity"
+      ],
+      "benefitBlends": [
+        "Beavity",
+        "Beaconcess",
+        "Probeacon",
+        "Watchcess",
+        "Leprocess",
+        "Acwatch",
+        "Watchvity",
+        "Actiwatch",
+        "Beaprocess",
+        "Acbeacon",
+        "Processcon"
+      ],
+      "selectedBenefitBlends": [],
+      "durationMs": 193.89999999850988,
+      "traceFile": "trace-37.json.gz",
+      "sha256": "34185c6bbe97b843c3f46a91bb994e6828ef55fa0902453b05f8a0a4deac8ea6"
+    },
+    {
+      "partition": "regression",
+      "auto": [
+        "Curtect",
+        "Draftio",
+        "Quillio"
+      ],
+      "brief": "a tool that restores saved editor sessions after crashes",
+      "seed": 13,
+      "old": [
+        "Reprise",
+        "SessionMend",
+        "Restoresave"
+      ],
+      "current": [
+        "Reprise",
+        "SessionMend",
+        "Sereprise",
+        "Ediprise"
+      ],
+      "status": "ready",
+      "frame": "recovery",
+      "relation": {
+        "property": {
+          "end": 42,
+          "role": "object",
+          "start": 34,
+          "surface": "sessions",
+          "term": "session"
+        },
+        "provenance": "editorial-object-relations-v1",
+        "subject": {
+          "end": 33,
+          "role": "object",
+          "start": 27,
+          "surface": "editor",
+          "term": "editor"
+        },
+        "supporting_terms": [
+          {
+            "end": 26,
+            "role": "object",
+            "start": 21,
+            "surface": "saved",
+            "term": "save"
+          }
+        ]
+      },
+      "generationTerms": [
+        "restore",
+        "editor",
+        "session"
+      ],
+      "benefitBlends": [
+        "Mendraft",
+        "Repriscribe",
+        "Draftprise",
+        "Sereprise",
+        "Scribeprise",
+        "Quillprise",
+        "Ediprise",
+        "Edimend"
+      ],
+      "selectedBenefitBlends": [
+        "Sereprise",
+        "Ediprise"
+      ],
+      "durationMs": 651.5,
+      "traceFile": "trace-38.json.gz",
+      "sha256": "af37bf5efc71d5852c2a1123c5a9e274de67aa1fe5f75db7d68f5fbc406cf158"
+    },
+    {
+      "partition": "regression",
+      "auto": [
+        "Recenet",
+        "Utilit",
+        "Replank"
+      ],
+      "brief": "a utility that recovers damaged archive entries from replicas",
+      "seed": 13,
+      "old": [],
+      "current": [
+        "Reprise",
+        "MendEntry",
+        "Entryprise",
+        "Arstore"
+      ],
+      "status": "ready",
+      "frame": "recovery",
+      "relation": {
+        "property": {
+          "end": 47,
+          "role": "object",
+          "start": 40,
+          "surface": "entries",
+          "term": "entry"
+        },
+        "provenance": "editorial-object-relations-v1",
+        "subject": {
+          "end": 39,
+          "role": "object",
+          "start": 32,
+          "surface": "archive",
+          "term": "archive"
+        },
+        "supporting_terms": [
+          {
+            "end": 31,
+            "role": "object",
+            "start": 24,
+            "surface": "damaged",
+            "term": "damage"
+          },
+          {
+            "end": 61,
+            "role": "object",
+            "start": 53,
+            "surface": "replicas",
+            "term": "replica"
+          }
+        ]
+      },
+      "generationTerms": [
+        "restore",
+        "archive",
+        "entry"
+      ],
+      "benefitBlends": [
+        "Entryprise",
+        "Mendtry",
+        "Enreprise"
+      ],
+      "selectedBenefitBlends": [
+        "Entryprise"
+      ],
+      "durationMs": 380.30000000074506,
+      "traceFile": "trace-39.json.gz",
+      "sha256": "77a58c89a0a0265a88f0ea13f1e5ec0c43c53ddb97105b431f711377c8f8f513"
+    },
+    {
+      "partition": "regression",
+      "auto": [
+        "Mihenk",
+        "Specix",
+        "Probeora"
+      ],
+      "brief": "a tool that groups test failures by probable cause",
+      "seed": 13,
+      "old": [
+        "FailureShelf",
+        "Halka",
+        "GroupFailure"
+      ],
+      "current": [
+        "ShelfTest",
+        "Halka",
+        "ThreadTest",
+        "GroupFailure"
+      ],
+      "status": "ready",
+      "frame": "organization",
+      "relation": {
+        "property": {
+          "end": 32,
+          "role": "object",
+          "start": 24,
+          "surface": "failures",
+          "term": "failure"
+        },
+        "provenance": "editorial-object-relations-v1",
+        "subject": {
+          "end": 23,
+          "role": "object",
+          "start": 19,
+          "surface": "test",
+          "term": "test"
+        },
+        "supporting_terms": []
+      },
+      "generationTerms": [
+        "group",
+        "test",
+        "failure"
+      ],
+      "benefitBlends": [
+        "Speclio",
+        "Checklio",
+        "Focheck",
+        "Failthread",
+        "Folitest",
+        "Fospec",
+        "Folicheck",
+        "Folispec",
+        "Foprobe",
+        "Foliprobe",
+        "Failshelf"
+      ],
+      "selectedBenefitBlends": [],
+      "durationMs": 203.5,
+      "traceFile": "trace-40.json.gz",
+      "sha256": "192db35b42979e948aebeb746000c63dedcacc1f8722a79ec18e57f3d979633d"
+    },
+    {
+      "partition": "regression",
+      "auto": [
+        "Kinsignal",
+        "Alertia",
+        "Filterkin"
+      ],
+      "brief": "a utility that filters repeated alert messages during incidents",
+      "seed": 13,
+      "old": [
+        "AlertMesh",
+        "Valka",
+        "SieveAlert",
+        "Refilter"
+      ],
+      "current": [
+        "AlertMesh",
+        "Valka",
+        "Primessage",
+        "SieveAlert"
+      ],
+      "status": "ready",
+      "frame": "selection",
+      "relation": {
+        "property": {
+          "end": 46,
+          "role": "object",
+          "start": 38,
+          "surface": "messages",
+          "term": "message"
+        },
+        "provenance": "editorial-object-relations-v1",
+        "subject": {
+          "end": 37,
+          "role": "object",
+          "start": 32,
+          "surface": "alert",
+          "term": "alert"
+        },
+        "supporting_terms": [
+          {
+            "end": 31,
+            "role": "object",
+            "start": 23,
+            "surface": "repeated",
+            "term": "repeat"
+          }
+        ]
+      },
+      "generationTerms": [
+        "filter",
+        "alert",
+        "message"
+      ],
+      "benefitBlends": [
+        "Pribond",
+        "Primessage",
+        "Cimesh"
+      ],
+      "selectedBenefitBlends": [
+        "Primessage"
+      ],
+      "durationMs": 210.90000000223517,
+      "traceFile": "trace-41.json.gz",
+      "sha256": "a0e1a789ea72fefd6d4d22c610fe38d72aa65a80de7b6892e4f9a4a0a369e248"
+    },
+    {
+      "partition": "regression",
+      "auto": [
+        "Portolan",
+        "DepNode",
+        "Bumpify"
+      ],
+      "brief": "a tool that maps module dependencies across packages",
+      "seed": 13,
+      "old": [
+        "ModuleChart",
+        "Portolan",
+        "Harita",
+        "WeaveModule"
+      ],
+      "current": [
+        "ModuleChart",
+        "Portolan",
+        "WeaveModule",
+        "Harita"
+      ],
+      "status": "ready",
+      "frame": "topology",
+      "relation": {
+        "property": {
+          "end": 36,
+          "role": "object",
+          "start": 24,
+          "surface": "dependencies",
+          "term": "dependency"
+        },
+        "provenance": "editorial-object-relations-v1",
+        "subject": {
+          "end": 23,
+          "role": "object",
+          "start": 17,
+          "surface": "module",
+          "term": "module"
+        },
+        "supporting_terms": []
+      },
+      "generationTerms": [
+        "map",
+        "module",
+        "dependency"
+      ],
+      "benefitBlends": [
+        "Bumplas",
+        "Weavedate",
+        "Deplas",
+        "Chartdate",
+        "Atdency",
+        "Atlasdate",
+        "Chartdency",
+        "Depenweave",
+        "Depenchart",
+        "Atbump",
+        "Atupdate"
+      ],
+      "selectedBenefitBlends": [],
+      "durationMs": 356.9000000022352,
+      "traceFile": "trace-42.json.gz",
+      "sha256": "58437fe69c7a5f8beae0de8b542c31a36a13bf498aaf3a9a50566cd65d8093af"
+    },
+    {
+      "partition": "regression",
+      "auto": [
+        "Tokok",
+        "Detnit",
+        "Accoll"
+      ],
+      "brief": "a utility that detects exposed access tokens before uploads",
+      "seed": 13,
+      "old": [
+        "Seismograph",
+        "Sarraf"
+      ],
+      "current": [
+        "Seismograph",
+        "Triptoken",
+        "Sarraf",
+        "Lantoken"
+      ],
+      "status": "ready",
+      "frame": "exposure",
+      "relation": {
+        "property": {
+          "end": 44,
+          "role": "object",
+          "start": 38,
+          "surface": "tokens",
+          "term": "token"
+        },
+        "provenance": "editorial-object-relations-v1",
+        "subject": {
+          "end": 37,
+          "role": "object",
+          "start": 31,
+          "surface": "access",
+          "term": "access"
+        },
+        "supporting_terms": [
+          {
+            "end": 30,
+            "role": "object",
+            "start": 23,
+            "surface": "exposed",
+            "term": "expose"
+          }
+        ]
+      },
+      "generationTerms": [
+        "detect",
+        "access",
+        "token"
+      ],
+      "benefitBlends": [
+        "Triptoken",
+        "Lantoken",
+        "Tripken",
+        "Totinel",
+        "Tripwiken"
+      ],
+      "selectedBenefitBlends": [
+        "Triptoken",
+        "Lantoken"
+      ],
+      "durationMs": 212,
+      "traceFile": "trace-43.json.gz",
+      "sha256": "21838ed027e202e3149e12f1b114704003b1ae267981677a8110e9daee144643"
+    }
+  ]
+}

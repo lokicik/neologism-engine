@@ -1,0 +1,31 @@
+cold Auto pages: 90
+repaired pages: 26/90
+direct average quality: 83.67
+repaired average quality: 83.74
+direct / repaired sub-75: 7 / 0
+repaired near-duplicate pairs: 31
+repaired mean pair similarity: 0.189
+multiple-accent pages: 0/90 (max 1)
+strong lead reorder: 56/90 · quality 82.87 -> 85.81 · coverage 1.29 · suffix first 41 -> 8 · guided first 53
+justified near-tie trades: 2 · max quality loss 0.50
+targeted retry/set changes: Shieldify -> Kinloom, Poolify -> PayMate, Fluxora -> Kitwave, Bufferia -> Bufferlab, Vitalia -> RepLoop, Vitalia -> RepLoop
+own brief: brandable:Keyloom, brandable:Lexify, brandable:LexMint, brandable:Keyscope, reason:Creatic, brandable:Nomion, brandable:Markalias, brandable:Mintalias, brandable:Nomify, brandable:Lexora
+PASS  every repaired cold page contains ten names
+PASS  repair uses either no fallback or the bounded 30-name pool
+PASS  cold repair preserves Auto's one-accent visible-page contract
+PASS  the targeted retry closes exactly six fixed gaps
+PASS  only targeted retry pages change the repaired name set
+PASS  each change is a bounded lead retry or a diversity-safe two-point semantic/Brandable set upgrade
+PASS  any first-card quality trade stays inside the semantic/guided near-tie rule
+PASS  the fixed matrix retains two or three justified near-tie promotions
+PASS  first-card structural quality loss never exceeds half a point
+PASS  strong lead ordering never lowers first-card concept coverage
+PASS  ordered first-card structural quality stays at or above 85.4
+PASS  ordered first-card concept coverage stays at or above 1.23
+PASS  direct suffix leads stay at or below ten of ninety pages
+PASS  weak pages activate the offline repair pool
+PASS  no repaired cold Auto name falls below 75 structural quality
+PASS  repaired cold Auto quality stays at or above 83.24
+PASS  repaired cold Auto near-duplicate pairs stay at or below 41
+PASS  repaired cold Auto mean pair similarity stays at or below 0.2
+cold Auto quality audit: all gates passed

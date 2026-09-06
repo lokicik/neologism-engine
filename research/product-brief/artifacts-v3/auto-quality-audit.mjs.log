@@ -1,0 +1,9 @@
+weak Brandable context forms: 0
+quality-gated metaphor forms: 68 (39 unique)
+reviewed Respell forms: Vyntage:5, Edytor:5, Anymal:5
+
+Auto accent relevance
+reason: 56/56 prompt-linked
+respell: 15/15 prompt-linked
+all accents: 71/71 prompt-linked
+PASS  all 85 Auto pages contain ten names, no weak context forms or lossy seams, at most one prompt-linked mode accent, and at most two distinct 85+ metaphor forms

@@ -1,0 +1,27 @@
+PASS  promptless: shortlist holds two to four finalists (3)
+PASS  promptless: the rest of the batch stays behind the reveal
+PASS  promptless: the reveal names the batch size (Show all 10 names)
+PASS  promptless: every finalist states its case
+PASS  promptless: every finalist shows the name in three real contexts
+PASS  promptless: every finalist carries its availability
+PASS  promptless: at least two finalists carry a full case (3/3)
+PASS  "a self hosted password manager": shortlist holds two to four finalists (3)
+PASS  "a self hosted password manager": the rest of the batch stays behind the reveal
+PASS  "a self hosted password manager": the reveal names the batch size (Show all 10 names)
+PASS  "a self hosted password manager": every finalist states its case
+PASS  "a self hosted password manager": every finalist shows the name in three real contexts
+PASS  "a self hosted password manager": every finalist carries its availability
+PASS  "a self hosted password manager": a batch with a chain leads the shortlist with it (chain in batch: false, full cases: 0/3)
+PASS  "a terminal log viewer": shortlist holds two to four finalists (3)
+PASS  "a terminal log viewer": the rest of the batch stays behind the reveal
+PASS  "a terminal log viewer": the reveal names the batch size (Show all 10 names)
+PASS  "a terminal log viewer": every finalist states its case
+PASS  "a terminal log viewer": every finalist shows the name in three real contexts
+PASS  "a terminal log viewer": every finalist carries its availability
+PASS  "a terminal log viewer": a batch with a chain leads the shortlist with it (chain in batch: false, full cases: 1/3)
+PASS  the reveal opens the full batch (10 cards)
+PASS  the finalists stay on the page when the batch is revealed
+PASS  the reveal control offers the way back
+PASS  shortlist paths produce zero page errors ([])
+
+25/25 checks passed

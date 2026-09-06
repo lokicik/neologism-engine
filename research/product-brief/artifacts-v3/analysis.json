@@ -1,0 +1,108 @@
+{
+  "summary": {
+    "previousFrameReplays": 30,
+    "conditions": 44,
+    "repeats": 44,
+    "continuations": 44,
+    "controls": 7,
+    "paraphrasePairs": 16,
+    "identicalFrameMaterial": 16,
+    "identicalFinalists": 16,
+    "regressionBriefs": 12,
+    "previousNonempty": 11,
+    "currentNonempty": 12,
+    "seamblend": {
+      "initial": {
+        "returned": 288,
+        "eligible": 19,
+        "missingObject": 132
+      },
+      "bounded": {
+        "returned": 218,
+        "eligible": 104,
+        "missingObject": 69
+      },
+      "final": {
+        "returned": 193,
+        "eligible": 91,
+        "missingObject": 71
+      }
+    },
+    "humanQualityGate": "pending; thresholds unchanged",
+    "qualityImprovementEstablished": false
+  },
+  "assistantReview": [
+    {
+      "brief": "a tool that verifies archive signatures before extraction",
+      "suggestion": "ArchiveProof",
+      "rationale": "Arşiv ve doğrulama bağlantısı açık; önceki sürümde de vardı.",
+      "method": "assistant, source-visible; not human validation or training"
+    },
+    {
+      "brief": "a utility that checks manifest hashes before installation",
+      "suggestion": "HashSeal",
+      "rationale": "Hash ile onay/mühür ilişkisini anlaşılır biçimde taşıyor; önceki sürümde de vardı.",
+      "method": "assistant, source-visible; not human validation or training"
+    },
+    {
+      "brief": "a tool that measures query latency during load tests",
+      "suggestion": "QueryGauge",
+      "rationale": "Sorgu–gecikme ilişkisi korunduğu için QueryGauge yeniden aday olabiliyor.",
+      "method": "assistant, source-visible; not human validation or training"
+    },
+    {
+      "brief": "a utility that compares storage costs across regions",
+      "suggestion": "StorageGauge",
+      "rationale": "Depolama maliyeti ölçümünü çağrıştırıyor; kısa bir açıklama adı olmaya yakın.",
+      "method": "assistant, source-visible; not human validation or training"
+    },
+    {
+      "brief": "a tool that tracks queue depth during traffic spikes",
+      "suggestion": "QueueWatch",
+      "rationale": "Kuyruk izlemeyi doğrudan anlatıyor; önceki sürümde de vardı.",
+      "method": "assistant, source-visible; not human validation or training"
+    },
+    {
+      "brief": "a utility that records process activity during debugging",
+      "suggestion": "ProcessWatch",
+      "rationale": "İşlem izlemeyi doğrudan anlatıyor; önceki sürümde de vardı.",
+      "method": "assistant, source-visible; not human validation or training"
+    },
+    {
+      "brief": "a tool that restores saved editor sessions after crashes",
+      "suggestion": "Reprise",
+      "rationale": "Önceki duruma geri dönüş metaforu; diğer yeni birleşimlerden daha doğal buluyorum.",
+      "method": "assistant, source-visible; not human validation or training"
+    },
+    {
+      "brief": "a utility that recovers damaged archive entries from replicas",
+      "suggestion": "Entryprise",
+      "rationale": "Entry + reprise. Enterprise çağrışımı da var; yeni birleşimler içinde denemeye değer buluyorum.",
+      "method": "assistant, source-visible; not human validation or training"
+    },
+    {
+      "brief": "a tool that groups test failures by probable cause",
+      "suggestion": "Halka",
+      "rationale": "Gruplama için halka metaforu; biçimsel birleşimlerden daha doğal buluyorum.",
+      "method": "assistant, source-visible; not human validation or training"
+    },
+    {
+      "brief": "a utility that filters repeated alert messages during incidents",
+      "suggestion": "Primessage",
+      "rationale": "Prism + message. Yeni birleşimler içinde akıcı buluyorum; prime message şeklinde de okunabilir.",
+      "method": "assistant, source-visible; not human validation or training"
+    },
+    {
+      "brief": "a tool that maps module dependencies across packages",
+      "suggestion": "Portolan",
+      "rationale": "Haritalama metaforu; Auto zaten bu adı sunuyordu.",
+      "method": "assistant, source-visible; not human validation or training"
+    },
+    {
+      "brief": "a utility that detects exposed access tokens before uploads",
+      "suggestion": "Lantoken",
+      "rationale": "Lantern + token. Söylenişini denemeye değer buluyorum; güvenlik anlamı açıklama olmadan zayıf.",
+      "method": "assistant, source-visible; not human validation or training"
+    }
+  ]
+}

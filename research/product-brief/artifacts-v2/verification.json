@@ -1,0 +1,10 @@
+{
+  "previousFrameReplays": 30,
+  "conditions": 44,
+  "repeats": 44,
+  "continuations": 44,
+  "controls": 7,
+  "paraphrasePairs": 16,
+  "identicalFrameMaterial": 16,
+  "identicalFinalists": 16
+}
