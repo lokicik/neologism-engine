@@ -1,0 +1,18 @@
+PASS skip link reaches main content by keyboard
+PASS Lab has its own query route
+PASS all existing methods stay in one Lab selector
+PASS Product names Lab still generates finalists
+PASS Lab generation cannot replace Create results
+PASS AI Studio remains a separate tool
+PASS browser Back restores the routed view and title
+PASS Settings does not replace the underlying route
+PASS Settings closes with Escape
+PASS About stays under Tools
+PASS existing share links open Saved and stay separate from preferences
+PASS Undo of a share-only name never creates a like
+PASS shared names have no fabricated scores
+PASS comparison carries existing check observations and source rather than guessing availability
+PASS failed Undo retains durable data and offers retry
+PASS Undo retries successfully after a storage failure
+PASS navigation and shared-name flows produce no uncaught errors
+PASS 17 checks

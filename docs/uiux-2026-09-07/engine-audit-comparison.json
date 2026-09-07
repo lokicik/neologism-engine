@@ -1,0 +1,17 @@
+{
+  "auto-quality-audit": {
+    "unchangedOutput": true
+  },
+  "heldout-cold-quality-audit": {
+    "unchangedOutput": true
+  },
+  "cold-quality-audit": {
+    "unchangedOutput": true
+  },
+  "taste-quality-audit": {
+    "unchangedOutput": true
+  },
+  "mode-taste-audit": {
+    "unchangedOutput": true
+  }
+}

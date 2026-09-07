@@ -1,0 +1,119 @@
+{
+  "viewports": [
+    {
+      "width": 320,
+      "overflow": false,
+      "columns": 1,
+      "smallTargets": [],
+      "font": "Inter, sans-serif",
+      "reducedMotion": "0s",
+      "drawer": {
+        "x": 0,
+        "y": 0,
+        "width": 305,
+        "height": 844
+      }
+    },
+    {
+      "width": 390,
+      "overflow": false,
+      "columns": 1,
+      "smallTargets": [],
+      "font": "Inter, sans-serif",
+      "reducedMotion": "0s",
+      "drawer": {
+        "x": 0,
+        "y": 0,
+        "width": 375,
+        "height": 844
+      }
+    },
+    {
+      "width": 768,
+      "overflow": false,
+      "columns": 2,
+      "smallTargets": [],
+      "font": "Inter, sans-serif",
+      "reducedMotion": "0s",
+      "drawer": {
+        "x": 233,
+        "y": 0,
+        "width": 520,
+        "height": 1000
+      }
+    },
+    {
+      "width": 1251,
+      "overflow": false,
+      "columns": 3,
+      "smallTargets": [],
+      "font": "Inter, sans-serif",
+      "reducedMotion": "0s",
+      "drawer": {
+        "x": 716,
+        "y": 0,
+        "width": 520,
+        "height": 1000
+      }
+    },
+    {
+      "width": 1440,
+      "overflow": false,
+      "columns": 3,
+      "smallTargets": [],
+      "font": "Inter, sans-serif",
+      "reducedMotion": "0s",
+      "drawer": {
+        "x": 905,
+        "y": 0,
+        "width": 520,
+        "height": 1000
+      }
+    }
+  ],
+  "contrasts": [
+    {
+      "selector": ".discovery-name",
+      "fg": "rgb(242, 242, 245)",
+      "bg": "rgb(20, 20, 24)",
+      "ratio": 16.443460038878857
+    },
+    {
+      "selector": ".discovery-hint",
+      "fg": "rgb(161, 161, 174)",
+      "bg": "rgb(20, 20, 24)",
+      "ratio": 7.195612779217011
+    },
+    {
+      "selector": ".command-go",
+      "fg": "rgb(255, 255, 255)",
+      "bg": "rgb(109, 86, 232)",
+      "ratio": 5.064394422698819
+    },
+    {
+      "selector": ".command-input",
+      "fg": "rgb(242, 242, 245)",
+      "bg": "rgb(20, 20, 24)",
+      "ratio": 16.443460038878857
+    },
+    {
+      "selector": ".discovery-actions button",
+      "fg": "rgb(242, 242, 245)",
+      "bg": "rgb(20, 20, 24)",
+      "ratio": 16.443460038878857
+    }
+  ],
+  "detailText": {
+    "fg": "rgb(161, 161, 174)",
+    "bg": "rgb(20, 20, 24)",
+    "ratio": 7.195612779217011,
+    "opacity": 1,
+    "fontSize": 14
+  },
+  "performance": {
+    "fixtureCards": 500,
+    "renderMs": 257.78710000000046,
+    "inputMs": 58.644900000000234,
+    "context": "Isolated Chromium on the development host; no CPU throttling."
+  }
+}

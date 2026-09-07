@@ -1,4 +1,4 @@
-import { useId, useRef } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import type { Config } from '../lib/engine'
 
 interface Props {
@@ -10,6 +10,14 @@ interface Props {
 
 const lengths = [ ['Any length', 4, 12], ['Short', 4, 6], ['Medium', 5, 9], ['Long', 8, 14] ] as const
 const creativity = [ ['Safe', .6, .15], ['Balanced', .85, .3], ['Wild', 1.2, .6] ] as const
+
+function ListInput({ values, placeholder, onChange }: { values: string[]; placeholder: string; onChange: (values: string[]) => void }) {
+  const [text, setText] = useState(values.join(', '))
+  const parse = (value: string) => value.split(',').map(item => item.trim()).filter(Boolean)
+  const identity = JSON.stringify(values)
+  useEffect(() => { if (JSON.stringify(parse(text)) !== identity) setText(values.join(', ')) }, [identity, text, values])
+  return <input value={text} placeholder={placeholder} onChange={event => { setText(event.target.value); onChange(parse(event.target.value)) }} />
+}
 
 export function CommandBar({ config, onChange, onGenerate, loading, buttonLabel = 'Generate', exhausted = false, tasteReferences, tasteReferenceError, onTasteReferencesChange }: Props) {
   const id = useId()
@@ -33,8 +41,8 @@ export function CommandBar({ config, onChange, onGenerate, loading, buttonLabel 
         {!catalog && <label>Creativity<select value={creative < 0 ? 'custom' : creative} onChange={event => { const value = creativity[Number(event.target.value)]; onChange({ ...config, temperature: value[1], variety: value[2] }) }}>{creative < 0 && <option value="custom">Custom creativity</option>}{creativity.map(([label], index) => <option key={label} value={index}>{label}</option>)}</select></label>}
         <label>Starts with<input maxLength={3} value={config.starts_with ?? ''} placeholder="e.g. z" onChange={event => set('starts_with', event.target.value || undefined)} /></label>
         <label>Contains<input maxLength={6} value={config.contains ?? ''} placeholder="e.g. ex" onChange={event => set('contains', event.target.value || undefined)} /></label>
-        <label>Exclude names<input value={config.exclude?.join(', ') ?? ''} placeholder="Separate names with commas" onChange={event => set('exclude', event.target.value.split(',').map(value => value.trim()).filter(Boolean))} /></label>
-        {config.variant === undefined && !config.compound && <label>Seed words<input value={config.roots?.join(', ') ?? ''} placeholder="e.g. sync, orbit" onChange={event => set('roots', event.target.value.split(',').map(value => value.trim()).filter(Boolean))} /></label>}
+        <label>Exclude names<ListInput values={config.exclude ?? []} placeholder="Separate names with commas" onChange={values => set('exclude', values)} /></label>
+        {config.variant === undefined && !config.compound && <label>Seed words<ListInput values={config.roots ?? []} placeholder="e.g. sync, orbit" onChange={values => set('roots', values)} /></label>}
         {!catalog && <label className="reference-field">Reference names<input className="taste-reference-input" maxLength={240} value={tasteReferences} placeholder="Names you like, e.g. Linear, Notion" onChange={event => onTasteReferencesChange(event.target.value)} /><small>Optional examples for local ranking.</small>{tasteReferenceError && <small role="alert">{tasteReferenceError}</small>}</label>}
       </div>
     </details>

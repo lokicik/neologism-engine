@@ -1,0 +1,48 @@
+personalized pages: 100
+selected names: 1000
+average structural quality: 83.61 -> 85.32
+average taste affinity: -1.134 -> -0.778 (0.355)
+sub-75 names: 0
+three-plus prefix overflow: 0
+three-plus exact-ending overflow: 119
+four-plus exact-ending overflow: 0 (max 3)
+direct suffix forms / pages at cap / suffix-only / max: 578 / 33 / 0 / 8
+near-duplicate pairs: 207
+mean pair similarity: 0.193
+returned pool sizes: 29, 42, 43, 53, 60
+selected Respell accents: 20 pages · 1 unique
+  Desygn · 20 pages · a tool that syncs design tokens
+retry unique names: 278 -> 316 / 1000
+exact repeated retry pages: 40 -> 7
+  60  an offline naming engine for developer projects that checks npm and crates.io
+  53  a Rust CLI that processes logs
+  42/43  a secure password manager for teams
+  29  a tool that syncs design tokens
+  60  a local database inspector
+  taste -1.150 -> -0.646 (0.503)  Vercel, Linear, Notion
+  taste -1.162 -> -0.784 (0.379)  Stripe, Figma, Sentry
+  taste -1.246 -> -0.985 (0.261)  Docker, GitHub, Cloudflare
+  taste -0.976 -> -0.698 (0.279)  Supabase, Vite, Prisma
+  semantic engine 56/200 -> taste 67/200 (33.5%)  an offline naming engine for developer projects that checks npm and crates.io
+  semantic engine 12/200 -> taste 15/200 (7.5%)  a Rust CLI that processes logs
+  semantic engine 196/200 -> taste 190/200 (95.0%)  a secure password manager for teams
+  semantic engine 196/200 -> taste 160/200 (80.0%)  a tool that syncs design tokens
+  semantic engine 200/200 -> taste 200/200 (100.0%)  a local database inspector
+PASS  every page selects 10 names after requesting an expanded pool of up to 60
+PASS  no selected name falls below the structural quality floor
+PASS  personalized pages surface only reviewed Respell forms
+PASS  no visible page contains more than two names per prefix family
+PASS  no visible page contains more than three names per exact ending
+PASS  three-name ending families stay bounded across the matrix
+PASS  average structural quality stays at or above 85.2
+PASS  reference affinity stays within the retained floor
+PASS  local taste improves average affinity over engine order
+PASS  every reference family gains meaningful affinity
+PASS  near-duplicate pairs stay at or below 230
+PASS  mean pair similarity stays at or below 0.22
+PASS  direct root-plus-suffix forms stay below the retained ceiling
+PASS  no personalized page is only suffix templates
+PASS  seed-aware taste adds at least 30 fresh names across repeated first pages
+PASS  no more than ten seeded retries reproduce an exact prior page
+PASS  taste keeps at least 70% of the engine first page's specialized meaning
+personalized taste quality audit: all gates passed

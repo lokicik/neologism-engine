@@ -1,0 +1,27 @@
+PASS 320px: no horizontal overflow and expected columns
+PASS 320px: 44px targets, inherited fonts, and reduced motion
+PASS 320px: Details fits the viewport
+PASS 320px: keyboard focus stays in Details
+PASS 390px: no horizontal overflow and expected columns
+PASS 390px: 44px targets, inherited fonts, and reduced motion
+PASS 390px: Details fits the viewport
+PASS 390px: keyboard focus stays in Details
+PASS 390px: comparison scroll stays inside its dialog
+PASS 768px: no horizontal overflow and expected columns
+PASS 768px: 44px targets, inherited fonts, and reduced motion
+PASS 768px: Details fits the viewport
+PASS 768px: keyboard focus stays in Details
+PASS 1251px: no horizontal overflow and expected columns
+PASS 1251px: 44px targets, inherited fonts, and reduced motion
+PASS 1251px: Details fits the viewport
+PASS 1251px: keyboard focus stays in Details
+PASS 1440px: no horizontal overflow and expected columns
+PASS 1440px: 44px targets, inherited fonts, and reduced motion
+PASS 1440px: Details fits the viewport
+PASS 1440px: keyboard focus stays in Details
+PASS 1440px: comparison scroll stays inside its dialog
+PASS rendered primary text and controls meet 4.5:1 contrast
+PASS Details estimates remain readable without inherited small faint text
+PASS 500-card fixture and an 80-character name do not overflow
+PASS 500-card restore and editing remain responsive on this host
+PASS 26 checks

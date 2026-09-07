@@ -1,0 +1,105 @@
+import { runUiTest } from './ui-test-utils.mjs'
+
+await runUiTest(4254, async ({ browser, url, check }) => {
+  const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } })
+  const errors = []; const external = []
+  page.on('pageerror', error => errors.push(String(error)))
+  page.on('request', request => { if (/^https:/.test(request.url())) external.push(request.url()) })
+  await page.route('**/src/lib/discovery-generation.ts', async route => {
+    const response = await route.fetch()
+    const original = await response.text()
+    if (!original.includes('export async function generateDiscoveryPage')) throw new Error('Cannot install isolated generation fixture')
+    const body = original.replace('export async function generateDiscoveryPage', 'async function actualGenerateDiscoveryPage') + `
+      export async function generateDiscoveryPage(...args) {
+        const control = window.fixtureGeneration ??= { calls: 0, mode: 'real' };
+        control.calls++;
+        const mode = control.mode;
+        if (mode === 'delay') await new Promise(resolve => { control.resolve = resolve });
+        if (mode === 'error') throw new Error('Injected generation failure');
+        if (mode === 'empty') return [];
+        return actualGenerateDiscoveryPage(...args);
+      }
+    `
+    await route.fulfill({ response, body })
+  })
+  await page.goto(url)
+  const count = n => page.waitForFunction(n => document.querySelectorAll('.discovery-item').length === n, n)
+  const names = () => page.locator('.discovery-item').evaluateAll(nodes => nodes.map(node => node.getAttribute('aria-label')))
+  await count(10)
+  await page.evaluate(() => document.querySelector('.scroll-sentinel').scrollIntoView())
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.waitForTimeout(250)
+  check(await page.locator('.discovery-item').count() === 10, 'programmatic scroll and resize cannot chain generation')
+  await page.evaluate(() => scrollTo(0, 0))
+  await page.mouse.wheel(0, 12000)
+  await count(20)
+  await page.waitForTimeout(250)
+  check(await page.locator('.discovery-item').count() === 20, 'one downward scroll appends one page only')
+  for (let n = 30; n <= 100; n += 10) { await page.locator('.load-more').click(); await count(n) }
+  const hundred = await names()
+  check(new Set(hundred.map(name => name.toLowerCase())).size === 100, '100 real generated names contain no duplicates')
+  const initialHistory = await page.evaluate(() => localStorage.getItem('neologism:recent'))
+  await page.evaluate(() => { fixtureGeneration.mode = 'delay'; document.querySelector('.command-go').click(); document.querySelector('.command-go').click() })
+  await page.waitForFunction(() => typeof fixtureGeneration.resolve === 'function')
+  const calls = await page.evaluate(() => fixtureGeneration.calls)
+  await page.waitForTimeout(150)
+  check(await page.evaluate(() => fixtureGeneration.calls) === calls, 'rapid double click starts one pending generation')
+  await page.getByRole('button', { name: /^Saved/ }).first().click()
+  await page.evaluate(() => { fixtureGeneration.mode = 'real'; fixtureGeneration.resolve() })
+  await page.waitForTimeout(450)
+  check(await page.evaluate(() => localStorage.getItem('neologism:recent')) === initialHistory, 'late response cannot write seen-name history after leaving Create')
+  await page.getByRole('button', { name: 'Create', exact: true }).click()
+  check(JSON.stringify(await names()) === JSON.stringify(hundred), 'late response cannot alter the retained discovery')
+  await page.locator('.command-input').fill('a config validator')
+  await page.evaluate(() => { fixtureGeneration.mode = 'error' })
+  await page.locator('.command-go').click()
+  await page.getByRole('button', { name: 'Retry', exact: true }).waitFor()
+  check((await names()).length === 100 && await page.locator('.command-input').inputValue() === 'a config validator', 'generation failure preserves the old list and edited draft')
+  await page.evaluate(() => { fixtureGeneration.mode = 'real' })
+  await page.getByRole('button', { name: 'Retry', exact: true }).click()
+  await count(10)
+  check(await page.locator('.command-go').innerText() === 'More names', 'Retry successfully commits the requested discovery')
+  await page.evaluate(() => { fixtureGeneration.mode = 'empty' })
+  await page.locator('.command-go').click()
+  await page.locator('.exhausted-notice').waitFor()
+  check((await names()).length === 10 && await page.locator('.load-more').count() === 0, 'empty continuation preserves names and stops loading')
+  await page.locator('.command-input').fill('')
+  await page.evaluate(() => { fixtureGeneration.mode = 'real' })
+  await page.locator('.command-go').click()
+  await page.waitForFunction(() => !document.querySelector('.command-go').disabled)
+  check(await page.locator('.exhausted-notice').count() === 0, 'changing the brief recovers from exhaustion')
+  await page.locator('.generation-options summary').click()
+  await page.getByLabel('Exclude names', { exact: true }).pressSequentially('Alpha, Beta')
+  check(await page.getByLabel('Exclude names', { exact: true }).inputValue() === 'Alpha, Beta', 'comma separated exclusions can be typed naturally')
+  await page.getByLabel('Starts with', { exact: true }).fill('qzz')
+  await page.locator('.command-go').click()
+  await page.waitForTimeout(700)
+  await page.locator('.exhausted-notice').waitFor()
+  check((await names()).length === 0, 'an impossible constraint returns an honest empty pool')
+  await page.getByLabel('Starts with', { exact: true }).fill('')
+  await page.getByLabel('Contains', { exact: true }).fill('or')
+  await page.locator('.command-go').click()
+  await page.waitForFunction(() => !document.querySelector('.command-go').disabled || document.querySelector('.exhausted-notice'))
+  check((await names()).every(name => name.toLowerCase().includes('or')), 'Contains is preserved by UI generation')
+  await page.locator('.generation-options summary').click()
+  // Versioned session parsing is independent of durable Saved data.
+  const sessionChecks = await page.evaluate(async () => {
+    const { readDiscovery, writeDiscovery } = await import('/src/lib/discovery-session.ts')
+    const corrupt = readDiscovery({ getItem: () => '{bad' })
+    const denied = readDiscovery({ getItem() { throw new Error('denied') } })
+    const snapshot = JSON.parse(sessionStorage.getItem('neologism:discovery:v1'))
+    return { corrupt: !!corrupt.error && !corrupt.session, denied: !!denied.error, write: !!writeDiscovery({ setItem() { throw new Error('quota') } }, snapshot) }
+  })
+  check(Object.values(sessionChecks).every(Boolean), 'corrupt, denied, and unwritable session storage return recoverable warnings')
+  const corruptPage = await browser.newPage()
+  await corruptPage.addInitScript(() => sessionStorage.setItem('neologism:discovery:v1', '{bad'))
+  await corruptPage.goto(url)
+  await corruptPage.waitForSelector('.discovery-item')
+  check(await corruptPage.locator('.session-warning').isVisible(), 'a corrupt stored discovery still opens a usable Create page')
+  const deniedPage = await browser.newPage()
+  await deniedPage.addInitScript(() => { const set = Storage.prototype.setItem; Storage.prototype.setItem = function(key, value) { if (this === sessionStorage) throw new Error('fixture quota'); return set.call(this, key, value) } })
+  await deniedPage.goto(url)
+  await deniedPage.waitForSelector('.discovery-item')
+  check(await deniedPage.locator('.session-warning').isVisible(), 'unwritable storage shows a warning without breaking generation')
+  check(external.length === 0 && errors.length === 0, 'real discovery and fault recovery produce no external request or uncaught error')
+})

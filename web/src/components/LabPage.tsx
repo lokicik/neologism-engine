@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { CommandBar } from './CommandBar'
 import { CandidateLab, type LabRequest } from './CandidateLab'
 import { ProductNamesLab } from './ProductNamesLab'
@@ -35,6 +35,7 @@ export function LabPage({ favorites, rejected, references, referenceError, onRef
   const seed = useRef(randomSeed())
   const pool = method.endsWith('_pool')
   const experimental = pool || method === 'product_names'
+  const onBusy = useCallback((value: boolean) => { working.current = value; setBusy(value) }, [])
   useEffect(() => () => { run.current++; working.current = false }, [])
   function select(value: Method) {
     run.current++; working.current = false; setBusy(false); setRequest(null); setResults([]); setError(null); setExhausted(false); session.current = null
@@ -43,7 +44,7 @@ export function LabPage({ favorites, rejected, references, referenceError, onRef
   }
   async function generate(append = false) {
     if (working.current || busy) return
-    if (experimental) { setRequest({ id: ++run.current, config: { ...copyConfig(config), seed: randomSeed() } }); return }
+    if (experimental) { working.current = true; setBusy(true); setRequest({ id: ++run.current, config: { ...copyConfig(config), seed: randomSeed() } }); return }
     const token = ++run.current
     working.current = true; setBusy(true); setError(null)
     const input = copyConfig(append && session.current ? session.current : config)
@@ -60,7 +61,7 @@ export function LabPage({ favorites, rejected, references, referenceError, onRef
     <label className="lab-method">Method<select value={method} onChange={event => select(event.target.value as Method)}>{methods.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
     <CommandBar config={config} onChange={setConfig} loading={busy} onGenerate={() => void generate()} tasteReferences={references} tasteReferenceError={referenceError} onTasteReferencesChange={onReferencesChange} />
     {method === 'realword' && <p className="muted">Real words use a curated pool. Your brief does not affect this method.</p>}
-    {method === 'product_names' ? <ProductNamesLab request={request} onBusy={setBusy} /> : pool ? <CandidateLab key={method} request={request} onBusy={setBusy} /> : <>
+    {method === 'product_names' ? <ProductNamesLab request={request} onBusy={onBusy} /> : pool ? <CandidateLab key={method} request={request} onBusy={onBusy} /> : <>
       {error && <p role="alert" className="error-banner">{error}</p>}
       <div className="results-grid">{results.map((result, index) => <NameCard key={index + result.name} result={result} isFavorite={favorites.some(item => tasteIdentity(item) === tasteIdentity(result))} onToggleFavorite={onFavorite} isRejected={rejected.some(item => tasteIdentity(item) === tasteIdentity(result))} onToggleRejected={onRejected} />)}</div>
       {results.length > 0 && !exhausted && <button className="load-more" disabled={busy} onClick={() => void generate(true)}>More names</button>}

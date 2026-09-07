@@ -37,5 +37,15 @@ export async function generateDiscoveryPage(cfg: Config, input: {
       batch = fillColdLeadRetry(batch, await generateColdLeadRetry({ ...generationCfg, exclude: excluded }), pool)
     }
   }
-  return batch
+  // Some historical accent generators do not consume starts_with/contains.
+  // Enforce the user's explicit constraints at the UI boundary as well.
+  const normalize = (value: string) => value.trim().toLowerCase().normalize('NFC')
+  const excludedNames = new Set(excluded.map(normalize))
+  const starts = normalize(cfg.starts_with ?? '')
+  const contains = normalize(cfg.contains ?? '')
+  return batch.filter(item => {
+    const name = normalize(item.name)
+    return name.length >= (cfg.min_len ?? 0) && name.length <= (cfg.max_len ?? Infinity)
+      && name.startsWith(starts) && name.includes(contains) && !excludedNames.has(name)
+  })
 }

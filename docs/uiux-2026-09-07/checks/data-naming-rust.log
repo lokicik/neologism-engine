@@ -1,0 +1,243 @@
+   Compiling neologism-core v0.1.0 (C:\Users\LOKMAN\AppData\Local\Temp\neologism-uiux-20260907\index-check\core)
+   Compiling neologism-wasm v0.1.0 (C:\Users\LOKMAN\AppData\Local\Temp\neologism-uiux-20260907\index-check\wasm)
+warning: variable does not need to be mutable
+   --> core\examples\build_submorph_inventory.rs:155:9
+    |
+155 |     let mut register = |letters: &str, head: bool, parent: &str, pos_weight: f64,
+    |         ----^^^^^^^^
+    |         |
+    |         help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` on by default
+
+warning: `neologism-core` (example "build_submorph_inventory") generated 1 warning (run `cargo fix --example "build_submorph_inventory"` to apply 1 suggestion)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 7.15s
+     Running unittests src\lib.rs (C:\Users\LOKMAN\Desktop\personalProjects\neologism-engine\target\debug\deps\neologism_core-8997f9d2a4f05b88.exe)
+
+running 205 tests
+test blend::tests::compound_camelcases ... ok
+test blend::tests::drop_trailing_vowel ... ok
+test blend::tests::blend_micro_soft ... ok
+test blend::tests::blend_pin_interest ... ok
+test blend::tests::tech_suffix_of_stem_too_short ... ok
+test blend::tests::respell_classic_patterns ... ok
+test blend::tests::respell_never_identity_or_tiny ... ok
+test blend::tests::concept_transform_keeps_the_full_root_at_a_vowel_seam ... ok
+test blend::tests::naming_transform_gives_short_naming_roots_a_wider_palette ... ok
+test blend::tests::tech_suffix_of_no_suffix ... ok
+test blend::tests::semantic_join_preserves_short_roots ... ok
+test blend::tests::tech_suffix_of_recognized ... ok
+test blend::tests::respell_keeps_head_and_avoids_bad_endings ... ok
+test blend::tests::naming_transform_keeps_longer_roots_conservative ... ok
+test blend::tests::overlap_blend_merges_seam ... ok
+test connotation::tests::back_vowels_read_large ... ok
+test connotation::tests::front_vowels_read_small ... ok
+test blend::tests::tech_transform_never_lengthens_long_names ... ok
+test connotation::tests::tags_capped_and_nonempty ... ok
+test exclude::tests::edit1_equal_strings ... ok
+test exclude::tests::edit1_len_diff_two_false ... ok
+test exclude::tests::edit1_one_deletion ... ok
+test collision::tests::roundtrip_membership ... ok
+test exclude::tests::edit1_one_insertion ... ok
+test exclude::tests::edit1_one_substitution ... ok
+test exclude::tests::edit1_two_substitutions_false ... ok
+test exclude::tests::excludeset_exact ... ok
+test exclude::tests::excludeset_fuzzy_edit1 ... ok
+test exclude::tests::excludeset_fuzzy_false_no_extra_rejects ... ok
+test exclude::tests::excludeset_fuzzy_window_scopes_layers ... ok
+test collision::tests::embedded_bloom_knows_common_crates ... ok
+test exclude::tests::excludeset_max_window_matches_full_scope ... ok
+test exclude::tests::excludeset_stem_match ... ok
+test exclude::tests::excludeset_stem_reverse ... ok
+test exclude::tests::excludeset_unrelated_accepted ... ok
+test exclude::tests::stem_no_suffix ... ok
+test exclude::tests::stem_strips_suffix ... ok
+test keywords::tests::audience_terms_do_not_replace_an_unknown_product_domain ... ok
+test keywords::tests::compound_adjectives_follow_the_brief ... ok
+test keywords::tests::compound_adjectives_have_a_restrained_fallback ... ok
+test keywords::tests::ai_concepts_prefer_specific_cognitive_roots ... ok
+test keywords::tests::compound_continuation_broadens_only_after_the_focused_palette ... ok
+test keywords::tests::color_palette_briefs_add_viable_roots_and_drop_context_words ... ok
+test keywords::tests::compound_lexical_echoes_stay_narrow ... ok
+test keywords::tests::dedupes_stems ... ok
+test keywords::tests::compound_roots_drop_audience_and_modifier_terms ... ok
+test keywords::tests::broad_domains_use_distinctive_semantic_roots ... ok
+test keywords::tests::compound_prefers_specialized_dev_nouns_over_artifacts ... ok
+test keywords::tests::empty_text_yields_nothing ... ok
+test keywords::tests::dev_domain_modifiers_pair_with_domain_nouns ... ok
+test keywords::tests::disambiguates_common_consumer_product_contexts ... ok
+test keywords::tests::compound_pairing_keeps_roles_coherent ... ok
+test keywords::tests::education_wording_variants_keep_live_roots_and_drop_audience_context ... ok
+test keywords::tests::expands_held_out_developer_domains ... ok
+test keywords::tests::expands_developer_namespace_briefs_without_filesystem_leakage ... ok
+test keywords::tests::expands_legal_research_into_distinct_concepts ... ok
+test keywords::tests::expands_developer_naming_brief_into_contextual_roots ... ok
+test keywords::tests::extracts_content_words ... ok
+test keywords::tests::drops_context_only_words_beside_a_known_domain ... ok
+test keywords::tests::guided_ai_workflows_use_short_roles_only_in_their_lane ... ok
+test keywords::tests::expands_general_product_domains_on_synonym_prompts ... ok
+test keywords::tests::expands_second_wave_developer_domains ... ok
+test keywords::tests::guided_cloud_deployment_uses_sky_docking_roles_only_in_its_lane ... ok
+test keywords::tests::focuses_respell_sources_on_the_product_subject ... ok
+test keywords::tests::guided_household_catalogs_use_inventory_roles_only_in_their_lane ... ok
+test keywords::tests::guided_formatters_use_tool_roles_only_in_their_lane ... ok
+test keywords::tests::guided_feature_flags_use_flip_roles_only_in_their_lane ... ok
+test keywords::tests::guided_pairs_restore_suppressed_product_functions_only_in_their_lane ... ok
+test keywords::tests::guided_delivery_tracking_uses_shipping_operations_roles_only_in_its_lane ... ok
+test keywords::tests::guided_naming_tools_use_lex_roles_only_in_their_lane ... ok
+test keywords::tests::guided_recruiter_tracking_uses_hiring_workflow_roles_only_in_its_lane ... ok
+test keywords::tests::guided_shared_expense_pairs_use_concrete_roles_only_in_their_lane ... ok
+test keywords::tests::guided_sales_pipelines_use_revenue_roles_only_in_their_lane ... ok
+test keywords::tests::keeps_ai ... ok
+test keywords::tests::keeps_distinct_concepts_in_separate_groups ... ok
+test keywords::tests::keeps_context_words_when_no_domain_is_known ... ok
+test keywords::tests::keeps_offline_engine_words_for_unknown_briefs ... ok
+test keywords::tests::keeps_unknown_domain_words ... ok
+test keywords::tests::habit_routine_wording_variants_keep_live_roots_and_drop_delivery_context ... ok
+test keywords::tests::known_ai_domain_precedes_incidental_assistant_context ... ok
+test keywords::tests::orders_modifier_domain_then_function ... ok
+test keywords::tests::respects_limit ... ok
+test keywords::tests::legal_research_wording_variants_keep_domain_before_function ... ok
+test keywords::tests::low_scoring_domains_gain_short_distinctive_roots ... ok
+test keywords::tests::respell_sources_preserve_unknown_briefs ... ok
+test keywords::tests::stems_inflections ... ok
+test keywords::tests::message_queue_wording_variants_drop_delivery_and_audience_context ... ok
+test keywords::tests::rich_dev_palettes_replace_generic_artifacts_only_when_they_can ... ok
+test keywords::tests::specialized_context_drops_misleading_generic_concepts ... ok
+test markov::tests::deterministic_with_seed ... ok
+test keywords::tests::terminal_log_wording_variants_keep_terminal_roots_and_drop_role_context ... ok
+test markov::tests::log_likelihood_prefers_typical ... ok
+test metrics::tests::custom_relevance_survives_capped_selection ... ok
+test metrics::tests::batch_stats_basic ... ok
+test metrics::tests::composite_in_range ... ok
+test markov::tests::backoff_separates_brandlike_from_junk ... ok
+test metrics::tests::diversity_bounds ... ok
+test metrics::tests::mmr_increases_diversity ... ok
+test markov::tests::backoff_recovers_unseen_context ... ok
+test metrics::tests::zero_count_selects_nothing ... ok
+test morphemes::tests::compositions_handle_vowel_seams ... ok
+test metrics::tests::mmr_select_capped_max_cap_matches_mmr_select ... ok
+test phonemes::tests::alien_prefers_xzq ... ok
+test phonemes::tests::elvish_prefers_flowing_names ... ok
+test phonemes::tests::orcish_prefers_harsh_names ... ok
+test phonemes::tests::parse_known_variants ... ok
+test phonology::tests::arpabet_roundtrip_ignores_stress ... ok
+test phonology::tests::digraphs_map_to_single_phonemes ... ok
+test phonology::tests::doubled_consonants_collapse ... ok
+test morphemes::tests::dataset_loads_and_forms_are_clean ... ok
+test phonology::tests::magic_e_lengthens_the_vowel ... ok
+test phonology::tests::onset_maximization_splits_at_legal_onsets ... ok
+test metrics::tests::mmr_select_capped_limits_suffix_share ... ok
+test phonology::tests::phase_has_f_onset_and_magic_e ... ok
+test metrics::tests::mmr_select_capped_all_same_suffix_returns_full_count ... ok
+test phonology::tests::qu_and_x_expand ... ok
+test phonology::tests::rejects_non_alphabetic ... ok
+test phonology::tests::soft_c_and_g ... ok
+test phonology::tests::sonority_ranks ... ok
+test phonology::tests::spans_partition_the_word ... ok
+test phonology::tests::syllable_counts_match_intuition ... ok
+test phonology::tests::y_is_consonant_at_start_vowel_inside ... ok
+test phonotactics::tests::accepts_valid_fantasy ... ok
+test phonotactics::tests::rejects_long_consonant_run ... ok
+test phonotactics::tests::rejects_no_vowel ... ok
+test phonotactics::tests::sonority_accepts_natural_clusters ... ok
+test phonotactics::tests::sonority_rejects_unnatural_clusters ... ok
+test phonotactics::tests::syllable_count_works ... ok
+test score::tests::invented_word_high_novelty ... ok
+test score::tests::memorability_favors_short_punchy ... ok
+test score::tests::pronounceability_in_range ... ok
+test score::tests::real_word_low_novelty ... ok
+test reason::tests::kb_and_bridges_load ... ok
+test submorph::tests::inventory_loads_with_contract ... ok
+test reason::tests::knowledge_files_pass_lint ... ok
+test phonology::tests::aligned_spans_stay_anchored_to_letters ... ok
+test seamblend::tests::splice_fusions_hide_at_least_one_seam ... ok
+test phonology::tests::best_spanned_keeps_the_partition_contract ... ok
+test seamblend::tests::seam_guard_rejects_busharbor_class_reparses ... ok
+test seamblend::tests::overlap_fusion_finds_pinterest ... ok
+test phonology::tests::lexicon_beats_rules_for_real_words ... ok
+test tests::brand_appeal_orders_by_quality ... ok
+test semfield::tests::expands_known_keyword ... ok
+test semfield::tests::unknown_keyword_is_empty ... ok
+test semfield::tests::neighbors_are_not_the_key_itself ... ok
+test semfield::tests::respects_k_and_is_case_insensitive ... ok
+test tests::ambiguous_digraph_seam_only_flags_a_reparsed_root ... ok
+test submorph::tests::seamlessness_rejects_visible_assembly ... ok
+test tests::compound_mode_produces_compounds ... ok
+test tests::description_coverage_distinguishes_multi_concept_names ... ok
+test tests::compound_with_one_explicit_root_fills_the_batch ... ok
+test tests::compound_uses_description_keywords ... ok
+test seamblend::tests::different_seeds_can_reorder_but_share_no_rng_with_auto ... ok
+test seamblend::tests::generate_is_deterministic_and_respects_bounds ... ok
+test seamblend::tests::expansions_never_leak_as_names ... ok
+test tests::explain_decomposes_known_shapes ... ok
+test submorph::tests::generates_two_syllable_meaning_dense_names ... ok
+test tests::description_batch_is_diverse ... ok
+test morphemes::tests::deterministic_per_seed ... ok
+test tests::concept_ranking_balances_coinages_and_literal_joins ... ok
+test tests::generates_fantasy_names ... ok
+test tests::levenshtein_le2_matches_full ... ok
+test tests::metaphor_join_keeps_both_words_readable ... ok
+test tests::description_names_echo_keywords ... ok
+test tests::mimics_real_brand_flags_truncations ... ok
+test tests::multi_concept_names_use_a_reduced_suffix_bonus ... ok
+test tests::generates_scifi_names ... ok
+test reason::tests::coined_lane_mixes_in_with_chains ... ok
+test reason::tests::password_brief_reaches_lock_imagery_with_chains ... ok
+test tests::guided_metaphor_mode_stays_brief_linked_and_uses_safe_endings ... ok
+test tests::constraints_filter_output ... ok
+test tests::generates_bigtech_names ... ok
+test tests::description_drives_bigtech_roots ... ok
+test tests::concept_pair_mode_requires_two_groups_and_keeps_the_seam_visible ... ok
+test tests::mimics_indexed_matches_scan ... ok
+test tests::bigtech_names_within_syllable_cap ... ok
+test submorph::tests::page_shape_caps_hold ... ok
+test tests::description_mode_survives_exclusion ... ok
+test tests::seeded_output_is_deterministic ... ok
+test tests::single_concept_first_page_varies_its_shape ... ok
+test tests::no_mong_substring ... ok
+test tests::bigtech_excludes_common_words ... ok
+test tests::single_keyword_description_generates ... ok
+test morphemes::tests::light_brief_selects_light_morphemes_and_generates ... ok
+test submorph::tests::deterministic_per_seed ... ok
+test tests::realword_mode_emits_pool_words_only ... ok
+test tests::single_concept_compound_session_yields_100_fresh_names ... ok
+test tests::variant_sharpens_profile ... ok
+test tests::unknown_variant_matches_default_bigtech ... ok
+test tests::bigtech_avoids_brand_mimics ... ok
+test tests::respell_mode_emits_coinages_not_words ... ok
+test reason::tests::promptless_page_renders_with_variety ... ok
+test reason::tests::deterministic_and_seed_jitters_only_ties ... ok
+test tests::realword_mode_survives_exclusion ... ok
+test tests::single_viable_respell_accent_stays_tied_to_the_product_subject ... ok
+test tests::no_verbatim_corpus_reproduction ... ok
+test submorph::tests::promptless_pages_render_and_vary_by_seed ... ok
+test tests::description_session_yields_100_fresh_contextual_names ... ok
+test tests::single_keyword_session_yields_100_fresh_names ... ok
+test tests::naming_brief_reaches_smoother_coined_endings ... ok
+test tests::respell_prefers_description_keywords ... ok
+test reason::tests::stress_briefs_stay_covered ... ok
+test tests::large_selection_pool_opens_after_two_visible_pages ... ok
+test tests::prompted_compound_rejects_lexical_echoes ... ok
+test tests::prompted_compound_sustains_long_batches ... ok
+
+test result: ok. 205 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 29.97s
+
+     Running unittests src\lib.rs (C:\Users\LOKMAN\Desktop\personalProjects\neologism-engine\target\debug\deps\neologism_wasm-c80d5221afc8ccf3.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests neologism_core
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests neologism_wasm
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

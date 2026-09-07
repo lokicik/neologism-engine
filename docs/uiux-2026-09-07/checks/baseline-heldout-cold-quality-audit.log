@@ -1,0 +1,343 @@
+held-out cold pages: 105 + 111 wording stress pages
+average quality: 85.37 · lead 88.22 · coverage 1.40
+sub-75: 0 · near pairs 53 · similarity 0.187
+suffix leads: 6 · guided leads: 84
+AI agent average: 83.68 · direct semantic-pair pages 3/3
+AI assistant average: 87.53 · 15/30 unique · 6.67 overlap
+autonomous builder average: 85.87 · CogLoop leads 3/3
+CRM average: 82.55 · RevLoop leads 2/3
+formatter average: 83.60 · TidyKit leads 2/3
+household catalog average: 83.15 · StowLog leads 3/3
+recruiter tracking average: 82.89
+feature flag average: 83.46
+naming tool average: 87.65
+color palette average: 87.61 · 15/30 unique · 7.00 overlap
+legal research average: 83.97 · 19/30 unique · 4.67 overlap
+habit routine average: 84.53 · 24/30 unique · 2.00 overlap
+education average: 83.75 · 28/30 unique · 0.67 overlap
+terminal log average: 86.07 · 18/30 unique · 4.33 overlap
+message queue average: 85.01 · 26/30 unique · 1.67 overlap
+delivery tracking average: 86.30 · 17/30 unique · 5.67 overlap
+cloud deployment average: 83.18 · 22/30 unique · 3.33 overlap
+ShipOps leads: 3/3 canonical · 9/9 wording
+SkyDock leads: 3/3 canonical · 9/9 wording
+cloud wording diversity: 15/6.67 · 23/3.00 · 23/3.00
+cloud wording retries: 0 · Respells 0
+guarded repair upgrades: 8
+weak Respell accents: 0
+selected Respell accents: 18 pages · 4 unique
+selected lexical hazards: 0
+canonical construction shapes: suffix 456 (43.4%) · root+metaphor 359 (34.2%) · multi-concept 146 (13.9%) · Respell 12 (1.1%) · other 0 (0.0%)
+canonical template-match proxy: 961/1050 (91.5%) · 9.15/10 average · max 10/10
+canonical saturation pages: 23/105 at 10/10 · 98/105 at 9+ · 64/105 single-shape walls · 8/105 suffix walls
+canonical root-template subtotal: 7.76/10 average · 81/105 pages at 8+ · 9/105 pages at 10/10
+canonical dominant construction: 6.15/10 average · max 10/10 · 18/105 pages at 8+
+wording-stress construction shapes: suffix 426 (38.4%) · root+metaphor 434 (39.1%) · multi-concept 165 (14.9%) · Respell 6 (0.5%) · other 0 (0.0%)
+wording-stress template-match proxy: 1025/1110 (92.3%) · 29/111 pages at 10/10 · 83/111 single-shape walls
+seed diversity: 20.14/30 unique · 4.17/10 pair overlap · 0 duplicate pages
+dominant stem overflow: 1/105 pages · 1 excess cards
+fallback counts: 0, 14, 21, 23, 24, 25, 27, 28, 30
+
+AI workflow focus
+13 · CogLoop -> CogLoop · same set -> same set · CogLoop, Agentio, Logicia, Hudhud, Cognix, Cognora, Logicio, Agentix, Axiomia, Axiomix
+67 · CogLoop -> CogLoop · same set -> same set · CogLoop, Agentix, Cognify, Logicio, Axiomio, Hudhud, Cognora, Agentia, Axiomix, Logicix
+313 · CogLoop -> CogLoop · same set -> same set · CogLoop, Agentix, Cognify, Logicia, Axiomio, Delil, Cognora, Logicio, Agentia, Axiomix
+13 · CogLoop -> CogLoop · same set -> same set · CogLoop, Agentio, Logicia, Hudhud, Cognix, Cognora, Logicio, Agentix, Axiomia, Axiomix
+67 · CogLoop -> CogLoop · same set -> same set · CogLoop, Agentix, Cognify, Logicio, Axiomio, Hudhud, Cognora, Agentia, Axiomix, Logicix
+313 · CogLoop -> CogLoop · same set -> same set · CogLoop, Agentix, Cognify, Logicia, Axiomio, Delil, Cognora, Logicio, Agentia, Axiomix
+13 · CogLoop -> CogLoop · same set -> same set · CogLoop, Synthify, Agentix, Hudhud, Logicia, Axiomix, Agentia, Cognora, Axiomio, Logicix
+67 · CogLoop -> CogLoop · same set -> same set · CogLoop, Agentix, Cognify, Axiomio, Logicio, Hudhud, Cognix, Agentia, Axiomix, Logicia
+313 · CogLoop -> CogLoop · same set -> same set · CogLoop, Agentix, Cognify, Axiomio, Logicio, Delil, Agentia, Axiomix, Logicia, Neuralix
+13 · CogLoop -> CogLoop · same set -> same set · CogLoop, Logiclink, Agentio, Axiomlab, Cognify, Logicloom, Axiomlink, Hudhud, Agentix, Cognora
+67 · CogLoop -> CogLoop · same set -> same set · CogLoop, Logicbeam, Astrolab, Axiomloom, Agentix, Logicloom, Cognify, Cognix, Agentlink, Axiomix
+313 · CogLoop -> CogLoop · same set -> same set · CogLoop, Agentix, Logicio, Cognify, Logicflux, Tabir, Agentloom, Cognix, Logicvault, Synthia
+13 · CogLoop -> CogLoop · same set -> same set · CogLoop, Agentix, Logicseed, Cognify, Axiomio, Logicia, Daedal, Cognora, Agentio, Axiomix
+67 · CogLoop -> CogLoop · same set -> same set · CogLoop, Synthify, Logicio, Agentix, Cognora, Axiomia, Cognix, Logicseed, Agentseed, Axiomio
+313 · CogLoop -> CogLoop · same set -> same set · CogLoop, Agentix, Logicseed, Cognify, Creatic, Cognora, Logicio, Axiomio, Agentia, Axiomix
+
+formatter focus
+13 · TidyKit, Stylevault, Rulebeam, Tidyspring, Syntaxpeak, Stylegrid, Ruleflux, Indentia, Lintify, Lintix
+67 · Tidylink, Stylebeam, Lintify, Rulespark, Styleseed, Alignia, Indentix, Argot, Lintloom, Ruleora
+313 · TidyKit, Rulevault, Lintify, Ferman, Ruleflow, Styleflux, Alignix, Indentix, Indentlink, Lintix
+
+recruiter tracking focus
+13 · candidate tracking software for recruiters · JobLoop, Scoutforge, Crewrelay, Talentix, Crewscope, Hirecraft, Hirespring, Talentbeam, Fylgja, Scoutpulse
+67 · candidate tracking software for recruiters · JobLoop, Crewora, Talentix, Spinnaker, Hirepath, Crewify, Hireora, Scoutloom, Talentia, Scoutora
+313 · candidate tracking software for recruiters · JobLoop, Hireflow, Crewora, Talentix, Izci, Crewify, Scoutforge, Hirepath, Talentlink, Hiretrail
+13 · a recruiting pipeline for talent teams · JobLoop, Scoutforge, Crewrelay, Talentix, Crewscope, Hirecraft, Hirespring, Talentbeam, Lonca, Scoutpulse
+67 · a recruiting pipeline for talent teams · JobLoop, Crewora, Talentix, Harambee, Hirepath, Crewify, Hireora, Scoutloom, Talentia, Scoutora
+313 · a recruiting pipeline for talent teams · JobLoop, Hireflow, Crewora, Talentix, Lonca, Crewify, Scoutforge, Hirepath, Talentlink, Hiretrail
+13 · an applicant tracking system for hiring teams · JobLoop, Scoutforge, Crewrelay, Talentix, Crewscope, Hirecraft, Hirespring, Talentbeam, Izci, Scoutpulse
+67 · an applicant tracking system for hiring teams · JobLoop, Crewora, Talentix, Harambee, Hirepath, Crewify, Hireora, Scoutloom, Talentia, Scoutora
+313 · an applicant tracking system for hiring teams · JobLoop, Hireflow, Crewora, Talentix, Izci, Crewify, Scoutforge, Hirepath, Talentlink, Hiretrail
+13 · a hiring pipeline for recruiters · JobLoop, Scoutforge, Crewrelay, Talentix, Crewscope, Hirecraft, Hirespring, Talentbeam, Praiver, Scoutpulse
+67 · a hiring pipeline for recruiters · JobLoop, Crewora, Talentix, Norn, Hireseed, Crewify, Hireora, Scoutloom, Talentia, Scoutora
+313 · a hiring pipeline for recruiters · JobLoop, Hireflow, Crewora, Talentix, Praiver, Crewify, Scoutforge, Hirepath, Talentlink, Hiretrail
+
+feature flag focus
+13 · a feature flag service · FlipOps, Launchora, Gatevault, Flagflux, Gateseed, Flagsignal, Azimut, Rolloutseed, Switchix, Gatetrail
+67 · a feature flag service · FlipOps, Flagora, Azimut, Gateseed, Rolloutia, Gatebeam, Gateora, Flaglumen, Rolloutloom, Launchia
+313 · a feature flag service · FlipOps, Flagora, Featic, Gateloom, Gateora, Gateseed, Flagflux, Launchix, Togglevault, Switchix
+13 · feature toggle management for developers · FlipOps, Flagora, Switchify, Rolloutio, Launchia, Gateora, Bytebeam, Flagify, Gatekit, Rolloutkit
+67 · feature toggle management for developers · Kitwave, Flagora, Brigid, Launchia, Rolloutio, Gatekit, Flagstack, Gateora, FlipOps, Rolloutkit
+313 · feature toggle management for developers · Kitwave, Flagora, Daedal, Gatekit, FlipOps, Rolloutio, Flagnode, Gateora, Launchia, Rolloutkit
+13 · a feature rollout control service · FlipOps, Flagora, Falconer, Rolloutio, Flagify, Gateseed, Gateora, Launchix, Switchio, Gateia
+67 · a feature rollout control service · Flaglab, Flagora, Koru, FlipOps, Rolloutio, Gateora, Flagify, Launchia, Switchia, Gateix
+313 · a feature rollout control service · FlipOps, Flagora, Savak, Launchia, Rolloutio, Gateora, Gateseed, Flagix, Gateify, Switchio
+13 · a platform for feature flags · FlipOps, Launchora, Gatevault, Flagflux, Gateseed, Flagsignal, Azimut, Rolloutseed, Switchix, Gatetrail
+67 · a platform for feature flags · FlipOps, Flagora, Azimut, Gateseed, Rolloutia, Gatebeam, Gateora, Flaglumen, Rolloutloom, Launchia
+313 · a platform for feature flags · FlipOps, Flagora, Featic, Gateloom, Gateora, Gateseed, Flagflux, Launchix, Togglevault, Switchix
+
+naming tool focus
+13 · a naming tool for new products · LexLoom, Mintify, Marken, Nomera, Lexify, Mintel, Nombeam, Nomion, Sozluk, Markio
+67 · a naming tool for new products · LexLoom, Lexify, Mintel, Nomion, Lexia, Nomlink, Mintify, Meatex, Markora, Marken
+313 · a naming tool for new products · LexLoom, Mintel, Nomora, Markio, Nomify, Lexpeak, Lexia, Mahlas, Markora, Mintify
+13 · an offline naming engine for developer projects · LexLoom, Lexify, Nomora, Mintix, Marken, Nomion, Nomlink, Creatic, Markalias, Mintalias
+67 · an offline naming engine for developer projects · Keyloom, Lexia, Mintel, Nomera, Marken, Nomio, Markalias, Mintify, Mahlas, Nomalias
+313 · an offline naming engine for developer projects · Keyloom, Lexia, Marken, Nomify, Mintix, Creatic, Mintalias, Nomio, Lexora, Markalias
+13 · a tool that generates product names · LexLoom, Markforge, Nomforge, Markseed, Lexia, Nombeam, Nomion, Marken, Sozluk, Lexio
+67 · a tool that generates product names · LexLoom, Lexify, Markel, Nomora, Nomion, Lexia, Mahlas, Markforge, Marken, Nomforge
+313 · a tool that generates product names · LexLoom, Nomora, Marken, Lexia, Nomion, Markora, Markseed, Nomforge, Lexion, Sozluk
+13 · find available package names for developers · LexLoom, Lexify, Nomora, Creatic, Tagsignal, Nomio, Lexion, Marken, Mintify, Markalias
+67 · find available package names for developers · LexLoom, Mintalias, Scopekey, Markora, Markel, Nomio, Kura, Mintify, Lexia, Nomora
+313 · find available package names for developers · Keylink, Lexify, LexLoom, Markify, Lexia, Mintify, Markalias, Scopekey, Nomio, Nomen
+
+color palette focus
+13 · a color palette and visual design tool · Pixelix, Canvasia, Prismora, Vysual, Tintify, Toneora, Prismify, Pixelia, Toneseed, Strucder
+67 · a color palette and visual design tool · Toneseed, Prismora, Canvasio, Pixelio, Vysual, Tintify, Toneora, Prismify, Iris, Pixelia
+313 · a color palette and visual design tool · Toneloom, Prismora, Canvasio, Tintify, Vysual, Pixelia, Toneora, Prismify, Pixelio, Canvasix
+13 · a visual color system for designers · Pixelix, Canvasia, Prismora, Vysual, Tintify, Toneora, Prismify, Pixelia, Toneseed, Strucder
+67 · a visual color system for designers · Toneseed, Prismora, Canvasio, Pixelio, Vysual, Tintify, Toneora, Prismify, Adinkra, Pixelia
+313 · a visual color system for designers · Toneloom, Prismora, Canvasio, Tintify, Vysual, Pixelia, Toneora, Prismify, Pixelio, Canvasix
+13 · a palette tool for visual designers · Toneloom, Prismora, Canvasio, Pixelix, Vysual, Huetone, Prismify, Canvasia, Pixelia, Hueora
+67 · a palette tool for visual designers · Pixelio, Iris, Prismora, Vysual, Prismia, Pixelix, Canvastint, Huetone, Pixellab, Hueora
+313 · a palette tool for visual designers · Pixelix, Prismora, Canvasio, Vysual, Prismify, Huetone, Pixelio, Canvastint, Toneloom, Hueora
+13 · a color scheme generator · Pixelix, Takvim, Prismify, Tonebeam, Huesignal, Pixellab, Prismora, Toneloom, Canvasseed, Tonespring
+67 · a color scheme generator · Toneseed, Pixellab, Canvasseed, Prismora, Hueloom, Toneflow, Tintrelay, Pixelloom, Altair, Tintify
+313 · a color scheme generator · Toneflow, Canvaspath, Toneflux, Prismora, Tonevault, Tintrelay, Pixelloom, Pixelio, Takvim, Pixelix
+
+legal research focus
+13 · legal research for court cases · LexCite, Brieflens, Memoora, Gavelio, Lawtrace, Gavellab, Docketlens, Briefify, Memolens, Lawify
+67 · legal research for court cases · LexCite, Brieftrace, Memolens, Docketlens, Lawsource, Tracelab, Brieflens, Juryproof, Memoify, Gavellens
+313 · legal research for court cases · LexCite, Docketlens, Brieftrace, Docketix, Lawsource, Briefbeam, Gavellens, Memolens, Clauselens, Gavelio
+13 · case law research for attorneys · LexCite, Brieflens, Memoora, Gavelio, Lawtrace, Gavellab, Docketlens, Briefify, Memolens, Lawify
+67 · case law research for attorneys · LexCite, Brieftrace, Memolens, Docketlens, Lawsource, Tracelab, Brieflens, Juryproof, Memoify, Gavellens
+313 · case law research for attorneys · LexCite, Docketlens, Brieftrace, Docketix, Lawsource, Briefbeam, Gavellens, Memolens, Clauselens, Gavelio
+13 · court opinion and citation search · LexCite, Brieflens, Memoora, Gavelio, Lawtrace, Gavellab, Docketlens, Briefify, Memolens, Lawify
+67 · court opinion and citation search · LexCite, Brieftrace, Memolens, Docketlens, Lawsource, Tracelab, Brieflens, Juryproof, Memoify, Gavellens
+313 · court opinion and citation search · LexCite, Docketlens, Brieftrace, Docketix, Lawsource, Briefbeam, Gavellens, Memolens, Clauselens, Gavelio
+13 · a legal precedent research tool · LexCite, Brieflens, Memoora, Gavelio, Lawtrace, Gavellab, Docketlens, Briefify, Memolens, Lawify
+67 · a legal precedent research tool · LexCite, Brieftrace, Memolens, Docketlens, Lawsource, Tracelab, Brieflens, Juryproof, Memoify, Gavellens
+313 · a legal precedent research tool · LexCite, Docketlens, Brieftrace, Docketix, Lawsource, Briefbeam, Gavellens, Memolens, Clauselens, Gavelio
+
+habit routine focus
+13 · routine and streak coaching · Beatlab, Chainforge, Dailyflow, Chainlink, Dailyvault, Beatloom, Habitbeam, Beatrelay, Rituallab, Dailygrid
+67 · routine and streak coaching · Dailyloom, Chainforge, Beatsignal, Lonca, Chainhive, Habitbeam, Beatify, Ritualix, Habitia, Dailygrid
+313 · routine and streak coaching · Beatlab, Streakpath, Dailyglow, Lonca, Beatora, Beatloom, Chainix, Habitio, Ritualia, Dailylink
+13 · a habit tracker for daily routines · Beatlab, Chainforge, Dailyflow, Chainlink, Dailyvault, Beatloom, Habitbeam, Beatrelay, Rituallab, Dailygrid
+67 · a habit tracker for daily routines · Dailyloom, Chainforge, Beatsignal, Meltem, Chainhive, Habitbeam, Beatify, Ritualix, Habitia, Dailygrid
+313 · a habit tracker for daily routines · Beatlab, Streakpath, Dailyflow, Fylgja, Beatora, Beatloom, Chainix, Habitio, Ritualia, Dailylink
+13 · streak and ritual coaching · Beatlab, Chainforge, Dailyflow, Chainlink, Dailyvault, Beatloom, Habitbeam, Beatrelay, Rituallab, Dailygrid
+67 · streak and ritual coaching · Dailyloom, Chainforge, Beatsignal, Lonca, Chainhive, Habitbeam, Beatify, Ritualix, Habitia, Dailygrid
+313 · streak and ritual coaching · Beatlab, Streakpath, Dailyglow, Lonca, Beatora, Beatloom, Chainix, Habitio, Ritualia, Dailylink
+13 · daily habit building and streak tracking · Beatlab, Chainforge, Dailyflow, Chainlink, Dailyvault, Beatloom, Habitbeam, Beatrelay, Rituallab, Dailygrid
+67 · daily habit building and streak tracking · Dailyloom, Chainforge, Beatsignal, Synvide, Chainhive, Habitbeam, Beatify, Ritualix, Habitia, Dailygrid
+313 · daily habit building and streak tracking · Beatlab, Streakpath, Dailyflow, Fylgja, Beatora, Beatloom, Chainix, Habitio, Ritualia, Dailylink
+
+education focus
+13 · an online course and study app · Dojobeam, Sageseed, Quizforge, Lorebeam, Tutorlab, Sageatlas, Quizrelay, Tutorio, Sagelink, Lorelink
+67 · an online course and study app · Quizlab, Sagepath, Quizlink, Lorevault, Tutorflux, Sagebeam, Tutoria, Quizsignal, Dojolink, Dojovault
+313 · an online course and study app · Sagelab, Sageflow, Quizloom, Loreseed, Tutorio, Lorelink, Quizify, Rahle, Dojoflow, Tutorlink
+13 · a learning app for online courses · Dojobeam, Sageseed, Quizforge, Lorebeam, Tutorlab, Sageatlas, Quizrelay, Tutorio, Sagelink, Lorelink
+67 · a learning app for online courses · Quizlab, Sagepath, Quizlink, Lorevault, Tutorflux, Sagebeam, Tutoria, Quizsignal, Dojolink, Dojovault
+313 · a learning app for online courses · Sagelab, Sageflow, Quizloom, Loreseed, Tutorio, Lorelink, Quizify, Solfege, Dojoflow, Tutorlink
+13 · study tools for students · Dojobeam, Sageseed, Quizforge, Lorebeam, Tutorlab, Sageatlas, Quizrelay, Divit, Sagelink, Loreseed
+67 · study tools for students · Quizlab, Sagepath, Quizlink, Lorevault, Tutorflux, Sagebeam, Daedal, Quizsignal, Dojolink, Dojovault
+313 · study tools for students · Sagelab, Sageflow, Quizloom, Loreseed, Tutorio, Lorelink, Quizify, Rahle, Dojoflow, Tutorlink
+13 · a course platform for learners · Dojobeam, Sageseed, Quizforge, Lorebeam, Tutorlab, Sageatlas, Quizrelay, Tutorio, Sagelink, Lorelink
+67 · a course platform for learners · Quizlab, Sagepath, Quizlink, Lorevault, Tutorflux, Sagebeam, Tutoria, Quizsignal, Dojolink, Dojovault
+313 · a course platform for learners · Sagelab, Sageflow, Quizloom, Loreseed, Tutorio, Lorelink, Quizify, Solfege, Dojoflow, Tutorlink
+
+terminal log focus
+13 · a terminal log viewer · Panebeam, Shellio, Termify, Corcept, Logbeacon, Paneora, Termix, Logix, Paneloom, Shellpulse
+67 · a terminal log viewer · Panebeam, Shellio, Termify, Paneora, Promptio, Logora, Traceseed, Logpulse, Promptora, Termora
+313 · a terminal log viewer · Panelink, Promptio, Termora, Logscope, Termix, Paneloom, Promptora, Shellpulse, Logix, Paneora
+13 · CLI log viewer for developers · Panebeam, Shellio, Termify, Farol, Logbeacon, Paneora, Termix, Logix, Paneloom, Shellpulse
+67 · CLI log viewer for developers · Panebeam, Shellio, Termify, Paneora, Promptio, Logora, Traceseed, Logpulse, Portolan, Termora
+313 · CLI log viewer for developers · Panelink, Promptio, Termora, Logscope, Termix, Paneloom, Promptora, Shellpulse, Logix, Paneora
+13 · terminal logs and command output monitor · Panebeam, Shellio, Termify, Promptora, Logbeacon, Paneora, Termix, Logix, Paneloom, Shellpulse
+67 · terminal logs and command output monitor · Panebeam, Shellio, Termify, Paneora, Promptio, Logora, Traceseed, Logpulse, Promptora, Termora
+313 · terminal logs and command output monitor · Panelink, Promptio, Termora, Logscope, Termix, Paneloom, Farol, Shellpulse, Logix, Paneora
+13 · a console log inspection tool · Panebeam, Shellio, Termify, Farol, Logbeacon, Paneora, Termix, Logix, Paneloom, Shellpulse
+67 · a console log inspection tool · Panebeam, Shellio, Termify, Paneora, Promptio, Logora, Traceseed, Logpulse, Ostraka, Termora
+313 · a console log inspection tool · Panelink, Promptio, Termora, Logscope, Termix, Paneloom, Promptora, Shellpulse, Logix, Paneora
+
+message queue focus
+13 · a message queue client · Pipeloom, Publink, Queueflow, Publoom, Brokerlab, Pipeseed, Menzil, Pipevault, Queuesignal, Topicia
+67 · a message queue client · Publink, Streamwave, Queueframe, Brokerbeam, Pipeloom, Topicpath, Pubsignal, Pipegrid, Publoom, Queuebeam
+313 · a message queue client · Publoom, Streamia, Queuetrace, Topicflux, Pipebeam, Queueforge, Kervan, Pipecraft, Brokerflux, Pipeora
+13 · message broker client for developers · Pipeloom, Publink, Queueflow, Publoom, Brokerlab, Pipeseed, Creatic, Pipevault, Queuesignal, Topicia
+67 · message broker client for developers · Publink, Streamwave, Queueframe, Brokerbeam, Pipeloom, Topicpath, Pubsignal, Pipegrid, Publoom, Queuebeam
+313 · message broker client for developers · Publoom, Streamia, Queuetrace, Topicflux, Pipebeam, Queueforge, Creatic, Pipecraft, Brokerflux, Pipeora
+13 · event streaming and queue monitoring · Pipeloom, Publink, Queueflow, Publoom, Brokerlab, Pipeseed, Kervan, Pipevault, Queuesignal, Topicia
+67 · event streaming and queue monitoring · Publink, Streamwave, Queueframe, Brokerbeam, Pipeloom, Topicpath, Pubsignal, Pipegrid, Publoom, Queuebeam
+313 · event streaming and queue monitoring · Publoom, Streamia, Queuetrace, Topicflux, Pipebeam, Queueforge, Kervan, Pipecraft, Brokerflux, Pipeora
+13 · an async message bus · Pipeloom, Publink, Queueflow, Publoom, Brokerlab, Pipeseed, Dovecote, Pipevault, Queuesignal, Topicia
+67 · an async message bus · Publink, Streamwave, Queueframe, Brokerbeam, Pipeloom, Topicpath, Pubsignal, Pipegrid, Publoom, Queuebeam
+313 · an async message bus · Publoom, Streamia, Queuetrace, Topicflux, Pipebeam, Queueforge, Ulak, Pipecraft, Brokerflux, Pipeora
+
+delivery tracking focus
+13 · a delivery tracking and logistics app · ShipOps, Relayix, Routeora, Fleetify, Dockora, Cargoora, Dockio, Cargoio, Fylgja, Fleetio
+67 · a delivery tracking and logistics app · ShipOps, Fleetix, Cargoora, Dockify, Hudhud, Routeora, Dockora, Cargoio, Relayora, Routeio
+313 · a delivery tracking and logistics app · ShipOps, Fleetix, Cargoora, Dockify, Routeora, Izci, Dockora, Relayora, Routeix, Fleetify
+13 · shipping operations and parcel tracking · ShipOps, Fleetlink, Cargoatlas, Cargolink, Relaygrid, Fleetforge, Dockpath, Fylgja, Relaycraft, Dockora
+67 · shipping operations and parcel tracking · ShipOps, Docklink, Cargolab, Routeatlas, Fleetsignal, Routeseed, Cargoloom, Dockora, Fleetix, Liman
+313 · shipping operations and parcel tracking · ShipOps, Docklink, Fleetpulse, Relayloom, Cargoflow, Fleetlink, Dockora, Relayflux, Cargoatlas, Cargolink
+13 · a parcel tracking dashboard for delivery teams · ShipOps, Fleetlink, Cargoatlas, Cargolink, Relaygrid, Fleetforge, Dockpath, Izci, Relaycraft, Dockora
+67 · a parcel tracking dashboard for delivery teams · ShipOps, Docklink, Cargolab, Routeatlas, Fleetsignal, Routeseed, Cargoloom, Dockora, Fleetix, Harambee
+313 · a parcel tracking dashboard for delivery teams · ShipOps, Docklink, Fleetpulse, Relayloom, Cargoflow, Fleetlink, Dockora, Relayflux, Cargoatlas, Cargolink
+13 · logistics dispatch and shipment tracking · ShipOps, Fleetlink, Cargoatlas, Cargolink, Relaygrid, Fleetforge, Dockpath, Fylgja, Relaycraft, Dockora
+67 · logistics dispatch and shipment tracking · ShipOps, Docklink, Cargolab, Routeatlas, Fleetsignal, Routeseed, Cargoloom, Dockora, Fleetix, Liman
+313 · logistics dispatch and shipment tracking · ShipOps, Docklink, Fleetpulse, Relayloom, Cargoflow, Fleetlink, Dockora, Relayflux, Cargoatlas, Cargolink
+
+cloud deployment focus
+13 · a cloud deployment dashboard · SkyDock, Cloudio, Stackora, Gridwave, Docklink, Shipora, Stackpeak, Dockora, Cloudora, Shiprelay
+67 · a cloud deployment dashboard · SkyDock, Cloudio, Gridwave, Stackora, Shipbeam, Cloudflux, Shippath, Gridify, Fylgja, Shipsignal
+313 · a cloud deployment dashboard · SkyDock, Cloudify, Stackpeak, Gridflow, Docksignal, Cloudforge, Shiplink, Gridia, Shipora, Cloudio
+13 · cloud hosting deployment · SkyDock, Stackora, Shipio, Cloudio, Gridora, Shipora, Dockora, Gridify, Stackix, Konak
+67 · cloud hosting deployment · SkyDock, Cloudify, Stackora, Cloudio, Shipio, Gridia, Shipora, Dockora, Bower, Dockify
+313 · cloud hosting deployment · SkyDock, Mihmandar, Shipio, Cloudio, Gridia, Shipora, Dockify, Gridora, Stackix, Dockora
+13 · deploy applications to cloud infrastructure · SkyDock, Cloudio, Stackora, Shiplink, Docklink, Shipora, Stackpeak, Dockora, Liman, Shiprelay
+67 · deploy applications to cloud infrastructure · SkyDock, Cloudio, Gridwave, Stackora, Shipbeam, Cloudflux, Shippath, Gridify, Mercess, Shipsignal
+313 · deploy applications to cloud infrastructure · SkyDock, Cloudify, Stackpeak, Gridflow, Docksignal, Cloudforge, Shiplink, Gridia, Halyard, Cloudio
+13 · infrastructure deployment for cloud teams · SkyDock, Cloudio, Stackora, Shiplink, Docklink, Shipora, Stackpeak, Dockora, Fountor, Shiprelay
+67 · infrastructure deployment for cloud teams · SkyDock, Cloudio, Gridwave, Stackora, Shipbeam, Cloudflux, Shippath, Gridify, Imece, Shipsignal
+313 · infrastructure deployment for cloud teams · SkyDock, Cloudify, Stackpeak, Gridflow, Docksignal, Cloudforge, Shiplink, Gridia, Founist, Cloudio
+
+guarded repair upgrades
+313 · routine and streak coaching: Beatsignal:82.4 -> Dailylink:85.5
+67 · a mindfulness timer for sleep and breath: Rundream:78.7 -> Runcalm:86.5
+67 · a task and calendar planner: Planglow:83.2 -> Temposeed:85.5
+67 · a filesystem search CLI: Pathbyte:81.6 -> Filekit:88.0
+13 · a documentation site generator: Webforge:80.3 -> Webmint:86.5
+313 · a habit tracker for daily routines: Beatsignal:82.4 -> Dailylink:85.5
+313 · streak and ritual coaching: Beatsignal:82.4 -> Dailylink:85.5
+313 · daily habit building and streak tracking: Beatsignal:82.4 -> Dailylink:85.5
+
+weak Respell accents
+
+selected Respell inventory
+Browsr:87.3 · 3 pages · a browser bookmark manager
+Lybrary:88.3 · 3 pages · an API rate limiting library
+Pryvate:89.8 · 3 pages · a private mood journal
+Vysual:87.3 · 9 pages · a color palette and visual design tool / a visual color system for designers / a palette tool for visual designers
+
+remaining suffix leads
+13 · a weekly menu and grocery organizer: Dishify · guided capacity Dishlab/Plateseed
+67 · a weekly menu and grocery organizer: Dishify · guided capacity Dishatlas/Plateseed
+13 · a veterinary appointment and pet wellness tracker: Buddyix · no winning retry (Vetbeam/Vetnova/Vetloom/Petatlas)
+13 · a community chat app: Bondora · guided capacity Kinflux/Kinsignal
+13 · a color palette and visual design tool: Pixelix · respell Vysual
+13 · a fast performance monitor: Dashify · guided capacity Tracelab/Pulseloom
+
+lowest-average pages
+80.77 · 13 · candidate tracking software for recruiters: JobLoop, Scoutforge, Crewrelay, Talentix, Crewscope, Hirecraft, Hirespring, Talentbeam, Fylgja, Scoutpulse
+81.17 · 13 · a recruiting pipeline for talent teams: JobLoop, Scoutforge, Crewrelay, Talentix, Crewscope, Hirecraft, Hirespring, Talentbeam, Lonca, Scoutpulse
+81.24 · 13 · an applicant tracking system for hiring teams: JobLoop, Scoutforge, Crewrelay, Talentix, Crewscope, Hirecraft, Hirespring, Talentbeam, Izci, Scoutpulse
+81.66 · 313 · a community chat app: Kinflow, Tribeflow, Linksignal, Kinsignal, Bondatlas, Kinforge, Circleflux, Bondwave, Tribelink, Circleora
+81.73 · 13 · a hiring pipeline for recruiters: JobLoop, Scoutforge, Crewrelay, Talentix, Crewscope, Hirecraft, Hirespring, Talentbeam, Praiver, Scoutpulse
+81.76 · 67 · a customer relationship pipeline for sales representatives: Salelab, Clientora, Contactia, Saleora, Clientix, Degirmen, Saletrail, Contactix, Dealix, Clientify
+81.90 · 13 · local rain and temperature alerts: Rainlab, Cloudify, Raintrace, Skysignal, Sunforge, Stormatlas, Skywave, Cloudio, Andon, Rainframe
+82.14 · 313 · shipping operations and parcel tracking: ShipOps, Docklink, Fleetpulse, Relayloom, Cargoflow, Fleetlink, Dockora, Relayflux, Cargoatlas, Cargolink
+82.14 · 313 · a parcel tracking dashboard for delivery teams: ShipOps, Docklink, Fleetpulse, Relayloom, Cargoflow, Fleetlink, Dockora, Relayflux, Cargoatlas, Cargolink
+82.14 · 313 · logistics dispatch and shipment tracking: ShipOps, Docklink, Fleetpulse, Relayloom, Cargoflow, Fleetlink, Dockora, Relayflux, Cargoatlas, Cargolink
+82.17 · 13 · shipping operations and parcel tracking: ShipOps, Fleetlink, Cargoatlas, Cargolink, Relaygrid, Fleetforge, Dockpath, Fylgja, Relaycraft, Dockora
+82.17 · 13 · logistics dispatch and shipment tracking: ShipOps, Fleetlink, Cargoatlas, Cargolink, Relaygrid, Fleetforge, Dockpath, Fylgja, Relaycraft, Dockora
+
+most construction-saturated pages
+10/10 assembled · 10/10 template · dominant root_metaphor:10 · 67 · a message queue client · Publink:root_metaphor, Streamwave:root_metaphor, Queueframe:root_metaphor, Brokerbeam:root_metaphor, Pipeloom:root_metaphor, Topicpath:root_metaphor, Pubsignal:root_metaphor, Pipegrid:root_metaphor, Publoom:root_metaphor, Queuebeam:root_metaphor
+10/10 assembled · 10/10 template · dominant root_metaphor:10 · 13 · routine and streak coaching · Beatlab:root_metaphor, Chainforge:root_metaphor, Dailyflow:root_metaphor, Chainlink:root_metaphor, Dailyvault:root_metaphor, Beatloom:root_metaphor, Habitbeam:root_metaphor, Beatrelay:root_metaphor, Rituallab:root_metaphor, Dailygrid:root_metaphor
+10/10 assembled · 10/10 template · dominant root_metaphor:9 · 67 · a community chat app · Kinloom:root_metaphor, Bondsignal:root_metaphor, Circlegrid:root_metaphor, Tribevault:root_metaphor, Bondwave:root_metaphor, Tribelink:root_metaphor, Kinnova:root_metaphor, Linkora:direct_suffix, Kinflux:root_metaphor, Linksignal:root_metaphor
+10/10 assembled · 10/10 template · dominant root_metaphor:9 · 313 · a community chat app · Kinflow:root_metaphor, Tribeflow:root_metaphor, Linksignal:root_metaphor, Kinsignal:root_metaphor, Bondatlas:root_metaphor, Kinforge:root_metaphor, Circleflux:root_metaphor, Bondwave:root_metaphor, Tribelink:root_metaphor, Circleora:direct_suffix
+10/10 assembled · 10/10 template · dominant direct_suffix:9 · 13 · a veterinary appointment and pet wellness tracker · Buddyix:direct_suffix, Tailora:direct_suffix, Petify:direct_suffix, Pawify:direct_suffix, Tailia:direct_suffix, Vetbeam:root_metaphor, Vitalio:direct_suffix, Buddyio:direct_suffix, Petix:direct_suffix, Pawora:direct_suffix
+10/10 assembled · 10/10 template · dominant root_metaphor:9 · 13 · an online course and study app · Dojobeam:root_metaphor, Sageseed:root_metaphor, Quizforge:root_metaphor, Lorebeam:root_metaphor, Tutorlab:root_metaphor, Sageatlas:root_metaphor, Quizrelay:root_metaphor, Tutorio:direct_suffix, Sagelink:root_metaphor, Lorelink:root_metaphor
+10/10 assembled · 10/10 template · dominant root_metaphor:9 · 67 · an online course and study app · Quizlab:root_metaphor, Sagepath:root_metaphor, Quizlink:root_metaphor, Lorevault:root_metaphor, Tutorflux:root_metaphor, Sagebeam:root_metaphor, Tutoria:direct_suffix, Quizsignal:root_metaphor, Dojolink:root_metaphor, Dojovault:root_metaphor
+10/10 assembled · 10/10 template · dominant direct_suffix:6 · 13 · dependency update automation · Deplink:root_metaphor, Versionix:direct_suffix, Graphora:direct_suffix, Synclink:root_metaphor, Bumpify:direct_suffix, Versionlink:root_metaphor, Bumpseed:root_metaphor, Syncify:direct_suffix, Graphia:direct_suffix, Depora:direct_suffix
+10/10 assembled · 10/10 template · dominant direct_suffix:5 · 313 · dependency update automation · Depflow:root_metaphor, Versionia:direct_suffix, Deptrace:root_metaphor, Graphia:direct_suffix, Syncrelay:root_metaphor, Deplink:root_metaphor, Bumpseed:root_metaphor, Syncora:direct_suffix, Bumpora:direct_suffix, Graphora:direct_suffix
+10/10 assembled · 9/10 template · dominant direct_suffix:7 · 313 · a fast performance monitor · Pulseseed:root_metaphor, Fluxora:direct_suffix, Dashify:direct_suffix, Swiftio:direct_suffix, Boltify:direct_suffix, Dashora:direct_suffix, Tracebeam:root_metaphor, Boltpulse:multi_concept, Fluxia:direct_suffix, Swiftify:direct_suffix
+10/10 assembled · 9/10 template · dominant direct_suffix:7 · 67 · a terminal log viewer · Panebeam:root_metaphor, Shellio:direct_suffix, Termify:direct_suffix, Paneora:direct_suffix, Promptio:direct_suffix, Logora:direct_suffix, Traceseed:root_metaphor, Logpulse:multi_concept, Promptora:direct_suffix, Termora:direct_suffix
+10/10 assembled · 9/10 template · dominant root_metaphor:6 · 13 · a code formatter and linter · TidyKit:multi_concept, Stylevault:root_metaphor, Rulebeam:root_metaphor, Tidyspring:root_metaphor, Syntaxpeak:root_metaphor, Stylegrid:root_metaphor, Ruleflux:root_metaphor, Indentia:direct_suffix, Lintify:direct_suffix, Lintix:direct_suffix
+
+lowest seed diversity
+15/30 · overlap 7.00 · shared Prismora/Vysual/Tintify/Toneora/Prismify/Pixelia · a color palette and visual design tool
+15/30 · overlap 6.67 · shared CogLoop/Cognora/Logicio/Agentix/Axiomix · an AI assistant for workflow automation
+16/30 · overlap 6.67 · shared Tallyglow/Cashify/Fundora/Cashora/Coinify/Balanceio · a personal budget and expense tracker
+16/30 · overlap 6.67 · shared Indexia/Pathify/Pathora/Filekit/Seeknode/Indexkit · a filesystem search CLI
+16/30 · overlap 6.33 · shared Clientora/Clientify/Saleora/Contactia/Clientix · a customer relationship pipeline for sales representatives
+16/30 · overlap 6.00 · shared StowLog/Countify/Countix/Assetix · a catalog for household belongings
+17/30 · overlap 5.67 · shared ShipOps/Routeora/Dockora/Cargoora · a delivery tracking and logistics app
+17/30 · overlap 5.33 · shared Meterkit/Gateora/Lybrary · an API rate limiting library
+
+exact duplicate seed pages
+
+worst dominant stems
+13 · plan:4 · a task and calendar planner: Planbeam, Tempolink, Planora, Flowglow, Planify, Flowlink, Daedal, Temposmith, Taskio, Planix
+
+dominant stem repairs
+13 · 1->0 · routine and streak coaching: Beatsignal:82.4 -> Dailyflow:84.0
+313 · 1->0 · routine and streak coaching: Beatsignal:82.4/Habitflux:74.8 -> Dailyglow:84.0/Dailylink:85.5
+67 · 1->0 · a task and calendar planner: Planglow:83.2 -> Temposeed:85.5
+313 · 1->0 · a task and calendar planner: Planflow:83.2 -> Tasklink:83.2
+13 · 1->0 · an API testing toolkit: Tracestack:83.9 -> Probekit:84.5
+67 · 1->0 · an API testing toolkit: Speccrate:77.0 -> Probekit:84.5
+13 · 1->0 · a message queue client: Pipeora:91.3 -> Publoom:92.5
+67 · 1->0 · a filesystem search CLI: Pathbyte:81.6 -> Filekit:88.0
+PASS  every held-out page contains ten names
+PASS  held-out repair uses only the bounded fallback
+PASS  held-out pages preserve the one-accent contract
+PASS  sub-75 Respells cannot block a stronger Auto accent
+PASS  held-out pages surface only reviewed Respell forms
+PASS  held-out pages contain no high-confidence lexical reparses
+PASS  no held-out visible name falls below 75
+PASS  held-out average structural quality stays at or above 84.0
+PASS  held-out lead structural quality stays at or above 85.8
+PASS  held-out lead concept coverage stays at or above 1.19
+PASS  held-out near-duplicate pairs stay at or below 78
+PASS  held-out mean pair similarity stays at or below 0.203
+PASS  every held-out brief contributes all three deterministic seed pages
+PASS  held-out first pages retain at least 18/30 names across three seeds
+PASS  held-out seed pairs share at most 5.25/10 names on average
+PASS  held-out seed pages contain no content-identical sets
+PASS  held-out exact-stem repetition stays at or below nine excess cards
+PASS  held-out direct suffix leads stay at or below 24
+PASS  held-out selection retains the four pinned brief-specific inner-card outcomes
+PASS  AI-assistant pages use the stronger cognitive palette without seed-set collapse
+PASS  color-palette pages add viable Tone/Tint roots and retain a strong metaphor beside Vysual
+PASS  color-palette wording variants stay full, seed-diverse, and free of audience/function Respells
+PASS  legal-research pages lead with LexCite without seed-set or Lens-family collapse
+PASS  legal-research wording variants reject filesystem roots and weak legal Respells
+PASS  habit-routine pages replace ineffective roots without a Daily or Beat stem wall
+PASS  habit-routine wording variants suppress build and tracking context without changing intent
+PASS  education pages use five live roots without Sage/Lore or repeated-lead collapse
+PASS  education wording variants suppress tool and learner context without changing intent
+PASS  terminal-log pages use Log and Pane alternatives without a Term stem wall
+PASS  terminal-log wording variants reject developer and function-word leakage
+PASS  message-queue pages add a Pub lane without a Pipe stem wall
+PASS  message-queue wording variants reject async, monitoring, and developer leakage
+PASS  delivery-tracking pages lead with ShipOps without suffix or stem-family collapse
+PASS  delivery-tracking wording variants suppress audience and function-word leakage
+PASS  cloud-deployment pages lead with the scoped SkyDock release metaphor
+PASS  cloud-deployment wording variants reject application and team context leakage
+PASS  recruiter tracking pages lead with JobLoop without a damaged role-word Respell
+PASS  recruiter wording variants keep JobLoop and reject damaged role-word Respells
+PASS  feature flag pages lead with the scoped FlipOps control role
+PASS  feature flag wording variants keep FlipOps and reject audience Respells
+PASS  naming tool pages lead with the scoped LexLoom word-making role
+PASS  naming tool wording variants retain a tail-safe word-making role without retry
+PASS  formatter pages lead with a strong tool-specific construction without retry
+PASS  household catalog pages lead with their StowLog inventory role without retry
+PASS  AI workflow variants avoid an unqualified suffix-only first impression
+PASS  recognized AI semantics cannot starve when context words come first
+PASS  AI agent pages surface their semantic pair before the final retry
+PASS  generic builder roles cannot steal the AI workflow Respell accent
+PASS  CRM pages surface RevLoop only where it improves the existing metaphor path

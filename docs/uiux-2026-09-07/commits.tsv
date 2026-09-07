@@ -1,0 +1,24 @@
+032d105	data(naming): retain concept bridges and story vocabulary
+9b59c61	fix(reason): require declared vocabulary in reasoning chains
+593566f	feat(diagnostics): trace candidate generation and rejection stages
+ad233ab	feat(intent): isolate brief and operation-object interpretation
+e6de911	feat(semantics): preserve product meaning and retained construction evidence
+b0c62ab	feat(lab): compare shared candidate pools in an isolated interface
+93aa079	feat(concepts): compile a versioned product-name catalog and Rust API
+c798336	feat(lab): expose product-name interpretations and evidence
+b153524	docs(research): retain shared-pool protocol and evidence
+55a9106	docs(research): retain quality-cause protocol and evidence
+be7aa9e	docs(research): retain brief-intent protocol and evidence
+3c1c64e	docs(research): retain operation-object protocol and evidence
+9f27ebe	docs(research): retain meaning-first protocol and evidence
+15dc7c0	docs(research): retain product-frame protocol and evidence
+b7772bd	docs(research): retain product-brief protocol and evidence
+432f5b2	docs(research): retain pool-review protocol and evidence
+158743e	docs(research): retain retained-fragments protocol and evidence
+92ef5c1	docs(research): retain final-direction protocol and evidence
+064e57d	docs(research): retain concept-naming protocol and evidence
+585e623	docs: record naming experiments and preference evidence limits
+0a3a784	feat(ui): separate Auto discovery from naming tools
+0b72373	feat(discovery): restore continuous browsing and same-tab sessions
+441c437	feat(names): simplify cards and move evidence into details
+c561789	feat(saved): add search comparison and undo removal

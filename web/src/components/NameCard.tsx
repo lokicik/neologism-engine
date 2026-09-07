@@ -9,8 +9,9 @@ import {
   type DomainObservationStatus,
 } from '../lib/domain'
 import { composite } from '../lib/score'
+import { rememberNameChecks } from '../lib/session-checks'
 import { Monogram } from './Monogram'
-import { IconCopy, IconCheck, IconStar, IconThumbDown } from './icons'
+import { IconCopy, IconCheck, IconStar, IconThumbDown, IconChevronDown, IconExternalLink } from './icons'
 
 interface Props {
   result: NameResult
@@ -72,6 +73,8 @@ export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction 
   const availabilityPanelId = useId()
   const availabilityPanel = useRef<HTMLDivElement>(null)
   const availabilityTrigger = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => { rememberNameChecks(result.name, domains) }, [result.name, domains])
 
   useEffect(() => {
     domainAbort.current?.abort()
@@ -319,7 +322,7 @@ export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction 
 
       {result.reasonChain && (
         <p className="card-ai-reason" title="The engine's reasoning chain for this name">
-          🧭 {result.reasonChain}
+          {result.reasonChain}
         </p>
       )}
 
@@ -348,7 +351,7 @@ export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction 
         >
           {why ? (
             <>
-              {whyParts(why).join(' · ') || 'No lexical construction evidence recorded.'}
+              {whyParts(why).join(' · ') || (result.reasonChain ? 'Construction evidence is shown above.' : 'No additional construction evidence recorded.')}
               <span className="why-scores">
                 Structural estimates: pronounceability {why.score_pronounce} · memorability {why.score_memorability} · novelty {why.score_novelty}
               </span>
@@ -372,7 +375,7 @@ export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction 
           onClick={toggleWhy}
           onKeyDown={handleWhyKeyDown}
         >
-          Why <span className={`chip-chevron${showWhy ? ' open' : ''}`} aria-hidden="true">▾</span>
+          Why <span className={`chip-chevron${showWhy ? ' open' : ''}`} aria-hidden="true"><IconChevronDown /></span>
         </button>
         <button
           ref={availabilityTrigger}
@@ -384,7 +387,7 @@ export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction 
           onClick={toggleAvailability}
           onKeyDown={handleAvailabilityKeyDown}
         >
-          Name checks <span className={`chip-chevron${showAvail ? ' open' : ''}`} aria-hidden="true">▾</span>
+          Name checks <span className={`chip-chevron${showAvail ? ' open' : ''}`} aria-hidden="true"><IconChevronDown /></span>
         </button>
         <div className="card-icons">
           <button
@@ -506,7 +509,7 @@ export function NameCard({ result, isFavorite, onToggleFavorite, favoriteAction 
                     rel="noreferrer"
                     title={`Open ${link.label} manually · not evaluated`}
                   >
-                    {link.label} ↗
+                    {link.label} <IconExternalLink />
                   </a>
                 ))}
               </div>

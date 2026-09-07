@@ -1,0 +1,309 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-07T00:34:34.502Z",
+  "title": "Design System: Neologism Engine",
+  "extensions": {
+    "colorMeta": {
+      "bg": {
+        "role": "neutral",
+        "displayName": "Near-black ground",
+        "tonalRamp": [
+          "oklch(15.00% 0.0043 285.86)",
+          "oklch(26.43% 0.0043 285.86)",
+          "oklch(37.86% 0.0043 285.86)",
+          "oklch(49.29% 0.0043 285.86)",
+          "oklch(60.71% 0.0043 285.86)",
+          "oklch(72.14% 0.0043 285.86)",
+          "oklch(83.57% 0.0043 285.86)",
+          "oklch(95.00% 0.0043 285.86)"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Card surface",
+        "tonalRamp": [
+          "oklch(15.00% 0.0080 285.63)",
+          "oklch(26.43% 0.0080 285.63)",
+          "oklch(37.86% 0.0080 285.63)",
+          "oklch(49.29% 0.0080 285.63)",
+          "oklch(60.71% 0.0080 285.63)",
+          "oklch(72.14% 0.0080 285.63)",
+          "oklch(83.57% 0.0080 285.63)",
+          "oklch(95.00% 0.0080 285.63)"
+        ]
+      },
+      "surface-2": {
+        "role": "neutral",
+        "displayName": "Raised surface",
+        "tonalRamp": [
+          "oklch(15.00% 0.0115 285.46)",
+          "oklch(26.43% 0.0115 285.46)",
+          "oklch(37.86% 0.0115 285.46)",
+          "oklch(49.29% 0.0115 285.46)",
+          "oklch(60.71% 0.0115 285.46)",
+          "oklch(72.14% 0.0115 285.46)",
+          "oklch(83.57% 0.0115 285.46)",
+          "oklch(95.00% 0.0115 285.46)"
+        ]
+      },
+      "text": {
+        "role": "neutral",
+        "displayName": "Primary text",
+        "tonalRamp": [
+          "oklch(15.00% 0.0040 286.32)",
+          "oklch(26.43% 0.0040 286.32)",
+          "oklch(37.86% 0.0040 286.32)",
+          "oklch(49.29% 0.0040 286.32)",
+          "oklch(60.71% 0.0040 286.32)",
+          "oklch(72.14% 0.0040 286.32)",
+          "oklch(83.57% 0.0040 286.32)",
+          "oklch(95.00% 0.0040 286.32)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted text",
+        "tonalRamp": [
+          "oklch(15.00% 0.0187 285.92)",
+          "oklch(26.43% 0.0187 285.92)",
+          "oklch(37.86% 0.0187 285.92)",
+          "oklch(49.29% 0.0187 285.92)",
+          "oklch(60.71% 0.0187 285.92)",
+          "oklch(72.14% 0.0187 285.92)",
+          "oklch(83.57% 0.0187 285.92)",
+          "oklch(95.00% 0.0187 285.92)"
+        ]
+      },
+      "accent": {
+        "role": "primary",
+        "displayName": "Violet accent",
+        "tonalRamp": [
+          "oklch(15.00% 0.2107 284.49)",
+          "oklch(26.43% 0.2107 284.49)",
+          "oklch(37.86% 0.2107 284.49)",
+          "oklch(49.29% 0.2107 284.49)",
+          "oklch(60.71% 0.2107 284.49)",
+          "oklch(72.14% 0.2107 284.49)",
+          "oklch(83.57% 0.2107 284.49)",
+          "oklch(95.00% 0.2107 284.49)"
+        ]
+      },
+      "border": {
+        "role": "neutral",
+        "displayName": "Fine border",
+        "tonalRamp": [
+          "oklch(15.00% 0.0162 285.37)",
+          "oklch(26.43% 0.0162 285.37)",
+          "oklch(37.86% 0.0162 285.37)",
+          "oklch(49.29% 0.0162 285.37)",
+          "oklch(60.71% 0.0162 285.37)",
+          "oklch(72.14% 0.0162 285.37)",
+          "oklch(83.57% 0.0162 285.37)",
+          "oklch(95.00% 0.0162 285.37)"
+        ]
+      },
+      "on-accent": {
+        "role": "neutral",
+        "displayName": "White action text",
+        "tonalRamp": [
+          "oklch(15.00% 0.0000 0.00)",
+          "oklch(26.43% 0.0000 0.00)",
+          "oklch(37.86% 0.0000 0.00)",
+          "oklch(49.29% 0.0000 0.00)",
+          "oklch(60.71% 0.0000 0.00)",
+          "oklch(72.14% 0.0000 0.00)",
+          "oklch(83.57% 0.0000 0.00)",
+          "oklch(95.00% 0.0000 0.00)"
+        ]
+      },
+      "active-ink": {
+        "role": "primary",
+        "displayName": "Light violet ink",
+        "tonalRamp": [
+          "oklch(15.00% 0.0967 293.47)",
+          "oklch(26.43% 0.0967 293.47)",
+          "oklch(37.86% 0.0967 293.47)",
+          "oklch(49.29% 0.0967 293.47)",
+          "oklch(60.71% 0.0967 293.47)",
+          "oklch(72.14% 0.0967 293.47)",
+          "oklch(83.57% 0.0967 293.47)",
+          "oklch(95.00% 0.0967 293.47)"
+        ]
+      },
+      "focus": {
+        "role": "primary",
+        "displayName": "Focus violet",
+        "tonalRamp": [
+          "oklch(15.00% 0.1156 290.77)",
+          "oklch(26.43% 0.1156 290.77)",
+          "oklch(37.86% 0.1156 290.77)",
+          "oklch(49.29% 0.1156 290.77)",
+          "oklch(60.71% 0.1156 290.77)",
+          "oklch(72.14% 0.1156 290.77)",
+          "oklch(83.57% 0.1156 290.77)",
+          "oklch(95.00% 0.1156 290.77)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Discovery name",
+        "purpose": "Primary name in a discovery or Saved card; 32px below 700px."
+      },
+      "headline": {
+        "displayName": "Page and Details heading",
+        "purpose": "Page introductions and Details title; page introductions become 28px below 700px."
+      },
+      "title": {
+        "displayName": "Comparison name",
+        "purpose": "Name headings in the comparison table."
+      },
+      "body": {
+        "displayName": "Introduction text",
+        "purpose": "Inter body copy with a readable 65ch introduction measure."
+      },
+      "label": {
+        "displayName": "Control label",
+        "purpose": "Minimum size for core action and form labels; static metadata is separate."
+      }
+    },
+    "shadows": [
+      {
+        "name": "popover",
+        "value": "0 12px 36px #0008",
+        "purpose": "Tools and Export menus."
+      },
+      {
+        "name": "dialog",
+        "value": "-12px 0 40px #0005",
+        "purpose": "Base Details dialog; inherited by centered Compare."
+      }
+    ],
+    "motion": [
+      {
+        "name": "card-hover",
+        "value": "160ms ease-out",
+        "purpose": "Discovery border-color transition only; no card lift or entrance."
+      },
+      {
+        "name": "control-hover",
+        "value": "150ms ease",
+        "purpose": "Inherited Generate opacity and Details-chip color and border transitions."
+      },
+      {
+        "name": "control-press",
+        "value": "80ms ease",
+        "purpose": "Inherited Generate and Details-chip transform transition to scale(0.96)."
+      },
+      {
+        "name": "disclosure-turn",
+        "value": "150ms ease",
+        "purpose": "Inherited Details-chevron transform transition to rotate(180deg)."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "0s",
+        "purpose": "Global transition override; animations are removed and scroll-behavior is auto."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "three-columns",
+        "value": "1100px"
+      },
+      {
+        "name": "two-columns-and-desktop-shell",
+        "value": "700px"
+      },
+      {
+        "name": "compact-wordmark",
+        "value": "360px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Generate Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Filled primary action with the implemented inherited hover, press, disabled, and focus states.",
+      "html": "<button class=\"ds-primary\" type=\"button\">Generate</button>",
+      "css": ".ds-primary { min-width: 152px; min-height: 54px; padding: 12px 20px; background: var(--accent, #6D56E8); color: #fff; border: 0; border-radius: 10px; font: 600 15px 'Inter', sans-serif; flex-shrink: 0; cursor: pointer; white-space: nowrap; transition: opacity .15s, transform .08s; } .ds-primary:hover:not(:disabled) { background: #5b43d4; opacity: .88; } .ds-primary:active { transform: scale(.96); } .ds-primary:disabled { opacity: .45; cursor: not-allowed; } .ds-primary:focus-visible { outline: 2px solid rgba(124, 106, 249, .9); outline-offset: 2px; } @media (max-width: 699px) { .ds-primary { min-height: 48px; } } @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; scroll-behavior: auto !important; transition-duration: 0s !important; } }"
+    },
+    {
+      "name": "Project Brief Field",
+      "kind": "input",
+      "refersTo": "input-brief",
+      "description": "Optional brief input with a visually hidden label and the currently inherited command focus ring.",
+      "html": "<label class=\"ds-field-label\" for=\"ds-project-brief\">Project brief</label><input class=\"ds-brief\" id=\"ds-project-brief\" type=\"text\" maxlength=\"1000\" placeholder=\"What are you building? (optional)\">",
+      "css": ".ds-field-label { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; } .ds-brief { min-width: 0; width: 100%; min-height: 54px; background: var(--surface, #141418); border: 1px solid var(--border, #2C2C35); border-radius: 10px; padding: 14px 18px; color: var(--text, #F2F2F5); font: 400 16px 'Inter', sans-serif; caret-color: #c5baff; outline: none; } .ds-brief::placeholder { color: var(--muted, #A1A1AE); opacity: 1; } .ds-brief:hover { border-color: var(--border, #2C2C35); } .ds-brief:focus-visible { outline: 2px solid rgba(124, 106, 249, .9); outline-offset: 2px; }"
+    },
+    {
+      "name": "Application Navigation",
+      "kind": "nav",
+      "refersTo": "navigation-item",
+      "description": "Sticky-header navigation contents with current-page state and a native Tools disclosure.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Application navigation\"><button class=\"ds-wordmark\" type=\"button\" aria-label=\"Neologism — Create\"><svg width=\"23\" height=\"23\" viewBox=\"0 0 24 24\" fill=\"none\" aria-hidden=\"true\"><path d=\"m12 2 10 10-10 10L2 12 12 2Z\" stroke=\"currentColor\" stroke-width=\"1.5\"/><path d=\"m8 15 3-7 5 7\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg><span>neologism</span></button><div class=\"ds-nav-items\"><button type=\"button\" aria-current=\"page\">Create</button><button type=\"button\">Saved<span class=\"ds-saved-count\">3</span></button><details class=\"ds-tools\"><summary>Tools<svg width=\"12\" height=\"12\" viewBox=\"0 0 12 12\" fill=\"none\" aria-hidden=\"true\"><path d=\"m3 4.5 3 3 3-3\" stroke=\"currentColor\" stroke-width=\"1.5\"/></svg></summary><div class=\"ds-tools-popover\"><button type=\"button\">Lab<span>Explore individual methods</span></button><button type=\"button\">AI Studio<span>Optional AI-assisted review</span></button><button type=\"button\">Settings</button><button type=\"button\">About</button></div></details></div></nav>",
+      "css": ".ds-nav { max-width: 1160px; min-height: 72px; margin: auto; padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; gap: 20px; background: var(--bg, #0A0A0C); border-bottom: 1px solid var(--border, #2C2C35); font-family: 'Inter', sans-serif; } .ds-nav button, .ds-nav summary { min-height: 44px; background: none; border: 0; color: var(--muted, #A1A1AE); cursor: pointer; font: 400 14px 'Inter', sans-serif; } .ds-wordmark { display: inline-flex; align-items: center; gap: 10px; color: var(--text, #F2F2F5) !important; font: 600 21px 'Space Grotesk', sans-serif !important; padding: 0; } .ds-wordmark svg { color: #aa99ff; flex-shrink: 0; } .ds-nav-items { display: flex; align-items: center; gap: 6px; } .ds-nav-items > button, .ds-tools > summary { padding: 0 14px; border-radius: 8px; display: flex; align-items: center; gap: 7px; } .ds-nav [aria-current='page'] { color: var(--text, #F2F2F5); background: var(--surface-2, #1C1C22); } .ds-nav button:hover, .ds-tools > summary:hover { color: var(--text, #F2F2F5); background: var(--surface, #141418); } .ds-nav button:focus-visible, .ds-nav summary:focus-visible { outline: 2px solid #BAADFF; outline-offset: 4px; } .ds-saved-count { color: #c9bdff; font-size: 12px; font-variant-numeric: tabular-nums; } .ds-tools { position: relative; } .ds-tools > summary { list-style: none; } .ds-tools > summary::-webkit-details-marker { display: none; } .ds-tools-popover { position: absolute; right: 0; top: calc(100% + 10px); z-index: 1; width: 246px; padding: 6px; background: var(--surface-2, #1C1C22); border-radius: 12px; box-shadow: 0 12px 36px #0008; } .ds-tools-popover button { display: block; width: 100%; text-align: left; padding: 10px 12px; border-radius: 7px; color: var(--text, #F2F2F5); } .ds-tools-popover span { display: block; margin-top: 4px; font-size: 12px; color: var(--muted, #A1A1AE); } @media (max-width: 699px) { .ds-nav { min-height: 64px; gap: 8px; padding: 10px 16px; } .ds-wordmark { gap: 7px; font-size: 18px !important; } .ds-wordmark svg { width: 19px; } .ds-nav-items { gap: 0; } .ds-nav-items > button, .ds-tools > summary { padding: 0 9px; } } @media (max-width: 359px) { .ds-wordmark span { font-size: 16px; } .ds-wordmark svg { display: none; } .ds-nav-items > button, .ds-tools > summary { padding: 0 7px; } .ds-saved-count { display: none; } }"
+    },
+    {
+      "name": "Details Disclosure",
+      "kind": "chip",
+      "refersTo": "chip-disclosure",
+      "description": "Why disclosure in its closed and expanded visual states, preserving the existing Details cascade.",
+      "html": "<div class=\"ds-chip-examples\"><button class=\"ds-chip\" type=\"button\" aria-expanded=\"false\">Why<span class=\"ds-chip-chevron\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m6 9 6 6 6-6\"/></svg></span></button><button class=\"ds-chip ds-chip-active\" type=\"button\" aria-expanded=\"true\">Name checks<span class=\"ds-chip-chevron ds-chip-open\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m6 9 6 6 6-6\"/></svg></span></button></div>",
+      "css": ".ds-chip-examples { display: flex; flex-wrap: wrap; gap: 8px; } .ds-chip { display: inline-flex; align-items: center; gap: .3rem; min-height: 44px; min-width: 44px; padding: .32rem .85rem; color: var(--muted, #A1A1AE); background: transparent; border: 1px solid var(--border, #2C2C35); border-radius: 999px; font: 500 14px 'Inter', sans-serif; cursor: pointer; transition: color .15s, border-color .15s, transform .08s; } .ds-chip:hover { color: var(--text, #F2F2F5); border-color: rgba(255, 255, 255, .22); } .ds-chip:active { transform: scale(.96); } .ds-chip.ds-chip-active { color: #c8baff; border-color: rgba(124, 106, 249, .5); } .ds-chip:focus-visible { outline: 2px solid rgba(124, 106, 249, .9); outline-offset: 2px; } .ds-chip-chevron { font-size: .58rem; opacity: .7; transition: transform .15s ease; } .ds-chip-chevron.ds-chip-open { transform: rotate(180deg); } @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; scroll-behavior: auto !important; transition-duration: 0s !important; } }"
+    },
+    {
+      "name": "Discovery Card",
+      "kind": "card",
+      "refersTo": "discovery-card",
+      "description": "Name, one-line construction hint, and visible actions. Preview copy is illustrative, not a generated result or quality claim.",
+      "html": "<article class=\"ds-discovery\"><h2 class=\"ds-discovery-name\">Example name</h2><p class=\"ds-discovery-hint\">Construction evidence appears here.</p><div class=\"ds-discovery-actions\"><button class=\"ds-save\" type=\"button\" aria-pressed=\"false\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1L12 2z\"/></svg>Save</button><button type=\"button\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"9\" y=\"9\" width=\"12\" height=\"12\" rx=\"2.5\"/><path d=\"M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1\"/></svg>Copy</button><button type=\"button\" aria-haspopup=\"dialog\">Details</button></div></article>",
+      "css": ".ds-discovery { display: flex; flex-direction: column; min-width: 0; min-height: 212px; height: 100%; padding: 24px 22px 16px; border: 1px solid var(--border, #2C2C35); border-radius: 12px; background: var(--surface, #141418); font-family: 'Inter', sans-serif; transition: border-color 160ms ease-out; } .ds-discovery:hover { border-color: #52505f; } .ds-discovery.ds-is-saved { border-color: #756596; } .ds-discovery-name { margin: 0 0 12px; color: var(--text, #F2F2F5); font: 500 34px/1.2 'Space Grotesk', sans-serif; letter-spacing: -.025em; overflow-wrap: anywhere; user-select: text; } .ds-discovery-hint { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 1; overflow: hidden; min-height: 22px; margin: 0 0 24px; color: var(--muted, #A1A1AE); font-size: 14px; line-height: 22px; } .ds-discovery-actions { display: flex; align-items: center; justify-content: space-between; gap: 4px; margin: auto -6px 0; } .ds-discovery-actions button { display: inline-flex; min-height: 44px; padding: 8px 7px; align-items: center; justify-content: center; gap: 6px; background: none; border: 0; border-radius: 6px; color: var(--muted, #A1A1AE); font: 400 14px 'Inter', sans-serif; cursor: pointer; } .ds-discovery-actions button:hover { background: var(--surface-2, #1C1C22); color: var(--text, #F2F2F5); } .ds-discovery-actions .ds-save { color: var(--text, #F2F2F5); } .ds-discovery-actions .ds-save[aria-pressed='true'] { color: #c8baff; } .ds-discovery-actions button:focus-visible { outline: 2px solid #BAADFF; outline-offset: 4px; } .ds-discovery-actions svg { width: 16px; height: 16px; flex-shrink: 0; } @media (max-width: 699px) { .ds-discovery-name { font-size: 32px; } .ds-discovery { min-height: 198px; padding: 22px 20px 14px; } } @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; scroll-behavior: auto !important; transition-duration: 0s !important; } }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Dark, spacious name exploration",
+    "overview": "This is a descriptive label for the user-approved existing system, not a new metaphor. A near-black ground, slightly lighter surfaces, restrained violet, and generous spacing keep names easy to read. Space Grotesk gives names and headings a clear identity; Inter carries the interface.\n\nThe system recorded here covers the current application header, Create discovery, Saved names, Details drawer, and Compare dialog. English interface copy and the existing local fonts are binding choices. Names remain selectable text, and the hierarchy places each name before its construction hint and actions.",
+    "keyCharacteristics": [
+      "Dark tonal surfaces with fine borders.",
+      "Large names with readable, explicitly labelled actions.",
+      "A centered, spacious frame that adapts from three columns to one.",
+      "Flat cards, with shadows reserved for overlapping panels.",
+      "Visible keyboard focus and reduced-motion support."
+    ],
+    "rules": [
+      {
+        "name": "The Color Role Rule",
+        "body": "Use violet for primary actions and the implemented selected states. Use neutral text and surfaces for the main reading hierarchy.",
+        "section": "colors"
+      },
+      {
+        "name": "The Readable Names Rule",
+        "body": "Keep discovery names at the implemented desktop and mobile sizes, keep action labels at least 14px, and allow long names to wrap.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat Cards Rule",
+        "body": "Keep discovery cards flat at rest and on hover. Reserve shadows for the implemented popovers and dialogs.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do preserve the approved dark palette, English interface, Inter, and Space Grotesk.",
+      "Do keep names visually dominant, selectable, and able to wrap.",
+      "Do preserve the 1160px frame and the three/two/one-column transitions at 1100px and 700px.",
+      "Do keep core action labels at least 14px and their targets at least 44px.",
+      "Do preserve visible focus, native dialog behavior, and the reduced-motion override.",
+      "Do retain visible labels and explanations alongside state colors and icons."
+    ],
+    "donts": [
+      "Don't promote legacy Lab, AI Studio, landing, or Settings styling into the core system without a separate review.",
+      "Don't reuse emoji or text glyphs as control icons where the current system uses drawn SVGs.",
+      "Don't turn structural scores or snapshot-check colors into a visual quality or availability guarantee.",
+      "Don't add elevation or entrance animation to the discovery-card pattern.",
+      "Don't shrink names or widen the document to fit the mobile comparison table."
+    ]
+  }
+}

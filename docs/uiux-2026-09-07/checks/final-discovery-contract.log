@@ -1,0 +1,14 @@
+PASS initial Auto loads exactly one ten-name page
+PASS unchanged brief offers More names
+PASS explicit append keeps twenty distinct names
+PASS explicit append focuses the new section
+PASS navigation preserves the discovery
+PASS navigation restores scroll position
+PASS same-tab reload restores exact names
+PASS reload restores scroll position
+PASS edited draft offers Generate
+PASS dirty draft pauses automatic append
+PASS successful generation commits the new brief
+PASS session retains committed brief provenance
+PASS no uncaught browser errors
+PASS 13 discovery checks

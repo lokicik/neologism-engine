@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Neologism interface · Before and after</title>
+<style>
+  :root { color-scheme:dark; font-family:system-ui,sans-serif; background:#0a0a0c; color:#f2f2f5 }
+  body { max-width:1440px; margin:0 auto; padding:32px 24px 64px; line-height:1.6 }
+  h1 { font-size:clamp(26px,4vw,40px); line-height:1.15; margin:0 0 16px }
+  h2 { font-size:24px; margin:40px 0 16px }
+  p { color:#a1a1ae; max-width:75ch }
+  a { color:#c8baff; text-underline-offset:3px }
+  a:focus-visible { outline:2px solid #c8baff; outline-offset:4px }
+  .pair { display:grid; grid-template-columns:1fr 1fr; gap:24px; align-items:start }
+  figure { margin:0; min-width:0 }
+  figcaption { padding:0 0 10px; font-weight:600 }
+  img { display:block; width:100%; height:auto; border:1px solid #30303a; box-sizing:border-box }
+  .mobile { max-width:830px }
+  @media(max-width:700px) { body { padding:24px 16px } .pair { grid-template-columns:1fr } }
+</style>
+<h1>Auto discovery, with room for the names</h1>
+<p>The interface now opens into Create. Save promising names, then compare a few in Saved. Methods remain under Tools → Lab. The images compare the interface; different generated names are not evidence of better naming quality.</p>
+<p><a href="REPORT.md">Delivery report and checks</a> · <a href="finish-review.md">Independent finish review</a></p>
+<h2>Desktop · 1440px</h2>
+<div class="pair">
+  <figure><figcaption>Before</figcaption><a href="screenshots/before-desktop.png"><img src="screenshots/before-desktop.png" alt="Previous desktop naming interface with the former navigation and result structure"></a></figure>
+  <figure><figcaption>After</figcaption><a href="screenshots/create-1440.png"><img src="screenshots/create-1440.png" alt="New Create page with optional brief and one three-column Auto name list"></a></figure>
+</div>
+<h2>Mobile · 390px</h2>
+<div class="pair mobile">
+  <figure><figcaption>Before</figcaption><a href="screenshots/before-mobile.png"><img loading="lazy" src="screenshots/before-mobile.png" alt="Previous mobile naming interface"></a></figure>
+  <figure><figcaption>After</figcaption><a href="screenshots/create-390.png"><img loading="lazy" src="screenshots/create-390.png" alt="New mobile Create page with a single-column list and large names"></a></figure>
+</div>
+<h2>Details and Saved</h2>
+<div class="pair">
+  <figure><figcaption>Evidence in a modal drawer</figcaption><a href="screenshots/details-1440.png"><img loading="lazy" src="screenshots/details-1440.png" alt="Name Details in a right drawer over the unchanged list"></a></figure>
+  <figure><figcaption>Search and select in Saved</figcaption><a href="screenshots/saved-1440.png"><img loading="lazy" src="screenshots/saved-1440.png" alt="Saved names with search, comparison selection, and secondary export"></a></figure>
+</div>
+<h2>Compare existing evidence</h2>
+<figure><a href="screenshots/compare-1440.png"><img loading="lazy" src="screenshots/compare-1440.png" alt="Three saved names compared side by side without an automatic winner"></a></figure>
+</html>

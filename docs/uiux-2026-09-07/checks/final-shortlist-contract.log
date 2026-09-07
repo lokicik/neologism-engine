@@ -1,0 +1,15 @@
+PASS Create shows ten real Auto names directly
+PASS Create has one list without finalists, score badges, or Show all
+PASS promptless: retained shortlist holds two to four finalists
+PASS promptless: retained finalists have explanations
+PASS promptless: retained finalists keep three naming contexts
+PASS promptless: unchanged legacy explanation gate
+PASS a self hosted password manager: retained shortlist holds two to four finalists
+PASS a self hosted password manager: retained finalists have explanations
+PASS a self hosted password manager: retained finalists keep three naming contexts
+PASS a self hosted password manager: unchanged legacy explanation gate
+PASS a terminal log viewer: retained shortlist holds two to four finalists
+PASS a terminal log viewer: retained finalists have explanations
+PASS a terminal log viewer: retained finalists keep three naming contexts
+PASS a terminal log viewer: unchanged legacy explanation gate
+PASS 14 checks

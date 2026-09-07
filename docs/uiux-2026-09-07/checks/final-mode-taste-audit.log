@@ -1,0 +1,18 @@
+compound-reference pages: 25
+quality: 85.39 -> 85.34
+taste affinity: -1.494 -> -1.336
+compound cards: 0 -> 30
+unique names: 89 -> 103
+unlinked / sub-75: 5/0 -> 4/0
+  -1.377 -> -1.306 · 4/50 Compound · an offline naming engine for developer projects that checks npm and crates.io
+  -1.425 -> -1.425 · 0/50 Compound · a Rust CLI that processes logs
+  -1.495 -> -1.240 · 10/50 Compound · a secure password manager for teams
+  -1.673 -> -1.363 · 10/50 Compound · a tool that syncs design tokens
+  -1.498 -> -1.344 · 6/50 Compound · a local database inspector
+PASS  Compound accents preserve structural quality
+PASS  Compound accents materially improve matching taste
+PASS  strong two-part taste surfaces Compound candidates
+PASS  Compound accents never take over a ten-name page
+PASS  mode-aware taste broadens the visible vocabulary
+PASS  mode accents do not weaken brief coverage
+PASS  mode accents preserve the structural quality floor

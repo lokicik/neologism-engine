@@ -17,7 +17,7 @@ export function NameDialog({ title, label, onClose, children, wide = false }: { 
       target?.focus({ preventScroll: true })
     }
   }, [])
-  return <dialog ref={dialog} className={`name-dialog${wide ? ' comparison-dialog' : ''}`} aria-labelledby={id} onCancel={event => { event.preventDefault(); onClose() }} onClick={event => {
+  return <dialog ref={dialog} className={`name-dialog${wide ? ' comparison-dialog' : ''}`} aria-labelledby={id} onKeyDownCapture={event => { if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); onClose() } }} onCancel={event => { event.preventDefault(); onClose() }} onClick={event => {
     const rect = event.currentTarget.getBoundingClientRect()
     if (event.target === event.currentTarget && (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom)) onClose()
   }}>

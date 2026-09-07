@@ -95,11 +95,13 @@ a { text-underline-offset: .2em; }
 .name-dialog-body { padding: 24px 28px 40px; }
 .name-dialog .name-card { padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; animation: none; }
 .name-dialog .card-meta-line, .name-dialog .card-ai-reason { font-size: 14px; line-height: 1.6; }
+.name-dialog .card-meta-line { white-space: normal; overflow: visible; }
+.name-dialog .card-ai-reason, .name-dialog .card-chip.active { color: #c8baff; }
 .name-dialog .card-expansion { margin: 18px 0; padding: 16px 0; background: none; border-top: 1px solid var(--border); font-size: 14px; line-height: 1.7; }
 .name-dialog .card-actions-row { flex-wrap: wrap; }
 .name-dialog .card-icons { margin-left: 0; }
 .name-dialog .card-chip, .name-dialog .icon-btn, .name-dialog .availability-run, .name-dialog .availability-manual-link { min-height: 44px; min-width: 44px; font-size: 14px; }
-.name-dialog .why-scores { display: block; margin-top: 18px; color: var(--muted); line-height: 1.8; }
+.name-dialog .why-scores { display: block; margin-top: 18px; color: var(--muted); font-size: 14px; line-height: 1.8; opacity: 1; }
 .snapshot-note { display: block; color: var(--muted); font-size: 13px; line-height: 1.6; margin-top: 8px; }
 .name-dialog .availability-intro, .name-dialog .availability-disclaimer, .name-dialog .availability-meta { font-size: 13px; line-height: 1.6; }
 .name-dialog .availability-grid { grid-template-columns: minmax(0, 1fr); }
@@ -146,6 +148,7 @@ html { scrollbar-gutter: stable; }
 .name-comparison th:first-child { width: 150px; color: var(--muted); font-weight: 400; }
 .name-comparison thead th:not(:first-child) { font: 500 28px/1.2 'Space Grotesk', sans-serif; }
 .name-comparison td { color: var(--text); }
+.comparison-check-source { display: block; color: var(--muted); line-height: 1.6; margin-top: 8px; }
 @media (max-width: 699px) {
   .saved-toolbar { flex-wrap: wrap; gap: 10px; }
   .saved-search { flex-basis: 100%; }

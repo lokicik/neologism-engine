@@ -1,0 +1,4 @@
+{"commit": "0a3a784d7e29a61462f7a00f2208636634d12fcc", "tree": "bfa918d08e57d9eb3327557ad2b1a3eaf0ea88ac", "message": "feat(ui): separate Auto discovery from naming tools", "stagedBuild": true}
+{"commit": "0b723736f33c89c7ad6e5df0c71f78fb7b8e558d", "tree": "e4dea03a8a943c2d7b80dcfce1a1143b7925ef33", "message": "feat(discovery): restore continuous browsing and same-tab sessions", "stagedBuild": true}
+{"commit": "441c437f0d1964d959153cc519c96571e61cd735", "tree": "67e00e5b4047ad885feb253eeb282973bbae7513", "message": "feat(names): simplify cards and move evidence into details", "stagedBuild": true}
+{"commit": "c561789ab10a9e22b6962ed5263bea30003bf7e3", "tree": "552f2e0e3789a39805c3c075899a05042c016c77", "message": "feat(saved): add search comparison and undo removal", "stagedBuild": true}
