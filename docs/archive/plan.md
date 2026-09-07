@@ -112,14 +112,14 @@ logos/handles are optional polish.
 
 **7b — Real-word filter (done).** Root cause: shared `words.txt` is only 561 stop-words, AND it's
 shared by all styles, so expanding it in place would have changed Sci-Fi/Fantasy. Fix: a **separate,
-big-tech-only** [core/data/common_words.txt](core/data/common_words.txt) (~19.4k common English
+big-tech-only** [core/data/common_words.txt](../../core/data/common_words.txt) (~19.4k common English
 words) applied only in `generate_bigtech`; scoring + shared dict untouched. Kills jarring leaks
 (`Guard`, `Telegraph`, `Content`, `Greet`). A few brandable real words (`Fluent`, `Lucid`) and rare
 ones (`Decamp`) still pass — left on purpose: real-word brands (Stripe/Square/Notion) are good, and
 an exhaustive dictionary would filter those too.
 
 **7a — Constant sweep (done).** Knobs extracted into a `BigTechTuning` struct (`Default` = production
-values) so they're swept in-process via [core/examples/tune.rs](core/examples/tune.rs) (coordinate
+values) so they're swept in-process via [core/examples/tune.rs](../../core/examples/tune.rs) (coordinate
 descent, composite objective averaged over 8 seeds, uniq/novelty/diversity guards). Result
 (composite 90.1 → 92.7):
 
@@ -357,7 +357,7 @@ count keeps rising — 68% of the 33,575 (22,707 names) appeared exactly once. T
 big-tech vocabulary is at least 6× what §11's 10k sample implied, and still growing at 100k.
 
 **Seeds were never the cause of repeats — proven, not asserted.** The engine already draws a fresh
-`rand::random()` seed on every call ([lib.rs:185](core/src/lib.rs#L185)); `wasm/Cargo.toml` enables
+`rand::random()` seed on every call ([lib.rs:185](../../core/src/lib.rs#L185)); `wasm/Cargo.toml` enables
 `getrandom`'s `js` feature so that has real browser entropy; and the web app passes no fixed seed
 (the UI's "seed words" box is `roots`, unrelated). A decisive test — **10,000 distinct seeds, one
 name each** — produced only **6,535 distinct names (65.4%)**, with `Keyston` recurring across **92
@@ -368,7 +368,7 @@ not seed reuse.
 
 **The only real anti-repeat lever is exclude-recent — and it's a web-app concept, not an engine
 one.** The core engine is stateless per call: it only accepts an `exclude` list
-([lib.rs:292](core/src/lib.rs#L292)) and filters those names out. The **web app** maintains the
+([lib.rs:292](../../core/src/lib.rs#L292)) and filters those names out. The **web app** maintains the
 rolling "recent" list (capped at `RECENT_WINDOW`, persisted in localStorage) and passes it as
 `exclude` every Generate. The CLI examples mostly pass an empty exclude (`sample`, `metrics`, and the
 sweep tooling measured the **raw generator** — which is why those distinct-% figures are the floor,

@@ -1,8 +1,33 @@
+# Rust and web build outputs
 /target/
 /web/node_modules/
 /web/dist/
 /web/src/wasm/
 /web/e2e/shots/
+*.tsbuildinfo
+npm-debug.log*
+
+# Python environments and bytecode, including lanes without a local ignore file
+.venv/
+__pycache__/
+*.py[cod]
+
+# Local environment values; example templates can be committed
+.env
+.env.*
+!.env.example
+!.env.*.example
+!.env.sample
+!.env.template
+
+# Local tool state and operating-system metadata
+.claude/
+.netlify/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Lane-specific generated data; keep retained reports, logs, and snapshots tracked
 /research/selection-study/.collector-dist/
 /research/wordnet-gloss-retrieval/work/
 /research/conceptnet-semantic/work/
@@ -16,4 +41,3 @@
 /research/semantic-field/glove.6B.zip
 /research/semantic-field/*.txt
 /research/collision/*.txt
-.claude/
