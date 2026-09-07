@@ -3,7 +3,7 @@ await runUiTest(4256, async ({ browser, url, check }) => {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 } })
   const page = await context.newPage(); const errors = []
   page.on('pageerror', error => errors.push(String(error)))
-  await page.goto(url)
+  await page.goto(url + '/?view=create')
   await page.waitForSelector('.discovery-card')
   const discovery = await page.locator('.discovery-name').allTextContents()
   await page.getByRole('button', { name: 'Skip to main content' }).focus()
@@ -35,7 +35,7 @@ await runUiTest(4256, async ({ browser, url, check }) => {
   check(await page.getByRole('dialog').count() === 0, 'Settings closes with Escape')
   await page.locator('.tools-menu summary').click()
   await page.getByRole('button', { name: 'About', exact: true }).click()
-  check(new URL(page.url()).searchParams.get('view') === 'about', 'About stays under Tools')
+  check(new URL(page.url()).search === '' && await page.locator('.landing').isVisible(), 'About returns to the standalone landing page')
   const payload = Buffer.from(JSON.stringify([{ n: 'SharedAnchor', s: 'big_tech' }, { n: 'SharedBeacon', s: 'fantasy' }])).toString('base64')
   await page.goto(url + '/#names=' + payload)
   await page.getByRole('heading', { name: 'Saved names', exact: true }).waitFor()

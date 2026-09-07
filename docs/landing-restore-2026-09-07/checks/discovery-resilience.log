@@ -1,0 +1,18 @@
+PASS programmatic scroll and resize cannot chain generation
+PASS one downward scroll appends one page only
+PASS 100 real generated names contain no duplicates
+PASS rapid double click starts one pending generation
+PASS late response cannot write seen-name history after leaving Create
+PASS late response cannot alter the retained discovery
+PASS generation failure preserves the old list and edited draft
+PASS Retry successfully commits the requested discovery
+PASS empty continuation preserves names and stops loading
+PASS changing the brief recovers from exhaustion
+PASS comma separated exclusions can be typed naturally
+PASS an impossible constraint returns an honest empty pool
+PASS Contains is preserved by UI generation
+PASS corrupt, denied, and unwritable session storage return recoverable warnings
+PASS a corrupt stored discovery still opens a usable Create page
+PASS unwritable storage shows a warning without breaking generation
+PASS real discovery and fault recovery produce no external request or uncaught error
+PASS 17 checks

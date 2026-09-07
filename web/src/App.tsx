@@ -14,21 +14,15 @@ import { SettingsModal } from './components/SettingsModal'
 import { Landing } from './components/Landing'
 
 type View = AppView | 'landing'
-const titles: Record<View, string> = { create: 'Create — Neologism Engine', saved: 'Saved — Neologism Engine', lab: 'Lab — Neologism Engine', studio: 'AI Studio — Neologism Engine', landing: 'About — Neologism Engine' }
-function route(): View | null {
+const titles: Record<View, string> = { create: 'Create — Neologism Engine', saved: 'Saved — Neologism Engine', lab: 'Lab — Neologism Engine', studio: 'AI Studio — Neologism Engine', landing: 'Neologism Engine — Startup & Project Name Generator' }
+function route(): View {
   const value = new URLSearchParams(location.search).get('view')
-  if (value === 'about') return 'landing'
-  return value === 'create' || value === 'saved' || value === 'lab' || value === 'studio' ? value : null
-}
-function historyView(state: unknown): View | null {
-  if (state === null || typeof state !== 'object') return null
-  const value = (state as Record<string, unknown>).neologismView
-  return value === 'create' || value === 'saved' || value === 'lab' || value === 'studio' || value === 'landing' ? value : null
+  return value === 'create' || value === 'saved' || value === 'lab' || value === 'studio' ? value : 'landing'
 }
 function historyStateFor(view: View) { return { ...(history.state && typeof history.state === 'object' ? history.state : {}), neologismView: view } }
 
 export default function App() {
-  const [view, setView] = useState<View>(() => decodeShareUrl().length ? 'saved' : route() ?? historyView(history.state) ?? 'create')
+  const [view, setView] = useState<View>(() => decodeShareUrl().length ? 'saved' : route())
   const [favorites, setFavorites] = useState<NameResult[]>(loadFavorites)
   const [importedSaved, setImportedSaved] = useState<NameResult[]>(loadImportedSaved)
   const [rejected, setRejected] = useState<NameResult[]>(loadRejected)
@@ -45,22 +39,36 @@ export default function App() {
   const viewRef = useRef(view)
   const createSession = useRef<CreatePageHandle>(null)
 
-  const navigateView = useCallback((next: View) => {
+  const navigateView = useCallback((next: View, keyboard = false) => {
     if (viewRef.current === next) return
     if (viewRef.current === 'create') createSession.current?.leave()
     const url = new URL(location.href)
-    url.searchParams.set('view', next === 'landing' ? 'about' : next)
+    if (next === 'landing') url.searchParams.delete('view')
+    else url.searchParams.set('view', next)
     history.pushState(historyStateFor(next), '', url)
     viewRef.current = next; setView(next); setShowSettings(false)
-    if (next !== 'create') requestAnimationFrame(() => { window.scrollTo(0, 0); document.getElementById('main-content')?.focus({ preventScroll: true }) })
+    requestAnimationFrame(() => {
+      if (next === 'landing') {
+        window.scrollTo(0, 0)
+        if (keyboard) document.querySelector<HTMLElement>('.landing-title')?.focus({ preventScroll: true })
+      } else if (next === 'create') {
+        if (keyboard) document.querySelector<HTMLElement>('.create-page .command-input')?.focus({ preventScroll: true })
+      } else {
+        window.scrollTo(0, 0)
+        document.getElementById('main-content')?.focus({ preventScroll: true })
+      }
+    })
   }, [])
   useEffect(() => {
     history.replaceState(historyStateFor(viewRef.current), '', location.href)
-    const back = (event: PopStateEvent) => {
+    const back = () => {
       if (viewRef.current === 'create') createSession.current?.leave()
-      const next = route() ?? historyView(event.state) ?? 'create'
+      const next = decodeShareUrl().length ? 'saved' : route()
       viewRef.current = next; setView(next); setShowSettings(false)
-      if (next !== 'create') requestAnimationFrame(() => document.getElementById('main-content')?.focus())
+      if (next !== 'create') requestAnimationFrame(() => {
+        const target = next === 'landing' ? document.querySelector<HTMLElement>('.landing-title') : document.getElementById('main-content')
+        target?.focus()
+      })
     }
     addEventListener('popstate', back)
     return () => removeEventListener('popstate', back)
@@ -78,9 +86,8 @@ export default function App() {
         }
         return
       }
-      // A valid share is an intentional entry into the app. Remember it so the
-      // recipient returns to the product, not the first-visit landing page,
-      // after the recovery hash has been cleared.
+      // Keep the existing visited marker for compatibility. The explicit Saved
+      // route below preserves the share destination after consuming its hash.
       const visitedPersisted = markVisited()
       const stubs: NameResult[] = shared.map((item) => ({
         name: item.name,
@@ -239,17 +246,19 @@ export default function App() {
 
 
   const savedEntries = savedNameEntries(favorites, importedSaved)
-  return <div className="shell">
+  return <>
+    {view === 'landing' && <Landing onEnter={keyboard => { markVisited(); navigateView('create', keyboard) }} />}
+    <div className="shell" hidden={view === 'landing'}>
     <button className="skip-main-content" onClick={() => document.getElementById('main-content')?.focus()}>Skip to main content</button>
-    <Sidebar view={view} savedCount={savedEntries.length} onNavigate={navigateView} onAbout={() => navigateView('landing')} onSettings={() => setShowSettings(true)} />
+    <Sidebar view={view} savedCount={savedEntries.length} onNavigate={navigateView} onAbout={keyboard => navigateView('landing', keyboard)} onSettings={() => setShowSettings(true)} />
     <main id="main-content" className="page" tabIndex={-1}>
       {feedbackError && <div className="feedback-alert" role="alert">{feedbackError}</div>}
       <CreatePage active={view === 'create'} paused={showSettings} sessionRef={createSession} favorites={favorites} rejected={rejected} references={tasteReferences} referenceError={tasteReferenceError} onReferencesChange={handleTasteReferencesChange} onFavorite={handleToggleFavorite} onRejected={handleToggleRejected} />
       {view === 'saved' && <SavedPage entries={savedEntries} undoName={savedRemoval?.name ?? null} onUndo={undoSavedRemoval} onDismissUndo={() => setSavedRemoval(null)} onRemoveSaved={handleRemoveSaved} onGoCreate={() => navigateView('create')} />}
       {view === 'lab' && <LabPage favorites={favorites} rejected={rejected} references={tasteReferences} referenceError={tasteReferenceError} onReferencesChange={handleTasteReferencesChange} onFavorite={handleToggleFavorite} onRejected={handleToggleRejected} />}
       {view === 'studio' && <AiStudio judgeConfig={judgeConfig} favorites={favorites} onToggleFavorite={handleToggleFavorite} onOpenSettings={() => setShowSettings(true)} />}
-      {view === 'landing' && <Landing onEnter={() => navigateView('create')} />}
     </main>
     {showSettings && <SettingsModal config={judgeConfig} favorites={favorites} rejected={rejected} onSave={saveSettings} onUndoFavorite={handleUndoFavorite} onUndoRejected={handleUndoRejected} onClose={() => setShowSettings(false)} />}
-  </div>
+    </div>
+  </>
 }

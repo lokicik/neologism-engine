@@ -16,7 +16,8 @@ Create uses Auto and local Rust/WASM generation. Runtime LLM use is not required
 
 ## Product principles
 
-- Show real names immediately; a brief is optional.
+- Keep the original landing page at the root address, with an explicit action to enter Create.
+- Create shows real Auto names immediately; a brief is optional.
 - Keep exploration continuous and preserve the current discovery across a same-tab reload.
 - Help the user select names; do not present structural scores as proven name quality.
 - Save and Pass are explicit choices. Scrolling and comparison selections do not train preferences.

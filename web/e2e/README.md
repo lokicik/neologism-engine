@@ -4,6 +4,7 @@ Run from `web/` after building WASM and installing dependencies. Each script lau
 
 | Script | Contract |
 |---|---|
+| `landing-route-contract.mjs` | Standalone root landing, original title, explicit Create entry, keyboard/pointer focus, Home/Back/About, preserved discovery |
 | `discovery-contract.mjs` | One initial Auto page, append, dirty draft, navigation and same-tab reload/scroll |
 | `discovery-resilience.mjs` | 100 real names, bounded scroll, double click, delayed response, errors/Retry, constraints, exhaustion, corrupt/unwritable storage |
 | `saved-contract.mjs` | Details/focus, search, 2–4 comparison, no implicit taste, source-specific Undo and saved-family reload |
@@ -14,5 +15,7 @@ Run from `web/` after building WASM and installing dependencies. Each script lau
 `ui-surfaces.mjs` writes captures and measurements to `docs/uiux-2026-09-07` by default. Set `UI_EVIDENCE_DIR` to a different screenshot directory for later runs so this delivery's evidence can remain frozen. The 500-card case is a rendering fixture, not 500 generated quality examples. Timing limits are generous local regression guards, not cross-device guarantees.
 
 Production engine controls remain `auto-quality-audit`, `heldout-cold-quality-audit`, `cold-quality-audit`, `taste-quality-audit`, and `mode-taste-audit`. Their original numeric thresholds were retained.
+
+Discovery contracts enter through `?view=create`; the root landing was restored after the Auto-first delivery. `landing-route-contract.mjs` writes its captures under `docs/landing-restore-2026-09-07` by default, or the supplied `UI_EVIDENCE_DIR`.
 
 Other numbered-phase UI probes remain available for historical replay at commit `585e623`. Their earlier sidebar, inline Why, method-chip, finalist/reveal, or landing-first assumptions have been replaced by the current contracts above. No claim is made that every historical probe runs against the redesigned surface. Pure storage/domain/taste/judge checks and isolated research harnesses are unaffected by this UI contract migration.

@@ -3,7 +3,7 @@ import { runUiTest } from './ui-test-utils.mjs'
 await runUiTest(4253, async ({ browser, url, check }) => {
   const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } })
   const errors = []; page.on('pageerror', error => errors.push(String(error)))
-  await page.goto(url)
+  await page.goto(url + '/?view=create')
   await page.waitForSelector('.discovery-item')
   const cards = page.locator('.discovery-card')
   const originals = await page.locator('.discovery-name').allTextContents()

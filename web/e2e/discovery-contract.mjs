@@ -16,7 +16,7 @@ try {
   const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } })
   const page = await context.newPage()
   page.on('pageerror', error => errors.push(String(error)))
-  await page.goto(`http://127.0.0.1:${port}/`)
+  await page.goto(`http://127.0.0.1:${port}/?view=create`)
   const items = page.locator('.discovery-item')
   const names = () => items.evaluateAll(nodes => nodes.map(node => node.getAttribute('aria-label')))
   const count = n => page.waitForFunction(n => document.querySelectorAll('.discovery-item').length === n, n)

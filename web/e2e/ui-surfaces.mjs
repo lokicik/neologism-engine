@@ -9,7 +9,7 @@ await runUiTest(4255, async ({ browser, url, check }) => {
   for (const width of [320, 390, 768, 1251, 1440]) {
     const context = await browser.newContext({ viewport: { width, height: width < 700 ? 844 : 1000 }, reducedMotion: 'reduce' })
     const page = await context.newPage()
-    await page.goto(url)
+    await page.goto(url + '/?view=create')
     await page.waitForFunction(() => document.querySelectorAll('.discovery-card').length === 10)
     await page.evaluate(() => document.fonts.ready)
     const geometry = await page.evaluate(() => {
@@ -43,7 +43,7 @@ await runUiTest(4255, async ({ browser, url, check }) => {
     await context.close()
   }
   const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } })
-  await page.goto(url)
+  await page.goto(url + '/?view=create')
   await page.waitForSelector('.discovery-card')
   const contrasts = await page.evaluate(() => {
     const rgb = value => value.match(/[\d.]+/g).map(Number).slice(0, 3).map(n => n / 255)

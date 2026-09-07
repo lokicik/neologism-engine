@@ -12,7 +12,7 @@ export function Sidebar({ view, savedCount, onNavigate, onAbout, onSettings }: P
     return () => document.removeEventListener('pointerdown', outside)
   }, [])
   return <header className="app-header"><nav className="app-nav" aria-label="Application navigation">
-    <button className="app-wordmark" onClick={() => onNavigate('create')} aria-label="Neologism — Create">
+    <button className="app-wordmark" onClick={event => onAbout(event.detail === 0)} aria-label="Neologism — Home">
       <svg width="23" height="23" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m12 2 10 10-10 10L2 12 12 2Z" stroke="currentColor" strokeWidth="1.5"/><path d="m8 15 3-7 5 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg><span>neologism</span>
     </button>
     <div className="app-nav-items">

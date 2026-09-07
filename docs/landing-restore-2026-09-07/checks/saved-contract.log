@@ -1,0 +1,19 @@
+PASS Details does not resize the underlying grid
+PASS Details shows the selected name
+PASS Escape returns focus to the exact Details trigger
+PASS Saved displays explicit saves in their original order
+PASS search is case insensitive
+PASS empty search offers a recovery action
+PASS comparison needs at least two names
+PASS comparison prevents a fifth selection
+PASS four names appear side by side with row labels
+PASS comparison reports check state without an automatic winner
+PASS comparison restores keyboard focus
+PASS search and comparison do not change preferences
+PASS remove immediately updates Saved
+PASS Undo restores the removed position and preserves later saves
+PASS Undo does not revert a later choice for the same name
+PASS Undo preserves scoped and shared sources and refuses to overwrite a later Pass
+PASS all saved generator families survive reload
+PASS Saved and Details have no uncaught browser errors
+PASS 18 checks

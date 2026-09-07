@@ -6,7 +6,7 @@ Built for naming **packages, CLIs, libraries, and brands** — local generation 
 
 ## Interface
 
-Create opens immediately with up to ten Auto names. A brief is optional. **More names** continues the current discovery; **Generate** starts a new one after you change the brief or Options. Downward scrolling can append one page at a time, with **Load more** available for explicit control. A same-tab reload retains the list and its position when session storage is available.
+The root address opens the original standalone landing page. **Open app** and **Find your name** enter Create at `?view=create`, which opens immediately with up to ten Auto names. A brief is optional. **More names** continues the current discovery; **Generate** starts a new one after you change the brief or Options. Downward scrolling can append one page at a time, with **Load more** available for explicit control. A same-tab reload retains the list and its position when session storage is available. The app wordmark returns to the landing page; existing `?view=about` links also remain supported.
 
 Save promising names, inspect their evidence in **Details**, and compare two to four in **Saved**. Search preserves collection order; removal offers Undo. **Tools** contains Lab, AI Studio, Settings, and About. Lab exposes every existing generator and experiment through one method selector; its generation state is separate from Create.
 

@@ -1,0 +1,34 @@
+PASS 320px: root shows only the landing, despite old visit state
+PASS 320px: original landing stands outside the app frame without overflow
+PASS 320px: landing keeps its original page title
+PASS 320px: landing action enters real Auto discovery
+PASS 320px: entry focus respects keyboard versus pointer
+PASS 320px: the app wordmark returns home
+PASS 320px: returning keeps the discovery, draft, and scroll position
+PASS 320px: explicit Create reload keeps its session
+PASS 320px: browser Back returns to the landing
+PASS 320px: existing About links still open the standalone landing
+PASS 320px: landing and discovery navigation have no uncaught errors
+PASS 390px: root shows only the landing, despite old visit state
+PASS 390px: original landing stands outside the app frame without overflow
+PASS 390px: landing keeps its original page title
+PASS 390px: landing action enters real Auto discovery
+PASS 390px: entry focus respects keyboard versus pointer
+PASS 390px: the app wordmark returns home
+PASS 390px: returning keeps the discovery, draft, and scroll position
+PASS 390px: explicit Create reload keeps its session
+PASS 390px: browser Back returns to the landing
+PASS 390px: existing About links still open the standalone landing
+PASS 390px: landing and discovery navigation have no uncaught errors
+PASS 1440px: root shows only the landing, despite old visit state
+PASS 1440px: original landing stands outside the app frame without overflow
+PASS 1440px: landing keeps its original page title
+PASS 1440px: landing action enters real Auto discovery
+PASS 1440px: entry focus respects keyboard versus pointer
+PASS 1440px: the app wordmark returns home
+PASS 1440px: returning keeps the discovery, draft, and scroll position
+PASS 1440px: explicit Create reload keeps its session
+PASS 1440px: browser Back returns to the landing
+PASS 1440px: existing About links still open the standalone landing
+PASS 1440px: landing and discovery navigation have no uncaught errors
+PASS 33 checks

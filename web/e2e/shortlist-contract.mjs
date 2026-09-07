@@ -4,7 +4,7 @@
 import { runUiTest } from './ui-test-utils.mjs'
 await runUiTest(4231, async ({ browser, url, check }) => {
   const page = await browser.newPage()
-  await page.goto(url)
+  await page.goto(url + '/?view=create')
   await page.waitForSelector('.discovery-card')
   check(await page.locator('.discovery-card').count() === 10, 'Create shows ten real Auto names directly')
   check(await page.locator('.finalist, .shortlist-reveal, .create-page .card-score').count() === 0, 'Create has one list without finalists, score badges, or Show all')

@@ -9,6 +9,8 @@ input, textarea { caret-color: #c5baff; }
 input::placeholder { color: var(--muted); opacity: 1; }
 a { text-underline-offset: .2em; }
 .shell { display: block; min-height: 100vh; }
+.shell[hidden] { display: none; }
+.landing { --surface: #121215; --border: rgba(255, 255, 255, .07); --text: #ededf2; --muted: #84848f; --accent: #7c6af9; color: var(--text); }
 .page { width: 100%; max-width: 1160px; margin: 0 auto; padding: 40px 24px 80px; min-width: 0; }
 .app-header { position: sticky; top: 0; z-index: 30; background: var(--bg); border-bottom: 1px solid var(--border); }
 .app-nav { max-width: 1160px; min-height: 72px; margin: auto; padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
