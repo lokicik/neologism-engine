@@ -4,9 +4,9 @@ Run from `web/` after building WASM and installing dependencies. Each script lau
 
 | Script | Contract |
 |---|---|
-| `landing-route-contract.mjs` | Standalone root landing, original title, explicit Create entry, keyboard/pointer focus, Home/Back/About, preserved discovery |
+| `landing-route-contract.mjs` | Standalone root landing, shared app/landing wordmark, original title, explicit Create entry, keyboard/pointer focus, Home/Back/About, preserved discovery |
 | `discovery-contract.mjs` | One initial Auto page, append, dirty draft, navigation and same-tab reload/scroll |
-| `discovery-resilience.mjs` | 100 real names, bounded scroll, double click, delayed response, errors/Retry, constraints, exhaustion, corrupt/unwritable storage |
+| `discovery-resilience.mjs` | 100 real names, downward scrolling without a separate wheel/key signal, no idle loading chain, double click, delayed response, errors/Retry, constraints, exhaustion, corrupt/unwritable storage |
 | `saved-contract.mjs` | Details/focus, search, 2–4 comparison, no implicit taste, source-specific Undo and saved-family reload |
 | `navigation-contract.mjs` | Query routes, Back, isolated Lab/Studio, Product names Lab, shared links, check observations and failed Undo retry |
 | `ui-surfaces.mjs` | 320/390/768/1251/1440px captures, target sizes, keyboard, reduced motion, rendered contrast, 500-card fixture |

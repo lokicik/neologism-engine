@@ -22,6 +22,13 @@ await runUiTest(4258, async ({ browser, url, check }) => {
     check(await page.locator('.landing').evaluate(node => !node.closest('.shell, .page') && document.documentElement.scrollWidth <= innerWidth), `${width}px: original landing stands outside the app frame without overflow`)
     check((await page.title()) === 'Neologism Engine — Startup & Project Name Generator', `${width}px: landing keeps its original page title`)
     await page.evaluate(() => document.fonts.ready)
+    const readWordmark = node => {
+      const text = getComputedStyle(node)
+      const icon = node.querySelector('svg')
+      const svg = getComputedStyle(icon)
+      return { markup: node.innerHTML, font: text.font, color: text.color, gap: text.gap, icon: { color: svg.color, width: svg.width, height: svg.height, display: svg.display } }
+    }
+    const landingWordmark = await page.locator('.landing-nav .brand-wordmark').evaluate(readWordmark)
     await page.screenshot({ path: resolve(out, `landing-${width}.png`), fullPage: true })
 
     const enter = page.getByRole('button', { name: 'Open app' })
@@ -30,6 +37,7 @@ await runUiTest(4258, async ({ browser, url, check }) => {
     await page.waitForFunction(() => document.querySelectorAll('.discovery-card').length === 10)
     const input = page.locator('.create-page .command-input')
     check(new URL(page.url()).searchParams.get('view') === 'create' && await page.locator('.landing').count() === 0, `${width}px: landing action enters real Auto discovery`)
+    check(JSON.stringify(await page.locator('.app-wordmark .brand-wordmark').evaluate(readWordmark)) === JSON.stringify(landingWordmark), `${width}px: landing and app use the same logo and typography`)
     check(await input.evaluate((node, keyboard) => (document.activeElement === node) === keyboard, width === 1440), `${width}px: entry focus respects keyboard versus pointer`)
     await page.locator('.command-go').click()
     await page.waitForFunction(() => document.querySelectorAll('.discovery-card').length === 20)

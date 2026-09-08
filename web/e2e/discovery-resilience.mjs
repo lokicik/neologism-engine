@@ -26,16 +26,19 @@ await runUiTest(4254, async ({ browser, url, check }) => {
   const count = n => page.waitForFunction(n => document.querySelectorAll('.discovery-item').length === n, n)
   const names = () => page.locator('.discovery-item').evaluateAll(nodes => nodes.map(node => node.getAttribute('aria-label')))
   await count(10)
+  // A scrollbar drag changes scrollY without a wheel, touch, or key event.
   await page.evaluate(() => document.querySelector('.scroll-sentinel').scrollIntoView())
+  await count(20)
+  check(await page.locator('.discovery-item').count() === 20, 'downward movement without a separate input event appends one page')
   await page.setViewportSize({ width: 1440, height: 900 })
   await page.waitForTimeout(250)
-  check(await page.locator('.discovery-item').count() === 10, 'programmatic scroll and resize cannot chain generation')
+  check(await page.locator('.discovery-item').count() === 20, 'resize and an idle viewport cannot chain generation')
   await page.evaluate(() => scrollTo(0, 0))
   await page.mouse.wheel(0, 12000)
-  await count(20)
+  await count(30)
   await page.waitForTimeout(250)
-  check(await page.locator('.discovery-item').count() === 20, 'one downward scroll appends one page only')
-  for (let n = 30; n <= 100; n += 10) { await page.locator('.load-more').click(); await count(n) }
+  check(await page.locator('.discovery-item').count() === 30, 'one downward scroll appends one page only')
+  for (let n = 40; n <= 100; n += 10) { await page.locator('.load-more').click(); await count(n) }
   const hundred = await names()
   check(new Set(hundred.map(name => name.toLowerCase())).size === 100, '100 real generated names contain no duplicates')
   const initialHistory = await page.evaluate(() => localStorage.getItem('neologism:recent'))

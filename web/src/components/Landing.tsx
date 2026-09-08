@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type MouseEvent } from 'react'
 import { generateNames, explainName, type Explanation, type NameResult } from '../lib/engine'
 import { RECENT_WINDOW } from '../lib/storage'
+import { Wordmark } from './Wordmark'
 
 interface Props {
   onEnter: (keyboard: boolean) => void
@@ -275,7 +276,7 @@ export function Landing({ onEnter }: Props) {
       data-name-motion={nameMotionPaused ? 'paused' : 'running'}
     >
       <nav className="landing-nav">
-        <span className="wordmark">◈ neologism</span>
+        <Wordmark />
         <button className="nav-cta" onClick={(event) => onEnter(event.detail === 0)}>Open app →</button>
       </nav>
 
@@ -449,7 +450,7 @@ export function Landing({ onEnter }: Props) {
       </section>
 
       <footer className="landing-footer">
-        <span className="wordmark">◈ neologism</span>
+        <Wordmark />
         <span>Local WebAssembly generation — no app backend, account, or tracking.</span>
       </footer>
     </div>

@@ -15,8 +15,9 @@ a { text-underline-offset: .2em; }
 .app-header { position: sticky; top: 0; z-index: 30; background: var(--bg); border-bottom: 1px solid var(--border); }
 .app-nav { max-width: 1160px; min-height: 72px; margin: auto; padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
 .app-nav button, .app-nav summary { min-height: 44px; background: none; border: 0; color: var(--muted); cursor: pointer; font-size: 14px; }
-.app-wordmark { display: inline-flex; align-items: center; gap: 10px; color: var(--text) !important; font-family: 'Space Grotesk', sans-serif !important; font-size: 21px !important; font-weight: 600; padding: 0; }
-.app-wordmark svg { color: #aa99ff; flex-shrink: 0; }
+.app-wordmark { display: inline-flex; padding: 0; }
+.brand-wordmark { display: inline-flex; align-items: center; gap: 10px; color: #f2f2f5; font-family: 'Space Grotesk', sans-serif; font-size: 21px; font-weight: 600; }
+.brand-wordmark svg { color: #aa99ff; flex-shrink: 0; }
 .app-nav-items { display: flex; align-items: center; gap: 6px; }
 .app-nav-items > button, .tools-menu > summary { padding: 0 14px; border-radius: 8px; display: flex; align-items: center; gap: 7px; }
 .app-nav [aria-current='page'], .tools-menu .current-tool { color: var(--text); background: var(--surface-2); }
@@ -53,8 +54,8 @@ a { text-underline-offset: .2em; }
 @media (max-width: 699px) {
   .page { padding: 28px 16px 56px; }
   .app-nav { min-height: 64px; gap: 8px; padding: 10px 16px; }
-  .app-wordmark { gap: 7px; font-size: 18px !important; }
-  .app-wordmark svg { width: 19px; }
+  .brand-wordmark { gap: 7px; font-size: 18px; }
+  .brand-wordmark svg { width: 19px; }
   .app-nav-items { gap: 0; }
   .app-nav-items > button, .tools-menu > summary { padding: 0 9px; }
   .options-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
@@ -63,7 +64,7 @@ a { text-underline-offset: .2em; }
   .page-intro h1 { font-size: 28px; }
   .options-value { margin-left: 12px; }
 }
-@media (max-width: 359px) { .app-wordmark span { font-size: 16px; } .app-wordmark svg { display: none; } .app-nav-items > button, .tools-menu > summary { padding: 0 7px; } .saved-count { display: none; } }
+@media (max-width: 359px) { .brand-wordmark { font-size: 16px; } .brand-wordmark svg { display: none; } .app-nav-items > button, .tools-menu > summary { padding: 0 7px; } .saved-count { display: none; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; scroll-behavior: auto !important; transition-duration: 0s !important; } }
 
 .discovery-meta { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin: 4px 0 18px; color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }

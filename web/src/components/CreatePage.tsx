@@ -39,12 +39,22 @@ export function CreatePage(props: Props) {
   const ticket = useRef(0)
   const started = useRef(results.length > 0 || exhausted)
   const sentinel = useRef<HTMLDivElement>(null)
+  const programmaticScroll = useRef(false)
+  const scrollRelease = useRef(0)
   const latest = useRef(props)
   latest.current = { ...props, paused }
   snapshot.current = { ...snapshot.current, config, generationConfig: committed, results, exhausted }
   const dirty = configIdentity(config) !== configIdentity(committed)
   const dirtyRef = useRef(dirty); dirtyRef.current = dirty
   const errorRef = useRef(error); errorRef.current = error
+
+  const moveViewport = useCallback((action: () => void) => {
+    // Restoring a session or focusing new results must not request another page.
+    programmaticScroll.current = true
+    cancelAnimationFrame(scrollRelease.current)
+    action()
+    scrollRelease.current = requestAnimationFrame(() => { programmaticScroll.current = false })
+  }, [])
 
   const persist = useCallback(() => {
     try { const failure = writeDiscovery(sessionStorage, snapshot.current); if (failure) setWarning(failure) }
@@ -77,13 +87,13 @@ export function CreatePage(props: Props) {
       if (!saveRecent(recent.current)) setHistoryWarning('Seen-name history could not be saved. This discovery will still avoid repeats.')
       setStatus(unique.length ? `${unique.length} new names. ${shown.length} names in this discovery.` : 'No more names with these options.')
       persist()
-      if (focus && unique.length) requestAnimationFrame(() => { const first = document.getElementById(`discovery-name-${start}`); first?.focus({ preventScroll: true }); first?.scrollIntoView({ block: 'start' }) })
+      if (focus && unique.length) requestAnimationFrame(() => moveViewport(() => { const first = document.getElementById(`discovery-name-${start}`); first?.focus({ preventScroll: true }); first?.scrollIntoView({ block: 'start' }) }))
     } catch {
       if (request === ticket.current && latest.current.active) setError('Could not generate names. Your current list is safe. Try again.')
     } finally {
       if (request === ticket.current) { inFlight.current = false; setLoading(false) }
     }
-  }, [persist])
+  }, [persist, moveViewport])
 
   useEffect(() => {
     if (!active || paused || started.current) return
@@ -95,9 +105,9 @@ export function CreatePage(props: Props) {
   useLayoutEffect(() => {
     if (!active) return
     const y = snapshot.current.scrollY
-    const frame = requestAnimationFrame(() => window.scrollTo({ top: y, behavior: 'instant' }))
+    const frame = requestAnimationFrame(() => moveViewport(() => window.scrollTo({ top: y, behavior: 'instant' })))
     return () => cancelAnimationFrame(frame)
-  }, [active])
+  }, [active, moveViewport])
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | undefined
     const scroll = () => {
@@ -107,28 +117,37 @@ export function CreatePage(props: Props) {
     }
     const flush = () => { if (latest.current.active && !latest.current.paused) snapshot.current.scrollY = window.scrollY; persist() }
     addEventListener('scroll', scroll, { passive: true }); addEventListener('pagehide', flush)
-    return () => { clearTimeout(timer); removeEventListener('scroll', scroll); removeEventListener('pagehide', flush); ticket.current++ }
+    return () => { clearTimeout(timer); cancelAnimationFrame(scrollRelease.current); removeEventListener('scroll', scroll); removeEventListener('pagehide', flush); ticket.current++ }
   }, [persist])
   useEffect(() => {
     if (!active || paused || dirty || error || exhausted || !results.length) return
-    let userIntent = false
     let previousY = window.scrollY
+    let touchY: number | undefined
     const more = () => {
-      if (!userIntent || inFlight.current || dirtyRef.current || errorRef.current || !latest.current.active || latest.current.paused || snapshot.current.exhausted) return
+      if (programmaticScroll.current || inFlight.current || dirtyRef.current || errorRef.current || !latest.current.active || latest.current.paused || snapshot.current.exhausted) return
+      // The completed batch must reach the DOM before measuring its new end.
+      if (snapshot.current.results.length !== results.length) return
       const rect = sentinel.current?.getBoundingClientRect()
-      if (rect && rect.top <= innerHeight + 300) { userIntent = false; void generate(true) }
+      if (rect && rect.top <= innerHeight + 300) void generate(true)
     }
-    const wheel = (event: WheelEvent) => { if (event.deltaY > 0 && !inFlight.current) userIntent = true }
-    const touch = () => { if (!inFlight.current) userIntent = true }
+    // Wheel/key/touch also allow continuation when already at the scroll limit.
+    const wheel = (event: WheelEvent) => { if (event.deltaY > 0) more() }
+    const touchStart = (event: TouchEvent) => { touchY = event.touches[0]?.clientY }
+    const touch = (event: TouchEvent) => {
+      const y = event.touches[0]?.clientY
+      if (y !== undefined && touchY !== undefined && y < touchY) more()
+      touchY = y
+    }
     const key = (event: KeyboardEvent) => {
-      if ((event.target as HTMLElement)?.closest('input, textarea, select, [contenteditable]')) return
-      if (['ArrowDown', 'PageDown', 'End', ' '].includes(event.key) && !inFlight.current) userIntent = true
+      const target = event.target as HTMLElement
+      if (event.defaultPrevented || target?.closest('input, textarea, select, [contenteditable]')) return
+      if (event.key === ' ' && (event.shiftKey || target?.closest('button, a, summary, [role="button"]'))) return
+      if (['ArrowDown', 'PageDown', 'End', ' '].includes(event.key)) more()
     }
-    const scroll = () => { const y = window.scrollY; if (y > previousY + 2) more(); previousY = y }
-    const observer = new IntersectionObserver(more, { rootMargin: '300px 0px' })
-    if (sentinel.current) observer.observe(sentinel.current)
-    addEventListener('wheel', wheel, { passive: true }); addEventListener('touchmove', touch, { passive: true }); addEventListener('keydown', key); addEventListener('scroll', scroll, { passive: true })
-    return () => { observer.disconnect(); removeEventListener('wheel', wheel); removeEventListener('touchmove', touch); removeEventListener('keydown', key); removeEventListener('scroll', scroll) }
+    // Observe actual movement too: scrollbar drags have no wheel or key event.
+    const scroll = () => { const y = window.scrollY; if (y > previousY) more(); previousY = y }
+    addEventListener('wheel', wheel, { passive: true }); addEventListener('touchstart', touchStart, { passive: true }); addEventListener('touchmove', touch, { passive: true }); addEventListener('keydown', key); addEventListener('scroll', scroll, { passive: true })
+    return () => { removeEventListener('wheel', wheel); removeEventListener('touchstart', touchStart); removeEventListener('touchmove', touch); removeEventListener('keydown', key); removeEventListener('scroll', scroll) }
   }, [active, paused, dirty, error, exhausted, results.length, generate])
 
   const append = results.length > 0 && !dirty
